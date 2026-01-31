@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Envases La Económica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-slate-100 p-4">
+    <div class="max-w-5xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden">
+        <div class="bg-blue-900 p-6 flex justify-between items-center">
+            <h1 class="text-white text-2xl font-bold">Panel de Control: Catálogo</h1>
+            <div id="auth-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white">Desconectado</div>
+        </div>
+
+        <div class="p-6 border-b bg-gray-50">
+            <h2 class="font-bold mb-4 text-gray-700">Subir Nuevo Producto</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <input id="prodName" type="text" placeholder="Nombre (ej. Botella 1L)" class="p-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                <input id="prodCat" type="text" placeholder="Categoría (ej. PET)" class="p-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                <input id="prodFile" type="text" placeholder="URL de imagen" class="p-2 border rounded outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="uploadProduct()" id="btnUpload" class="bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700 transition disabled:bg-gray-400">
+                    Guardar Producto
+                </button>
+            </div>
+            <p id="status" class="mt-2 text-sm text-blue-600 hidden font-medium">Procesando solicitud...</p>
+        </div>
+
+        <div class="p-6">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-gray-400 border-b text-sm uppercase">
+                        <th class="p-3">Vista</th>
+                        <th class="p-3">Nombre</th>
+                        <th class="p-3">Categoría</th>
+                        <th class="p-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="4" class="p-6 text-center text-gray-500 italic">Conectando con Firebase...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-2xl hidden z-50 transition-all"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
+            projectId: "productoseen",
+            storageBucket: "productoseen.firebasestorage.app",
+            messagingSenderId: "1052892398028",
+            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69",
+            measurementId: "G-FMB6PPNJB3"
+        };
+        
+        // Inicialización segura
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'productoseen-v1';
+        let currentUser = null;
+
+        // --- AUTENTICACIÓN MEJORADA ---
+        async function initAuth() {
+            try {
+                // Intentamos anónimo directamente para tus credenciales
+                console.log("Iniciando sesión anónima...");
+                await auth.signInAnonymously();
+            } catch (error) {
+                console.error("ERROR DE AUTENTICACIÓN:", error.code, error.message);
+                
+                let errorMsg = "Falla de conexión";
+                if (error.code === 'auth/operation-not-allowed') {
+                    errorMsg = "Error: Habilita 'Anónimo' en la consola de Firebase";
+                } else if (error.code === 'auth/invalid-api-key') {
+                    errorMsg = "Error: API Key inválida";
+                }
+                
+                showToast(errorMsg);
+                document.getElementById('auth-badge').innerText = "Error Auth";
+            }
+        }
+
+        // Listener de estado de Auth
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            const badge = document.getElementById('auth-badge');
+            if (user) {
+                badge.innerText = "Conectado";
+                badge.classList.replace('bg-red-500', 'bg-green-500');
+                console.log("Sesión activa:", user.uid);
+                loadProducts();
+            } else {
+                badge.innerText = "Desconectado";
+                badge.classList.replace('bg-green-500', 'bg-red-500');
+            }
+        });
+
+        // --- MANEJO DE DATOS ---
+        function getCollection() {
+            // Estructura recomendada para el entorno
+            return db.collection('artifacts').doc(appId).collection('public').doc('data').collection('productos');
+        }
+
+        function loadProducts() {
+            getCollection().onSnapshot((snapshot) => {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = "";
+                
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">No hay productos. Añade el primero arriba.</td></tr>`;
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const p = doc.data();
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-gray-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-2">
+                            <img src="${p.image || 'https://via.placeholder.com/50'}" class="w-12 h-12 object-cover rounded shadow-sm" onerror="this.src='https://via.placeholder.com/50?text=Error'">
+                        </td>
+                        <td class="p-2">
+                            <input onchange="update('${doc.id}','name',this.value)" value="${p.name || ''}" class="bg-transparent focus:bg-white p-1 w-full border border-transparent focus:border-blue-300 rounded outline-none">
+                        </td>
+                        <td class="p-2">
+                            <input onchange="update('${doc.id}','category',this.value)" value="${p.category || ''}" class="bg-transparent focus:bg-white p-1 w-full border border-transparent focus:border-blue-300 rounded outline-none text-gray-600">
+                        </td>
+                        <td class="p-2">
+                            <button onclick="remove('${doc.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2 py-1">Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }, (error) => {
+                console.error("Error Firestore Snapshot:", error);
+                if (error.code === 'permission-denied') {
+                    showToast("Error: Revisa las Reglas de Firestore");
+                }
+            });
+        }
+
+        async function uploadProduct() {
+            if (!currentUser) return showToast("No estás autenticado");
+
+            const name = document.getElementById('prodName').value;
+            const cat = document.getElementById('prodCat').value;
+            const url = document.getElementById('prodFile').value;
+            const status = document.getElementById('status');
+            const btn = document.getElementById('btnUpload');
+
+            if(!name || !url) return showToast("Completa Nombre e Imagen");
+
+            status.classList.remove('hidden');
+            btn.disabled = true;
+
+            try {
+                await getCollection().add({
+                    name: name,
+                    category: cat,
+                    image: url,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast("¡Producto guardado!");
+                document.getElementById('prodName').value = "";
+                document.getElementById('prodCat').value = "";
+                document.getElementById('prodFile').value = "";
+            } catch (e) {
+                console.error("Error al añadir:", e);
+                showToast("Falla al guardar datos");
+            } finally {
+                status.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        window.update = async function(id, field, val) { 
+            if (!currentUser) return;
+            try {
+                await getCollection().doc(id).update({[field]: val});
+                showToast("Cambio guardado");
+            } catch(e) {
+                console.error("Error al actualizar:", e);
+                showToast("Error al editar");
+            }
+        };
+
+        window.remove = async function(id) { 
+            if (!currentUser) return;
+            if(confirm("¿Estás seguro de eliminar este producto?")) {
+                try {
+                    await getCollection().doc(id).delete();
+                    showToast("Eliminado correctamente");
+                } catch(e) {
+                    console.error("Error al eliminar:", e);
+                    showToast("Error al eliminar");
+                }
+            }
+        };
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3500);
+        }
+
+        // Ejecutar inicio
+        initAuth();
+        window.uploadProduct = uploadProduct;
+    </script>
+</body>
+</html>
