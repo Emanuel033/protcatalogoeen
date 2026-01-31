@@ -65,7 +65,7 @@
             firebase.initializeApp(firebaseConfig);
         }
         
-        const db = firebase.firestore();
+        const db = db = getFirestore(app, "productoseen");
         const auth = firebase.auth();
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'productoseen-v1';
         let currentUser = null;
