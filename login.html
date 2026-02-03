@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Centralizado - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+<body class="bg-slate-900 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-slate-800 mb-6">Panel de Administración</h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
+                <input id="email" type="email" class="w-full p-3 border rounded-lg mt-1 outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Contraseña</label>
+                <input id="pass" type="password" class="w-full p-3 border rounded-lg mt-1 outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <button onclick="login()" id="btnLogin" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">
+                Entrar al Panel
+            </button>
+        </div>
+        <p id="error-msg" class="text-red-500 text-sm mt-4 hidden text-center"></p>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
+            projectId: "productoseen",
+            storageBucket: "productoseen.firebasestorage.app",
+            messagingSenderId: "1052892398028",
+            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            const btn = document.getElementById('btnLogin');
+            const errorMsg = document.getElementById('error-msg');
+
+            btn.disabled = true;
+            btn.innerText = "Verificando...";
+
+            try {
+                // 1. Autenticar al usuario
+                const userCredential = await auth.signInWithEmailAndPassword(email, pass);
+                const uid = userCredential.user.uid;
+
+                // 2. Consultar sus permisos en Realtime Database
+                const snapshot = await db.ref('usuarios_permisos/' + uid).once('value');
+                
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    // 3. Redireccionar según su configuración
+                    window.location.href = userData.redireccion; 
+                } else {
+                    errorMsg.innerText = "Usuario autenticado pero sin permisos de admin.";
+                    errorMsg.classList.remove('hidden');
+                    auth.signOut();
+                }
+
+            } catch (error) {
+                errorMsg.innerText = "Error: " + error.message;
+                errorMsg.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Entrar al Panel";
+            }
+        }
+    </script>
+</body>
+</html>
