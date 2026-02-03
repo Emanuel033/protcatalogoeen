@@ -111,19 +111,19 @@
             }
         }
 
-        auth.onAuthStateChanged((user) => {
-            currentUser = user;
-            const badge = document.getElementById('auth-badge');
-            if (user) {
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-400"></span> Conectado (RTDB)`;
-                badge.classList.replace('border-indigo-700', 'border-green-600');
-                badge.classList.add('bg-green-900', 'text-green-100');
-                loadProducts();
-            } else {
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Desconectado`;
-                badge.classList.remove('bg-green-900', 'text-green-100');
-            }
-        });
+       auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+        // Si no hay usuario, mandarlo al login
+        window.location.href = "login.html";
+    } else {
+        // Verificar que el usuario tenga permiso para ESTA página específica
+        const snap = await db.ref('usuarios_permisos/' + user.uid).once('value');
+        if (!snap.exists() || snap.val().redireccion !== "https://github.com/Emanuel033/protcatalogoeen/edit/main/admin.html") {
+             alert("No tienes permiso para acceder aquí");
+             window.location.href = "login.html";
+        }
+    }
+});
 
         // --- MANEJO DE DATOS (REALTIME DATABASE) ---
         
