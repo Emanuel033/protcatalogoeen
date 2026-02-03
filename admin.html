@@ -118,7 +118,7 @@
     } else {
         // Verificar que el usuario tenga permiso para ESTA página específica
         const snap = await db.ref('usuarios_permisos/' + user.uid).once('value');
-        if (!snap.exists() || snap.val().redireccion !== "admin.html") {
+        if (!snap.exists() || snap.val().redireccion !== "https://emanuel033.github.io/protcatalogoeen/admin.html") {
              alert("No tienes permiso para acceder aquí");
              window.location.href = "login.html";
         }
