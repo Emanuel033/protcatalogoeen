@@ -11,16 +11,28 @@
 </head>
 <body class="bg-slate-100 p-4 font-sans">
     
-    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-slate-200">
+    <!-- 1. PANTALLA DE CARGA (Para ocultar el panel mientras verificamos permisos) -->
+    <div id="loader" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white">
+        <div class="animate-spin h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
+        <p class="text-sm tracking-widest uppercase font-semibold">Verificando Permisos...</p>
+    </div>
+
+    <!-- 2. CONTENIDO PRINCIPAL (Oculto por defecto con 'hidden') -->
+    <div id="main-content" class="max-w-6xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-slate-200 hidden">
         <!-- Header -->
         <div class="bg-indigo-900 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-white text-2xl font-bold tracking-tight">Panel de Control: Catálogo</h1>
-                <p class="text-indigo-200 text-xs mt-1">Gestión de base de datos en tiempo real (RTDB)</p>
+                <p id="user-info" class="text-indigo-200 text-xs mt-1">Usuario autenticado</p>
             </div>
-            <div id="auth-badge" class="px-4 py-1.5 rounded-full text-xs font-bold bg-indigo-800 border border-indigo-700 text-indigo-200 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
-                Conectando...
+            <div class="flex items-center gap-3">
+                <div class="px-3 py-1 rounded-full text-xs font-bold bg-green-600 text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    Conectado
+                </div>
+                <button onclick="logout()" class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition">
+                    Salir
+                </button>
             </div>
         </div>
 
@@ -45,13 +57,9 @@
                 </div>
                 <button onclick="uploadProduct()" id="btnUpload" class="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-lg hover:bg-indigo-700 transition shadow-md active:transform active:scale-95 disabled:bg-slate-400 disabled:cursor-not-allowed flex justify-center items-center gap-2">
                     <span>Guardar</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </button>
             </div>
-            <p id="status" class="mt-3 text-xs text-indigo-600 hidden font-medium flex items-center gap-2">
-                <svg class="animate-spin h-4 w-4 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                Guardando en base de datos...
-            </p>
+            <p id="status" class="mt-3 text-xs text-indigo-600 hidden font-medium">Guardando...</p>
         </div>
 
         <!-- Tabla de datos -->
@@ -75,12 +83,11 @@
     </div>
 
     <!-- Toast de Notificaciones -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-2xl hidden z-50 transform transition-all duration-300 border-l-4 border-indigo-500 flex items-center gap-3">
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-2xl hidden z-50 transform transition-all duration-300 border-l-4 border-indigo-500">
         <span id="toast-msg">Notificación</span>
     </div>
 
     <script>
-        // Configuración de tu proyecto
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
             authDomain: "productoseen.firebaseapp.com",
@@ -88,187 +95,136 @@
             projectId: "productoseen",
             storageBucket: "productoseen.firebasestorage.app",
             messagingSenderId: "1052892398028",
-            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69",
-            measurementId: "G-FMB6PPNJB3"
+            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
         };
         
-        // Inicialización
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
         let currentUser = null;
 
-        // --- AUTENTICACIÓN ---
-        
+        // --- LÓGICA DE AUTENTICACIÓN CORREGIDA ---
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // 1. Guardamos el usuario en la variable global para que upload/delete funcionen
+                currentUser = user; 
+                
+                try {
+                    // 2. Verificamos permisos en la base de datos
+                    const snap = await db.ref('usuarios_permisos/' + user.uid).once('value');
+                    
+                    // 3. Validación estricta: Debe existir Y debe tener permiso para "admin.html"
+                    if (snap.exists() && snap.val().redireccion === "admin.html") {
+                        // ¡ACCESO CONCEDIDO!
+                        document.getElementById('user-info').innerText = user.email;
+                        
+                        // Ocultamos loader y mostramos el panel
+                        document.getElementById('loader').classList.add('hidden');
+                        document.getElementById('main-content').classList.remove('hidden');
+                        
+                        // Cargamos los datos
+                        loadProducts();
+                    } else {
+                        throw new Error("Permisos insuficientes para este panel.");
+                    }
+                } catch (error) {
+                    alert("Acceso denegado: " + error.message);
+                    window.location.href = "login.html"; // Redirigir si falla
+                }
+            } else {
+                // Si no hay usuario logueado, adiós
+                window.location.href = "login.html";
+            }
+        });
 
-       auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-        // Si no hay usuario, mandarlo al login
-        window.location.href = "login.html";
-    } else {
-        // Verificar que el usuario tenga permiso para ESTA página específica
-        const snap = await db.ref('usuarios_permisos/' + user.uid).once('value');
-        if (!snap.exists() || snap.val().redireccion !== "admin.html") {
-             alert("No tienes permiso para acceder aquí");
-             window.location.href = "login.html";
+        // Función para cerrar sesión manualmente
+        async function logout() {
+            await auth.signOut();
+            window.location.href = "login.html";
         }
-    }
-});
 
-        // --- MANEJO DE DATOS (REALTIME DATABASE) ---
-        
+        // --- MANEJO DE DATOS (Igual que antes) ---
         function loadProducts() {
             const productsRef = db.ref('productos');
-            
-            // Escuchar cambios en tiempo real
             productsRef.orderByChild('createdAt').on('value', (snapshot) => {
                 const tbody = document.getElementById('tableBody');
                 tbody.innerHTML = "";
                 
                 if (!snapshot.exists()) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic bg-white">No hay productos en la base de datos.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Inventario vacío.</td></tr>`;
                     return;
                 }
 
-                // Convertir snapshot a array
                 const products = [];
-                snapshot.forEach((childSnapshot) => {
-                    products.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-
-                // Ordenar: más recientes primero
+                snapshot.forEach((child) => products.push({id: child.key, ...child.val()}));
                 products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 products.forEach(p => {
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors bg-white group";
+                    tr.className = "hover:bg-slate-50 transition-colors bg-white";
                     tr.innerHTML = `
                         <td class="p-3 text-center">
-                            <div class="w-14 h-14 mx-auto bg-slate-100 rounded-lg overflow-hidden border border-slate-200 shadow-sm relative group-hover:shadow-md transition-all">
-                                <img src="${p.image || ''}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/100?text=IMG'">
-                            </div>
+                            <img src="${p.image}" class="w-12 h-12 mx-auto object-cover rounded bg-slate-100" onerror="this.src='https://via.placeholder.com/100'">
                         </td>
                         <td class="p-3">
-                            <input onchange="updateProduct('${p.id}','name',this.value)" value="${p.name || ''}" 
-                                class="w-full bg-transparent hover:bg-white focus:bg-white p-2 border border-transparent hover:border-slate-200 focus:border-indigo-400 rounded transition outline-none font-medium text-slate-800 placeholder-slate-400" placeholder="Nombre">
+                            <input onchange="updateProduct('${p.id}','name',this.value)" value="${p.name}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none">
                         </td>
                         <td class="p-3">
-                            <input onchange="updateProduct('${p.id}','category',this.value)" value="${p.category || ''}" 
-                                class="w-full bg-transparent hover:bg-white focus:bg-white p-2 border border-transparent hover:border-slate-200 focus:border-indigo-400 rounded transition outline-none text-slate-600 placeholder-slate-400" placeholder="Categoría">
+                            <input onchange="updateProduct('${p.id}','category',this.value)" value="${p.category}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none">
                         </td>
                         <td class="p-3 text-right">
-                            <button onclick="deleteProduct('${p.id}')" class="text-slate-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all" title="Eliminar producto">
+                            <button onclick="deleteProduct('${p.id}')" class="text-slate-400 hover:text-red-600 p-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
-            }, (error) => {
-                console.error("RTDB Error:", error);
-                if (error.code === 'PERMISSION_DENIED') {
-                    showToast("ERROR: Permisos denegados. Revisa las reglas.");
-                }
             });
         }
 
-        // --- FUNCIONES DE ACCIÓN (Globales) ---
-
         async function uploadProduct() {
-            if (!currentUser) return showToast("Espera a que se conecte la base de datos...");
-
-            const name = document.getElementById('prodName').value.trim();
-            const cat = document.getElementById('prodCat').value.trim();
-            const url = document.getElementById('prodFile').value.trim();
-            const status = document.getElementById('status');
-            const btn = document.getElementById('btnUpload');
-
-            if(!name || !url) return showToast("El nombre y la URL de imagen son obligatorios");
-
-            status.classList.remove('hidden');
-            btn.disabled = true;
-
+            if (!currentUser) return showToast("Error: Sesión no válida");
+            const name = document.getElementById('prodName').value;
+            const cat = document.getElementById('prodCat').value;
+            const url = document.getElementById('prodFile').value;
+            
+            if(!name || !url) return showToast("Faltan datos");
+            
             try {
-                // Guardar en RTDB
                 await db.ref('productos').push({
-                    name: name,
-                    category: cat,
-                    image: url,
+                    name, category: cat, image: url,
                     createdAt: firebase.database.ServerValue.TIMESTAMP
                 });
-                
-                showToast("¡Producto guardado exitosamente!");
-                
-                // Limpiar inputs
+                showToast("Producto Agregado");
                 document.getElementById('prodName').value = "";
-                document.getElementById('prodCat').value = "";
                 document.getElementById('prodFile').value = "";
-            } catch (e) {
-                console.error("Error Upload:", e);
-                showToast("Error al guardar: " + e.message);
-            } finally {
-                status.classList.add('hidden');
-                btn.disabled = false;
+            } catch(e) { showToast("Error al guardar"); }
+        }
+
+        window.updateProduct = async (id, field, val) => {
+            if(!currentUser) return;
+            await db.ref('productos/'+id).update({[field]: val});
+            showToast("Actualizado");
+        };
+
+        window.deleteProduct = async (id) => {
+            if(!currentUser) return;
+            if(confirm("¿Eliminar?")) {
+                await db.ref('productos/'+id).remove();
+                showToast("Eliminado");
             }
+        };
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.remove('hidden', 'translate-y-10');
+            setTimeout(() => t.classList.add('translate-y-10'), 3000);
         }
 
-        async function updateProduct(id, field, val) { 
-            if (!currentUser) return showToast("No estás conectado");
-            
-            // Feedback visual
-            showToast("Guardando cambios...");
-            
-            try {
-                await db.ref('productos/' + id).update({
-                    [field]: val
-                });
-                showToast("Cambio actualizado correctamente");
-            } catch(e) {
-                console.error(e);
-                showToast("Error al actualizar: " + e.message);
-            }
-        }
-
-        async function deleteProduct(id) { 
-            if (!currentUser) return showToast("No estás conectado");
-            
-            if(confirm("¿Estás seguro de que deseas eliminar este producto permanentemente?")) {
-                try {
-                    await db.ref('productos/' + id).remove();
-                    showToast("Producto eliminado del catálogo");
-                } catch(e) {
-                    console.error(e);
-                    showToast("Error al eliminar: " + e.message);
-                }
-            }
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const msg = document.getElementById('toast-msg');
-            msg.textContent = message;
-            toast.classList.remove('hidden', 'translate-y-10', 'opacity-0');
-            
-            // Auto-ocultar después de 3 segundos
-            setTimeout(() => {
-                toast.classList.add('translate-y-10', 'opacity-0');
-                setTimeout(() => toast.classList.add('hidden'), 300);
-            }, 3000);
-        }
-
-  
-
-        // Exportar funciones explícitamente al objeto window para que el HTML las vea
+        // Exportar a global
         window.uploadProduct = uploadProduct;
-        window.updateProduct = updateProduct;
-        window.deleteProduct = deleteProduct;
-
     </script>
 </body>
 </html>
