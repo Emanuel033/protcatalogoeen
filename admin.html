@@ -103,60 +103,56 @@
         const auth = firebase.auth();
         let currentUser = null;
 
-        // --- LÓGICA DE AUTENTICACIÓN CORREGIDA ---
+        // --- LÓGICA DE AUTENTICACIÓN ---
         auth.onAuthStateChanged(async (user) => {
             if (user) {
-                // 1. Guardamos el usuario en la variable global para que upload/delete funcionen
                 currentUser = user; 
-                
                 try {
-                    // 2. Verificamos permisos en la base de datos
                     const snap = await db.ref('usuarios_permisos/' + user.uid).once('value');
                     
-                    // 3. Validación estricta: Debe existir Y debe tener permiso para "admin.html"
                     if (snap.exists() && snap.val().redireccion === "admin.html") {
-                        // ¡ACCESO CONCEDIDO!
                         document.getElementById('user-info').innerText = user.email;
-                        
-                        // Ocultamos loader y mostramos el panel
                         document.getElementById('loader').classList.add('hidden');
                         document.getElementById('main-content').classList.remove('hidden');
-                        
-                        // Cargamos los datos
-                        loadProducts();
+                        loadProducts(); // Cargar datos solo si hay permiso
                     } else {
                         throw new Error("Permisos insuficientes para este panel.");
                     }
                 } catch (error) {
                     alert("Acceso denegado: " + error.message);
-                    window.location.href = "login.html"; // Redirigir si falla
+                    window.location.href = "login.html"; 
                 }
             } else {
-                // Si no hay usuario logueado, adiós
                 window.location.href = "login.html";
             }
         });
 
-        // Función para cerrar sesión manualmente
         async function logout() {
             await auth.signOut();
             window.location.href = "login.html";
         }
 
-        // --- MANEJO DE DATOS (Igual que antes) ---
+        // --- MANEJO DE DATOS CORREGIDO ---
         function loadProducts() {
             const productsRef = db.ref('productos');
+            
+            // Corrección: Añadido callback de error para detectar problemas de permisos
             productsRef.orderByChild('createdAt').on('value', (snapshot) => {
                 const tbody = document.getElementById('tableBody');
                 tbody.innerHTML = "";
                 
+                // Debugging: Ver en consola qué llega
+                console.log("Datos recibidos de Firebase:", snapshot.val());
+
                 if (!snapshot.exists()) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Inventario vacío.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">No se encontraron productos en la base de datos "productos".</td></tr>`;
                     return;
                 }
 
                 const products = [];
                 snapshot.forEach((child) => products.push({id: child.key, ...child.val()}));
+                
+                // Ordenar por fecha (descendente)
                 products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 products.forEach(p => {
@@ -164,13 +160,13 @@
                     tr.className = "hover:bg-slate-50 transition-colors bg-white";
                     tr.innerHTML = `
                         <td class="p-3 text-center">
-                            <img src="${p.image}" class="w-12 h-12 mx-auto object-cover rounded bg-slate-100" onerror="this.src='https://via.placeholder.com/100'">
+                            <img src="${p.image}" class="w-12 h-12 mx-auto object-cover rounded bg-slate-100" onerror="this.src='https://via.placeholder.com/100?text=IMG'">
                         </td>
                         <td class="p-3">
-                            <input onchange="updateProduct('${p.id}','name',this.value)" value="${p.name}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none">
+                            <input onchange="updateProduct('${p.id}','name',this.value)" value="${p.name || ''}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none">
                         </td>
                         <td class="p-3">
-                            <input onchange="updateProduct('${p.id}','category',this.value)" value="${p.category}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none">
+                            <input onchange="updateProduct('${p.id}','category',this.value)" value="${p.category || ''}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none">
                         </td>
                         <td class="p-3 text-right">
                             <button onclick="deleteProduct('${p.id}')" class="text-slate-400 hover:text-red-600 p-2">
@@ -180,6 +176,16 @@
                     `;
                     tbody.appendChild(tr);
                 });
+            }, (error) => {
+                // Captura de errores de permisos (Reglas de Firebase)
+                console.error("Error al leer datos:", error);
+                const tbody = document.getElementById('tableBody');
+                if (error.code === 'PERMISSION_DENIED') {
+                    showToast("ERROR: No tienes permiso para leer los datos");
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-500 font-bold bg-red-50 rounded-lg">Error de Permisos: Revisa las reglas de Realtime Database.</td></tr>`;
+                } else {
+                    showToast("Error de conexión: " + error.message);
+                }
             });
         }
 
@@ -199,20 +205,24 @@
                 showToast("Producto Agregado");
                 document.getElementById('prodName').value = "";
                 document.getElementById('prodFile').value = "";
-            } catch(e) { showToast("Error al guardar"); }
+            } catch(e) { showToast("Error al guardar: " + e.message); }
         }
 
         window.updateProduct = async (id, field, val) => {
             if(!currentUser) return;
-            await db.ref('productos/'+id).update({[field]: val});
-            showToast("Actualizado");
+            try {
+                await db.ref('productos/'+id).update({[field]: val});
+                showToast("Actualizado");
+            } catch(e) { showToast("Error al actualizar"); }
         };
 
         window.deleteProduct = async (id) => {
             if(!currentUser) return;
             if(confirm("¿Eliminar?")) {
-                await db.ref('productos/'+id).remove();
-                showToast("Eliminado");
+                try {
+                    await db.ref('productos/'+id).remove();
+                    showToast("Eliminado");
+                } catch(e) { showToast("Error al eliminar"); }
             }
         };
 
@@ -223,7 +233,6 @@
             setTimeout(() => t.classList.add('translate-y-10'), 3000);
         }
 
-        // Exportar a global
         window.uploadProduct = uploadProduct;
     </script>
 </body>
