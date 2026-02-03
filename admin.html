@@ -102,14 +102,7 @@
         let currentUser = null;
 
         // --- AUTENTICACIÓN ---
-        async function initAuth() {
-            try {
-                await auth.signInAnonymously();
-            } catch (error) {
-                console.error("Auth Error:", error);
-                showToast("Error de conexión: " + error.message);
-            }
-        }
+        
 
        auth.onAuthStateChanged(async (user) => {
     if (!user) {
