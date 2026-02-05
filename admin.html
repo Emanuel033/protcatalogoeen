@@ -66,13 +66,13 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-semibold tracking-wider">
-                            <th class="p-4 w-20 text-center">Imagen</th>
-                            <th class="p-4">Nombre (Editable)</th>
-                            <th class="p-4">Categoría (Editable)</th>
-                            <th class="p-4 text-right">Acciones</th>
-                        </tr>
-                    </thead>
+    <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-semibold tracking-wider">
+        <th class="p-4 w-20 text-center">Imagen</th>
+        <th class="p-4">Nombre (Editable)</th>
+        <th class="p-4">Categoría (Editable)</th>
+        <th class="p-4 text-center">Visible</th> <th class="p-4 text-right">Acciones</th>
+    </tr>
+</thead>
                     <tbody id="tableBody" class="divide-y divide-slate-100 text-sm text-slate-700">
                         <tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Cargando inventario...</td></tr>
                     </tbody>
@@ -132,79 +132,87 @@
 
         // --- CARGAR PRODUCTOS (CORREGIDO) ---
         function loadProducts() {
-            const productsRef = db.ref('productos');
-            
-            productsRef.orderByChild('createdAt').on('value', (snapshot) => {
-                const tbody = document.getElementById('tableBody');
-                tbody.innerHTML = "";
-                
-                if (!snapshot.exists()) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">No hay productos.</td></tr>`;
-                    return;
-                }
-
-                const products = [];
-                
-                // --- CORRECCIÓN AQUÍ ---
-                // Agregamos llaves {} para evitar el 'return' implícito que detenía el bucle
-                snapshot.forEach((child) => {
-                    products.push({id: child.key, ...child.val()});
-                });
-                
-                products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-                products.forEach(p => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors bg-white";
-                    tr.innerHTML = `
-                        <td class="p-3 text-center">
-                            <img src="${p.image}" class="w-12 h-12 mx-auto object-cover rounded bg-slate-100 border" onerror="this.src='https://via.placeholder.com/100?text=IMG'">
-                        </td>
-                        <td class="p-3">
-                            <input onchange="updateProduct('${p.id}','name',this.value)" value="${p.name || ''}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none transition">
-                        </td>
-                        <td class="p-3">
-                            <input onchange="updateProduct('${p.id}','category',this.value)" value="${p.category || ''}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none transition">
-                        </td>
-                        <td class="p-3 text-right">
-                            <button onclick="deleteProduct('${p.id}')" class="text-slate-400 hover:text-red-600 p-2 transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }, (error) => {
-                console.error("Error:", error);
-                showToast("Error de conexión: " + error.message);
-            });
+    const productsRef = db.ref('productos');
+    
+    productsRef.orderByChild('createdAt').on('value', (snapshot) => {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        
+        if (!snapshot.exists()) {
+            tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 italic">No hay productos.</td></tr>`;
+            return;
         }
+
+        const products = [];
+        snapshot.forEach((child) => {
+            products.push({id: child.key, ...child.val()});
+        });
+        
+        // Ordenar por fecha descendente
+        products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        products.forEach(p => {
+            // Si el campo 'activo' no existe (productos viejos), asumimos que es true
+            const isActive = p.activo !== false; 
+            const activeColor = isActive ? 'text-green-600' : 'text-gray-400';
+
+            const tr = document.createElement('tr');
+            tr.className = `hover:bg-slate-50 transition-colors bg-white ${!isActive ? 'opacity-60 bg-gray-50' : ''}`;
+            tr.innerHTML = `
+                <td class="p-3 text-center">
+                    <img src="${p.image}" class="w-12 h-12 mx-auto object-cover rounded bg-slate-100 border" onerror="this.src='https://via.placeholder.com/100?text=IMG'">
+                </td>
+                <td class="p-3">
+                    <input onchange="updateProduct('${p.id}','name',this.value)" value="${p.name || ''}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none transition">
+                </td>
+                <td class="p-3">
+                    <input onchange="updateProduct('${p.id}','category',this.value)" value="${p.category || ''}" class="w-full bg-transparent p-1 border-b border-transparent focus:border-indigo-300 outline-none transition">
+                </td>
+                <td class="p-3 text-center">
+                     <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" onchange="updateProduct('${p.id}', 'activo', this.checked)" class="sr-only peer" ${isActive ? 'checked' : ''}>
+                        <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                </td>
+                <td class="p-3 text-right">
+                    <button onclick="deleteProduct('${p.id}')" class="text-slate-400 hover:text-red-600 p-2 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }, (error) => {
+        showToast("Error: " + error.message);
+    });
+}
 
         // --- FUNCIONES CRUD ---
         async function uploadProduct() {
-            if (!currentUser) return showToast("Sesión inválida");
-            const name = document.getElementById('prodName').value;
-            const cat = document.getElementById('prodCat').value;
-            const url = document.getElementById('prodFile').value;
-            const btn = document.getElementById('btnUpload');
-            
-            if(!name || !url) return showToast("Faltan datos");
-            
-            btn.disabled = true;
-            btn.innerText = "Guardando...";
+    if (!currentUser) return showToast("Sesión inválida");
+    const name = document.getElementById('prodName').value;
+    const cat = document.getElementById('prodCat').value;
+    const url = document.getElementById('prodFile').value;
+    const btn = document.getElementById('btnUpload');
+    
+    if(!name || !url) return showToast("Faltan datos");
+    
+    btn.disabled = true;
+    btn.innerText = "Guardando...";
 
-            try {
-                await db.ref('productos').push({
-                    name, category: cat, image: url,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP
-                });
-                showToast("Producto Agregado");
-                document.getElementById('prodName').value = "";
-                document.getElementById('prodCat').value = "";
-                document.getElementById('prodFile').value = "";
-            } catch(e) { showToast("Error al guardar: " + e.message); }
-            finally { btn.disabled = false; btn.innerText = "Guardar"; }
-        }
+    try {
+        await db.ref('productos').push({
+            name, 
+            category: cat, 
+            image: url,
+            activo: true, // <--- NUEVA LÍNEA: Activo por defecto
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+        });
+        showToast("Producto Agregado");
+        // ... (resto del código de limpieza de inputs)
+    } catch(e) { showToast("Error al guardar: " + e.message); }
+    finally { btn.disabled = false; btn.innerText = "Guardar"; }
+}
 
         window.updateProduct = async (id, field, val) => {
             if(!currentUser) return;
