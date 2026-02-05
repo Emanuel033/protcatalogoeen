@@ -145,19 +145,28 @@
 
         // Escuchar cambios en la base de datos
         database.ref("productos").on('value', (snapshot) => {
-            products = [];
-            snapshot.forEach((child) => {
-                const data = child.val();
-                products.push({
-                    id: child.key,
-                    name: data.name || 'Producto sin nombre',
-                    category: data.category || 'General',
-                    image: data.image || 'https://via.placeholder.com/300?text=Sin+Imagen'
-                });
-            });
-            
-            renderCategoryButtons();
-            filterProducts();
+    products = [];
+    snapshot.forEach((child) => {
+        const data = child.val();
+        
+        // LÓGICA DE FILTRADO:
+        // Si 'activo' es false explícitamente, lo ignoramos.
+        // Si es true o undefined (productos viejos), lo mostramos.
+        if (data.activo === false) {
+            return; // Saltamos este producto
+        }
+
+        products.push({
+            id: child.key,
+            name: data.name || 'Producto sin nombre',
+            category: data.category || 'General',
+            image: data.image || 'https://via.placeholder.com/300?text=Sin+Imagen'
+        });
+    });
+    
+    // El resto sigue igual...
+    renderCategoryButtons();
+    filterProducts();
         });
 
         function renderCategoryButtons() {
@@ -275,3 +284,4 @@
     </script>
 </body>
 </html>
+
