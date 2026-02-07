@@ -14,89 +14,84 @@
         /* Animación suave para filas */
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        /* Scrollbar personalizada fina */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { bg: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+        
+        /* Ajuste para inputs compactos */
+        .input-compact { padding-top: 2px; padding-bottom: 2px; }
     </style>
 </head>
-<body class="bg-gray-100 p-2 md:p-6 font-sans text-slate-800 h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-100 font-sans text-slate-800 h-screen flex flex-col overflow-hidden text-xs md:text-sm">
     
     <!-- 1. PANTALLA DE CARGA -->
     <div id="loader" class="fixed inset-0 bg-slate-900 z-[60] flex flex-col items-center justify-center text-white transition-opacity duration-500">
         <div class="animate-spin h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
-        <p class="text-sm tracking-widest uppercase font-semibold animate-pulse">Cargando Sistema...</p>
+        <p class="text-xs tracking-widest uppercase font-semibold animate-pulse">Cargando Sistema...</p>
     </div>
 
     <!-- 2. CONTENIDO PRINCIPAL (Flex Column para ocupar toda la altura) -->
-    <div id="main-content" class="max-w-7xl mx-auto bg-white shadow-2xl rounded-xl border border-gray-200 hidden flex-col h-full w-full">
+    <div id="main-content" class="max-w-full mx-auto bg-white shadow-2xl border-x border-gray-200 hidden flex-col h-full w-full">
         
-        <!-- HEADER -->
-        <div class="bg-indigo-900 p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
-            <div class="flex items-center gap-4">
-                <div class="bg-indigo-700 p-3 rounded-lg text-white">
-                    <i class="fa-solid fa-boxes-stacked text-2xl"></i>
+        <!-- HEADER COMPACTO -->
+        <div class="bg-indigo-900 px-4 py-2 flex justify-between items-center shrink-0 h-14">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-700 p-1.5 rounded text-white">
+                    <i class="fa-solid fa-boxes-stacked text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-white text-xl md:text-2xl font-bold tracking-tight">Panel de Inventario</h1>
-                    <div class="flex items-center gap-2 text-indigo-200 text-xs">
+                    <h1 class="text-white text-base font-bold tracking-tight leading-tight">Inventario</h1>
+                    <div class="flex items-center gap-1 text-indigo-200 text-[10px]">
                         <i class="fa-solid fa-user-shield"></i>
-                        <span id="user-info">Cargando usuario...</span>
+                        <span id="user-info">...</span>
                     </div>
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <div class="hidden md:flex flex-col items-end mr-4">
-                    <span id="total-count" class="text-white font-bold text-lg">0</span>
-                    <span class="text-indigo-300 text-xs uppercase">Productos</span>
+                <div class="hidden md:flex flex-col items-end mr-2">
+                    <span id="total-count" class="text-white font-bold text-base leading-none">0</span>
+                    <span class="text-indigo-300 text-[9px] uppercase">Prod.</span>
                 </div>
-                <button onclick="logout()" class="text-xs bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-lg flex items-center gap-2">
+                <button onclick="logout()" class="text-[10px] bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded transition shadow flex items-center gap-1">
                     <i class="fa-solid fa-right-from-bracket"></i> Salir
                 </button>
             </div>
         </div>
 
-        <!-- FORMULARIO DE AGREGAR (Collapsible) -->
+        <!-- FORMULARIO DE AGREGAR (Más compacto) -->
         <div class="border-b bg-gray-50 shrink-0">
-            <details class="group p-4" open>
-                <summary class="list-none flex justify-between items-center cursor-pointer mb-2">
-                    <h2 class="font-bold text-indigo-800 uppercase text-xs tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-circle-plus text-indigo-500"></i> Agregar Nuevo Producto
+            <details class="group px-4 py-2" open>
+                <summary class="list-none flex justify-between items-center cursor-pointer mb-1 outline-none">
+                    <h2 class="font-bold text-indigo-800 uppercase text-[10px] tracking-wider flex items-center gap-2 hover:text-indigo-600">
+                        <i class="fa-solid fa-circle-plus"></i> Agregar Nuevo
                     </h2>
-                    <span class="text-xs text-gray-400 group-open:rotate-180 transition-transform"><i class="fa-solid fa-chevron-down"></i></span>
+                    <span class="text-[10px] text-gray-400 group-open:rotate-180 transition-transform"><i class="fa-solid fa-chevron-down"></i></span>
                 </summary>
                 
-                <div class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end animate-in fade-in zoom-in-95 duration-200">
-                    <div class="col-span-1 md:col-span-2 space-y-1">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Nombre del Producto</label>
-                        <input id="prodName" type="text" placeholder="Ej. Botella PET 1L" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-end animate-in fade-in zoom-in-95 duration-200 pb-1">
+                    <div class="col-span-1 md:col-span-3 space-y-0.5">
+                        <input id="prodName" type="text" placeholder="Nombre Producto" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Categoría</label>
-                        <input id="prodCat" type="text" placeholder="Ej. Plásticos" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
+                    <div class="col-span-1 md:col-span-2 space-y-0.5">
+                        <input id="prodCat" type="text" placeholder="Categoría" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Piezas x Paq.</label>
-                        <input id="prodPcs" type="number" placeholder="Ej. 50" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Ubicación</label>
-                        <input id="prodLoc" type="text" placeholder="Ej. A-12" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
+                    <div class="col-span-1 md:col-span-1 space-y-0.5">
+                        <input id="prodPcs" type="number" placeholder="Piezas" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
                     </div>
                     
-                    <!-- Input Imagen Inteligente -->
-                    <div class="col-span-1 md:col-span-6 flex gap-3 items-end pt-2">
-                         <div class="flex-grow space-y-1 relative">
-                            <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">URL Imagen</label>
-                            <input id="prodFile" oninput="previewImage(this.value)" type="text" placeholder="https://..." class="w-full p-2 pl-8 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
-                            <i class="fa-solid fa-link absolute left-3 top-8 text-gray-400 text-xs"></i>
+                    <!-- Input Imagen Integrado -->
+                    <div class="col-span-1 md:col-span-5 flex gap-2 items-center">
+                        <div class="flex-grow relative">
+                            <input id="prodFile" oninput="previewImage(this.value)" type="text" placeholder="URL Imagen..." class="w-full px-2 py-1.5 pl-6 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
+                            <i class="fa-solid fa-link absolute left-2 top-2 text-gray-400 text-[10px]"></i>
                         </div>
-                        <div id="imgPreviewBox" class="w-10 h-10 bg-gray-200 rounded border border-gray-300 flex items-center justify-center overflow-hidden hidden">
+                        <div id="imgPreviewBox" class="w-7 h-7 bg-gray-200 rounded border border-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden hidden">
                             <img id="imgPreview" class="w-full h-full object-cover">
                         </div>
-                        <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded hover:bg-indigo-700 transition shadow-md flex items-center gap-2 whitespace-nowrap h-10">
-                            <i class="fa-solid fa-save"></i> Guardar
+                        <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold py-1.5 px-3 rounded hover:bg-indigo-700 transition shadow text-xs flex items-center gap-1 whitespace-nowrap h-8">
+                            <i class="fa-solid fa-save"></i>
                         </button>
                     </div>
                 </div>
@@ -104,51 +99,49 @@
         </div>
 
         <!-- BARRA DE HERRAMIENTAS TABLA -->
-        <div class="p-3 bg-white border-b flex flex-col sm:flex-row justify-between items-center gap-3 shrink-0 z-10">
-            <div class="relative w-full sm:w-96">
-                <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-                <input id="searchInput" onkeyup="filterProducts()" type="text" placeholder="Buscar por nombre, SKU o categoría..." 
-                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border-transparent focus:bg-white focus:ring-2 focus:ring-indigo-200 rounded-lg text-sm transition-all outline-none">
+        <div class="px-4 py-2 bg-white border-b flex flex-row justify-between items-center gap-3 shrink-0 z-10 h-10">
+            <div class="relative w-full max-w-md">
+                <i class="fa-solid fa-search absolute left-2 top-2 text-gray-400 text-xs"></i>
+                <input id="searchInput" onkeyup="filterProducts()" type="text" placeholder="Buscar..." 
+                    class="w-full pl-7 pr-4 py-1 bg-gray-100 border-transparent focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded text-xs transition-all outline-none h-7">
             </div>
             <div class="flex gap-2">
-                <button onclick="loadProducts()" class="text-gray-500 hover:text-indigo-600 p-2 rounded-full hover:bg-gray-100 transition" title="Refrescar">
-                    <i class="fa-solid fa-arrows-rotate"></i>
+                <button onclick="loadProducts()" class="text-gray-400 hover:text-indigo-600 p-1 rounded hover:bg-gray-50 transition" title="Refrescar">
+                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
                 </button>
             </div>
         </div>
 
         <!-- TABLA CON SCROLL INDEPENDIENTE -->
         <div class="flex-grow overflow-auto bg-gray-50 relative">
-            <table class="w-full text-left border-collapse min-w-[800px]">
-                <thead class="bg-white text-xs uppercase text-gray-500 font-semibold tracking-wider sticky top-0 z-10 shadow-sm">
+            <table class="w-full text-left border-collapse min-w-[600px]">
+                <thead class="bg-white text-[10px] uppercase text-gray-500 font-bold tracking-wider sticky top-0 z-10 shadow-sm">
                     <tr>
-                        <th class="p-4 w-20 text-center bg-white">Img</th>
-                        <th class="p-4 bg-white">Producto / Categoría</th>
-                        <th class="p-4 w-32 bg-white">Piezas</th>
-                        <th class="p-4 w-32 bg-white">Ubicación</th>
-                        <th class="p-4 w-24 text-center bg-white">Visible</th>
-                        <th class="p-4 w-20 text-right bg-white">Acción</th>
+                        <th class="py-2 px-2 w-12 text-center bg-white border-b">Img</th>
+                        <th class="py-2 px-2 bg-white border-b">Descripción</th>
+                        <th class="py-2 px-2 w-20 text-center bg-white border-b">Piezas</th>
+                        <th class="py-2 px-2 w-16 text-center bg-white border-b">Visible</th>
+                        <th class="py-2 px-2 w-12 text-center bg-white border-b"></th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="divide-y divide-gray-200 text-sm text-gray-700 bg-white">
+                <tbody id="tableBody" class="divide-y divide-gray-200 text-xs text-gray-700 bg-white">
                     <!-- Los productos se inyectan aquí -->
                 </tbody>
             </table>
             
             <!-- Estado Vacío -->
-            <div id="emptyState" class="hidden flex flex-col items-center justify-center h-64 text-gray-400">
-                <i class="fa-solid fa-box-open text-4xl mb-3"></i>
-                <p>No se encontraron productos</p>
+            <div id="emptyState" class="hidden flex flex-col items-center justify-center h-40 text-gray-400">
+                <i class="fa-solid fa-filter text-2xl mb-2"></i>
+                <p class="text-xs">Sin resultados</p>
             </div>
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-6 py-4 rounded-lg shadow-2xl translate-y-24 transition-transform duration-300 z-[100] border-l-4 border-indigo-500 flex items-center gap-3">
-        <i id="toast-icon" class="fa-solid fa-check-circle text-green-400"></i>
+    <!-- TOAST NOTIFICATION COMPACTA -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-2 rounded shadow-xl translate-y-24 transition-transform duration-300 z-[100] border-l-4 border-indigo-500 flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-check text-green-400"></i>
         <div>
-            <h4 id="toast-title" class="font-bold text-sm">Notificación</h4>
-            <p id="toast-msg" class="text-xs text-slate-300">Mensaje del sistema</p>
+            <p id="toast-msg" class="text-xs font-medium text-slate-200">Mensaje</p>
         </div>
     </div>
 
@@ -168,32 +161,26 @@
         const db = firebase.database();
         const auth = firebase.auth();
         let currentUser = null;
-        let allProducts = []; // Almacenamiento local para búsqueda rápida
+        let allProducts = []; 
 
         // --- AUTH & INICIALIZACIÓN ---
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user; 
                 try {
-                    // Verificación de permisos (Igual que tu código original)
                     const snap = await db.ref('usuarios_permisos/' + user.uid).once('value');
                     if (snap.exists() && snap.val().redireccion === "admin.html") {
-                        document.getElementById('user-info').innerText = user.email.split('@')[0]; // Mostrar solo nombre
-                        document.getElementById('loader').classList.add('opacity-0', 'pointer-events-none'); // Fade out loader
+                        document.getElementById('user-info').innerText = user.email.split('@')[0];
+                        document.getElementById('loader').classList.add('opacity-0', 'pointer-events-none');
                         document.getElementById('main-content').classList.remove('hidden');
                         document.getElementById('main-content').classList.add('flex');
-                        
                         setupRealtimeListener(); 
-                    } else {
-                        throw new Error("Permisos insuficientes.");
-                    }
+                    } else { throw new Error("Permisos insuficientes."); }
                 } catch (error) {
                     alert("Acceso denegado: " + error.message);
                     window.location.href = "login.html"; 
                 }
-            } else {
-                window.location.href = "login.html";
-            }
+            } else { window.location.href = "login.html"; }
         });
 
         async function logout() {
@@ -201,40 +188,31 @@
             window.location.href = "login.html";
         }
 
-        // --- LÓGICA DE DATOS OPTIMIZADA ---
+        // --- LÓGICA ---
         function setupRealtimeListener() {
             const productsRef = db.ref('productos');
-            
-            // Escuchar cambios. Almacenamos todo en 'allProducts' y luego renderizamos
             productsRef.orderByChild('createdAt').on('value', (snapshot) => {
                 allProducts = [];
                 if (snapshot.exists()) {
                     snapshot.forEach((child) => {
                         allProducts.push({id: child.key, ...child.val()});
                     });
-                    // Orden descendente por fecha
                     allProducts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                 }
-                
                 document.getElementById('total-count').innerText = allProducts.length;
-                filterProducts(); // Renderiza usando el filtro actual (o todo si está vacío)
-            }, (error) => {
-                showToast("Error de conexión", error.message, "error");
-            });
+                filterProducts(); 
+            }, (error) => showToast("Error de conexión", "error"));
         }
 
-        // Función de filtrado (Búsqueda local instantánea)
         window.filterProducts = () => {
             const term = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allProducts.filter(p => 
                 (p.name || '').toLowerCase().includes(term) ||
-                (p.category || '').toLowerCase().includes(term) ||
-                (p.ubicacion || '').toLowerCase().includes(term)
+                (p.category || '').toLowerCase().includes(term)
             );
             renderTable(filtered);
         }
 
-        // Renderizado de tabla
         function renderTable(products) {
             const tbody = document.getElementById('tableBody');
             const emptyState = document.getElementById('emptyState');
@@ -248,37 +226,34 @@
 
             products.forEach(p => {
                 const isActive = p.activo !== false; 
-                
                 const tr = document.createElement('tr');
-                tr.className = `group hover:bg-indigo-50 transition-colors border-b border-gray-100 ${!isActive ? 'opacity-60 bg-gray-50' : ''} fade-in`;
+                // Filas compactas con hover suave
+                tr.className = `group hover:bg-indigo-50 transition-colors border-b border-gray-100 ${!isActive ? 'opacity-50 bg-gray-50' : ''} fade-in`;
                 
                 tr.innerHTML = `
-                    <td class="p-3 text-center">
-                        <div class="relative group/img w-10 h-10 mx-auto">
-                            <img src="${p.image}" class="w-10 h-10 object-cover rounded shadow-sm bg-white border cursor-pointer" 
+                    <td class="p-1 text-center align-middle">
+                        <div class="w-8 h-8 mx-auto bg-white rounded border border-gray-200 overflow-hidden cursor-pointer hover:scale-150 transition-transform origin-left z-10 relative">
+                            <img src="${p.image}" class="w-full h-full object-cover" 
                                 onerror="this.src='https://via.placeholder.com/100?text=IMG'"
                                 onclick="window.open('${p.image}', '_blank')">
                         </div>
                     </td>
-                    <td class="p-3">
-                        <input onchange="updateProduct('${p.id}','name',this.value, this)" value="${p.name || ''}" class="block w-full text-sm font-medium text-gray-900 bg-transparent border-b border-transparent focus:border-indigo-500 outline-none transition placeholder-gray-400 mb-1" placeholder="Nombre...">
-                        <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="block w-full text-xs text-indigo-600 font-mono bg-transparent border-b border-transparent focus:border-indigo-500 outline-none transition placeholder-gray-300" placeholder="Categoría...">
+                    <td class="p-1 align-middle">
+                        <input onchange="updateProduct('${p.id}','name',this.value, this)" value="${p.name || ''}" class="block w-full font-semibold text-gray-900 bg-transparent border-none focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded px-1 py-0.5 outline-none transition placeholder-gray-400 text-xs" placeholder="Nombre...">
+                        <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="block w-full text-[10px] text-indigo-600 font-mono bg-transparent border-none focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded px-1 py-0 outline-none transition placeholder-gray-300 mt-0.5" placeholder="Categoría...">
                     </td>
-                    <td class="p-3 align-top">
-                        <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-full bg-transparent p-1 border border-gray-200 rounded text-center focus:bg-white focus:border-indigo-500 outline-none text-xs" placeholder="-">
+                    <td class="p-1 align-middle text-center">
+                        <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-16 mx-auto bg-transparent border border-gray-100 rounded text-center focus:bg-white focus:border-indigo-500 outline-none text-xs py-0.5" placeholder="-">
                     </td>
-                     <td class="p-3 align-top">
-                        <input type="text" onchange="updateProduct('${p.id}','ubicacion',this.value, this)" value="${p.ubicacion || ''}" class="w-full bg-transparent p-1 border border-gray-200 rounded text-center focus:bg-white focus:border-indigo-500 outline-none text-xs" placeholder="-">
-                    </td>
-                    <td class="p-3 text-center align-middle">
+                    <td class="p-1 text-center align-middle">
                          <label class="inline-flex items-center cursor-pointer relative group/toggle" title="Activar/Desactivar">
                             <input type="checkbox" onchange="updateProduct('${p.id}', 'activo', this.checked)" class="sr-only peer" ${isActive ? 'checked' : ''}>
-                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                            <div class="w-7 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-green-500"></div>
                         </label>
                     </td>
-                    <td class="p-3 text-right align-middle">
-                        <button onclick="deleteProduct('${p.id}')" class="text-gray-300 hover:text-red-500 p-2 transition transform hover:scale-110" title="Eliminar">
-                            <i class="fa-solid fa-trash"></i>
+                    <td class="p-1 text-center align-middle">
+                        <button onclick="deleteProduct('${p.id}')" class="text-gray-300 hover:text-red-500 p-1 transition opacity-0 group-hover:opacity-100" title="Eliminar">
+                            <i class="fa-solid fa-trash text-xs"></i>
                         </button>
                     </td>
                 `;
@@ -286,7 +261,6 @@
             });
         }
 
-        // --- PREVIEW IMAGEN ---
         window.previewImage = (url) => {
             const box = document.getElementById('imgPreviewBox');
             const img = document.getElementById('imgPreview');
@@ -294,121 +268,87 @@
                 box.classList.remove('hidden');
                 img.src = url;
                 img.onerror = () => box.classList.add('hidden');
-            } else {
-                box.classList.add('hidden');
-            }
+            } else { box.classList.add('hidden'); }
         }
 
-        // --- CRUD MEJORADO ---
         async function uploadProduct() {
-            if (!currentUser) return showToast("Error", "Sesión inválida", "error");
+            if (!currentUser) return showToast("Error Sesión", "error");
             
             const name = document.getElementById('prodName').value;
             const cat = document.getElementById('prodCat').value;
             const url = document.getElementById('prodFile').value;
-            const pcs = document.getElementById('prodPcs').value; // Nuevo
-            const loc = document.getElementById('prodLoc').value; // Nuevo
+            const pcs = document.getElementById('prodPcs').value;
             const btn = document.getElementById('btnUpload');
             
-            if(!name || !url) return showToast("Faltan datos", "El nombre y la imagen son obligatorios", "error");
+            if(!name || !url) return showToast("Faltan datos", "error");
             
-            // UI Loading
             const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Guardando...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
 
             try {
                 await db.ref('productos').push({
                     name, 
                     category: cat, 
                     image: url,
-                    piezas: pcs, // Guardar piezas
-                    ubicacion: loc, // Guardar ubicación
+                    piezas: pcs,
                     activo: true, 
                     createdAt: firebase.database.ServerValue.TIMESTAMP
                 });
-                showToast("Éxito", "Producto agregado correctamente", "success");
+                showToast("Guardado", "success");
                 
-                // Limpiar campos
                 document.getElementById('prodName').value = "";
                 document.getElementById('prodCat').value = "";
                 document.getElementById('prodFile').value = "";
                 document.getElementById('prodPcs').value = "";
-                document.getElementById('prodLoc').value = "";
                 document.getElementById('imgPreviewBox').classList.add('hidden');
-            } catch(e) { 
-                showToast("Error", e.message, "error"); 
-            } finally { 
-                btn.disabled = false; 
-                btn.innerHTML = originalText; 
-            }
+                document.getElementById('prodName').focus(); // Foco rápido para seguir agregando
+            } catch(e) { showToast(e.message, "error"); } 
+            finally { btn.disabled = false; btn.innerHTML = originalText; }
         }
 
-        // Actualización inteligente (con feedback en el input)
         window.updateProduct = async (id, field, val, inputElement) => {
             if(!currentUser) return;
-            
-            // Feedback visual inmediato en el input (si se proporcionó)
-            let originalBorder = "";
-            if(inputElement) {
-                originalBorder = inputElement.className;
-                inputElement.classList.add('border-yellow-400', 'bg-yellow-50');
-            }
+            if(inputElement) inputElement.classList.add('bg-yellow-50');
 
             try {
                 await db.ref('productos/'+id).update({[field]: val});
-                
-                // Feedback de éxito
                 if(inputElement) {
-                    inputElement.classList.remove('border-yellow-400', 'bg-yellow-50');
-                    inputElement.classList.add('border-green-400', 'bg-green-50');
-                    setTimeout(() => {
-                        inputElement.classList.remove('border-green-400', 'bg-green-50');
-                    }, 1000);
+                    inputElement.classList.replace('bg-yellow-50', 'bg-green-50');
+                    setTimeout(() => inputElement.classList.remove('bg-green-50'), 500);
                 }
-                
-                // Solo mostramos toast para cambios críticos (como el toggle activo)
-                if(field === 'activo') showToast("Actualizado", "Visibilidad del producto cambiada", "success");
-
             } catch(e) { 
-                showToast("Error", "No se pudo actualizar", "error");
-                if(inputElement) inputElement.classList.add('border-red-500');
+                showToast("Error", "error");
+                if(inputElement) inputElement.classList.add('bg-red-50');
             }
         };
 
         window.deleteProduct = async (id) => {
             if(!currentUser) return;
-            // Usamos confirm nativo pero con texto más claro
-            if(confirm("⚠️ ¿Estás seguro de eliminar este producto?\n\nEsta acción no se puede deshacer.")) {
+            if(confirm("¿Eliminar?")) {
                 try {
                     await db.ref('productos/'+id).remove();
-                    showToast("Eliminado", "El producto ha sido borrado", "success");
-                } catch(e) { showToast("Error", e.message, "error"); }
+                    showToast("Eliminado", "success");
+                } catch(e) { showToast("Error", "error"); }
             }
         };
 
-        // Sistema de notificaciones (Toasts)
         let toastTimeout;
-        function showToast(title, msg, type = "success") {
+        function showToast(msg, type = "success") {
             const t = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
-            
-            document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-msg').innerText = msg;
             
-            // Colores según tipo
             if(type === 'error') {
                 t.classList.replace('border-indigo-500', 'border-red-500');
-                icon.className = "fa-solid fa-circle-exclamation text-red-500 text-xl";
+                icon.className = "fa-solid fa-xmark text-red-500";
             } else {
                 t.classList.replace('border-red-500', 'border-indigo-500');
-                icon.className = "fa-solid fa-check-circle text-green-400 text-xl";
+                icon.className = "fa-solid fa-check text-green-400";
             }
-
             t.classList.remove('translate-y-24');
-            
             clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => t.classList.add('translate-y-24'), 3000);
+            toastTimeout = setTimeout(() => t.classList.add('translate-y-24'), 2000);
         }
 
         window.uploadProduct = uploadProduct;
