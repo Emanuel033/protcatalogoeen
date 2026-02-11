@@ -178,7 +178,7 @@
                     });
                     
                     const tempByDate = [...allProducts].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    latestProductIds = tempByDate.slice(0, 5).map(p => p.id);
+                    latestProductIds = tempByDate.slice(0, 12).map(p => p.id);
 
                     allProducts.sort((a, b) => {
                         const isANew = latestProductIds.includes(a.id);
