@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 4.0 - Productividad Total</title>
+    <title>Admin 4.1 - Envases La Económica</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -16,7 +16,6 @@
         ::-webkit-scrollbar-track { bg: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
-        /* Efecto focus sutil para atajos de teclado */
         .shortcut-active { ring: 2px; ring-color: #6366f1; }
     </style>
 </head>
@@ -24,7 +23,7 @@
     
     <div id="loader" class="fixed inset-0 bg-slate-900 z-[60] flex flex-col items-center justify-center text-white transition-opacity duration-500">
         <div class="animate-spin h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
-        <p class="text-xs tracking-widest uppercase font-semibold animate-pulse">Cargando...</p>
+        <p class="text-xs tracking-widest uppercase font-semibold animate-pulse">Cargando Sistema...</p>
     </div>
 
     <div id="main-content" class="max-w-full mx-auto bg-white shadow-2xl border-x border-gray-200 hidden flex-col h-full w-full">
@@ -39,7 +38,7 @@
                     <div class="flex items-center gap-1 text-indigo-200 text-[10px]">
                         <i class="fa-solid fa-user-shield"></i>
                         <span id="user-info">...</span>
-                        <span class="hidden md:inline text-indigo-400 ml-2">| Atajos: "/" buscar, "Esc" limpiar</span>
+                        <span class="hidden md:inline text-indigo-400 ml-2">| "/" Buscar | "Esc" Limpiar</span>
                     </div>
                 </div>
             </div>
@@ -108,7 +107,7 @@
                     </button>
                 </div>
 
-                <button onclick="filterIncomplete()" class="bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded h-8 w-8 flex items-center justify-center shadow transition" title="Ver productos sin piezas (0)">
+                <button onclick="filterIncomplete()" class="bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded h-8 w-8 flex items-center justify-center shadow transition" title="Ver sin piezas (0)">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </button>
 
@@ -116,7 +115,7 @@
                     <i class="fa-solid fa-file-excel"></i>
                 </button>
                 
-                <button onclick="resetFilters()" class="text-gray-400 hover:text-indigo-600 p-1.5 rounded hover:bg-gray-50 transition h-8 w-8" title="Limpiar filtros / Refrescar (Esc)">
+                <button onclick="resetFilters()" class="text-gray-400 hover:text-indigo-600 p-1.5 rounded hover:bg-gray-50 transition h-8 w-8" title="Limpiar filtros (Esc)">
                     <i class="fa-solid fa-arrows-rotate"></i>
                 </button>
             </div>
@@ -149,7 +148,7 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
+        // --- CONFIGURACIÓN FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
             authDomain: "productoseen.firebaseapp.com",
@@ -185,12 +184,16 @@
 
         async function logout() { await auth.signOut(); window.location.href = "login.html"; }
 
-        // --- PRODUCTOS ---
+        // --- LÓGICA DE PRODUCTOS (CORREGIDA) ---
         function setupRealtimeListener() {
             db.ref('productos').orderByChild('createdAt').on('value', (snapshot) => {
                 allProducts = [];
                 if (snapshot.exists()) {
-                    snapshot.forEach((child) => allProducts.push({id: child.key, ...child.val()}));
+                    // CORRECCIÓN AQUÍ: Usamos llaves {} para evitar retorno implícito
+                    snapshot.forEach((child) => {
+                        allProducts.push({id: child.key, ...child.val()});
+                    });
+                    
                     // Ordenar por fecha descendente
                     allProducts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                 }
@@ -199,7 +202,7 @@
             });
         }
 
-        // --- FILTRADO Y RENDERIZADO ---
+        // --- FILTROS Y UI ---
         window.resetFilters = () => {
             document.getElementById('searchInput').value = "";
             filterProducts();
@@ -215,7 +218,6 @@
         };
 
         window.filterIncomplete = () => {
-            // Filtra productos con 0 piezas, null, o undefined
             currentFilteredProducts = allProducts.filter(p => !p.piezas || p.piezas == 0);
             renderTable(currentFilteredProducts);
             showToast(`Mostrando ${currentFilteredProducts.length} productos sin piezas`, "success");
@@ -230,7 +232,6 @@
 
             products.forEach(p => {
                 const isActive = p.activo !== false; 
-                // Imagen placeholder segura si falla la URL
                 const fallbackImg = "https://via.placeholder.com/100?text=IMG";
 
                 const tr = document.createElement('tr');
@@ -258,7 +259,7 @@
                     </td>
                     <td class="p-1 text-center align-middle">
                         <div class="flex justify-center gap-2">
-                            <button onclick="cloneProduct('${p.id}')" class="text-blue-300 hover:text-blue-500 p-1 transition opacity-0 group-hover:opacity-100" title="Clonar (Duplicar)">
+                            <button onclick="cloneProduct('${p.id}')" class="text-blue-300 hover:text-blue-500 p-1 transition opacity-0 group-hover:opacity-100" title="Clonar">
                                 <i class="fa-solid fa-copy text-xs"></i>
                             </button>
                             <button onclick="deleteProduct('${p.id}')" class="text-gray-300 hover:text-red-500 p-1 transition opacity-0 group-hover:opacity-100" title="Eliminar">
@@ -271,14 +272,12 @@
             });
         }
 
-        // --- ATAJOS DE TECLADO ---
+        // --- ATAJOS Y UTILS ---
         document.addEventListener('keydown', (e) => {
-            // Tecla "/" para ir al buscador
             if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
                 e.preventDefault();
                 document.getElementById('searchInput').focus();
             }
-            // Tecla "Escape" para limpiar
             if (e.key === 'Escape') {
                 document.getElementById('searchInput').value = '';
                 document.getElementById('searchInput').blur();
@@ -286,14 +285,11 @@
             }
         });
 
-        // Detectar Enter en inputs del formulario de agregar
         window.checkEnter = (e) => {
             if (e.key === 'Enter') uploadProduct();
         };
 
-        // --- FUNCIONES NUEVAS ---
-        
-        // 1. Clonar Producto
+        // --- ACCIONES DE USUARIO ---
         window.cloneProduct = (id) => {
             const prod = allProducts.find(p => p.id === id);
             if (!prod) return;
@@ -302,40 +298,31 @@
             document.getElementById('prodCat').value = prod.category;
             document.getElementById('prodPcs').value = prod.piezas;
             document.getElementById('prodFile').value = prod.image;
-            
             previewImage(prod.image);
             
-            // Abrir detalle si está cerrado
             document.getElementById('addFormDetails').open = true;
-            // Scroll suave hacia arriba
             document.getElementById('main-content').scrollIntoView({ behavior: 'smooth' });
-            // Foco en el nombre para editar rápido
             document.getElementById('prodName').focus();
-            
-            showToast("Datos copiados. Edita y presiona Enter.", "success");
+            showToast("Datos copiados. Edita y Enter.", "success");
         };
 
-        // 2. Exportar a Excel
         window.exportToExcel = () => {
             if (currentFilteredProducts.length === 0) return showToast("Nada que exportar", "error");
             let csvContent = "\uFEFFNombre,Categoria,Piezas,Activo,ImagenURL\n";
-
             currentFilteredProducts.forEach(p => {
                 const cleanName = (p.name || "").replace(/"/g, '""');
                 const cleanCat = (p.category || "").replace(/"/g, '""');
                 const row = [`"${cleanName}"`, `"${cleanCat}"`, p.piezas || 0, p.activo !== false ? "SI" : "NO", `"${p.image || ""}"`].join(",");
                 csvContent += row + "\n";
             });
-
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
-            showToast("Descargando Excel...", "success");
+            showToast("Exportado correctamente", "success");
         };
 
-        // 3. Edición Masiva
         window.applyMassUpdate = async () => {
             if (!currentUser) return;
             const qty = document.getElementById('massQtyInput').value;
@@ -351,7 +338,7 @@
             } catch (e) { showToast(e.message, "error"); }
         };
 
-        // --- CRUD BASICO ---
+        // --- CRUD BÁSICO ---
         window.previewImage = (url) => {
             const box = document.getElementById('imgPreviewBox');
             if(url && url.length > 10) {
@@ -381,14 +368,13 @@
                     piezas: pcs ? Number(pcs) : 0,
                     activo: true, createdAt: firebase.database.ServerValue.TIMESTAMP
                 });
-                showToast("Producto Guardado", "success");
-                // Limpiar form
+                showToast("Guardado", "success");
                 document.getElementById('prodName').value = "";
                 document.getElementById('prodCat').value = "";
                 document.getElementById('prodFile').value = "";
                 document.getElementById('prodPcs').value = "";
                 document.getElementById('imgPreviewBox').classList.add('hidden');
-                document.getElementById('prodName').focus(); // Listo para el siguiente
+                document.getElementById('prodName').focus(); 
             } catch(e) { showToast(e.message, "error"); } 
             finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
@@ -402,7 +388,7 @@
                 if(inputElement) inputElement.classList.replace('bg-yellow-50', 'bg-green-50');
                 setTimeout(() => inputElement?.classList.remove('bg-green-50'), 500);
             } catch(e) { 
-                showToast("Error al guardar", "error");
+                showToast("Error", "error");
                 inputElement?.classList.add('bg-red-50');
             }
         };
