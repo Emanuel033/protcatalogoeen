@@ -24,7 +24,6 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
 
-    <!-- NAV -->
     <nav class="bg-indigo-900 text-white sticky top-0 z-40 shadow-xl">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3 w-full md:w-auto">
@@ -41,7 +40,6 @@
         </div>
     </nav>
 
-    <!-- HERO BANNER -->
     <div class="bg-indigo-800 hero-pattern text-white relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 py-8 md:py-12 relative z-10">
             <h2 class="text-2xl md:text-4xl font-bold mb-2">Soluciones en Envases</h2>
@@ -52,7 +50,6 @@
         </div>
     </div>
 
-    <!-- CATEGORÍAS -->
     <div class="bg-white border-b border-slate-200 sticky top-[64px] z-30 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 py-3">
             <div id="categories-container" class="flex gap-2 overflow-x-auto hide-scroll pb-1">
@@ -61,7 +58,6 @@
         </div>
     </div>
 
-    <!-- MAIN -->
     <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
         <div id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div class="col-span-full text-center py-20 text-slate-400">Cargando...</div>
@@ -74,33 +70,26 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
     <footer class="bg-white border-t border-slate-200 mt-auto py-8 text-center text-xs text-slate-400">
-        © 2024 Envases La Económica del Norte.
+        © 2026 Envases La Económica del Norte.
     </footer>
 
-    <!-- TOAST -->
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none text-sm font-medium">
         Agregado al carrito
     </div>
 
-    <!-- FLOTANTES -->
     <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
-        
-        <!-- Botón Ayuda -->
         <button type="button" onclick="openGeneralWhatsApp()" class="bg-white text-green-500 p-3 rounded-full shadow-lg hover:scale-110 transition border border-green-100 group relative">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">¿Dudas?</span>
         </button>
 
-        <!-- Botón Carrito -->
         <button type="button" onclick="toggleCart()" class="bg-indigo-600 text-white p-4 rounded-full shadow-lg shadow-indigo-600/40 group transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center relative">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-indigo-600 transform scale-0 transition-transform duration-200">0</span>
         </button>
     </div>
 
-    <!-- MODAL CARRITO -->
     <div id="cart-modal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0" id="cart-backdrop" onclick="toggleCart()"></div>
         <div class="absolute right-0 top-0 h-full w-full md:w-[500px] bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cart-panel">
@@ -129,11 +118,9 @@
         </div>
     </div>
 
-    <!-- LIGHTBOX -->
     <div id="lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center" onclick="this.classList.add('hidden')">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
         <img id="lightbox-img" src="" class="max-w-[95%] max-h-[90vh] rounded-lg shadow-2xl relative z-10 transition-transform scale-95" onclick="event.stopPropagation()">
-        <button type="button" class="absolute top-4 right-4 text-white z-50 p-2 opacity-70 hover:opacity-100"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
     </div>
 
     <script>
@@ -161,8 +148,33 @@
                 cart = JSON.parse(localStorage.getItem('cart_een')) || [];
                 loadProducts();
                 renderCart();
+                // Verificamos si viene de un código QR
+                checkQRParam();
             } catch (e) { console.error(e); }
         });
+
+        // === LÓGICA QR ===
+        function checkQRParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('add');
+
+            if (productId) {
+                // Intervalo para asegurar que los productos de Firebase ya cargaron
+                const qrCheck = setInterval(() => {
+                    if (allProducts.length > 0) {
+                        const productExists = allProducts.find(p => p.id === productId);
+                        if (productExists) {
+                            add(productId); 
+                            toggleCart(); // Mostrar al cliente que se agregó
+                            showToast("¡Producto escaneado agregado!");
+                            // Limpiar la URL sin recargar para evitar duplicados al refrescar manualmente
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        }
+                        clearInterval(qrCheck);
+                    }
+                }, 500);
+            }
+        }
 
         // === DATOS ===
         function loadProducts() {
@@ -245,65 +257,37 @@
             cont.innerHTML = pageItems.map((p, idx) => {
                 const categoryLower = (p.category || '').toLowerCase();
                 const isBolsas = categoryLower.includes('bolsa'); 
-                
-                // Lógica Estricta para Bolsas: Siempre 100
                 const packQty = isBolsas ? 100 : (p.piezas ? parseInt(p.piezas) : 0);
                 const hasPack = packQty > 1;
                 const isNew = latestProductIds.includes(p.id);
-                
                 const displayMin = isBolsas ? 100 : 1;
                 
-                // Selector: Si es Bolsa, SOLO muestra opción de Paquete (100)
                 let selectorHTML = '';
                 if(isBolsas) {
-                    selectorHTML = `
-                        <select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold focus:ring-2 focus:ring-indigo-100 outline-none">
-                             <option value="100">Paquete (100 pzas)</option>
-                        </select>`;
+                    selectorHTML = `<select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none"><option value="100">Paquete (100 pzas)</option></select>`;
                 } else if (hasPack) {
-                    selectorHTML = `
-                        <select id="sel-${p.id}" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 mb-2 bg-slate-50 text-slate-700 font-medium focus:ring-2 focus:ring-indigo-100 outline-none">
-                             <option value="1">Individual</option>
-                             <option value="${packQty}">Paquete completo</option>
-                        </select>`;
+                    selectorHTML = `<select id="sel-${p.id}" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 mb-2 bg-slate-50 text-slate-700 font-medium outline-none"><option value="1">Individual</option><option value="${packQty}">Paquete completo</option></select>`;
                 } else {
                     selectorHTML = `<input type="hidden" id="sel-${p.id}" value="1">`;
                 }
 
                 return `
                 <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
-                    
                     <div class="relative h-52 p-4 cursor-pointer overflow-hidden rounded-t-2xl" onclick="openImage('${p.image}')">
                         <img src="${p.image}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300?text=Sin+Imagen'">
-                        
                         ${isNew ? `<span class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md badge-pulse">NUEVO</span>` : ''}
-                        
-                        <div class="absolute bottom-2 right-2 bg-white text-indigo-600 p-1.5 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m4-3H6"/></svg>
-                        </div>
                     </div>
-
                     <div class="p-4 flex flex-col flex-1 border-t border-slate-50">
-                        <div class="mb-1">
-                            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">${p.category || 'General'}</span>
-                        </div>
-                        <h3 class="font-bold text-sm mb-2 h-10 line-clamp-2 leading-snug text-slate-800" title="${p.name}">${p.name}</h3>
-                        
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">${p.category || 'General'}</span>
+                        <h3 class="font-bold text-sm mb-2 h-10 line-clamp-2 leading-snug text-slate-800">${p.name}</h3>
                         ${selectorHTML}
-                        
-                        <!-- ETIQUETAS INFO -->
                         <div class="flex justify-between items-center text-[10px] text-slate-500 font-bold mb-3 mt-1">
                             <span class="bg-slate-100 px-2 py-1 rounded text-slate-600">Mínimo: ${displayMin}</span>
                             ${hasPack ? `<span class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded">Paq: ${packQty} pz</span>` : '<span></span>'}
                         </div>
-
-                        <!-- BOTONES -->
                         <div class="mt-auto flex gap-2">
-                            <button type="button" onclick="add('${p.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md shadow-indigo-100 transition active:scale-95 flex items-center justify-center gap-1">
-                                Agregar
-                            </button>
-                            <!-- Pregunta Rápida -->
-                            <button type="button" onclick="askProduct('${p.id}')" class="w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-green-500 hover:bg-green-50 hover:border-green-200 transition active:scale-95" title="Preguntar por WhatsApp">
+                            <button type="button" onclick="add('${p.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95">Agregar</button>
+                            <button type="button" onclick="askProduct('${p.id}')" class="w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-green-500 hover:bg-green-50 transition active:scale-95">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                             </button>
                         </div>
@@ -332,14 +316,11 @@
         function add(id) {
             const p = allProducts.find(x => x.id === id);
             if(!p) return;
-            
             const sel = document.getElementById(`sel-${id}`);
             const qty = sel ? parseInt(sel.value) : 1;
-            
             const exist = cart.find(x => x.id === id);
             if(exist) exist.quantity += qty;
             else cart.push({ ...p, quantity: qty });
-            
             saveCart();
             showToast(`Agregado (+${qty})`);
         }
@@ -347,31 +328,18 @@
         function updateCartItem(id) {
             const item = cart.find(x => x.id === id);
             if(!item) return;
-
             const prod = allProducts.find(p => p.id === id) || item; 
             const categoryLower = (prod.category || '').toLowerCase();
             const isBolsas = categoryLower.includes('bolsa');
-
-            // Si es Bolsa, packSize es 100 forzado, si no, usa DB
             const packSize = isBolsas ? 100 : (prod.piezas ? parseInt(prod.piezas) : 0);
-            const hasPack = packSize > 1;
-
-            if (hasPack) {
-                const inputPack = document.getElementById(`inp-pack-${id}`);
-                const inputLoose = document.getElementById(`inp-loose-${id}`);
-                
-                const packs = inputPack ? parseInt(inputPack.value) || 0 : 0;
-                let loose = inputLoose ? parseInt(inputLoose.value) || 0 : 0;
-                
-                // Restricción: Si es bolsa, sueltas siempre es 0
-                if(isBolsas) loose = 0;
-
+            
+            if (packSize > 1) {
+                const packs = parseInt(document.getElementById(`inp-pack-${id}`).value) || 0;
+                let loose = isBolsas ? 0 : (parseInt(document.getElementById(`inp-loose-${id}`).value) || 0);
                 item.quantity = (packs * packSize) + loose;
             } else {
-                const inputSimple = document.getElementById(`inp-simple-${id}`);
-                if(inputSimple) item.quantity = parseInt(inputSimple.value) || 1;
+                item.quantity = parseInt(document.getElementById(`inp-simple-${id}`).value) || 1;
             }
-
             if(item.quantity <= 0) remove(id);
             else saveCart();
         }
@@ -398,10 +366,7 @@
             if(totalEl) totalEl.innerText = total;
 
             if(cart.length === 0) {
-                itemsCont.innerHTML = `<div class="h-64 flex flex-col items-center justify-center text-slate-400 gap-3 border-2 border-dashed border-slate-200 rounded-xl m-2">
-                    <svg class="w-12 h-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                    <p class="text-sm font-medium">Carrito vacío</p>
-                </div>`;
+                itemsCont.innerHTML = `<div class="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl m-2"><p class="text-sm font-medium">Carrito vacío</p></div>`;
                 return;
             }
 
@@ -409,110 +374,29 @@
                 const prod = allProducts.find(p => p.id === item.id) || item;
                 const categoryLower = (prod.category || '').toLowerCase();
                 const isBolsas = categoryLower.includes('bolsa');
-
                 const packSize = isBolsas ? 100 : (prod.piezas ? parseInt(prod.piezas) : 0);
-                const hasPack = packSize > 1;
-
-                let inputsHTML = '';
                 
-                if (hasPack) {
-                    const packs = Math.floor(item.quantity / packSize);
-                    const loose = item.quantity % packSize;
-
-                    // Si es Bolsa, ocultamos completamente el input de sueltas
-                    const looseDisplay = isBolsas ? 'hidden' : 'block';
-
-                    inputsHTML = `
-                        <div class="flex gap-2 mt-2">
-                            <div class="flex-1">
-                                <label class="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">Paquetes (${packSize})</label>
-                                <input type="number" id="inp-pack-${item.id}" value="${packs}" min="0" 
-                                    onchange="updateCartItem('${item.id}')" 
-                                    class="w-full border border-indigo-200 rounded text-center font-bold text-sm py-1.5 bg-indigo-50 text-indigo-700 focus:ring-1 focus:ring-indigo-500 outline-none">
-                            </div>
-                            <div class="flex-1 ${looseDisplay}">
-                                <label class="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">Sueltas</label>
-                                <input type="number" id="inp-loose-${item.id}" value="${loose}" min="0" 
-                                    onchange="updateCartItem('${item.id}')" 
-                                    class="w-full border border-slate-200 rounded text-center font-bold text-sm py-1.5 focus:ring-1 focus:ring-indigo-500 outline-none">
-                            </div>
-                        </div>
-                        <div class="text-[10px] text-right text-slate-400 mt-1.5 font-medium">Total: <b class="text-slate-700">${item.quantity}</b> pzas</div>
-                    `;
+                let inputsHTML = '';
+                if (packSize > 1) {
+                    inputsHTML = `<div class="flex gap-2 mt-2">
+                        <div class="flex-1"><label class="text-[9px] text-slate-400 font-bold uppercase block">Paquetes</label><input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full border rounded text-center text-sm py-1 bg-indigo-50 outline-none"></div>
+                        <div class="flex-1 ${isBolsas?'hidden':''}"><label class="text-[9px] text-slate-400 font-bold uppercase block">Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full border rounded text-center text-sm py-1 outline-none"></div>
+                    </div>`;
                 } else {
-                    inputsHTML = `
-                        <div class="mt-2 flex justify-end items-center gap-2">
-                            <label class="text-[10px] text-slate-400 font-bold uppercase">Piezas:</label>
-                            <input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" 
-                                onchange="updateCartItem('${item.id}')" 
-                                class="w-20 border border-slate-200 rounded text-center font-bold text-sm py-1.5 focus:ring-1 focus:ring-indigo-500 outline-none">
-                        </div>
-                    `;
+                    inputsHTML = `<div class="mt-2 flex justify-end items-center gap-2"><label class="text-[10px] text-slate-400 font-bold">Piezas:</label><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-20 border rounded text-center text-sm py-1 outline-none"></div>`;
                 }
 
-                return `
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-4 transition-all hover:shadow-md">
-                    <div class="w-16 h-16 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center shrink-0">
-                        <img src="${item.image}" class="w-full h-full object-contain mix-blend-multiply">
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-bold text-sm leading-tight text-slate-800 pr-2">${item.name}</p>
-                                <p class="text-[10px] text-slate-400 uppercase font-bold mt-0.5 tracking-wide">${item.category || ''}</p>
-                            </div>
-                            <button type="button" onclick="remove('${item.id}')" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                        </div>
-                        ${inputsHTML}
-                    </div>
-                </div>`;
+                return `<div class="bg-white p-4 rounded-xl border flex gap-4"><img src="${item.image}" class="w-16 h-16 object-contain shrink-0"><div class="flex-1"><div class="flex justify-between font-bold text-sm text-slate-800"><span>${item.name}</span><button onclick="remove('${item.id}')" class="text-red-400">×</button></div>${inputsHTML}</div></div>`;
             }).join('');
         }
 
-        // === FUNCIONES SEGURAS ===
-        function clearCart() {
-            if(confirm("¿Estás seguro de vaciar toda la lista?")) { 
-                cart = []; 
-                localStorage.setItem('cart_een', '[]'); 
-                renderCart(); 
-                
-                // Forzar cierre
-                const m = document.getElementById('cart-modal');
-                const b = document.getElementById('cart-backdrop');
-                const p = document.getElementById('cart-panel');
-                
-                if(m && b && p) {
-                    b.classList.add('opacity-0');
-                    p.classList.add('translate-x-full');
-                    setTimeout(() => m.classList.add('hidden'), 300);
-                }
-                
-                showToast("Carrito vaciado correctamente");
-            }
-        }
-
-        function openLinkSafe(url) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
+        // === WHATSAPP Y UTILS ===
         function sendWhatsApp() {
             if(cart.length === 0) return;
-            
             let msg = "👋 Hola Envases La Económica, deseo cotizar:\n\n";
             cart.forEach(item => {
                 const prod = allProducts.find(p => p.id === item.id) || item;
-                const categoryLower = (prod.category || '').toLowerCase();
-                const isBolsas = categoryLower.includes('bolsa');
-                const packSize = isBolsas ? 100 : (prod.piezas ? parseInt(prod.piezas) : 0);
-                
+                const packSize = (prod.category||'').toLowerCase().includes('bolsa') ? 100 : (parseInt(prod.piezas)||0);
                 msg += `🔹 ${item.name}\n`;
                 if (packSize > 1) {
                     const packs = Math.floor(item.quantity / packSize);
@@ -520,43 +404,27 @@
                     if(packs > 0) msg += `   📦 ${packs} Paq (${packSize} c/u)\n`;
                     if(loose > 0) msg += `   🧩 ${loose} Pzas sueltas\n`;
                     msg += `   (Total: ${item.quantity} pzas)\n\n`;
-                } else {
-                    msg += `   🧩 ${item.quantity} Pzas\n\n`;
-                }
+                } else msg += `   🧩 ${item.quantity} Pzas\n\n`;
             });
-            msg += `📍 *Total General: ${cart.reduce((a,b)=>a+b.quantity,0)} piezas*`;
-            
-            const phones = ['528113728493', '528118400503'];
-            const phone = phones[Math.floor(Math.random() * phones.length)];
-            const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
-            
-            openLinkSafe(url);
+            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
         }
 
         function askProduct(id) {
             const prod = allProducts.find(p => p.id === id);
             if(!prod) return;
-            const phones = ['528113728493', '528118400503'];
-            const phone = phones[Math.floor(Math.random() * phones.length)];
-            const msg = `Hola, me interesa información sobre: ${prod.name}`;
-            const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
-            openLinkSafe(url);
+            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, me interesa: " + prod.name)}`;
+            window.open(url, '_blank');
         }
 
         function openGeneralWhatsApp() {
-            const phones = ['528113728493', '528118400503'];
-            const phone = phones[Math.floor(Math.random() * phones.length)];
-            const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent("Hola, tengo una duda general.")}`;
-            openLinkSafe(url);
+            window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, tengo una duda general.")}`, '_blank');
         }
 
-        // === UTILS ===
         function toggleCart() {
             const m = document.getElementById('cart-modal');
             const b = document.getElementById('cart-backdrop');
             const p = document.getElementById('cart-panel');
-            if(!m) return;
-
             if(m.classList.contains('hidden')) {
                 m.classList.remove('hidden');
                 setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
@@ -569,22 +437,20 @@
 
         function showToast(msg) {
             const t = document.getElementById('toast');
-            if(t) {
-                t.innerText = msg;
-                t.classList.remove('opacity-0', 'translate-y-24');
-                setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
-            }
+            t.innerText = msg;
+            t.classList.remove('opacity-0', 'translate-y-24');
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
         }
 
         function openImage(src) {
             const l = document.getElementById('lightbox');
-            if(l) {
-                document.getElementById('lightbox-img').src = src;
-                l.classList.remove('hidden');
-                document.getElementById('lightbox-img').classList.remove('scale-95');
-            }
+            document.getElementById('lightbox-img').src = src;
+            l.classList.remove('hidden');
+        }
+        
+        function clearCart() {
+            if(confirm("¿Vaciar carrito?")) { cart = []; saveCart(); toggleCart(); }
         }
     </script>
 </body>
 </html>
-
