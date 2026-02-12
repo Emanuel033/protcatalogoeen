@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 4.2 - Control de Novedades</title>
+    <title>Admin 4.3 - Control + Etiquetas QR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .fade-in { animation: fadeIn 0.3s ease-in; }
@@ -110,6 +111,11 @@
                         class="w-12 px-1 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-7 text-center">
                     <button onclick="applyMassUpdate()" title="Aplicar cantidad" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold py-1 px-2 rounded h-7 shadow transition"><i class="fa-solid fa-check"></i></button>
                 </div>
+                
+                <button onclick="printQRs()" class="bg-purple-600 hover:bg-purple-700 text-white p-1.5 rounded h-8 w-8 flex items-center justify-center shadow transition" title="Imprimir Etiquetas QR de lo filtrado">
+                    <i class="fa-solid fa-qrcode"></i>
+                </button>
+
                 <button onclick="filterIncomplete()" class="bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded h-8 w-8 flex items-center justify-center shadow transition" title="Ver sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
                 <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white p-1.5 rounded h-8 w-8 flex items-center justify-center shadow transition" title="Exportar Excel"><i class="fa-solid fa-file-excel"></i></button>
                 <button onclick="resetFilters()" class="text-gray-400 hover:text-indigo-600 p-1.5 rounded hover:bg-gray-50 transition h-8 w-8" title="Refrescar"><i class="fa-solid fa-arrows-rotate"></i></button>
@@ -245,6 +251,89 @@
                 tbody.appendChild(tr);
             });
         }
+
+        // === LÓGICA DE IMPRESIÓN QR ===
+        window.printQRs = () => {
+            if (currentFilteredProducts.length === 0) return showToast("No hay productos filtrados", "error");
+
+            // 1. Obtener o pedir la URL Base
+            let baseUrl = localStorage.getItem('een_catalog_url');
+            if (!baseUrl) {
+                baseUrl = prompt("Para generar los códigos, ingresa la URL de tu catálogo:\n(Ejemplo: https://envases-norte.web.app)", window.location.origin);
+                if (baseUrl) {
+                    if(!baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
+                    // Asegurar que no termine en slash para evitar dobles //
+                    if(baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+                    localStorage.setItem('een_catalog_url', baseUrl);
+                } else return;
+            }
+
+            // 2. Generar el HTML de la ventana de impresión
+            const printWindow = window.open('', '_blank');
+            if(!printWindow) return showToast("Permite las ventanas emergentes", "error");
+
+            let htmlContent = `
+            <html>
+            <head>
+                <title>Etiquetas QR - Envases La Económica</title>
+                <style>
+                    body { font-family: sans-serif; padding: 20px; }
+                    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+                    .card { 
+                        border: 2px dashed #ccc; 
+                        padding: 10px; 
+                        text-align: center; 
+                        border-radius: 8px; 
+                        break-inside: avoid; /* Evita que se corten al imprimir */
+                        display: flex; flex-col; align-items: center; justify-content: center;
+                    }
+                    .qr-img { width: 120px; height: 120px; margin: 10px auto; display: block; }
+                    .title { font-size: 12px; font-weight: bold; margin-bottom: 5px; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+                    .meta { font-size: 10px; color: #666; margin-top: 5px; }
+                    .logo { font-size: 10px; font-weight: bold; color: #3730a3; text-transform: uppercase; margin-top: 5px; }
+                    @media print {
+                        .no-print { display: none; }
+                        body { margin: 0; padding: 0.5cm; }
+                        .card { border: 1px solid #ddd; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="no-print" style="margin-bottom: 20px; padding: 10px; background: #eee; text-align: center;">
+                    <button onclick="window.print()" style="font-size: 16px; padding: 10px 20px; cursor: pointer; background: #4f46e5; color: white; border: none; border-radius: 5px;">🖨️ Imprimir Etiquetas</button>
+                    <span style="margin-left: 10px;">Se generaron ${currentFilteredProducts.length} etiquetas.</span>
+                </div>
+                <div class="grid">
+            `;
+
+            // 3. Generar los QR usando la librería QRIOUS y convertirlos a DataURL
+            currentFilteredProducts.forEach(p => {
+                const fullUrl = `${baseUrl}/?add=${p.id}`;
+                // Creamos un QR temporal en memoria
+                const qr = new QRious({
+                    value: fullUrl,
+                    size: 200,
+                    level: 'H'
+                });
+                const imgData = qr.toDataURL();
+                
+                const pzasText = p.piezas ? (p.piezas > 1 ? `Paq. ${p.piezas} pzas` : 'Pieza Individual') : '';
+
+                htmlContent += `
+                    <div class="card">
+                        <div class="title">${p.name}</div>
+                        <img src="${imgData}" class="qr-img">
+                        <div class="meta">${pzasText}</div>
+                        <div class="logo">Escanea para pedir</div>
+                    </div>
+                `;
+            });
+
+            htmlContent += `</div></body></html>`;
+
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+        };
 
         document.addEventListener('keydown', (e) => {
             if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); document.getElementById('searchInput').focus(); }
