@@ -20,6 +20,11 @@
         }
         .badge-pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+        
+        /* Estilos para las opciones seleccionables */
+        .option-btn { border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .option-btn.selected { background-color: #eff6ff; border-color: #4f46e5; color: #4338ca; font-weight: bold; }
+        .option-btn:hover:not(.selected) { background-color: #f8fafc; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
@@ -45,7 +50,6 @@
             <h2 class="text-2xl md:text-4xl font-bold mb-2">Soluciones en Envases</h2>
             <p class="text-indigo-200 text-sm md:text-base max-w-2xl">
                 Encuentra la más amplia variedad de envases industriales, tapas y accesorios. 
-                Cotiza en línea y recibe atención personalizada.
             </p>
         </div>
     </div>
@@ -93,23 +97,103 @@
     <div id="cart-modal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0" id="cart-backdrop" onclick="toggleCart()"></div>
         <div class="absolute right-0 top-0 h-full w-full md:w-[500px] bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cart-panel">
-            <div class="p-5 border-b flex justify-between items-center bg-slate-50">
-                <h2 class="text-xl font-bold text-slate-800">Tu Pedido</h2>
+            <div class="p-4 border-b flex justify-between items-center bg-slate-50 shrink-0">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    Tu Pedido
+                </h2>
                 <button type="button" onclick="toggleCart()" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-slate-100 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             
-            <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
-            
-            <div class="p-5 border-t bg-slate-50">
-                <div class="flex justify-between mb-4 font-bold text-lg">
-                    <span>Total Piezas:</span>
-                    <span id="cart-total" class="text-indigo-900">0</span>
+            <div class="flex-1 overflow-y-auto bg-slate-50/50">
+                <div id="cart-items" class="p-4 space-y-3"></div>
+                
+                <div id="cart-config" class="p-4 bg-white border-t border-slate-100 hidden">
+                    <div class="mb-4">
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">¿A quién le cotizamos?</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="client-name" placeholder="Tu Nombre / Negocio" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 transition" onchange="savePrefs()">
+                            <button onclick="setPublicoGeneral()" class="text-[10px] bg-slate-100 text-slate-600 px-3 py-1 rounded-lg hover:bg-slate-200 border border-slate-200 font-medium whitespace-nowrap">Público Gral.</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Método de Entrega</label>
+                        <div class="grid grid-cols-3 gap-2 mb-3">
+                            <button onclick="setDelivery('recoger')" id="btn-recoger" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
+                                <i class="text-lg">🏪</i> Sucursal
+                            </button>
+                            <button onclick="setDelivery('local')" id="btn-local" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
+                                <i class="text-lg">🚚</i> Local
+                            </button>
+                            <button onclick="setDelivery('foraneo')" id="btn-foraneo" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
+                                <i class="text-lg">✈️</i> Foráneo
+                            </button>
+                        </div>
+
+                        <div id="panel-recoger" class="hidden text-sm bg-slate-50 p-3 rounded-lg border border-slate-200 animate-in fade-in zoom-in-95">
+                            <p class="text-slate-500 text-xs mb-2 font-bold">Pago al recoger:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="setPayment('Efectivo')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Efectivo</button>
+                                <button onclick="setPayment('Tarjeta')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Tarjeta</button>
+                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia</button>
+                                <button onclick="setPayment('Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Cheque</button>
+                            </div>
+                        </div>
+
+                        <div id="panel-local" class="hidden text-sm bg-orange-50 p-3 rounded-lg border border-orange-100 animate-in fade-in zoom-in-95">
+                            <div class="flex gap-2 items-start mb-3">
+                                <span class="text-orange-500 text-lg">⚠️</span>
+                                <p class="text-orange-800 text-xs leading-tight">
+                                    <strong>Nota:</strong> Para envío a domicilio sin costo, el pedido mínimo sugerido es de <strong>$7,000 MXN</strong>.
+                                </p>
+                            </div>
+                            <input type="text" id="delivery-address" placeholder="Dirección de entrega..." class="w-full border border-orange-200 rounded px-3 py-1.5 text-xs mb-2 outline-none" onchange="savePrefs()">
+                            <p class="text-slate-500 text-xs mb-2 font-bold">Método de Pago:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia (Previo)</button>
+                                <button onclick="setPayment('Efectivo Contra Entrega')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Efectivo (Entrega)</button>
+                                <button onclick="setPayment('Cheque Contra Entrega')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Cheque (Entrega)</button>
+                                <button onclick="setPayment('Deposito Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Depósito Cheque</button>
+                            </div>
+                        </div>
+
+                        <div id="panel-foraneo" class="hidden text-sm bg-indigo-50 p-3 rounded-lg border border-indigo-100 animate-in fade-in zoom-in-95">
+                            <div class="mb-2">
+                                <input type="text" id="fletera-name" placeholder="¿Qué fletera prefieres?" class="w-full border border-indigo-200 rounded px-3 py-1.5 text-xs outline-none mb-2" onchange="savePrefs()">
+                                <div class="flex gap-2">
+                                    <button onclick="setOcurre(true)" id="btn-ocurre-si" class="option-btn flex-1 py-1 rounded text-xs bg-white">A Ocurre</button>
+                                    <button onclick="setOcurre(false)" id="btn-ocurre-no" class="option-btn flex-1 py-1 rounded text-xs bg-white">A Domicilio</button>
+                                </div>
+                            </div>
+                            <p class="text-slate-500 text-xs mb-2 font-bold">Pago:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia</button>
+                                <button onclick="setPayment('Deposito Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Depósito Cheque</button>
+                            </div>
+                        </div>
+
+                        <div id="bank-info" class="hidden mt-3 p-3 bg-slate-800 text-slate-200 rounded-lg text-xs font-mono">
+                            <p class="font-bold text-indigo-300 mb-1">DATOS PARA TRANSFERIR:</p>
+                            <p>Banco: BANAMEX</p>
+                            <p>Cuenta: 1234567890</p>
+                            <p>CLABE: 00218001234567890</p>
+                            <p class="mt-1 text-[10px] text-slate-400">*Favor de enviar comprobante al confirmar.</p>
+                        </div>
+                    </div>
                 </div>
-                <button type="button" onclick="sendWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg transition mb-3 flex justify-center items-center gap-2">
+            </div>
+            
+            <div class="p-5 border-t bg-white shrink-0 z-10 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                <div class="flex justify-between mb-4 font-bold text-lg items-center">
+                    <span class="text-slate-600 text-sm">Total Piezas:</span>
+                    <span id="cart-total" class="text-indigo-900 text-2xl">0</span>
+                </div>
+                <button type="button" onclick="sendWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition mb-3 flex justify-center items-center gap-2 text-sm md:text-base">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    Pedir por WhatsApp
+                    Realizar Pedido / Cotizar
                 </button>
                 <button type="button" onclick="clearCart()" class="w-full text-red-400 hover:text-red-600 text-xs font-bold uppercase py-2 transition-colors cursor-pointer tracking-widest bg-red-50 hover:bg-red-100 rounded-lg">
                     Vaciar Carrito
@@ -140,34 +224,38 @@
         const itemsPerPage = 48;
         let searchTimeout;
 
+        // Variables de estado para el formulario del carrito
+        let selectedDelivery = null; 
+        let selectedPayment = null;
+        let isOcurre = false;
+
         // === INICIO ===
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.database();
                 cart = JSON.parse(localStorage.getItem('cart_een')) || [];
+                
+                // Cargar preferencias guardadas del usuario (NOMBRE, DIRECCIÓN, ETC)
+                loadPrefs();
+
                 loadProducts();
                 renderCart();
-                // Verificamos si viene de un código QR
                 checkQRParam();
             } catch (e) { console.error(e); }
         });
 
-        // === LÓGICA QR ===
         function checkQRParam() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('add');
-
             if (productId) {
-                // Intervalo para asegurar que los productos de Firebase ya cargaron
                 const qrCheck = setInterval(() => {
                     if (allProducts.length > 0) {
                         const productExists = allProducts.find(p => p.id === productId);
                         if (productExists) {
                             add(productId); 
-                            toggleCart(); // Mostrar al cliente que se agregó
+                            toggleCart();
                             showToast("¡Producto escaneado agregado!");
-                            // Limpiar la URL sin recargar para evitar duplicados al refrescar manualmente
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }
                         clearInterval(qrCheck);
@@ -176,7 +264,84 @@
             }
         }
 
-        // === DATOS ===
+        // === LOGICA DE PREFERENCIAS (MEMORIA) ===
+        function loadPrefs() {
+            const prefs = JSON.parse(localStorage.getItem('user_prefs_een')) || {};
+            if(prefs.name) document.getElementById('client-name').value = prefs.name;
+            if(prefs.address) document.getElementById('delivery-address').value = prefs.address;
+            if(prefs.fletera) document.getElementById('fletera-name').value = prefs.fletera;
+            if(prefs.deliveryType) setDelivery(prefs.deliveryType, false); // false para no guardar de nuevo
+            if(prefs.paymentMethod) setPayment(prefs.paymentMethod, false);
+            if(prefs.isOcurre !== undefined) setOcurre(prefs.isOcurre, false);
+        }
+
+        function savePrefs() {
+            const prefs = {
+                name: document.getElementById('client-name').value,
+                address: document.getElementById('delivery-address').value,
+                fletera: document.getElementById('fletera-name').value,
+                deliveryType: selectedDelivery,
+                paymentMethod: selectedPayment,
+                isOcurre: isOcurre
+            };
+            localStorage.setItem('user_prefs_een', JSON.stringify(prefs));
+        }
+
+        function setPublicoGeneral() {
+            document.getElementById('client-name').value = "Público en General";
+            savePrefs();
+        }
+
+        // === LÓGICA DE INTERFAZ DEL CARRITO ===
+        function setDelivery(type, save = true) {
+            selectedDelivery = type;
+            
+            // UI Reset
+            ['recoger', 'local', 'foraneo'].forEach(t => {
+                document.getElementById(`btn-${t}`).classList.remove('selected', 'bg-indigo-50', 'border-indigo-500');
+                document.getElementById(`panel-${t}`).classList.add('hidden');
+            });
+            
+            // UI Set
+            document.getElementById(`btn-${type}`).classList.add('selected');
+            document.getElementById(`panel-${type}`).classList.remove('hidden');
+
+            // Reset Payment visual when switching delivery
+            selectedPayment = null; 
+            document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('bank-info').classList.add('hidden');
+            
+            if(save) savePrefs();
+        }
+
+        function setPayment(method, save = true) {
+            selectedPayment = method;
+            document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+            
+            // Buscar todos los botones con ese texto y seleccionarlos (por si hay duplicados en diferentes paneles)
+            document.querySelectorAll('.pay-btn').forEach(b => {
+                if(b.innerText.includes(method) || b.innerText === method) b.classList.add('selected');
+            });
+
+            // Mostrar info bancaria si es transferencia
+            if (method === 'Transferencia') {
+                document.getElementById('bank-info').classList.remove('hidden');
+            } else {
+                document.getElementById('bank-info').classList.add('hidden');
+            }
+
+            if(save) savePrefs();
+        }
+
+        function setOcurre(val, save = true) {
+            isOcurre = val;
+            document.getElementById('btn-ocurre-si').classList.toggle('selected', val);
+            document.getElementById('btn-ocurre-no').classList.toggle('selected', !val);
+            if(save) savePrefs();
+        }
+
+
+        // === DATOS FIREBASE ===
         function loadProducts() {
             const container = document.getElementById('products-container');
             if(!container) return;
@@ -206,7 +371,6 @@
             });
         }
 
-        // === RENDER ===
         function renderCategories() {
             const cont = document.getElementById('categories-container');
             if(!cont) return;
@@ -356,6 +520,7 @@
 
         function renderCart() {
             const itemsCont = document.getElementById('cart-items');
+            const configPanel = document.getElementById('cart-config');
             const badge = document.getElementById('cart-badge');
             const totalEl = document.getElementById('cart-total');
             if(!itemsCont) return;
@@ -367,8 +532,11 @@
 
             if(cart.length === 0) {
                 itemsCont.innerHTML = `<div class="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl m-2"><p class="text-sm font-medium">Carrito vacío</p></div>`;
+                configPanel.classList.add('hidden'); // Ocultar opciones si no hay items
                 return;
             }
+
+            configPanel.classList.remove('hidden'); // Mostrar opciones si hay items
 
             itemsCont.innerHTML = cart.map(item => {
                 const prod = allProducts.find(p => p.id === item.id) || item;
@@ -386,34 +554,59 @@
                     inputsHTML = `<div class="mt-2 flex justify-end items-center gap-2"><label class="text-[10px] text-slate-400 font-bold">Piezas:</label><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-20 border rounded text-center text-sm py-1 outline-none"></div>`;
                 }
 
-                return `<div class="bg-white p-4 rounded-xl border flex gap-4"><img src="${item.image}" class="w-16 h-16 object-contain shrink-0"><div class="flex-1"><div class="flex justify-between font-bold text-sm text-slate-800"><span>${item.name}</span><button onclick="remove('${item.id}')" class="text-red-400">×</button></div>${inputsHTML}</div></div>`;
+                return `<div class="bg-white p-4 rounded-xl border flex gap-4 shadow-sm"><img src="${item.image}" class="w-16 h-16 object-contain shrink-0"><div class="flex-1"><div class="flex justify-between font-bold text-sm text-slate-800"><span>${item.name}</span><button onclick="remove('${item.id}')" class="text-red-400 hover:text-red-600 transition">×</button></div>${inputsHTML}</div></div>`;
             }).join('');
         }
 
-        // === WHATSAPP Y UTILS ===
+        // === WHATSAPP INTELIGENTE ===
         function sendWhatsApp() {
-            if(cart.length === 0) return;
-            let msg = "👋 Hola Envases La Económica, deseo cotizar:\n\n";
+            if(cart.length === 0) return showToast("El carrito está vacío");
+
+            // Recopilar datos del formulario
+            const name = document.getElementById('client-name').value.trim() || "Cliente";
+            const deliveryType = selectedDelivery; // 'recoger', 'local', 'foraneo'
+            const payment = selectedPayment || "Por definir";
+            
+            let headerMsg = `👋 Hola, soy *${name}*.\nDeseo realizar el siguiente pedido:\n\n`;
+            let deliveryMsg = "";
+
+            if (deliveryType === 'recoger') {
+                deliveryMsg = `📍 *Método:* Pasar a Recoger a Sucursal\n💳 *Pago:* ${payment}\n`;
+            } else if (deliveryType === 'local') {
+                const address = document.getElementById('delivery-address').value.trim() || "Pendiente enviar ubicación";
+                deliveryMsg = `🚚 *Método:* Envío Local (Monterrey)\n🏠 *Dirección:* ${address}\n💳 *Pago:* ${payment}\n`;
+            } else if (deliveryType === 'foraneo') {
+                const fletera = document.getElementById('fletera-name').value.trim() || "Por definir";
+                const tipoEnvio = isOcurre ? "A Ocurre" : "A Domicilio";
+                deliveryMsg = `✈️ *Método:* Envío Foráneo\n🚛 *Fletera:* ${fletera} (${tipoEnvio})\n💳 *Pago:* ${payment}\n`;
+            } else {
+                deliveryMsg = "📍 *Método:* Pendiente de confirmar\n";
+            }
+
+            let productsMsg = "";
             cart.forEach(item => {
                 const prod = allProducts.find(p => p.id === item.id) || item;
                 const packSize = (prod.category||'').toLowerCase().includes('bolsa') ? 100 : (parseInt(prod.piezas)||0);
-                msg += `🔹 ${item.name}\n`;
+                productsMsg += `🔹 ${item.name}\n`;
                 if (packSize > 1) {
                     const packs = Math.floor(item.quantity / packSize);
                     const loose = item.quantity % packSize;
-                    if(packs > 0) msg += `   📦 ${packs} Paq (${packSize} c/u)\n`;
-                    if(loose > 0) msg += `   🧩 ${loose} Pzas sueltas\n`;
-                    msg += `   (Total: ${item.quantity} pzas)\n\n`;
-                } else msg += `   🧩 ${item.quantity} Pzas\n\n`;
+                    if(packs > 0) productsMsg += `   📦 ${packs} Paq (${packSize} c/u)\n`;
+                    if(loose > 0) productsMsg += `   🧩 ${loose} Pzas sueltas\n`;
+                    productsMsg += `   (Total: ${item.quantity} pzas)\n`;
+                } else productsMsg += `   🧩 ${item.quantity} Pzas\n`;
+                productsMsg += "\n";
             });
-            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`;
+
+            const finalMsg = headerMsg + deliveryMsg + "\n🛒 *DETALLE DEL PEDIDO:*\n" + productsMsg;
+            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(finalMsg)}`;
             window.open(url, '_blank');
         }
 
         function askProduct(id) {
             const prod = allProducts.find(p => p.id === id);
             if(!prod) return;
-            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, me interesa: " + prod.name)}`;
+            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, me interesa saber más sobre: " + prod.name)}`;
             window.open(url, '_blank');
         }
 
