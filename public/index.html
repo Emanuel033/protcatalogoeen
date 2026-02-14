@@ -153,7 +153,7 @@
                 
                 <button onclick="startTour()" class="hidden md:flex items-center gap-2 bg-indigo-800 px-4 rounded-xl text-indigo-200 hover:text-white hover:bg-indigo-700 transition whitespace-nowrap" title="Ver Tutorial de Ayuda">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span class="text-xs font-bold">Tutorial</span>
+                    <span class="text-xs font-bold">Ayuda</span>
                 </button>
             </div>
         </div>
@@ -190,7 +190,7 @@
         </div>
     </main>
 
-        <!-- FOOTER COMPLETO -->
+    <!-- FOOTER COMPLETO -->
     <footer class="bg-white border-t border-slate-200 mt-auto pt-10 pb-6">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -426,145 +426,9 @@
                 </div>
                 <button type="button" id="btn-send-order" onclick="sendWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition mb-3 flex justify-center items-center gap-2 text-sm md:text-base">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">¿Dudas?</span>
-        </button>
-
-        <button type="button" id="cart-fab" onclick="toggleCart()" class="bg-indigo-600 text-white p-4 rounded-full shadow-lg shadow-indigo-600/40 group transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center relative">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-indigo-600 transform scale-0 transition-transform duration-200">0</span>
-        </button>
-    </div>
-
-    <!-- UI del Tutorial -->
-    <div id="tour-overlay" onclick="endTour()"></div>
-
-    <div id="tour-tooltip">
-        <h4 id="tour-title" class="font-bold text-lg mb-2 text-indigo-900">Título</h4>
-        <p id="tour-desc" class="text-gray-600 mb-4 text-sm leading-relaxed">Descripción.</p>
-        <div class="flex justify-between items-center mt-4 border-t pt-3 border-gray-100">
-            <span id="tour-step-count" class="text-xs text-gray-400 font-medium">1 / 6</span>
-            <div>
-                <button onclick="endTour()" class="text-slate-400 text-xs hover:text-red-500 mr-4 font-medium transition">Saltar</button>
-                <button onclick="nextStep()" id="tour-next-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition">Siguiente</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Carrito -->
-    <div id="cart-modal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0" id="cart-backdrop" onclick="toggleCart()"></div>
-        <div class="absolute right-0 top-0 h-full w-full md:w-[500px] bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cart-panel">
-            
-            <div id="cart-tour-overlay"></div>
-
-            <div class="p-4 border-b flex justify-between items-center bg-slate-50 shrink-0 relative z-10">
-                <div class="flex items-center gap-3">
-                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                        Tu Pedido
-                    </h2>
-                </div>
-                <div class="flex items-center gap-1">
-                    <button type="button" onclick="startCartTour()" class="text-indigo-400 hover:text-indigo-600 p-2 rounded-full hover:bg-indigo-50 transition" title="Ayuda del Carrito">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </button>
-                    <button type="button" onclick="toggleCart()" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-slate-100 transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto bg-slate-50/50 relative z-10">
-                <div id="cart-items" class="p-4 space-y-3"></div>
-                
-                <div id="cart-config" class="p-4 bg-white border-t border-slate-100 hidden">
-                    <div class="mb-4">
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">¿A quién le cotizamos?</label>
-                        <div class="flex gap-2" id="client-info-container">
-                            <input type="text" id="client-name" placeholder="Tu Nombre / Negocio" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 transition" onchange="savePrefs()">
-                            <button onclick="setPublicoGeneral()" class="text-[10px] bg-slate-100 text-slate-600 px-3 py-1 rounded-lg hover:bg-slate-200 border border-slate-200 font-medium whitespace-nowrap">Público Gral.</button>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Método de Entrega</label>
-                        <div class="grid grid-cols-3 gap-2 mb-3" id="delivery-options-container">
-                            <button onclick="setDelivery('recoger')" id="btn-recoger" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
-                                <i class="text-lg">🏪</i> Sucursal
-                            </button>
-                            <button onclick="setDelivery('local')" id="btn-local" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
-                                <i class="text-lg">🚚</i> Local
-                            </button>
-                            <button onclick="setDelivery('foraneo')" id="btn-foraneo" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
-                                <i class="text-lg">✈️</i> Foráneo
-                            </button>
-                        </div>
-
-                        <!-- Opciones dinámicas de entrega (Ocultas por defecto) -->
-                        <div id="panel-recoger" class="hidden text-sm bg-slate-50 p-3 rounded-lg border border-slate-200 animate-in fade-in zoom-in-95">
-                            <p class="text-slate-500 text-xs mb-2 font-bold">Pago al recoger:</p>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="setPayment('Efectivo')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Efectivo</button>
-                                <button onclick="setPayment('Tarjeta')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Tarjeta</button>
-                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia</button>
-                                <button onclick="setPayment('Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Cheque</button>
-                            </div>
-                        </div>
-
-                        <div id="panel-local" class="hidden text-sm bg-orange-50 p-3 rounded-lg border border-orange-100 animate-in fade-in zoom-in-95">
-                            <div class="flex gap-2 items-start mb-3">
-                                <span class="text-orange-500 text-lg">⚠️</span>
-                                <p class="text-orange-800 text-xs leading-tight">
-                                    <strong>Nota:</strong> Para envío a domicilio sin costo, el pedido mínimo sugerido es de <strong>$7,000 MXN</strong>.
-                                </p>
-                            </div>
-                            <input type="text" id="delivery-address" placeholder="Dirección de entrega..." class="w-full border border-orange-200 rounded px-3 py-1.5 text-xs mb-2 outline-none" onchange="savePrefs()">
-                            <p class="text-slate-500 text-xs mb-2 font-bold">Método de Pago:</p>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia (Previo)</button>
-                                <button onclick="setPayment('Efectivo Contra Entrega')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Efectivo (Entrega)</button>
-                                <button onclick="setPayment('Cheque Contra Entrega')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Cheque (Entrega)</button>
-                                <button onclick="setPayment('Deposito Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Depósito Cheque</button>
-                            </div>
-                        </div>
-
-                        <div id="panel-foraneo" class="hidden text-sm bg-indigo-50 p-3 rounded-lg border border-indigo-100 animate-in fade-in zoom-in-95">
-                            <div class="mb-2">
-                                <input type="text" id="fletera-name" placeholder="¿Qué fletera prefieres?" class="w-full border border-indigo-200 rounded px-3 py-1.5 text-xs outline-none mb-2" onchange="savePrefs()">
-                                <div class="flex gap-2">
-                                    <button onclick="setOcurre(true)" id="btn-ocurre-si" class="option-btn flex-1 py-1 rounded text-xs bg-white">A Ocurre</button>
-                                    <button onclick="setOcurre(false)" id="btn-ocurre-no" class="option-btn flex-1 py-1 rounded text-xs bg-white">A Domicilio</button>
-                                </div>
-                            </div>
-                            <p class="text-slate-500 text-xs mb-2 font-bold">Pago:</p>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia</button>
-                                <button onclick="setPayment('Deposito Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Depósito Cheque</button>
-                            </div>
-                        </div>
-
-                        <div id="bank-info" class="hidden mt-3 p-3 bg-slate-800 text-slate-200 rounded-lg text-xs font-mono">
-                            <p class="font-bold text-indigo-300 mb-1">DATOS PARA TRANSFERIR:</p>
-                            <p>Banco: BANORTE</p>
-                            <p>Cuenta: 0184214699 </p>
-                            <p>CLABE: 072580001842146996</p>
-                            <p>SUC. 058</p>
-                            <p class="mt-1 text-[10px] text-slate-400">*En breve le mandamos la prefactura. Favor de enviar comprobante al confirmar.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="p-5 border-t bg-white shrink-0 z-10 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-                <div class="flex justify-between mb-4 font-bold text-lg items-center">
-                    <span class="text-slate-600 text-sm">Total Piezas:</span>
-                    <span id="cart-total" class="text-indigo-900 text-2xl">0</span>
-                </div>
-                <button type="button" id="btn-send-order" onclick="sendWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition mb-3 flex justify-center items-center gap-2 text-sm md:text-base">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                     Realizar Pedido / Cotizar
                 </button>
-                <button type="button" onclick="clearCart()" class="w-full text-red-400 hover:text-red-600 text-xs font-bold uppercase py-2 transition-colors cursor-pointer tracking-widest bg-red-50 hover:bg-red-100 rounded-lg">
+                <button type="button" id="btn-clear-cart" onclick="clearCart()" class="w-full text-red-400 hover:text-red-600 text-xs font-bold uppercase py-2 transition-colors cursor-pointer tracking-widest bg-red-50 hover:bg-red-100 rounded-lg">
                     Vaciar Carrito
                 </button>
             </div>
@@ -603,27 +467,33 @@
             try {
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.database();
-                cart = JSON.parse(localStorage.getItem('cart_een')) || [];
+                
+                // Intento seguro de cargar carrito
+                try {
+                    cart = JSON.parse(localStorage.getItem('cart_een')) || [];
+                } catch(e) {
+                    console.log("Modo Privado detectado, iniciando carrito vacío");
+                    cart = [];
+                }
                 
                 loadPrefs();
-
                 loadProducts();
                 renderCart();
-                checkQRParam();
+                checkQRParam(); // Ejecutar inmediatamente
 
                 // Scroll listener para el botón "Volver arriba"
                 window.addEventListener('scroll', () => {
                     const btn = document.getElementById('scroll-top-btn');
-                    if (window.scrollY > 300) {
-                        btn.classList.add('visible');
-                    } else {
-                        btn.classList.remove('visible');
+                    if(btn) {
+                        if (window.scrollY > 300) btn.classList.add('visible');
+                        else btn.classList.remove('visible');
                     }
                 });
 
-                // --- LÓGICA CORREGIDA DEL TOUR ---
+                // --- INICIO DE TOUR ---
+                // Verifica si hay parametro 'add' en la URL
                 const urlParams = new URLSearchParams(window.location.search);
-                const isScanning = urlParams.has('add'); // Detecta si venimos de un QR
+                const isScanning = urlParams.has('add'); 
 
                 // Solo inicia el tour si NO se ha visto antes Y NO se está escaneando un producto
                 if(!localStorage.getItem('tour_seen_v2') && !isScanning) {
@@ -632,33 +502,50 @@
             } catch (e) { console.error(e); }
         });
 
-        // === QR: Lógica mejorada para acumular productos ===
+        // === QR: Lógica mejorada para iPhone/Safari ===
         function checkQRParam() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('add');
             
             if (productId) {
-                // Intervalo para esperar a que los productos carguen de Firebase
+                // 1. Feedback inmediato visual
+                showToast("Procesando código QR...");
+
+                // 2. Intervalo de reintentos
+                let attempts = 0;
                 const qrCheck = setInterval(() => {
+                    attempts++;
+                    // Si pasa mucho tiempo (30 seg), dejar de intentar
+                    if (attempts > 60) {
+                        clearInterval(qrCheck);
+                        showToast("No se encontró el producto (Error de conexión)");
+                        return;
+                    }
+
                     if (allProducts.length > 0) {
                         const productExists = allProducts.find(p => p.id === productId);
                         
                         if (productExists) {
-                            // IMPORTANTE: Recargar el carrito desde LocalStorage antes de añadir
-                            // Esto evita que se sobrescriba el carrito si el navegador aisló la sesión o si había datos previos
-                            const storedCart = JSON.parse(localStorage.getItem('cart_een')) || [];
-                            if (storedCart.length > 0) {
-                                cart = storedCart;
-                            }
+                            // IMPORTANTE: Recargar el carrito desde LocalStorage
+                            // Por si acaso cambio en otra pestaña, aunque en iPhone QR es sesión nueva usualmente
+                            try {
+                                const storedCart = JSON.parse(localStorage.getItem('cart_een')) || [];
+                                if (storedCart.length > 0) {
+                                    cart = storedCart;
+                                }
+                            } catch(e) {}
 
                             add(productId); 
                             
-                            // Abrir carrito y mostrar notificación
+                            // Abrir carrito y mostrar notificación final
                             toggleCart();
                             showToast("¡Producto escaneado agregado!");
                             
-                            // Limpiar URL para evitar re-agregar al recargar
+                            // Limpiar URL
                             window.history.replaceState({}, document.title, window.location.pathname);
+                            
+                            // Marcar tour como visto para que no estorbe
+                            try { localStorage.setItem('tour_seen_v2', 'true'); } catch(e){}
                         }
                         clearInterval(qrCheck);
                     }
@@ -668,25 +555,29 @@
 
         // --- MANEJO DE PREFERENCIAS DE CLIENTE ---
         function loadPrefs() {
-            const prefs = JSON.parse(localStorage.getItem('user_prefs_een')) || {};
-            if(prefs.name) document.getElementById('client-name').value = prefs.name;
-            if(prefs.address) document.getElementById('delivery-address').value = prefs.address;
-            if(prefs.fletera) document.getElementById('fletera-name').value = prefs.fletera;
-            if(prefs.deliveryType) setDelivery(prefs.deliveryType, false); 
-            if(prefs.paymentMethod) setPayment(prefs.paymentMethod, false);
-            if(prefs.isOcurre !== undefined) setOcurre(prefs.isOcurre, false);
+            try {
+                const prefs = JSON.parse(localStorage.getItem('user_prefs_een')) || {};
+                if(prefs.name) document.getElementById('client-name').value = prefs.name;
+                if(prefs.address) document.getElementById('delivery-address').value = prefs.address;
+                if(prefs.fletera) document.getElementById('fletera-name').value = prefs.fletera;
+                if(prefs.deliveryType) setDelivery(prefs.deliveryType, false); 
+                if(prefs.paymentMethod) setPayment(prefs.paymentMethod, false);
+                if(prefs.isOcurre !== undefined) setOcurre(prefs.isOcurre, false);
+            } catch(e) {}
         }
 
         function savePrefs() {
-            const prefs = {
-                name: document.getElementById('client-name').value,
-                address: document.getElementById('delivery-address').value,
-                fletera: document.getElementById('fletera-name').value,
-                deliveryType: selectedDelivery,
-                paymentMethod: selectedPayment,
-                isOcurre: isOcurre
-            };
-            localStorage.setItem('user_prefs_een', JSON.stringify(prefs));
+            try {
+                const prefs = {
+                    name: document.getElementById('client-name').value,
+                    address: document.getElementById('delivery-address').value,
+                    fletera: document.getElementById('fletera-name').value,
+                    deliveryType: selectedDelivery,
+                    paymentMethod: selectedPayment,
+                    isOcurre: isOcurre
+                };
+                localStorage.setItem('user_prefs_een', JSON.stringify(prefs));
+            } catch(e) {}
         }
 
         function setPublicoGeneral() {
@@ -697,11 +588,15 @@
         function setDelivery(type, save = true) {
             selectedDelivery = type;
             ['recoger', 'local', 'foraneo'].forEach(t => {
-                document.getElementById(`btn-${t}`).classList.remove('selected', 'bg-indigo-50', 'border-indigo-500');
-                document.getElementById(`panel-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`btn-${t}`);
+                const panel = document.getElementById(`panel-${t}`);
+                if(btn) btn.classList.remove('selected', 'bg-indigo-50', 'border-indigo-500');
+                if(panel) panel.classList.add('hidden');
             });
-            document.getElementById(`btn-${type}`).classList.add('selected');
-            document.getElementById(`panel-${type}`).classList.remove('hidden');
+            const btnSel = document.getElementById(`btn-${type}`);
+            const panelSel = document.getElementById(`panel-${type}`);
+            if(btnSel) btnSel.classList.add('selected');
+            if(panelSel) panelSel.classList.remove('hidden');
 
             selectedPayment = null; 
             document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
@@ -904,9 +799,11 @@
 
         function showToast(msg) {
             const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.remove('opacity-0', 'translate-y-24');
-            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
+            if(t) {
+                t.innerText = msg;
+                t.classList.remove('opacity-0', 'translate-y-24');
+                setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
+            }
         }
 
         function openImage(src) {
@@ -925,11 +822,6 @@
             const sel = document.getElementById(`sel-${id}`);
             const qty = sel ? parseInt(sel.value) : 1;
             
-            // Lógica simple para manejar piezas/paquetes en el carrito
-            const isPack = qty > 1 && !p.category?.toLowerCase().includes('bolsa'); // Si seleccionó algo > 1 y no es bolsa (que siempre es 100), asumimos paquete si aplica
-            // Nota: En la versión simplificada, agregamos como item único para evitar complejidad excesiva, 
-            // pero si ya existe sumamos.
-            
             const exist = cart.find(x => x.id === id);
             if(exist) exist.quantity += qty;
             else cart.push({ ...p, quantity: qty });
@@ -938,7 +830,6 @@
             showToast(`Agregado (+${qty})`);
         }
         
-        // Función updateCartItem y remove (restauradas del backup)
         function updateCartItem(id) {
             const item = cart.find(x => x.id === id);
             if(!item) return;
@@ -964,12 +855,19 @@
         }
 
         function saveCart() {
-            localStorage.setItem('cart_een', JSON.stringify(cart));
+            // Protección contra errores en iOS Private Mode
+            try {
+                localStorage.setItem('cart_een', JSON.stringify(cart));
+            } catch (e) {
+                console.warn("No se pudo guardar en LocalStorage (Posible modo privado)");
+            }
             renderCart();
             const b = document.getElementById('cart-badge');
-            b.classList.remove('scale-0');
-            b.classList.add('scale-125');
-            setTimeout(() => b.classList.remove('scale-125'), 200);
+            if(b) {
+                b.classList.remove('scale-0');
+                b.classList.add('scale-125');
+                setTimeout(() => b.classList.remove('scale-125'), 200);
+            }
         }
 
         function renderCart() {
@@ -986,11 +884,11 @@
 
             if(cart.length === 0) {
                 itemsCont.innerHTML = `<div class="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl m-2"><p class="text-sm font-medium">Carrito vacío</p></div>`;
-                configPanel.classList.add('hidden');
+                if(configPanel) configPanel.classList.add('hidden');
                 return;
             }
 
-            configPanel.classList.remove('hidden');
+            if(configPanel) configPanel.classList.remove('hidden');
 
             itemsCont.innerHTML = cart.map(item => {
                 const prod = allProducts.find(p => p.id === item.id) || item;
@@ -1062,24 +960,23 @@
         let tourIndex = 0;
 
         function startTour() {
-            localStorage.setItem('tour_seen_v2', 'true');
+            // Verificar si hay parámetro QR para NO iniciar tour
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('add')) return;
+
+            try { localStorage.setItem('tour_seen_v2', 'true'); } catch(e){}
             
-            // FIX: Ensure products are actually loaded and rendered
-            // Check list length AND content (avoid "Cargando...")
             const container = document.getElementById('products-container');
             const hasProducts = allProducts.length > 0;
             const hasRendered = container.children.length > 0 && !container.innerText.includes('Cargando');
 
             if(!hasProducts || !hasRendered) {
-                // Retry in 500ms
                 setTimeout(startTour, 500);
                 return;
             }
 
-            // Asegurarse de que los modales estén cerrados
             const cartModal = document.getElementById('cart-modal');
             if (!cartModal.classList.contains('hidden')) {
-                 // Reset styles manually to ensure clean state
                  document.getElementById('cart-backdrop').classList.add('opacity-0');
                  document.getElementById('cart-panel').classList.add('translate-x-full');
                  cartModal.classList.add('hidden');
@@ -1104,19 +1001,16 @@
                 {
                     element: '#products-container > div:first-child',
                     title: 'Tarjeta de Producto',
-                    // TEXTO ACTUALIZADO: Pieza o Paquete
                     description: 'En cada tarjeta verás detalles y opciones. **Nota: Algunos productos se venden por pieza o por paquete, selecciona la opción que prefieras antes de agregar.**'
                 },
                 {
                     element: '#whatsapp-fab',
                     title: 'Ayuda Directa',
-                    // TEXTO ACTUALIZADO: Ubicación del botón
                     description: '¿No encuentras algo? Toca el **botón de WhatsApp en la esquina inferior derecha** para contactarnos directamente.'
                 },
                 {
                     element: '#cart-fab',
                     title: 'Tu Pedido',
-                    // TEXTO ACTUALIZADO: Ubicación del carrito
                     description: 'Finalmente, revisa tu pedido en el **botón azul del carrito (abajo a la derecha)** y envíanos tu cotización.'
                 }
             ];
@@ -1126,11 +1020,9 @@
             showStep();
         }
 
-        // --- NUEVA FUNCIÓN PARA TOUR DE CARRITO ---
         function startCartTour() {
             if(cart.length === 0) return showToast("Agrega productos primero");
 
-            // No cerramos el modal, solo iniciamos el overlay
             currentTourSteps = [
                 { element: '#cart-items', title: 'Tus Productos', description: 'Aquí puedes ver tus productos. Usa los controles para ajustar cantidades o la X para eliminar.' },
                 { element: '#client-info-container', title: 'Tus Datos', description: 'Escribe tu nombre o el de tu negocio para personalizar la cotización.' },
@@ -1147,7 +1039,6 @@
             const step = currentTourSteps[tourIndex];
             let target = document.querySelector(step.element);
             
-            // Fallback por si acaso
             if(!target && step.element.includes('products-container')) {
                  nextStep();
                  return;
@@ -1155,14 +1046,12 @@
 
             const tourTooltip = document.getElementById('tour-tooltip');
 
-            // Limpiar resaltados anteriores
             document.querySelectorAll('.tour-highlight, .tour-highlight-fixed, .tour-fix-stacking').forEach(el => {
                 el.classList.remove('tour-highlight', 'tour-highlight-fixed', 'tour-fix-stacking');
                 el.style.zIndex = '';
             });
 
             if (target) {
-                // Decidir qué clase usar según si el elemento es fijo (como FABs) o normal
                 const isFixed = window.getComputedStyle(target).position === 'fixed';
                 
                 if (isFixed) {
@@ -1171,19 +1060,15 @@
                     target.classList.add('tour-highlight');
                 }
                 
-                // Fix para stacking context en tarjetas
                 if(step.element.includes('products-container')) {
                      target.classList.add('tour-fix-stacking');
                 }
 
-                // Scroll al elemento si no está visible (Centered to ensure safe space above/below)
                 target.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 
-                // 1. Mostrar oculto para medir dimensiones reales
                 tourTooltip.style.visibility = 'hidden';
                 tourTooltip.style.display = 'block';
 
-                // 2. Llenar contenido (esto afecta el alto)
                 document.getElementById('tour-title').innerText = step.title;
                 document.getElementById('tour-desc').innerHTML = step.description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 document.getElementById('tour-step-count').innerText = `${tourIndex + 1} / ${currentTourSteps.length}`;
@@ -1195,64 +1080,49 @@
                     const rect = target.getBoundingClientRect();
                     const tooltipHeight = tourTooltip.offsetHeight;
                     const tooltipWidth = tourTooltip.offsetWidth;
-                    const headerHeight = 80; // Nav + Categories buffer
+                    const headerHeight = 80;
                     
                     let finalTop, finalLeft, placement;
 
-                    // === LÓGICA DE POSICIONAMIENTO ===
-
-                    // CASO 1: Paso 4 (Tarjeta) -> CENTRADO
                     if (tourIndex === 3 && step.element.includes('products-container')) { 
                         finalTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
                         finalLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
                         placement = 'center';
-                        
-                        // Si es muy alto y se sale por arriba
                         if (finalTop < headerHeight) finalTop = headerHeight + 10;
                     } 
-                    // CASO 2: FABs (Botones fijos abajo derecha) -> ARRIBA + IZQUIERDA ALINEADA
                     else if (isFixed && rect.bottom > window.innerHeight - 100) {
                         finalTop = rect.top - 15 - tooltipHeight;
-                        // Alinear borde derecho del tooltip con borde derecho del target (menos margen)
                         finalLeft = rect.right - tooltipWidth + 10; 
                         placement = 'top';
                     }
-                    // CASO 3: Estándar -> ABAJO CENTRADO
                     else {
                         finalTop = rect.bottom + 15;
                         finalLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
                         placement = 'bottom';
 
-                        // Rebote si se sale por abajo
                         if (finalTop + tooltipHeight > window.innerHeight) {
-                             // Si cabe arriba, ponerlo arriba
                              if (rect.top - 15 - tooltipHeight > headerHeight) {
                                  finalTop = rect.top - 15 - tooltipHeight;
                                  placement = 'top';
                              } else {
-                                 // Si no cabe ni arriba ni abajo, forzar centrado en pantalla
                                  finalTop = (window.innerHeight - tooltipHeight) / 2;
                                  placement = 'center';
                              }
                         }
                     }
                     
-                    // --- CLAMPING (Límites de pantalla ESTRICTOS) ---
-                    // Vertical
                     if (finalTop < headerHeight) finalTop = headerHeight + 10;
                     if (finalTop + tooltipHeight > window.innerHeight) finalTop = window.innerHeight - tooltipHeight - 10;
 
-                    // Horizontal
                     if (finalLeft < 10) finalLeft = 10;
                     if (finalLeft + tooltipWidth > window.innerWidth) finalLeft = window.innerWidth - tooltipWidth - 10;
                     
-                    // Aplicar y mostrar
                     tourTooltip.style.top = `${finalTop}px`;
                     tourTooltip.style.left = `${finalLeft}px`;
                     tourTooltip.className = `placement-${placement}`; 
                     tourTooltip.style.visibility = 'visible';
 
-                }, 350); // Increased delay slightly for scroll
+                }, 350);
 
             } else {
                 console.warn('Elemento del tour no encontrado:', step.element);
