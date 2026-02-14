@@ -42,6 +42,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <!-- Librería para Escáner QR -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
     <style>
         .hide-scroll::-webkit-scrollbar { display: none; }
@@ -142,9 +144,16 @@
                         <p class="text-[10px] text-indigo-300 uppercase">Catálogo Digital</p>
                     </div>
                 </div>
-                <button onclick="startTour()" class="md:hidden bg-indigo-800 p-2 rounded-full text-indigo-200 hover:text-white hover:bg-indigo-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </button>
+                
+                <!-- Botones Móviles (Tour + Scanner) -->
+                <div class="flex gap-2 md:hidden">
+                    <button onclick="startQRScanner()" class="bg-indigo-800 p-2 rounded-full text-indigo-200 hover:text-white hover:bg-indigo-700 transition" title="Escanear Código QR">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    </button>
+                    <button onclick="startTour()" class="bg-indigo-800 p-2 rounded-full text-indigo-200 hover:text-white hover:bg-indigo-700 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
+                </div>
             </div>
             
             <div class="w-full md:w-96 flex gap-2">
@@ -286,6 +295,27 @@
     <button onclick="scrollToTop()" id="scroll-top-btn" class="fixed bottom-36 right-6 z-40 bg-slate-800/80 hover:bg-slate-800 text-white p-3 rounded-full shadow-lg backdrop-blur-sm border border-slate-700">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
     </button>
+
+    <!-- Modal Scanner QR -->
+    <div id="qr-scanner-modal" class="fixed inset-0 z-[100] hidden bg-slate-900/95 flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-white rounded-2xl overflow-hidden relative shadow-2xl">
+            <div class="p-4 bg-indigo-900 text-white flex justify-between items-center">
+                <h3 class="font-bold flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    Escanear Producto
+                </h3>
+                <button onclick="stopQRScanner()" class="text-indigo-200 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="reader" class="w-full bg-black overflow-hidden relative">
+                <!-- El lector se renderiza aquí -->
+            </div>
+            <div class="p-4 text-center text-sm text-slate-500 bg-slate-50 border-t border-slate-100">
+                Apunta la cámara al código QR del producto
+            </div>
+        </div>
+    </div>
 
     <div id="fab-container" class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
         <button type="button" id="whatsapp-fab" onclick="openGeneralWhatsApp()" class="bg-white text-green-500 p-3 rounded-full shadow-lg hover:scale-110 transition border border-green-100 group relative">
@@ -550,6 +580,89 @@
                         clearInterval(qrCheck);
                     }
                 }, 500);
+            }
+        }
+
+        // ==========================================
+        // SCANNER QR INTERNO (HTML5-QRCode)
+        // ==========================================
+        let html5QrcodeScanner;
+
+        function startQRScanner() {
+            const modal = document.getElementById('qr-scanner-modal');
+            modal.classList.remove('hidden');
+            
+            // Si ya existe instancia, detenerla para reiniciar (seguridad)
+            if(html5QrcodeScanner) { 
+               stopQRScanner().then(() => initScanner());
+            } else {
+                initScanner();
+            }
+        }
+
+        function initScanner() {
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            // Preferir cámara trasera
+            html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess)
+            .catch(err => {
+                console.error("Error starting scanner", err);
+                alert("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
+                document.getElementById('qr-scanner-modal').classList.add('hidden');
+            });
+        }
+
+        function stopQRScanner() {
+            const modal = document.getElementById('qr-scanner-modal');
+            modal.classList.add('hidden');
+            
+            if (html5QrcodeScanner) {
+                return html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner.clear();
+                    html5QrcodeScanner = null;
+                }).catch(err => console.error(err));
+            }
+            return Promise.resolve();
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // Detener escáner primero para liberar cámara
+            stopQRScanner();
+
+            // Lógica para interpretar el texto escaneado
+            try {
+                let productId = decodedText;
+                
+                // Si el QR es una URL completa (ej: ...?add=XYZ), extraemos el ID
+                if (decodedText.includes('add=')) {
+                    // Hack rápido para extraer param si es URL completa o parcial
+                    try {
+                        const urlObj = new URL(decodedText);
+                        productId = urlObj.searchParams.get('add');
+                    } catch(e) {
+                        // Si no es URL válida, intentar split manual
+                        const parts = decodedText.split('add=');
+                        if(parts.length > 1) productId = parts[1].split('&')[0];
+                    }
+                }
+
+                if (productId) {
+                    // Verificar si el producto existe
+                    const exists = allProducts.find(p => p.id === productId);
+                    if (exists) {
+                        add(productId);
+                        toggleCart();
+                        showToast("¡Producto detectado!");
+                    } else {
+                        alert("Producto no encontrado en el catálogo actual.");
+                    }
+                } else {
+                     alert("Código QR no válido. Asegúrate de escanear un código del catálogo.");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error al procesar el código.");
             }
         }
 
