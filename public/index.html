@@ -478,9 +478,8 @@
         <img id="lightbox-img" src="" class="max-w-[95%] max-h-[90vh] rounded-lg shadow-2xl relative z-10 transition-transform scale-95" onclick="event.stopPropagation()">
     </div>
 
-    <script type="module">
-        import { initializeApp } from "firebase/app";
-        import { getAnalytics } from "firebase/analytics";
+    <script>
+      
         // === CONFIGURACIÓN FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
@@ -505,7 +504,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 firebase.initializeApp(firebaseConfig);
-                getAnalytics(firebase.initializeApp(firebaseConfig));
+               
                 db = firebase.database();
                 
                 // Intento seguro de cargar carrito
