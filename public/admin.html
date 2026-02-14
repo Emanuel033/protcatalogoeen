@@ -3,49 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 2.0 - Envases La Económica del Norte</title>
+    <title>Admin 4.3 - Control + Etiquetas QR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <!-- Iconos para mejorar la UI -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Animación suave para filas */
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        /* Scrollbar personalizada fina */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { bg: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
-        
-        /* Ajuste para inputs compactos */
-        .input-compact { padding-top: 2px; padding-bottom: 2px; }
+        .shortcut-active { ring: 2px; ring-color: #6366f1; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-slate-800 h-screen flex flex-col overflow-hidden text-xs md:text-sm">
     
-    <!-- 1. PANTALLA DE CARGA -->
     <div id="loader" class="fixed inset-0 bg-slate-900 z-[60] flex flex-col items-center justify-center text-white transition-opacity duration-500">
         <div class="animate-spin h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
         <p class="text-xs tracking-widest uppercase font-semibold animate-pulse">Cargando Sistema...</p>
     </div>
 
-    <!-- 2. CONTENIDO PRINCIPAL (Flex Column para ocupar toda la altura) -->
     <div id="main-content" class="max-w-full mx-auto bg-white shadow-2xl border-x border-gray-200 hidden flex-col h-full w-full">
         
-        <!-- HEADER COMPACTO -->
         <div class="bg-indigo-900 px-4 py-2 flex justify-between items-center shrink-0 h-14">
             <div class="flex items-center gap-3">
                 <div class="bg-indigo-700 p-1.5 rounded text-white">
                     <i class="fa-solid fa-boxes-stacked text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-white text-base font-bold tracking-tight leading-tight">Administración de catálogo de productos</h1>
+                    <h1 class="text-white text-base font-bold tracking-tight leading-tight">Administración</h1>
                     <div class="flex items-center gap-1 text-indigo-200 text-[10px]">
                         <i class="fa-solid fa-user-shield"></i>
                         <span id="user-info">...</span>
+                        <span class="hidden md:inline text-indigo-400 ml-2">| "/" Buscar | "Esc" Limpiar</span>
                     </div>
                 </div>
             </div>
@@ -60,9 +54,8 @@
             </div>
         </div>
 
-        <!-- FORMULARIO DE AGREGAR (Más compacto) -->
         <div class="border-b bg-gray-50 shrink-0">
-            <details class="group px-4 py-2" open>
+            <details id="addFormDetails" class="group px-4 py-2" open>
                 <summary class="list-none flex justify-between items-center cursor-pointer mb-1 outline-none">
                     <h2 class="font-bold text-indigo-800 uppercase text-[10px] tracking-wider flex items-center gap-2 hover:text-indigo-600">
                         <i class="fa-solid fa-circle-plus"></i> Agregar Nuevo
@@ -72,25 +65,31 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-end animate-in fade-in zoom-in-95 duration-200 pb-1">
                     <div class="col-span-1 md:col-span-3 space-y-0.5">
-                        <input id="prodName" type="text" placeholder="Nombre Producto" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
+                        <input id="prodName" onkeydown="checkEnter(event)" type="text" placeholder="Nombre Producto" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
                     </div>
                     <div class="col-span-1 md:col-span-2 space-y-0.5">
-                        <input id="prodCat" type="text" placeholder="Categoría" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
+                        <input id="prodCat" onkeydown="checkEnter(event)" type="text" placeholder="Categoría" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
                     </div>
                     <div class="col-span-1 md:col-span-1 space-y-0.5">
-                        <input id="prodPcs" type="number" placeholder="Pzas x Paq" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none" title="Piezas por Paquete/Bolsa">
+                        <input id="prodPcs" onkeydown="checkEnter(event)" type="number" placeholder="Pzas x Paq" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
                     </div>
                     
-                    <!-- Input Imagen Integrado -->
-                    <div class="col-span-1 md:col-span-5 flex gap-2 items-center">
+                    <div class="col-span-1 md:col-span-6 flex gap-2 items-center">
                         <div class="flex-grow relative">
-                            <input id="prodFile" oninput="previewImage(this.value)" type="text" placeholder="URL Imagen..." class="w-full px-2 py-1.5 pl-6 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
+                            <input id="prodFile" onkeydown="checkEnter(event)" oninput="previewImage(this.value)" type="text" placeholder="URL Imagen..." class="w-full px-2 py-1.5 pl-6 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none">
                             <i class="fa-solid fa-link absolute left-2 top-2 text-gray-400 text-[10px]"></i>
                         </div>
+                        
                         <div id="imgPreviewBox" class="w-7 h-7 bg-gray-200 rounded border border-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden hidden">
                             <img id="imgPreview" class="w-full h-full object-cover">
                         </div>
-                        <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold py-1.5 px-3 rounded hover:bg-indigo-700 transition shadow text-xs flex items-center gap-1 whitespace-nowrap h-8">
+
+                        <div class="flex items-center h-8 bg-gray-100 px-2 rounded border border-gray-200" title="Si activas esto, el producto no saldrá como 'Nuevo' en la web">
+                            <input id="prodOldDate" type="checkbox" class="w-3 h-3 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer">
+                            <label for="prodOldDate" class="ml-1 text-[9px] text-gray-600 font-bold uppercase cursor-pointer select-none">Antiguo</label>
+                        </div>
+
+                        <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold py-1.5 px-3 rounded hover:bg-indigo-700 transition shadow text-xs flex items-center gap-1 whitespace-nowrap h-8" title="Guardar (Enter)">
                             <i class="fa-solid fa-save"></i>
                         </button>
                     </div>
@@ -98,55 +97,56 @@
             </details>
         </div>
 
-        <!-- BARRA DE HERRAMIENTAS TABLA -->
-        <div class="px-4 py-2 bg-white border-b flex flex-row justify-between items-center gap-3 shrink-0 z-10 h-10">
-            <div class="relative w-full max-w-md">
+        <div class="px-4 py-2 bg-white border-b flex flex-col md:flex-row justify-between items-center gap-3 shrink-0 z-10">
+            <div class="relative w-full md:w-1/3">
                 <i class="fa-solid fa-search absolute left-2 top-2 text-gray-400 text-xs"></i>
-                <input id="searchInput" onkeyup="filterProducts()" type="text" placeholder="Buscar..." 
-                    class="w-full pl-7 pr-4 py-1 bg-gray-100 border-transparent focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded text-xs transition-all outline-none h-7">
+                <input id="searchInput" onkeyup="filterProducts()" type="text" placeholder="Buscar ( / )..." 
+                    class="w-full pl-7 pr-4 py-1 bg-gray-100 border-transparent focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded text-xs transition-all outline-none h-8">
             </div>
-            <div class="flex gap-2">
-                <button onclick="loadProducts()" class="text-gray-400 hover:text-indigo-600 p-1 rounded hover:bg-gray-50 transition" title="Refrescar">
-                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
+
+            <div class="flex gap-2 w-full md:w-auto justify-end items-center flex-wrap">
+                <div class="flex items-center gap-1 bg-indigo-50 p-1 rounded border border-indigo-100 mr-2">
+                    <span class="text-[9px] font-bold text-indigo-800 uppercase px-1 hidden lg:block">Masivo:</span>
+                    <input id="massQtyInput" type="number" placeholder="#" 
+                        class="w-12 px-1 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-7 text-center">
+                    <button onclick="applyMassUpdate()" title="Aplicar cantidad" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold py-1 px-2 rounded h-7 shadow transition"><i class="fa-solid fa-check"></i></button>
+                </div>
+                
+                <button onclick="printQRs()" class="bg-purple-600 hover:bg-purple-700 text-white p-1.5 rounded h-8 w-8 flex items-center justify-center shadow transition" title="Imprimir Etiquetas QR de lo filtrado">
+                    <i class="fa-solid fa-qrcode"></i>
                 </button>
+
+                <button onclick="filterIncomplete()" class="bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded h-8 w-8 flex items-center justify-center shadow transition" title="Ver sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
+                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white p-1.5 rounded h-8 w-8 flex items-center justify-center shadow transition" title="Exportar Excel"><i class="fa-solid fa-file-excel"></i></button>
+                <button onclick="resetFilters()" class="text-gray-400 hover:text-indigo-600 p-1.5 rounded hover:bg-gray-50 transition h-8 w-8" title="Refrescar"><i class="fa-solid fa-arrows-rotate"></i></button>
             </div>
         </div>
 
-        <!-- TABLA CON SCROLL INDEPENDIENTE -->
         <div class="flex-grow overflow-auto bg-gray-50 relative">
             <table class="w-full text-left border-collapse min-w-[600px]">
                 <thead class="bg-white text-[10px] uppercase text-gray-500 font-bold tracking-wider sticky top-0 z-10 shadow-sm">
                     <tr>
                         <th class="py-2 px-2 w-12 text-center bg-white border-b">Img</th>
                         <th class="py-2 px-2 bg-white border-b">Descripción</th>
-                        <th class="py-2 px-2 w-24 text-center bg-white border-b">Pzas x Paq</th>
-                        <th class="py-2 px-2 w-16 text-center bg-white border-b">Visible</th>
-                        <th class="py-2 px-2 w-12 text-center bg-white border-b"></th>
+                        <th class="py-2 px-2 w-20 text-center bg-white border-b">Pzas</th>
+                        <th class="py-2 px-2 w-16 text-center bg-white border-b">Vis.</th>
+                        <th class="py-2 px-2 w-28 text-center bg-white border-b">Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="divide-y divide-gray-200 text-xs text-gray-700 bg-white">
-                    <!-- Los productos se inyectan aquí -->
-                </tbody>
+                <tbody id="tableBody" class="divide-y divide-gray-200 text-xs text-gray-700 bg-white"></tbody>
             </table>
-            
-            <!-- Estado Vacío -->
             <div id="emptyState" class="hidden flex flex-col items-center justify-center h-40 text-gray-400">
-                <i class="fa-solid fa-filter text-2xl mb-2"></i>
-                <p class="text-xs">Sin resultados</p>
+                <i class="fa-solid fa-filter text-2xl mb-2"></i><p class="text-xs">Sin resultados</p>
             </div>
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION COMPACTA -->
     <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-2 rounded shadow-xl translate-y-24 transition-transform duration-300 z-[100] border-l-4 border-indigo-500 flex items-center gap-3">
         <i id="toast-icon" class="fa-solid fa-check text-green-400"></i>
-        <div>
-            <p id="toast-msg" class="text-xs font-medium text-slate-200">Mensaje</p>
-        </div>
+        <div><p id="toast-msg" class="text-xs font-medium text-slate-200">Msg</p></div>
     </div>
 
     <script>
-        // CONFIGURACIÓN (Tus credenciales originales)
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
             authDomain: "productoseen.firebaseapp.com",
@@ -156,14 +156,13 @@
             messagingSenderId: "1052892398028",
             appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
         let currentUser = null;
         let allProducts = []; 
+        let currentFilteredProducts = [];
 
-        // --- AUTH & INICIALIZACIÓN ---
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user; 
@@ -176,182 +175,292 @@
                         document.getElementById('main-content').classList.add('flex');
                         setupRealtimeListener(); 
                     } else { throw new Error("Permisos insuficientes."); }
-                } catch (error) {
-                    alert("Acceso denegado: " + error.message);
-                    window.location.href = "login.html"; 
-                }
+                } catch (error) { alert(error.message); window.location.href = "login.html"; }
             } else { window.location.href = "login.html"; }
         });
 
-        async function logout() {
-            await auth.signOut();
-            window.location.href = "login.html";
-        }
+        async function logout() { await auth.signOut(); window.location.href = "login.html"; }
 
-        // --- LÓGICA ---
         function setupRealtimeListener() {
-            const productsRef = db.ref('productos');
-            productsRef.orderByChild('createdAt').on('value', (snapshot) => {
+            db.ref('productos').orderByChild('createdAt').on('value', (snapshot) => {
                 allProducts = [];
                 if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        allProducts.push({id: child.key, ...child.val()});
-                    });
+                    snapshot.forEach((child) => { allProducts.push({id: child.key, ...child.val()}); });
+                    // Ordenar por fecha (más reciente arriba)
                     allProducts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                 }
                 document.getElementById('total-count').innerText = allProducts.length;
-                filterProducts(); 
-            }, (error) => showToast("Error de conexión", "error"));
+                filterProducts();
+            });
         }
+
+        window.resetFilters = () => { document.getElementById('searchInput').value = ""; filterProducts(); };
 
         window.filterProducts = () => {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allProducts.filter(p => 
-                (p.name || '').toLowerCase().includes(term) ||
-                (p.category || '').toLowerCase().includes(term)
-            );
-            renderTable(filtered);
-        }
+            currentFilteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes(term) || (p.category || '').toLowerCase().includes(term));
+            renderTable(currentFilteredProducts);
+        };
+
+        window.filterIncomplete = () => {
+            currentFilteredProducts = allProducts.filter(p => !p.piezas || p.piezas == 0);
+            renderTable(currentFilteredProducts);
+            showToast("Productos sin piezas", "success");
+        };
 
         function renderTable(products) {
             const tbody = document.getElementById('tableBody');
             const emptyState = document.getElementById('emptyState');
             tbody.innerHTML = "";
-
-            if (products.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            }
+            if (products.length === 0) { emptyState.classList.remove('hidden'); return; }
             emptyState.classList.add('hidden');
 
             products.forEach(p => {
                 const isActive = p.activo !== false; 
+                const fallbackImg = "https://via.placeholder.com/100?text=IMG";
                 const tr = document.createElement('tr');
-                // Filas compactas con hover suave
                 tr.className = `group hover:bg-indigo-50 transition-colors border-b border-gray-100 ${!isActive ? 'opacity-50 bg-gray-50' : ''} fade-in`;
                 
                 tr.innerHTML = `
                     <td class="p-1 text-center align-middle">
-                        <div class="w-8 h-8 mx-auto bg-white rounded border border-gray-200 overflow-hidden cursor-pointer hover:scale-150 transition-transform origin-left z-10 relative">
-                            <img src="${p.image}" class="w-full h-full object-cover" 
-                                onerror="this.src='https://via.placeholder.com/100?text=IMG'"
-                                onclick="window.open('${p.image}', '_blank')">
+                        <div class="w-8 h-8 mx-auto bg-white rounded border border-gray-200 overflow-hidden cursor-pointer hover:scale-150 transition-transform origin-left z-10">
+                            <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'" onclick="window.open('${p.image}', '_blank')">
                         </div>
                     </td>
                     <td class="p-1 align-middle">
-                        <input onchange="updateProduct('${p.id}','name',this.value, this)" value="${p.name || ''}" class="block w-full font-semibold text-gray-900 bg-transparent border-none focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded px-1 py-0.5 outline-none transition placeholder-gray-400 text-xs" placeholder="Nombre...">
-                        <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="block w-full text-[10px] text-indigo-600 font-mono bg-transparent border-none focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded px-1 py-0 outline-none transition placeholder-gray-300 mt-0.5" placeholder="Categoría...">
+                        <input onchange="updateProduct('${p.id}','name',this.value, this)" value="${p.name || ''}" class="block w-full font-semibold text-gray-900 bg-transparent border-none focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded px-1 py-0.5 outline-none transition placeholder-gray-400 text-xs">
+                        <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="block w-full text-[10px] text-indigo-600 font-mono bg-transparent border-none focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded px-1 py-0 outline-none transition placeholder-gray-300 mt-0.5">
                     </td>
                     <td class="p-1 align-middle text-center">
-                        <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-20 mx-auto bg-transparent border border-gray-100 rounded text-center focus:bg-white focus:border-indigo-500 outline-none text-xs py-0.5" placeholder="Pzas">
+                        <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="${!p.piezas ? 'bg-orange-100' : 'bg-transparent'} w-16 mx-auto border border-gray-100 rounded text-center focus:bg-white focus:border-indigo-500 outline-none text-xs py-0.5" placeholder="Pzas">
                     </td>
                     <td class="p-1 text-center align-middle">
-                         <label class="inline-flex items-center cursor-pointer relative group/toggle" title="Activar/Desactivar">
+                         <label class="inline-flex items-center cursor-pointer relative group/toggle">
                             <input type="checkbox" onchange="updateProduct('${p.id}', 'activo', this.checked)" class="sr-only peer" ${isActive ? 'checked' : ''}>
-                            <div class="w-7 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-green-500"></div>
+                            <div class="w-7 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"></div>
                         </label>
                     </td>
                     <td class="p-1 text-center align-middle">
-                        <button onclick="deleteProduct('${p.id}')" class="text-gray-300 hover:text-red-500 p-1 transition opacity-0 group-hover:opacity-100" title="Eliminar">
-                            <i class="fa-solid fa-trash text-xs"></i>
-                        </button>
+                        <div class="flex justify-center gap-2">
+                            <button onclick="cloneProduct('${p.id}')" class="text-blue-300 hover:text-blue-500 p-1 transition opacity-0 group-hover:opacity-100" title="Clonar"><i class="fa-solid fa-copy text-xs"></i></button>
+                            <button onclick="makeProductOld('${p.id}')" class="text-orange-300 hover:text-orange-500 p-1 transition opacity-0 group-hover:opacity-100" title="Quitar de Nuevos (Envejecer)"><i class="fa-solid fa-clock-rotate-left text-xs"></i></button>
+                            <button onclick="deleteProduct('${p.id}')" class="text-gray-300 hover:text-red-500 p-1 transition opacity-0 group-hover:opacity-100" title="Eliminar"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        window.previewImage = (url) => {
-            const box = document.getElementById('imgPreviewBox');
-            const img = document.getElementById('imgPreview');
-            if(url && url.length > 10) {
-                box.classList.remove('hidden');
-                img.src = url;
-                img.onerror = () => box.classList.add('hidden');
-            } else { box.classList.add('hidden'); }
-        }
+        // === LÓGICA DE IMPRESIÓN QR ===
+        window.printQRs = () => {
+            if (currentFilteredProducts.length === 0) return showToast("No hay productos filtrados", "error");
 
-        async function uploadProduct() {
-            if (!currentUser) return showToast("Error Sesión", "error");
-            
+            // 1. Obtener o pedir la URL Base
+            let baseUrl = localStorage.getItem('een_catalog_url');
+            if (!baseUrl) {
+                baseUrl = prompt("Para generar los códigos, ingresa la URL de tu catálogo:\n(Ejemplo: https://envases-norte.web.app)", window.location.origin);
+                if (baseUrl) {
+                    if(!baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
+                    // Asegurar que no termine en slash para evitar dobles //
+                    if(baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+                    localStorage.setItem('een_catalog_url', baseUrl);
+                } else return;
+            }
+
+            // 2. Generar el HTML de la ventana de impresión
+            const printWindow = window.open('', '_blank');
+            if(!printWindow) return showToast("Permite las ventanas emergentes", "error");
+
+            let htmlContent = `
+            <html>
+            <head>
+                <title>Etiquetas QR - Envases La Económica</title>
+                <style>
+                    body { font-family: sans-serif; padding: 20px; }
+                    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+                    .card { 
+                        border: 2px dashed #ccc; 
+                        padding: 10px; 
+                        text-align: center; 
+                        border-radius: 8px; 
+                        break-inside: avoid; /* Evita que se corten al imprimir */
+                        display: flex; flex-col; align-items: center; justify-content: center;
+                    }
+                    .qr-img { width: 120px; height: 120px; margin: 10px auto; display: block; }
+                    .title { font-size: 12px; font-weight: bold; margin-bottom: 5px; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+                    .meta { font-size: 10px; color: #666; margin-top: 5px; }
+                    .logo { font-size: 10px; font-weight: bold; color: #3730a3; text-transform: uppercase; margin-top: 5px; }
+                    @media print {
+                        .no-print { display: none; }
+                        body { margin: 0; padding: 0.5cm; }
+                        .card { border: 1px solid #ddd; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="no-print" style="margin-bottom: 20px; padding: 10px; background: #eee; text-align: center;">
+                    <button onclick="window.print()" style="font-size: 16px; padding: 10px 20px; cursor: pointer; background: #4f46e5; color: white; border: none; border-radius: 5px;">🖨️ Imprimir Etiquetas</button>
+                    <span style="margin-left: 10px;">Se generaron ${currentFilteredProducts.length} etiquetas.</span>
+                </div>
+                <div class="grid">
+            `;
+
+            // 3. Generar los QR usando la librería QRIOUS y convertirlos a DataURL
+            currentFilteredProducts.forEach(p => {
+                const fullUrl = `${baseUrl}/?add=${p.id}`;
+                // Creamos un QR temporal en memoria
+                const qr = new QRious({
+                    value: fullUrl,
+                    size: 200,
+                    level: 'H'
+                });
+                const imgData = qr.toDataURL();
+                
+                const pzasText = p.piezas ? (p.piezas > 1 ? `Paq. ${p.piezas} pzas` : 'Pieza Individual') : '';
+
+                htmlContent += `
+                    <div class="card">
+                        <div class="title">${p.name}</div>
+                        <img src="${imgData}" class="qr-img">
+                        <div class="meta">${pzasText}</div>
+                        <div class="logo">Escanea para pedir</div>
+                    </div>
+                `;
+            });
+
+            htmlContent += `</div></body></html>`;
+
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+            if (e.key === 'Escape') { document.getElementById('searchInput').value = ''; document.getElementById('searchInput').blur(); resetFilters(); }
+        });
+        window.checkEnter = (e) => { if (e.key === 'Enter') uploadProduct(); };
+
+        window.uploadProduct = async () => {
+            if (!currentUser) return;
             const name = document.getElementById('prodName').value;
             const cat = document.getElementById('prodCat').value;
             const url = document.getElementById('prodFile').value;
             const pcs = document.getElementById('prodPcs').value;
+            const isOld = document.getElementById('prodOldDate').checked; // Checkbox Antiguo
             const btn = document.getElementById('btnUpload');
             
-            if(!name || !url) return showToast("Faltan datos", "error");
+            if(!name) return showToast("Falta nombre", "error");
             
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
+            const originalHtml = btn.innerHTML;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+            btn.disabled = true;
+
+            // Fecha: Si está marcado "Antiguo", usamos 1 Enero 2024. Si no, Fecha Actual.
+            const dateToSave = isOld ? new Date('2024-01-01').getTime() : firebase.database.ServerValue.TIMESTAMP;
 
             try {
                 await db.ref('productos').push({
-                    name, 
-                    category: cat, 
-                    image: url,
-                    piezas: pcs,
+                    name, category: cat, image: url,
+                    piezas: pcs ? Number(pcs) : 0,
                     activo: true, 
-                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                    createdAt: dateToSave // Aquí guardamos la fecha decidida
                 });
-                showToast("Guardado", "success");
+                showToast(isOld ? "Guardado como ANTIGUO" : "Guardado como NUEVO", "success");
                 
+                // Limpiar
                 document.getElementById('prodName').value = "";
                 document.getElementById('prodCat').value = "";
                 document.getElementById('prodFile').value = "";
                 document.getElementById('prodPcs').value = "";
                 document.getElementById('imgPreviewBox').classList.add('hidden');
-                document.getElementById('prodName').focus(); // Foco rápido para seguir agregando
+                document.getElementById('prodOldDate').checked = false; // Resetear checkbox
+                document.getElementById('prodName').focus(); 
             } catch(e) { showToast(e.message, "error"); } 
-            finally { btn.disabled = false; btn.innerHTML = originalText; }
+            finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
+
+        // Nueva función para envejecer productos existentes
+        window.makeProductOld = async (id) => {
+            if(!currentUser) return;
+            if(!confirm("¿Quieres que este producto deje de aparecer como 'Nuevo'?\n\nSe cambiará su fecha al año 2024.")) return;
+            
+            try {
+                await db.ref('productos/'+id).update({
+                    createdAt: new Date('2024-01-01').getTime()
+                });
+                showToast("Producto movido al historial antiguo", "success");
+            } catch(e) { showToast("Error", "error"); }
+        };
+
+        window.cloneProduct = (id) => {
+            const prod = allProducts.find(p => p.id === id);
+            if (!prod) return;
+            document.getElementById('prodName').value = prod.name;
+            document.getElementById('prodCat').value = prod.category;
+            document.getElementById('prodPcs').value = prod.piezas;
+            document.getElementById('prodFile').value = prod.image;
+            previewImage(prod.image);
+            document.getElementById('addFormDetails').open = true;
+            document.getElementById('main-content').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('prodName').focus();
+            showToast("Datos copiados", "success");
+        };
 
         window.updateProduct = async (id, field, val, inputElement) => {
             if(!currentUser) return;
+            if (field === 'piezas') val = Number(val);
             if(inputElement) inputElement.classList.add('bg-yellow-50');
-
             try {
                 await db.ref('productos/'+id).update({[field]: val});
-                if(inputElement) {
-                    inputElement.classList.replace('bg-yellow-50', 'bg-green-50');
-                    setTimeout(() => inputElement.classList.remove('bg-green-50'), 500);
-                }
-            } catch(e) { 
-                showToast("Error", "error");
-                if(inputElement) inputElement.classList.add('bg-red-50');
-            }
+                if(inputElement) inputElement.classList.replace('bg-yellow-50', 'bg-green-50');
+                setTimeout(() => inputElement?.classList.remove('bg-green-50'), 500);
+            } catch(e) { showToast("Error", "error"); inputElement?.classList.add('bg-red-50'); }
         };
 
         window.deleteProduct = async (id) => {
             if(!currentUser) return;
-            if(confirm("¿Eliminar?")) {
-                try {
-                    await db.ref('productos/'+id).remove();
-                    showToast("Eliminado", "success");
-                } catch(e) { showToast("Error", "error"); }
-            }
+            if(confirm("¿Eliminar definitivamente?")) { await db.ref('productos/'+id).remove(); showToast("Eliminado", "success"); }
         };
 
-        let toastTimeout;
-        function showToast(msg, type = "success") {
-            const t = document.getElementById('toast');
-            const icon = document.getElementById('toast-icon');
-            document.getElementById('toast-msg').innerText = msg;
-            
-            if(type === 'error') {
-                t.classList.replace('border-indigo-500', 'border-red-500');
-                icon.className = "fa-solid fa-xmark text-red-500";
-            } else {
-                t.classList.replace('border-red-500', 'border-indigo-500');
-                icon.className = "fa-solid fa-check text-green-400";
-            }
-            t.classList.remove('translate-y-24');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => t.classList.add('translate-y-24'), 2000);
-        }
+        window.applyMassUpdate = async () => {
+            const qty = document.getElementById('massQtyInput').value;
+            if (!qty || qty <= 0) return showToast("Cantidad inválida", "error");
+            if (!confirm(`¿Actualizar ${currentFilteredProducts.length} productos?`)) return;
+            try {
+                const updates = {};
+                currentFilteredProducts.forEach(prod => updates['/productos/' + prod.id + '/piezas'] = Number(qty));
+                await db.ref().update(updates);
+                showToast("Actualizado masivamente", "success");
+                document.getElementById('massQtyInput').value = "";
+            } catch (e) { showToast(e.message, "error"); }
+        };
 
-        window.uploadProduct = uploadProduct;
+        window.exportToExcel = () => {
+            if (currentFilteredProducts.length === 0) return showToast("Nada que exportar", "error");
+            let csvContent = "\uFEFFNombre,Categoria,Piezas,Activo,ImagenURL\n";
+            currentFilteredProducts.forEach(p => {
+                csvContent += [`"${(p.name||"").replace(/"/g,'""')}"`,`"${(p.category||"").replace(/"/g,'""')}"`,p.piezas||0,p.activo!==false?"SI":"NO",`"${p.image||""}"`].join(",") + "\n";
+            });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
+            link.download = `inventario_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        };
+
+        window.previewImage = (url) => {
+            const box = document.getElementById('imgPreviewBox');
+            if(url && url.length > 10) { box.classList.remove('hidden'); document.getElementById('imgPreview').src = url; document.getElementById('imgPreview').onerror = () => box.classList.add('hidden'); } 
+            else { box.classList.add('hidden'); }
+        }
+        function showToast(msg, type="success") {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').className = type === 'error' ? "fa-solid fa-xmark text-red-500" : "fa-solid fa-check text-green-400";
+            t.classList.replace(type==='error'?'border-indigo-500':'border-red-500', type==='error'?'border-red-500':'border-indigo-500');
+            t.classList.remove('translate-y-24');
+            setTimeout(() => t.classList.add('translate-y-24'), 2000);
+        }
     </script>
 </body>
 </html>
