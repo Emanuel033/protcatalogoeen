@@ -7,12 +7,12 @@
     <!-- === SEO PRINCIPAL === -->
     <title>Catálogo - Envases La Económica del Norte | Servirle es un placer</title>
     <meta name="description" content="Catálogo digital de Envases La Económica del Norte. Encuentra la más amplia variedad de envases industriales, garrafas, cubetas, tambores, tapas y accesorios en Monterrey y con envíos a todo México.">
-    <meta name="keywords" content="envases industriales, garrafas, cubetas, tambores, tapas, envases monterrey, plastico industrial, botellas pet, envases hdpe, la economica del norte">
+    <meta name="keywords" content="envases industriales, garrafas, cubetas, tambos, tapas, envases monterrey, plastico industrial, botellas pet, envases hdpe, la economica del norte">
     <meta name="author" content="Envases La Económica del Norte">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://productoseen.firebaseapp.com/">
 
-    <!-- === OPEN GRAPH (Para WhatsApp, Facebook, LinkedIn) === -->
+    <!-- === OPEN GRAPH === -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://productoseen.firebaseapp.com/">
     <meta property="og:title" content="Catálogo - Envases La Económica del Norte">
@@ -20,13 +20,7 @@
     <meta property="og:image" content="https://via.placeholder.com/1200x630?text=Envases+La+Economica">
     <meta property="og:locale" content="es_MX">
 
-    <!-- === TWITTER CARDS === -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Catálogo - Envases La Económica del Norte">
-    <meta name="twitter:description" content="Soluciones en envases industriales. Explora nuestro catálogo y cotiza por WhatsApp.">
-    <meta name="twitter:image" content="https://via.placeholder.com/1200x630?text=Envases+La+Economica">
-
-    <!-- === DATOS ESTRUCTURADOS (JSON-LD para Google) === -->
+    <!-- === DATOS ESTRUCTURADOS === -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -65,54 +59,79 @@
         .option-btn.selected { background-color: #eff6ff; border-color: #4f46e5; color: #4338ca; font-weight: bold; }
         .option-btn:hover:not(.selected) { background-color: #f8fafc; }
 
-        /* === ESTILOS DEL TUTORIAL (GLOBAL) === */
+        /* === ESTILOS DEL TUTORIAL === */
         #tour-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.75);
-            z-index: 9999;
+            z-index: 9990;
             display: none; opacity: 0; transition: opacity 0.3s ease;
         }
         #tour-overlay.active { display: block; opacity: 1; }
         
-        /* === ESTILOS DEL TUTORIAL (CARRITO) === */
-        #cart-tour-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 60;
-            display: none; opacity: 0; transition: opacity 0.3s ease;
-            pointer-events: auto;
-        }
-        #cart-tour-overlay.active { display: block; opacity: 1; }
-
         .tour-highlight {
             position: relative;
-            z-index: 10005 !important;
+            z-index: 9995 !important;
             background-color: white;
             box-shadow: 0 0 0 4px #4f46e5, 0 0 25px rgba(0,0,0,0.5);
             border-radius: 8px;
-            pointer-events: none; 
+            pointer-events: none;
+            transition: all 0.3s ease;
         }
-        .tour-fix-stacking {
-            z-index: 10005 !important;
-            position: relative !important;
+        .tour-highlight-fixed {
+            z-index: 9995 !important;
+            box-shadow: 0 0 0 4px #4f46e5, 0 0 25px rgba(0,0,0,0.5);
+            pointer-events: none;
         }
-        
+
         input.tour-highlight, select.tour-highlight { background-color: white !important; }
 
         #tour-tooltip {
             position: fixed;
-            z-index: 10010;
+            z-index: 2147483647 !important;
             width: 300px; max-width: 90vw;
             background: white; padding: 20px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: none; transition: top 0.1s, left 0.1s; animation: fadeIn 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: none; 
+            transition: top 0.3s ease, left 0.3s ease, opacity 0.3s ease; 
+            animation: fadeIn 0.3s ease;
+        }
+        
+        #tour-tooltip::after {
+            content: ''; position: absolute;
+            width: 12px; height: 12px;
+            background: white;
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+        #tour-tooltip.placement-bottom::after { top: -6px; left: 50%; margin-left: -6px; }
+        #tour-tooltip.placement-top::after { bottom: -6px; left: 50%; margin-left: -6px; }
+        
+        /* Ocultar flecha cuando está centrado (Paso 4) */
+        #tour-tooltip.placement-center::after { display: none; }
+
+        .tour-fix-stacking {
+            z-index: 9995 !important;
+            position: relative !important;
+        }
+
+        /* Botón Scroll Top */
+        #scroll-top-btn {
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+        }
+        #scroll-top-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
         }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
 
+    <!-- Navegación -->
     <nav class="bg-indigo-900 text-white sticky top-0 z-40 shadow-xl" id="main-nav">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center justify-between w-full md:w-auto">
@@ -123,7 +142,7 @@
                         <p class="text-[10px] text-indigo-300 uppercase">Catálogo Digital</p>
                     </div>
                 </div>
-                <button onclick="startTour('main')" class="md:hidden bg-indigo-800 p-2 rounded-full text-indigo-200 hover:text-white hover:bg-indigo-700">
+                <button onclick="startTour()" class="md:hidden bg-indigo-800 p-2 rounded-full text-indigo-200 hover:text-white hover:bg-indigo-700">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </button>
             </div>
@@ -132,9 +151,9 @@
                 <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." 
                        class="w-full py-2.5 pl-4 pr-4 rounded-xl border-none outline-none bg-indigo-800/50 text-white placeholder-indigo-300 focus:bg-white focus:text-slate-800 transition-all text-sm">
                 
-                <button onclick="startTour('main')" class="hidden md:flex items-center gap-2 bg-indigo-800 px-4 rounded-xl text-indigo-200 hover:text-white hover:bg-indigo-700 transition whitespace-nowrap" title="Ver Tutorial de Ayuda">
+                <button onclick="startTour()" class="hidden md:flex items-center gap-2 bg-indigo-800 px-4 rounded-xl text-indigo-200 hover:text-white hover:bg-indigo-700 transition whitespace-nowrap" title="Ver Tutorial de Ayuda">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span class="text-xs font-bold">Ver Tutorial</span>
+                    <span class="text-xs font-bold">Tutorial</span>
                 </button>
             </div>
         </div>
@@ -149,6 +168,7 @@
         </div>
     </div>
 
+    <!-- Barra de Categorías -->
     <div class="bg-white border-b border-slate-200 sticky top-[64px] z-30 shadow-sm" id="categories-bar">
         <div class="max-w-7xl mx-auto px-4 py-3">
             <div id="categories-container" class="flex gap-2 overflow-x-auto hide-scroll pb-1">
@@ -157,6 +177,7 @@
         </div>
     </div>
 
+    <!-- Contenedor Principal -->
     <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
         <div id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div class="col-span-full text-center py-20 text-slate-400">Cargando...</div>
@@ -169,15 +190,103 @@
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 mt-auto py-8 text-center text-xs text-slate-400">
-        © 2026 Envases La Económica del Norte.
+    <!-- FOOTER COMPLETO -->
+    <footer class="bg-white border-t border-slate-200 mt-auto pt-10 pb-6">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                
+                <!-- Columna 1: Ubicación -->
+                <div>
+                    <h4 class="font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Ubicación
+                    </h4>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Calzada Guadalupe Victoria 105 Oriente,<br>
+                        Col. Obrerista, Monterrey, N.L.<br>
+                        C.P. 64470
+                    </p>
+                    <a href="https://maps.app.goo.gl/tGkspDmxdFNXLjn46" target="_blank" class="inline-block mt-2 text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline">Ver en Mapa →</a>
+                </div>
+
+                <!-- Columna 2: Teléfonos Fijos -->
+                <div>
+                    <h4 class="font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        Teléfonos Oficina
+                    </h4>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li><a href="tel:8183754630" class="hover:text-indigo-600 transition-colors">81 8375 4630</a></li>
+                        <li><a href="tel:8183728736" class="hover:text-indigo-600 transition-colors">81 8372 8736</a></li>
+                        <li><a href="tel:8183746703" class="hover:text-indigo-600 transition-colors">81 8374 6703</a></li>
+                        <li><a href="tel:8183751518" class="hover:text-indigo-600 transition-colors">81 8375 1518</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: WhatsApp -->
+                <div>
+                    <h4 class="font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        WhatsApp
+                    </h4>
+                    <ul class="text-sm text-slate-600 space-y-2">
+                        <li>
+                            <a href="https://wa.me/528113728493" target="_blank" class="hover:text-green-600 transition-colors flex items-center gap-2">
+                                <span class="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded font-bold">Ventas</span> 81 1372 8493
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://wa.me/528118400503" target="_blank" class="hover:text-green-600 transition-colors flex items-center gap-2">
+                                <span class="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded font-bold">Ventas</span> 81 1840 0503
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                 <!-- Columna 4: Contacto Digital -->
+                <div>
+                    <h4 class="font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Contacto Digital
+                    </h4>
+                    <div class="text-sm text-slate-600 flex flex-col gap-3">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Correo</span>
+                            <a href="mailto:ventas@laeconomicamty.com" class="block hover:text-indigo-600 transition-colors break-all">ventas@laeconomicamty.com</a>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Sitio Web</span>
+                            <a href="http://www.econoenvasesindustriales.com" target="_blank" class="block text-indigo-600 hover:text-indigo-800 font-medium hover:underline transition-colors">
+                                www.econoenvasesindustriales.com
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="pt-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-xs text-slate-400 text-center md:text-left">
+                    &copy; <span id="year"></span> Envases La Económica del Norte. Todos los derechos reservados.
+                </div>
+                <div class="text-xs text-slate-300 font-medium">
+                    Grupo Econoenvases
+                </div>
+            </div>
+        </div>
     </footer>
 
+    <!-- Notificaciones y FABs -->
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none text-sm font-medium">
         Agregado al carrito
     </div>
 
-    <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
+    <!-- Botón Scroll Top -->
+    <button onclick="scrollToTop()" id="scroll-top-btn" class="fixed bottom-36 right-6 z-40 bg-slate-800/80 hover:bg-slate-800 text-white p-3 rounded-full shadow-lg backdrop-blur-sm border border-slate-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+    </button>
+
+    <div id="fab-container" class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
         <button type="button" id="whatsapp-fab" onclick="openGeneralWhatsApp()" class="bg-white text-green-500 p-3 rounded-full shadow-lg hover:scale-110 transition border border-green-100 group relative">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">¿Dudas?</span>
@@ -189,13 +298,14 @@
         </button>
     </div>
 
+    <!-- UI del Tutorial -->
     <div id="tour-overlay" onclick="endTour()"></div>
 
     <div id="tour-tooltip">
         <h4 id="tour-title" class="font-bold text-lg mb-2 text-indigo-900">Título</h4>
         <p id="tour-desc" class="text-gray-600 mb-4 text-sm leading-relaxed">Descripción.</p>
         <div class="flex justify-between items-center mt-4 border-t pt-3 border-gray-100">
-            <span id="tour-step-count" class="text-xs text-gray-400 font-medium">1 / 4</span>
+            <span id="tour-step-count" class="text-xs text-gray-400 font-medium">1 / 6</span>
             <div>
                 <button onclick="endTour()" class="text-slate-400 text-xs hover:text-red-500 mr-4 font-medium transition">Saltar</button>
                 <button onclick="nextStep()" id="tour-next-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition">Siguiente</button>
@@ -203,6 +313,7 @@
         </div>
     </div>
 
+    <!-- Modal Carrito -->
     <div id="cart-modal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0" id="cart-backdrop" onclick="toggleCart()"></div>
         <div class="absolute right-0 top-0 h-full w-full md:w-[500px] bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cart-panel">
@@ -215,14 +326,15 @@
                         <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                         Tu Pedido
                     </h2>
-                    <button onclick="startTour('cart')" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 font-bold flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Ayuda
+                </div>
+                <div class="flex items-center gap-1">
+                    <button type="button" onclick="startCartTour()" class="text-indigo-400 hover:text-indigo-600 p-2 rounded-full hover:bg-indigo-50 transition" title="Ayuda del Carrito">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
+                    <button type="button" onclick="toggleCart()" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-slate-100 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                <button type="button" onclick="toggleCart()" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-slate-100 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
             </div>
             
             <div class="flex-1 overflow-y-auto bg-slate-50/50 relative z-10">
@@ -251,6 +363,7 @@
                             </button>
                         </div>
 
+                        <!-- Opciones dinámicas de entrega (Ocultas por defecto) -->
                         <div id="panel-recoger" class="hidden text-sm bg-slate-50 p-3 rounded-lg border border-slate-200 animate-in fade-in zoom-in-95">
                             <p class="text-slate-500 text-xs mb-2 font-bold">Pago al recoger:</p>
                             <div class="flex flex-wrap gap-2">
@@ -321,12 +434,14 @@
         </div>
     </div>
 
+    <!-- Lightbox -->
     <div id="lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center" onclick="this.classList.add('hidden')">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
         <img id="lightbox-img" src="" class="max-w-[95%] max-h-[90vh] rounded-lg shadow-2xl relative z-10 transition-transform scale-95" onclick="event.stopPropagation()">
     </div>
 
     <script>
+        // === CONFIGURACIÓN FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
             authDomain: "productoseen.firebaseapp.com",
@@ -342,6 +457,7 @@
         const itemsPerPage = 48;
         let searchTimeout;
 
+        // Variables de checkout
         let selectedDelivery = null; 
         let selectedPayment = null;
         let isOcurre = false;
@@ -358,23 +474,49 @@
                 renderCart();
                 checkQRParam();
 
-                if(!localStorage.getItem('tour_seen')) {
-                   setTimeout(() => startTour('main'), 1500); 
+                // Scroll listener para el botón "Volver arriba"
+                window.addEventListener('scroll', () => {
+                    const btn = document.getElementById('scroll-top-btn');
+                    if (window.scrollY > 300) {
+                        btn.classList.add('visible');
+                    } else {
+                        btn.classList.remove('visible');
+                    }
+                });
+
+                // Iniciar tour si es primera vez (con delay para asegurar carga)
+                if(!localStorage.getItem('tour_seen_v2')) {
+                   setTimeout(() => startTour(), 2000); 
                 }
             } catch (e) { console.error(e); }
         });
 
+        // === QR: Lógica mejorada para acumular productos ===
         function checkQRParam() {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('add');
+            
             if (productId) {
+                // Intervalo para esperar a que los productos carguen de Firebase
                 const qrCheck = setInterval(() => {
                     if (allProducts.length > 0) {
                         const productExists = allProducts.find(p => p.id === productId);
+                        
                         if (productExists) {
+                            // IMPORTANTE: Recargar el carrito desde LocalStorage antes de añadir
+                            // Esto evita que se sobrescriba el carrito si el navegador aisló la sesión o si había datos previos
+                            const storedCart = JSON.parse(localStorage.getItem('cart_een')) || [];
+                            if (storedCart.length > 0) {
+                                cart = storedCart;
+                            }
+
                             add(productId); 
+                            
+                            // Abrir carrito y mostrar notificación
                             toggleCart();
                             showToast("¡Producto escaneado agregado!");
+                            
+                            // Limpiar URL para evitar re-agregar al recargar
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }
                         clearInterval(qrCheck);
@@ -383,6 +525,7 @@
             }
         }
 
+        // --- MANEJO DE PREFERENCIAS DE CLIENTE ---
         function loadPrefs() {
             const prefs = JSON.parse(localStorage.getItem('user_prefs_een')) || {};
             if(prefs.name) document.getElementById('client-name').value = prefs.name;
@@ -447,6 +590,7 @@
             if(save) savePrefs();
         }
 
+        // --- CARGA DE PRODUCTOS ---
         function loadProducts() {
             const container = document.getElementById('products-container');
             if(!container) return;
@@ -462,6 +606,7 @@
                     const tempByDate = [...allProducts].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
                     latestProductIds = tempByDate.slice(0, 12).map(p => p.id);
 
+                    // Orden por novedad y luego alfabético
                     allProducts.sort((a, b) => {
                         const isANew = latestProductIds.includes(a.id);
                         const isBNew = latestProductIds.includes(b.id);
@@ -556,8 +701,8 @@
                         </div>
                         <div class="mt-auto flex gap-2">
                             <button type="button" onclick="add('${p.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95">Agregar</button>
-                            <button type="button" onclick="askProduct('${p.id}')" class="product-help-btn w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-green-500 hover:bg-green-50 transition active:scale-95">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            <button type="button" onclick="askProduct('${p.id}')" class="product-help-btn w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-green-500 hover:bg-green-50 transition active:scale-95" title="Preguntar dudas">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </button>
                         </div>
                     </div>
@@ -575,10 +720,62 @@
             }
         }
 
-        function changePage(d) {
-            currentPage += d;
-            renderGrid();
-            document.getElementById('products-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Funciones JS Carrito y Generales
+        function changePage(delta) {
+            const max = Math.ceil(filteredProducts.length / itemsPerPage);
+            const next = currentPage + delta;
+            if(next >= 1 && next <= max) {
+                currentPage = next;
+                renderGrid();
+                document.getElementById('products-container').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('page-info').innerText = `Pág ${currentPage}`;
+            }
+        }
+
+        function askProduct(id) {
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
+            const text = `Hola, me interesa más información sobre: ${p.name}`;
+            window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function openGeneralWhatsApp() {
+            window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, tengo una duda general.")}`, '_blank');
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleCart() {
+            const m = document.getElementById('cart-modal');
+            const b = document.getElementById('cart-backdrop');
+            const p = document.getElementById('cart-panel');
+            if(m.classList.contains('hidden')) {
+                m.classList.remove('hidden');
+                setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
+            } else {
+                b.classList.add('opacity-0');
+                p.classList.add('translate-x-full');
+                setTimeout(() => m.classList.add('hidden'), 300);
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('opacity-0', 'translate-y-24');
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
+        }
+
+        function openImage(src) {
+            const l = document.getElementById('lightbox');
+            document.getElementById('lightbox-img').src = src;
+            l.classList.remove('hidden');
+        }
+        
+        function clearCart() {
+            if(confirm("¿Vaciar carrito?")) { cart = []; saveCart(); toggleCart(); }
         }
 
         function add(id) {
@@ -586,13 +783,21 @@
             if(!p) return;
             const sel = document.getElementById(`sel-${id}`);
             const qty = sel ? parseInt(sel.value) : 1;
+            
+            // Lógica simple para manejar piezas/paquetes en el carrito
+            const isPack = qty > 1 && !p.category?.toLowerCase().includes('bolsa'); // Si seleccionó algo > 1 y no es bolsa (que siempre es 100), asumimos paquete si aplica
+            // Nota: En la versión simplificada, agregamos como item único para evitar complejidad excesiva, 
+            // pero si ya existe sumamos.
+            
             const exist = cart.find(x => x.id === id);
             if(exist) exist.quantity += qty;
             else cart.push({ ...p, quantity: qty });
+            
             saveCart();
             showToast(`Agregado (+${qty})`);
         }
-
+        
+        // Función updateCartItem y remove (restauradas del backup)
         function updateCartItem(id) {
             const item = cart.find(x => x.id === id);
             if(!item) return;
@@ -620,6 +825,10 @@
         function saveCart() {
             localStorage.setItem('cart_een', JSON.stringify(cart));
             renderCart();
+            const b = document.getElementById('cart-badge');
+            b.classList.remove('scale-0');
+            b.classList.add('scale-125');
+            setTimeout(() => b.classList.remove('scale-125'), 200);
         }
 
         function renderCart() {
@@ -705,190 +914,207 @@
             window.open(url, '_blank');
         }
 
-        function askProduct(id) {
-            const prod = allProducts.find(p => p.id === id);
-            if(!prod) return;
-            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, me interesa saber más sobre: " + prod.name)}`;
-            window.open(url, '_blank');
-        }
-
-        function openGeneralWhatsApp() {
-            window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, tengo una duda general.")}`, '_blank');
-        }
-
-        function toggleCart() {
-            const m = document.getElementById('cart-modal');
-            const b = document.getElementById('cart-backdrop');
-            const p = document.getElementById('cart-panel');
-            if(m.classList.contains('hidden')) {
-                m.classList.remove('hidden');
-                setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
-            } else {
-                b.classList.add('opacity-0');
-                p.classList.add('translate-x-full');
-                setTimeout(() => m.classList.add('hidden'), 300);
-            }
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.remove('opacity-0', 'translate-y-24');
-            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
-        }
-
-        function openImage(src) {
-            const l = document.getElementById('lightbox');
-            document.getElementById('lightbox-img').src = src;
-            l.classList.remove('hidden');
-        }
-        
-        function clearCart() {
-            if(confirm("¿Vaciar carrito?")) { cart = []; saveCart(); toggleCart(); }
-        }
-
-        const mainTourSteps = [
-            {
-                element: '#main-nav',
-                title: '¡Bienvenido al Catálogo!',
-                description: 'Aquí puedes explorar todos nuestros productos. Comencemos con un tour rápido.'
-            },
-            {
-                element: '#searchInput',
-                title: 'Buscador Rápido',
-                description: 'Escribe aquí el nombre del envase que buscas (ej. "Garrafa", "Cubeta").'
-            },
-            {
-                element: '#categories-bar',
-                title: 'Categorías',
-                description: 'Filtra por tipo de producto para encontrar más rápido lo que necesitas.'
-            },
-            {
-                element: '#products-container',
-                title: 'Productos y Ayuda',
-                description: 'Aquí verás el inventario. Usa el botón "Agregar" para tu pedido, o el icono de mensaje (?) si tienes dudas sobre un producto.'
-            },
-            {
-                element: '#cart-fab',
-                title: 'Tu Carrito',
-                description: 'Cuando termines, toca aquí para revisar tu pedido y enviarnos la cotización.'
-            },
-            {
-                element: '#whatsapp-fab',
-                title: 'Ayuda Directa',
-                description: '¿No encuentras algo? Toca aquí para hablar directamente por WhatsApp con un asesor.'
-            }
-        ];
-
-        const cartTourSteps = [
-            {
-                element: '#cart-items',
-                title: 'Tus Productos',
-                description: 'Aquí verás la lista de lo que has agregado. Puedes cambiar cantidades o eliminar.'
-            },
-            {
-                element: '#client-info-container',
-                title: 'Tus Datos',
-                description: 'Es importante que pongas tu nombre o negocio para identificarte al enviar el mensaje.'
-            },
-            {
-                element: '#delivery-options-container',
-                title: 'Forma de Entrega',
-                description: 'Elige si pasas por él, si es envío local (Mty) o foráneo. Esto nos ayuda a cotizarte mejor.'
-            },
-            {
-                element: '#btn-send-order',
-                title: 'Finalizar',
-                description: 'Al terminar, presiona este botón verde. Te abrirá WhatsApp con todo el pedido listo para enviar.'
-            }
-        ];
-
-        let tourIndex = 0;
+        // ==========================================
+        // SISTEMA DE TUTORIAL (CORREGIDO)
+        // ==========================================
         let currentTourSteps = [];
-        let currentOverlayId = '';
-        const tourTooltip = document.getElementById('tour-tooltip');
+        let tourIndex = 0;
 
-        function startTour(type) {
+        function startTour() {
+            localStorage.setItem('tour_seen_v2', 'true');
+            
+            // FIX: Ensure products are actually loaded and rendered
+            // Check list length AND content (avoid "Cargando...")
+            const container = document.getElementById('products-container');
+            const hasProducts = allProducts.length > 0;
+            const hasRendered = container.children.length > 0 && !container.innerText.includes('Cargando');
+
+            if(!hasProducts || !hasRendered) {
+                // Retry in 500ms
+                setTimeout(startTour, 500);
+                return;
+            }
+
+            // Asegurarse de que los modales estén cerrados
+            const cartModal = document.getElementById('cart-modal');
+            if (!cartModal.classList.contains('hidden')) {
+                 // Reset styles manually to ensure clean state
+                 document.getElementById('cart-backdrop').classList.add('opacity-0');
+                 document.getElementById('cart-panel').classList.add('translate-x-full');
+                 cartModal.classList.add('hidden');
+            }
+
+            currentTourSteps = [
+                {
+                    element: '#main-nav', 
+                    title: '¡Bienvenido!', 
+                    description: 'Este es el catálogo digital de Envases La Económica. Aquí podrás cotizar envases y tapas de forma rápida.' 
+                },
+                {
+                    element: '#searchInput',
+                    title: 'Buscador Inteligente',
+                    description: 'Escribe aquí lo que buscas (ej. "botella 1 litro", "tapa r-53") y encuéntralo al instante.'
+                },
+                {
+                    element: '#categories-bar', 
+                    title: 'Filtra por Categoría', 
+                    description: 'Usa estos botones para navegar rápidamente entre Botellas, Garrafas, Tapas y más.' 
+                },
+                {
+                    element: '#products-container > div:first-child',
+                    title: 'Tarjeta de Producto',
+                    // TEXTO ACTUALIZADO: Pieza o Paquete
+                    description: 'En cada tarjeta verás detalles y opciones. **Nota: Algunos productos se venden por pieza o por paquete, selecciona la opción que prefieras antes de agregar.**'
+                },
+                {
+                    element: '#whatsapp-fab',
+                    title: 'Ayuda Directa',
+                    // TEXTO ACTUALIZADO: Ubicación del botón
+                    description: '¿No encuentras algo? Toca el **botón de WhatsApp en la esquina inferior derecha** para contactarnos directamente.'
+                },
+                {
+                    element: '#cart-fab',
+                    title: 'Tu Pedido',
+                    // TEXTO ACTUALIZADO: Ubicación del carrito
+                    description: 'Finalmente, revisa tu pedido en el **botón azul del carrito (abajo a la derecha)** y envíanos tu cotización.'
+                }
+            ];
+
             tourIndex = 0;
-            
-            if (type === 'cart') {
-                currentTourSteps = cartTourSteps;
-                currentOverlayId = 'cart-tour-overlay';
-            } else {
-                currentTourSteps = mainTourSteps;
-                currentOverlayId = 'tour-overlay';
-            }
-
-            document.getElementById(currentOverlayId).classList.add('active');
-            tourTooltip.style.display = 'block';
-            
+            document.getElementById('tour-overlay').classList.add('active');
             showStep();
-            
-            if(type === 'main') {
-                localStorage.setItem('tour_seen', 'true');
-            }
+        }
+
+        // --- NUEVA FUNCIÓN PARA TOUR DE CARRITO ---
+        function startCartTour() {
+            if(cart.length === 0) return showToast("Agrega productos primero");
+
+            // No cerramos el modal, solo iniciamos el overlay
+            currentTourSteps = [
+                { element: '#cart-items', title: 'Tus Productos', description: 'Aquí puedes ver tus productos. Usa los controles para ajustar cantidades o la X para eliminar.' },
+                { element: '#client-info-container', title: 'Tus Datos', description: 'Escribe tu nombre o el de tu negocio para personalizar la cotización.' },
+                { element: '#delivery-options-container', title: 'Método de Entrega', description: 'Selecciona si pasarás a recoger, requieres envío local o envío foráneo.' },
+                { element: '#btn-send-order', title: 'Enviar Pedido', description: 'Finalmente, presiona este botón para enviar tu pedido por WhatsApp.' }
+            ];
+
+            tourIndex = 0;
+            document.getElementById('tour-overlay').classList.add('active');
+            showStep();
         }
 
         function showStep() {
             const step = currentTourSteps[tourIndex];
-            const target = document.querySelector(step.element);
+            let target = document.querySelector(step.element);
             
-            document.querySelectorAll('.tour-highlight').forEach(el => {
-                el.classList.remove('tour-highlight');
+            // Fallback por si acaso
+            if(!target && step.element.includes('products-container')) {
+                 nextStep();
+                 return;
+            }
+
+            const tourTooltip = document.getElementById('tour-tooltip');
+
+            // Limpiar resaltados anteriores
+            document.querySelectorAll('.tour-highlight, .tour-highlight-fixed, .tour-fix-stacking').forEach(el => {
+                el.classList.remove('tour-highlight', 'tour-highlight-fixed', 'tour-fix-stacking');
                 el.style.zIndex = '';
-            });
-            
-            document.querySelectorAll('.tour-fix-stacking').forEach(el => {
-                el.classList.remove('tour-fix-stacking');
             });
 
             if (target) {
-                target.classList.add('tour-highlight');
+                // Decidir qué clase usar según si el elemento es fijo (como FABs) o normal
+                const isFixed = window.getComputedStyle(target).position === 'fixed';
                 
-                target.scrollIntoView({ behavior: 'auto', block: 'center' });
-
-                if(target.classList.contains('product-help-btn')) {
-                    const card = target.closest('.group'); 
-                    if(card) card.classList.add('tour-fix-stacking');
+                if (isFixed) {
+                    target.classList.add('tour-highlight-fixed');
+                } else {
+                    target.classList.add('tour-highlight');
                 }
+                
+                // Fix para stacking context en tarjetas
+                if(step.element.includes('products-container')) {
+                     target.classList.add('tour-fix-stacking');
+                }
+
+                // Scroll al elemento si no está visible (Centered to ensure safe space above/below)
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // 1. Mostrar oculto para medir dimensiones reales
+                tourTooltip.style.visibility = 'hidden';
+                tourTooltip.style.display = 'block';
+
+                // 2. Llenar contenido (esto afecta el alto)
+                document.getElementById('tour-title').innerText = step.title;
+                document.getElementById('tour-desc').innerHTML = step.description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                document.getElementById('tour-step-count').innerText = `${tourIndex + 1} / ${currentTourSteps.length}`;
+                
+                const nextBtn = document.getElementById('tour-next-btn');
+                nextBtn.innerText = (tourIndex === currentTourSteps.length - 1) ? 'Finalizar' : 'Siguiente';
 
                 setTimeout(() => {
                     const rect = target.getBoundingClientRect();
-                    const tooltipRect = tourTooltip.getBoundingClientRect();
+                    const tooltipHeight = tourTooltip.offsetHeight;
+                    const tooltipWidth = tourTooltip.offsetWidth;
+                    const headerHeight = 80; // Nav + Categories buffer
                     
-                    let top, left;
+                    let finalTop, finalLeft, placement;
 
-                    if (rect.bottom + tooltipRect.height + 20 < window.innerHeight) {
-                        top = rect.bottom + 15;
+                    // === LÓGICA DE POSICIONAMIENTO ===
+
+                    // CASO 1: Paso 4 (Tarjeta) -> CENTRADO
+                    if (tourIndex === 3 && step.element.includes('products-container')) { 
+                        finalTop = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+                        finalLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+                        placement = 'center';
+                        
+                        // Si es muy alto y se sale por arriba
+                        if (finalTop < headerHeight) finalTop = headerHeight + 10;
                     } 
-                    else if (rect.top - tooltipRect.height - 15 > 0) {
-                        top = rect.top - tooltipRect.height - 15;
+                    // CASO 2: FABs (Botones fijos abajo derecha) -> ARRIBA + IZQUIERDA ALINEADA
+                    else if (isFixed && rect.bottom > window.innerHeight - 100) {
+                        finalTop = rect.top - 15 - tooltipHeight;
+                        // Alinear borde derecho del tooltip con borde derecho del target (menos margen)
+                        finalLeft = rect.right - tooltipWidth + 10; 
+                        placement = 'top';
                     }
+                    // CASO 3: Estándar -> ABAJO CENTRADO
                     else {
-                        top = window.innerHeight - tooltipRect.height - 20;
+                        finalTop = rect.bottom + 15;
+                        finalLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+                        placement = 'bottom';
+
+                        // Rebote si se sale por abajo
+                        if (finalTop + tooltipHeight > window.innerHeight) {
+                             // Si cabe arriba, ponerlo arriba
+                             if (rect.top - 15 - tooltipHeight > headerHeight) {
+                                 finalTop = rect.top - 15 - tooltipHeight;
+                                 placement = 'top';
+                             } else {
+                                 // Si no cabe ni arriba ni abajo, forzar centrado en pantalla
+                                 finalTop = (window.innerHeight - tooltipHeight) / 2;
+                                 placement = 'center';
+                             }
+                        }
                     }
                     
-                    left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
-                    
-                    if (left < 10) left = 10;
-                    
-                    if (left + tooltipRect.width > window.innerWidth) {
-                        left = window.innerWidth - tooltipRect.width - 10;
-                    }
+                    // --- CLAMPING (Límites de pantalla ESTRICTOS) ---
+                    // Vertical
+                    if (finalTop < headerHeight) finalTop = headerHeight + 10;
+                    if (finalTop + tooltipHeight > window.innerHeight) finalTop = window.innerHeight - tooltipHeight - 10;
 
-                    tourTooltip.style.top = top + 'px';
-                    tourTooltip.style.left = left + 'px';
-
-                    document.getElementById('tour-title').innerText = step.title;
-                    document.getElementById('tour-desc').innerText = step.description;
-                    document.getElementById('tour-step-count').innerText = `${tourIndex + 1} / ${currentTourSteps.length}`;
+                    // Horizontal
+                    if (finalLeft < 10) finalLeft = 10;
+                    if (finalLeft + tooltipWidth > window.innerWidth) finalLeft = window.innerWidth - tooltipWidth - 10;
                     
-                    const nextBtn = document.getElementById('tour-next-btn');
-                    nextBtn.innerText = (tourIndex === currentTourSteps.length - 1) ? 'Finalizar' : 'Siguiente';
-                }, 50); 
+                    // Aplicar y mostrar
+                    tourTooltip.style.top = `${finalTop}px`;
+                    tourTooltip.style.left = `${finalLeft}px`;
+                    tourTooltip.className = `placement-${placement}`; 
+                    tourTooltip.style.visibility = 'visible';
+
+                }, 350); // Increased delay slightly for scroll
 
             } else {
-                console.warn('Elemento del tour no encontrado, saltando paso:', step.element);
+                console.warn('Elemento del tour no encontrado:', step.element);
                 nextStep();
             }
         }
@@ -903,16 +1129,11 @@
         }
 
         function endTour() {
-            if(currentOverlayId) {
-                document.getElementById(currentOverlayId).classList.remove('active');
-            }
-            tourTooltip.style.display = 'none';
-            document.querySelectorAll('.tour-highlight').forEach(el => {
-                el.classList.remove('tour-highlight');
+            document.getElementById('tour-overlay').classList.remove('active');
+            document.getElementById('tour-tooltip').style.display = 'none';
+            document.querySelectorAll('.tour-highlight, .tour-highlight-fixed, .tour-fix-stacking').forEach(el => {
+                el.classList.remove('tour-highlight', 'tour-highlight-fixed', 'tour-fix-stacking');
                 el.style.zIndex = '';
-            });
-            document.querySelectorAll('.tour-fix-stacking').forEach(el => {
-                el.classList.remove('tour-fix-stacking');
             });
         }
     </script>
