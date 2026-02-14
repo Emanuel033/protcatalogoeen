@@ -190,7 +190,7 @@
         </div>
     </main>
 
-    <!-- FOOTER COMPLETO -->
+        <!-- FOOTER COMPLETO -->
     <footer class="bg-white border-t border-slate-200 mt-auto pt-10 pb-6">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -270,11 +270,12 @@
                     &copy; <span id="year"></span> Envases La Económica del Norte. Todos los derechos reservados.
                 </div>
                 <div class="text-xs text-slate-300 font-medium">
-                    Grupo Econoenvases
+                    Grupo La Económica
                 </div>
             </div>
         </div>
     </footer>
+
 
     <!-- Notificaciones y FABs -->
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none text-sm font-medium">
@@ -289,6 +290,142 @@
     <div id="fab-container" class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
         <button type="button" id="whatsapp-fab" onclick="openGeneralWhatsApp()" class="bg-white text-green-500 p-3 rounded-full shadow-lg hover:scale-110 transition border border-green-100 group relative">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">¿Dudas?</span>
+        </button>
+
+        <button type="button" id="cart-fab" onclick="toggleCart()" class="bg-indigo-600 text-white p-4 rounded-full shadow-lg shadow-indigo-600/40 group transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center relative">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-indigo-600 transform scale-0 transition-transform duration-200">0</span>
+        </button>
+    </div>
+
+    <!-- UI del Tutorial -->
+    <div id="tour-overlay" onclick="endTour()"></div>
+
+    <div id="tour-tooltip">
+        <h4 id="tour-title" class="font-bold text-lg mb-2 text-indigo-900">Título</h4>
+        <p id="tour-desc" class="text-gray-600 mb-4 text-sm leading-relaxed">Descripción.</p>
+        <div class="flex justify-between items-center mt-4 border-t pt-3 border-gray-100">
+            <span id="tour-step-count" class="text-xs text-gray-400 font-medium">1 / 6</span>
+            <div>
+                <button onclick="endTour()" class="text-slate-400 text-xs hover:text-red-500 mr-4 font-medium transition">Saltar</button>
+                <button onclick="nextStep()" id="tour-next-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Carrito -->
+    <div id="cart-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0" id="cart-backdrop" onclick="toggleCart()"></div>
+        <div class="absolute right-0 top-0 h-full w-full md:w-[500px] bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cart-panel">
+            
+            <div id="cart-tour-overlay"></div>
+
+            <div class="p-4 border-b flex justify-between items-center bg-slate-50 shrink-0 relative z-10">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        Tu Pedido
+                    </h2>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button type="button" onclick="startCartTour()" class="text-indigo-400 hover:text-indigo-600 p-2 rounded-full hover:bg-indigo-50 transition" title="Ayuda del Carrito">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
+                    <button type="button" onclick="toggleCart()" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-slate-100 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto bg-slate-50/50 relative z-10">
+                <div id="cart-items" class="p-4 space-y-3"></div>
+                
+                <div id="cart-config" class="p-4 bg-white border-t border-slate-100 hidden">
+                    <div class="mb-4">
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">¿A quién le cotizamos?</label>
+                        <div class="flex gap-2" id="client-info-container">
+                            <input type="text" id="client-name" placeholder="Tu Nombre / Negocio" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 transition" onchange="savePrefs()">
+                            <button onclick="setPublicoGeneral()" class="text-[10px] bg-slate-100 text-slate-600 px-3 py-1 rounded-lg hover:bg-slate-200 border border-slate-200 font-medium whitespace-nowrap">Público Gral.</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Método de Entrega</label>
+                        <div class="grid grid-cols-3 gap-2 mb-3" id="delivery-options-container">
+                            <button onclick="setDelivery('recoger')" id="btn-recoger" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
+                                <i class="text-lg">🏪</i> Sucursal
+                            </button>
+                            <button onclick="setDelivery('local')" id="btn-local" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
+                                <i class="text-lg">🚚</i> Local
+                            </button>
+                            <button onclick="setDelivery('foraneo')" id="btn-foraneo" class="option-btn rounded-lg p-2 text-xs flex flex-col items-center gap-1">
+                                <i class="text-lg">✈️</i> Foráneo
+                            </button>
+                        </div>
+
+                        <!-- Opciones dinámicas de entrega (Ocultas por defecto) -->
+                        <div id="panel-recoger" class="hidden text-sm bg-slate-50 p-3 rounded-lg border border-slate-200 animate-in fade-in zoom-in-95">
+                            <p class="text-slate-500 text-xs mb-2 font-bold">Pago al recoger:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="setPayment('Efectivo')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Efectivo</button>
+                                <button onclick="setPayment('Tarjeta')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Tarjeta</button>
+                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia</button>
+                                <button onclick="setPayment('Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Cheque</button>
+                            </div>
+                        </div>
+
+                        <div id="panel-local" class="hidden text-sm bg-orange-50 p-3 rounded-lg border border-orange-100 animate-in fade-in zoom-in-95">
+                            <div class="flex gap-2 items-start mb-3">
+                                <span class="text-orange-500 text-lg">⚠️</span>
+                                <p class="text-orange-800 text-xs leading-tight">
+                                    <strong>Nota:</strong> Para envío a domicilio sin costo, el pedido mínimo sugerido es de <strong>$7,000 MXN</strong>.
+                                </p>
+                            </div>
+                            <input type="text" id="delivery-address" placeholder="Dirección de entrega..." class="w-full border border-orange-200 rounded px-3 py-1.5 text-xs mb-2 outline-none" onchange="savePrefs()">
+                            <p class="text-slate-500 text-xs mb-2 font-bold">Método de Pago:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia (Previo)</button>
+                                <button onclick="setPayment('Efectivo Contra Entrega')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Efectivo (Entrega)</button>
+                                <button onclick="setPayment('Cheque Contra Entrega')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Cheque (Entrega)</button>
+                                <button onclick="setPayment('Deposito Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Depósito Cheque</button>
+                            </div>
+                        </div>
+
+                        <div id="panel-foraneo" class="hidden text-sm bg-indigo-50 p-3 rounded-lg border border-indigo-100 animate-in fade-in zoom-in-95">
+                            <div class="mb-2">
+                                <input type="text" id="fletera-name" placeholder="¿Qué fletera prefieres?" class="w-full border border-indigo-200 rounded px-3 py-1.5 text-xs outline-none mb-2" onchange="savePrefs()">
+                                <div class="flex gap-2">
+                                    <button onclick="setOcurre(true)" id="btn-ocurre-si" class="option-btn flex-1 py-1 rounded text-xs bg-white">A Ocurre</button>
+                                    <button onclick="setOcurre(false)" id="btn-ocurre-no" class="option-btn flex-1 py-1 rounded text-xs bg-white">A Domicilio</button>
+                                </div>
+                            </div>
+                            <p class="text-slate-500 text-xs mb-2 font-bold">Pago:</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Transferencia</button>
+                                <button onclick="setPayment('Deposito Cheque')" class="pay-btn option-btn px-3 py-1 rounded-full text-xs">Depósito Cheque</button>
+                            </div>
+                        </div>
+
+                        <div id="bank-info" class="hidden mt-3 p-3 bg-slate-800 text-slate-200 rounded-lg text-xs font-mono">
+                            <p class="font-bold text-indigo-300 mb-1">DATOS PARA TRANSFERIR:</p>
+                            <p>Banco: BANORTE</p>
+                            <p>Cuenta: 0184214699 </p>
+                            <p>CLABE: 072580001842146996</p>
+                            <p>SUC. 058</p>
+                            <p class="mt-1 text-[10px] text-slate-400">*En breve le mandamos la prefactura. Favor de enviar comprobante al confirmar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-5 border-t bg-white shrink-0 z-10 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                <div class="flex justify-between mb-4 font-bold text-lg items-center">
+                    <span class="text-slate-600 text-sm">Total Piezas:</span>
+                    <span id="cart-total" class="text-indigo-900 text-2xl">0</span>
+                </div>
+                <button type="button" id="btn-send-order" onclick="sendWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition mb-3 flex justify-center items-center gap-2 text-sm md:text-base">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">¿Dudas?</span>
         </button>
 
@@ -484,8 +621,12 @@
                     }
                 });
 
-                // Iniciar tour si es primera vez (con delay para asegurar carga)
-                if(!localStorage.getItem('tour_seen_v2')) {
+                // --- LÓGICA CORREGIDA DEL TOUR ---
+                const urlParams = new URLSearchParams(window.location.search);
+                const isScanning = urlParams.has('add'); // Detecta si venimos de un QR
+
+                // Solo inicia el tour si NO se ha visto antes Y NO se está escaneando un producto
+                if(!localStorage.getItem('tour_seen_v2') && !isScanning) {
                    setTimeout(() => startTour(), 2000); 
                 }
             } catch (e) { console.error(e); }
