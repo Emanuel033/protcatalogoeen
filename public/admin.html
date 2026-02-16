@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 5.8 - ERP Móvil (Escáner Estable)</title>
+    <title>Admin 5.9 - ERP Móvil Estable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -80,7 +80,7 @@
                                 <span class="text-[9px] font-bold text-gray-600 uppercase">Antiguo</span>
                             </label>
                             
-                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold w-10 h-8 rounded-lg shadow-md hover:bg-indigo-700 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
+                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold w-10 h-8 rounded-lg shadow-md hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
                         </div>
                     </div>
                 </details>
@@ -155,7 +155,7 @@
             <div id="reader" class="w-full max-w-sm overflow-hidden rounded-3xl border-2 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.2)] bg-black relative">
                 <div id="scanOverlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-200">
                     <div class="bg-white/20 backdrop-blur-sm rounded-full p-4 mb-2 shadow-xl"><i class="fa-solid fa-check text-5xl text-white drop-shadow-md"></i></div>
-                    <div id="overlayQty" class="text-4xl font-black text-white drop-shadow-lg tracking-tighter">+0</div>
+                    <div id="overlayQty" class="text-4xl font-black text-white drop-shadow-lg tracking-tighter">+24</div>
                 </div>
             </div>
             
@@ -227,6 +227,7 @@
             });
         }
 
+        // === TABS ===
         function switchTab(tabName) {
             const vCat = document.getElementById('view-catalogo'), vInv = document.getElementById('view-inventario');
             const tCat = document.getElementById('tab-catalogo'), tInv = document.getElementById('tab-inventario');
@@ -234,18 +235,21 @@
             if (tabName === 'catalogo') {
                 vCat.classList.remove('hidden'); vCat.classList.add('flex'); 
                 vInv.classList.add('hidden'); vInv.classList.remove('flex');
+                
                 tCat.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-indigo-600 text-indigo-700 transition-colors";
                 tInv.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-600 transition-colors";
                 closeScannerModal();
             } else {
                 vInv.classList.remove('hidden'); vInv.classList.add('flex'); 
                 vCat.classList.add('hidden'); vCat.classList.remove('flex');
+                
                 tInv.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-indigo-600 text-indigo-700 transition-colors";
                 tCat.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-600 transition-colors";
                 renderInventoryTable();
             }
         }
 
+        // === VISTA CATÁLOGO ===
         window.filterProducts = () => {
             const term = document.getElementById('searchInput').value.toLowerCase();
             currentFilteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes(term) || (p.category || '').toLowerCase().includes(term));
@@ -288,10 +292,10 @@
         }
 
         // ==========================================
-        // LÓGICA DE IMPRESIÓN INTELIGENTE
+        // LÓGICA DE IMPRESIÓN INTELIGENTE (Caja vs Vitrina URL)
         // ==========================================
         function buildPrintHTML(productsToPrint, qtyPerProduct, printType, baseUrl) {
-            let html = `<html><head><title>Etiquetas</title><style>
+            let html = `<html><head><title>Etiquetas ${printType === 'vitrina' ? 'Vitrina' : 'Cajas'}</title><style>
                 body { font-family: sans-serif; text-align: center; margin: 0; padding: 10px; }
                 .label { display: inline-block; width: 140px; border: 1px dashed #ccc; margin: 5px; padding: 10px; page-break-inside: avoid; }
                 img { max-width: 100%; height: auto; }
@@ -314,6 +318,7 @@
                 }
 
                 const qr = new QRious({ value: qrValue, size: 300, level: 'M' });
+                
                 for(let i=0; i<qtyPerProduct; i++) {
                     html += `<div class="label"><div class="title">${p.name}</div><img src="${qr.toDataURL()}"><div class="qty-badge">${pzasToPrint} PZAS</div></div>`;
                 }
@@ -325,7 +330,7 @@
         function getBaseUrl() {
             let baseUrl = localStorage.getItem('een_catalog_url');
             if (!baseUrl) {
-                baseUrl = prompt("Para generar códigos URL, ingresa la dirección de tu catálogo:\n(Ej: https://productoseen.web.app)", window.location.origin);
+                baseUrl = prompt("Para generar códigos de Vitrina (URL), ingresa la dirección de tu catálogo:\n(Ej: https://productoseen.web.app)", window.location.origin);
                 if (baseUrl) {
                     if(!baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
                     if(baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
@@ -340,9 +345,10 @@
             let baseUrl = "";
             if (printType === 'vitrina') {
                 baseUrl = getBaseUrl();
-                if (!baseUrl) return showToast("Se requiere URL", "error");
+                if (!baseUrl) return showToast("Se requiere URL para vitrina", "error");
             }
-            const qty = prompt(`¿Cuántas etiquetas POR CADA PRODUCTO?`, "1");
+            const labelType = printType === 'vitrina' ? 'VITRINA (1 pieza)' : 'ALMACÉN (Cajas)';
+            const qty = prompt(`Has seleccionado QRs para ${labelType}\n\n¿Cuántas etiquetas POR CADA PRODUCTO?`, "1");
             if (!qty || qty <= 0) return;
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(currentFilteredProducts, qty, printType, baseUrl)); pw.document.close();
         };
@@ -354,7 +360,8 @@
                 baseUrl = getBaseUrl();
                 if (!baseUrl) return showToast("Se requiere URL", "error");
             }
-            const qty = prompt(`Etiquetas para:\n${p.name}\n\n¿Cuántas?`, "1");
+            const labelType = printType === 'vitrina' ? 'VITRINA (1 pieza)' : 'ALMACÉN (Caja)';
+            const qty = prompt(`Imprimir QR para ${labelType}:\n${p.name}\n\n¿Cuántas etiquetas?`, "1");
             if (!qty || qty <= 0) return;
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML([p], qty, printType, baseUrl)); pw.document.close();
         };
@@ -385,7 +392,7 @@
                 `;
                 container.appendChild(card);
             });
-            if(filtered.length === 0) container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fa-solid fa-box-open text-4xl mb-2 opacity-50"></i><p>Sin resultados.</p></div>`;
+            if(filtered.length === 0) container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fa-solid fa-box-open text-4xl mb-2 opacity-50"></i><p>No se encontraron productos.</p></div>`;
         }
 
         window.adjustStock = async (id, amount) => {
@@ -401,34 +408,27 @@
         };
 
         // ====================================================
-        // LECTOR QR ESCUDADO (Evita congelamientos de celular)
+        // ESCÁNER MÓVIL EXACTO A LA 5.5 + ACTUALIZACIÓN INMEDIATA DE UI
         // ====================================================
         window.openScannerModal = () => {
-            document.getElementById('scannerModal').classList.remove('hidden'); document.getElementById('scannerModal').classList.add('flex');
+            document.getElementById('scannerModal').classList.remove('hidden'); 
+            document.getElementById('scannerModal').classList.add('flex');
+            
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess).catch((err) => { showToast("Error al iniciar cámara", "error"); });
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                .catch((err) => { showToast("Error al iniciar cámara", "error"); });
         };
 
         window.closeScannerModal = () => {
-            document.getElementById('scannerModal').classList.add('hidden'); document.getElementById('scannerModal').classList.remove('flex');
+            document.getElementById('scannerModal').classList.add('hidden'); 
+            document.getElementById('scannerModal').classList.remove('flex');
             if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(err => console.log(err));
         };
 
-        function triggerSuccessFeedback() {
-            // Escudado: Si el celular bloquea el sonido, simplemente lo ignora y no se congela
-            try {
-                if (window.AudioContext || window.webkitAudioContext) {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator(); osc.connect(ctx.destination); osc.frequency.value = 1200; osc.start(); setTimeout(() => osc.stop(), 80);
-                }
-            } catch(e) {}
-            try { if ("vibrate" in navigator) navigator.vibrate([100]); } catch(e) {}
-        }
-
         let lastScanTime = 0;
         
-        // ¡Se quitó el 'async' del inicio de la función principal de lectura!
+        // Función idéntica a la 5.5 pero actualizando la pantalla antes que Firebase
         async function onScanSuccess(decodedText) {
             const now = Date.now();
             if (now - lastScanTime < 1500) return; 
@@ -437,7 +437,7 @@
                 let scannedId = null;
                 let scannedPzas = null;
 
-                // Lógica idéntica a la 5.5 que sí reconocía los códigos
+                // CÓDIGO EXACTO DE LECTURA DE LA VERSIÓN 5.5
                 if (decodedText.startsWith('ID:')) {
                     const parts = decodedText.split('|');
                     scannedId = parts[0].split(':')[1];
@@ -453,27 +453,30 @@
 
                 if (scannedPzas === null || isNaN(scannedPzas)) scannedPzas = prod.piezas || 1; 
 
-                // Guardar tiempo para no escanear dos veces seguidas
                 lastScanTime = now;
                 const nuevoStock = (prod.stock || 0) + scannedPzas;
 
-                // PASO 1: ACTUALIZAR LA PANTALLA ¡INMEDIATAMENTE!
+                // ---> AQUÍ ESTÁ EL CAMBIO CLAVE: PRIMERO ACTUALIZAMOS LA PANTALLA
                 const overlay = document.getElementById('scanOverlay');
                 document.getElementById('overlayQty').innerText = `+${scannedPzas}`;
-                overlay.classList.remove('opacity-0'); overlay.classList.add('success-flash');
+                overlay.classList.remove('opacity-0'); 
+                overlay.classList.add('success-flash');
                 
                 document.getElementById('scanProdName').innerText = prod.name;
                 document.getElementById('scanTotal').innerText = nuevoStock;
 
-                setTimeout(() => { overlay.classList.add('opacity-0'); overlay.classList.remove('success-flash'); }, 600);
+                // Pequeña vibración nativa (super segura, no traba)
+                try { if ("vibrate" in navigator) navigator.vibrate(100); } catch(e){}
 
-                // PASO 2: Intentar hacer ruido (sin bloquear si falla)
-                triggerSuccessFeedback(); 
+                setTimeout(() => { 
+                    overlay.classList.add('opacity-0'); 
+                    overlay.classList.remove('success-flash'); 
+                }, 600);
 
-                // PASO 3: Guardar en la base de datos (por debajo del agua)
+                // ---> DESPUÉS GUARDAMOS EN FIREBASE (Si tarda, el usuario ya vio el texto)
                 await db.ref('productos/'+scannedId).update({stock: nuevoStock});
 
-            } catch (err) { console.error("Error al procesar QR:", err); }
+            } catch (err) { console.error(err); }
         }
 
         // === CRUD EXTRAS ===
