@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 5.4 - ERP Móvil Premium + QRs Vitrina</title>
+    <title>Admin 5.5 - ERP Móvil Premium + QRs Vitrina URL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -99,7 +99,7 @@
                     </div>
                     
                     <button onclick="printFilteredQRs('inventario')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs para Cajas/Paquetes"><i class="fa-solid fa-box"></i> QRs Cajas</button>
-                    <button onclick="printFilteredQRs('vitrina')" class="bg-pink-600 hover:bg-pink-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs Unitarios para Vitrina"><i class="fa-solid fa-store"></i> QRs 1 Pza</button>
+                    <button onclick="printFilteredQRs('vitrina')" class="bg-pink-600 hover:bg-pink-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs URL para Vitrina/Clientes"><i class="fa-solid fa-store"></i> QRs Vitrina</button>
                     
                     <button onclick="filterIncomplete()" class="bg-orange-100 hover:bg-orange-200 text-orange-600 p-1.5 rounded-lg border border-orange-200 transition" title="Sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
                     <button onclick="exportToExcel('catalogo')" class="bg-green-100 hover:bg-green-200 text-green-700 p-1.5 rounded-lg border border-green-200 transition" title="Excel"><i class="fa-solid fa-file-excel"></i></button>
@@ -280,7 +280,7 @@
                     <td class="p-2 text-center align-middle">
                         <div class="flex items-center justify-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onclick="printSingleQR('${p.id}', 'inventario')" class="text-purple-600 hover:bg-purple-100 w-7 h-7 rounded flex items-center justify-center transition" title="QR Caja (Inventario)"><i class="fa-solid fa-box"></i></button>
-                            <button onclick="printSingleQR('${p.id}', 'vitrina')" class="text-pink-600 hover:bg-pink-100 w-7 h-7 rounded flex items-center justify-center transition" title="QR 1 Pza (Vitrina)"><i class="fa-solid fa-store"></i></button>
+                            <button onclick="printSingleQR('${p.id}', 'vitrina')" class="text-pink-600 hover:bg-pink-100 w-7 h-7 rounded flex items-center justify-center transition" title="QR URL (Vitrina/Cliente)"><i class="fa-solid fa-store"></i></button>
                             
                             <button onclick="cloneProduct('${p.id}')" class="text-blue-500 hover:bg-blue-100 w-7 h-7 rounded flex items-center justify-center transition" title="Clonar"><i class="fa-solid fa-copy"></i></button>
                             <button onclick="makeProductOld('${p.id}')" class="text-orange-400 hover:bg-orange-100 w-7 h-7 rounded flex items-center justify-center transition" title="Hacer Antiguo"><i class="fa-solid fa-clock-rotate-left"></i></button>
@@ -293,9 +293,9 @@
         }
 
         // ==========================================
-        // LÓGICA DE IMPRESIÓN INTELIGENTE (Caja vs Vitrina)
+        // LÓGICA DE IMPRESIÓN INTELIGENTE (Caja vs Vitrina URL)
         // ==========================================
-        function buildPrintHTML(productsToPrint, qtyPerProduct, printType) {
+        function buildPrintHTML(productsToPrint, qtyPerProduct, printType, baseUrl) {
             let html = `<html><head><title>Etiquetas ${printType === 'vitrina' ? 'Vitrina' : 'Cajas'}</title><style>
                 body { font-family: sans-serif; text-align: center; margin: 0; padding: 10px; }
                 .label { display: inline-block; width: 140px; border: 1px dashed #ccc; margin: 5px; padding: 10px; page-break-inside: avoid; }
@@ -306,18 +306,20 @@
             
             productsToPrint.forEach(p => {
                 let pzasToPrint = 1;
+                let qrValue = "";
 
                 if (printType === 'inventario') {
-                    // Para Cajas: Imprime la cantidad configurada del paquete
+                    // Para Cajas: Formato interno de ERP
                     pzasToPrint = p.piezas || 1;
+                    qrValue = `ID:${p.id}|P:${pzasToPrint}`; 
                 } else {
-                    // Para Vitrina: Imprime 1, EXCEPTO si es bolsa
+                    // Para Vitrina: Formato URL completo para el index.html
                     const nameAndCat = ((p.name || '') + ' ' + (p.category || '')).toLowerCase();
                     const isBolsa = nameAndCat.includes('bolsa');
                     pzasToPrint = isBolsa ? (p.piezas || 100) : 1;
+                    qrValue = `${baseUrl}/?add=${p.id}`; // <--- AQUI ESTA LA MAGIA DE LA URL
                 }
 
-                const qrValue = `ID:${p.id}|P:${pzasToPrint}`; 
                 const qr = new QRious({ value: qrValue, size: 300, level: 'M' });
                 
                 for(let i=0; i<qtyPerProduct; i++) {
@@ -328,22 +330,50 @@
             return html;
         }
 
+        // Función para obtener la URL base de tu tienda
+        function getBaseUrl() {
+            let baseUrl = localStorage.getItem('een_catalog_url');
+            if (!baseUrl) {
+                baseUrl = prompt("Para generar códigos de Vitrina (escaneables por clientes), ingresa la URL de tu catálogo:\n(Ejemplo: https://envases-norte.web.app)", window.location.origin);
+                if (baseUrl) {
+                    if(!baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
+                    if(baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+                    localStorage.setItem('een_catalog_url', baseUrl);
+                }
+            }
+            return baseUrl;
+        }
+
         // Imprimir Múltiple
         window.printFilteredQRs = (printType) => {
             if (currentFilteredProducts.length === 0) return showToast("Filtra productos primero", "error");
+            
+            let baseUrl = "";
+            if (printType === 'vitrina') {
+                baseUrl = getBaseUrl();
+                if (!baseUrl) return showToast("Se requiere la URL de la tienda para vitrina", "error");
+            }
+
             const labelType = printType === 'vitrina' ? 'VITRINA (1 pieza)' : 'ALMACÉN (Cajas)';
             const qty = prompt(`Has seleccionado QRs para ${labelType}\n\n¿Cuántas etiquetas POR CADA PRODUCTO en pantalla deseas imprimir?`, "1");
             if (!qty || qty <= 0) return;
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(currentFilteredProducts, qty, printType)); pw.document.close();
+            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(currentFilteredProducts, qty, printType, baseUrl)); pw.document.close();
         };
 
         // Imprimir Individual
         window.printSingleQR = (id, printType) => {
             const p = allProducts.find(x => x.id === id); if (!p) return;
+            
+            let baseUrl = "";
+            if (printType === 'vitrina') {
+                baseUrl = getBaseUrl();
+                if (!baseUrl) return showToast("Se requiere la URL de la tienda para vitrina", "error");
+            }
+
             const labelType = printType === 'vitrina' ? 'VITRINA (1 pieza)' : 'ALMACÉN (Caja)';
             const qty = prompt(`Imprimir QR para ${labelType}:\n${p.name}\n\n¿Cuántas etiquetas?`, "1");
             if (!qty || qty <= 0) return;
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML([p], qty, printType)); pw.document.close();
+            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML([p], qty, printType, baseUrl)); pw.document.close();
         };
 
         // === VISTA INVENTARIO MÓVIL ===
@@ -419,8 +449,8 @@
                     const parts = decodedText.split('|');
                     scannedId = parts[0].split(':')[1];
                     scannedPzas = parseInt(parts[1].split(':')[1]);
-                } else if (decodedText.includes('?add=')) {
-                    scannedId = decodedText.split('?add=')[1];
+                } else if (decodedText.includes('add=')) {
+                    scannedId = decodedText.split('add=')[1].split('&')[0];
                 }
 
                 if (!scannedId) return; 
