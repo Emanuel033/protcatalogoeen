@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 5.3 - ERP Móvil Premium</title>
+    <title>Admin 5.4 - ERP Móvil Premium + QRs Vitrina</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -18,12 +18,10 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         
-        /* Ajustes Lector QR Móvil */
         #reader video { object-fit: cover; border-radius: 16px; }
         .success-flash { animation: flashGreen 0.6s ease-out; }
         @keyframes flashGreen { 0% { background-color: rgba(34, 197, 94, 0.9); } 100% { background-color: transparent; } }
         
-        /* Ocultar flechas en input number */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
@@ -99,9 +97,12 @@
                         <input id="massQtyInput" type="number" placeholder="#" class="w-12 px-1 text-xs text-center h-6 rounded border-none outline-none">
                         <button onclick="applyMassUpdate()" class="bg-indigo-600 text-white rounded w-6 h-6"><i class="fa-solid fa-check text-[10px]"></i></button>
                     </div>
-                    <button onclick="printFilteredQRs()" class="bg-purple-600 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide" title="Imprimir QRs Visibles"><i class="fa-solid fa-print"></i> QRs</button>
-                    <button onclick="filterIncomplete()" class="bg-orange-100 text-orange-600 p-1.5 rounded-lg border border-orange-200" title="Sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
-                    <button onclick="exportToExcel('catalogo')" class="bg-green-100 text-green-700 p-1.5 rounded-lg border border-green-200" title="Excel"><i class="fa-solid fa-file-excel"></i></button>
+                    
+                    <button onclick="printFilteredQRs('inventario')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs para Cajas/Paquetes"><i class="fa-solid fa-box"></i> QRs Cajas</button>
+                    <button onclick="printFilteredQRs('vitrina')" class="bg-pink-600 hover:bg-pink-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs Unitarios para Vitrina"><i class="fa-solid fa-store"></i> QRs 1 Pza</button>
+                    
+                    <button onclick="filterIncomplete()" class="bg-orange-100 hover:bg-orange-200 text-orange-600 p-1.5 rounded-lg border border-orange-200 transition" title="Sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
+                    <button onclick="exportToExcel('catalogo')" class="bg-green-100 hover:bg-green-200 text-green-700 p-1.5 rounded-lg border border-green-200 transition" title="Excel"><i class="fa-solid fa-file-excel"></i></button>
                 </div>
             </div>
 
@@ -113,7 +114,7 @@
                             <th class="py-2 px-2">Descripción del Producto</th>
                             <th class="py-2 px-2 w-20 text-center">Pzas/Paq</th>
                             <th class="py-2 px-2 w-16 text-center">Vis.</th>
-                            <th class="py-2 px-2 w-32 text-center">Acciones</th>
+                            <th class="py-2 px-2 w-40 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-100 text-xs text-gray-700 bg-white"></tbody>
@@ -122,25 +123,18 @@
         </div>
 
         <div id="view-inventario" class="hidden flex-col h-full overflow-hidden bg-gray-100 relative">
-            
             <div class="bg-white p-3 border-b shrink-0 flex justify-between items-center shadow-sm z-10">
                 <div class="relative w-2/3 md:w-1/2">
                     <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
                     <input id="searchInvInput" onkeyup="renderInventoryTable()" type="text" placeholder="Buscar para ajuste manual..." class="w-full pl-8 pr-4 py-2 bg-gray-100 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-indigo-200 transition-all">
                 </div>
-                
                 <div class="flex items-center gap-2">
-                    <button onclick="exportToExcel('inventario')" class="bg-green-600 text-white w-9 h-9 flex justify-center items-center rounded-xl shadow-md" title="Exportar Contpaqi">
-                        <i class="fa-solid fa-file-csv text-lg"></i>
-                    </button>
-                    <button onclick="resetAllStock()" class="bg-red-100 text-red-600 w-9 h-9 flex justify-center items-center rounded-xl" title="Todo a CERO">
-                        <i class="fa-solid fa-trash-arrow-up text-lg"></i>
-                    </button>
+                    <button onclick="exportToExcel('inventario')" class="bg-green-600 text-white w-9 h-9 flex justify-center items-center rounded-xl shadow-md" title="Exportar Contpaqi"><i class="fa-solid fa-file-csv text-lg"></i></button>
+                    <button onclick="resetAllStock()" class="bg-red-100 text-red-600 w-9 h-9 flex justify-center items-center rounded-xl" title="Todo a CERO"><i class="fa-solid fa-trash-arrow-up text-lg"></i></button>
                 </div>
             </div>
 
-            <div class="flex-grow overflow-auto p-3 pb-24" id="inventoryCardsContainer">
-                </div>
+            <div class="flex-grow overflow-auto p-3 pb-24" id="inventoryCardsContainer"></div>
 
             <button onclick="openScannerModal()" class="fixed bottom-6 right-6 md:absolute md:bottom-8 md:right-8 w-16 h-16 bg-indigo-600 text-white rounded-full shadow-[0_8px_16px_rgba(79,70,229,0.4)] flex items-center justify-center hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all z-30 ring-4 ring-indigo-100">
                 <i class="fa-solid fa-qrcode text-2xl"></i>
@@ -154,17 +148,13 @@
                 <h3 class="font-bold text-lg leading-none"><i class="fa-solid fa-expand text-indigo-400"></i> Escáner Físico</h3>
                 <p class="text-[10px] text-gray-300 mt-1">Apunta la cámara al QR del paquete</p>
             </div>
-            <button onclick="closeScannerModal()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
+            <button onclick="closeScannerModal()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
         </div>
         
         <div class="flex-grow relative flex flex-col justify-center items-center p-4 pt-20">
             <div id="reader" class="w-full max-w-sm overflow-hidden rounded-3xl border-2 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.2)] bg-black relative">
                 <div id="scanOverlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-200">
-                    <div class="bg-white/20 backdrop-blur-sm rounded-full p-4 mb-2 shadow-xl">
-                        <i class="fa-solid fa-check text-5xl text-white drop-shadow-md"></i>
-                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-full p-4 mb-2 shadow-xl"><i class="fa-solid fa-check text-5xl text-white drop-shadow-md"></i></div>
                     <div id="overlayQty" class="text-4xl font-black text-white drop-shadow-lg tracking-tighter">+24</div>
                 </div>
             </div>
@@ -173,7 +163,6 @@
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
                 <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Último Agregado</p>
                 <div id="scanProdName" class="text-white font-bold text-base leading-tight min-h-[1.2rem]">Esperando lectura...</div>
-                
                 <div class="mt-3 inline-block bg-gray-800 rounded-xl px-4 py-2 border border-gray-700">
                     <span class="text-gray-400 text-xs mr-2">Stock Total:</span>
                     <span id="scanTotal" class="text-2xl font-black text-indigo-400">0</span>
@@ -238,7 +227,7 @@
             });
         }
 
-        // === NAVEGACIÓN TABS ===
+        // === TABS ===
         function switchTab(tabName) {
             const vCat = document.getElementById('view-catalogo'), vInv = document.getElementById('view-inventario');
             const tCat = document.getElementById('tab-catalogo'), tInv = document.getElementById('tab-inventario');
@@ -249,7 +238,6 @@
                 
                 tCat.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-indigo-600 text-indigo-700 transition-colors";
                 tInv.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-600 transition-colors";
-                
                 closeScannerModal();
             } else {
                 vInv.classList.remove('hidden'); vInv.classList.add('flex'); 
@@ -257,12 +245,11 @@
                 
                 tInv.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-indigo-600 text-indigo-700 transition-colors";
                 tCat.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-600 transition-colors";
-                
                 renderInventoryTable();
             }
         }
 
-        // === VISTA CATÁLOGO (PC) ===
+        // === VISTA CATÁLOGO ===
         window.filterProducts = () => {
             const term = document.getElementById('searchInput').value.toLowerCase();
             currentFilteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes(term) || (p.category || '').toLowerCase().includes(term));
@@ -292,7 +279,9 @@
                     </td>
                     <td class="p-2 text-center align-middle">
                         <div class="flex items-center justify-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="printSingleQR('${p.id}')" class="text-purple-500 hover:bg-purple-100 w-7 h-7 rounded flex items-center justify-center transition" title="Imprimir QR"><i class="fa-solid fa-qrcode"></i></button>
+                            <button onclick="printSingleQR('${p.id}', 'inventario')" class="text-purple-600 hover:bg-purple-100 w-7 h-7 rounded flex items-center justify-center transition" title="QR Caja (Inventario)"><i class="fa-solid fa-box"></i></button>
+                            <button onclick="printSingleQR('${p.id}', 'vitrina')" class="text-pink-600 hover:bg-pink-100 w-7 h-7 rounded flex items-center justify-center transition" title="QR 1 Pza (Vitrina)"><i class="fa-solid fa-store"></i></button>
+                            
                             <button onclick="cloneProduct('${p.id}')" class="text-blue-500 hover:bg-blue-100 w-7 h-7 rounded flex items-center justify-center transition" title="Clonar"><i class="fa-solid fa-copy"></i></button>
                             <button onclick="makeProductOld('${p.id}')" class="text-orange-400 hover:bg-orange-100 w-7 h-7 rounded flex items-center justify-center transition" title="Hacer Antiguo"><i class="fa-solid fa-clock-rotate-left"></i></button>
                             <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-100 w-7 h-7 rounded flex items-center justify-center transition" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
@@ -303,40 +292,61 @@
             });
         }
 
-        // === IMPRESIÓN ===
-        function buildPrintHTML(productsToPrint, qtyPerProduct) {
-            let html = `<html><head><title>Etiquetas</title><style>
+        // ==========================================
+        // LÓGICA DE IMPRESIÓN INTELIGENTE (Caja vs Vitrina)
+        // ==========================================
+        function buildPrintHTML(productsToPrint, qtyPerProduct, printType) {
+            let html = `<html><head><title>Etiquetas ${printType === 'vitrina' ? 'Vitrina' : 'Cajas'}</title><style>
                 body { font-family: sans-serif; text-align: center; margin: 0; padding: 10px; }
                 .label { display: inline-block; width: 140px; border: 1px dashed #ccc; margin: 5px; padding: 10px; page-break-inside: avoid; }
                 img { max-width: 100%; height: auto; }
                 .title { font-size: 10px; font-weight: bold; margin-bottom: 5px; height: 30px; overflow: hidden; }
-                .qty-badge { font-size: 14px; font-weight: 900; background: #000; color: #fff; padding: 4px; border-radius: 4px; margin-top: 5px; display: inline-block;}
+                .qty-badge { font-size: 14px; font-weight: 900; background: ${printType === 'vitrina' ? '#ec4899' : '#000'}; color: #fff; padding: 4px; border-radius: 4px; margin-top: 5px; display: inline-block;}
             </style></head><body>`;
+            
             productsToPrint.forEach(p => {
-                const pzas = p.piezas || 1;
-                const qrValue = `ID:${p.id}|P:${pzas}`; 
+                let pzasToPrint = 1;
+
+                if (printType === 'inventario') {
+                    // Para Cajas: Imprime la cantidad configurada del paquete
+                    pzasToPrint = p.piezas || 1;
+                } else {
+                    // Para Vitrina: Imprime 1, EXCEPTO si es bolsa
+                    const nameAndCat = ((p.name || '') + ' ' + (p.category || '')).toLowerCase();
+                    const isBolsa = nameAndCat.includes('bolsa');
+                    pzasToPrint = isBolsa ? (p.piezas || 100) : 1;
+                }
+
+                const qrValue = `ID:${p.id}|P:${pzasToPrint}`; 
                 const qr = new QRious({ value: qrValue, size: 300, level: 'M' });
-                for(let i=0; i<qtyPerProduct; i++) html += `<div class="label"><div class="title">${p.name}</div><img src="${qr.toDataURL()}"><div class="qty-badge">${pzas} PZAS</div></div>`;
+                
+                for(let i=0; i<qtyPerProduct; i++) {
+                    html += `<div class="label"><div class="title">${p.name}</div><img src="${qr.toDataURL()}"><div class="qty-badge">${pzasToPrint} PZAS</div></div>`;
+                }
             });
             html += `</body><script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script></html>`;
             return html;
         }
 
-        window.printFilteredQRs = () => {
+        // Imprimir Múltiple
+        window.printFilteredQRs = (printType) => {
             if (currentFilteredProducts.length === 0) return showToast("Filtra productos primero", "error");
-            const qty = prompt("¿Etiquetas POR CADA PRODUCTO?", "1");
+            const labelType = printType === 'vitrina' ? 'VITRINA (1 pieza)' : 'ALMACÉN (Cajas)';
+            const qty = prompt(`Has seleccionado QRs para ${labelType}\n\n¿Cuántas etiquetas POR CADA PRODUCTO en pantalla deseas imprimir?`, "1");
             if (!qty || qty <= 0) return;
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(currentFilteredProducts, qty)); pw.document.close();
+            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(currentFilteredProducts, qty, printType)); pw.document.close();
         };
 
-        window.printSingleQR = (id) => {
+        // Imprimir Individual
+        window.printSingleQR = (id, printType) => {
             const p = allProducts.find(x => x.id === id); if (!p) return;
-            const qty = prompt(`¿Cuántas etiquetas para:\n${p.name}?`, "1");
+            const labelType = printType === 'vitrina' ? 'VITRINA (1 pieza)' : 'ALMACÉN (Caja)';
+            const qty = prompt(`Imprimir QR para ${labelType}:\n${p.name}\n\n¿Cuántas etiquetas?`, "1");
             if (!qty || qty <= 0) return;
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML([p], qty)); pw.document.close();
+            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML([p], qty, printType)); pw.document.close();
         };
 
-        // === VISTA INVENTARIO (CARDS MÓVIL) ===
+        // === VISTA INVENTARIO MÓVIL ===
         function renderInventoryTable() {
             const term = document.getElementById('searchInvInput').value.toLowerCase();
             const container = document.getElementById('inventoryCardsContainer');
@@ -346,33 +356,23 @@
             filtered.forEach(p => {
                 const stock = p.stock || 0;
                 const fallbackImg = "https://via.placeholder.com/100?text=IMG";
-                
                 const card = document.createElement('div');
                 card.className = `bg-white p-3 rounded-2xl shadow-sm border border-gray-100 mb-3 flex items-center gap-3 transition-colors ${stock > 0 ? 'border-l-4 border-l-indigo-500' : ''}`;
-                
                 card.innerHTML = `
-                    <div class="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-200">
-                        <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'">
-                    </div>
+                    <div class="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-200"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
                     <div class="flex-grow min-w-0">
                         <h3 class="font-bold text-gray-800 text-xs truncate">${p.name}</h3>
                         <p class="text-[10px] text-gray-400 truncate">${p.category||'Sin categoría'} • Pzas/Paq: <span class="font-bold text-gray-500">${p.piezas||0}</span></p>
                     </div>
-                    
                     <div class="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-200 shrink-0">
                         <button onclick="adjustStock('${p.id}', -1)" class="w-8 h-8 rounded-lg bg-white text-gray-600 hover:text-red-500 shadow-sm font-bold flex justify-center items-center text-lg active:scale-90 transition-transform"><i class="fa-solid fa-minus text-[10px]"></i></button>
-                        
                         <input type="number" onchange="updateProduct('${p.id}','stock',this.value)" value="${stock}" class="w-10 text-center bg-transparent font-black text-indigo-700 outline-none text-sm">
-                        
                         <button onclick="adjustStock('${p.id}', 1)" class="w-8 h-8 rounded-lg bg-white text-gray-600 hover:text-green-500 shadow-sm font-bold flex justify-center items-center text-lg active:scale-90 transition-transform"><i class="fa-solid fa-plus text-[10px]"></i></button>
                     </div>
                 `;
                 container.appendChild(card);
             });
-            
-            if(filtered.length === 0) {
-                container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fa-solid fa-box-open text-4xl mb-2 opacity-50"></i><p>No se encontraron productos.</p></div>`;
-            }
+            if(filtered.length === 0) container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fa-solid fa-box-open text-4xl mb-2 opacity-50"></i><p>No se encontraron productos.</p></div>`;
         }
 
         window.adjustStock = async (id, amount) => {
@@ -387,9 +387,7 @@
             await db.ref().update(updates); showToast("Inventario reiniciado", "success");
         };
 
-        // ====================================================
-        // LECTOR QR FLOTANTE MEJORADO (CON SOPORTE A QRs VIEJOS)
-        // ====================================================
+        // === ESCÁNER MÓVIL ===
         window.openScannerModal = () => {
             document.getElementById('scannerModal').classList.remove('hidden'); document.getElementById('scannerModal').classList.add('flex');
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
@@ -411,45 +409,36 @@
         let lastScanTime = 0;
         async function onScanSuccess(decodedText) {
             const now = Date.now();
-            if (now - lastScanTime < 1500) return; // Anti-rebote
+            if (now - lastScanTime < 1500) return; 
             
             try {
                 let scannedId = null;
                 let scannedPzas = null;
 
-                // 1. Detección Inteligente de Formato QR
                 if (decodedText.startsWith('ID:')) {
-                    // Formato NUEVO (Admin 5.1+): "ID:-Nx123|P:24"
                     const parts = decodedText.split('|');
                     scannedId = parts[0].split(':')[1];
                     scannedPzas = parseInt(parts[1].split(':')[1]);
                 } else if (decodedText.includes('?add=')) {
-                    // Formato VIEJO (Admin 4.3): "https://...?add=-Nx123"
                     scannedId = decodedText.split('?add=')[1];
                 }
 
-                if (!scannedId) return; // Si no es nuestro formato, ignora.
+                if (!scannedId) return; 
 
                 const prod = allProducts.find(p => p.id === scannedId);
                 if (!prod) { showToast("El producto no existe", "error"); return; }
 
-                // Si era un QR viejo (no traía piezas grabadas), usamos las de la Base de Datos
-                if (scannedPzas === null || isNaN(scannedPzas)) {
-                    scannedPzas = prod.piezas || 1; 
-                }
+                if (scannedPzas === null || isNaN(scannedPzas)) scannedPzas = prod.piezas || 1; 
 
-                // 2. Ejecutar Lógica de Inventario
                 lastScanTime = now;
                 triggerSuccessFeedback(); 
 
                 const nuevoStock = (prod.stock || 0) + scannedPzas;
                 await db.ref('productos/'+scannedId).update({stock: nuevoStock});
 
-                // 3. UI Feedback en Modal
                 const overlay = document.getElementById('scanOverlay');
                 document.getElementById('overlayQty').innerText = `+${scannedPzas}`;
                 overlay.classList.remove('opacity-0'); overlay.classList.add('success-flash');
-                
                 document.getElementById('scanProdName').innerText = prod.name;
                 document.getElementById('scanTotal').innerText = nuevoStock;
 
@@ -457,7 +446,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // === FUNCIONES CRUD EXTRAS ===
+        // === CRUD EXTRAS ===
         window.uploadProduct = async () => { 
             if (!currentUser) return;
             const name = document.getElementById('prodName').value, cat = document.getElementById('prodCat').value, url = document.getElementById('prodFile').value, pcs = document.getElementById('prodPcs').value, isOld = document.getElementById('prodOldDate').checked, btn = document.getElementById('btnUpload');
