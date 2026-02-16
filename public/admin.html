@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 5.6 - ERP Móvil (Escáner Optimizado)</title>
+    <title>Admin 5.7 - ERP Móvil (Escáner Ultra-Rápido)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -80,7 +80,7 @@
                                 <span class="text-[9px] font-bold text-gray-600 uppercase">Antiguo</span>
                             </label>
                             
-                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold w-10 h-8 rounded-lg shadow-md hover:bg-indigo-700 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
+                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold w-10 h-8 rounded-lg shadow-md hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
                         </div>
                     </div>
                 </details>
@@ -401,110 +401,75 @@
         };
 
         // ====================================================
-        // ESCÁNER MÓVIL BLINDADO Y ULTRARRÁPIDO
+        // ESCÁNER MÓVIL (RÁPIDO Y FUNCIONAL DE 5.5 + FIX DE UI)
         // ====================================================
         window.openScannerModal = () => {
-            document.getElementById('scannerModal').classList.remove('hidden'); 
-            document.getElementById('scannerModal').classList.add('flex');
-            
+            document.getElementById('scannerModal').classList.remove('hidden'); document.getElementById('scannerModal').classList.add('flex');
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
-            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-                .catch((err) => { showToast("Error de cámara", "error"); });
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess).catch((err) => { showToast("Error al iniciar cámara", "error"); });
         };
 
         window.closeScannerModal = () => {
-            document.getElementById('scannerModal').classList.add('hidden'); 
-            document.getElementById('scannerModal').classList.remove('flex');
+            document.getElementById('scannerModal').classList.add('hidden'); document.getElementById('scannerModal').classList.remove('flex');
             if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(err => console.log(err));
         };
 
-        // Función blindada contra bloqueos del navegador móvil
         function triggerSuccessFeedback() {
             try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    const ctx = new AudioContext();
-                    const osc = ctx.createOscillator(); 
-                    osc.connect(ctx.destination); 
-                    osc.frequency.value = 1200; 
-                    osc.start(); 
-                    setTimeout(() => osc.stop(), 80);
-                }
-            } catch(e) { console.log("Audio bloqueado por navegador"); }
-            
-            try {
-                if ("vibrate" in navigator) navigator.vibrate([100]);
-            } catch(e) { console.log("Vibración no soportada"); }
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator(); osc.connect(ctx.destination); osc.frequency.value = 1200; osc.start(); setTimeout(() => osc.stop(), 80);
+            } catch(e) {}
+            try { if ("vibrate" in navigator) navigator.vibrate([100]); } catch(e) {}
         }
 
         let lastScanTime = 0;
         
-        async function onScanSuccess(decodedText) {
+        function onScanSuccess(decodedText) { // AHORA NO ES ASYNC (Para no pausar la pantalla)
             const now = Date.now();
-            if (now - lastScanTime < 1500) return; // Espera para no escanear doble
+            if (now - lastScanTime < 1500) return; 
             
             try {
                 let scannedId = null;
                 let scannedPzas = null;
-                const text = decodedText.trim();
 
-                // 1. Extraer ID según el formato escaneado
-                if (text.startsWith('ID:')) {
-                    // Formato Inventario: ID:-Nx123|P:24
-                    const parts = text.split('|');
-                    scannedId = parts[0].split(':')[1];
-                    if (parts[1]) scannedPzas = parseInt(parts[1].split(':')[1]);
-                } else if (text.includes('add=')) {
-                    // Formato Vitrina URL: https://...?add=-Nx123
-                    scannedId = text.split('add=')[1].split('&')[0];
-                } else if (text.startsWith('-N')) {
-                    // Formato puro de Firebase por si acaso
-                    scannedId = text;
+                // Extraemos ID con la lógica de 5.5
+                if (decodedText.includes('ID:')) {
+                    const parts = decodedText.split('|');
+                    scannedId = parts[0].split('ID:')[1];
+                    if(parts[1] && parts[1].includes('P:')) {
+                        scannedPzas = parseInt(parts[1].split('P:')[1]);
+                    }
+                } else if (decodedText.includes('add=')) {
+                    scannedId = decodedText.split('add=')[1].split('&')[0];
                 }
 
                 if (!scannedId) return; 
 
-                // 2. Buscar producto
                 const prod = allProducts.find(p => p.id === scannedId);
-                if (!prod) { 
-                    showToast("Producto no encontrado", "error"); 
-                    return; 
-                }
+                if (!prod) { showToast("El producto no existe", "error"); return; }
 
-                // 3. Determinar piezas a sumar
-                if (scannedPzas === null || isNaN(scannedPzas)) {
-                    scannedPzas = prod.piezas || 1; 
-                }
+                if (scannedPzas === null || isNaN(scannedPzas)) scannedPzas = prod.piezas || 1; 
 
                 lastScanTime = now;
                 triggerSuccessFeedback(); 
 
                 const nuevoStock = (prod.stock || 0) + scannedPzas;
 
-                // 4. ACTUALIZAR PANTALLA INMEDIATAMENTE (Sin esperar internet)
+                // MAGIA: ACTUALIZAMOS LA PANTALLA INSTANTÁNEAMENTE (ANTES de conectarnos a la Base de Datos)
                 const overlay = document.getElementById('scanOverlay');
                 document.getElementById('overlayQty').innerText = `+${scannedPzas}`;
-                overlay.classList.remove('opacity-0'); 
-                overlay.classList.add('success-flash');
+                overlay.classList.remove('opacity-0'); overlay.classList.add('success-flash');
                 
                 document.getElementById('scanProdName').innerText = prod.name;
                 document.getElementById('scanTotal').innerText = nuevoStock;
 
-                setTimeout(() => { 
-                    overlay.classList.add('opacity-0'); 
-                    overlay.classList.remove('success-flash'); 
-                }, 600);
+                setTimeout(() => { overlay.classList.add('opacity-0'); overlay.classList.remove('success-flash'); }, 600);
 
-                // 5. GUARDAR EN BD DE FONDO
-                db.ref('productos/'+scannedId).update({stock: nuevoStock}).catch(e => {
-                    showToast("Error de conexión", "error");
-                });
+                // FINALMENTE, GUARDAMOS EN FIREBASE DE FONDO (Si el internet tarda, la pantalla ya se actualizó de todos modos)
+                db.ref('productos/'+scannedId).update({stock: nuevoStock}).catch(e => console.error("Error BD", e));
 
-            } catch (err) { 
-                console.error("Error al procesar el QR:", err); 
-            }
+            } catch (err) { console.error(err); }
         }
 
         // === CRUD EXTRAS ===
