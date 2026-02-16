@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 5.1 - ERP Inventario QRs Inteligentes</title>
+    <title>Admin 5.2 - ERP Móvil y QRs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -17,10 +17,10 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { bg: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
-        /* Ajustes Lector QR */
-        #reader { width: 100%; max-width: 500px; margin: 0 auto; border: none !important; border-radius: 8px; overflow: hidden; }
-        #reader__scan_region { background: #000; }
-        #reader__dashboard_section_csr button { background-color: #4f46e5; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        /* Ajustes Lector QR Móvil */
+        #reader video { object-fit: cover; border-radius: 12px; }
+        .success-flash { animation: flashGreen 0.8s ease-out; }
+        @keyframes flashGreen { 0% { background-color: rgba(34, 197, 94, 0.8); } 100% { background-color: transparent; } }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-slate-800 h-screen flex flex-col overflow-hidden text-xs md:text-sm">
@@ -36,7 +36,7 @@
             <div class="flex items-center gap-3">
                 <div class="bg-indigo-700 p-1.5 rounded text-white"><i class="fa-solid fa-boxes-stacked text-lg"></i></div>
                 <div>
-                    <h1 class="text-white text-base font-bold tracking-tight leading-tight">Admin ERP Económica</h1>
+                    <h1 class="text-white text-base font-bold tracking-tight leading-tight">ERP Económica</h1>
                     <div class="flex items-center gap-1 text-indigo-200 text-[10px]"><i class="fa-solid fa-user-shield"></i><span id="user-info">...</span></div>
                 </div>
             </div>
@@ -46,61 +46,61 @@
         </div>
 
         <div class="flex border-b bg-gray-200 shrink-0">
-            <button onclick="switchTab('catalogo')" id="tab-catalogo" class="flex-1 py-2 px-4 font-bold text-center border-t-2 border-indigo-600 bg-white text-indigo-700 transition-colors">
-                <i class="fa-solid fa-tags"></i> Catálogo de Productos
+            <button onclick="switchTab('catalogo')" id="tab-catalogo" class="flex-1 py-3 px-2 md:px-4 font-bold text-center border-b-2 border-indigo-600 bg-white text-indigo-700 transition-colors text-xs md:text-sm">
+                <i class="fa-solid fa-tags"></i> Catálogo
             </button>
-            <button onclick="switchTab('inventario')" id="tab-inventario" class="flex-1 py-2 px-4 font-bold text-center border-t-2 border-transparent bg-gray-200 text-gray-500 hover:bg-gray-100 transition-colors">
-                <i class="fa-solid fa-clipboard-check"></i> Conteo / Inventario
+            <button onclick="switchTab('inventario')" id="tab-inventario" class="flex-1 py-3 px-2 md:px-4 font-bold text-center border-b-2 border-transparent bg-gray-200 text-gray-500 hover:bg-gray-100 transition-colors text-xs md:text-sm">
+                <i class="fa-solid fa-clipboard-check"></i> Inventario Físico
             </button>
         </div>
 
         <div id="view-catalogo" class="flex flex-col h-full overflow-hidden">
             <div class="border-b bg-gray-50 shrink-0">
-                <details id="addFormDetails" class="group px-4 py-2" open>
+                <details id="addFormDetails" class="group px-4 py-2">
                     <summary class="list-none flex justify-between items-center cursor-pointer mb-1 outline-none">
-                        <h2 class="font-bold text-indigo-800 uppercase text-[10px] tracking-wider flex items-center gap-2"><i class="fa-solid fa-circle-plus"></i> Agregar Nuevo</h2>
+                        <h2 class="font-bold text-indigo-800 uppercase text-[10px] tracking-wider flex items-center gap-2"><i class="fa-solid fa-circle-plus"></i> Formulario de Alta</h2>
                         <span class="text-[10px] text-gray-400 group-open:rotate-180 transition-transform"><i class="fa-solid fa-chevron-down"></i></span>
                     </summary>
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-end animate-in fade-in zoom-in-95 duration-200 pb-1">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-end animate-in fade-in zoom-in-95 duration-200 pb-1 mt-2">
                         <div class="col-span-1 md:col-span-3 space-y-0.5"><input id="prodName" onkeydown="checkEnter(event)" type="text" placeholder="Nombre Producto" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none"></div>
                         <div class="col-span-1 md:col-span-2 space-y-0.5"><input id="prodCat" onkeydown="checkEnter(event)" type="text" placeholder="Categoría" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none"></div>
                         <div class="col-span-1 md:col-span-1 space-y-0.5"><input id="prodPcs" onkeydown="checkEnter(event)" type="number" placeholder="Pzas x Paq" class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none"></div>
                         <div class="col-span-1 md:col-span-6 flex gap-2 items-center">
                             <div class="flex-grow relative"><input id="prodFile" onkeydown="checkEnter(event)" oninput="previewImage(this.value)" type="text" placeholder="URL Imagen..." class="w-full px-2 py-1.5 pl-6 border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 text-xs outline-none"><i class="fa-solid fa-link absolute left-2 top-2 text-gray-400 text-[10px]"></i></div>
-                            <div id="imgPreviewBox" class="w-7 h-7 bg-gray-200 rounded border border-gray-300 flex-shrink-0 flex items-center justify-center overflow-hidden hidden"><img id="imgPreview" class="w-full h-full object-cover"></div>
-                            <div class="flex items-center h-8 bg-gray-100 px-2 rounded border border-gray-200"><input id="prodOldDate" type="checkbox" class="w-3 h-3 text-indigo-600 rounded cursor-pointer"><label for="prodOldDate" class="ml-1 text-[9px] text-gray-600 font-bold uppercase cursor-pointer">Antiguo</label></div>
-                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold py-1.5 px-3 rounded hover:bg-indigo-700 transition shadow text-xs h-8"><i class="fa-solid fa-save"></i></button>
+                            <div id="imgPreviewBox" class="w-7 h-7 bg-gray-200 rounded border flex-shrink-0 flex items-center justify-center overflow-hidden hidden"><img id="imgPreview" class="w-full h-full object-cover"></div>
+                            <div class="flex items-center h-8 bg-gray-100 px-2 rounded border"><input id="prodOldDate" type="checkbox" class="w-3 h-3 text-indigo-600 rounded cursor-pointer"><label for="prodOldDate" class="ml-1 text-[9px] font-bold uppercase cursor-pointer">Antiguo</label></div>
+                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold py-1.5 px-3 rounded shadow text-xs h-8"><i class="fa-solid fa-save"></i></button>
                         </div>
                     </div>
                 </details>
             </div>
 
-            <div class="px-4 py-2 bg-white border-b flex flex-col md:flex-row justify-between items-center gap-3 shrink-0 z-10">
+            <div class="px-4 py-2 bg-white border-b flex flex-col md:flex-row justify-between items-center gap-2 shrink-0 z-10">
                 <div class="relative w-full md:w-1/3">
-                    <i class="fa-solid fa-search absolute left-2 top-2 text-gray-400 text-xs"></i>
-                    <input id="searchInput" onkeyup="filterProducts()" type="text" placeholder="Buscar..." class="w-full pl-7 pr-4 py-1 bg-gray-100 border-transparent focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded text-xs transition-all outline-none h-8">
+                    <i class="fa-solid fa-search absolute left-2 top-2.5 text-gray-400 text-xs"></i>
+                    <input id="searchInput" onkeyup="filterProducts()" type="text" placeholder="Buscar..." class="w-full pl-7 pr-4 py-1.5 bg-gray-100 border-transparent rounded text-xs outline-none">
                 </div>
                 <div class="flex gap-2 w-full md:w-auto justify-end items-center flex-wrap">
-                    <div class="flex items-center gap-1 bg-indigo-50 p-1 rounded border border-indigo-100 mr-2">
-                        <span class="text-[9px] font-bold text-indigo-800 uppercase px-1 hidden lg:block">Masivo:</span>
-                        <input id="massQtyInput" type="number" placeholder="#" class="w-12 px-1 py-1 text-xs border border-gray-300 rounded text-center h-7 outline-none">
-                        <button onclick="applyMassUpdate()" class="bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-2 rounded h-7"><i class="fa-solid fa-check"></i></button>
+                    <div class="flex items-center gap-1 bg-indigo-50 p-1 rounded border mr-2 hidden md:flex">
+                        <span class="text-[9px] font-bold text-indigo-800 uppercase px-1">Masivo:</span>
+                        <input id="massQtyInput" type="number" placeholder="#" class="w-12 px-1 py-1 text-xs border rounded text-center h-7 outline-none">
+                        <button onclick="applyMassUpdate()" class="bg-indigo-600 text-white py-1 px-2 rounded h-7"><i class="fa-solid fa-check"></i></button>
                     </div>
-                    <button onclick="printQRs()" class="bg-purple-600 hover:bg-purple-700 text-white p-1.5 rounded h-8 w-8 shadow transition" title="Imprimir Etiquetas QR"><i class="fa-solid fa-qrcode"></i></button>
-                    <button onclick="filterIncomplete()" class="bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded h-8 w-8 shadow transition" title="Ver sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
-                    <button onclick="exportToExcel('catalogo')" class="bg-green-600 hover:bg-green-700 text-white p-1.5 rounded h-8 w-8 shadow transition" title="Exportar Catálogo"><i class="fa-solid fa-file-excel"></i></button>
+                    <button onclick="printFilteredQRs()" class="bg-purple-600 text-white py-1.5 px-3 rounded shadow text-xs font-bold" title="Imprimir Visibles"><i class="fa-solid fa-print"></i> QRs Visibles</button>
+                    <button onclick="filterIncomplete()" class="bg-orange-500 text-white p-1.5 rounded w-8 shadow" title="Sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
+                    <button onclick="exportToExcel('catalogo')" class="bg-green-600 text-white p-1.5 rounded w-8 shadow"><i class="fa-solid fa-file-excel"></i></button>
                 </div>
             </div>
 
             <div class="flex-grow overflow-auto bg-gray-50 relative">
                 <table class="w-full text-left border-collapse min-w-[600px]">
-                    <thead class="bg-white text-[10px] uppercase text-gray-500 font-bold tracking-wider sticky top-0 z-10 shadow-sm">
+                    <thead class="bg-white text-[10px] uppercase text-gray-500 font-bold sticky top-0 z-10 shadow-sm">
                         <tr>
                             <th class="py-2 px-2 w-12 text-center bg-white border-b">Img</th>
                             <th class="py-2 px-2 bg-white border-b">Descripción</th>
                             <th class="py-2 px-2 w-20 text-center bg-white border-b">Pzas x Paq</th>
                             <th class="py-2 px-2 w-16 text-center bg-white border-b">Vis.</th>
-                            <th class="py-2 px-2 w-28 text-center bg-white border-b">Acciones</th>
+                            <th class="py-2 px-2 w-32 text-center bg-white border-b">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-gray-200 text-xs text-gray-700 bg-white"></tbody>
@@ -109,47 +109,67 @@
         </div>
 
         <div id="view-inventario" class="hidden flex-col h-full overflow-hidden bg-gray-100">
-            <div class="flex flex-col md:flex-row h-full">
-                <div class="w-full md:w-1/3 bg-white border-r border-gray-200 p-4 flex flex-col shrink-0">
-                    <h2 class="font-bold text-indigo-800 uppercase text-xs mb-3 flex justify-between items-center">
-                        <span><i class="fa-solid fa-camera"></i> Escáner de Paquetes</span>
-                        <button onclick="resetAllStock()" class="text-[9px] bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200 font-bold transition">Todo a CERO</button>
-                    </h2>
-                    
-                    <div id="reader" class="mb-4 shadow-inner"></div>
-
-                    <div id="scanFeedback" class="hidden p-3 rounded border text-center transition-all">
-                        <div class="text-[10px] font-bold uppercase text-gray-500 mb-1">Último escaneo:</div>
-                        <div id="scanProdName" class="font-bold text-sm text-gray-800">Cargando...</div>
-                        <div id="scanQty" class="text-2xl font-black mt-1">+0</div>
-                        <div class="text-[10px] text-gray-500 mt-1">Stock Actual: <span id="scanTotal" class="font-bold">0</span></div>
-                    </div>
+            
+            <div class="bg-white p-3 border-b shrink-0 flex flex-col md:flex-row gap-3 justify-between items-center shadow-sm z-10">
+                <button onclick="openScannerModal()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex justify-center items-center gap-2 text-sm transition-transform active:scale-95">
+                    <i class="fa-solid fa-camera text-xl"></i> INICIAR ESCÁNER QR
+                </button>
+                
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <button onclick="exportToExcel('inventario')" class="flex-1 md:flex-none bg-green-600 text-white text-xs font-bold py-2 px-4 rounded shadow">
+                        <i class="fa-solid fa-file-csv"></i> Excel Contpaqi
+                    </button>
+                    <button onclick="resetAllStock()" class="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200" title="Todo a CERO">
+                        <i class="fa-solid fa-trash-arrow-up"></i>
+                    </button>
                 </div>
+            </div>
 
-                <div class="w-full md:w-2/3 flex flex-col h-full">
-                    <div class="p-3 bg-white border-b flex justify-between items-center shrink-0">
-                        <div class="relative w-1/2">
-                            <i class="fa-solid fa-search absolute left-2 top-2 text-gray-400 text-xs"></i>
-                            <input id="searchInvInput" onkeyup="renderInventoryTable()" type="text" placeholder="Buscar para ajuste manual..." class="w-full pl-7 pr-4 py-1 bg-gray-100 border-transparent focus:bg-white focus:ring-1 focus:ring-indigo-200 rounded text-xs outline-none">
-                        </div>
-                        <button onclick="exportToExcel('inventario')" class="bg-green-600 hover:bg-green-700 text-white text-[10px] font-bold py-1.5 px-3 rounded shadow transition flex items-center gap-1">
-                            <i class="fa-solid fa-file-csv"></i> Exportar Contpaqi
-                        </button>
-                    </div>
-
-                    <div class="flex-grow overflow-auto relative">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-200 text-[10px] uppercase text-gray-600 font-bold sticky top-0 z-10 shadow-sm">
-                                <tr>
-                                    <th class="py-2 px-3 border-b">Producto</th>
-                                    <th class="py-2 px-2 text-center border-b w-24">Pzas/Paquete</th>
-                                    <th class="py-2 px-2 text-center border-b w-32 bg-indigo-100 text-indigo-800">Conteo Actual</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryTableBody" class="divide-y divide-gray-200 text-xs text-gray-700 bg-white"></tbody>
-                        </table>
-                    </div>
+            <div class="flex-grow flex flex-col overflow-hidden">
+                <div class="p-2 bg-gray-50 border-b shrink-0 relative">
+                    <i class="fa-solid fa-search absolute left-4 top-4 text-gray-400 text-xs"></i>
+                    <input id="searchInvInput" onkeyup="renderInventoryTable()" type="text" placeholder="Buscar producto para ajuste manual..." class="w-full pl-8 pr-4 py-2 bg-white border border-gray-300 rounded text-xs outline-none">
                 </div>
+                
+                <div class="flex-grow overflow-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-200 text-[10px] uppercase text-gray-600 font-bold sticky top-0 z-10">
+                            <tr>
+                                <th class="py-2 px-3 border-b">Producto</th>
+                                <th class="py-2 px-2 text-center border-b w-16 md:w-24">Pz/Paq</th>
+                                <th class="py-2 px-2 text-center border-b w-28 md:w-32 bg-indigo-100 text-indigo-800">Físico</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="divide-y divide-gray-200 text-xs text-gray-700 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scannerModal" class="fixed inset-0 bg-black/95 z-[70] hidden flex-col">
+        <div class="p-4 flex justify-between items-center bg-black text-white shrink-0">
+            <div>
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-qrcode text-indigo-400"></i> Escáner Físico</h3>
+                <p class="text-[10px] text-gray-400">Apunta la cámara al código QR</p>
+            </div>
+            <button onclick="closeScannerModal()" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        
+        <div class="flex-grow relative flex flex-col justify-center items-center p-4">
+            <div id="reader" class="w-full max-w-sm overflow-hidden rounded-2xl border-2 border-indigo-500/50 shadow-[0_0_20px_rgba(99,102,241,0.3)] bg-gray-900 relative">
+                <div id="scanOverlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+                    <i class="fa-solid fa-circle-check text-6xl text-white mb-2 drop-shadow-lg"></i>
+                    <div id="overlayQty" class="text-3xl font-black text-white drop-shadow-md">+24</div>
+                </div>
+            </div>
+            
+            <div class="mt-6 w-full max-w-sm bg-gray-800 rounded-lg p-4 border border-gray-700 text-center">
+                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Último Agregado:</p>
+                <div id="scanProdName" class="text-white font-bold text-sm h-5 overflow-hidden">Esperando lectura...</div>
+                <div class="mt-2 text-indigo-400 font-mono text-xs">Stock Total: <span id="scanTotal" class="text-lg font-bold text-white">0</span></div>
             </div>
         </div>
     </div>
@@ -176,7 +196,7 @@
         let currentUser = null;
         let allProducts = []; 
         let currentFilteredProducts = [];
-        let html5QrcodeScanner = null; 
+        let html5QrCode = null; // Instancia directa para control total móvil
 
         auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -214,15 +234,21 @@
             const tCat = document.getElementById('tab-catalogo'), tInv = document.getElementById('tab-inventario');
 
             if (tabName === 'catalogo') {
-                vCat.classList.remove('hidden'); vCat.classList.add('flex'); vInv.classList.add('hidden'); vInv.classList.remove('flex');
-                tCat.className = "flex-1 py-2 px-4 font-bold text-center border-t-2 border-indigo-600 bg-white text-indigo-700 transition-colors";
-                tInv.className = "flex-1 py-2 px-4 font-bold text-center border-t-2 border-transparent bg-gray-200 text-gray-500 hover:bg-gray-100 transition-colors";
-                if(html5QrcodeScanner) { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }
+                vCat.classList.remove('hidden'); vCat.classList.add('flex'); 
+                vInv.classList.add('hidden'); vInv.classList.remove('flex');
+                
+                tCat.classList.replace('border-transparent', 'border-indigo-600'); tCat.classList.replace('bg-gray-200', 'bg-white'); tCat.classList.replace('text-gray-500', 'text-indigo-700');
+                tInv.classList.replace('border-indigo-600', 'border-transparent'); tInv.classList.replace('bg-white', 'bg-gray-200'); tInv.classList.replace('text-indigo-700', 'text-gray-500');
+                
+                closeScannerModal();
             } else {
-                vInv.classList.remove('hidden'); vInv.classList.add('flex'); vCat.classList.add('hidden'); vCat.classList.remove('flex');
-                tInv.className = "flex-1 py-2 px-4 font-bold text-center border-t-2 border-indigo-600 bg-white text-indigo-700 transition-colors";
-                tCat.className = "flex-1 py-2 px-4 font-bold text-center border-t-2 border-transparent bg-gray-200 text-gray-500 hover:bg-gray-100 transition-colors";
-                startQRScanner(); renderInventoryTable();
+                vInv.classList.remove('hidden'); vInv.classList.add('flex'); 
+                vCat.classList.add('hidden'); vCat.classList.remove('flex');
+                
+                tInv.classList.replace('border-transparent', 'border-indigo-600'); tInv.classList.replace('bg-gray-200', 'bg-white'); tInv.classList.replace('text-gray-500', 'text-indigo-700');
+                tCat.classList.replace('border-indigo-600', 'border-transparent'); tCat.classList.replace('bg-white', 'bg-gray-200'); tCat.classList.replace('text-indigo-700', 'text-gray-500');
+                
+                renderInventoryTable();
             }
         }
 
@@ -250,7 +276,9 @@
                     <td class="p-1 align-middle text-center"><input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-16 mx-auto bg-transparent border rounded text-center text-xs py-0.5"></td>
                     <td class="p-1 text-center align-middle"><input type="checkbox" onchange="updateProduct('${p.id}', 'activo', this.checked)" ${isActive ? 'checked' : ''}></td>
                     <td class="p-1 text-center align-middle">
-                        <button onclick="cloneProduct('${p.id}')" class="text-blue-500 p-1"><i class="fa-solid fa-copy"></i></button>
+                        <button onclick="printSingleQR('${p.id}')" class="text-purple-500 hover:text-purple-700 p-1 bg-purple-100 rounded mr-1" title="Imprimir este QR"><i class="fa-solid fa-qrcode"></i></button>
+                        
+                        <button onclick="cloneProduct('${p.id}')" class="text-blue-500 p-1" title="Clonar"><i class="fa-solid fa-copy"></i></button>
                         <button onclick="makeProductOld('${p.id}')" class="text-orange-300 hover:text-orange-500 p-1" title="Quitar de Nuevos"><i class="fa-solid fa-clock-rotate-left"></i></button>
                         <button onclick="deleteProduct('${p.id}')" class="text-red-500 p-1"><i class="fa-solid fa-trash"></i></button>
                     </td>
@@ -259,16 +287,8 @@
             });
         }
 
-        // ====================================================
-        // MAGIA QR: IMPRESIÓN CON MEMORIA DE PIEZAS (OPCIÓN 1)
-        // ====================================================
-        window.printQRs = () => {
-            if (currentFilteredProducts.length === 0) return showToast("Filtra los productos primero", "error");
-            
-            const qty = prompt("¿Cuántas etiquetas quieres imprimir POR CADA PRODUCTO en pantalla?", "1");
-            if (!qty || qty <= 0) return;
-            
-            let printWindow = window.open('', '_blank');
+        // === IMPRESIÓN DE QRs ===
+        function buildPrintHTML(productsToPrint, qtyPerProduct) {
             let html = `<html><head><title>Etiquetas QR</title><style>
                 body { font-family: sans-serif; text-align: center; margin: 0; padding: 10px; }
                 .label { display: inline-block; width: 140px; border: 1px dashed #ccc; margin: 5px; padding: 10px; page-break-inside: avoid; }
@@ -277,25 +297,37 @@
                 .qty-badge { font-size: 14px; font-weight: 900; background: #000; color: #fff; padding: 4px; border-radius: 4px; margin-top: 5px; display: inline-block;}
             </style></head><body>`;
 
-            currentFilteredProducts.forEach(p => {
+            productsToPrint.forEach(p => {
                 const pzas = p.piezas || 1;
-                // ESTRUCTURA CLAVE: ID:-Nx123|P:24
                 const qrValue = `ID:${p.id}|P:${pzas}`; 
                 const qr = new QRious({ value: qrValue, size: 300, level: 'M' });
-                
-                for(let i=0; i<qty; i++) {
-                    html += `<div class="label">
-                        <div class="title">${p.name}</div>
-                        <img src="${qr.toDataURL()}">
-                        <div class="qty-badge">${pzas} PZAS</div>
-                    </div>`;
+                for(let i=0; i<qtyPerProduct; i++) {
+                    html += `<div class="label"><div class="title">${p.name}</div><img src="${qr.toDataURL()}"><div class="qty-badge">${pzas} PZAS</div></div>`;
                 }
             });
-
             html += `</body><script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script></html>`;
-            printWindow.document.write(html);
+            return html;
+        }
+
+        window.printFilteredQRs = () => {
+            if (currentFilteredProducts.length === 0) return showToast("Filtra los productos primero", "error");
+            const qty = prompt("¿Cuántas etiquetas quieres imprimir POR CADA PRODUCTO en pantalla?", "1");
+            if (!qty || qty <= 0) return;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(buildPrintHTML(currentFilteredProducts, qty));
             printWindow.document.close();
         };
+
+        window.printSingleQR = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if (!p) return;
+            const qty = prompt(`¿Cuántas etiquetas imprimir para:\n${p.name}?`, "1");
+            if (!qty || qty <= 0) return;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(buildPrintHTML([p], qty));
+            printWindow.document.close();
+        };
+
 
         // === VISTA INVENTARIO ===
         function renderInventoryTable() {
@@ -309,13 +341,13 @@
                 const tr = document.createElement('tr');
                 tr.className = `hover:bg-indigo-50 transition-colors border-b border-gray-100 ${stock > 0 ? 'bg-green-50' : ''}`;
                 tr.innerHTML = `
-                    <td class="p-2 align-middle"><div class="font-bold text-gray-900 text-xs">${p.name}</div><div class="text-[10px] text-gray-500">${p.category||''}</div></td>
-                    <td class="p-2 align-middle text-center text-gray-500 text-xs">${p.piezas||0} pz/paq</td>
+                    <td class="p-2 align-middle"><div class="font-bold text-gray-900 text-xs">${p.name}</div><div class="text-[9px] text-gray-400">${p.category||''}</div></td>
+                    <td class="p-2 align-middle text-center text-gray-500 text-xs">${p.piezas||0}</td>
                     <td class="p-2 align-middle text-center bg-indigo-50 border-l border-indigo-100">
                         <div class="flex items-center justify-center gap-1">
-                            <button onclick="adjustStock('${p.id}', -1)" class="w-6 h-6 bg-gray-200 text-gray-600 rounded hover:bg-red-200 font-bold">-</button>
-                            <input type="number" onchange="updateProduct('${p.id}','stock',this.value, this)" value="${stock}" class="w-16 font-bold text-indigo-700 text-center bg-transparent border-b border-indigo-300 outline-none">
-                            <button onclick="adjustStock('${p.id}', 1)" class="w-6 h-6 bg-gray-200 text-gray-600 rounded hover:bg-green-200 font-bold">+</button>
+                            <button onclick="adjustStock('${p.id}', -1)" class="w-6 h-6 md:w-8 md:h-8 bg-gray-200 text-gray-600 rounded hover:bg-red-200 font-bold">-</button>
+                            <input type="number" onchange="updateProduct('${p.id}','stock',this.value, this)" value="${stock}" class="w-10 md:w-16 font-bold text-indigo-700 text-center bg-transparent border-b border-indigo-300 outline-none">
+                            <button onclick="adjustStock('${p.id}', 1)" class="w-6 h-6 md:w-8 md:h-8 bg-gray-200 text-gray-600 rounded hover:bg-green-200 font-bold">+</button>
                         </div>
                     </td>
                 `;
@@ -331,7 +363,7 @@
         };
 
         window.resetAllStock = async () => {
-            if(!confirm("¿Poner inventario de TODOS los productos en CERO?")) return;
+            if(!confirm("⚠️ ADVERTENCIA ⚠️\n¿Poner inventario de TODOS los productos en CERO?")) return;
             const updates = {};
             allProducts.forEach(prod => updates['/productos/' + prod.id + '/stock'] = 0);
             await db.ref().update(updates);
@@ -339,26 +371,53 @@
         };
 
         // ====================================================
-        // MAGIA QR: LECTURA INTELIGENTE DE PIEZAS
+        // LECTOR QR FLOTANTE (Optimizado Móvil)
         // ====================================================
-        function startQRScanner() {
-            if(html5QrcodeScanner) return;
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-            html5QrcodeScanner.render(onScanSuccess, () => {});
-        }
+        window.openScannerModal = () => {
+            document.getElementById('scannerModal').classList.remove('hidden');
+            document.getElementById('scannerModal').classList.add('flex');
+            
+            if (!html5QrCode) {
+                // Usamos Html5Qrcode directo para mayor control en lugar de Html5QrcodeScanner
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            
+            // Forzar cámara trasera (environment)
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                .catch((err) => {
+                    showToast("No se pudo iniciar la cámara trasera.", "error");
+                    console.log(err);
+                });
+        };
 
-        function playBeep() {
+        window.closeScannerModal = () => {
+            document.getElementById('scannerModal').classList.add('hidden');
+            document.getElementById('scannerModal').classList.remove('flex');
+            
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(err => console.log(err));
+            }
+        };
+
+        // Feedback Auditivo y Físico (Vibración)
+        function triggerSuccessFeedback() {
+            // Sonido
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator(); osc.connect(ctx.destination); osc.frequency.value = 800; osc.start(); setTimeout(() => osc.stop(), 100);
+            const osc = ctx.createOscillator(); osc.connect(ctx.destination); osc.frequency.value = 1000; osc.start(); setTimeout(() => osc.stop(), 100);
+            
+            // Vibración si el celular lo soporta
+            if ("vibrate" in navigator) {
+                navigator.vibrate([100]); // Vibra 100 milisegundos
+            }
         }
 
         let lastScanTime = 0;
         async function onScanSuccess(decodedText) {
             const now = Date.now();
-            if (now - lastScanTime < 2000) return; // Esperar 2 segundos entre lecturas
+            if (now - lastScanTime < 1500) return; // Esperar 1.5 segs entre lecturas
             
             try {
-                // Verificar formato: ID:-Nx123|P:24
                 if (!decodedText.startsWith('ID:')) return; 
                 
                 const parts = decodedText.split('|');
@@ -368,49 +427,42 @@
                 if (!scannedId || isNaN(scannedPzas)) return;
 
                 lastScanTime = now;
-                playBeep(); 
+                triggerSuccessFeedback(); 
 
                 const prod = allProducts.find(p => p.id === scannedId);
                 if (prod) {
-                    const stockActual = prod.stock || 0;
-                    // AQUÍ SUMA LAS PIEZAS QUE DICE EL QR, NO LA BD
-                    const nuevoStock = stockActual + scannedPzas;
-
+                    const nuevoStock = (prod.stock || 0) + scannedPzas;
                     await db.ref('productos/'+scannedId).update({stock: nuevoStock});
 
-                    const feedback = document.getElementById('scanFeedback');
-                    document.getElementById('scanProdName').innerText = prod.name;
-                    document.getElementById('scanQty').innerText = `+${scannedPzas} agregadas`;
-                    document.getElementById('scanQty').className = "text-2xl font-black mt-1 text-green-600";
-                    document.getElementById('scanTotal').innerText = nuevoStock;
+                    // Efecto visual en la cámara (Flash verde)
+                    const overlay = document.getElementById('scanOverlay');
+                    document.getElementById('overlayQty').innerText = `+${scannedPzas}`;
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('success-flash');
                     
-                    feedback.classList.remove('hidden'); feedback.classList.add('bg-green-100', 'border-green-300');
-                    setTimeout(() => feedback.classList.remove('bg-green-100', 'border-green-300'), 1000);
-                } else { showToast("Producto no encontrado", "error"); }
+                    // Actualizar panel inferior
+                    document.getElementById('scanProdName').innerText = prod.name;
+                    document.getElementById('scanTotal').innerText = nuevoStock;
+
+                    setTimeout(() => {
+                        overlay.classList.add('opacity-0');
+                        overlay.classList.remove('success-flash');
+                    }, 800);
+                } else { showToast("QR no existe en BD", "error"); }
             } catch (err) { console.error(err); }
         }
 
-        // === CRUD Y UTILIDADES BÁSICAS ===
-        window.uploadProduct = async () => {
+        // === CRUD Y EXCEL ===
+        window.uploadProduct = async () => { /* Sin cambios, lógica de guardado */
             if (!currentUser) return;
             const name = document.getElementById('prodName').value, cat = document.getElementById('prodCat').value, url = document.getElementById('prodFile').value, pcs = document.getElementById('prodPcs').value, isOld = document.getElementById('prodOldDate').checked, btn = document.getElementById('btnUpload');
             if(!name) return showToast("Falta nombre", "error");
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; btn.disabled = true;
-            try {
-                await db.ref('productos').push({ name, category: cat, image: url, piezas: pcs ? Number(pcs) : 0, stock: 0, activo: true, createdAt: isOld ? new Date('2024-01-01').getTime() : firebase.database.ServerValue.TIMESTAMP });
-                showToast("Guardado", "success");
-                ['prodName','prodCat','prodFile','prodPcs'].forEach(id => document.getElementById(id).value = "");
-                document.getElementById('imgPreviewBox').classList.add('hidden'); document.getElementById('prodOldDate').checked = false; document.getElementById('prodName').focus(); 
-            } catch(e) { showToast(e.message, "error"); } finally { btn.innerHTML = `<i class="fa-solid fa-save"></i>`; btn.disabled = false; }
+            try { await db.ref('productos').push({ name, category: cat, image: url, piezas: pcs ? Number(pcs) : 0, stock: 0, activo: true, createdAt: isOld ? new Date('2024-01-01').getTime() : firebase.database.ServerValue.TIMESTAMP }); showToast("Guardado", "success"); ['prodName','prodCat','prodFile','prodPcs'].forEach(id => document.getElementById(id).value = ""); document.getElementById('imgPreviewBox').classList.add('hidden'); document.getElementById('prodOldDate').checked = false; document.getElementById('prodName').focus(); } 
+            catch(e) { showToast(e.message, "error"); } finally { btn.innerHTML = `<i class="fa-solid fa-save"></i>`; btn.disabled = false; }
         };
 
-        window.updateProduct = async (id, field, val, el) => {
-            if(!currentUser) return;
-            if (field === 'piezas' || field === 'stock') val = Number(val);
-            if(el) el.classList.add('bg-yellow-50');
-            try { await db.ref('productos/'+id).update({[field]: val}); if(el) { el.classList.replace('bg-yellow-50', 'bg-green-50'); setTimeout(() => el.classList.remove('bg-green-50'), 500); } } catch(e) { showToast("Error", "error"); }
-        };
-
+        window.updateProduct = async (id, field, val, el) => { if(!currentUser) return; if (field === 'piezas' || field === 'stock') val = Number(val); if(el) el.classList.add('bg-yellow-50'); try { await db.ref('productos/'+id).update({[field]: val}); if(el) { el.classList.replace('bg-yellow-50', 'bg-green-50'); setTimeout(() => el.classList.remove('bg-green-50'), 500); } } catch(e) { showToast("Error", "error"); } };
         window.makeProductOld = async (id) => { if(confirm("¿Quitar de 'Nuevos'?")) { await db.ref('productos/'+id).update({createdAt: new Date('2024-01-01').getTime()}); showToast("Listo", "success"); } };
         window.cloneProduct = (id) => { const p = allProducts.find(x => x.id === id); if(!p) return; ['Name','Cat','Pcs','File'].forEach(k => document.getElementById(`prod${k}`).value = p[k.toLowerCase()] || p[k==='Pcs'?'piezas':'image']); document.getElementById('addFormDetails').open = true; document.getElementById('prodName').focus(); };
         window.deleteProduct = async (id) => { if(confirm("¿Borrar?")) await db.ref('productos/'+id).remove(); };
@@ -420,6 +472,7 @@
             let csv = "\uFEFF";
             if (tipo === 'inventario') {
                 csv += "Nombre,Categoria,Stock_Contado\n";
+                // En inventario usualmente exportamos solo lo que tiene existencias o todo, aquí exportamos todo.
                 allProducts.forEach(p => csv += `"${(p.name||"").replace(/"/g,'""')}","${(p.category||"").replace(/"/g,'""')}",${p.stock||0}\n`);
             } else {
                 csv += "Nombre,Categoria,PiezasxPaq,Activo\n";
@@ -429,7 +482,6 @@
         };
 
         window.previewImage = (url) => { const b = document.getElementById('imgPreviewBox'), i = document.getElementById('imgPreview'); if(url && url.length > 10) { b.classList.remove('hidden'); i.src = url; i.onerror = () => b.classList.add('hidden'); } else b.classList.add('hidden'); }
-        window.checkEnter = (e) => { if (e.key === 'Enter') uploadProduct(); };
         function showToast(msg, type="success") { const t = document.getElementById('toast'), i = document.getElementById('toast-icon'); document.getElementById('toast-msg').innerText = msg; i.className = type === 'error' ? "fa-solid fa-xmark text-red-500" : "fa-solid fa-check text-green-400"; t.classList.replace(type==='error'?'border-indigo-500':'border-red-500', type==='error'?'border-red-500':'border-indigo-500'); t.classList.remove('translate-y-24'); setTimeout(() => t.classList.add('translate-y-24'), 2000); }
     </script>
 </body>
