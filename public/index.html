@@ -14,7 +14,7 @@
 
     <!-- === OPEN GRAPH === -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://productoseen.web.app/">
+    <meta property="og:url" content="https://productoseen.firebaseapp.com/">
     <meta property="og:title" content="Catálogo - Envases La Económica del Norte">
     <meta property="og:description" content="Cotiza en línea envases industriales, tapas y accesorios. Calidad y servicio en Monterrey y todo el país.">
     <meta property="og:image" content="https://via.placeholder.com/1200x630?text=Envases+La+Economica">
@@ -34,14 +34,18 @@
         "addressRegion": "Nuevo León",
         "addressCountry": "MX"
       },
-      "url": "https://productoseen.web.app/",
+      "url": "https://productoseen.firebaseapp.com/",
       "priceRange": "$$"
     }
     </script>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- === FIREBASE LIBRARIES === -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+    
     <!-- Librería para Escáner QR -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
@@ -108,8 +112,6 @@
         }
         #tour-tooltip.placement-bottom::after { top: -6px; left: 50%; margin-left: -6px; }
         #tour-tooltip.placement-top::after { bottom: -6px; left: 50%; margin-left: -6px; }
-        
-        /* Ocultar flecha cuando está centrado (Paso 4) */
         #tour-tooltip.placement-center::after { display: none; }
 
         .tour-fix-stacking {
@@ -156,9 +158,14 @@
                 </div>
             </div>
             
-            <div class="w-full md:w-96 flex gap-2">
+            <div class="w-full md:w-96 flex gap-2 relative">
                 <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." 
-                       class="w-full py-2.5 pl-4 pr-4 rounded-xl border-none outline-none bg-indigo-800/50 text-white placeholder-indigo-300 focus:bg-white focus:text-slate-800 transition-all text-sm">
+                       class="w-full py-2.5 pl-4 pr-10 rounded-xl border-none outline-none bg-indigo-800/50 text-white placeholder-indigo-300 focus:bg-white focus:text-slate-800 transition-all text-sm">
+                
+                <!-- Botón de Limpiar Búsqueda -->
+                <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
                 
                 <button onclick="startTour()" class="hidden md:flex items-center gap-2 bg-indigo-800 px-4 rounded-xl text-indigo-200 hover:text-white hover:bg-indigo-700 transition whitespace-nowrap" title="Ver Tutorial de Ayuda">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -276,7 +283,7 @@
             
             <div class="pt-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="text-xs text-slate-400 text-center md:text-left">
-                    &copy; <span id="year"></span> Envases La Económica del Norte. Todos los derechos reservados.
+                    &copy; <span id="year">2026</span> Envases La Económica del Norte. Todos los derechos reservados.
                 </div>
                 <div class="text-xs text-slate-300 font-medium">
                     Grupo La Económica
@@ -455,7 +462,7 @@
                     <span id="cart-total" class="text-indigo-900 text-2xl">0</span>
                 </div>
                 
-                <!-- NUEVO BOTÓN: ESCANEAR OTRO PRODUCTO -->
+                <!-- BOTÓN: ESCANEAR OTRO PRODUCTO -->
                 <button type="button" onclick="startQRScanner()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl mb-3 flex justify-center items-center gap-2 text-sm transition border border-indigo-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                     Escanear otro producto
@@ -479,7 +486,6 @@
     </div>
 
     <script>
-      
         // === CONFIGURACIÓN FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
@@ -495,6 +501,7 @@
         let currentCategory = 'Todos', currentPage = 1, latestProductIds = [];
         const itemsPerPage = 48;
         let searchTimeout;
+        let analytics; // Variable global para analytics
 
         // Variables de checkout
         let selectedDelivery = null; 
@@ -504,9 +511,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 firebase.initializeApp(firebaseConfig);
-               
                 db = firebase.database();
                 
+                // INICIALIZAR ANALYTICS AQUÍ
+                if (firebase.analytics) {
+                    analytics = firebase.analytics();
+                }
+
                 // Intento seguro de cargar carrito
                 try {
                     cart = JSON.parse(localStorage.getItem('cart_een')) || [];
@@ -530,11 +541,9 @@
                 });
 
                 // --- INICIO DE TOUR ---
-                // Verifica si hay parametro 'add' en la URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const isScanning = urlParams.has('add'); 
 
-                // Solo inicia el tour si NO se ha visto antes Y NO se está escaneando un producto
                 if(!localStorage.getItem('tour_seen_v2') && !isScanning) {
                    setTimeout(() => startTour(), 2000); 
                 }
@@ -547,14 +556,10 @@
             const productId = urlParams.get('add');
             
             if (productId) {
-                // 1. Feedback inmediato visual
                 showToast("Procesando código QR...");
-
-                // 2. Intervalo de reintentos
                 let attempts = 0;
                 const qrCheck = setInterval(() => {
                     attempts++;
-                    // Si pasa mucho tiempo (30 seg), dejar de intentar
                     if (attempts > 60) {
                         clearInterval(qrCheck);
                         showToast("No se encontró el producto (Error de conexión)");
@@ -565,8 +570,6 @@
                         const productExists = allProducts.find(p => p.id === productId);
                         
                         if (productExists) {
-                            // IMPORTANTE: Recargar el carrito desde LocalStorage
-                            // Por si acaso cambio en otra pestaña, aunque en iPhone QR es sesión nueva usualmente
                             try {
                                 const storedCart = JSON.parse(localStorage.getItem('cart_een')) || [];
                                 if (storedCart.length > 0) {
@@ -575,16 +578,14 @@
                             } catch(e) {}
 
                             add(productId); 
-                            
-                            // Abrir carrito y mostrar notificación final
                             toggleCart();
                             showToast("¡Producto escaneado agregado!");
-                            
-                            // Limpiar URL
                             window.history.replaceState({}, document.title, window.location.pathname);
                             
-                            // Marcar tour como visto para que no estorbe
                             try { localStorage.setItem('tour_seen_v2', 'true'); } catch(e){}
+                            
+                            // Trackear escaneo
+                            if(analytics) analytics.logEvent('scan_qr', { product_id: productId });
                         }
                         clearInterval(qrCheck);
                     }
@@ -601,7 +602,6 @@
             const modal = document.getElementById('qr-scanner-modal');
             modal.classList.remove('hidden');
             
-            // Si ya existe instancia, detenerla para reiniciar (seguridad)
             if(html5QrcodeScanner) { 
                stopQRScanner().then(() => initScanner());
             } else {
@@ -613,7 +613,6 @@
             html5QrcodeScanner = new Html5Qrcode("reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
             
-            // Preferir cámara trasera
             html5QrcodeScanner.start({ facingMode: "environment" }, config, onScanSuccess)
             .catch(err => {
                 console.error("Error starting scanner", err);
@@ -636,40 +635,30 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            // Detener escáner primero para liberar cámara
             stopQRScanner();
 
-            // Lógica para interpretar el texto escaneado
             try {
                 let productId = decodedText;
-                
-                // Si el QR es una URL completa (ej: ...?add=XYZ), extraemos el ID
                 if (decodedText.includes('add=')) {
-                    // Hack rápido para extraer param si es URL completa o parcial
                     try {
                         const urlObj = new URL(decodedText);
                         productId = urlObj.searchParams.get('add');
                     } catch(e) {
-                        // Si no es URL válida, intentar split manual
                         const parts = decodedText.split('add=');
                         if(parts.length > 1) productId = parts[1].split('&')[0];
                     }
                 }
 
                 if (productId) {
-                    // Verificar si el producto existe
                     const exists = allProducts.find(p => p.id === productId);
                     if (exists) {
                         add(productId);
-                        
-                        // LOGICA INTELIGENTE: Si el carrito ya está abierto, NO ejecutar toggleCart() (que lo cerraría)
-                        // Si está cerrado (tiene clase 'hidden'), ábrelo.
                         const m = document.getElementById('cart-modal');
                         if (m && m.classList.contains('hidden')) {
                             toggleCart();
                         }
-                        
                         showToast("¡Producto detectado!");
+                        if(analytics) analytics.logEvent('scan_qr_camera', { product_id: productId });
                     } else {
                         alert("Producto no encontrado en el catálogo actual.");
                     }
@@ -771,7 +760,6 @@
                     const tempByDate = [...allProducts].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
                     latestProductIds = tempByDate.slice(0, 12).map(p => p.id);
 
-                    // Orden por novedad y luego alfabético
                     allProducts.sort((a, b) => {
                         const isANew = latestProductIds.includes(a.id);
                         const isBNew = latestProductIds.includes(b.id);
@@ -801,11 +789,46 @@
             currentCategory = cat;
             renderCategories();
             applyFilter();
+            if(analytics) analytics.logEvent('select_content', { content_type: 'category', item_id: cat });
         }
 
         function debouncedFilter() {
+            const term = document.getElementById('searchInput')?.value;
+            // Mostrar botón limpiar si hay texto
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if(clearBtn) {
+                if(term && term.length > 0) clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden');
+            }
+
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(applyFilter, 300);
+            searchTimeout = setTimeout(() => {
+                applyFilter();
+                if(term && term.length > 2 && analytics) {
+                    analytics.logEvent('search', { search_term: term });
+                }
+            }, 300);
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            if(input) {
+                input.value = '';
+                debouncedFilter();
+                input.focus();
+            }
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag])
+            );
         }
 
         function applyFilter() {
@@ -840,6 +863,7 @@
                 const hasPack = packQty > 1;
                 const isNew = latestProductIds.includes(p.id);
                 const displayMin = isBolsas ? 100 : 1;
+                const safeName = escapeHTML(p.name);
                 
                 let selectorHTML = '';
                 if(isBolsas) {
@@ -853,12 +877,12 @@
                 return `
                 <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
                     <div class="relative h-52 p-4 cursor-pointer overflow-hidden rounded-t-2xl" onclick="openImage('${p.image}')">
-                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300?text=Sin+Imagen'">
+                        <img src="${p.image}" loading="lazy" alt="${safeName}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300?text=Sin+Imagen'">
                         ${isNew ? `<span class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md badge-pulse">NUEVO</span>` : ''}
                     </div>
                     <div class="p-4 flex flex-col flex-1 border-t border-slate-50">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">${p.category || 'General'}</span>
-                        <h3 class="font-bold text-sm mb-2 h-10 line-clamp-2 leading-snug text-slate-800">${p.name}</h3>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">${escapeHTML(p.category || 'General')}</span>
+                        <h3 class="font-bold text-sm mb-2 h-10 line-clamp-2 leading-snug text-slate-800">${safeName}</h3>
                         ${selectorHTML}
                         <div class="flex justify-between items-center text-[10px] text-slate-500 font-bold mb-3 mt-1">
                             <span class="bg-slate-100 px-2 py-1 rounded text-slate-600">Mínimo: ${displayMin}</span>
@@ -902,10 +926,12 @@
             if(!p) return;
             const text = `Hola, me interesa más información sobre: ${p.name}`;
             window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(text)}`, '_blank');
+            if(analytics) analytics.logEvent('ask_product', { product_id: id, product_name: p.name });
         }
 
         function openGeneralWhatsApp() {
             window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, tengo una duda general.")}`, '_blank');
+            if(analytics) analytics.logEvent('contact_general');
         }
 
         function scrollToTop() {
@@ -919,6 +945,7 @@
             if(m.classList.contains('hidden')) {
                 m.classList.remove('hidden');
                 setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
+                if(analytics) analytics.logEvent('view_cart');
             } else {
                 b.classList.add('opacity-0');
                 p.classList.add('translate-x-full');
@@ -957,6 +984,12 @@
             
             saveCart();
             showToast(`Agregado (+${qty})`);
+            
+            if(analytics) analytics.logEvent('add_to_cart', { 
+                currency: 'MXN', 
+                value: 0, 
+                items: [{ item_id: id, item_name: p.name, quantity: qty }]
+            });
         }
         
         function updateCartItem(id) {
@@ -981,10 +1014,10 @@
         function remove(id) {
             cart = cart.filter(x => x.id !== id);
             saveCart();
+            if(analytics) analytics.logEvent('remove_from_cart', { item_id: id });
         }
 
         function saveCart() {
-            // Protección contra errores en iOS Private Mode
             try {
                 localStorage.setItem('cart_een', JSON.stringify(cart));
             } catch (e) {
@@ -1024,6 +1057,7 @@
                 const categoryLower = (prod.category || '').toLowerCase();
                 const isBolsas = categoryLower.includes('bolsa');
                 const packSize = isBolsas ? 100 : (prod.piezas ? parseInt(prod.piezas) : 0);
+                const safeName = escapeHTML(item.name);
                 
                 let inputsHTML = '';
                 if (packSize > 1) {
@@ -1035,7 +1069,7 @@
                     inputsHTML = `<div class="mt-2 flex justify-end items-center gap-2"><label class="text-[10px] text-slate-400 font-bold">Piezas:</label><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-20 border rounded text-center text-sm py-1 outline-none"></div>`;
                 }
 
-                return `<div class="bg-white p-4 rounded-xl border flex gap-4 shadow-sm"><img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-contain shrink-0"><div class="flex-1"><div class="flex justify-between font-bold text-sm text-slate-800"><span>${item.name}</span><button onclick="remove('${item.id}')" class="text-red-400 hover:text-red-600 transition">×</button></div>${inputsHTML}</div></div>`;
+                return `<div class="bg-white p-4 rounded-xl border flex gap-4 shadow-sm"><img src="${item.image}" alt="${safeName}" class="w-16 h-16 object-contain shrink-0"><div class="flex-1"><div class="flex justify-between font-bold text-sm text-slate-800"><span>${safeName}</span><button onclick="remove('${item.id}')" class="text-red-400 hover:text-red-600 transition">×</button></div>${inputsHTML}</div></div>`;
             }).join('');
         }
 
@@ -1080,6 +1114,8 @@
             const finalMsg = headerMsg + deliveryMsg + "\n🛒 *DETALLE DEL PEDIDO:*\n" + productsMsg;
             const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(finalMsg)}`;
             window.open(url, '_blank');
+            
+            if(analytics) analytics.logEvent('generate_lead', { currency: 'MXN', value: 0 });
         }
 
         // ==========================================
