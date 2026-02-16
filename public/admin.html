@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin 5.5 - ERP Móvil Premium + QRs Vitrina URL</title>
+    <title>Admin 5.6 - ERP Móvil (Escáner Optimizado)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -80,7 +80,7 @@
                                 <span class="text-[9px] font-bold text-gray-600 uppercase">Antiguo</span>
                             </label>
                             
-                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold w-10 h-8 rounded-lg shadow-md hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
+                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold w-10 h-8 rounded-lg shadow-md hover:bg-indigo-700 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
                         </div>
                     </div>
                 </details>
@@ -155,7 +155,7 @@
             <div id="reader" class="w-full max-w-sm overflow-hidden rounded-3xl border-2 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.2)] bg-black relative">
                 <div id="scanOverlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-200">
                     <div class="bg-white/20 backdrop-blur-sm rounded-full p-4 mb-2 shadow-xl"><i class="fa-solid fa-check text-5xl text-white drop-shadow-md"></i></div>
-                    <div id="overlayQty" class="text-4xl font-black text-white drop-shadow-lg tracking-tighter">+24</div>
+                    <div id="overlayQty" class="text-4xl font-black text-white drop-shadow-lg tracking-tighter">+0</div>
                 </div>
             </div>
             
@@ -175,7 +175,7 @@
         <div id="toast-icon-bg" class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
             <i id="toast-icon" class="fa-solid fa-check text-green-400 text-xs"></i>
         </div>
-        <p id="toast-msg" class="text-xs font-semibold text-slate-100 tracking-wide">Mensaje de prueba</p>
+        <p id="toast-msg" class="text-xs font-semibold text-slate-100 tracking-wide">Mensaje</p>
     </div>
 
     <script>
@@ -227,7 +227,6 @@
             });
         }
 
-        // === TABS ===
         function switchTab(tabName) {
             const vCat = document.getElementById('view-catalogo'), vInv = document.getElementById('view-inventario');
             const tCat = document.getElementById('tab-catalogo'), tInv = document.getElementById('tab-inventario');
@@ -235,21 +234,18 @@
             if (tabName === 'catalogo') {
                 vCat.classList.remove('hidden'); vCat.classList.add('flex'); 
                 vInv.classList.add('hidden'); vInv.classList.remove('flex');
-                
                 tCat.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-indigo-600 text-indigo-700 transition-colors";
                 tInv.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-600 transition-colors";
                 closeScannerModal();
             } else {
                 vInv.classList.remove('hidden'); vInv.classList.add('flex'); 
                 vCat.classList.add('hidden'); vCat.classList.remove('flex');
-                
                 tInv.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-indigo-600 text-indigo-700 transition-colors";
                 tCat.className = "flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-600 transition-colors";
                 renderInventoryTable();
             }
         }
 
-        // === VISTA CATÁLOGO ===
         window.filterProducts = () => {
             const term = document.getElementById('searchInput').value.toLowerCase();
             currentFilteredProducts = allProducts.filter(p => (p.name || '').toLowerCase().includes(term) || (p.category || '').toLowerCase().includes(term));
@@ -281,7 +277,6 @@
                         <div class="flex items-center justify-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onclick="printSingleQR('${p.id}', 'inventario')" class="text-purple-600 hover:bg-purple-100 w-7 h-7 rounded flex items-center justify-center transition" title="QR Caja (Inventario)"><i class="fa-solid fa-box"></i></button>
                             <button onclick="printSingleQR('${p.id}', 'vitrina')" class="text-pink-600 hover:bg-pink-100 w-7 h-7 rounded flex items-center justify-center transition" title="QR URL (Vitrina/Cliente)"><i class="fa-solid fa-store"></i></button>
-                            
                             <button onclick="cloneProduct('${p.id}')" class="text-blue-500 hover:bg-blue-100 w-7 h-7 rounded flex items-center justify-center transition" title="Clonar"><i class="fa-solid fa-copy"></i></button>
                             <button onclick="makeProductOld('${p.id}')" class="text-orange-400 hover:bg-orange-100 w-7 h-7 rounded flex items-center justify-center transition" title="Hacer Antiguo"><i class="fa-solid fa-clock-rotate-left"></i></button>
                             <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-100 w-7 h-7 rounded flex items-center justify-center transition" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
@@ -293,10 +288,10 @@
         }
 
         // ==========================================
-        // LÓGICA DE IMPRESIÓN INTELIGENTE (Caja vs Vitrina URL)
+        // LÓGICA DE IMPRESIÓN INTELIGENTE
         // ==========================================
         function buildPrintHTML(productsToPrint, qtyPerProduct, printType, baseUrl) {
-            let html = `<html><head><title>Etiquetas ${printType === 'vitrina' ? 'Vitrina' : 'Cajas'}</title><style>
+            let html = `<html><head><title>Etiquetas</title><style>
                 body { font-family: sans-serif; text-align: center; margin: 0; padding: 10px; }
                 .label { display: inline-block; width: 140px; border: 1px dashed #ccc; margin: 5px; padding: 10px; page-break-inside: avoid; }
                 img { max-width: 100%; height: auto; }
@@ -309,19 +304,16 @@
                 let qrValue = "";
 
                 if (printType === 'inventario') {
-                    // Para Cajas: Formato interno de ERP
                     pzasToPrint = p.piezas || 1;
                     qrValue = `ID:${p.id}|P:${pzasToPrint}`; 
                 } else {
-                    // Para Vitrina: Formato URL completo para el index.html
                     const nameAndCat = ((p.name || '') + ' ' + (p.category || '')).toLowerCase();
                     const isBolsa = nameAndCat.includes('bolsa');
                     pzasToPrint = isBolsa ? (p.piezas || 100) : 1;
-                    qrValue = `${baseUrl}/?add=${p.id}`; // <--- AQUI ESTA LA MAGIA DE LA URL
+                    qrValue = `${baseUrl}/?add=${p.id}`; 
                 }
 
                 const qr = new QRious({ value: qrValue, size: 300, level: 'M' });
-                
                 for(let i=0; i<qtyPerProduct; i++) {
                     html += `<div class="label"><div class="title">${p.name}</div><img src="${qr.toDataURL()}"><div class="qty-badge">${pzasToPrint} PZAS</div></div>`;
                 }
@@ -330,11 +322,10 @@
             return html;
         }
 
-        // Función para obtener la URL base de tu tienda
         function getBaseUrl() {
             let baseUrl = localStorage.getItem('een_catalog_url');
             if (!baseUrl) {
-                baseUrl = prompt("Para generar códigos de Vitrina (escaneables por clientes), ingresa la URL de tu catálogo:\n(Ejemplo: https://envases-norte.web.app)", window.location.origin);
+                baseUrl = prompt("Para generar códigos URL, ingresa la dirección de tu catálogo:\n(Ej: https://productoseen.web.app)", window.location.origin);
                 if (baseUrl) {
                     if(!baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
                     if(baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
@@ -344,34 +335,26 @@
             return baseUrl;
         }
 
-        // Imprimir Múltiple
         window.printFilteredQRs = (printType) => {
             if (currentFilteredProducts.length === 0) return showToast("Filtra productos primero", "error");
-            
             let baseUrl = "";
             if (printType === 'vitrina') {
                 baseUrl = getBaseUrl();
-                if (!baseUrl) return showToast("Se requiere la URL de la tienda para vitrina", "error");
+                if (!baseUrl) return showToast("Se requiere URL", "error");
             }
-
-            const labelType = printType === 'vitrina' ? 'VITRINA (1 pieza)' : 'ALMACÉN (Cajas)';
-            const qty = prompt(`Has seleccionado QRs para ${labelType}\n\n¿Cuántas etiquetas POR CADA PRODUCTO en pantalla deseas imprimir?`, "1");
+            const qty = prompt(`¿Cuántas etiquetas POR CADA PRODUCTO?`, "1");
             if (!qty || qty <= 0) return;
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(currentFilteredProducts, qty, printType, baseUrl)); pw.document.close();
         };
 
-        // Imprimir Individual
         window.printSingleQR = (id, printType) => {
             const p = allProducts.find(x => x.id === id); if (!p) return;
-            
             let baseUrl = "";
             if (printType === 'vitrina') {
                 baseUrl = getBaseUrl();
-                if (!baseUrl) return showToast("Se requiere la URL de la tienda para vitrina", "error");
+                if (!baseUrl) return showToast("Se requiere URL", "error");
             }
-
-            const labelType = printType === 'vitrina' ? 'VITRINA (1 pieza)' : 'ALMACÉN (Caja)';
-            const qty = prompt(`Imprimir QR para ${labelType}:\n${p.name}\n\n¿Cuántas etiquetas?`, "1");
+            const qty = prompt(`Etiquetas para:\n${p.name}\n\n¿Cuántas?`, "1");
             if (!qty || qty <= 0) return;
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML([p], qty, printType, baseUrl)); pw.document.close();
         };
@@ -402,7 +385,7 @@
                 `;
                 container.appendChild(card);
             });
-            if(filtered.length === 0) container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fa-solid fa-box-open text-4xl mb-2 opacity-50"></i><p>No se encontraron productos.</p></div>`;
+            if(filtered.length === 0) container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fa-solid fa-box-open text-4xl mb-2 opacity-50"></i><p>Sin resultados.</p></div>`;
         }
 
         window.adjustStock = async (id, amount) => {
@@ -417,63 +400,111 @@
             await db.ref().update(updates); showToast("Inventario reiniciado", "success");
         };
 
-        // === ESCÁNER MÓVIL ===
+        // ====================================================
+        // ESCÁNER MÓVIL BLINDADO Y ULTRARRÁPIDO
+        // ====================================================
         window.openScannerModal = () => {
-            document.getElementById('scannerModal').classList.remove('hidden'); document.getElementById('scannerModal').classList.add('flex');
+            document.getElementById('scannerModal').classList.remove('hidden'); 
+            document.getElementById('scannerModal').classList.add('flex');
+            
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess).catch((err) => { showToast("Error al iniciar cámara", "error"); });
+            
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                .catch((err) => { showToast("Error de cámara", "error"); });
         };
 
         window.closeScannerModal = () => {
-            document.getElementById('scannerModal').classList.add('hidden'); document.getElementById('scannerModal').classList.remove('flex');
+            document.getElementById('scannerModal').classList.add('hidden'); 
+            document.getElementById('scannerModal').classList.remove('flex');
             if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(err => console.log(err));
         };
 
+        // Función blindada contra bloqueos del navegador móvil
         function triggerSuccessFeedback() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator(); osc.connect(ctx.destination); osc.frequency.value = 1200; osc.start(); setTimeout(() => osc.stop(), 80);
-            if ("vibrate" in navigator) navigator.vibrate([100]);
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator(); 
+                    osc.connect(ctx.destination); 
+                    osc.frequency.value = 1200; 
+                    osc.start(); 
+                    setTimeout(() => osc.stop(), 80);
+                }
+            } catch(e) { console.log("Audio bloqueado por navegador"); }
+            
+            try {
+                if ("vibrate" in navigator) navigator.vibrate([100]);
+            } catch(e) { console.log("Vibración no soportada"); }
         }
 
         let lastScanTime = 0;
+        
         async function onScanSuccess(decodedText) {
             const now = Date.now();
-            if (now - lastScanTime < 1500) return; 
+            if (now - lastScanTime < 1500) return; // Espera para no escanear doble
             
             try {
                 let scannedId = null;
                 let scannedPzas = null;
+                const text = decodedText.trim();
 
-                if (decodedText.startsWith('ID:')) {
-                    const parts = decodedText.split('|');
+                // 1. Extraer ID según el formato escaneado
+                if (text.startsWith('ID:')) {
+                    // Formato Inventario: ID:-Nx123|P:24
+                    const parts = text.split('|');
                     scannedId = parts[0].split(':')[1];
-                    scannedPzas = parseInt(parts[1].split(':')[1]);
-                } else if (decodedText.includes('add=')) {
-                    scannedId = decodedText.split('add=')[1].split('&')[0];
+                    if (parts[1]) scannedPzas = parseInt(parts[1].split(':')[1]);
+                } else if (text.includes('add=')) {
+                    // Formato Vitrina URL: https://...?add=-Nx123
+                    scannedId = text.split('add=')[1].split('&')[0];
+                } else if (text.startsWith('-N')) {
+                    // Formato puro de Firebase por si acaso
+                    scannedId = text;
                 }
 
                 if (!scannedId) return; 
 
+                // 2. Buscar producto
                 const prod = allProducts.find(p => p.id === scannedId);
-                if (!prod) { showToast("El producto no existe", "error"); return; }
+                if (!prod) { 
+                    showToast("Producto no encontrado", "error"); 
+                    return; 
+                }
 
-                if (scannedPzas === null || isNaN(scannedPzas)) scannedPzas = prod.piezas || 1; 
+                // 3. Determinar piezas a sumar
+                if (scannedPzas === null || isNaN(scannedPzas)) {
+                    scannedPzas = prod.piezas || 1; 
+                }
 
                 lastScanTime = now;
                 triggerSuccessFeedback(); 
 
                 const nuevoStock = (prod.stock || 0) + scannedPzas;
-                await db.ref('productos/'+scannedId).update({stock: nuevoStock});
 
+                // 4. ACTUALIZAR PANTALLA INMEDIATAMENTE (Sin esperar internet)
                 const overlay = document.getElementById('scanOverlay');
                 document.getElementById('overlayQty').innerText = `+${scannedPzas}`;
-                overlay.classList.remove('opacity-0'); overlay.classList.add('success-flash');
+                overlay.classList.remove('opacity-0'); 
+                overlay.classList.add('success-flash');
+                
                 document.getElementById('scanProdName').innerText = prod.name;
                 document.getElementById('scanTotal').innerText = nuevoStock;
 
-                setTimeout(() => { overlay.classList.add('opacity-0'); overlay.classList.remove('success-flash'); }, 600);
-            } catch (err) { console.error(err); }
+                setTimeout(() => { 
+                    overlay.classList.add('opacity-0'); 
+                    overlay.classList.remove('success-flash'); 
+                }, 600);
+
+                // 5. GUARDAR EN BD DE FONDO
+                db.ref('productos/'+scannedId).update({stock: nuevoStock}).catch(e => {
+                    showToast("Error de conexión", "error");
+                });
+
+            } catch (err) { 
+                console.error("Error al procesar el QR:", err); 
+            }
         }
 
         // === CRUD EXTRAS ===
