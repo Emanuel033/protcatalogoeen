@@ -1,0 +1,115 @@
+/* ==========================================
+   ESTILOS GENERALES Y UTILIDADES
+   ========================================== */
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Scrollbar personalizado para Admin */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+.fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+.hero-pattern {
+    background-image: radial-gradient(circle at 20% 150%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 80% -50%, rgba(255,255,255,0.15) 0%, transparent 50%);
+}
+
+.badge-pulse { animation: pulse 2s infinite; }
+
+@keyframes pulse { 
+    0%, 100% { opacity: 1; } 
+    50% { opacity: .7; } 
+}
+
+/* ==========================================
+   LOGIN ESPECÍFICO (Efecto Vidrio)
+   ========================================== */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+/* ==========================================
+   COMPONENTES UI
+   ========================================== */
+.option-btn { border: 1px solid #e2e8f0; transition: all 0.2s; }
+.option-btn.selected { background-color: #eff6ff; border-color: #4f46e5; color: #4338ca; font-weight: bold; }
+.option-btn:hover:not(.selected) { background-color: #f8fafc; }
+
+#scroll-top-btn {
+    transition: all 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+}
+#scroll-top-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* ==========================================
+   ESTILOS DEL TUTORIAL (TOUR)
+   ========================================== */
+#tour-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 9990;
+    display: none; opacity: 0; transition: opacity 0.3s ease;
+}
+#tour-overlay.active { display: block; opacity: 1; }
+
+.tour-highlight {
+    position: relative;
+    z-index: 9995 !important;
+    background-color: white;
+    box-shadow: 0 0 0 4px #4f46e5, 0 0 25px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.tour-highlight-fixed {
+    z-index: 9995 !important;
+    box-shadow: 0 0 0 4px #4f46e5, 0 0 25px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+
+input.tour-highlight, select.tour-highlight { background-color: white !important; }
+
+#tour-tooltip {
+    position: fixed;
+    z-index: 2147483647 !important;
+    width: 300px; max-width: 90vw;
+    background: white; padding: 20px; border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    display: none; 
+    transition: top 0.3s ease, left 0.3s ease, opacity 0.3s ease; 
+    animation: fadeIn 0.3s ease;
+}
+
+#tour-tooltip::after {
+    content: ''; position: absolute;
+    width: 12px; height: 12px;
+    background: white;
+    transform: rotate(45deg);
+    z-index: -1;
+}
+
+#tour-tooltip.placement-bottom::after { top: -6px; left: 50%; margin-left: -6px; }
+#tour-tooltip.placement-top::after { bottom: -6px; left: 50%; margin-left: -6px; }
+#tour-tooltip.placement-center::after { display: none; }
+
+.tour-fix-stacking {
+    z-index: 9995 !important;
+    position: relative !important;
+}
