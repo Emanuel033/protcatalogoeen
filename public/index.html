@@ -5,37 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo - Envases La Económica del Norte</title>
     
+    <!-- CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Librerías -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    
-    <style>
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .hero-pattern {
-            background-image: radial-gradient(circle at 20% 150%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                              radial-gradient(circle at 80% -50%, rgba(255,255,255,0.15) 0%, transparent 50%);
-        }
-        .badge-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
-    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <!-- JS Propio -->
+    <script src="assets/js/firebase-config.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
 
-    <nav class="bg-indigo-900 text-white sticky top-0 z-40 shadow-xl">
+    <nav class="bg-indigo-900 text-white sticky top-0 z-40 shadow-xl" id="main-nav">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                <div class="bg-white text-indigo-900 p-2 rounded-xl font-bold h-10 w-10 flex items-center justify-center">E</div>
-                <div>
-                    <h1 class="text-lg font-bold leading-tight">Envases La Económica</h1>
-                    <p class="text-[10px] text-indigo-300 uppercase">Catálogo Digital</p>
+            <div class="flex items-center justify-between w-full md:w-auto">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white text-indigo-900 p-2 rounded-xl font-bold h-10 w-10 flex items-center justify-center">E</div>
+                    <div><h1 class="text-lg font-bold">Envases La Económica</h1><p class="text-[10px] text-indigo-300 uppercase">Catálogo Digital</p></div>
+                </div>
+                <div class="flex gap-2 md:hidden">
+                    <button onclick="startQRScanner()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-qrcode"></i></button>
+                    <button onclick="startTour()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-circle-question"></i></button>
                 </div>
             </div>
-            <div class="w-full md:w-96 relative">
-                <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." 
-                       class="w-full py-2.5 pl-4 pr-4 rounded-xl border-none outline-none bg-indigo-800/50 text-white placeholder-indigo-300 focus:bg-white focus:text-slate-800 transition-all text-sm">
+            <div class="w-full md:w-96 flex gap-2 relative">
+                <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar..." class="w-full py-2.5 pl-4 pr-10 rounded-xl bg-indigo-800/50 text-white placeholder-indigo-300 focus:bg-white focus:text-slate-800 transition-all text-sm outline-none">
+                <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="startTour()" class="hidden md:flex items-center gap-2 bg-indigo-800 px-4 rounded-xl text-indigo-200 hover:text-white transition whitespace-nowrap"><i class="fa-solid fa-circle-info"></i><span class="text-xs font-bold">Ayuda</span></button>
             </div>
         </div>
     </nav>
@@ -43,414 +46,73 @@
     <div class="bg-indigo-800 hero-pattern text-white relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 py-8 md:py-12 relative z-10">
             <h2 class="text-2xl md:text-4xl font-bold mb-2">Soluciones en Envases</h2>
-            <p class="text-indigo-200 text-sm md:text-base max-w-2xl">
-                Encuentra la más amplia variedad de envases industriales, tapas y accesorios. 
-                Cotiza en línea y recibe atención personalizada.
-            </p>
+            <p class="text-indigo-200 text-sm md:text-base max-w-2xl">Encuentra la más amplia variedad de envases industriales en Monterrey.</p>
         </div>
     </div>
 
-    <div class="bg-white border-b border-slate-200 sticky top-[64px] z-30 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3">
-            <div id="categories-container" class="flex gap-2 overflow-x-auto hide-scroll pb-1">
-                <div class="animate-pulse bg-slate-200 h-9 w-24 rounded-full"></div>
-            </div>
-        </div>
+    <div class="bg-white border-b border-slate-200 sticky top-[64px] z-30 shadow-sm" id="categories-bar">
+        <div class="max-w-7xl mx-auto px-4 py-3"><div id="categories-container" class="flex gap-2 overflow-x-auto hide-scroll pb-1"></div></div>
     </div>
 
     <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
         <div id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div class="col-span-full text-center py-20 text-slate-400">Cargando...</div>
+            <div class="col-span-full text-center py-20 text-slate-400">Cargando catálogo...</div>
         </div>
-        
         <div id="pagination-controls" class="hidden flex justify-center items-center gap-4 mt-10 pt-6 border-t border-slate-200">
-            <button type="button" onclick="changePage(-1)" id="btn-prev" class="px-4 py-2 bg-white border rounded shadow-sm">Anterior</button>
+            <button onclick="changePage(-1)" id="btn-prev" class="px-4 py-2 bg-white border rounded shadow-sm">Anterior</button>
             <span id="page-info" class="text-sm font-bold">Pág 1</span>
-            <button type="button" onclick="changePage(1)" id="btn-next" class="px-4 py-2 bg-white border rounded shadow-sm">Siguiente</button>
+            <button onclick="changePage(1)" id="btn-next" class="px-4 py-2 bg-white border rounded shadow-sm">Siguiente</button>
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 mt-auto py-8 text-center text-xs text-slate-400">
-        © 2026 Envases La Económica del Norte.
+    <footer class="bg-white border-t border-slate-200 mt-auto pt-10 pb-6">
+        <div class="max-w-7xl mx-auto px-4 text-center md:text-left">
+            <p class="text-sm text-slate-500">© 2026 Envases La Económica del Norte.</p>
+        </div>
     </footer>
 
-    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none text-sm font-medium">
-        Agregado al carrito
+    <!-- Botones Flotantes y Modales -->
+    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none text-sm font-medium">Msg</div>
+    <button onclick="scrollToTop()" id="scroll-top-btn" class="fixed bottom-36 right-6 z-40 bg-slate-800/80 text-white p-3 rounded-full shadow-lg"><i class="fa-solid fa-arrow-up"></i></button>
+
+    <div id="qr-scanner-modal" class="fixed inset-0 z-[100] hidden bg-slate-900/95 flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-white rounded-2xl overflow-hidden relative shadow-2xl">
+            <div class="p-4 bg-indigo-900 text-white flex justify-between items-center"><h3 class="font-bold">Escanear</h3><button onclick="stopQRScanner()"><i class="fa-solid fa-xmark"></i></button></div>
+            <div id="reader" class="w-full bg-black"></div>
+        </div>
     </div>
 
-    <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
-        <button type="button" onclick="openGeneralWhatsApp()" class="bg-white text-green-500 p-3 rounded-full shadow-lg hover:scale-110 transition border border-green-100 group relative">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">¿Dudas?</span>
-        </button>
-
-        <button type="button" onclick="toggleCart()" class="bg-indigo-600 text-white p-4 rounded-full shadow-lg shadow-indigo-600/40 group transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center relative">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-indigo-600 transform scale-0 transition-transform duration-200">0</span>
-        </button>
+    <div id="fab-container" class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
+        <button onclick="openGeneralWhatsApp()" class="bg-white text-green-500 p-3 rounded-full shadow-lg hover:scale-110 transition border border-green-100"><i class="fa-brands fa-whatsapp text-xl"></i></button>
+        <button id="cart-fab" onclick="toggleCart()" class="bg-indigo-600 text-white p-4 rounded-full shadow-lg group hover:scale-110 relative"><i class="fa-solid fa-cart-shopping"></i><span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-indigo-600 scale-0 transition-transform">0</span></button>
     </div>
 
+    <!-- UI Carrito -->
     <div id="cart-modal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0" id="cart-backdrop" onclick="toggleCart()"></div>
-        <div class="absolute right-0 top-0 h-full w-full md:w-[500px] bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cart-panel">
-            <div class="p-5 border-b flex justify-between items-center bg-slate-50">
-                <h2 class="text-xl font-bold text-slate-800">Tu Pedido</h2>
-                <button type="button" onclick="toggleCart()" class="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-slate-100 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            
-            <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
-            
-            <div class="p-5 border-t bg-slate-50">
-                <div class="flex justify-between mb-4 font-bold text-lg">
-                    <span>Total Piezas:</span>
-                    <span id="cart-total" class="text-indigo-900">0</span>
+        <div class="absolute inset-0 bg-slate-900/60 transition-opacity opacity-0" id="cart-backdrop" onclick="toggleCart()"></div>
+        <div class="absolute right-0 top-0 h-full w-full md:w-[500px] bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform" id="cart-panel">
+            <div class="p-4 border-b flex justify-between items-center bg-slate-50"><h2 class="text-lg font-bold"><i class="fa-solid fa-bag-shopping"></i> Pedido</h2><button onclick="toggleCart()"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="flex-1 overflow-y-auto bg-slate-50/50"><div id="cart-items" class="p-4 space-y-3"></div>
+                <div id="cart-config" class="p-4 bg-white border-t hidden">
+                    <div class="mb-4"><label class="text-xs font-bold text-slate-500 uppercase">Cliente</label><div class="flex gap-2"><input type="text" id="client-name" placeholder="Nombre / Negocio" class="flex-1 border rounded px-3 py-2 text-sm" onchange="savePrefs()"><button onclick="setPublicoGeneral()" class="text-xs bg-slate-100 px-3 rounded border">Público</button></div></div>
+                    <div class="mb-4"><label class="text-xs font-bold text-slate-500 uppercase">Entrega</label><div class="grid grid-cols-3 gap-2"><button onclick="setDelivery('recoger')" id="btn-recoger" class="option-btn rounded p-2 text-xs">Sucursal</button><button onclick="setDelivery('local')" id="btn-local" class="option-btn rounded p-2 text-xs">Local</button><button onclick="setDelivery('foraneo')" id="btn-foraneo" class="option-btn rounded p-2 text-xs">Foráneo</button></div></div>
+                    <div id="panel-recoger" class="hidden text-sm bg-slate-50 p-2 border rounded mt-2"><div class="flex flex-wrap gap-2"><button onclick="setPayment('Efectivo')" class="pay-btn option-btn px-3 py-1 rounded text-xs">Efectivo</button><button onclick="setPayment('Tarjeta')" class="pay-btn option-btn px-3 py-1 rounded text-xs">Tarjeta</button></div></div>
+                    <div id="panel-local" class="hidden text-sm bg-orange-50 p-2 border border-orange-100 rounded mt-2"><input type="text" id="delivery-address" placeholder="Dirección..." class="w-full border p-1 mb-2 text-xs" onchange="savePrefs()"><div class="flex flex-wrap gap-2"><button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded text-xs">Transf.</button><button onclick="setPayment('Efectivo')" class="pay-btn option-btn px-3 py-1 rounded text-xs">Efectivo</button></div></div>
+                    <div id="panel-foraneo" class="hidden text-sm bg-indigo-50 p-2 border border-indigo-100 rounded mt-2"><input type="text" id="fletera-name" placeholder="Fletera..." class="w-full border p-1 mb-2 text-xs" onchange="savePrefs()"><div class="flex gap-2"><button onclick="setOcurre(true)" id="btn-ocurre-si" class="option-btn flex-1 text-xs">Ocurre</button><button onclick="setOcurre(false)" id="btn-ocurre-no" class="option-btn flex-1 text-xs">Domicilio</button></div><div class="flex gap-2 mt-2"><button onclick="setPayment('Transferencia')" class="pay-btn option-btn px-3 py-1 rounded text-xs">Transf.</button></div></div>
+                    <div id="bank-info" class="hidden mt-2 p-2 bg-slate-800 text-slate-200 rounded text-xs">Banco: BANORTE | Cuenta: 0184214699</div>
                 </div>
-                <button type="button" onclick="sendWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg transition mb-3 flex justify-center items-center gap-2">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    Pedir por WhatsApp
-                </button>
-                <button type="button" onclick="clearCart()" class="w-full text-red-400 hover:text-red-600 text-xs font-bold uppercase py-2 transition-colors cursor-pointer tracking-widest bg-red-50 hover:bg-red-100 rounded-lg">
-                    Vaciar Carrito
-                </button>
+            </div>
+            <div class="p-5 border-t bg-white shadow-lg">
+                <div class="flex justify-between mb-4 font-bold text-lg"><span class="text-slate-600 text-sm">Total Piezas:</span><span id="cart-total" class="text-indigo-900">0</span></div>
+                <button onclick="startQRScanner()" class="w-full bg-indigo-50 text-indigo-700 font-bold py-3 rounded-xl mb-3 text-sm border border-indigo-200">Escanear otro</button>
+                <button onclick="sendWhatsApp()" class="w-full bg-green-500 text-white font-bold py-3.5 rounded-xl shadow-lg mb-3">Enviar Pedido WhatsApp</button>
+                <button onclick="clearCart()" class="w-full text-red-400 text-xs font-bold uppercase py-2">Vaciar</button>
             </div>
         </div>
     </div>
 
-    <div id="lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center" onclick="this.classList.add('hidden')">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
-        <img id="lightbox-img" src="" class="max-w-[95%] max-h-[90vh] rounded-lg shadow-2xl relative z-10 transition-transform scale-95" onclick="event.stopPropagation()">
-    </div>
-
-    <script>
-        // === CONFIGURACIÓN ===
-        const firebaseConfig = {
-            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
-            authDomain: "productoseen.firebaseapp.com",
-            databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
-            projectId: "productoseen",
-            storageBucket: "productoseen.firebasestorage.app",
-            messagingSenderId: "1052892398028",
-            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
-        };
-        
-        let db, allProducts = [], filteredProducts = [], cart = [];
-        let currentCategory = 'Todos', currentPage = 1, latestProductIds = [];
-        const itemsPerPage = 48;
-        let searchTimeout;
-
-        // === INICIO ===
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                cart = JSON.parse(localStorage.getItem('cart_een')) || [];
-                loadProducts();
-                renderCart();
-                // Verificamos si viene de un código QR
-                checkQRParam();
-            } catch (e) { console.error(e); }
-        });
-
-        // === LÓGICA QR ===
-        function checkQRParam() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const productId = urlParams.get('add');
-
-            if (productId) {
-                // Intervalo para asegurar que los productos de Firebase ya cargaron
-                const qrCheck = setInterval(() => {
-                    if (allProducts.length > 0) {
-                        const productExists = allProducts.find(p => p.id === productId);
-                        if (productExists) {
-                            add(productId); 
-                            toggleCart(); // Mostrar al cliente que se agregó
-                            showToast("¡Producto escaneado agregado!");
-                            // Limpiar la URL sin recargar para evitar duplicados al refrescar manualmente
-                            window.history.replaceState({}, document.title, window.location.pathname);
-                        }
-                        clearInterval(qrCheck);
-                    }
-                }, 500);
-            }
-        }
-
-        // === DATOS ===
-        function loadProducts() {
-            const container = document.getElementById('products-container');
-            if(!container) return;
-
-            db.ref('productos').on('value', (snap) => {
-                allProducts = [];
-                if(snap.exists()) {
-                    snap.forEach(child => {
-                        const val = child.val();
-                        if(val.activo !== false) allProducts.push({ id: child.key, ...val });
-                    });
-                    
-                    const tempByDate = [...allProducts].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    latestProductIds = tempByDate.slice(0, 12).map(p => p.id);
-
-                    allProducts.sort((a, b) => {
-                        const isANew = latestProductIds.includes(a.id);
-                        const isBNew = latestProductIds.includes(b.id);
-                        if (isANew && !isBNew) return -1;
-                        if (!isANew && isBNew) return 1;
-                        if (isANew && isBNew) return (b.createdAt || 0) - (a.createdAt || 0);
-                        return a.name.localeCompare(b.name);
-                    });
-                }
-                renderCategories();
-                applyFilter();
-            });
-        }
-
-        // === RENDER ===
-        function renderCategories() {
-            const cont = document.getElementById('categories-container');
-            if(!cont) return;
-            const cats = ['Todos', ...new Set(allProducts.map(p => p.category || 'Varios'))].sort();
-            cont.innerHTML = cats.map(cat => `
-                <button type="button" onclick="filterCat('${cat}')" 
-                    class="px-5 py-2 rounded-full text-sm font-bold border transition ${currentCategory === cat ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}">
-                    ${cat}
-                </button>`).join('');
-        }
-
-        function filterCat(cat) {
-            currentCategory = cat;
-            renderCategories();
-            applyFilter();
-        }
-
-        function debouncedFilter() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(applyFilter, 300);
-        }
-
-        function applyFilter() {
-            const term = document.getElementById('searchInput')?.value.toLowerCase() || '';
-            filteredProducts = allProducts.filter(p => {
-                const matchCat = currentCategory === 'Todos' || p.category === currentCategory;
-                const matchSearch = p.name.toLowerCase().includes(term);
-                return matchCat && matchSearch;
-            });
-            currentPage = 1;
-            renderGrid();
-        }
-
-        function renderGrid() {
-            const cont = document.getElementById('products-container');
-            const controls = document.getElementById('pagination-controls');
-            if(!cont) return;
-
-            if(filteredProducts.length === 0) {
-                cont.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400">Sin resultados que mostrar.</div>`;
-                if(controls) controls.classList.add('hidden');
-                return;
-            }
-
-            const start = (currentPage - 1) * itemsPerPage;
-            const pageItems = filteredProducts.slice(start, start + itemsPerPage);
-
-            cont.innerHTML = pageItems.map((p, idx) => {
-                const categoryLower = (p.category || '').toLowerCase();
-                const isBolsas = categoryLower.includes('bolsa'); 
-                const packQty = isBolsas ? 100 : (p.piezas ? parseInt(p.piezas) : 0);
-                const hasPack = packQty > 1;
-                const isNew = latestProductIds.includes(p.id);
-                const displayMin = isBolsas ? 100 : 1;
-                
-                let selectorHTML = '';
-                if(isBolsas) {
-                    selectorHTML = `<select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none"><option value="100">Paquete (100 pzas)</option></select>`;
-                } else if (hasPack) {
-                    selectorHTML = `<select id="sel-${p.id}" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 mb-2 bg-slate-50 text-slate-700 font-medium outline-none"><option value="1">Individual</option><option value="${packQty}">Paquete completo</option></select>`;
-                } else {
-                    selectorHTML = `<input type="hidden" id="sel-${p.id}" value="1">`;
-                }
-
-                return `
-                <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
-                    <div class="relative h-52 p-4 cursor-pointer overflow-hidden rounded-t-2xl" onclick="openImage('${p.image}')">
-                        <img src="${p.image}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300?text=Sin+Imagen'">
-                        ${isNew ? `<span class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md badge-pulse">NUEVO</span>` : ''}
-                    </div>
-                    <div class="p-4 flex flex-col flex-1 border-t border-slate-50">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">${p.category || 'General'}</span>
-                        <h3 class="font-bold text-sm mb-2 h-10 line-clamp-2 leading-snug text-slate-800">${p.name}</h3>
-                        ${selectorHTML}
-                        <div class="flex justify-between items-center text-[10px] text-slate-500 font-bold mb-3 mt-1">
-                            <span class="bg-slate-100 px-2 py-1 rounded text-slate-600">Mínimo: ${displayMin}</span>
-                            ${hasPack ? `<span class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded">Paq: ${packQty} pz</span>` : '<span></span>'}
-                        </div>
-                        <div class="mt-auto flex gap-2">
-                            <button type="button" onclick="add('${p.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95">Agregar</button>
-                            <button type="button" onclick="askProduct('${p.id}')" class="w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-green-500 hover:bg-green-50 transition active:scale-95">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-
-            if(controls) {
-                const total = Math.ceil(filteredProducts.length / itemsPerPage);
-                controls.classList.toggle('hidden', total <= 1);
-                if(total > 1) {
-                    document.getElementById('page-info').innerText = `Pág ${currentPage} / ${total}`;
-                    document.getElementById('btn-prev').disabled = currentPage === 1;
-                    document.getElementById('btn-next').disabled = currentPage === total;
-                }
-            }
-        }
-
-        function changePage(d) {
-            currentPage += d;
-            renderGrid();
-            document.getElementById('products-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // === CARRITO ===
-        function add(id) {
-            const p = allProducts.find(x => x.id === id);
-            if(!p) return;
-            const sel = document.getElementById(`sel-${id}`);
-            const qty = sel ? parseInt(sel.value) : 1;
-            const exist = cart.find(x => x.id === id);
-            if(exist) exist.quantity += qty;
-            else cart.push({ ...p, quantity: qty });
-            saveCart();
-            showToast(`Agregado (+${qty})`);
-        }
-
-        function updateCartItem(id) {
-            const item = cart.find(x => x.id === id);
-            if(!item) return;
-            const prod = allProducts.find(p => p.id === id) || item; 
-            const categoryLower = (prod.category || '').toLowerCase();
-            const isBolsas = categoryLower.includes('bolsa');
-            const packSize = isBolsas ? 100 : (prod.piezas ? parseInt(prod.piezas) : 0);
-            
-            if (packSize > 1) {
-                const packs = parseInt(document.getElementById(`inp-pack-${id}`).value) || 0;
-                let loose = isBolsas ? 0 : (parseInt(document.getElementById(`inp-loose-${id}`).value) || 0);
-                item.quantity = (packs * packSize) + loose;
-            } else {
-                item.quantity = parseInt(document.getElementById(`inp-simple-${id}`).value) || 1;
-            }
-            if(item.quantity <= 0) remove(id);
-            else saveCart();
-        }
-
-        function remove(id) {
-            cart = cart.filter(x => x.id !== id);
-            saveCart();
-        }
-
-        function saveCart() {
-            localStorage.setItem('cart_een', JSON.stringify(cart));
-            renderCart();
-        }
-
-        function renderCart() {
-            const itemsCont = document.getElementById('cart-items');
-            const badge = document.getElementById('cart-badge');
-            const totalEl = document.getElementById('cart-total');
-            if(!itemsCont) return;
-
-            const total = cart.reduce((a,b) => a + b.quantity, 0);
-            badge.innerText = total;
-            badge.classList.toggle('scale-0', total === 0);
-            if(totalEl) totalEl.innerText = total;
-
-            if(cart.length === 0) {
-                itemsCont.innerHTML = `<div class="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl m-2"><p class="text-sm font-medium">Carrito vacío</p></div>`;
-                return;
-            }
-
-            itemsCont.innerHTML = cart.map(item => {
-                const prod = allProducts.find(p => p.id === item.id) || item;
-                const categoryLower = (prod.category || '').toLowerCase();
-                const isBolsas = categoryLower.includes('bolsa');
-                const packSize = isBolsas ? 100 : (prod.piezas ? parseInt(prod.piezas) : 0);
-                
-                let inputsHTML = '';
-                if (packSize > 1) {
-                    inputsHTML = `<div class="flex gap-2 mt-2">
-                        <div class="flex-1"><label class="text-[9px] text-slate-400 font-bold uppercase block">Paquetes</label><input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full border rounded text-center text-sm py-1 bg-indigo-50 outline-none"></div>
-                        <div class="flex-1 ${isBolsas?'hidden':''}"><label class="text-[9px] text-slate-400 font-bold uppercase block">Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full border rounded text-center text-sm py-1 outline-none"></div>
-                    </div>`;
-                } else {
-                    inputsHTML = `<div class="mt-2 flex justify-end items-center gap-2"><label class="text-[10px] text-slate-400 font-bold">Piezas:</label><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-20 border rounded text-center text-sm py-1 outline-none"></div>`;
-                }
-
-                return `<div class="bg-white p-4 rounded-xl border flex gap-4"><img src="${item.image}" class="w-16 h-16 object-contain shrink-0"><div class="flex-1"><div class="flex justify-between font-bold text-sm text-slate-800"><span>${item.name}</span><button onclick="remove('${item.id}')" class="text-red-400">×</button></div>${inputsHTML}</div></div>`;
-            }).join('');
-        }
-
-        // === WHATSAPP Y UTILS ===
-        function sendWhatsApp() {
-            if(cart.length === 0) return;
-            let msg = "👋 Hola Envases La Económica, deseo cotizar:\n\n";
-            cart.forEach(item => {
-                const prod = allProducts.find(p => p.id === item.id) || item;
-                const packSize = (prod.category||'').toLowerCase().includes('bolsa') ? 100 : (parseInt(prod.piezas)||0);
-                msg += `🔹 ${item.name}\n`;
-                if (packSize > 1) {
-                    const packs = Math.floor(item.quantity / packSize);
-                    const loose = item.quantity % packSize;
-                    if(packs > 0) msg += `   📦 ${packs} Paq (${packSize} c/u)\n`;
-                    if(loose > 0) msg += `   🧩 ${loose} Pzas sueltas\n`;
-                    msg += `   (Total: ${item.quantity} pzas)\n\n`;
-                } else msg += `   🧩 ${item.quantity} Pzas\n\n`;
-            });
-            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        function askProduct(id) {
-            const prod = allProducts.find(p => p.id === id);
-            if(!prod) return;
-            const url = `https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, me interesa: " + prod.name)}`;
-            window.open(url, '_blank');
-        }
-
-        function openGeneralWhatsApp() {
-            window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Hola, tengo una duda general.")}`, '_blank');
-        }
-
-        function toggleCart() {
-            const m = document.getElementById('cart-modal');
-            const b = document.getElementById('cart-backdrop');
-            const p = document.getElementById('cart-panel');
-            if(m.classList.contains('hidden')) {
-                m.classList.remove('hidden');
-                setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
-            } else {
-                b.classList.add('opacity-0');
-                p.classList.add('translate-x-full');
-                setTimeout(() => m.classList.add('hidden'), 300);
-            }
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.remove('opacity-0', 'translate-y-24');
-            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
-        }
-
-        function openImage(src) {
-            const l = document.getElementById('lightbox');
-            document.getElementById('lightbox-img').src = src;
-            l.classList.remove('hidden');
-        }
-        
-        function clearCart() {
-            if(confirm("¿Vaciar carrito?")) { cart = []; saveCart(); toggleCart(); }
-        }
-    </script>
+    <div id="tour-overlay" onclick="endTour()"></div>
+    <div id="tour-tooltip"><h4 id="tour-title" class="font-bold"></h4><p id="tour-desc" class="text-sm"></p><div class="flex justify-between mt-2"><span id="tour-step-count" class="text-xs"></span><button id="tour-next-btn" onclick="nextStep()" class="bg-indigo-600 text-white px-3 py-1 rounded text-xs">Siguiente</button></div></div>
+    <div id="lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/90" onclick="this.classList.add('hidden')"><img id="lightbox-img" class="max-w-[95%] max-h-[90vh] rounded" onclick="event.stopPropagation()"></div>
 </body>
 </html>
