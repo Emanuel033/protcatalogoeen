@@ -28,17 +28,21 @@
             <div class="flex items-center justify-between w-full md:w-auto">
                 <div class="flex items-center gap-3">
                     <div class="bg-white text-indigo-900 p-2 rounded-xl font-bold h-10 w-10 flex items-center justify-center">E</div>
-                    <div><h1 class="text-lg font-bold">Envases La Económica</h1><p class="text-[10px] text-indigo-300 uppercase">Catálogo Digital</p></div>
+                    <div>
+                        <!-- CAMBIO: Nombre completo en mayúsculas -->
+                        <h1 class="text-lg font-bold uppercase tracking-tight">ENVASES LA ECONOMICA DEL NORTE</h1>
+                        <p class="text-[10px] text-indigo-300 uppercase">Catálogo Digital</p>
+                    </div>
                 </div>
                 <div class="flex gap-2 md:hidden">
                     <button onclick="startQRScanner()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-qrcode"></i></button>
-                    <!-- Tour eliminado de móviles también -->
                 </div>
             </div>
             <div class="w-full md:w-96 flex gap-2 relative">
-                <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar..." class="w-full py-2.5 pl-4 pr-10 rounded-xl bg-indigo-800/50 text-white placeholder-indigo-300 focus:bg-white focus:text-slate-800 transition-all text-sm outline-none">
+                <!-- CAMBIO: Buscador blanco (bg-white) con texto oscuro (text-slate-800) -->
+                <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." class="w-full py-2.5 pl-4 pr-10 rounded-xl bg-white text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 transition-all text-sm outline-none shadow-sm">
+                
                 <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark"></i></button>
-                <!-- Botón de ayuda eliminado -->
             </div>
         </div>
     </nav>
@@ -65,7 +69,7 @@
         </div>
     </main>
 
-    <!-- FOOTER COMPLETO RESTAURADO -->
+    <!-- FOOTER COMPLETO -->
     <footer class="bg-white border-t border-slate-200 mt-auto pt-10 pb-6">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
