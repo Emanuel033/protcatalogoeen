@@ -301,6 +301,12 @@ function stopQRScanner() {
     return html5QrcodeScanner ? html5QrcodeScanner.stop().then(() => { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }) : Promise.resolve();
 }
 
+// === LÓGICA DE ROUND ROBIN WHATSAPP ===
+function getRandomPhone() {
+    const phones = ['528113728493', '528118400503'];
+    return phones[Math.floor(Math.random() * phones.length)];
+}
+
 function sendWhatsApp() {
     if(cart.length === 0) return showToast("Carrito vacío");
     const name = document.getElementById('client-name').value.trim() || "Cliente";
@@ -321,9 +327,23 @@ function sendWhatsApp() {
         } else msg += ` (${i.quantity} pzas)`;
         msg += '\n';
     });
-    window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`, '_blank');
+
+    const phone = getRandomPhone();
+    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     
     if(analytics) analytics.logEvent('generate_lead', { currency: 'MXN', value: 0 });
+}
+
+function openGeneralWhatsApp() {
+    const phone = getRandomPhone();
+    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent("Hola, tengo una duda general.")}`, '_blank');
+}
+
+function askProduct(id) { 
+    const p = allProducts.find(x => x.id === id); 
+    const phone = getRandomPhone();
+    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent("Info sobre: "+p.name)}`, '_blank');
+    if(analytics) analytics.logEvent('ask_product', { product_id: id });
 }
 
 function loadPrefs() { try { const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; if(p.name) document.getElementById('client-name').value = p.name; if(p.deliveryType) setDelivery(p.deliveryType, false); } catch(e){} }
@@ -347,11 +367,6 @@ function setOcurre(v) { isOcurre = v; document.getElementById('btn-ocurre-si').c
 function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.remove('opacity-0','translate-y-24'); setTimeout(()=>t.classList.add('opacity-0','translate-y-24'),2500); }
 function openImage(s) { document.getElementById('lightbox-img').src=s; document.getElementById('lightbox').classList.remove('hidden'); }
 function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
-function askProduct(id) { 
-    const p = allProducts.find(x => x.id === id); 
-    window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Info sobre: "+p.name)}`, '_blank');
-    if(analytics) analytics.logEvent('ask_product', { product_id: id });
-}
 
 function startTour() {
     const tour = [
