@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin 8.3 - Tipografía Refinada y Multilínea</title>
+    <title>Admin 8.4 - Alta Densidad y Ajuste de Marca</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -37,113 +37,112 @@
         <p class="text-xs tracking-[0.2em] font-bold animate-pulse text-indigo-100">INICIANDO ERP...</p>
     </div>
 
-    <aside class="hidden md:flex flex-col w-64 h-full bg-white border-r border-slate-200 shadow-sm z-20 shrink-0">
-        <div class="p-6 flex items-center gap-3 border-b border-slate-100">
-            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 shrink-0">
-                <i class="fa-solid fa-boxes-stacked text-lg"></i>
+    <aside class="hidden md:flex flex-col w-52 h-full bg-white border-r border-slate-200 shadow-sm z-20 shrink-0">
+        <div class="p-5 flex items-center gap-3 border-b border-slate-100">
+            <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 shrink-0">
+                <i class="fa-solid fa-boxes-stacked text-sm"></i>
             </div>
             <div>
-                <h1 class="text-slate-800 text-lg font-extrabold tracking-tight leading-none">Económica</h1>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">ERP Admin</p>
+                <h1 class="text-slate-800 text-[11px] font-black tracking-tighter leading-tight uppercase">Envases La<br>Económica<br>del Norte</h1>
             </div>
         </div>
         
-        <nav class="flex-grow p-4 space-y-2">
-            <button onclick="switchTab('catalogo')" id="tab-catalogo-desktop" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-700 bg-indigo-50 font-bold transition-all">
-                <i class="fa-solid fa-tags text-lg w-5 text-center"></i> Catálogo
+        <nav class="flex-grow p-3 space-y-1.5 overflow-y-auto">
+            <button onclick="switchTab('catalogo')" id="tab-catalogo-desktop" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-indigo-700 bg-indigo-50 font-bold transition-all text-xs">
+                <i class="fa-solid fa-tags text-base w-5 text-center"></i> Catálogo
             </button>
-            <button onclick="switchTab('inventario')" id="tab-inventario-desktop" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-semibold transition-all">
-                <i class="fa-solid fa-clipboard-check text-lg w-5 text-center"></i> Inventario Físico
+            <button onclick="switchTab('inventario')" id="tab-inventario-desktop" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-semibold transition-all text-xs">
+                <i class="fa-solid fa-clipboard-check text-base w-5 text-center"></i> Inventario Físico
             </button>
-            <hr class="border-slate-100 my-4">
-            <button onclick="openAddModal()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-md font-bold transition-all mt-4">
-                <i class="fa-solid fa-circle-plus text-lg w-5 text-center"></i> Nuevo Producto
+            <hr class="border-slate-100 my-3">
+            <button onclick="openAddModal()" class="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-md font-bold transition-all mt-3 text-xs">
+                <i class="fa-solid fa-circle-plus text-base w-5 text-center"></i> Nuevo
             </button>
         </nav>
 
-        <div class="p-4 border-t border-slate-100">
-            <div class="flex items-center gap-3 px-4 py-2">
-                <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-user"></i></div>
-                <div class="flex-grow min-w-0"><p id="user-info-desk" class="text-xs font-bold text-slate-700 truncate">Usuario</p></div>
-                <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition-colors" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></button>
+        <div class="p-3 border-t border-slate-100">
+            <div class="flex items-center gap-2 px-2 py-1.5">
+                <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-user text-[10px]"></i></div>
+                <div class="flex-grow min-w-0"><p id="user-info-desk" class="text-[10px] font-bold text-slate-700 truncate">Usuario</p></div>
+                <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition-colors" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket text-xs"></i></button>
             </div>
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50 w-full">
         
-        <div class="md:hidden bg-white px-5 py-4 flex justify-between items-center shrink-0 z-20 shadow-sm rounded-b-3xl relative">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                    <i class="fa-solid fa-boxes-stacked text-lg"></i>
+        <div class="md:hidden bg-white px-4 py-3 flex justify-between items-center shrink-0 z-20 shadow-sm rounded-b-2xl relative">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-boxes-stacked text-sm"></i>
                 </div>
                 <div>
-                    <h1 class="text-slate-800 text-lg font-extrabold tracking-tight leading-none">Económica</h1>
-                    <p id="user-info-mob" class="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Cargando...</p>
+                    <h1 class="text-slate-800 text-[13px] font-black tracking-tight leading-none uppercase">La Económica</h1>
+                    <p id="user-info-mob" class="text-[9px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Cargando...</p>
                 </div>
             </div>
-            <button onclick="logout()" class="w-9 h-9 bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-full flex items-center justify-center transition-colors">
-                <i class="fa-solid fa-power-off"></i>
+            <button onclick="logout()" class="w-8 h-8 bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-full flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-power-off text-xs"></i>
             </button>
         </div>
 
-        <header class="hidden md:flex px-8 py-6 items-center justify-between shrink-0 max-w-5xl mx-auto w-full">
-            <h2 id="seccion-titulo" class="text-2xl font-black text-slate-800 tracking-tight">Catálogo de Productos</h2>
+        <header class="hidden md:flex px-6 py-4 items-center justify-between shrink-0 max-w-5xl mx-auto w-full">
+            <h2 id="seccion-titulo" class="text-xl font-black text-slate-800 tracking-tight">Catálogo de Productos</h2>
         </header>
 
         <div id="view-catalogo" class="flex flex-col h-full overflow-hidden relative w-full">
-            <div class="px-4 md:px-8 py-3 shrink-0 z-10 max-w-5xl mx-auto w-full">
+            <div class="px-3 md:px-6 py-2 shrink-0 z-10 max-w-5xl mx-auto w-full">
                 <div class="flex gap-2">
                     <div class="relative flex-grow">
-                        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input id="searchInput" oninput="filterProducts()" type="text" placeholder="Buscar producto..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm md:text-base outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold text-slate-800">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input id="searchInput" oninput="filterProducts()" type="text" placeholder="Buscar producto..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold text-slate-800">
                     </div>
-                    <button onclick="openMassActions()" class="w-12 md:w-auto md:px-4 h-12 bg-white border border-slate-200 text-slate-600 rounded-2xl flex items-center justify-center shadow-sm hover:bg-slate-50 transition-colors shrink-0 gap-2 font-bold">
+                    <button onclick="openMassActions()" class="w-10 md:w-auto md:px-3 h-10 bg-white border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center shadow-sm hover:bg-slate-50 transition-colors shrink-0 gap-1.5 font-bold text-xs">
                         <i class="fa-solid fa-layer-group"></i> <span class="hidden md:inline">Acciones</span>
                     </button>
                 </div>
             </div>
 
-            <div class="flex-grow overflow-y-auto px-4 md:px-8 pb-32 md:pb-8 pt-1" id="catalogCardsContainer">
-                <div id="catalogGrid" class="flex flex-col gap-3 max-w-5xl mx-auto w-full"></div>
-                <div id="catalogLoadMoreBtn" class="mt-4 pb-4"></div>
+            <div class="flex-grow overflow-y-auto px-3 md:px-6 pb-28 md:pb-6 pt-1" id="catalogCardsContainer">
+                <div id="catalogGrid" class="flex flex-col gap-2 max-w-5xl mx-auto w-full"></div>
+                <div id="catalogLoadMoreBtn" class="mt-3 pb-3"></div>
             </div>
         </div>
 
         <div id="view-inventario" class="hidden flex-col h-full overflow-hidden relative w-full">
-            <div class="px-4 md:px-8 py-3 shrink-0 z-10 flex gap-2 max-w-5xl mx-auto w-full">
+            <div class="px-3 md:px-6 py-2 shrink-0 z-10 flex gap-2 max-w-5xl mx-auto w-full">
                 <div class="relative flex-grow">
-                    <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input id="searchInvInput" oninput="renderInventoryTable()" type="text" placeholder="Buscar para ajustar stock..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm md:text-base outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input id="searchInvInput" oninput="renderInventoryTable()" type="text" placeholder="Buscar para ajustar stock..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold">
                 </div>
-                <button onclick="exportToExcel('inventario')" class="w-12 md:w-auto md:px-4 h-12 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm hover:bg-emerald-100 transition-colors shrink-0 gap-2 font-bold" title="Exportar a Excel">
-                    <i class="fa-solid fa-file-excel text-lg"></i> <span class="hidden md:inline">Exportar</span>
+                <button onclick="exportToExcel('inventario')" class="w-10 md:w-auto md:px-3 h-10 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm hover:bg-emerald-100 transition-colors shrink-0 gap-1.5 font-bold text-xs" title="Exportar a Excel">
+                    <i class="fa-solid fa-file-excel text-sm"></i> <span class="hidden md:inline">Exportar</span>
                 </button>
-                <button onclick="resetAllStock()" class="w-12 md:w-auto md:px-4 h-12 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center justify-center shadow-sm hover:bg-red-100 transition-colors shrink-0 gap-2 font-bold" title="Poner inventario a CERO">
-                    <i class="fa-solid fa-trash-arrow-up text-lg"></i> <span class="hidden md:inline">Limpiar Stock</span>
+                <button onclick="resetAllStock()" class="w-10 md:w-auto md:px-3 h-10 bg-red-50 border border-red-100 text-red-600 rounded-xl flex items-center justify-center shadow-sm hover:bg-red-100 transition-colors shrink-0 gap-1.5 font-bold text-xs" title="Poner inventario a CERO">
+                    <i class="fa-solid fa-trash-arrow-up text-sm"></i> <span class="hidden md:inline">Limpiar</span>
                 </button>
             </div>
 
-            <div class="flex-grow overflow-y-auto px-4 md:px-8 pb-32 md:pb-8" id="inventoryCardsContainer">
-                <div id="inventoryGrid" class="flex flex-col gap-4 max-w-5xl mx-auto w-full"></div>
-                <div id="inventoryLoadMoreBtn" class="mt-4 pb-4"></div>
+            <div class="flex-grow overflow-y-auto px-3 md:px-6 pb-28 md:pb-6 pt-1" id="inventoryCardsContainer">
+                <div id="inventoryGrid" class="flex flex-col gap-2.5 max-w-5xl mx-auto w-full"></div>
+                <div id="inventoryLoadMoreBtn" class="mt-3 pb-3"></div>
             </div>
 
-            <button onclick="openScannerModal()" class="fixed bottom-28 md:absolute md:bottom-8 right-5 md:right-8 w-16 h-16 md:w-20 md:h-20 bg-gradient-to-tr from-indigo-600 to-purple-500 text-white rounded-[20px] md:rounded-[24px] shadow-[0_10px_25px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40">
-                <i class="fa-solid fa-qrcode text-2xl md:text-3xl"></i>
+            <button onclick="openScannerModal()" class="fixed bottom-24 md:absolute md:bottom-6 right-4 md:right-6 w-14 h-14 md:w-16 md:h-16 bg-gradient-to-tr from-indigo-600 to-purple-500 text-white rounded-2xl md:rounded-[20px] shadow-[0_8px_20px_rgba(79,70,229,0.35)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40">
+                <i class="fa-solid fa-qrcode text-xl md:text-2xl"></i>
             </button>
         </div>
 
-        <div class="md:hidden fixed bottom-0 left-0 w-full glass-nav pt-3 pb-6 px-6 z-50 rounded-t-[2rem] border-t border-slate-200 shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
+        <div class="md:hidden fixed bottom-0 left-0 w-full glass-nav pt-2 pb-5 px-5 z-50 rounded-t-3xl border-t border-slate-200 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
             <div class="flex justify-between items-center relative">
-                <button onclick="switchTab('catalogo')" id="tab-catalogo-mobile" class="flex flex-col items-center gap-1 w-20 text-indigo-600 transition-colors">
-                    <i class="fa-solid fa-tags text-xl mb-0.5"></i> <span class="text-[10px] font-bold tracking-wide">Catálogo</span>
+                <button onclick="switchTab('catalogo')" id="tab-catalogo-mobile" class="flex flex-col items-center gap-0.5 w-16 text-indigo-600 transition-colors">
+                    <i class="fa-solid fa-tags text-lg mb-0.5"></i> <span class="text-[9px] font-bold tracking-wide">Catálogo</span>
                 </button>
-                <button onclick="openAddModal()" class="absolute left-1/2 -translate-x-1/2 -top-10 w-14 h-14 bg-slate-900 text-white rounded-full shadow-lg shadow-slate-400/50 flex items-center justify-center hover:bg-black active:scale-90 transition-all border-4 border-white">
-                    <i class="fa-solid fa-plus text-xl"></i>
+                <button onclick="openAddModal()" class="absolute left-1/2 -translate-x-1/2 -top-8 w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-slate-400/50 flex items-center justify-center hover:bg-black active:scale-90 transition-all border-[3px] border-white">
+                    <i class="fa-solid fa-plus text-lg"></i>
                 </button>
-                <button onclick="switchTab('inventario')" id="tab-inventario-mobile" class="flex flex-col items-center gap-1 w-20 text-slate-400 hover:text-slate-600 transition-colors">
-                    <i class="fa-solid fa-clipboard-check text-xl mb-0.5"></i> <span class="text-[10px] font-bold tracking-wide">Inventario</span>
+                <button onclick="switchTab('inventario')" id="tab-inventario-mobile" class="flex flex-col items-center gap-0.5 w-16 text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="fa-solid fa-clipboard-check text-lg mb-0.5"></i> <span class="text-[9px] font-bold tracking-wide">Inventario</span>
                 </button>
             </div>
         </div>
@@ -151,60 +150,60 @@
 
     <div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] hidden flex-col justify-end md:justify-center md:items-center">
         <div class="bg-white w-full md:max-w-xl mx-auto rounded-t-[2rem] md:rounded-3xl p-6 md:p-8 slide-up md:animate-none md:fade-in shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl md:text-2xl font-black text-slate-800">Nuevo Producto</h2>
-                <button onclick="closeAddModal()" class="w-8 h-8 md:w-10 md:h-10 bg-slate-100 rounded-full text-slate-500 flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark md:text-lg"></i></button>
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-xl font-black text-slate-800">Nuevo Producto</h2>
+                <button onclick="closeAddModal()" class="w-8 h-8 bg-slate-100 rounded-full text-slate-500 flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="space-y-4 md:space-y-5">
+            <div class="space-y-4">
                 <div>
-                    <label class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Nombre del Producto</label>
-                    <input id="prodName" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors text-slate-900">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nombre del Producto</label>
+                    <input id="prodName" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors text-slate-900">
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Categoría</label>
-                        <input id="prodCat" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors text-slate-900">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Categoría</label>
+                        <input id="prodCat" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors text-slate-900">
                     </div>
                     <div>
-                        <label class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Pzas x Paquete</label>
-                        <input id="prodPcs" type="number" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors text-slate-900">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Pzas x Paquete</label>
+                        <input id="prodPcs" type="number" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors text-slate-900">
                     </div>
                 </div>
                 <div>
-                    <label class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">URL de Imagen</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">URL de Imagen</label>
                     <div class="flex gap-2">
-                        <input id="prodFile" oninput="previewImage(this.value)" type="text" class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors">
-                        <div id="imgPreviewBox" class="w-12 h-12 rounded-xl border border-slate-200 overflow-hidden hidden shrink-0"><img id="imgPreview" class="w-full h-full object-cover"></div>
+                        <input id="prodFile" oninput="previewImage(this.value)" type="text" class="flex-grow bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors">
+                        <div id="imgPreviewBox" class="w-10 h-10 rounded-lg border border-slate-200 overflow-hidden hidden shrink-0"><img id="imgPreview" class="w-full h-full object-cover"></div>
                     </div>
                 </div>
-                <div class="pt-4"><button onclick="uploadProduct()" id="btnUpload" class="w-full bg-indigo-600 text-white font-bold rounded-xl py-4 shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all text-sm">Guardar Producto</button></div>
+                <div class="pt-2"><button onclick="uploadProduct()" id="btnUpload" class="w-full bg-indigo-600 text-white font-bold rounded-lg py-3 shadow-md shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all text-sm">Guardar Producto</button></div>
             </div>
         </div>
     </div>
 
     <div id="optionsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[80] hidden flex-col justify-end md:justify-center md:items-center" onclick="if(event.target === this) closeOptionsModal()">
-        <div class="bg-white w-full md:max-w-sm mx-auto rounded-t-[2rem] md:rounded-3xl p-6 slide-up shadow-2xl relative pb-8 md:pb-6">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 md:hidden"></div>
-            <h3 id="optProdName" class="text-center font-bold text-slate-800 text-lg md:text-xl mb-6 px-4 truncate">Nombre Producto</h3>
+        <div class="bg-white w-full md:max-w-sm mx-auto rounded-t-3xl md:rounded-2xl p-5 slide-up shadow-2xl relative pb-6">
+            <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4 md:hidden"></div>
+            <h3 id="optProdName" class="text-center font-bold text-slate-900 text-base mb-5 px-2 truncate">Nombre Producto</h3>
             <div class="space-y-2">
-                <button onclick="actionClone()" class="w-full flex items-center p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors text-slate-700 font-semibold"><div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-4"><i class="fa-solid fa-copy"></i></div>Clonar Producto</button>
-                <button onclick="actionMakeOld()" class="w-full flex items-center p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors text-slate-700 font-semibold"><div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-4"><i class="fa-solid fa-clock-rotate-left"></i></div>Mover al final</button>
-                <button onclick="actionDelete()" class="w-full flex items-center p-4 rounded-2xl bg-red-50 hover:bg-red-100 transition-colors text-red-600 font-bold mt-4"><div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-4"><i class="fa-solid fa-trash"></i></div>Eliminar Producto</button>
+                <button onclick="actionClone()" class="w-full flex items-center p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors text-slate-700 font-semibold text-sm"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-copy text-xs"></i></div>Clonar Producto</button>
+                <button onclick="actionMakeOld()" class="w-full flex items-center p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors text-slate-700 font-semibold text-sm"><div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mr-3"><i class="fa-solid fa-clock-rotate-left text-xs"></i></div>Mover al final</button>
+                <button onclick="actionDelete()" class="w-full flex items-center p-3 rounded-xl bg-red-50 hover:bg-red-100 transition-colors text-red-600 font-bold mt-3 text-sm"><div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-3"><i class="fa-solid fa-trash text-xs"></i></div>Eliminar Producto</button>
             </div>
         </div>
     </div>
 
     <div id="massActionsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[80] hidden flex-col justify-end md:justify-center md:items-center" onclick="if(event.target === this) closeMassActions()">
-        <div class="bg-white w-full md:max-w-md mx-auto rounded-t-[2rem] md:rounded-3xl p-6 slide-up shadow-2xl relative pb-8 md:pb-6">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 md:hidden"></div>
-            <h3 class="font-bold text-slate-800 text-lg md:text-xl mb-6">Acciones de Catálogo</h3>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="printFilteredQRs('inventario')" class="bg-purple-50 hover:bg-purple-100 border border-purple-100 text-purple-700 p-4 rounded-2xl font-bold flex flex-col items-center justify-center gap-2"><i class="fa-solid fa-box text-2xl"></i> QRs Cajas</button>
-                <button onclick="printFilteredQRs('vitrina')" class="bg-pink-50 hover:bg-pink-100 border border-pink-100 text-pink-700 p-4 rounded-2xl font-bold flex flex-col items-center justify-center gap-2"><i class="fa-solid fa-store text-2xl"></i> QRs Vitrina</button>
+        <div class="bg-white w-full md:max-w-md mx-auto rounded-t-3xl md:rounded-2xl p-5 slide-up shadow-2xl relative pb-6">
+            <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4 md:hidden"></div>
+            <h3 class="font-black text-slate-900 text-lg mb-4">Acciones de Catálogo</h3>
+            <div class="grid grid-cols-2 gap-2.5 mb-5">
+                <button onclick="printFilteredQRs('inventario')" class="bg-purple-50 hover:bg-purple-100 border border-purple-100 text-purple-700 p-3 rounded-xl font-bold flex flex-col items-center justify-center gap-1.5 text-xs"><i class="fa-solid fa-box text-xl"></i> QRs Cajas</button>
+                <button onclick="printFilteredQRs('vitrina')" class="bg-pink-50 hover:bg-pink-100 border border-pink-100 text-pink-700 p-3 rounded-xl font-bold flex flex-col items-center justify-center gap-1.5 text-xs"><i class="fa-solid fa-store text-xl"></i> QRs Vitrina</button>
             </div>
-            <div class="flex gap-3">
-                <button onclick="filterIncomplete(); closeMassActions();" class="flex-1 bg-orange-50 text-orange-600 py-3 rounded-xl font-bold border border-orange-100"><i class="fa-solid fa-triangle-exclamation"></i> Sin piezas</button>
-                <button onclick="exportToExcel('catalogo'); closeMassActions();" class="flex-1 bg-emerald-50 text-emerald-600 py-3 rounded-xl font-bold border border-emerald-100"><i class="fa-solid fa-file-excel"></i> Excel Catálogo</button>
+            <div class="flex gap-2.5">
+                <button onclick="filterIncomplete(); closeMassActions();" class="flex-1 bg-orange-50 text-orange-600 py-2.5 rounded-lg font-bold border border-orange-100 text-xs"><i class="fa-solid fa-triangle-exclamation"></i> Sin piezas</button>
+                <button onclick="exportToExcel('catalogo'); closeMassActions();" class="flex-1 bg-emerald-50 text-emerald-600 py-2.5 rounded-lg font-bold border border-emerald-100 text-xs"><i class="fa-solid fa-file-excel"></i> Excel Catálogo</button>
             </div>
         </div>
     </div>
@@ -212,68 +211,67 @@
     <div id="scannerModal" class="fixed inset-0 bg-black/95 z-[90] hidden flex-col md:justify-center md:items-center">
         <div class="p-4 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent text-white shrink-0 absolute top-0 w-full z-20">
             <div>
-                <h3 class="font-bold text-lg leading-none"><i class="fa-solid fa-qrcode text-indigo-400"></i> Auditoría Física</h3>
-                <p class="text-[10px] text-gray-300 mt-1">Escanea para abrir calculadora</p>
+                <h3 class="font-bold text-base leading-none"><i class="fa-solid fa-qrcode text-indigo-400"></i> Auditoría Física</h3>
+                <p class="text-[10px] text-gray-300 mt-0.5">Escanea para abrir calculadora</p>
             </div>
-            <button onclick="closeScannerModal()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors backdrop-blur-md"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <button onclick="closeScannerModal()" class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors backdrop-blur-md"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
         <div class="flex-grow relative flex flex-col justify-center items-center p-4 w-full h-full pb-10">
             
-            <div id="readerWrapper" class="w-full max-w-sm overflow-hidden rounded-[2rem] border-4 border-indigo-500/30 shadow-[0_0_50px_rgba(99,102,241,0.15)] bg-black relative transition-all duration-300">
+            <div id="readerWrapper" class="w-full max-w-xs overflow-hidden rounded-[2rem] border-4 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.15)] bg-black relative transition-all duration-300">
                 <div id="reader" class="w-full"></div>
                 <div id="scanOverlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-200">
-                    <div class="bg-white/20 backdrop-blur-md rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-2xl"><i class="fa-solid fa-check text-5xl text-white"></i></div>
-                    <div id="overlayQty" class="text-6xl font-black text-white drop-shadow-lg tracking-tighter">Guardado</div>
+                    <div class="bg-white/20 backdrop-blur-md rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-2xl"><i class="fa-solid fa-check text-4xl text-white"></i></div>
+                    <div id="overlayQty" class="text-5xl font-black text-white drop-shadow-lg tracking-tighter">Guardado</div>
                 </div>
             </div>
             
-            <div id="scanPanelWaiting" class="mt-8 w-full max-w-sm bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-2xl text-center relative overflow-hidden transition-all duration-300">
+            <div id="scanPanelWaiting" class="mt-6 w-full max-w-xs bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-2xl text-center relative overflow-hidden transition-all duration-300">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
                 <div id="waitingContent" class="animate-pulse">
-                    <i class="fa-solid fa-expand text-slate-500 text-3xl mb-3"></i>
-                    <h3 class="text-white font-bold text-lg">Esperando código...</h3>
-                    <p class="text-slate-400 text-xs mt-1">El panel de ajuste aparecerá automáticamente</p>
+                    <i class="fa-solid fa-expand text-slate-500 text-2xl mb-2"></i>
+                    <h3 class="text-white font-bold text-sm">Esperando código...</h3>
                 </div>
             </div>
 
-            <div id="scanPanelAdjust" class="hidden absolute bottom-0 w-full max-w-md bg-white rounded-t-[2rem] p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-30 slide-up border-t border-slate-200 pb-10">
-                <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+            <div id="scanPanelAdjust" class="hidden absolute bottom-0 w-full max-w-sm bg-white rounded-t-3xl p-5 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-30 slide-up border-t border-slate-200 pb-8">
+                <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3"></div>
                 
-                <h3 id="adjProdName" class="font-bold text-slate-800 text-lg md:text-xl leading-tight truncate px-2 text-center">Nombre Producto</h3>
-                <p class="text-center text-xs text-slate-500 font-bold mt-1 mb-5 bg-slate-100 py-1.5 px-3 rounded-full w-max mx-auto border border-slate-200"><i class="fa-solid fa-box-open text-indigo-500 mr-1"></i> Contiene <span id="adjPzasPaq" class="font-bold text-slate-800">0</span> pzas por paquete</p>
+                <h3 id="adjProdName" class="font-bold text-slate-900 text-base leading-tight truncate px-2 text-center">Nombre Producto</h3>
+                <p class="text-center text-[10px] text-slate-500 font-bold mt-1 mb-4 bg-slate-100 py-1 px-3 rounded-full w-max mx-auto border border-slate-200"><i class="fa-solid fa-box-open text-indigo-500 mr-1"></i> Contiene <span id="adjPzasPaq" class="font-bold text-slate-800">0</span> pzas por paquete</p>
 
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center bg-indigo-50/50 p-3 rounded-2xl border border-indigo-100">
+                <div class="space-y-2.5">
+                    <div class="flex justify-between items-center bg-indigo-50/50 p-2.5 rounded-xl border border-indigo-100">
                         <div class="pl-2">
-                            <p class="font-bold text-slate-700 text-sm">Cajas / Paquetes</p>
-                            <p class="text-[10px] text-indigo-500 font-semibold">Se multiplicará x <span id="adjMult">0</span></p>
+                            <p class="font-bold text-slate-700 text-xs">Cajas / Paquetes</p>
+                            <p class="text-[9px] text-indigo-500 font-semibold">x <span id="adjMult">0</span></p>
                         </div>
-                        <div class="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-indigo-50 p-1">
-                            <button onclick="changeAdjQty('paq', -1)" class="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-200 font-bold text-lg flex items-center justify-center active:scale-90 transition-transform"><i class="fa-solid fa-minus"></i></button>
-                            <input id="adjInputPaq" type="number" oninput="calculateAdjTotal()" value="1" class="w-12 text-center font-black text-indigo-700 text-lg outline-none bg-transparent">
-                            <button onclick="changeAdjQty('paq', 1)" class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold text-lg flex items-center justify-center active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
+                        <div class="flex items-center gap-1.5 bg-white rounded-lg shadow-sm border border-indigo-50 p-1">
+                            <button onclick="changeAdjQty('paq', -1)" class="w-8 h-8 rounded-md bg-slate-50 text-slate-500 hover:bg-slate-200 font-bold flex items-center justify-center active:scale-90 transition-transform"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <input id="adjInputPaq" type="number" oninput="calculateAdjTotal()" value="1" class="w-10 text-center font-black text-indigo-700 text-base outline-none bg-transparent p-0">
+                            <button onclick="changeAdjQty('paq', 1)" class="w-8 h-8 rounded-md bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold flex items-center justify-center active:scale-90 transition-transform"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                         <div class="pl-2">
-                            <p class="font-bold text-slate-700 text-sm">Piezas Sueltas</p>
-                            <p class="text-[10px] text-slate-400 font-semibold">Unidades individuales</p>
+                            <p class="font-bold text-slate-700 text-xs">Piezas Sueltas</p>
+                            <p class="text-[9px] text-slate-400 font-semibold">Individuales</p>
                         </div>
-                        <div class="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-slate-100 p-1">
-                            <button onclick="changeAdjQty('sue', -1)" class="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-200 font-bold text-lg flex items-center justify-center active:scale-90 transition-transform"><i class="fa-solid fa-minus"></i></button>
-                            <input id="adjInputSue" type="number" oninput="calculateAdjTotal()" value="0" class="w-12 text-center font-black text-slate-800 text-lg outline-none bg-transparent">
-                            <button onclick="changeAdjQty('sue', 1)" class="w-10 h-10 rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold text-lg flex items-center justify-center active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
+                        <div class="flex items-center gap-1.5 bg-white rounded-lg shadow-sm border border-slate-100 p-1">
+                            <button onclick="changeAdjQty('sue', -1)" class="w-8 h-8 rounded-md bg-slate-50 text-slate-500 hover:bg-slate-200 font-bold flex items-center justify-center active:scale-90 transition-transform"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <input id="adjInputSue" type="number" oninput="calculateAdjTotal()" value="0" class="w-10 text-center font-black text-slate-800 text-base outline-none bg-transparent p-0">
+                            <button onclick="changeAdjQty('sue', 1)" class="w-8 h-8 rounded-md bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold flex items-center justify-center active:scale-90 transition-transform"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 flex gap-3">
-                    <button onclick="cancelAdjust()" class="w-14 h-14 shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-2xl font-bold flex items-center justify-center transition-colors"><i class="fa-solid fa-rotate-left text-xl"></i></button>
-                    <button onclick="confirmAdjust()" class="flex-grow bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-lg shadow-indigo-200 flex flex-col items-center justify-center active:scale-95 transition-all">
-                        <span class="text-[10px] font-semibold text-indigo-200 uppercase tracking-widest leading-none mb-1 pt-1">Total a sumar</span>
-                        <span class="font-black text-2xl leading-none"><i class="fa-solid fa-plus text-sm mr-1"></i><span id="adjTotalFinal">0</span></span>
+                <div class="mt-4 flex gap-2.5">
+                    <button onclick="cancelAdjust()" class="w-12 h-12 shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl font-bold flex items-center justify-center transition-colors"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button onclick="confirmAdjust()" class="flex-grow bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200 flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="text-[9px] font-semibold text-indigo-200 uppercase tracking-widest leading-none mb-0.5 pt-0.5">Total a sumar</span>
+                        <span class="font-black text-xl leading-none"><i class="fa-solid fa-plus text-[10px] mr-1"></i><span id="adjTotalFinal">0</span></span>
                     </button>
                 </div>
             </div>
@@ -281,9 +279,9 @@
         </div>
     </div>
 
-    <div id="toast" class="fixed top-6 right-1/2 translate-x-1/2 md:translate-x-0 md:right-8 md:top-8 bg-slate-800 text-white px-5 py-3.5 rounded-2xl shadow-2xl -translate-y-32 transition-transform duration-300 z-[100] flex items-center gap-3 w-max max-w-[90vw]">
-        <div id="toast-icon-bg" class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"><i id="toast-icon" class="text-sm"></i></div>
-        <p id="toast-msg" class="text-sm font-semibold tracking-wide">Mensaje</p>
+    <div id="toast" class="fixed top-4 right-1/2 translate-x-1/2 md:translate-x-0 md:right-6 md:top-6 bg-slate-800 text-white px-4 py-2.5 rounded-xl shadow-2xl -translate-y-32 transition-transform duration-300 z-[100] flex items-center gap-2.5 w-max max-w-[90vw]">
+        <div id="toast-icon-bg" class="w-6 h-6 rounded-full flex items-center justify-center shrink-0"><i id="toast-icon" class="text-xs"></i></div>
+        <p id="toast-msg" class="text-xs font-semibold tracking-wide">Mensaje</p>
     </div>
 
     <script>
@@ -346,9 +344,8 @@
             isScanPaused = false;
             
             document.getElementById('waitingContent').innerHTML = `
-                <i class="fa-solid fa-expand text-slate-500 text-3xl mb-3"></i>
-                <h3 class="text-white font-bold text-lg">Esperando código...</h3>
-                <p class="text-slate-400 text-xs mt-1">El panel de ajuste aparecerá automáticamente</p>
+                <i class="fa-solid fa-expand text-slate-500 text-3xl mb-2"></i>
+                <h3 class="text-white font-bold text-sm">Esperando código...</h3>
             `;
             document.getElementById('waitingContent').classList.add('animate-pulse');
             resetScanUI();
@@ -438,13 +435,12 @@
             window.renderInventoryTable(); 
 
             document.getElementById('waitingContent').innerHTML = `
-                <div class="mb-2"><i class="fa-solid fa-circle-check text-emerald-400 text-4xl"></i></div>
-                <h3 class="text-white font-bold text-sm truncate px-2 mb-2">${freshProd.name}</h3>
-                <div class="inline-block bg-slate-800 rounded-xl px-4 py-2 border border-slate-700">
-                    <span class="text-slate-400 text-[10px] mr-2 uppercase tracking-widest font-bold">STOCK TOTAL:</span>
-                    <span class="text-3xl font-black text-emerald-400">${nuevoStock}</span>
+                <div class="mb-2"><i class="fa-solid fa-circle-check text-emerald-400 text-3xl"></i></div>
+                <h3 class="text-white font-bold text-xs truncate px-2 mb-2">${freshProd.name}</h3>
+                <div class="inline-block bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-700">
+                    <span class="text-slate-400 text-[9px] mr-1 uppercase tracking-widest font-bold">STOCK:</span>
+                    <span class="text-2xl font-black text-emerald-400">${nuevoStock}</span>
                 </div>
-                <p class="text-slate-500 text-[10px] mt-4 uppercase tracking-widest animate-pulse"><i class="fa-solid fa-camera mr-1"></i> Listo para el siguiente</p>
             `;
             document.getElementById('waitingContent').classList.remove('animate-pulse');
 
@@ -476,19 +472,19 @@
                 vCat.classList.remove('hidden'); vCat.classList.add('flex'); 
                 vInv.classList.add('hidden'); vInv.classList.remove('flex');
                 title.innerText = "Catálogo de Productos";
-                tCatMob.className = "flex flex-col items-center gap-1 w-20 text-indigo-600 transition-colors";
-                tInvMob.className = "flex flex-col items-center gap-1 w-20 text-slate-400 hover:text-slate-600 transition-colors";
-                tCatDesk.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-700 bg-indigo-50 font-bold transition-all";
-                tInvDesk.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-semibold transition-all";
+                tCatMob.className = "flex flex-col items-center gap-0.5 w-16 text-indigo-600 transition-colors";
+                tInvMob.className = "flex flex-col items-center gap-0.5 w-16 text-slate-400 hover:text-slate-600 transition-colors";
+                tCatDesk.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-indigo-700 bg-indigo-50 font-bold transition-all text-xs";
+                tInvDesk.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-semibold transition-all text-xs";
                 closeScannerModal();
             } else {
                 vInv.classList.remove('hidden'); vInv.classList.add('flex'); 
                 vCat.classList.add('hidden'); vCat.classList.remove('flex');
                 title.innerText = "Inventario Físico";
-                tInvMob.className = "flex flex-col items-center gap-1 w-20 text-indigo-600 transition-colors";
-                tCatMob.className = "flex flex-col items-center gap-1 w-20 text-slate-400 hover:text-slate-600 transition-colors";
-                tInvDesk.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-700 bg-indigo-50 font-bold transition-all";
-                tCatDesk.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-semibold transition-all";
+                tInvMob.className = "flex flex-col items-center gap-0.5 w-16 text-indigo-600 transition-colors";
+                tCatMob.className = "flex flex-col items-center gap-0.5 w-16 text-slate-400 hover:text-slate-600 transition-colors";
+                tInvDesk.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-indigo-700 bg-indigo-50 font-bold transition-all text-xs";
+                tCatDesk.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-slate-50 font-semibold transition-all text-xs";
                 renderInventoryTable();
             }
         }
@@ -504,44 +500,44 @@
             toRender.forEach(p => {
                 const isActive = p.activo !== false, fallbackImg = "https://via.placeholder.com/150?text=IMG";
                 const card = document.createElement('div');
-                card.className = `bg-white rounded-[1.25rem] p-4 md:p-5 shadow-sm border border-slate-100 fade-in ${!isActive ? 'opacity-60 grayscale' : ''} hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center gap-3 md:gap-6`;
+                // Tarjeta de catálogo más ajustada (p-3 md:p-3.5)
+                card.className = `bg-white rounded-xl p-3 md:p-3.5 shadow-sm border border-slate-100 fade-in ${!isActive ? 'opacity-60 grayscale' : ''} hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center gap-2 md:gap-4`;
                 
-                // === CAMBIO CLAVE: Se reemplaza el <input> por un <textarea rows="2"> para mostrar todo el texto ===
                 card.innerHTML = `
-                    <div class="flex gap-3 md:gap-4 items-start flex-grow min-w-0">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 shadow-inner opacity-90">
+                    <div class="flex gap-2.5 md:gap-3 items-start flex-grow min-w-0">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden shrink-0 bg-slate-50 border border-slate-200 shadow-inner opacity-90 mt-0.5">
                             <img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'">
                         </div>
                         <div class="flex-grow min-w-0 flex flex-col justify-start">
-                            <textarea rows="2" onchange="updateProduct('${p.id}','name',this.value, this)" class="w-full font-bold text-slate-800 text-sm md:text-base bg-transparent border-none outline-none focus:bg-white focus:ring-1 focus:ring-indigo-100 rounded resize-none overflow-hidden placeholder-slate-300 leading-snug p-0 m-0">${p.name || ''}</textarea>
+                            <textarea rows="2" onchange="updateProduct('${p.id}','name',this.value, this)" class="w-full font-bold text-slate-800 text-[13px] md:text-sm bg-transparent border-none outline-none focus:bg-white focus:ring-1 focus:ring-indigo-100 rounded resize-none overflow-hidden placeholder-slate-300 leading-snug p-0 m-0">${p.name || ''}</textarea>
                             
-                            <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mt-1.5">
-                                <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="w-full md:w-auto text-xs md:text-sm text-indigo-600 font-bold bg-transparent border-none outline-none truncate placeholder-slate-300 p-0 m-0">
-                                <div class="flex items-center bg-slate-50 w-max px-2.5 py-1 rounded border border-slate-200 text-[10px] md:text-xs text-slate-600 font-bold">
-                                    PZAS/PAQ: <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-10 ml-1 bg-white border border-slate-300 rounded text-center font-black text-slate-900 outline-none focus:border-indigo-500 p-0">
+                            <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mt-1">
+                                <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="w-full md:w-auto text-[11px] md:text-xs text-indigo-600 font-bold bg-transparent border-none outline-none truncate placeholder-slate-300 p-0 m-0">
+                                <div class="flex items-center bg-slate-50 w-max px-2 py-0.5 rounded border border-slate-200 text-[9px] md:text-[10px] text-slate-600 font-bold">
+                                    PZAS/PAQ: <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-8 ml-1 bg-white border border-slate-300 rounded text-center font-black text-slate-900 outline-none focus:border-indigo-500 p-0">
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="flex items-center justify-between md:justify-end gap-4 md:gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
-                        <div class="flex gap-2">
-                            <button onclick="printSingleQR('${p.id}', 'inventario')" class="bg-purple-50 text-purple-700 hover:bg-purple-100 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors"><i class="fa-solid fa-box mr-1"></i> Caja</button>
-                            <button onclick="printSingleQR('${p.id}', 'vitrina')" class="bg-pink-50 text-pink-700 hover:bg-pink-100 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors"><i class="fa-solid fa-store mr-1"></i> 1 Pza</button>
+                    <div class="flex items-center justify-between md:justify-end gap-3 md:gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
+                        <div class="flex gap-1.5">
+                            <button onclick="printSingleQR('${p.id}', 'inventario')" class="bg-purple-50 text-purple-700 hover:bg-purple-100 px-3 py-1.5 md:py-2 rounded-lg text-[11px] font-bold transition-colors"><i class="fa-solid fa-box mr-1"></i> Caja</button>
+                            <button onclick="printSingleQR('${p.id}', 'vitrina')" class="bg-pink-50 text-pink-700 hover:bg-pink-100 px-3 py-1.5 md:py-2 rounded-lg text-[11px] font-bold transition-colors"><i class="fa-solid fa-store mr-1"></i> 1 Pza</button>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2.5">
                             <label class="relative inline-flex items-center cursor-pointer">
                               <input type="checkbox" class="sr-only peer" onchange="updateProduct('${p.id}', 'activo', this.checked)" ${isActive ? 'checked' : ''}>
-                              <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
+                              <div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
                             </label>
-                            <button onclick="openOptionsModal('${p.id}', '${p.name ? p.name.replace(/'/g, "\\'") : ''}')" class="text-slate-400 hover:text-slate-800 p-2"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
+                            <button onclick="openOptionsModal('${p.id}', '${p.name ? p.name.replace(/'/g, "\\'") : ''}')" class="text-slate-400 hover:text-slate-800 p-1.5"><i class="fa-solid fa-ellipsis-vertical text-base"></i></button>
                         </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
-            if (products.length > catLimit) btnContainer.innerHTML = `<button onclick="loadMoreCat()" class="w-full max-w-sm mx-auto block bg-white text-indigo-600 p-3 rounded-xl font-bold text-sm border border-slate-200 hover:bg-slate-50 hover:border-indigo-200 transition-colors shadow-sm"><i class="fa-solid fa-caret-down mr-1"></i> Cargar más resultados (${products.length - catLimit})</button>`;
-            else if (products.length === 0) grid.innerHTML = `<div class="col-span-full text-center text-slate-400 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-30"></i><p class="font-medium">No se encontraron productos</p></div>`;
+            if (products.length > catLimit) btnContainer.innerHTML = `<button onclick="loadMoreCat()" class="w-full max-w-sm mx-auto block bg-white text-indigo-600 p-2.5 rounded-lg font-bold text-xs border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"><i class="fa-solid fa-caret-down mr-1"></i> Cargar más resultados (${products.length - catLimit})</button>`;
+            else if (products.length === 0) grid.innerHTML = `<div class="col-span-full text-center text-slate-400 mt-8"><i class="fa-solid fa-folder-open text-3xl mb-2 opacity-30"></i><p class="font-medium text-xs">No se encontraron productos</p></div>`;
         }
         window.loadMoreCat = () => { catLimit += 40; renderCatalogCards(currentFilteredProducts); };
 
@@ -559,45 +555,45 @@
                 const fallbackImg = "https://via.placeholder.com/150?text=IMG";
                 
                 const card = document.createElement('div');
-                card.className = `bg-white p-4 rounded-[1.25rem] shadow-sm border flex flex-col gap-3 transition-colors fade-in hover:shadow-md ${stock > 0 ? 'border-indigo-200 bg-indigo-50/10' : 'border-slate-100'}`;
+                // Tarjeta de inventario más ajustada (p-2.5 md:p-3, gap-2)
+                card.className = `bg-white p-2.5 md:p-3 rounded-xl shadow-sm border flex flex-col gap-2 transition-colors fade-in hover:shadow-md ${stock > 0 ? 'border-indigo-200 bg-indigo-50/10' : 'border-slate-100'}`;
                 
-                // === CAMBIO CLAVE: Texto más pequeño (text-xs md:text-sm) y menos negro (font-bold) en el Inventario ===
                 card.innerHTML = `
-                    <div class="flex items-start md:items-center gap-3">
-                        <div class="w-12 h-12 bg-slate-50 rounded-lg overflow-hidden shrink-0 border border-slate-200 mt-1 md:mt-0"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 bg-slate-50 rounded-lg overflow-hidden shrink-0 border border-slate-200"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
                         <div class="flex-grow min-w-0">
-                            <h3 class="font-bold text-slate-800 text-xs md:text-sm leading-snug break-words pr-2">${p.name}</h3>
-                            <p class="text-[10px] font-bold text-slate-400 mt-1">${p.category||'Sin categoría'} <span class="bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded ml-1">PAQ: ${pzasPaq} pzas</span></p>
+                            <h3 class="font-bold text-slate-800 text-xs md:text-sm leading-snug break-words pr-1">${p.name}</h3>
+                            <p class="text-[9px] font-bold text-slate-400 mt-0.5">${p.category||'Sin categoría'} <span class="bg-indigo-50 text-indigo-600 border border-indigo-100 px-1 py-0.5 rounded ml-1">PAQ: ${pzasPaq} pzas</span></p>
                         </div>
-                        <div class="shrink-0 flex flex-col items-end bg-slate-50 p-2 rounded-xl border border-slate-100">
-                            <span class="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-widest">Stock Total</span>
-                            <input id="inv-stock-${p.id}" type="number" onchange="updateProduct('${p.id}','stock',this.value, this)" value="${stock}" class="w-16 text-center bg-white border border-slate-200 rounded-lg py-1 font-black text-indigo-700 text-lg outline-none focus:border-indigo-500 transition-all p-0">
+                        <div class="shrink-0 flex flex-col items-end bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                            <span class="text-[8px] text-slate-400 font-bold mb-0.5 uppercase tracking-widest">Stock</span>
+                            <input id="inv-stock-${p.id}" type="number" onchange="updateProduct('${p.id}','stock',this.value, this)" value="${stock}" class="w-12 text-center bg-white border border-slate-200 rounded py-0.5 font-black text-indigo-700 text-sm outline-none focus:border-indigo-500 transition-all p-0">
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100">
-                        <div class="flex items-center justify-between bg-indigo-50/50 rounded-xl p-1 border border-indigo-100">
-                            <button onclick="adjustStockDirect('${p.id}', -${pzasPaq})" class="w-10 h-10 rounded-lg bg-white text-indigo-500 shadow-sm font-black text-lg active:scale-90 transition-transform"><i class="fa-solid fa-minus"></i></button>
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                        <div class="flex items-center justify-between bg-indigo-50/50 rounded-lg p-1 border border-indigo-100">
+                            <button onclick="adjustStockDirect('${p.id}', -${pzasPaq})" class="w-8 h-8 rounded-md bg-white text-indigo-500 shadow-sm font-black text-sm active:scale-90 transition-transform"><i class="fa-solid fa-minus"></i></button>
                             <div class="text-center">
-                                <div class="text-[11px] font-black text-indigo-800 leading-none">PAQUETE</div>
-                                <div class="text-[9px] font-bold text-indigo-500 mt-0.5">x${pzasPaq}</div>
+                                <div class="text-[10px] font-black text-indigo-800 leading-none">PAQUETE</div>
+                                <div class="text-[8px] font-bold text-indigo-500 mt-0.5">x${pzasPaq}</div>
                             </div>
-                            <button onclick="adjustStockDirect('${p.id}', ${pzasPaq})" class="w-10 h-10 rounded-lg bg-indigo-500 text-white shadow-sm font-black text-lg active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="adjustStockDirect('${p.id}', ${pzasPaq})" class="w-8 h-8 rounded-md bg-indigo-500 text-white shadow-sm font-black text-sm active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
                         </div>
-                        <div class="flex items-center justify-between bg-slate-50 rounded-xl p-1 border border-slate-200">
-                            <button onclick="adjustStockDirect('${p.id}', -1)" class="w-10 h-10 rounded-lg bg-white text-slate-500 shadow-sm font-black text-lg active:scale-90 transition-transform"><i class="fa-solid fa-minus"></i></button>
+                        <div class="flex items-center justify-between bg-slate-50 rounded-lg p-1 border border-slate-200">
+                            <button onclick="adjustStockDirect('${p.id}', -1)" class="w-8 h-8 rounded-md bg-white text-slate-500 shadow-sm font-black text-sm active:scale-90 transition-transform"><i class="fa-solid fa-minus"></i></button>
                             <div class="text-center">
-                                <div class="text-[11px] font-black text-slate-700 leading-none">PIEZA</div>
-                                <div class="text-[9px] font-bold text-slate-400 mt-0.5">Suelta</div>
+                                <div class="text-[10px] font-black text-slate-700 leading-none">PIEZA</div>
+                                <div class="text-[8px] font-bold text-slate-400 mt-0.5">Suelta</div>
                             </div>
-                            <button onclick="adjustStockDirect('${p.id}', 1)" class="w-10 h-10 rounded-lg bg-slate-700 text-white shadow-sm font-black text-lg active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="adjustStockDirect('${p.id}', 1)" class="w-8 h-8 rounded-md bg-slate-700 text-white shadow-sm font-black text-sm active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
-            if (filteredProducts.length > invLimit) btnContainer.innerHTML = `<button onclick="loadMoreInv()" class="w-full max-w-sm mx-auto block bg-white text-indigo-600 p-3 rounded-xl font-bold text-sm border border-slate-200 hover:bg-slate-50 hover:border-indigo-200 transition-colors shadow-sm"><i class="fa-solid fa-caret-down mr-1"></i> Cargar más resultados (${filteredProducts.length - invLimit})</button>`;
-            else if (filteredProducts.length === 0) grid.innerHTML = `<div class="col-span-full text-center text-slate-400 mt-10"><i class="fa-solid fa-box-open text-4xl mb-3 opacity-30"></i><p class="font-medium">Sin resultados</p></div>`;
+            if (filteredProducts.length > invLimit) btnContainer.innerHTML = `<button onclick="loadMoreInv()" class="w-full max-w-sm mx-auto block bg-white text-indigo-600 p-2.5 rounded-lg font-bold text-xs border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"><i class="fa-solid fa-caret-down mr-1"></i> Cargar más resultados (${filteredProducts.length - invLimit})</button>`;
+            else if (filteredProducts.length === 0) grid.innerHTML = `<div class="col-span-full text-center text-slate-400 mt-8"><i class="fa-solid fa-box-open text-3xl mb-2 opacity-30"></i><p class="font-medium text-xs">Sin resultados</p></div>`;
         }
         window.loadMoreInv = () => { invLimit += 40; window.renderInventoryTable(); };
 
