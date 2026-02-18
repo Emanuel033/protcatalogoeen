@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
 
-        // TOUR DESACTIVADO: Se comenta esta sección para evitar que aparezca
+        // TOUR DESACTIVADO
         /*
         const urlParams = new URLSearchParams(window.location.search);
         if(!localStorage.getItem('tour_seen_v2') && !urlParams.has('add')) {
@@ -133,12 +133,21 @@ function renderGrid() {
         const hasPack = packQty > 1;
         const isNew = latestProductIds.includes(p.id);
         
+        // --- RESTAURADO: Información visual de piezas/paquete ---
+        let badgeHTML = '';
+        if(isBolsas) {
+            badgeHTML = `<div class="text-[10px] text-indigo-600 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-box-open"></i> Min: 1 Paquete (100 pzas)</div>`;
+        } else if(hasPack) {
+            badgeHTML = `<div class="text-[10px] text-slate-500 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-box"></i> Paquete master: <b>${packQty} pzas</b></div>`;
+        } else {
+             badgeHTML = `<div class="text-[10px] text-slate-400 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-cube"></i> Venta Individual</div>`;
+        }
+
         let selectorHTML = isBolsas 
             ? `<select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none"><option value="100">Paquete (100 pzas)</option></select>`
-            : (hasPack ? `<select id="sel-${p.id}" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 mb-2 bg-slate-50 text-slate-700 font-medium outline-none"><option value="1">Individual</option><option value="${packQty}">Paquete completo</option></select>` 
+            : (hasPack ? `<select id="sel-${p.id}" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 mb-2 bg-slate-50 text-slate-700 font-medium outline-none"><option value="1">Individual</option><option value="${packQty}">Paquete completo (${packQty})</option></select>` 
             : `<input type="hidden" id="sel-${p.id}" value="1">`);
 
-        // Diseño actualizado para nombre completo (más pequeño)
         return `
         <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
             <div class="relative h-52 p-4 cursor-pointer overflow-hidden rounded-t-2xl" onclick="openImage('${p.image}')">
@@ -148,9 +157,11 @@ function renderGrid() {
             <div class="p-4 flex flex-col flex-1 border-t border-slate-50">
                 <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">${escapeHTML(p.category || 'General')}</span>
                 
-                <h3 class="font-bold text-xs text-slate-900 mb-3 leading-relaxed">
+                <h3 class="font-bold text-xs text-slate-900 mb-2 leading-relaxed h-auto">
                     ${escapeHTML(p.name)}
                 </h3>
+                
+                ${badgeHTML} <!-- AQUÍ SE MUESTRA LA INFO -->
                 
                 ${selectorHTML}
                 
