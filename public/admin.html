@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin 8.1 - Inventario Completo y UI Escritorio</title>
+    <title>Admin 8.2 - Vista Lista y Controles Duales</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -87,13 +87,13 @@
             </button>
         </div>
 
-        <header class="hidden md:flex px-8 py-6 items-center justify-between shrink-0">
+        <header class="hidden md:flex px-8 py-6 items-center justify-between shrink-0 max-w-5xl mx-auto w-full">
             <h2 id="seccion-titulo" class="text-2xl font-black text-slate-800 tracking-tight">Catálogo de Productos</h2>
         </header>
 
         <div id="view-catalogo" class="flex flex-col h-full overflow-hidden relative w-full">
-            <div class="px-4 md:px-8 py-3 shrink-0 z-10">
-                <div class="flex gap-2 max-w-4xl">
+            <div class="px-4 md:px-8 py-3 shrink-0 z-10 max-w-5xl mx-auto w-full">
+                <div class="flex gap-2">
                     <div class="relative flex-grow">
                         <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         <input id="searchInput" oninput="filterProducts()" type="text" placeholder="Buscar producto..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm md:text-base outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold text-slate-800">
@@ -105,13 +105,13 @@
             </div>
 
             <div class="flex-grow overflow-y-auto px-4 md:px-8 pb-32 md:pb-8 pt-1" id="catalogCardsContainer">
-                <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+                <div id="catalogGrid" class="flex flex-col gap-3 max-w-5xl mx-auto w-full"></div>
                 <div id="catalogLoadMoreBtn" class="mt-4 pb-4"></div>
             </div>
         </div>
 
         <div id="view-inventario" class="hidden flex-col h-full overflow-hidden relative w-full">
-            <div class="px-4 md:px-8 py-3 shrink-0 z-10 flex gap-2 max-w-4xl">
+            <div class="px-4 md:px-8 py-3 shrink-0 z-10 flex gap-2 max-w-5xl mx-auto w-full">
                 <div class="relative flex-grow">
                     <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                     <input id="searchInvInput" oninput="renderInventoryTable()" type="text" placeholder="Buscar para ajustar stock..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm md:text-base outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold">
@@ -125,7 +125,7 @@
             </div>
 
             <div class="flex-grow overflow-y-auto px-4 md:px-8 pb-32 md:pb-8" id="inventoryCardsContainer">
-                <div id="inventoryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+                <div id="inventoryGrid" class="flex flex-col gap-4 max-w-5xl mx-auto w-full"></div>
                 <div id="inventoryLoadMoreBtn" class="mt-4 pb-4"></div>
             </div>
 
@@ -504,30 +504,36 @@
             toRender.forEach(p => {
                 const isActive = p.activo !== false, fallbackImg = "https://via.placeholder.com/150?text=IMG";
                 const card = document.createElement('div');
-                card.className = `bg-white rounded-[1.25rem] p-4 shadow-sm border border-slate-100 fade-in ${!isActive ? 'opacity-60 grayscale' : ''} hover:shadow-md transition-shadow`;
+                card.className = `bg-white rounded-[1.25rem] p-4 md:p-5 shadow-sm border border-slate-100 fade-in ${!isActive ? 'opacity-60 grayscale' : ''} hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center gap-3 md:gap-6`;
                 
-                // MEJORA ESCRITORIO: Texto md:text-xl y md:font-black con imagen reducida
+                // === MEJORA VISTA LISTA ESCRITORIO ===
+                // Eliminamos 'truncate' del input para que el texto siempre quepa al 100% en pantallas grandes (al usar vista lista ancha).
                 card.innerHTML = `
-                    <div class="flex gap-3 md:gap-4 mb-3 items-start">
-                        <div class="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 mt-1 shadow-inner opacity-90"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
-                        <div class="flex-grow min-w-0">
-                            <input onchange="updateProduct('${p.id}','name',this.value, this)" value="${p.name || ''}" class="w-full font-black text-slate-900 text-[15px] md:text-xl bg-transparent border-none outline-none focus:border-b focus:border-indigo-400 truncate placeholder-slate-300 leading-tight">
-                            <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="w-full text-xs md:text-sm text-indigo-600 font-bold bg-transparent border-none outline-none mt-0.5 truncate placeholder-slate-300">
-                            <div class="flex items-center mt-2 bg-slate-50 w-max px-2.5 py-1 rounded border border-slate-200 text-[10px] md:text-xs text-slate-600 font-bold">
-                                PZAS/PAQ: <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-10 ml-1 bg-white border border-slate-300 rounded text-center font-black text-slate-900 outline-none focus:border-indigo-500">
+                    <div class="flex gap-3 md:gap-4 items-start md:items-center flex-grow min-w-0">
+                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 shadow-inner opacity-90"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
+                        <div class="flex-grow min-w-0 flex flex-col justify-center">
+                            <input onchange="updateProduct('${p.id}','name',this.value, this)" value="${p.name || ''}" class="w-full font-black text-slate-900 text-[15px] md:text-xl bg-transparent border-none outline-none focus:border-b focus:border-indigo-400 placeholder-slate-300 leading-tight">
+                            <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mt-1.5">
+                                <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="w-full md:w-auto text-xs md:text-sm text-indigo-600 font-bold bg-transparent border-none outline-none truncate placeholder-slate-300">
+                                <div class="flex items-center bg-slate-50 w-max px-2.5 py-1 rounded border border-slate-200 text-[10px] md:text-xs text-slate-600 font-bold">
+                                    PZAS/PAQ: <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-10 ml-1 bg-white border border-slate-300 rounded text-center font-black text-slate-900 outline-none focus:border-indigo-500">
+                                </div>
                             </div>
                         </div>
-                        <div class="shrink-0 flex flex-col items-end justify-between h-full">
-                            <label class="relative inline-flex items-center cursor-pointer mt-1">
+                    </div>
+                    
+                    <div class="flex items-center justify-between md:justify-end gap-4 md:gap-6 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
+                        <div class="flex gap-2">
+                            <button onclick="printSingleQR('${p.id}', 'inventario')" class="bg-purple-50 text-purple-700 hover:bg-purple-100 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors"><i class="fa-solid fa-box mr-1"></i> Caja</button>
+                            <button onclick="printSingleQR('${p.id}', 'vitrina')" class="bg-pink-50 text-pink-700 hover:bg-pink-100 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors"><i class="fa-solid fa-store mr-1"></i> 1 Pza</button>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <label class="relative inline-flex items-center cursor-pointer">
                               <input type="checkbox" class="sr-only peer" onchange="updateProduct('${p.id}', 'activo', this.checked)" ${isActive ? 'checked' : ''}>
                               <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
                             </label>
-                            <button onclick="openOptionsModal('${p.id}', '${p.name ? p.name.replace(/'/g, "\\'") : ''}')" class="text-slate-400 p-2 mt-3 hover:text-slate-800 bg-slate-50 rounded-lg"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
+                            <button onclick="openOptionsModal('${p.id}', '${p.name ? p.name.replace(/'/g, "\\'") : ''}')" class="text-slate-400 hover:text-slate-800 p-2"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
                         </div>
-                    </div>
-                    <div class="flex gap-2 pt-3 border-t border-slate-100">
-                        <button onclick="printSingleQR('${p.id}', 'inventario')" class="flex-1 bg-purple-50 text-purple-700 hover:bg-purple-100 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-colors"><i class="fa-solid fa-box mr-1"></i> Caja</button>
-                        <button onclick="printSingleQR('${p.id}', 'vitrina')" class="flex-1 bg-pink-50 text-pink-700 hover:bg-pink-100 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-colors"><i class="fa-solid fa-store mr-1"></i> 1 Pza</button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -546,21 +552,44 @@
             const toRender = filteredProducts.slice(0, invLimit);
 
             toRender.forEach(p => {
-                const stock = p.stock || 0, fallbackImg = "https://via.placeholder.com/150?text=IMG";
-                const card = document.createElement('div');
-                card.className = `bg-white p-3.5 rounded-[1.25rem] shadow-sm border flex items-center gap-3 transition-colors fade-in hover:shadow-md ${stock > 0 ? 'border-indigo-200 bg-indigo-50/10' : 'border-slate-100'}`;
+                const stock = p.stock || 0;
+                const pzasPaq = p.piezas && p.piezas > 0 ? p.piezas : 1;
+                const fallbackImg = "https://via.placeholder.com/150?text=IMG";
                 
-                // MEJORA INVENTARIO: Icono pequeño y Letras Gruesas (font-black text-slate-900)
+                const card = document.createElement('div');
+                card.className = `bg-white p-4 rounded-[1.25rem] shadow-sm border flex flex-col gap-3 transition-colors fade-in hover:shadow-md ${stock > 0 ? 'border-indigo-200 bg-indigo-50/10' : 'border-slate-100'}`;
+                
+                // === MEJORA INVENTARIO: CONTROLES DUALES MANUALES (MÓVIL FRIENDLY) ===
                 card.innerHTML = `
-                    <div class="w-10 h-10 bg-slate-50 rounded-lg overflow-hidden shrink-0 border border-slate-200"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
-                    <div class="flex-grow min-w-0 pr-1">
-                        <h3 class="font-black text-slate-900 text-sm md:text-base truncate leading-tight">${p.name}</h3>
-                        <p class="text-[10px] md:text-xs font-bold text-slate-400 truncate mt-0.5">${p.category||'Sin categoría'} <span class="text-indigo-500 ml-1">Pzas/Paq: ${p.piezas||0}</span></p>
+                    <div class="flex items-start md:items-center gap-3">
+                        <div class="w-12 h-12 bg-slate-50 rounded-lg overflow-hidden shrink-0 border border-slate-200 mt-1 md:mt-0"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
+                        <div class="flex-grow min-w-0">
+                            <h3 class="font-black text-slate-900 text-[15px] md:text-lg leading-tight break-words pr-2">${p.name}</h3>
+                            <p class="text-[10px] md:text-xs font-bold text-slate-400 mt-1">${p.category||'Sin categoría'} <span class="bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded ml-1">PAQ: ${pzasPaq} pzas</span></p>
+                        </div>
+                        <div class="shrink-0 flex flex-col items-end bg-slate-50 p-2 rounded-xl border border-slate-100">
+                            <span class="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-widest">Stock Total</span>
+                            <input id="inv-stock-${p.id}" type="number" onchange="updateProduct('${p.id}','stock',this.value, this)" value="${stock}" class="w-16 text-center bg-white border border-slate-200 rounded-lg py-1 font-black text-indigo-700 text-lg outline-none focus:border-indigo-500 transition-all">
+                        </div>
                     </div>
-                    <div class="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shrink-0 shadow-sm">
-                        <button onclick="adjustStock('${p.id}', -1)" class="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 hover:text-red-500 flex justify-center items-center active:scale-90 transition-transform"><i class="fa-solid fa-minus text-sm"></i></button>
-                        <input type="number" onchange="updateProduct('${p.id}','stock',this.value, this)" value="${stock}" class="w-12 text-center bg-transparent font-black text-indigo-700 text-base md:text-lg outline-none">
-                        <button onclick="adjustStock('${p.id}', 1)" class="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 hover:text-emerald-500 flex justify-center items-center active:scale-90 transition-transform"><i class="fa-solid fa-plus text-sm"></i></button>
+                    
+                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+                        <div class="flex items-center justify-between bg-indigo-50/50 rounded-xl p-1 border border-indigo-100">
+                            <button onclick="adjustStockDirect('${p.id}', -${pzasPaq})" class="w-10 h-10 rounded-lg bg-white text-indigo-500 shadow-sm font-black text-lg active:scale-90 transition-transform"><i class="fa-solid fa-minus"></i></button>
+                            <div class="text-center">
+                                <div class="text-[11px] font-black text-indigo-800 leading-none">PAQUETE</div>
+                                <div class="text-[9px] font-bold text-indigo-500 mt-0.5">x${pzasPaq}</div>
+                            </div>
+                            <button onclick="adjustStockDirect('${p.id}', ${pzasPaq})" class="w-10 h-10 rounded-lg bg-indigo-500 text-white shadow-sm font-black text-lg active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 rounded-xl p-1 border border-slate-200">
+                            <button onclick="adjustStockDirect('${p.id}', -1)" class="w-10 h-10 rounded-lg bg-white text-slate-500 shadow-sm font-black text-lg active:scale-90 transition-transform"><i class="fa-solid fa-minus"></i></button>
+                            <div class="text-center">
+                                <div class="text-[11px] font-black text-slate-700 leading-none">PIEZA</div>
+                                <div class="text-[9px] font-bold text-slate-400 mt-0.5">Suelta</div>
+                            </div>
+                            <button onclick="adjustStockDirect('${p.id}', 1)" class="w-10 h-10 rounded-lg bg-slate-700 text-white shadow-sm font-black text-lg active:scale-90 transition-transform"><i class="fa-solid fa-plus"></i></button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -569,6 +598,25 @@
             else if (filteredProducts.length === 0) grid.innerHTML = `<div class="col-span-full text-center text-slate-400 mt-10"><i class="fa-solid fa-box-open text-4xl mb-3 opacity-30"></i><p class="font-medium">Sin resultados</p></div>`;
         }
         window.loadMoreInv = () => { invLimit += 40; window.renderInventoryTable(); };
+
+        // Función de ajuste rápido manual (SIN abrir escaner)
+        window.adjustStockDirect = async (id, amount) => { 
+            const prod = allProducts.find(p => p.id === id); if (!prod) return; 
+            const newStock = Math.max(0, (prod.stock || 0) + amount); 
+            
+            // Actualización visual inmediata sin recargar todo el grid
+            prod.stock = newStock;
+            const inputEl = document.getElementById('inv-stock-' + id);
+            if (inputEl) {
+                inputEl.value = newStock;
+                inputEl.classList.add('bg-indigo-100', 'scale-105');
+                setTimeout(() => inputEl.classList.remove('bg-indigo-100', 'scale-105'), 200);
+            }
+            try { if ("vibrate" in navigator) navigator.vibrate(20); } catch(e){}
+
+            // Guardar en BD en segundo plano
+            await db.ref('productos/'+id).update({stock: newStock}); 
+        };
 
         window.openAddModal = () => { document.getElementById('addModal').classList.remove('hidden'); document.getElementById('addModal').classList.add('flex'); setTimeout(()=>document.getElementById('prodName').focus(), 100); }
         window.closeAddModal = () => { document.getElementById('addModal').classList.add('hidden'); document.getElementById('addModal').classList.remove('flex'); }
@@ -581,9 +629,7 @@
         window.actionDelete = () => { if(selectedProdId) deleteProduct(selectedProdId); closeOptionsModal(); }
 
         window.updateProduct = async (id, field, val, el) => { if(!currentUser) return; const prod = allProducts.find(p => p.id === id); const originalVal = prod ? prod[field] : ''; if (field === 'piezas' || field === 'stock') val = Number(val); if(el && el.tagName === 'INPUT' && field !== 'activo') el.classList.add('text-indigo-500'); try { await db.ref('productos/'+id).update({[field]: val}); if(el && el.tagName === 'INPUT' && field !== 'activo') { el.classList.replace('text-indigo-500', 'text-emerald-500'); setTimeout(() => el.classList.replace('text-emerald-500', 'text-slate-900'), 800); } } catch(e) { showToast("Error de red", "error"); if(el && el.tagName === 'INPUT') { el.value = originalVal; el.classList.remove('text-indigo-500'); } } };
-        window.adjustStock = async (id, amount) => { const prod = allProducts.find(p => p.id === id); if (!prod) return; const newStock = Math.max(0, (prod.stock || 0) + amount); await db.ref('productos/'+id).update({stock: newStock}); };
         
-        // ¡RESTAURADA FUNCIÓN RESET ALL STOCK!
         window.resetAllStock = async () => { 
             if(!confirm("⚠️ ADVERTENCIA ⚠️\n¿Estás seguro de poner el inventario de TODOS los productos a CERO?")) return; 
             const updates = {}; 
