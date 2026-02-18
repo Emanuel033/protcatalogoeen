@@ -136,9 +136,9 @@ function renderGrid() {
         // --- RESTAURADO: Información visual de piezas/paquete ---
         let badgeHTML = '';
         if(isBolsas) {
-            badgeHTML = `<div class="text-[10px] text-indigo-600 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-box-open"></i> Min: 1 Paquete (100 pzas)</div>`;
+            badgeHTML = `<div class="text-[10px] text-indigo-600 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-box-open"></i> Minimo: 1 Paquete (100 pzas)</div>`;
         } else if(hasPack) {
-            badgeHTML = `<div class="text-[10px] text-slate-500 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-box"></i> Paquete master: <b>${packQty} pzas</b></div>`;
+            badgeHTML = `<div class="text-[10px] text-slate-500 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-box"></i> Minimo:1 pz - Paquete: <b>${packQty} pzas</b></div>`;
         } else {
              badgeHTML = `<div class="text-[10px] text-slate-400 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-cube"></i> Venta Individual</div>`;
         }
@@ -161,7 +161,7 @@ function renderGrid() {
                     ${escapeHTML(p.name)}
                 </h3>
                 
-                ${badgeHTML} <!-- AQUÍ SE MUESTRA LA INFO -->
+                ${badgeHTML}
                 
                 ${selectorHTML}
                 
@@ -187,7 +187,7 @@ function renderGrid() {
 function changePage(d) { currentPage += d; renderGrid(); document.getElementById('products-container').scrollIntoView({ behavior: 'smooth' }); }
 
 // ==========================================
-// CARRITO
+// CARRITO - DISEÑO VISUAL MEJORADO
 // ==========================================
 function add(id) {
     const p = allProducts.find(x => x.id === id);
@@ -236,23 +236,73 @@ function renderCart() {
     document.getElementById('cart-badge').classList.toggle('scale-0', total === 0);
     document.getElementById('cart-total').innerText = total;
 
+    // Estado vacío
     if(cart.length === 0) {
-        itemsCont.innerHTML = `<div class="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl m-2"><p class="text-sm font-medium">Carrito vacío</p></div>`;
+        itemsCont.innerHTML = `
+        <div class="h-64 flex flex-col items-center justify-center text-slate-400 m-4">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                <i class="fa-solid fa-basket-shopping text-2xl"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-500">Tu carrito está vacío</p>
+            <p class="text-xs text-slate-400 mt-1">¡Agrega productos para comenzar!</p>
+        </div>`;
         document.getElementById('cart-config').classList.add('hidden');
         return;
     }
     document.getElementById('cart-config').classList.remove('hidden');
 
+    // Renderizado de ítems con NUEVO DISEÑO
     itemsCont.innerHTML = cart.map(item => {
         const prod = allProducts.find(p => p.id === item.id) || item;
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
         const packSize = isBolsas ? 100 : (parseInt(prod.piezas)||0);
         
-        let inputsHTML = packSize > 1 
-            ? `<div class="flex gap-2 mt-2"><div class="flex-1"><label class="text-[9px] text-slate-400 font-bold uppercase block">Paquetes</label><input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full border rounded text-center text-sm py-1 bg-indigo-50 outline-none"></div><div class="flex-1 ${isBolsas?'hidden':''}"><label class="text-[9px] text-slate-400 font-bold uppercase block">Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full border rounded text-center text-sm py-1 outline-none"></div></div>`
-            : `<div class="mt-2 flex justify-end items-center gap-2"><label class="text-[10px] text-slate-400 font-bold">Piezas:</label><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-20 border rounded text-center text-sm py-1 outline-none"></div>`;
+        let inputsHTML = '';
+        if (packSize > 1) {
+            // Diseño para productos con paquetes (inputs más bonitos)
+            inputsHTML = `
+            <div class="mt-3 flex items-end gap-2 text-xs">
+                <div class="flex-1 bg-slate-50 rounded-lg p-1.5 border border-slate-100 relative group-focus-within:border-indigo-200 transition-colors">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5 tracking-wider">Paquetes</label>
+                    <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-indigo-700 text-center outline-none text-sm">
+                </div>
+                ${!isBolsas ? `
+                <div class="flex-1 bg-slate-50 rounded-lg p-1.5 border border-slate-100 relative group-focus-within:border-indigo-200 transition-colors">
+                    <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5 tracking-wider">Sueltas</label>
+                    <input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-700 text-center outline-none text-sm">
+                </div>
+                ` : ''}
+            </div>`;
+        } else {
+            // Diseño simple
+            inputsHTML = `
+            <div class="mt-3 flex justify-end">
+                <div class="flex items-center gap-2 bg-slate-50 rounded-lg p-1 border border-slate-100">
+                    <span class="text-[10px] font-bold text-slate-400 px-1">CANT:</span>
+                    <input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-16 bg-transparent font-bold text-slate-700 text-center outline-none text-sm">
+                </div>
+            </div>`;
+        }
 
-        return `<div class="bg-white p-4 rounded-xl border flex gap-4 shadow-sm"><img src="${item.image}" class="w-16 h-16 object-contain shrink-0"><div class="flex-1"><div class="flex justify-between font-bold text-sm text-slate-800"><span>${escapeHTML(item.name)}</span><button onclick="remove('${item.id}')" class="text-red-400 hover:text-red-600 transition">×</button></div>${inputsHTML}</div></div>`;
+        return `
+        <div class="group relative flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md mb-3">
+            <!-- Imagen -->
+            <div class="h-20 w-20 shrink-0 rounded-xl bg-slate-50 p-2 flex items-center justify-center border border-slate-50">
+                <img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply">
+            </div>
+            
+            <!-- Info -->
+            <div class="flex flex-1 flex-col justify-between min-w-0">
+                <div class="flex justify-between items-start gap-2">
+                    <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${escapeHTML(item.name)}</h4>
+                    <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors -mr-1 -mt-1 p-1" title="Eliminar">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+                
+                ${inputsHTML}
+            </div>
+        </div>`;
     }).join('');
 }
 
