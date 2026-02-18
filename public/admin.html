@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin 8.0 - UI Textual y Auditoría Segura</title>
+    <title>Admin 8.1 - Inventario Completo y UI Escritorio</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -16,8 +16,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.2s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
@@ -96,7 +96,7 @@
                 <div class="flex gap-2 max-w-4xl">
                     <div class="relative flex-grow">
                         <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input id="searchInput" oninput="filterProducts()" type="text" placeholder="Buscar producto..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold text-slate-800">
+                        <input id="searchInput" oninput="filterProducts()" type="text" placeholder="Buscar producto..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm md:text-base outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold text-slate-800">
                     </div>
                     <button onclick="openMassActions()" class="w-12 md:w-auto md:px-4 h-12 bg-white border border-slate-200 text-slate-600 rounded-2xl flex items-center justify-center shadow-sm hover:bg-slate-50 transition-colors shrink-0 gap-2 font-bold">
                         <i class="fa-solid fa-layer-group"></i> <span class="hidden md:inline">Acciones</span>
@@ -105,7 +105,7 @@
             </div>
 
             <div class="flex-grow overflow-y-auto px-4 md:px-8 pb-32 md:pb-8 pt-1" id="catalogCardsContainer">
-                <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+                <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3"></div>
                 <div id="catalogLoadMoreBtn" class="mt-4 pb-4"></div>
             </div>
         </div>
@@ -114,15 +114,18 @@
             <div class="px-4 md:px-8 py-3 shrink-0 z-10 flex gap-2 max-w-4xl">
                 <div class="relative flex-grow">
                     <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input id="searchInvInput" oninput="renderInventoryTable()" type="text" placeholder="Buscar para ajustar stock..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold">
+                    <input id="searchInvInput" oninput="renderInventoryTable()" type="text" placeholder="Buscar para ajustar stock..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm md:text-base outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm font-semibold">
                 </div>
-                <button onclick="exportToExcel('inventario')" class="w-12 md:w-auto md:px-4 h-12 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm hover:bg-emerald-100 transition-colors shrink-0 gap-2 font-bold">
+                <button onclick="exportToExcel('inventario')" class="w-12 md:w-auto md:px-4 h-12 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm hover:bg-emerald-100 transition-colors shrink-0 gap-2 font-bold" title="Exportar a Excel">
                     <i class="fa-solid fa-file-excel text-lg"></i> <span class="hidden md:inline">Exportar</span>
+                </button>
+                <button onclick="resetAllStock()" class="w-12 md:w-auto md:px-4 h-12 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center justify-center shadow-sm hover:bg-red-100 transition-colors shrink-0 gap-2 font-bold" title="Poner inventario a CERO">
+                    <i class="fa-solid fa-trash-arrow-up text-lg"></i> <span class="hidden md:inline">Limpiar Stock</span>
                 </button>
             </div>
 
             <div class="flex-grow overflow-y-auto px-4 md:px-8 pb-32 md:pb-8" id="inventoryCardsContainer">
-                <div id="inventoryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+                <div id="inventoryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3"></div>
                 <div id="inventoryLoadMoreBtn" class="mt-4 pb-4"></div>
             </div>
 
@@ -331,7 +334,7 @@
         }
 
         // ====================================================
-        // ESCÁNER INTELIGENTE (SINCRONIZACIÓN CORREGIDA)
+        // ESCÁNER INTELIGENTE
         // ====================================================
         let html5QrCode = null; 
         let isScanPaused = false; 
@@ -342,7 +345,6 @@
             document.getElementById('scannerModal').classList.add('flex');
             isScanPaused = false;
             
-            // Restablecer panel de espera limpio
             document.getElementById('waitingContent').innerHTML = `
                 <i class="fa-solid fa-expand text-slate-500 text-3xl mb-3"></i>
                 <h3 class="text-white font-bold text-lg">Esperando código...</h3>
@@ -366,17 +368,12 @@
 
         async function onScanSuccess(decodedText) {
             if (isScanPaused) return; 
-            
             try {
                 let scannedId = null;
-                if (decodedText.startsWith('ID:')) {
-                    scannedId = decodedText.split('|')[0].split(':')[1];
-                } else if (decodedText.includes('add=')) {
-                    scannedId = decodedText.split('add=')[1].split('&')[0];
-                }
+                if (decodedText.startsWith('ID:')) scannedId = decodedText.split('|')[0].split(':')[1];
+                else if (decodedText.includes('add=')) scannedId = decodedText.split('add=')[1].split('&')[0];
                 if (!scannedId) return; 
 
-                // Extraemos el objeto FRESCO de allProducts
                 const prod = allProducts.find(p => p.id === scannedId);
                 if (!prod) { showToast("Producto no encontrado", "error"); return; }
 
@@ -393,16 +390,13 @@
                 panelAdj.classList.remove('hidden');
 
                 document.getElementById('adjProdName').innerText = prod.name;
-                
                 const pzasPorPaq = prod.piezas && prod.piezas > 0 ? prod.piezas : 1;
                 document.getElementById('adjPzasPaq').innerText = pzasPorPaq;
                 document.getElementById('adjMult').innerText = pzasPorPaq;
-                
                 document.getElementById('adjInputPaq').value = 1;
                 document.getElementById('adjInputSue').value = 0;
                 
                 calculateAdjTotal();
-
             } catch (err) { console.error(err); }
         }
 
@@ -419,23 +413,17 @@
             const paq = parseInt(document.getElementById('adjInputPaq').value) || 0;
             const sue = parseInt(document.getElementById('adjInputSue').value) || 0;
             const mult = currentScannedProd.piezas && currentScannedProd.piezas > 0 ? currentScannedProd.piezas : 1;
-            
             const total = (paq * mult) + sue;
             document.getElementById('adjTotalFinal').innerText = total;
         };
 
-        window.cancelAdjust = () => {
-            resetScanUI();
-            isScanPaused = false; 
-        };
+        window.cancelAdjust = () => { resetScanUI(); isScanPaused = false; };
 
         window.confirmAdjust = async () => {
             if(!currentScannedProd) return;
-            
             const totalToAdd = parseInt(document.getElementById('adjTotalFinal').innerText) || 0;
             if (totalToAdd === 0) { showToast("Ingresa una cantidad mayor a 0", "error"); return; }
 
-            // Buscar el producto fresco por si se actualizó en otro lado mientras tenías abierta la app
             const freshProd = allProducts.find(p => p.id === currentScannedProd.id) || currentScannedProd;
             const nuevoStock = (freshProd.stock || 0) + totalToAdd;
 
@@ -445,14 +433,10 @@
             
             try { if ("vibrate" in navigator) navigator.vibrate([100, 50, 100]); } catch(e){}
 
-            // AWAIT forzado para asegurar que se guarde en la BD antes de continuar
             await db.ref('productos/'+freshProd.id).update({stock: nuevoStock});
-            
-            // Actualización forzada local para que no haya retraso (debounce) en el fondo
             freshProd.stock = nuevoStock; 
             window.renderInventoryTable(); 
 
-            // Construir panel de éxito masivo
             document.getElementById('waitingContent').innerHTML = `
                 <div class="mb-2"><i class="fa-solid fa-circle-check text-emerald-400 text-4xl"></i></div>
                 <h3 class="text-white font-bold text-sm truncate px-2 mb-2">${freshProd.name}</h3>
@@ -468,7 +452,7 @@
 
             setTimeout(() => { 
                 overlay.classList.add('opacity-0'); overlay.classList.remove('success-flash'); 
-                isScanPaused = false; // Se vuelve a activar la cámara solita
+                isScanPaused = false; 
             }, 600);
         };
 
@@ -480,7 +464,7 @@
         }
 
         // ====================================================
-        // UI TEXTUAL Y FUNCIONES BÁSICAS
+        // UI BÁSICA Y FUNCIONES
         // ====================================================
         window.switchTab = (tabName) => {
             const vCat = document.getElementById('view-catalogo'), vInv = document.getElementById('view-inventario');
@@ -522,14 +506,14 @@
                 const card = document.createElement('div');
                 card.className = `bg-white rounded-[1.25rem] p-4 shadow-sm border border-slate-100 fade-in ${!isActive ? 'opacity-60 grayscale' : ''} hover:shadow-md transition-shadow`;
                 
-                // MEJORA VISUAL: IMAGEN PEQUEÑA (w-12 h-12), TEXTO GRANDE Y NEGRO (font-black text-slate-900)
+                // MEJORA ESCRITORIO: Texto md:text-xl y md:font-black con imagen reducida
                 card.innerHTML = `
-                    <div class="flex gap-3 mb-4 items-start">
-                        <div class="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 mt-1 shadow-inner"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
+                    <div class="flex gap-3 md:gap-4 mb-3 items-start">
+                        <div class="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 mt-1 shadow-inner opacity-90"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
                         <div class="flex-grow min-w-0">
-                            <input onchange="updateProduct('${p.id}','name',this.value, this)" value="${p.name || ''}" class="w-full font-black text-slate-900 text-[15px] bg-transparent border-none outline-none focus:border-b focus:border-indigo-400 truncate placeholder-slate-300 leading-tight">
-                            <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="w-full text-xs text-indigo-600 font-bold bg-transparent border-none outline-none mt-0.5 truncate placeholder-slate-300">
-                            <div class="flex items-center mt-2 bg-slate-50 w-max px-2.5 py-1 rounded border border-slate-200 text-[10px] text-slate-600 font-bold">
+                            <input onchange="updateProduct('${p.id}','name',this.value, this)" value="${p.name || ''}" class="w-full font-black text-slate-900 text-[15px] md:text-xl bg-transparent border-none outline-none focus:border-b focus:border-indigo-400 truncate placeholder-slate-300 leading-tight">
+                            <input onchange="updateProduct('${p.id}','category',this.value, this)" value="${p.category || ''}" class="w-full text-xs md:text-sm text-indigo-600 font-bold bg-transparent border-none outline-none mt-0.5 truncate placeholder-slate-300">
+                            <div class="flex items-center mt-2 bg-slate-50 w-max px-2.5 py-1 rounded border border-slate-200 text-[10px] md:text-xs text-slate-600 font-bold">
                                 PZAS/PAQ: <input type="number" onchange="updateProduct('${p.id}','piezas',this.value, this)" value="${p.piezas || ''}" class="w-10 ml-1 bg-white border border-slate-300 rounded text-center font-black text-slate-900 outline-none focus:border-indigo-500">
                             </div>
                         </div>
@@ -542,8 +526,8 @@
                         </div>
                     </div>
                     <div class="flex gap-2 pt-3 border-t border-slate-100">
-                        <button onclick="printSingleQR('${p.id}', 'inventario')" class="flex-1 bg-purple-50 text-purple-700 hover:bg-purple-100 py-2.5 rounded-xl text-xs font-bold transition-colors"><i class="fa-solid fa-box mr-1"></i> Caja</button>
-                        <button onclick="printSingleQR('${p.id}', 'vitrina')" class="flex-1 bg-pink-50 text-pink-700 hover:bg-pink-100 py-2.5 rounded-xl text-xs font-bold transition-colors"><i class="fa-solid fa-store mr-1"></i> 1 Pza</button>
+                        <button onclick="printSingleQR('${p.id}', 'inventario')" class="flex-1 bg-purple-50 text-purple-700 hover:bg-purple-100 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-colors"><i class="fa-solid fa-box mr-1"></i> Caja</button>
+                        <button onclick="printSingleQR('${p.id}', 'vitrina')" class="flex-1 bg-pink-50 text-pink-700 hover:bg-pink-100 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-colors"><i class="fa-solid fa-store mr-1"></i> 1 Pza</button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -566,16 +550,16 @@
                 const card = document.createElement('div');
                 card.className = `bg-white p-3.5 rounded-[1.25rem] shadow-sm border flex items-center gap-3 transition-colors fade-in hover:shadow-md ${stock > 0 ? 'border-indigo-200 bg-indigo-50/10' : 'border-slate-100'}`;
                 
-                // MEJORA VISUAL: IMAGEN PEQUEÑA (w-10 h-10) EN INVENTARIO, NOMBRE MÁS LLAMATIVO
+                // MEJORA INVENTARIO: Icono pequeño y Letras Gruesas (font-black text-slate-900)
                 card.innerHTML = `
                     <div class="w-10 h-10 bg-slate-50 rounded-lg overflow-hidden shrink-0 border border-slate-200"><img src="${p.image}" class="w-full h-full object-cover" onerror="this.src='${fallbackImg}'"></div>
                     <div class="flex-grow min-w-0 pr-1">
-                        <h3 class="font-black text-slate-900 text-sm truncate leading-tight">${p.name}</h3>
-                        <p class="text-[10px] font-bold text-slate-400 truncate mt-0.5">${p.category||'Sin categoría'} <span class="text-indigo-500 ml-1">Pzas/Paq: ${p.piezas||0}</span></p>
+                        <h3 class="font-black text-slate-900 text-sm md:text-base truncate leading-tight">${p.name}</h3>
+                        <p class="text-[10px] md:text-xs font-bold text-slate-400 truncate mt-0.5">${p.category||'Sin categoría'} <span class="text-indigo-500 ml-1">Pzas/Paq: ${p.piezas||0}</span></p>
                     </div>
                     <div class="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shrink-0 shadow-sm">
                         <button onclick="adjustStock('${p.id}', -1)" class="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 hover:text-red-500 flex justify-center items-center active:scale-90 transition-transform"><i class="fa-solid fa-minus text-sm"></i></button>
-                        <input type="number" onchange="updateProduct('${p.id}','stock',this.value, this)" value="${stock}" class="w-12 text-center bg-transparent font-black text-indigo-700 text-base outline-none">
+                        <input type="number" onchange="updateProduct('${p.id}','stock',this.value, this)" value="${stock}" class="w-12 text-center bg-transparent font-black text-indigo-700 text-base md:text-lg outline-none">
                         <button onclick="adjustStock('${p.id}', 1)" class="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 hover:text-emerald-500 flex justify-center items-center active:scale-90 transition-transform"><i class="fa-solid fa-plus text-sm"></i></button>
                     </div>
                 `;
@@ -598,7 +582,15 @@
 
         window.updateProduct = async (id, field, val, el) => { if(!currentUser) return; const prod = allProducts.find(p => p.id === id); const originalVal = prod ? prod[field] : ''; if (field === 'piezas' || field === 'stock') val = Number(val); if(el && el.tagName === 'INPUT' && field !== 'activo') el.classList.add('text-indigo-500'); try { await db.ref('productos/'+id).update({[field]: val}); if(el && el.tagName === 'INPUT' && field !== 'activo') { el.classList.replace('text-indigo-500', 'text-emerald-500'); setTimeout(() => el.classList.replace('text-emerald-500', 'text-slate-900'), 800); } } catch(e) { showToast("Error de red", "error"); if(el && el.tagName === 'INPUT') { el.value = originalVal; el.classList.remove('text-indigo-500'); } } };
         window.adjustStock = async (id, amount) => { const prod = allProducts.find(p => p.id === id); if (!prod) return; const newStock = Math.max(0, (prod.stock || 0) + amount); await db.ref('productos/'+id).update({stock: newStock}); };
-        window.resetAllStock = async () => { if(!confirm("⚠️ ADVERTENCIA ⚠️\n¿Poner TODO el inventario a CERO?")) return; const updates = {}; allProducts.forEach(prod => updates['/productos/' + prod.id + '/stock'] = 0); await db.ref().update(updates); showToast("Inventario en Cero", "success"); };
+        
+        // ¡RESTAURADA FUNCIÓN RESET ALL STOCK!
+        window.resetAllStock = async () => { 
+            if(!confirm("⚠️ ADVERTENCIA ⚠️\n¿Estás seguro de poner el inventario de TODOS los productos a CERO?")) return; 
+            const updates = {}; 
+            allProducts.forEach(prod => updates['/productos/' + prod.id + '/stock'] = 0); 
+            await db.ref().update(updates); 
+            showToast("Inventario limpio (Todo a Cero)", "success"); 
+        };
 
         window.uploadProduct = async () => { if (!currentUser) return; const name = document.getElementById('prodName').value, cat = document.getElementById('prodCat').value, url = document.getElementById('prodFile').value, pcs = document.getElementById('prodPcs').value; if(!name) return showToast("Falta el nombre", "error"); if(pcs && Number(pcs) < 0) return showToast("Piezas inválidas", "error"); const btn = document.getElementById('btnUpload'); btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`; btn.disabled = true; try { await db.ref('productos').push({ name, category: cat, image: url, piezas: pcs ? Number(pcs) : 0, stock: 0, activo: true, createdAt: firebase.database.ServerValue.TIMESTAMP }); showToast("Producto Creado", "success"); ['prodName','prodCat','prodFile','prodPcs'].forEach(id => document.getElementById(id).value = ""); document.getElementById('imgPreviewBox').classList.add('hidden'); closeAddModal(); } catch(e) { showToast("Error al guardar", "error"); } finally { btn.innerHTML = `Guardar Producto`; btn.disabled = false; } };
         window.makeProductOld = async (id) => { if(confirm("¿Mover al final de la lista?")) { await db.ref('productos/'+id).update({createdAt: new Date('2024-01-01').getTime()}); showToast("Listo", "success"); } };
