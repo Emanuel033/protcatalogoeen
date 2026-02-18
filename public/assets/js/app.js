@@ -22,13 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCart();
         checkQRParam();
 
-        // Botón volver arriba
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('scroll-top-btn');
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
 
-        // Iniciar Tour si no hay QR param y es primera vez
         const urlParams = new URLSearchParams(window.location.search);
         if(!localStorage.getItem('tour_seen_v2') && !urlParams.has('add')) {
            setTimeout(() => startTour(), 2000); 
@@ -50,10 +48,8 @@ function loadProducts() {
                 const val = child.val();
                 if(val.activo !== false) allProducts.push({ id: child.key, ...val });
             });
-            // Ordenamiento inteligente: Nuevos primero
             const tempByDate = [...allProducts].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
             latestProductIds = tempByDate.slice(0, 12).map(p => p.id);
-            
             allProducts.sort((a, b) => {
                 const isANew = latestProductIds.includes(a.id), isBNew = latestProductIds.includes(b.id);
                 if (isANew && !isBNew) return -1;
@@ -79,7 +75,6 @@ function filterCat(cat) {
     currentCategory = cat;
     renderCategories();
     applyFilter();
-    // ANALYTICS: Registrar clic en categoría
     if(analytics) analytics.logEvent('select_content', { content_type: 'category', item_id: cat });
 }
 
@@ -91,7 +86,6 @@ function debouncedFilter() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         applyFilter();
-        // ANALYTICS: Registrar búsqueda (si tiene más de 3 letras)
         if(term && term.length > 2 && analytics) {
             analytics.logEvent('search', { search_term: term });
         }
@@ -141,6 +135,10 @@ function renderGrid() {
             : (hasPack ? `<select id="sel-${p.id}" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 mb-2 bg-slate-50 text-slate-700 font-medium outline-none"><option value="1">Individual</option><option value="${packQty}">Paquete completo</option></select>` 
             : `<input type="hidden" id="sel-${p.id}" value="1">`);
 
+        // --- AQUÍ ESTÁ EL CAMBIO DE DISEÑO ---
+        // Se cambió 'text-sm' a 'text-xs'
+        // Se eliminó 'h-10' y 'line-clamp-2' para que el texto fluya completo
+        // Se agregó 'text-slate-900' para mejor contraste en letra pequeña
         return `
         <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
             <div class="relative h-52 p-4 cursor-pointer overflow-hidden rounded-t-2xl" onclick="openImage('${p.image}')">
@@ -148,9 +146,14 @@ function renderGrid() {
                 ${isNew ? `<span class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md badge-pulse">NUEVO</span>` : ''}
             </div>
             <div class="p-4 flex flex-col flex-1 border-t border-slate-50">
-                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">${escapeHTML(p.category || 'General')}</span>
-                <h3 class="font-bold text-sm mb-2 h-10 line-clamp-2 leading-snug text-slate-800">${escapeHTML(p.name)}</h3>
+                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">${escapeHTML(p.category || 'General')}</span>
+                
+                <h3 class="font-bold text-xs text-slate-900 mb-3 leading-relaxed">
+                    ${escapeHTML(p.name)}
+                </h3>
+                
                 ${selectorHTML}
+                
                 <div class="mt-auto flex gap-2 pt-2">
                     <button onclick="add('${p.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95">Agregar</button>
                     <button onclick="askProduct('${p.id}')" class="product-help-btn w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-green-500 hover:bg-green-50 transition active:scale-95"><i class="fa-brands fa-whatsapp"></i></button>
@@ -184,8 +187,6 @@ function add(id) {
     if(exist) exist.quantity += qty; else cart.push({ ...p, quantity: qty });
     saveCart();
     showToast(`Agregado (+${qty})`);
-    
-    // ANALYTICS: Registrar agregado al carrito
     if(analytics) analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: p.name, quantity: qty }] });
 }
 
@@ -249,7 +250,6 @@ function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
     if(m.classList.contains('hidden')) {
         m.classList.remove('hidden'); setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
-        // ANALYTICS: Ver carrito
         if(analytics) analytics.logEvent('view_cart');
     } else {
         b.classList.add('opacity-0'); p.classList.add('translate-x-full'); setTimeout(() => m.classList.add('hidden'), 300);
@@ -273,7 +273,6 @@ function checkQRParam() {
                     toggleCart(); 
                     showToast("¡Escaneado exitoso!"); 
                     window.history.replaceState({},'',window.location.pathname); 
-                    // ANALYTICS: QR Scan Exitoso
                     if(analytics) analytics.logEvent('scan_qr', { product_id: pid });
                 }
                 clearInterval(i);
@@ -307,7 +306,6 @@ function sendWhatsApp() {
     const name = document.getElementById('client-name').value.trim() || "Cliente";
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
     
-    // Método entrega
     if(selectedDelivery === 'recoger') msg += `📍 Recoger en Sucursal (${selectedPayment||'?'})\n`;
     else if(selectedDelivery === 'local') msg += `🚚 Envío Local a: ${document.getElementById('delivery-address').value} (${selectedPayment||'?'})\n`;
     else if(selectedDelivery === 'foraneo') msg += `✈️ Envío Foráneo (${isOcurre?'Ocurre':'Domicilio'}) por ${document.getElementById('fletera-name').value}\n`;
@@ -325,11 +323,9 @@ function sendWhatsApp() {
     });
     window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`, '_blank');
     
-    // ANALYTICS: Lead generado
     if(analytics) analytics.logEvent('generate_lead', { currency: 'MXN', value: 0 });
 }
 
-// Preferencias
 function loadPrefs() { try { const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; if(p.name) document.getElementById('client-name').value = p.name; if(p.deliveryType) setDelivery(p.deliveryType, false); } catch(e){} }
 function savePrefs() { localStorage.setItem('user_prefs_een', JSON.stringify({ name: document.getElementById('client-name').value, deliveryType: selectedDelivery, paymentMethod: selectedPayment, isOcurre: isOcurre, address: document.getElementById('delivery-address').value, fletera: document.getElementById('fletera-name').value })); }
 
@@ -354,11 +350,9 @@ function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
 function askProduct(id) { 
     const p = allProducts.find(x => x.id === id); 
     window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent("Info sobre: "+p.name)}`, '_blank');
-    // ANALYTICS: Pregunta por producto
     if(analytics) analytics.logEvent('ask_product', { product_id: id });
 }
 
-// Tour (simplificado)
 function startTour() {
     const tour = [
         {el:'#main-nav', t:'¡Bienvenido!', d:'Explora nuestro catálogo digital.'},
@@ -367,7 +361,6 @@ function startTour() {
         {el:'#products-container > div:first-child', t:'Producto', d:'Agrega o consulta dudas.'},
         {el:'#cart-fab', t:'Carrito', d:'Revisa tu pedido aquí.'}
     ];
-    // Lógica básica de tour... (se mantiene igual que versión anterior)
     localStorage.setItem('tour_seen_v2', 'true');
 }
 function startCartTour() { alert("Aquí puedes ver tu pedido, elegir entrega y enviar por WhatsApp."); }
