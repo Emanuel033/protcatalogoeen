@@ -3,101 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin ERP - Envases La Económica</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <title>Admin 6.0 - ERP Optimizado</title>
 
-    <!-- Firebase -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    
-    <!-- Scripts -->
-    <script src="assets/js/firebase-config.js" defer></script>
-    <script src="assets/js/admin.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        #reader video { object-fit: cover; border-radius: 16px; }
+        .success-flash { animation: flashGreen 0.6s ease-out; }
+        @keyframes flashGreen { 0% { background-color: rgba(34, 197, 94, 0.9); } 100% { background-color: transparent; } }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
 </head>
-<body class="bg-slate-100 h-screen overflow-hidden flex font-sans text-slate-800">
-    <div id="loading-screen" class="fixed inset-0 z-50 bg-white flex items-center justify-center"><div class="animate-spin w-12 h-12 border-4 border-t-indigo-600 rounded-full"></div></div>
+<body class="bg-gray-100 font-sans text-slate-800 h-screen flex flex-col overflow-hidden text-xs md:text-sm">
 
-    <aside class="w-64 bg-indigo-900 text-white flex-col hidden md:flex z-20">
-        <div class="p-6 border-b border-indigo-800"><h1 class="text-2xl font-black flex items-center gap-2"><i class="fa-solid fa-cube"></i> ADMIN</h1></div>
-        <nav class="flex-1 p-4 space-y-2">
-            <button onclick="showSection('dashboard')" class="w-full text-left px-4 py-3 rounded-xl bg-indigo-800"><i class="fa-solid fa-chart-pie w-5"></i> Resumen</button>
-            <button onclick="showSection('catalog')" class="w-full text-left px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-800"><i class="fa-solid fa-boxes-stacked w-5"></i> Catálogo</button>
-            <button onclick="showSection('inventory')" class="w-full text-left px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-800"><i class="fa-solid fa-clipboard-list w-5"></i> Stock</button>
-            <button onclick="showSection('scanner')" class="w-full text-left px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-800"><i class="fa-solid fa-qrcode w-5"></i> Escáner Entradas</button>
-        </nav>
-        <div class="p-4 border-t border-indigo-800"><button onclick="logout()" class="w-full py-2 bg-indigo-950 text-indigo-300 rounded hover:bg-red-900">Cerrar Sesión</button></div>
-    </aside>
+    <div id="loader" class="fixed inset-0 bg-slate-900 z-[60] flex flex-col items-center justify-center text-white transition-opacity duration-500">
+        <div class="animate-spin h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
+        <p class="text-xs tracking-widest uppercase font-semibold animate-pulse">Cargando ERP...</p>
+    </div>
 
-    <div class="flex-1 flex flex-col h-full relative">
-        <header class="bg-white border-b p-4 md:hidden flex justify-between"><h1 class="font-bold">ADMIN</h1><button onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button></header>
+    <div id="main-content" class="max-w-full mx-auto bg-white shadow-2xl border-x border-gray-200 hidden flex-col h-full w-full relative">
 
-        <main id="admin-content" class="flex-1 overflow-y-auto p-4 md:p-8 hidden bg-slate-50">
-            <!-- Dashboard -->
-            <div id="dashboard" class="fade-in max-w-5xl mx-auto">
-                <h2 class="text-2xl font-bold mb-6">Resumen</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm"><div class="text-xs font-bold text-slate-400">TOTAL</div><div class="text-3xl font-black text-indigo-600" id="total-products">...</div></div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm"><div class="text-xs font-bold text-slate-400">CATEGORÍAS</div><div class="text-3xl font-black text-emerald-500" id="total-categories">...</div></div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm"><div class="text-xs font-bold text-slate-400">ACTIVOS</div><div class="text-3xl font-black text-blue-500" id="active-products">...</div></div>
-                    <button onclick="openModal('create')" class="bg-indigo-600 text-white p-5 rounded-2xl shadow-lg flex flex-col items-center justify-center hover:bg-indigo-700"><i class="fa-solid fa-plus text-2xl"></i><span class="font-bold text-sm">Nuevo</span></button>
+        <div class="bg-indigo-900 px-4 py-2 flex justify-between items-center shrink-0 h-14">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-700 p-1.5 rounded-lg text-white shadow"><i class="fa-solid fa-boxes-stacked text-lg"></i></div>
+                <div>
+                    <h1 class="text-white text-base font-bold tracking-tight leading-none">ERP Económica</h1>
+                    <div class="flex items-center gap-1 text-indigo-300 text-[10px] mt-0.5"><i class="fa-solid fa-user-shield"></i><span id="user-info">...</span></div>
+                </div>
+            </div>
+            <button onclick="logout()" class="text-[10px] bg-red-500/20 hover:bg-red-500 text-red-100 hover:text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden md:inline">Salir</span>
+            </button>
+        </div>
+
+        <div class="flex shrink-0 bg-white shadow-sm z-20">
+            <button onclick="switchTab('catalogo')" id="tab-catalogo" class="flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-indigo-600 text-indigo-700 transition-colors">
+                <i class="fa-solid fa-tags text-lg"></i> <span class="text-[10px] uppercase tracking-wide">Catálogo</span>
+            </button>
+            <button onclick="switchTab('inventario')" id="tab-inventario" class="flex-1 py-3 px-2 flex flex-col items-center gap-1 font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fa-solid fa-clipboard-check text-lg"></i> <span class="text-[10px] uppercase tracking-wide">Inventario</span>
+            </button>
+        </div>
+
+        <div id="view-catalogo" class="flex flex-col h-full overflow-hidden bg-gray-50">
+            <div class="border-b bg-white shrink-0 shadow-sm z-10">
+                <details id="addFormDetails" class="group px-4 py-2">
+                    <summary class="list-none flex justify-between items-center cursor-pointer outline-none">
+                        <h2 class="font-bold text-indigo-800 text-[11px] uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-circle-plus text-indigo-500"></i> Nuevo Producto
+                        </h2>
+                        <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 group-open:rotate-180 transition-transform"><i class="fa-solid fa-chevron-down text-[10px]"></i></div>
+                    </summary>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 animate-in fade-in zoom-in-95 duration-200 mt-3 pb-2">
+                        <div class="col-span-1 md:col-span-3"><input id="prodName" onkeydown="checkEnter(event)" type="text" placeholder="Nombre" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 text-xs outline-none transition-all"></div>
+                        <div class="col-span-1 md:col-span-2"><input id="prodCat" onkeydown="checkEnter(event)" type="text" placeholder="Categoría" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 text-xs outline-none transition-all"></div>
+                        <div class="col-span-1 md:col-span-2"><input id="prodPcs" onkeydown="checkEnter(event)" type="number" placeholder="Pzas x Paq" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 text-xs outline-none transition-all"></div>
+
+                        <div class="col-span-1 md:col-span-5 flex gap-2 items-center">
+                            <div class="flex-grow relative"><input id="prodFile" onkeydown="checkEnter(event)" oninput="previewImage(this.value)" type="text" placeholder="URL Imagen" class="w-full px-3 py-2 pl-8 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 text-xs outline-none transition-all"><i class="fa-solid fa-image absolute left-2.5 top-2.5 text-gray-400"></i></div>
+                            <div id="imgPreviewBox" class="w-8 h-8 rounded-lg border overflow-hidden hidden shadow-sm"><img id="imgPreview" class="w-full h-full object-cover"></div>
+
+                            <label class="flex items-center gap-1 cursor-pointer bg-gray-100 px-2 py-1.5 rounded-lg border hover:bg-gray-200 transition-colors">
+                                <input id="prodOldDate" type="checkbox" class="w-3.5 h-3.5 text-indigo-600 rounded">
+                                <span class="text-[9px] font-bold text-gray-600 uppercase">Antiguo</span>
+                            </label>
+
+                            <button onclick="uploadProduct()" id="btnUpload" class="bg-indigo-600 text-white font-bold w-10 h-8 rounded-lg shadow-md hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="px-4 py-2 bg-white border-b flex flex-col md:flex-row justify-between items-center gap-2 shrink-0">
+                <div class="relative w-full md:w-1/3">
+                    <i class="fa-solid fa-search absolute left-3 top-2 text-gray-400 text-xs"></i>
+                    <input id="searchInput" oninput="filterProducts()" type="text" placeholder="Buscar producto..." class="w-full pl-8 pr-4 py-1.5 bg-gray-100 border-transparent rounded-full text-xs outline-none focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all">
+                </div>
+                <div class="flex gap-2 w-full md:w-auto justify-end items-center">
+                    <div class="flex items-center gap-1 bg-indigo-50 p-1 rounded-lg border border-indigo-100 hidden md:flex">
+                        <span class="text-[9px] font-bold text-indigo-800 uppercase px-1">Masivo:</span>
+                        <input id="massQtyInput" type="number" placeholder="#" class="w-12 px-1 text-xs text-center h-6 rounded border-none outline-none">
+                        <button onclick="applyMassUpdate()" class="bg-indigo-600 text-white rounded w-6 h-6"><i class="fa-solid fa-check text-[10px]"></i></button>
+                    </div>
+
+                    <button onclick="printFilteredQRs('inventario')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs para Cajas/Paquetes"><i class="fa-solid fa-box"></i> QRs Cajas</button>
+                    <button onclick="printFilteredQRs('vitrina')" class="bg-pink-600 hover:bg-pink-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs URL para Vitrina/Clientes"><i class="fa-solid fa-store"></i> QRs Vitrina</button>
+
+                    <button onclick="filterIncomplete()" class="bg-orange-100 hover:bg-orange-200 text-orange-600 p-1.5 rounded-lg border border-orange-200 transition" title="Sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
+                    <button onclick="exportToExcel('catalogo')" class="bg-green-100 hover:bg-green-200 text-green-700 p-1.5 rounded-lg border border-green-200 transition" title="Excel"><i class="fa-solid fa-file-excel"></i></button>
                 </div>
             </div>
 
-            <!-- Catálogo -->
-            <div id="catalog" class="hidden fade-in max-w-6xl mx-auto">
-                <div class="flex justify-between mb-4"><input type="text" id="searchCatalog" onkeyup="renderCatalog()" placeholder="Buscar..." class="border rounded-xl px-4 py-2 w-full max-w-sm"><button onclick="openModal('create')" class="ml-2 bg-indigo-600 text-white px-4 py-2 rounded-xl"><i class="fa-solid fa-plus"></i></button></div>
-                <div class="bg-white rounded-2xl shadow border overflow-hidden"><table class="w-full text-left"><tbody id="catalog-body" class="divide-y"></tbody></table><div class="p-3 text-center"><button onclick="loadMore('cat')" class="text-indigo-600 text-xs font-bold">Ver más</button></div></div>
+            <div class="flex-grow overflow-auto relative" id="tableContainer">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead class="bg-gray-100/80 backdrop-blur-sm text-[10px] uppercase text-gray-500 font-bold sticky top-0 z-10 border-b">
+                        <tr>
+                            <th class="py-2 px-2 w-14 text-center">Img</th>
+                            <th class="py-2 px-2">Descripción del Producto</th>
+                            <th class="py-2 px-2 w-20 text-center">Pzas/Paq</th>
+                            <th class="py-2 px-2 w-16 text-center">Vis.</th>
+                            <th class="py-2 px-2 w-40 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-100 text-xs text-gray-700 bg-white"></tbody>
+                </table>
             </div>
+        </div>
 
-            <!-- Inventario -->
-            <div id="inventory" class="hidden fade-in max-w-3xl mx-auto">
-                <input type="text" id="searchInventory" onkeyup="renderInventory()" placeholder="Buscar para ajustar stock..." class="w-full px-4 py-3 rounded-xl border mb-4">
-                <div id="inventory-grid" class="space-y-3 pb-20"></div>
-                <button onclick="loadMore('inv')" class="w-full py-3 text-center text-indigo-500 text-sm font-bold">Ver más</button>
-            </div>
-
-            <!-- Escáner -->
-            <div id="scanner" class="hidden fade-in h-full flex flex-col items-center justify-center">
-                <div class="bg-white p-2 rounded-3xl border-4 relative overflow-hidden w-full max-w-md aspect-square">
-                    <div id="reader" class="w-full h-full bg-black"></div>
-                    <div id="scan-overlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 pointer-events-none transition text-center p-4"></div>
+        <div id="view-inventario" class="hidden flex-col h-full overflow-hidden bg-gray-100 relative">
+            <div class="bg-white p-3 border-b shrink-0 flex justify-between items-center shadow-sm z-10">
+                <div class="relative w-2/3 md:w-1/2">
+                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                    <input id="searchInvInput" oninput="renderInventoryTable()" type="text" placeholder="Buscar para ajuste manual..." class="w-full pl-8 pr-4 py-2 bg-gray-100 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-indigo-200 transition-all">
                 </div>
-                <div class="mt-4 bg-gray-900 text-white px-6 py-4 rounded-2xl w-full max-w-md text-center"><p class="text-[10px] text-gray-400 font-bold uppercase">Último Agregado</p><div id="scanProdName" class="font-bold text-lg">...</div><div class="text-2xl font-black text-indigo-400" id="scanTotal">0</div></div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportToExcel('inventario')" class="bg-green-600 text-white w-9 h-9 flex justify-center items-center rounded-xl shadow-md" title="Exportar Contpaqi"><i class="fa-solid fa-file-csv text-lg"></i></button>
+                    <button onclick="resetAllStock()" class="bg-red-100 text-red-600 w-9 h-9 flex justify-center items-center rounded-xl" title="Todo a CERO"><i class="fa-solid fa-trash-arrow-up text-lg"></i></button>
+                </div>
             </div>
-        </main>
-    </div>
 
-    <!-- Modales (Producto / QR) -->
-    <div id="product-modal" class="fixed inset-0 z-50 hidden bg-slate-900/50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-2xl p-6 relative">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="font-bold text-lg mb-4">Producto</h3>
-            <form id="product-form" onsubmit="saveProduct(event)" class="space-y-3">
-                <input type="hidden" id="prodId">
-                <input type="text" id="name" required placeholder="Nombre" class="w-full border rounded p-2">
-                <div class="grid grid-cols-2 gap-3"><input type="text" id="category" list="cat-list" placeholder="Categoría" class="border rounded p-2"><input type="number" id="piezas" placeholder="Piezas x Paq" class="border rounded p-2"></div>
-                <datalist id="cat-list"><option>Botellas</option><option>Garrafas</option><option>Tapas</option></datalist>
-                <input type="text" id="image" onchange="previewImage(this.value)" placeholder="URL Imagen" class="w-full border rounded p-2">
-                <div id="imgPreviewBox" class="hidden text-center bg-slate-50 p-2 rounded"><img id="imgPreview" class="h-20 mx-auto object-contain"></div>
-                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded">Guardar</button>
-            </form>
+            <div class="flex-grow overflow-auto p-3 pb-24" id="inventoryCardsContainer"></div>
+
+            <button onclick="openScannerModal()" class="fixed bottom-6 right-6 md:absolute md:bottom-8 md:right-8 w-16 h-16 bg-indigo-600 text-white rounded-full shadow-[0_8px_16px_rgba(79,70,229,0.4)] flex items-center justify-center hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all z-30 ring-4 ring-indigo-100">
+                <i class="fa-solid fa-qrcode text-2xl"></i>
+            </button>
         </div>
     </div>
 
-    <div id="qr-modal" class="fixed inset-0 z-[60] hidden bg-slate-900/80 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-3xl text-center">
-            <h3 id="qr-prod-name" class="font-bold mb-4">Producto</h3>
-            <canvas id="qr-canvas" class="border-2 border-dashed p-2 rounded mb-4"></canvas>
-            <div class="flex gap-2 justify-center"><button onclick="printQR()" class="bg-indigo-600 text-white px-4 py-2 rounded">Imprimir</button><button onclick="document.getElementById('qr-modal').classList.add('hidden')" class="bg-slate-200 px-4 py-2 rounded">Cerrar</button></div>
+    <div id="scannerModal" class="fixed inset-0 bg-black/95 z-[70] hidden flex-col">
+        <div class="p-4 flex justify-between items-center bg-black/50 backdrop-blur-md text-white shrink-0 absolute top-0 w-full z-20">
+            <div>
+                <h3 class="font-bold text-lg leading-none"><i class="fa-solid fa-expand text-indigo-400"></i> Escáner Físico</h3>
+                <p class="text-[10px] text-gray-300 mt-1">Apunta la cámara al QR del paquete</p>
+            </div>
+            <button onclick="closeScannerModal()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+
+        <div class="flex-grow relative flex flex-col justify-center items-center p-4 pt-20">
+            <div id="reader" class="w-full max-w-sm overflow-hidden rounded-3xl border-2 border-indigo-500/30 shadow-[0_0_40px_rgba(99,102,241,0.2)] bg-black relative">
+                <div id="scanOverlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none opacity-0 transition-opacity duration-200">
+                    <div class="bg-white/20 backdrop-blur-sm rounded-full p-4 mb-2 shadow-xl"><i class="fa-solid fa-check text-5xl text-white drop-shadow-md"></i></div>
+                    <div id="overlayQty" class="text-4xl font-black text-white drop-shadow-lg tracking-tighter">+24</div>
+                </div>
+            </div>
+
+            <div class="mt-8 w-full max-w-sm bg-gray-900 rounded-2xl p-5 border border-gray-800 shadow-xl text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
+                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Último Agregado</p>
+                <div id="scanProdName" class="text-white font-bold text-base leading-tight min-h-[1.2rem]">Esperando lectura...</div>
+                <div class="mt-3 inline-block bg-gray-800 rounded-xl px-4 py-2 border border-gray-700">
+                    <span class="text-gray-400 text-xs mr-2">Stock Total:</span>
+                    <span id="scanTotal" class="text-2xl font-black text-indigo-400">0</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-xl translate-y-32 transition-transform duration-300 z-[100] border-l-4 border-indigo-500"><span id="toast-msg"></span></div>
+    <div id="toast" class="fixed bottom-6 right-1/2 translate-x-1/2 md:translate-x-0 md:right-6 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-2xl translate-y-32 transition-transform duration-300 z-[100] border-l-4 border-indigo-500 flex items-center gap-3 w-max max-w-[90vw]">
+        <div id="toast-icon-bg" class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+            <i id="toast-icon" class="fa-solid fa-check text-green-400 text-xs"></i>
+        </div>
+        <p id="toast-msg" class="text-xs font-semibold text-slate-100 tracking-wide">Mensaje</p>
+    </div>
+
+    <script src="admin.js"></script>
 </body>
 </html>
