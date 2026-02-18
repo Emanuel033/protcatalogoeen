@@ -27,10 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
 
+        // TOUR DESACTIVADO: Se comenta esta sección para evitar que aparezca
+        /*
         const urlParams = new URLSearchParams(window.location.search);
         if(!localStorage.getItem('tour_seen_v2') && !urlParams.has('add')) {
            setTimeout(() => startTour(), 2000); 
         }
+        */
     } catch (e) { console.error("Error init:", e); }
 });
 
@@ -135,10 +138,7 @@ function renderGrid() {
             : (hasPack ? `<select id="sel-${p.id}" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 mb-2 bg-slate-50 text-slate-700 font-medium outline-none"><option value="1">Individual</option><option value="${packQty}">Paquete completo</option></select>` 
             : `<input type="hidden" id="sel-${p.id}" value="1">`);
 
-        // --- AQUÍ ESTÁ EL CAMBIO DE DISEÑO ---
-        // Se cambió 'text-sm' a 'text-xs'
-        // Se eliminó 'h-10' y 'line-clamp-2' para que el texto fluya completo
-        // Se agregó 'text-slate-900' para mejor contraste en letra pequeña
+        // Diseño actualizado para nombre completo (más pequeño)
         return `
         <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
             <div class="relative h-52 p-4 cursor-pointer overflow-hidden rounded-t-2xl" onclick="openImage('${p.image}')">
