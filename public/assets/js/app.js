@@ -64,12 +64,26 @@ function loadProducts() {
     });
 }
 
+function getCategoryIcon(cat) {
+    const c = cat.toLowerCase();
+    if(c.includes('bolsa')) return '<i class="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>';
+    if(c.includes('cubeta')) return '<i class="fa-solid fa-fill-drip mr-1.5 opacity-80"></i>';
+    if(c.includes('garrafa')) return '<i class="fa-solid fa-jug-detergent mr-1.5 opacity-80"></i>';
+    if(c.includes('tapa')) return '<i class="fa-solid fa-circle-notch mr-1.5 opacity-80"></i>';
+    if(c.includes('tambor') || c.includes('barril')) return '<i class="fa-solid fa-drum-steelpan mr-1.5 opacity-80"></i>';
+    if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-bottle-water mr-1.5 opacity-80"></i>';
+    if(c.includes('todos')) return '<i class="fa-solid fa-border-all mr-1.5 opacity-80"></i>';
+    return '<i class="fa-solid fa-box mr-1.5 opacity-80"></i>';
+}
+
 function renderCategories() {
     const cont = document.getElementById('categories-container');
     if(!cont) return;
     const cats = ['Todos', ...new Set(allProducts.map(p => p.category || 'Varios'))].sort();
     cont.innerHTML = cats.map(cat => `
-        <button onclick="filterCat('${cat}')" class="px-5 py-2 rounded-full text-sm font-bold border transition ${currentCategory === cat ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}">${cat}</button>
+        <button onclick="filterCat('${cat}')" class="px-5 py-2 flex items-center rounded-full text-sm font-bold border transition whitespace-nowrap ${currentCategory === cat ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}">
+            ${getCategoryIcon(cat)} ${cat}
+        </button>
     `).join('');
 }
 
@@ -187,7 +201,16 @@ function add(id) {
     if(exist) exist.quantity += qty; else cart.push({ ...p, quantity: qty });
     saveCart();
     showToast(`Agregado (+${qty})`);
-    if(analytics) analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: p.name, quantity: qty }] });
+    
+    // Animación de éxito en el botón flotante del carrito
+    const fab = document.getElementById('cart-fab');
+    if(fab) {
+        fab.classList.remove('animate-pop');
+        void fab.offsetWidth; // Forzar reinicio de la animación si se cliquea rápido
+        fab.classList.add('animate-pop');
+    }
+
+    if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: p.name, quantity: qty }] });
 }
 
 function updateCartItem(id) {
