@@ -133,15 +133,9 @@ function renderGrid() {
         const hasPack = packQty > 1;
         const isNew = latestProductIds.includes(p.id);
         
-        // --- RESTAURADO: Información visual de piezas/paquete ---
-        let badgeHTML = '';
-        if(isBolsas) {
-            badgeHTML = `<div class="text-[10px] text-indigo-600 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-box-open"></i> Minimo: 1 Paquete (100 pzas)</div>`;
-        } else if(hasPack) {
-            badgeHTML = `<div class="text-[10px] text-slate-500 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-box"></i> Minimo:1 pz - Paquete: <b>${packQty} pzas</b></div>`;
-        } else {
-             badgeHTML = `<div class="text-[10px] text-slate-400 font-medium mb-2 flex items-center gap-1"><i class="fa-solid fa-cube"></i> Venta Individual</div>`;
-        }
+        // --- INFORMACIÓN VISUAL (Mínimo y Paquete) ---
+        const minText = isBolsas ? "Min: 100 pzas" : "Min: 1 pz";
+        const packText = (hasPack && !isBolsas) ? `Paquete: ${packQty} pzas` : "";
 
         let selectorHTML = isBolsas 
             ? `<select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none"><option value="100">Paquete (100 pzas)</option></select>`
@@ -161,7 +155,11 @@ function renderGrid() {
                     ${escapeHTML(p.name)}
                 </h3>
                 
-                ${badgeHTML}
+                <!-- Info Mínimo y Paquete -->
+                <div class="flex justify-between items-end text-[10px] font-bold text-slate-500 mb-2">
+                    <span>${minText}</span>
+                    ${packText ? `<span class="text-indigo-600 font-black">${packText}</span>` : ''}
+                </div>
                 
                 ${selectorHTML}
                 
@@ -187,7 +185,7 @@ function renderGrid() {
 function changePage(d) { currentPage += d; renderGrid(); document.getElementById('products-container').scrollIntoView({ behavior: 'smooth' }); }
 
 // ==========================================
-// CARRITO - DISEÑO VISUAL MEJORADO
+// CARRITO
 // ==========================================
 function add(id) {
     const p = allProducts.find(x => x.id === id);
@@ -236,7 +234,6 @@ function renderCart() {
     document.getElementById('cart-badge').classList.toggle('scale-0', total === 0);
     document.getElementById('cart-total').innerText = total;
 
-    // Estado vacío
     if(cart.length === 0) {
         itemsCont.innerHTML = `
         <div class="h-64 flex flex-col items-center justify-center text-slate-400 m-4">
@@ -244,14 +241,13 @@ function renderCart() {
                 <i class="fa-solid fa-basket-shopping text-2xl"></i>
             </div>
             <p class="text-sm font-bold text-slate-500">Tu carrito está vacío</p>
-            <p class="text-xs text-slate-400 mt-1">¡Agrega productos para comenzar!</p>
         </div>`;
         document.getElementById('cart-config').classList.add('hidden');
         return;
     }
     document.getElementById('cart-config').classList.remove('hidden');
 
-    // Renderizado de ítems con NUEVO DISEÑO
+    // Renderizado con iconos claros y estructura intuitiva
     itemsCont.innerHTML = cart.map(item => {
         const prod = allProducts.find(p => p.id === item.id) || item;
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
@@ -259,47 +255,46 @@ function renderCart() {
         
         let inputsHTML = '';
         if (packSize > 1) {
-            // Diseño para productos con paquetes (inputs más bonitos)
             inputsHTML = `
-            <div class="mt-3 flex items-end gap-2 text-xs">
-                <div class="flex-1 bg-slate-50 rounded-lg p-1.5 border border-slate-100 relative group-focus-within:border-indigo-200 transition-colors">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5 tracking-wider">Paquetes</label>
-                    <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-indigo-700 text-center outline-none text-sm">
+            <div class="flex gap-2 mt-2">
+                <div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5">
+                    <i class="fa-solid fa-box text-indigo-500 text-sm"></i>
+                    <div class="flex flex-col flex-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Paquetes</label>
+                        <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
+                    </div>
                 </div>
                 ${!isBolsas ? `
-                <div class="flex-1 bg-slate-50 rounded-lg p-1.5 border border-slate-100 relative group-focus-within:border-indigo-200 transition-colors">
-                    <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5 tracking-wider">Sueltas</label>
-                    <input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-700 text-center outline-none text-sm">
-                </div>
-                ` : ''}
+                <div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5">
+                    <i class="fa-solid fa-shapes text-slate-400 text-sm"></i>
+                     <div class="flex flex-col flex-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label>
+                        <input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
+                    </div>
+                </div>` : ''}
             </div>`;
         } else {
-            // Diseño simple
-            inputsHTML = `
-            <div class="mt-3 flex justify-end">
-                <div class="flex items-center gap-2 bg-slate-50 rounded-lg p-1 border border-slate-100">
-                    <span class="text-[10px] font-bold text-slate-400 px-1">CANT:</span>
-                    <input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-16 bg-transparent font-bold text-slate-700 text-center outline-none text-sm">
+             inputsHTML = `
+            <div class="flex justify-end mt-2">
+                <div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32">
+                    <span class="text-[10px] font-bold text-slate-400">PZAS:</span>
+                    <input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none">
                 </div>
             </div>`;
         }
 
         return `
-        <div class="group relative flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md mb-3">
-            <!-- Imagen -->
-            <div class="h-20 w-20 shrink-0 rounded-xl bg-slate-50 p-2 flex items-center justify-center border border-slate-50">
+        <div class="flex gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm mb-3">
+            <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border">
                 <img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply">
             </div>
-            
-            <!-- Info -->
-            <div class="flex flex-1 flex-col justify-between min-w-0">
+            <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start gap-2">
                     <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${escapeHTML(item.name)}</h4>
-                    <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors -mr-1 -mt-1 p-1" title="Eliminar">
+                    <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
-                
                 ${inputsHTML}
             </div>
         </div>`;
