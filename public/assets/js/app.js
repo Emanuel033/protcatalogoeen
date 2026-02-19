@@ -26,14 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('scroll-top-btn');
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
-
-        // TOUR DESACTIVADO
-        /*
-        const urlParams = new URLSearchParams(window.location.search);
-        if(!localStorage.getItem('tour_seen_v2') && !urlParams.has('add')) {
-           setTimeout(() => startTour(), 2000); 
-        }
-        */
     } catch (e) { console.error("Error init:", e); }
 });
 
@@ -133,7 +125,6 @@ function renderGrid() {
         const hasPack = packQty > 1;
         const isNew = latestProductIds.includes(p.id);
         
-        // --- INFORMACIÓN VISUAL (Mínimo y Paquete) ---
         const minText = isBolsas ? "Min: 100 pzas" : "Min: 1 pz";
         const packText = (hasPack && !isBolsas) ? `Paquete: ${packQty} pzas` : "";
 
@@ -150,19 +141,12 @@ function renderGrid() {
             </div>
             <div class="p-4 flex flex-col flex-1 border-t border-slate-50">
                 <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">${escapeHTML(p.category || 'General')}</span>
-                
-                <h3 class="font-bold text-xs text-slate-900 mb-2 leading-relaxed h-auto">
-                    ${escapeHTML(p.name)}
-                </h3>
-                
-                <!-- Info Mínimo y Paquete -->
+                <h3 class="font-bold text-xs text-slate-900 mb-2 leading-relaxed h-auto">${escapeHTML(p.name)}</h3>
                 <div class="flex justify-between items-end text-[10px] font-bold text-slate-500 mb-2">
                     <span>${minText}</span>
                     ${packText ? `<span class="text-indigo-600 font-black">${packText}</span>` : ''}
                 </div>
-                
                 ${selectorHTML}
-                
                 <div class="mt-auto flex gap-2 pt-2">
                     <button onclick="add('${p.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95">Agregar</button>
                     <button onclick="askProduct('${p.id}')" class="product-help-btn w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-green-500 hover:bg-green-50 transition active:scale-95"><i class="fa-brands fa-whatsapp"></i></button>
@@ -235,68 +219,33 @@ function renderCart() {
     document.getElementById('cart-total').innerText = total;
 
     if(cart.length === 0) {
-        itemsCont.innerHTML = `
-        <div class="h-64 flex flex-col items-center justify-center text-slate-400 m-4">
-            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
-                <i class="fa-solid fa-basket-shopping text-2xl"></i>
-            </div>
-            <p class="text-sm font-bold text-slate-500">Tu carrito está vacío</p>
-        </div>`;
+        itemsCont.innerHTML = `<div class="h-64 flex flex-col items-center justify-center text-slate-400 m-4"><div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300"><i class="fa-solid fa-basket-shopping text-2xl"></i></div><p class="text-sm font-bold text-slate-500">Tu carrito está vacío</p></div>`;
         document.getElementById('cart-config').classList.add('hidden');
         return;
     }
     document.getElementById('cart-config').classList.remove('hidden');
 
-    // Renderizado con iconos claros y estructura intuitiva
     itemsCont.innerHTML = cart.map(item => {
         const prod = allProducts.find(p => p.id === item.id) || item;
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
         const packSize = isBolsas ? 100 : (parseInt(prod.piezas)||0);
-        
         let inputsHTML = '';
         if (packSize > 1) {
             inputsHTML = `
             <div class="flex gap-2 mt-2">
                 <div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5">
                     <i class="fa-solid fa-box text-indigo-500 text-sm"></i>
-                    <div class="flex flex-col flex-1">
-                        <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Paquetes</label>
-                        <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
-                    </div>
+                    <div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Paquetes</label><input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div>
                 </div>
-                ${!isBolsas ? `
-                <div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5">
-                    <i class="fa-solid fa-shapes text-slate-400 text-sm"></i>
-                     <div class="flex flex-col flex-1">
-                        <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label>
-                        <input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
-                    </div>
-                </div>` : ''}
+                ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
             </div>`;
         } else {
-             inputsHTML = `
-            <div class="flex justify-end mt-2">
-                <div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32">
-                    <span class="text-[10px] font-bold text-slate-400">PZAS:</span>
-                    <input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none">
-                </div>
-            </div>`;
+             inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
         }
-
         return `
         <div class="flex gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm mb-3">
-            <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border">
-                <img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply">
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-start gap-2">
-                    <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${escapeHTML(item.name)}</h4>
-                    <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Eliminar">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                </div>
-                ${inputsHTML}
-            </div>
+            <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border"><img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply"></div>
+            <div class="flex-1 min-w-0"><div class="flex justify-between items-start gap-2"><h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${escapeHTML(item.name)}</h4><button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button></div>${inputsHTML}</div>
         </div>`;
     }).join('');
 }
@@ -368,9 +317,14 @@ function sendWhatsApp() {
     const name = document.getElementById('client-name').value.trim() || "Cliente";
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
     
-    if(selectedDelivery === 'recoger') msg += `📍 Recoger en Sucursal (${selectedPayment||'?'})\n`;
-    else if(selectedDelivery === 'local') msg += `🚚 Envío Local a: ${document.getElementById('delivery-address').value} (${selectedPayment||'?'})\n`;
-    else if(selectedDelivery === 'foraneo') msg += `✈️ Envío Foráneo (${isOcurre?'Ocurre':'Domicilio'}) por ${document.getElementById('fletera-name').value}\n`;
+    // Método entrega y pago detallado
+    if(selectedDelivery === 'recoger') {
+        msg += `📍 Recoger en Sucursal\n💳 Pago: ${selectedPayment||'Por definir'}\n`;
+    } else if(selectedDelivery === 'local') {
+        msg += `🚚 Envío Local\n📍 Dirección: ${document.getElementById('delivery-address').value}\n💳 Pago: ${selectedPayment||'Por definir'}\n`;
+    } else if(selectedDelivery === 'foraneo') {
+        msg += `✈️ Envío Foráneo\n📦 Modalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${document.getElementById('fletera-name').value}\n💳 Pago: ${selectedPayment||'Transferencia'}\n`;
+    }
 
     cart.forEach(i => {
         const prod = allProducts.find(p => p.id === i.id) || i;
@@ -413,12 +367,55 @@ function setDelivery(t,s=true) {
     });
     document.getElementById(`btn-${t}`).classList.add('selected');
     document.getElementById(`panel-${t}`).classList.remove('hidden');
+    // Mostrar info bancaria si aplica
+    const bankInfo = document.getElementById('bank-info');
+    if (t === 'foraneo') {
+        bankInfo.classList.remove('hidden');
+    } else {
+        bankInfo.classList.add('hidden');
+    }
     if(s) savePrefs();
 }
 
-function setPayment(m) { selectedPayment = m; document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); event.target.classList.add('selected'); document.getElementById('bank-info').classList.toggle('hidden', m !== 'Transferencia'); savePrefs(); }
+function setPayment(m) { 
+    selectedPayment = m; 
+    document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
+    event.target.classList.add('selected'); 
+    
+    // Mostrar banco si es transferencia en Local o Sucursal (si aplica, aunque sucursal no suele ser transf)
+    const bankInfo = document.getElementById('bank-info');
+    if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
+        bankInfo.classList.remove('hidden');
+    } else {
+        bankInfo.classList.add('hidden');
+    }
+    savePrefs(); 
+}
+
 function setPublicoGeneral() { document.getElementById('client-name').value = "Público General"; savePrefs(); }
-function setOcurre(v) { isOcurre = v; document.getElementById('btn-ocurre-si').classList.toggle('selected', v); document.getElementById('btn-ocurre-no').classList.toggle('selected', !v); savePrefs(); }
+
+function setOcurre(v) { 
+    isOcurre = v; 
+    const btnSi = document.getElementById('btn-ocurre-si');
+    const btnNo = document.getElementById('btn-ocurre-no');
+    
+    // Reset visual
+    btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
+    btnSi.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+    
+    btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
+    btnNo.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+
+    // Activar el seleccionado
+    if(v) {
+        btnSi.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+        btnSi.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+    } else {
+        btnNo.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+        btnNo.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+    }
+    savePrefs(); 
+}
 
 function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.remove('opacity-0','translate-y-24'); setTimeout(()=>t.classList.add('opacity-0','translate-y-24'),2500); }
 function openImage(s) { document.getElementById('lightbox-img').src=s; document.getElementById('lightbox').classList.remove('hidden'); }
