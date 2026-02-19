@@ -35,11 +35,17 @@
                 </div>
                 <div class="flex gap-2 md:hidden">
                     <button onclick="startQRScanner()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-qrcode"></i></button>
+                    <!-- Botón Tour Móvil -->
+                    <button onclick="startTour()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-circle-question"></i></button>
                 </div>
             </div>
             <div class="w-full md:w-96 flex gap-2 relative">
-                <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." class="w-full py-2.5 pl-4 pr-10 rounded-xl bg-white text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 transition-all text-sm outline-none shadow-sm">
+                <!-- BUSCADOR AZUL CLARITO -->
+                <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." class="w-full py-2.5 pl-4 pr-10 rounded-xl bg-indigo-100/20 text-white placeholder-indigo-200 focus:bg-white focus:text-slate-800 focus:placeholder-slate-400 transition-all text-sm outline-none shadow-sm border border-transparent focus:border-indigo-300">
                 <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark"></i></button>
+                
+                <!-- Botón Tour Desktop -->
+                <button onclick="startTour()" class="hidden md:flex items-center gap-2 bg-indigo-800 px-4 rounded-xl text-indigo-200 hover:text-white hover:bg-indigo-700 transition whitespace-nowrap ml-2"><i class="fa-solid fa-circle-info"></i><span class="text-xs font-bold">Ayuda</span></button>
             </div>
         </div>
     </nav>
@@ -183,38 +189,58 @@
                                 <span class="font-bold">Local</span>
                             </button>
                             <button onclick="setDelivery('foraneo')" id="btn-foraneo" class="option-btn rounded-xl p-3 text-xs flex flex-col items-center justify-center gap-1.5 transition-all border border-slate-100 bg-slate-50/50 hover:border-indigo-200 hover:bg-white text-slate-500 hover:text-indigo-600">
-                                <i class="fa-solid fa-truck-fast text-xl"></i> 
+                                <i class="fa-solid fa-truck-plane text-xl"></i> 
                                 <span class="font-bold">Foráneo</span>
                             </button>
                         </div>
 
-                        <!-- Paneles Condicionales (Más limpios) -->
+                        <!-- Panel SUCURSAL -->
+                        <div id="panel-recoger" class="hidden mt-3 fade-in">
+                             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3 text-xs text-slate-600">
+                                <p><i class="fa-solid fa-location-dot text-indigo-500 mr-1"></i> Calzada Guadalupe Victoria 105 Oriente</p>
+                             </div>
+                             <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Método de Pago</label>
+                             <div class="flex gap-2">
+                                 <button onclick="setPayment('Transferencia')" class="pay-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Transf.</button>
+                                 <button onclick="setPayment('Tarjeta')" class="pay-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Tarjeta</button>
+                                 <button onclick="setPayment('Cheque')" class="pay-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Cheque</button>
+                             </div>
+                             <p class="text-[10px] text-slate-400 mt-2 ml-1">* Tarjetas Débito/Crédito (No Amex)</p>
+                        </div>
+
+                        <!-- Panel LOCAL -->
                         <div id="panel-local" class="hidden mt-3 fade-in">
-                            <div class="relative mb-2">
+                            <div class="relative mb-3">
                                 <i class="fa-solid fa-map-location-dot absolute left-3 top-3 text-orange-400"></i>
                                 <input type="text" id="delivery-address" placeholder="Dirección exacta de entrega..." class="w-full pl-9 pr-3 py-2.5 border border-orange-200 bg-orange-50/30 rounded-xl text-sm outline-none focus:border-orange-400 transition" onchange="savePrefs()">
                             </div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Método de Pago</label>
                             <div class="flex gap-2">
-                                <button onclick="setPayment('Transferencia')" class="pay-btn flex-1 py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Transferencia</button>
-                                <button onclick="setPayment('Efectivo')" class="pay-btn flex-1 py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Efectivo</button>
+                                <button onclick="setPayment('Transferencia')" class="pay-btn flex-1 py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Transferencia<br><span class="text-[9px] font-normal text-slate-400">(Previo)</span></button>
+                                <button onclick="setPayment('Cheque')" class="pay-btn flex-1 py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Cheque<br><span class="text-[9px] font-normal text-slate-400">(C. Entrega)</span></button>
+                                <button onclick="setPayment('Efectivo')" class="pay-btn flex-1 py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Efectivo<br><span class="text-[9px] font-normal text-slate-400">(C. Entrega)</span></button>
                             </div>
                         </div>
 
+                        <!-- Panel FORÁNEO -->
                         <div id="panel-foraneo" class="hidden mt-3 fade-in">
-                            <div class="relative mb-2">
+                            <div class="relative mb-3">
                                 <i class="fa-solid fa-truck-fast absolute left-3 top-3 text-indigo-400"></i>
                                 <input type="text" id="fletera-name" placeholder="Nombre de la fletera preferida..." class="w-full pl-9 pr-3 py-2.5 border border-indigo-200 bg-indigo-50/30 rounded-xl text-sm outline-none focus:border-indigo-400 transition" onchange="savePrefs()">
                             </div>
-                            <div class="flex gap-2 mb-2 p-1 bg-slate-100 rounded-lg">
-                                <button onclick="setOcurre(true)" id="btn-ocurre-si" class="option-btn flex-1 py-1.5 rounded-md text-xs font-bold transition">Ocurre</button>
-                                <button onclick="setOcurre(false)" id="btn-ocurre-no" class="option-btn flex-1 py-1.5 rounded-md text-xs font-bold transition">Domicilio</button>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <button onclick="setOcurre(true)" id="btn-ocurre-si" class="option-btn py-3 rounded-xl text-xs font-bold border flex flex-col items-center gap-1 transition-all">
+                                    <i class="fa-solid fa-warehouse text-lg"></i>
+                                    OCURRE
+                                </button>
+                                <button onclick="setOcurre(false)" id="btn-ocurre-no" class="option-btn py-3 rounded-xl text-xs font-bold border flex flex-col items-center gap-1 transition-all">
+                                    <i class="fa-solid fa-house-chimney text-lg"></i>
+                                    DOMICILIO
+                                </button>
                             </div>
-                            <button onclick="setPayment('Transferencia')" class="pay-btn w-full py-2 rounded-lg text-xs font-bold border border-indigo-200 bg-indigo-50 text-indigo-700 selected">Transferencia Bancaria</button>
-                        </div>
-                        
-                        <div id="panel-recoger" class="hidden mt-3 fade-in flex gap-2">
-                             <button onclick="setPayment('Efectivo')" class="pay-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Efectivo</button>
-                             <button onclick="setPayment('Tarjeta')" class="pay-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Tarjeta</button>
+                            <button onclick="setPayment('Transferencia')" class="pay-btn w-full py-2 rounded-lg text-xs font-bold border border-indigo-200 bg-indigo-50 text-indigo-700 selected cursor-default">
+                                <i class="fa-solid fa-building-columns mr-1"></i> Transferencia / Depósito
+                            </button>
                         </div>
                     </div>
                     
@@ -263,3 +289,5 @@
     <div id="lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/90" onclick="this.classList.add('hidden')"><img id="lightbox-img" class="max-w-[95%] max-h-[90vh] rounded" onclick="event.stopPropagation()"></div>
 </body>
 </html>
+
+
