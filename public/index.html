@@ -5,20 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo - Envases La Económica del Norte</title>
     
+    <!-- Íconos de la página (Favicon) -->
+    <link rel="icon" href="assets/img/logoeen.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="assets/img/logoeen.png">
+    
     <!-- CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     
-    <!-- Librerías -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+    <!-- Librerías Firebase (CORE) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-    <!-- JS Propio -->
-    <script src="assets/js/firebase-config.js" defer></script>
+    <!-- JS Propio (Ahora app.js tiene todo para evitar errores de carga) -->
     <script src="assets/js/app.js" defer></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
@@ -27,7 +30,9 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center justify-between w-full md:w-auto">
                 <div class="flex items-center gap-3">
-                    <div class="bg-white text-indigo-900 p-2 rounded-xl font-bold h-10 w-10 flex items-center justify-center">E</div>
+                    <!-- LOGO DE LA EMPRESA -->
+                    <img src="assets/img/logoeen.png" alt="Logo Envases La Económica" class="h-10 w-10 object-contain bg-white rounded-xl p-1 shadow-sm" onerror="this.outerHTML='<div class=\'bg-white text-indigo-900 p-2 rounded-xl font-bold h-10 w-10 flex items-center justify-center\'>E</div>'">
+                    
                     <div>
                         <h1 class="text-lg font-bold uppercase tracking-tight">ENVASES LA ECONOMICA DEL NORTE</h1>
                         <p class="text-[10px] text-indigo-300 uppercase">Catálogo Digital</p>
@@ -40,6 +45,7 @@
                 </div>
             </div>
             <div class="w-full md:w-96 flex gap-2 relative">
+                <!-- BUSCADOR AZUL CLARITO -->
                 <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." class="w-full py-2.5 pl-4 pr-10 rounded-xl bg-indigo-100/20 text-white placeholder-indigo-200 focus:bg-white focus:text-slate-800 focus:placeholder-slate-400 transition-all text-sm outline-none shadow-sm border border-transparent focus:border-indigo-300">
                 <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark"></i></button>
                 
@@ -189,7 +195,7 @@
                                 <i class="fa-solid fa-motorcycle text-xl"></i> <span class="font-bold">Local</span>
                             </button>
                             <button onclick="setDelivery('foraneo')" id="btn-foraneo" class="option-btn rounded-xl p-3 text-xs flex flex-col items-center justify-center gap-1.5 transition-all border border-slate-100 bg-slate-50/50 hover:border-indigo-200 hover:bg-white text-slate-500 hover:text-indigo-600">
-                                <i class="fa-solid fa-truck-fast text-xl"></i> <span class="font-bold">Foráneo</span>
+                                <i class="fa-solid fa-truck-plane text-xl"></i> <span class="font-bold">Foráneo</span>
                             </button>
                         </div>
 
@@ -242,15 +248,19 @@
                             </button>
                         </div>
                     </div>
+                    
                     <div id="bank-info" class="hidden mt-4 p-3 bg-slate-800 text-slate-300 rounded-xl text-xs border border-slate-700 relative overflow-hidden">
                         <div class="absolute right-0 top-0 p-2 opacity-10"><i class="fa-solid fa-building-columns text-4xl"></i></div>
                         <div class="text-[10px] uppercase font-bold text-slate-500 mb-1 tracking-wider">Datos Bancarios</div>
                         <div class="flex justify-between items-center mb-1"><span>BANCO:</span> <span class="text-white font-bold">BANORTE</span></div>
                         <div class="flex justify-between items-center mb-1"><span>CUENTA:</span> <span class="text-white font-mono text-sm">0184214699</span></div>
                         <div class="flex justify-between items-center"><span>CLABE:</span> <span class="text-white font-mono text-sm">072 580 001 842 146 996</span></div>
-                        <div class="flex justify-between items-center"><span class="text-white font-mono text-sm">*En breve le mandamos la prefactura. Favor de enviar comprobante al confirmar.</span></div>
+                        
+                        <!-- NUEVA NOTA DE PREFACTURA -->
+                        <div class="mt-3 pt-2 border-t border-slate-600 text-[10px] text-slate-400 italic leading-tight">
+                            *En breve le mandamos la prefactura. Favor de enviar comprobante al confirmar su pedido.
+                        </div>
                     </div>
-                   
 
                 </div>
             </div>
@@ -282,17 +292,29 @@
     </div>
 
     <!-- Elementos del Tour (Overlay y Tooltips) -->
-    <div id="tour-overlay" onclick="endTour()" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9998;"></div>
+    <div id="tour-overlay" onclick="endTour()" class="transition-opacity duration-300" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(2px); z-index: 9998;"></div>
     
-    <div id="tour-tooltip" style="display: none; position: fixed; z-index: 9999; width: 300px; max-width: 90vw; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
-        <h4 id="tour-title" class="font-bold text-lg mb-1"></h4>
-        <p id="tour-desc" class="text-sm text-slate-600 mb-4"></p>
-        <div class="flex justify-between items-center mt-2">
-            <span id="tour-step-count" class="text-xs text-slate-400 font-bold"></span>
-            <button id="tour-next-btn" onclick="nextStep()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 transition">Siguiente</button>
+    <div id="tour-tooltip" style="display: none; position: fixed; z-index: 9999; width: 320px; max-width: 92vw; background: white; padding: 24px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.05);">
+        <!-- Botón cerrar -->
+        <button onclick="endTour()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"><i class="fa-solid fa-xmark"></i></button>
+        
+        <div class="flex items-center gap-3 mb-4 pr-6">
+            <div id="tour-step-icon" class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-sm shrink-0">1</div>
+            <h4 id="tour-title" class="font-bold text-lg text-slate-800 leading-tight">Título</h4>
         </div>
-        <!-- Flechita decorativa del tooltip -->
-        <div class="absolute w-3 h-3 bg-white rotate-45 -top-1.5 left-5"></div>
+        
+        <p id="tour-desc" class="text-sm text-slate-600 mb-6 leading-relaxed"></p>
+        
+        <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+            <span id="tour-step-count" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest"></span>
+            <div class="flex gap-2">
+                <button id="tour-prev-btn" onclick="prevStep()" class="hidden px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Atrás</button>
+                <button id="tour-next-btn" onclick="nextStep()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition shadow-md shadow-indigo-200">Siguiente</button>
+            </div>
+        </div>
+        
+        <!-- Flecha direccional dinámica -->
+        <div id="tour-arrow" class="absolute w-4 h-4 bg-white rotate-45 transform origin-center" style="box-shadow: -2px -2px 4px rgba(0,0,0,0.03);"></div>
     </div>
     
     <div id="lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/90" onclick="this.classList.add('hidden')"><img id="lightbox-img" class="max-w-[95%] max-h-[90vh] rounded" onclick="event.stopPropagation()"></div>
