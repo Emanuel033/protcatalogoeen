@@ -3,7 +3,8 @@
 // ==========================================
 let allProducts = [], filteredProducts = [], cart = [];
 let currentCategory = 'Todos', currentPage = 1, latestProductIds = [];
-const itemsPerPage = 48;
+// Paginación dinámica (16 en móvil para cargar más rápido, 48 en desktop)
+let itemsPerPage = window.innerWidth < 768 ? 16 : 48; 
 let searchTimeout;
 let html5QrcodeScanner;
 
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { cart = JSON.parse(localStorage.getItem('cart_een')) || []; } catch(e) { cart = []; }
         
         loadPrefs();
-        loadProducts(); // Aquí es donde se llama a la base de datos
+        loadProducts(); // Llamada a la BD
         renderCart();
         checkQRParam();
 
@@ -31,13 +32,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
 
-        // FIX AUTOMÁTICO PARA HTML: Reemplazar icono de Foráneo que no carga en FA 6.0.0
+        // Reajustar paginación si giran el celular o cambian tamaño de ventana
+        window.addEventListener('resize', () => {
+            itemsPerPage = window.innerWidth < 768 ? 16 : 48;
+        });
+
+        // FIX AUTOMÁTICO PARA HTML: Reemplazar icono de Foráneo que no carga
         const foraneoIcon = document.querySelector('#btn-foraneo i');
         if(foraneoIcon && foraneoIcon.classList.contains('fa-truck-plane')) {
             foraneoIcon.className = 'fa-solid fa-plane-departure text-xl';
         }
 
-        // NOTA: Se ha eliminado el auto-play del tour. Solo se ejecutará cuando el cliente haga clic en "Ayuda".
+        // NOTA: Se eliminó el auto-play del tour. Activación manual.
         
     } catch (e) { console.error("Error init:", e); }
 });
@@ -77,7 +83,6 @@ function getCategoryIcon(cat) {
     if(c.includes('garrafa')) return '<i class="fa-solid fa-jug-detergent mr-1.5 opacity-80"></i>';
     if(c.includes('tapa')) return '<i class="fa-solid fa-circle-notch mr-1.5 opacity-80"></i>';
     if(c.includes('tambor') || c.includes('barril')) return '<i class="fa-solid fa-drum-steelpan mr-1.5 opacity-80"></i>';
-    // FIX: fa-bottle-water no es compatible con FA 6.0.0, usamos fa-recycle para PET
     if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-recycle mr-1.5 opacity-80"></i>'; 
     if(c.includes('todos')) return '<i class="fa-solid fa-border-all mr-1.5 opacity-80"></i>';
     return '<i class="fa-solid fa-box mr-1.5 opacity-80"></i>';
@@ -86,7 +91,14 @@ function getCategoryIcon(cat) {
 function renderCategories() {
     const cont = document.getElementById('categories-container');
     if(!cont) return;
-    const cats = ['Todos', ...new Set(allProducts.map(p => p.category || 'Varios'))].sort();
+    
+    // MEJORA: "Todos" siempre al principio, las demás ordenadas A-Z
+    let uniqueCats = [...new Set(allProducts.map(p => p.category || 'Varios'))];
+    uniqueCats = uniqueCats.filter(c => c.toLowerCase() !== 'todos'); // Remover 'Todos' si existía
+    uniqueCats.sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
+    
+    const cats = ['Todos', ...uniqueCats]; // Ensamblar lista final
+    
     cont.innerHTML = cats.map(cat => `
         <button onclick="filterCat('${cat}')" class="px-5 py-2 flex items-center rounded-full text-sm font-bold border transition whitespace-nowrap ${currentCategory === cat ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}">
             ${getCategoryIcon(cat)} ${cat}
@@ -98,7 +110,16 @@ function filterCat(cat) {
     currentCategory = cat;
     renderCategories();
     applyFilter();
-    if(analytics) analytics.logEvent('select_content', { content_type: 'category', item_id: cat });
+    
+    // Auto-centrar la categoría activa en dispositivos móviles
+    setTimeout(() => {
+        const activeBtn = document.querySelector('#categories-container button.bg-indigo-600');
+        if(activeBtn) {
+            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }, 50);
+
+    if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('select_content', { content_type: 'category', item_id: cat });
 }
 
 function debouncedFilter() {
@@ -109,7 +130,7 @@ function debouncedFilter() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         applyFilter();
-        if(term && term.length > 2 && analytics) {
+        if(term && term.length > 2 && typeof analytics !== 'undefined' && analytics) {
             analytics.logEvent('search', { search_term: term });
         }
     }, 500);
@@ -139,7 +160,15 @@ function renderGrid() {
     if(!cont) return;
 
     if(filteredProducts.length === 0) {
-        cont.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400">Sin resultados.</div>`;
+        // Estado Vacío Amigable e Interactivo
+        const term = document.getElementById('searchInput')?.value || '';
+        cont.innerHTML = `
+            <div class="col-span-full text-center py-20 fade-in">
+                <i class="fa-solid fa-box-open text-5xl text-slate-300 mb-4"></i>
+                <h3 class="text-lg font-bold text-slate-700 mb-1">Sin resultados</h3>
+                <p class="text-slate-500 font-medium">No encontramos productos ${term ? `para "<span class="font-bold text-slate-800">${escapeHTML(term)}</span>"` : 'en esta categoría'}.</p>
+                <button onclick="clearSearch(); filterCat('Todos');" class="mt-6 px-6 py-2 bg-indigo-50 text-indigo-600 rounded-full font-bold text-sm hover:bg-indigo-100 transition">Ver todo el catálogo</button>
+            </div>`;
         if(controls) controls.classList.add('hidden');
         return;
     }
@@ -194,7 +223,18 @@ function renderGrid() {
     }
 }
 
-function changePage(d) { currentPage += d; renderGrid(); document.getElementById('products-container').scrollIntoView({ behavior: 'smooth' }); }
+function changePage(d) { 
+    currentPage += d; 
+    renderGrid(); 
+    
+    // Scroll Inteligente
+    const container = document.getElementById('products-container');
+    if(container) {
+        const yOffset = -120; // Espacio extra para que no se oculte detrás del menú flotante
+        const y = container.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({top: y, behavior: 'smooth'});
+    }
+}
 
 // ==========================================
 // CARRITO
@@ -213,7 +253,7 @@ function add(id) {
     const fab = document.getElementById('cart-fab');
     if(fab) {
         fab.classList.remove('animate-pop');
-        void fab.offsetWidth; // Forzar reinicio de la animación si se cliquea rápido
+        void fab.offsetWidth; 
         fab.classList.add('animate-pop');
     }
 
@@ -292,7 +332,7 @@ function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
     if(m.classList.contains('hidden')) {
         m.classList.remove('hidden'); setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
-        if(analytics) analytics.logEvent('view_cart');
+        if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('view_cart');
     } else {
         b.classList.add('opacity-0'); p.classList.add('translate-x-full'); setTimeout(() => m.classList.add('hidden'), 300);
     }
@@ -315,7 +355,7 @@ function checkQRParam() {
                     toggleCart(); 
                     showToast("¡Escaneado exitoso!"); 
                     window.history.replaceState({},'',window.location.pathname); 
-                    if(analytics) analytics.logEvent('scan_qr', { product_id: pid });
+                    if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('scan_qr', { product_id: pid });
                 }
                 clearInterval(i);
             }
@@ -377,7 +417,7 @@ function sendWhatsApp() {
     const phone = getRandomPhone();
     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     
-    if(analytics) analytics.logEvent('generate_lead', { currency: 'MXN', value: 0 });
+    if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('generate_lead', { currency: 'MXN', value: 0 });
 }
 
 function openGeneralWhatsApp() {
@@ -389,7 +429,7 @@ function askProduct(id) {
     const p = allProducts.find(x => x.id === id); 
     const phone = getRandomPhone();
     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent("Info sobre: "+p.name)}`, '_blank');
-    if(analytics) analytics.logEvent('ask_product', { product_id: id });
+    if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('ask_product', { product_id: id });
 }
 
 // === PREFERENCIAS Y PAGOS ===
@@ -489,15 +529,12 @@ function showStep() {
     
     if(!el || el.offsetParent === null) return nextStep();
 
-    // 1. Limpieza total de clases previas
     document.querySelectorAll('.tour-highlight, .tour-fix-stacking').forEach(e => {
         e.classList.remove('tour-highlight', 'tour-fix-stacking');
     });
 
-    // 2. Aplicar resaltado al elemento actual
     el.classList.add('tour-highlight');
 
-    // 3. FIX A PRUEBA DE BALAS: Escalar el árbol del DOM para evitar que un padre oculte el elemento (overflow: hidden)
     let parent = el.parentElement;
     while(parent && parent.tagName !== 'BODY') {
         const style = window.getComputedStyle(parent);
@@ -507,10 +544,8 @@ function showStep() {
         parent = parent.parentElement;
     }
 
-    // Scroll centrado suave
     el.scrollIntoView({behavior: 'smooth', block: 'center'});
 
-    // Actualizar Textos
     document.getElementById('tour-title').innerText = step.title;
     document.getElementById('tour-desc').innerText = step.desc;
     
@@ -526,7 +561,6 @@ function showStep() {
     const nextBtn = document.getElementById('tour-next-btn');
     if(nextBtn) nextBtn.innerText = tourIndex === currentTourSteps.length - 1 ? 'Finalizar' : 'Siguiente';
 
-    // 4. POSICIONAMIENTO MATEMÁTICO INTELIGENTE
     setTimeout(() => {
         const rect = el.getBoundingClientRect();
         const tooltipHeight = tooltip.offsetHeight || 200;
@@ -536,23 +570,19 @@ function showStep() {
         let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
         let showArrowTop = true;
 
-        // Limites Laterales (Para que no se salga a la derecha ni izquierda)
         if (left < 10) left = 10;
         if (left + tooltipWidth > window.innerWidth - 10) left = window.innerWidth - tooltipWidth - 10;
 
-        // Limite Inferior (Si no cabe abajo, lo ponemos arriba)
         if (top + tooltipHeight > window.innerHeight - 10) {
             top = rect.top - tooltipHeight - 15;
             showArrowTop = false;
 
-            // Limite Superior (Si tampoco cabe arriba, forzamos centrado flotante)
             if (top < 10) {
                 top = Math.max(10, (window.innerHeight / 2) - (tooltipHeight / 2));
-                showArrowTop = null; // Ocultamos flechita porque ya no apunta directamente
+                showArrowTop = null; 
             }
         }
 
-        // Configuración de la flechita direccional
         const arrow = document.getElementById('tour-arrow');
         if(arrow) {
             arrow.style.display = showArrowTop === null ? 'none' : 'block';
@@ -564,7 +594,6 @@ function showStep() {
                 arrow.style.bottom = '-8px';
             }
 
-            // Calcular posición X de la flecha para que siempre apunte al centro del elemento
             let arrowLeft = (rect.left + rect.width / 2) - left - 8;
             if (arrowLeft < 20) arrowLeft = 20;
             if (arrowLeft > tooltipWidth - 30) arrowLeft = tooltipWidth - 30;
@@ -574,7 +603,7 @@ function showStep() {
         tooltip.style.top = `${top}px`;
         tooltip.style.left = `${left}px`;
         tooltip.style.display = 'block';
-    }, 350); // Tiempo para dejar que el scrollIntoView termine
+    }, 350); 
 }
 
 function nextStep() {
