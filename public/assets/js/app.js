@@ -295,14 +295,20 @@ function renderCart() {
     document.getElementById('cart-badge').classList.toggle('scale-0', total === 0);
     document.getElementById('cart-total').innerText = total;
 
+    // MEJORA: Estado vacío premium del carrito animado
     if(cart.length === 0) {
-        itemsCont.innerHTML = `<div class="h-64 flex flex-col items-center justify-center text-slate-400 m-4"><div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300"><i class="fa-solid fa-basket-shopping text-2xl"></i></div><p class="text-sm font-bold text-slate-500">Tu carrito está vacío</p></div>`;
+        itemsCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 m-4 py-20 fade-in">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 animate-pulse"><i class="fa-solid fa-basket-shopping text-3xl"></i></div>
+            <p class="text-sm font-bold text-slate-500">Tu pedido está vacío</p>
+            <p class="text-[10px] text-slate-400 mt-1">Agrega productos del catálogo para comenzar</p>
+        </div>`;
         document.getElementById('cart-config').classList.add('hidden');
         return;
     }
     document.getElementById('cart-config').classList.remove('hidden');
 
-    itemsCont.innerHTML = cart.map(item => {
+    // MEJORA: Productos en el carrito con cascada de animaciones "fade-in"
+    itemsCont.innerHTML = cart.map((item, idx) => {
         const prod = allProducts.find(p => p.id === item.id) || item;
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
         const packSize = isBolsas ? 100 : (parseInt(prod.piezas)||0);
@@ -320,7 +326,7 @@ function renderCart() {
              inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
         }
         return `
-        <div class="flex gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm mb-3">
+        <div class="flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm mb-3 fade-in relative transition-all duration-300 hover:shadow-md hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
             <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border"><img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply"></div>
             <div class="flex-1 min-w-0"><div class="flex justify-between items-start gap-2"><h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${escapeHTML(item.name)}</h4><button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button></div>${inputsHTML}</div>
         </div>`;
@@ -331,8 +337,11 @@ function clearCart() { if(confirm("¿Vaciar carrito?")) { cart = []; saveCart();
 function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
     if(m.classList.contains('hidden')) {
-        m.classList.remove('hidden'); setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
+        m.classList.remove('hidden'); 
+        setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
         if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('view_cart');
+        // Vuelve a pintar el carrito para asegurar la reproducción de la animación de cascada al abrirlo
+        renderCart();
     } else {
         b.classList.add('opacity-0'); p.classList.add('translate-x-full'); setTimeout(() => m.classList.add('hidden'), 300);
     }
