@@ -441,7 +441,7 @@ function setOcurre(v) {
     savePrefs(); 
 }
 
-// === MOTOR DEL TOUR (MEJORADO E INTUITIVO) ===
+// === MOTOR DEL TOUR (A PRUEBA DE BALAS) ===
 function startTour() {
     currentTourSteps = [
         {el:'#main-nav', title:'Navegación y Búsqueda', desc:'Usa la barra superior para buscar productos rápidamente o acceder al escáner QR.'},
@@ -456,7 +456,6 @@ function startTour() {
 
 function startCartTour() {
     const cartPanel = document.getElementById('cart-panel');
-    // Si el carrito está cerrado, lo abrimos y esperamos a que termine la animación
     if(cartPanel.classList.contains('translate-x-full')) {
         toggleCart(); 
         setTimeout(() => initiateCartTour(), 400); 
@@ -473,8 +472,6 @@ function initiateCartTour() {
     ];
     tourIndex = 0;
     document.getElementById('tour-overlay').style.display = 'block';
-    document.getElementById('tour-overlay').style.zIndex = '60'; // Encima del carrito
-    document.getElementById('tour-tooltip').style.zIndex = '70';
     showStep();
 }
 
@@ -483,73 +480,94 @@ function showStep() {
     const el = document.querySelector(step.el);
     const tooltip = document.getElementById('tour-tooltip');
     
-    if(!el || el.offsetParent === null) return nextStep(); // Omitir si no es visible
+    if(!el || el.offsetParent === null) return nextStep();
 
-    // Limpiar resaltados previos
-    document.querySelectorAll('.tour-highlight').forEach(e => {
-        e.classList.remove('tour-highlight', 'relative', 'z-50', 'z-[80]', 'bg-white', 'rounded-xl');
+    // 1. Limpieza total de clases previas
+    document.querySelectorAll('.tour-highlight, .tour-fix-stacking').forEach(e => {
+        e.classList.remove('tour-highlight', 'tour-fix-stacking');
     });
 
-    // Resaltar elemento actual
-    el.classList.add('tour-highlight', 'relative');
-    // Si el carrito está abierto, usar z-index más alto y fondos blancos para resaltar inputs
-    if(!document.getElementById('cart-modal').classList.contains('hidden')) {
-        el.classList.add('z-[80]');
-        if(step.el === '#cart-items' || step.el === '#cart-config') el.classList.add('bg-white', 'rounded-xl'); 
-    } else {
-        el.classList.add('z-50');
+    // 2. Aplicar resaltado al elemento actual
+    el.classList.add('tour-highlight');
+
+    // 3. FIX A PRUEBA DE BALAS: Escalar el árbol del DOM para evitar que un padre oculte el elemento (overflow: hidden)
+    let parent = el.parentElement;
+    while(parent && parent.tagName !== 'BODY') {
+        const style = window.getComputedStyle(parent);
+        if(style.overflow === 'hidden' || style.overflowX === 'hidden' || style.overflowY === 'hidden' || style.zIndex !== 'auto') {
+            parent.classList.add('tour-fix-stacking');
+        }
+        parent = parent.parentElement;
     }
-    
-    // Scroll suave centrado
+
+    // Scroll centrado suave
     el.scrollIntoView({behavior: 'smooth', block: 'center'});
 
-    // Actualizar contenido
+    // Actualizar Textos
     document.getElementById('tour-title').innerText = step.title;
     document.getElementById('tour-desc').innerText = step.desc;
-    document.getElementById('tour-step-icon').innerText = tourIndex + 1;
-    document.getElementById('tour-step-count').innerText = `Paso ${tourIndex + 1} de ${currentTourSteps.length}`;
     
-    // Controles de botones
-    document.getElementById('tour-prev-btn').style.display = tourIndex > 0 ? 'block' : 'none';
-    document.getElementById('tour-next-btn').innerText = tourIndex === currentTourSteps.length - 1 ? 'Finalizar' : 'Siguiente';
+    const iconEl = document.getElementById('tour-step-icon');
+    if(iconEl) iconEl.innerText = tourIndex + 1;
+    
+    const countEl = document.getElementById('tour-step-count');
+    if(countEl) countEl.innerText = `Paso ${tourIndex + 1} de ${currentTourSteps.length}`;
+    
+    const prevBtn = document.getElementById('tour-prev-btn');
+    if(prevBtn) prevBtn.style.display = tourIndex > 0 ? 'block' : 'none';
+    
+    const nextBtn = document.getElementById('tour-next-btn');
+    if(nextBtn) nextBtn.innerText = tourIndex === currentTourSteps.length - 1 ? 'Finalizar' : 'Siguiente';
 
-    // Posicionamiento inteligente con la flechita
+    // 4. POSICIONAMIENTO MATEMÁTICO INTELIGENTE
     setTimeout(() => {
         const rect = el.getBoundingClientRect();
+        const tooltipHeight = tooltip.offsetHeight || 200;
+        const tooltipWidth = tooltip.offsetWidth || 320;
+
         let top = rect.bottom + 15;
-        let left = rect.left + (rect.width / 2) - 160; 
-        
-        const arrow = document.getElementById('tour-arrow');
-        if(arrow) {
-            arrow.style.top = '-8px';
-            arrow.style.bottom = 'auto';
-        }
-        
-        // Ajustes para bordes de pantalla
+        let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        let showArrowTop = true;
+
+        // Limites Laterales (Para que no se salga a la derecha ni izquierda)
         if (left < 10) left = 10;
-        if (left + 320 > window.innerWidth) left = window.innerWidth - 330;
-        
-        // Si no cabe abajo, ponerlo arriba
-        if (top + 200 > window.innerHeight) {
-            top = rect.top - 220;
-            if(arrow) {
-                arrow.style.top = 'auto';
-                arrow.style.bottom = '-8px';
+        if (left + tooltipWidth > window.innerWidth - 10) left = window.innerWidth - tooltipWidth - 10;
+
+        // Limite Inferior (Si no cabe abajo, lo ponemos arriba)
+        if (top + tooltipHeight > window.innerHeight - 10) {
+            top = rect.top - tooltipHeight - 15;
+            showArrowTop = false;
+
+            // Limite Superior (Si tampoco cabe arriba, forzamos centrado flotante)
+            if (top < 10) {
+                top = Math.max(10, (window.innerHeight / 2) - (tooltipHeight / 2));
+                showArrowTop = null; // Ocultamos flechita porque ya no apunta directamente
             }
         }
 
-        // Alinear flechita
+        // Configuración de la flechita direccional
+        const arrow = document.getElementById('tour-arrow');
         if(arrow) {
+            arrow.style.display = showArrowTop === null ? 'none' : 'block';
+            if(showArrowTop) {
+                arrow.style.top = '-8px';
+                arrow.style.bottom = 'auto';
+            } else if (showArrowTop === false) {
+                arrow.style.top = 'auto';
+                arrow.style.bottom = '-8px';
+            }
+
+            // Calcular posición X de la flecha para que siempre apunte al centro del elemento
             let arrowLeft = (rect.left + rect.width / 2) - left - 8;
             if (arrowLeft < 20) arrowLeft = 20;
-            if (arrowLeft > 280) arrowLeft = 280;
+            if (arrowLeft > tooltipWidth - 30) arrowLeft = tooltipWidth - 30;
             arrow.style.left = `${arrowLeft}px`;
         }
 
         tooltip.style.top = `${top}px`;
         tooltip.style.left = `${left}px`;
         tooltip.style.display = 'block';
-    }, 300); // Pequeño delay para terminar el scroll
+    }, 350); // Tiempo para dejar que el scrollIntoView termine
 }
 
 function nextStep() {
@@ -571,10 +589,9 @@ function prevStep() {
 function endTour() {
     document.getElementById('tour-overlay').style.display = 'none';
     document.getElementById('tour-tooltip').style.display = 'none';
-    document.querySelectorAll('.tour-highlight').forEach(e => {
-        e.classList.remove('tour-highlight', 'relative', 'z-50', 'z-[80]', 'bg-white', 'rounded-xl');
+    document.querySelectorAll('.tour-highlight, .tour-fix-stacking').forEach(e => {
+        e.classList.remove('tour-highlight', 'tour-fix-stacking');
     });
-    document.getElementById('tour-overlay').style.zIndex = '9998';
 }
 
 // === UTILIDADES ===
