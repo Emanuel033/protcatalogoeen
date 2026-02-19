@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { cart = JSON.parse(localStorage.getItem('cart_een')) || []; } catch(e) { cart = []; }
         
         loadPrefs();
-        loadProducts();
+        loadProducts(); // Aquí es donde se llama a la base de datos
         renderCart();
         checkQRParam();
 
@@ -109,7 +109,7 @@ function applyFilter() {
 }
 
 function escapeHTML(str) {
-    return str.replace(/[&<>'"]/g, tag => ({'&': '&amp;','<': '&lt;','>': '&gt;',"'": '&#39;','"': '&quot;'}[tag]));
+    return str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;','<': '&lt;','>': '&gt;',"'": '&#39;','"': '&quot;'}[tag])) : '';
 }
 
 function renderGrid() {
