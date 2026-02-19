@@ -10,6 +10,10 @@ let html5QrcodeScanner;
 // Variables de Checkout
 let selectedDelivery = null, selectedPayment = null, isOcurre = false;
 
+// Variables del Tour
+let currentTourSteps = [];
+let tourIndex = 0;
+
 // ==========================================
 // INICIALIZACIÓN
 // ==========================================
@@ -26,6 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('scroll-top-btn');
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
+
+        // Iniciar tour automáticamente solo si es la primera vez absoluta
+        if(!localStorage.getItem('tour_seen_v3')) {
+            setTimeout(() => startTour(), 2000);
+        }
+        
     } catch (e) { console.error("Error init:", e); }
 });
 
@@ -306,7 +316,7 @@ function stopQRScanner() {
     return html5QrcodeScanner ? html5QrcodeScanner.stop().then(() => { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }) : Promise.resolve();
 }
 
-// === LÓGICA DE ROUND ROBIN WHATSAPP ===
+// === LÓGICA DE WHATSAPP ===
 function getRandomPhone() {
     const phones = ['528113728493', '528118400503'];
     return phones[Math.floor(Math.random() * phones.length)];
@@ -317,7 +327,6 @@ function sendWhatsApp() {
     const name = document.getElementById('client-name').value.trim() || "Cliente";
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
     
-    // Método entrega y pago detallado
     if(selectedDelivery === 'recoger') {
         msg += `📍 Recoger en Sucursal\n💳 Pago: ${selectedPayment||'Por definir'}\n`;
     } else if(selectedDelivery === 'local') {
@@ -356,6 +365,7 @@ function askProduct(id) {
     if(analytics) analytics.logEvent('ask_product', { product_id: id });
 }
 
+// === PREFERENCIAS Y PAGOS ===
 function loadPrefs() { try { const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; if(p.name) document.getElementById('client-name').value = p.name; if(p.deliveryType) setDelivery(p.deliveryType, false); } catch(e){} }
 function savePrefs() { localStorage.setItem('user_prefs_een', JSON.stringify({ name: document.getElementById('client-name').value, deliveryType: selectedDelivery, paymentMethod: selectedPayment, isOcurre: isOcurre, address: document.getElementById('delivery-address').value, fletera: document.getElementById('fletera-name').value })); }
 
@@ -367,68 +377,12 @@ function setDelivery(t,s=true) {
     });
     document.getElementById(`btn-${t}`).classList.add('selected');
     document.getElementById(`panel-${t}`).classList.remove('hidden');
-    // Mostrar info bancaria si aplica
+    // Mostrar info bancaria si aplica (Foráneo siempre)
     const bankInfo = document.getElementById('bank-info');
-    if (t === 'foraneo') {
-        bankInfo.classList.remove('hidden');
-    } else {
-        bankInfo.classList.add('hidden');
-    }
+    if (t === 'foraneo') bankInfo.classList.remove('hidden'); else bankInfo.classList.add('hidden');
     if(s) savePrefs();
 }
 
 function setPayment(m) { 
     selectedPayment = m; 
-    document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
-    event.target.classList.add('selected'); 
-    
-    // Mostrar banco si es transferencia en Local o Sucursal (si aplica, aunque sucursal no suele ser transf)
-    const bankInfo = document.getElementById('bank-info');
-    if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
-        bankInfo.classList.remove('hidden');
-    } else {
-        bankInfo.classList.add('hidden');
-    }
-    savePrefs(); 
-}
-
-function setPublicoGeneral() { document.getElementById('client-name').value = "Público General"; savePrefs(); }
-
-function setOcurre(v) { 
-    isOcurre = v; 
-    const btnSi = document.getElementById('btn-ocurre-si');
-    const btnNo = document.getElementById('btn-ocurre-no');
-    
-    // Reset visual
-    btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
-    btnSi.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
-    
-    btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
-    btnNo.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
-
-    // Activar el seleccionado
-    if(v) {
-        btnSi.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-        btnSi.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
-    } else {
-        btnNo.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-        btnNo.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
-    }
-    savePrefs(); 
-}
-
-function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.remove('opacity-0','translate-y-24'); setTimeout(()=>t.classList.add('opacity-0','translate-y-24'),2500); }
-function openImage(s) { document.getElementById('lightbox-img').src=s; document.getElementById('lightbox').classList.remove('hidden'); }
-function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
-
-function startTour() {
-    const tour = [
-        {el:'#main-nav', t:'¡Bienvenido!', d:'Explora nuestro catálogo digital.'},
-        {el:'#searchInput', t:'Buscador', d:'Encuentra productos rápidamente.'},
-        {el:'#categories-bar', t:'Filtros', d:'Navega por categorías.'},
-        {el:'#products-container > div:first-child', t:'Producto', d:'Agrega o consulta dudas.'},
-        {el:'#cart-fab', t:'Carrito', d:'Revisa tu pedido aquí.'}
-    ];
-    localStorage.setItem('tour_seen_v2', 'true');
-}
-function startCartTour() { alert("Aquí puedes ver tu pedido, elegir entrega y enviar por WhatsApp."); }
+    document.querySelectorA
