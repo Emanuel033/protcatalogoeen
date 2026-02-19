@@ -31,10 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
 
-        // Iniciar tour automáticamente solo si es la primera vez absoluta
-        if(!localStorage.getItem('tour_seen_v3')) {
-            setTimeout(() => startTour(), 2000);
-        }
+        // NOTA: Se ha eliminado el auto-play del tour. Solo se ejecutará cuando el cliente haga clic en "Ayuda".
         
     } catch (e) { console.error("Error init:", e); }
 });
@@ -421,13 +418,13 @@ function setOcurre(v) {
     savePrefs(); 
 }
 
-// === MOTOR DEL TOUR (CORREGIDO) ===
+// === MOTOR DEL TOUR (MEJORADO E INTUITIVO) ===
 function startTour() {
     currentTourSteps = [
-        {el:'#main-nav', title:'Navegación', desc:'Aquí encuentras el menú principal y buscador.'},
-        {el:'#categories-bar', title:'Categorías', desc:'Filtra los productos por tipo.'},
-        {el:'#products-container', title:'Productos', desc:'Toca una imagen para verla en grande o "Agregar" para comprar.'},
-        {el:'#cart-fab', title:'Tu Carrito', desc:'Aquí se guardan tus productos. ¡Tócalo para ver tu pedido!'}
+        {el:'#main-nav', title:'Navegación y Búsqueda', desc:'Usa la barra superior para buscar productos rápidamente o acceder al escáner QR.'},
+        {el:'#categories-bar', title:'Categorías', desc:'Filtra el catálogo por familia (Garrafas, Cubetas, Tapas, etc.) para encontrar lo que necesitas.'},
+        {el:'#products-container', title:'Catálogo Interactivo', desc:'Toca cualquier imagen para verla en detalle, elige la cantidad y presiona "Agregar".'},
+        {el:'#cart-fab', title:'Tu Carrito', desc:'Aquí se guardará tu pedido. ¡Tócalo en cualquier momento para revisar, editar o enviar!'}
     ];
     tourIndex = 0;
     document.getElementById('tour-overlay').style.display = 'block';
@@ -435,13 +432,26 @@ function startTour() {
 }
 
 function startCartTour() {
+    const cartPanel = document.getElementById('cart-panel');
+    // Si el carrito está cerrado, lo abrimos y esperamos a que termine la animación
+    if(cartPanel.classList.contains('translate-x-full')) {
+        toggleCart(); 
+        setTimeout(() => initiateCartTour(), 400); 
+    } else {
+        initiateCartTour();
+    }
+}
+
+function initiateCartTour() {
     currentTourSteps = [
-        {el:'#cart-items', title:'Tus Productos', desc:'Lista de lo que has agregado. Puedes editar cantidades aquí.'},
-        {el:'#cart-config', title:'Datos de Envío', desc:'Elige si es envío local, foráneo o recoges en sucursal.'},
-        {el:'#btn-send-wa', title:'Finalizar', desc:'Envía tu pedido por WhatsApp para que un asesor lo confirme.'}
+        {el:'#cart-items', title:'Tus Productos', desc:'Revisa lo que agregaste. Puedes sumar paquetes completos o piezas sueltas fácilmente.'},
+        {el:'#cart-config', title:'Datos y Envío', desc:'Ingresa tu nombre, elige si recoges en sucursal o necesitas envío (Local/Foráneo) y tu método de pago.'},
+        {el:'#btn-send-wa', title:'Enviar Pedido', desc:'Una vez listo, presiona aquí. Se generará un mensaje automático de WhatsApp para que un asesor confirme tu compra.'}
     ];
     tourIndex = 0;
     document.getElementById('tour-overlay').style.display = 'block';
+    document.getElementById('tour-overlay').style.zIndex = '60'; // Encima del carrito
+    document.getElementById('tour-tooltip').style.zIndex = '70';
     showStep();
 }
 
@@ -450,34 +460,73 @@ function showStep() {
     const el = document.querySelector(step.el);
     const tooltip = document.getElementById('tour-tooltip');
     
-    if(!el) return endTour();
+    if(!el || el.offsetParent === null) return nextStep(); // Omitir si no es visible
 
-    // Resetear estilos previos
+    // Limpiar resaltados previos
     document.querySelectorAll('.tour-highlight').forEach(e => {
-        e.classList.remove('tour-highlight', 'relative', 'z-50');
+        e.classList.remove('tour-highlight', 'relative', 'z-50', 'z-[80]', 'bg-white', 'rounded-xl');
     });
 
     // Resaltar elemento actual
-    el.classList.add('tour-highlight', 'relative', 'z-50');
+    el.classList.add('tour-highlight', 'relative');
+    // Si el carrito está abierto, usar z-index más alto y fondos blancos para resaltar inputs
+    if(!document.getElementById('cart-modal').classList.contains('hidden')) {
+        el.classList.add('z-[80]');
+        if(step.el === '#cart-items' || step.el === '#cart-config') el.classList.add('bg-white', 'rounded-xl'); 
+    } else {
+        el.classList.add('z-50');
+    }
+    
+    // Scroll suave centrado
     el.scrollIntoView({behavior: 'smooth', block: 'center'});
 
     // Actualizar contenido
     document.getElementById('tour-title').innerText = step.title;
     document.getElementById('tour-desc').innerText = step.desc;
-    document.getElementById('tour-step-count').innerText = `${tourIndex + 1} de ${currentTourSteps.length}`;
+    document.getElementById('tour-step-icon').innerText = tourIndex + 1;
+    document.getElementById('tour-step-count').innerText = `Paso ${tourIndex + 1} de ${currentTourSteps.length}`;
     
-    // Posicionar tooltip
-    const rect = el.getBoundingClientRect();
-    let top = rect.bottom + 10;
-    let left = rect.left;
-    
-    // Ajustes de bordes
-    if(left + 300 > window.innerWidth) left = window.innerWidth - 320;
-    if(top + 150 > window.innerHeight) top = rect.top - 160;
+    // Controles de botones
+    document.getElementById('tour-prev-btn').style.display = tourIndex > 0 ? 'block' : 'none';
+    document.getElementById('tour-next-btn').innerText = tourIndex === currentTourSteps.length - 1 ? 'Finalizar' : 'Siguiente';
 
-    tooltip.style.top = `${top}px`;
-    tooltip.style.left = `${left}px`;
-    tooltip.style.display = 'block';
+    // Posicionamiento inteligente con la flechita
+    setTimeout(() => {
+        const rect = el.getBoundingClientRect();
+        let top = rect.bottom + 15;
+        let left = rect.left + (rect.width / 2) - 160; 
+        
+        const arrow = document.getElementById('tour-arrow');
+        if(arrow) {
+            arrow.style.top = '-8px';
+            arrow.style.bottom = 'auto';
+        }
+        
+        // Ajustes para bordes de pantalla
+        if (left < 10) left = 10;
+        if (left + 320 > window.innerWidth) left = window.innerWidth - 330;
+        
+        // Si no cabe abajo, ponerlo arriba
+        if (top + 200 > window.innerHeight) {
+            top = rect.top - 220;
+            if(arrow) {
+                arrow.style.top = 'auto';
+                arrow.style.bottom = '-8px';
+            }
+        }
+
+        // Alinear flechita
+        if(arrow) {
+            let arrowLeft = (rect.left + rect.width / 2) - left - 8;
+            if (arrowLeft < 20) arrowLeft = 20;
+            if (arrowLeft > 280) arrowLeft = 280;
+            arrow.style.left = `${arrowLeft}px`;
+        }
+
+        tooltip.style.top = `${top}px`;
+        tooltip.style.left = `${left}px`;
+        tooltip.style.display = 'block';
+    }, 300); // Pequeño delay para terminar el scroll
 }
 
 function nextStep() {
@@ -489,13 +538,20 @@ function nextStep() {
     }
 }
 
+function prevStep() {
+    if(tourIndex > 0) {
+        tourIndex--;
+        showStep();
+    }
+}
+
 function endTour() {
     document.getElementById('tour-overlay').style.display = 'none';
     document.getElementById('tour-tooltip').style.display = 'none';
     document.querySelectorAll('.tour-highlight').forEach(e => {
-        e.classList.remove('tour-highlight', 'relative', 'z-50');
+        e.classList.remove('tour-highlight', 'relative', 'z-50', 'z-[80]', 'bg-white', 'rounded-xl');
     });
-    localStorage.setItem('tour_seen_v3', 'true');
+    document.getElementById('tour-overlay').style.zIndex = '9998';
 }
 
 // === UTILIDADES ===
