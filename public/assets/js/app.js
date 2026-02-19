@@ -31,6 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
 
+        // FIX AUTOMÁTICO PARA HTML: Reemplazar icono de Foráneo que no carga en FA 6.0.0
+        const foraneoIcon = document.querySelector('#btn-foraneo i');
+        if(foraneoIcon && foraneoIcon.classList.contains('fa-truck-plane')) {
+            foraneoIcon.className = 'fa-solid fa-plane-departure text-xl';
+        }
+
         // NOTA: Se ha eliminado el auto-play del tour. Solo se ejecutará cuando el cliente haga clic en "Ayuda".
         
     } catch (e) { console.error("Error init:", e); }
@@ -71,7 +77,8 @@ function getCategoryIcon(cat) {
     if(c.includes('garrafa')) return '<i class="fa-solid fa-jug-detergent mr-1.5 opacity-80"></i>';
     if(c.includes('tapa')) return '<i class="fa-solid fa-circle-notch mr-1.5 opacity-80"></i>';
     if(c.includes('tambor') || c.includes('barril')) return '<i class="fa-solid fa-drum-steelpan mr-1.5 opacity-80"></i>';
-    if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-bottle-water mr-1.5 opacity-80"></i>';
+    // FIX: fa-bottle-water no es compatible con FA 6.0.0, usamos fa-recycle para PET
+    if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-recycle mr-1.5 opacity-80"></i>'; 
     if(c.includes('todos')) return '<i class="fa-solid fa-border-all mr-1.5 opacity-80"></i>';
     return '<i class="fa-solid fa-box mr-1.5 opacity-80"></i>';
 }
