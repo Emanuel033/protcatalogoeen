@@ -385,4 +385,120 @@ function setDelivery(t,s=true) {
 
 function setPayment(m) { 
     selectedPayment = m; 
-    document.querySelectorA
+    document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
+    event.target.classList.add('selected'); 
+    
+    // Mostrar banco si es transferencia en Local o Foráneo
+    const bankInfo = document.getElementById('bank-info');
+    if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
+        bankInfo.classList.remove('hidden');
+    } else {
+        bankInfo.classList.add('hidden');
+    }
+    savePrefs(); 
+}
+
+function setPublicoGeneral() { document.getElementById('client-name').value = "Público General"; savePrefs(); }
+
+function setOcurre(v) { 
+    isOcurre = v; 
+    const btnSi = document.getElementById('btn-ocurre-si');
+    const btnNo = document.getElementById('btn-ocurre-no');
+    
+    btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
+    btnSi.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+    
+    btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
+    btnNo.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+
+    if(v) {
+        btnSi.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+        btnSi.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+    } else {
+        btnNo.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+        btnNo.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+    }
+    savePrefs(); 
+}
+
+// === MOTOR DEL TOUR (CORREGIDO) ===
+function startTour() {
+    currentTourSteps = [
+        {el:'#main-nav', title:'Navegación', desc:'Aquí encuentras el menú principal y buscador.'},
+        {el:'#categories-bar', title:'Categorías', desc:'Filtra los productos por tipo.'},
+        {el:'#products-container', title:'Productos', desc:'Toca una imagen para verla en grande o "Agregar" para comprar.'},
+        {el:'#cart-fab', title:'Tu Carrito', desc:'Aquí se guardan tus productos. ¡Tócalo para ver tu pedido!'}
+    ];
+    tourIndex = 0;
+    document.getElementById('tour-overlay').style.display = 'block';
+    showStep();
+}
+
+function startCartTour() {
+    currentTourSteps = [
+        {el:'#cart-items', title:'Tus Productos', desc:'Lista de lo que has agregado. Puedes editar cantidades aquí.'},
+        {el:'#cart-config', title:'Datos de Envío', desc:'Elige si es envío local, foráneo o recoges en sucursal.'},
+        {el:'#btn-send-wa', title:'Finalizar', desc:'Envía tu pedido por WhatsApp para que un asesor lo confirme.'}
+    ];
+    tourIndex = 0;
+    document.getElementById('tour-overlay').style.display = 'block';
+    showStep();
+}
+
+function showStep() {
+    const step = currentTourSteps[tourIndex];
+    const el = document.querySelector(step.el);
+    const tooltip = document.getElementById('tour-tooltip');
+    
+    if(!el) return endTour();
+
+    // Resetear estilos previos
+    document.querySelectorAll('.tour-highlight').forEach(e => {
+        e.classList.remove('tour-highlight', 'relative', 'z-50');
+    });
+
+    // Resaltar elemento actual
+    el.classList.add('tour-highlight', 'relative', 'z-50');
+    el.scrollIntoView({behavior: 'smooth', block: 'center'});
+
+    // Actualizar contenido
+    document.getElementById('tour-title').innerText = step.title;
+    document.getElementById('tour-desc').innerText = step.desc;
+    document.getElementById('tour-step-count').innerText = `${tourIndex + 1} de ${currentTourSteps.length}`;
+    
+    // Posicionar tooltip
+    const rect = el.getBoundingClientRect();
+    let top = rect.bottom + 10;
+    let left = rect.left;
+    
+    // Ajustes de bordes
+    if(left + 300 > window.innerWidth) left = window.innerWidth - 320;
+    if(top + 150 > window.innerHeight) top = rect.top - 160;
+
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.display = 'block';
+}
+
+function nextStep() {
+    if(tourIndex < currentTourSteps.length - 1) {
+        tourIndex++;
+        showStep();
+    } else {
+        endTour();
+    }
+}
+
+function endTour() {
+    document.getElementById('tour-overlay').style.display = 'none';
+    document.getElementById('tour-tooltip').style.display = 'none';
+    document.querySelectorAll('.tour-highlight').forEach(e => {
+        e.classList.remove('tour-highlight', 'relative', 'z-50');
+    });
+    localStorage.setItem('tour_seen_v3', 'true');
+}
+
+// === UTILIDADES ===
+function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.remove('opacity-0','translate-y-24'); setTimeout(()=>t.classList.add('opacity-0','translate-y-24'),2500); }
+function openImage(s) { document.getElementById('lightbox-img').src=s; document.getElementById('lightbox').classList.remove('hidden'); }
+function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
