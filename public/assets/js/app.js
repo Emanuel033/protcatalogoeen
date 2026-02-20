@@ -37,14 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
             itemsPerPage = window.innerWidth < 768 ? 16 : 48;
         });
 
-        // FIX AUTOMÁTICO PARA HTML: Reemplazar icono de Foráneo que no carga
-        const foraneoIcon = document.querySelector('#btn-foraneo i');
-        if(foraneoIcon && foraneoIcon.classList.contains('fa-truck-plane')) {
-            foraneoIcon.className = 'fa-solid fa-plane-departure text-xl';
-        }
-
-        // NOTA: Se eliminó el auto-play del tour. Activación manual.
-        
     } catch (e) { console.error("Error init:", e); }
 });
 
@@ -76,18 +68,18 @@ function loadProducts() {
     });
 }
 
-// === ICONOS ACTUALIZADOS (PAD, PBD, LÁMINA, CUBETA) ===
+// === ICONOS ACTUALIZADOS Y FUNCIONANDO (FA 6.5.1) ===
 function getCategoryIcon(cat) {
     const c = cat.toLowerCase();
     if(c.includes('bolsa')) return '<i class="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>';
-    if(c.includes('cubeta')) return '<i class="fa-solid fa-bucket mr-1.5 opacity-80"></i>'; // Cambiado a cubeta genérica
+    if(c.includes('cubeta')) return '<i class="fa-solid fa-bucket mr-1.5 opacity-80"></i>'; 
     if(c.includes('garrafa')) return '<i class="fa-solid fa-jug-detergent mr-1.5 opacity-80"></i>';
     if(c.includes('tapa')) return '<i class="fa-solid fa-circle-notch mr-1.5 opacity-80"></i>';
     if(c.includes('tambor') || c.includes('barril')) return '<i class="fa-solid fa-drum-steelpan mr-1.5 opacity-80"></i>';
     if(c.includes('lámina') || c.includes('lamina')) return '<i class="fa-solid fa-fill-drip mr-1.5 opacity-80"></i>'; // Bote de pintura (Lámina)
     if(c.includes('pad')) return '<i class="fa-solid fa-flask mr-1.5 opacity-80"></i>'; // PAD: Rígido / Químicos (Matraz)
     if(c.includes('pbd')) return '<i class="fa-solid fa-droplet mr-1.5 opacity-80"></i>'; // PBD: Flexible / Dosificador (Gota)
-    if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-recycle mr-1.5 opacity-80"></i>'; 
+    if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-bottle-water mr-1.5 opacity-80"></i>'; 
     if(c.includes('todos')) return '<i class="fa-solid fa-border-all mr-1.5 opacity-80"></i>';
     return '<i class="fa-solid fa-box mr-1.5 opacity-80"></i>';
 }
@@ -96,12 +88,12 @@ function renderCategories() {
     const cont = document.getElementById('categories-container');
     if(!cont) return;
     
-    // MEJORA: "Todos" siempre al principio, las demás ordenadas A-Z
+    // "Todos" siempre al principio, las demás ordenadas A-Z
     let uniqueCats = [...new Set(allProducts.map(p => p.category || 'Varios'))];
-    uniqueCats = uniqueCats.filter(c => c.toLowerCase() !== 'todos'); // Remover 'Todos' si existía
-    uniqueCats.sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
+    uniqueCats = uniqueCats.filter(c => c.toLowerCase() !== 'todos'); 
+    uniqueCats.sort((a, b) => a.localeCompare(b)); 
     
-    const cats = ['Todos', ...uniqueCats]; // Ensamblar lista final
+    const cats = ['Todos', ...uniqueCats]; 
     
     cont.innerHTML = cats.map(cat => `
         <button onclick="filterCat('${cat}')" class="px-5 py-2 flex items-center rounded-full text-sm font-bold border transition whitespace-nowrap ${currentCategory === cat ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-indigo-600'}">
@@ -115,7 +107,6 @@ function filterCat(cat) {
     renderCategories();
     applyFilter();
     
-    // Auto-centrar la categoría activa en dispositivos móviles
     setTimeout(() => {
         const activeBtn = document.querySelector('#categories-container button.bg-indigo-600');
         if(activeBtn) {
@@ -164,7 +155,6 @@ function renderGrid() {
     if(!cont) return;
 
     if(filteredProducts.length === 0) {
-        // Estado Vacío Amigable e Interactivo
         const term = document.getElementById('searchInput')?.value || '';
         cont.innerHTML = `
             <div class="col-span-full text-center py-20 fade-in">
@@ -231,10 +221,9 @@ function changePage(d) {
     currentPage += d; 
     renderGrid(); 
     
-    // Scroll Inteligente
     const container = document.getElementById('products-container');
     if(container) {
-        const yOffset = -120; // Espacio extra para que no se oculte detrás del menú flotante
+        const yOffset = -120; 
         const y = container.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({top: y, behavior: 'smooth'});
     }
@@ -253,7 +242,6 @@ function add(id) {
     saveCart();
     showToast(`Agregado (+${qty})`);
     
-    // Animación de éxito en el botón flotante del carrito
     const fab = document.getElementById('cart-fab');
     if(fab) {
         fab.classList.remove('animate-pop');
@@ -299,7 +287,6 @@ function renderCart() {
     document.getElementById('cart-badge').classList.toggle('scale-0', total === 0);
     document.getElementById('cart-total').innerText = total;
 
-    // Estado vacío premium del carrito animado
     if(cart.length === 0) {
         itemsCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 m-4 py-20 fade-in">
             <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 animate-pulse"><i class="fa-solid fa-basket-shopping text-3xl"></i></div>
@@ -311,7 +298,6 @@ function renderCart() {
     }
     document.getElementById('cart-config').classList.remove('hidden');
 
-    // Productos en el carrito con cascada de animaciones "fade-in"
     itemsCont.innerHTML = cart.map((item, idx) => {
         const prod = allProducts.find(p => p.id === item.id) || item;
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
@@ -344,7 +330,6 @@ function toggleCart() {
         m.classList.remove('hidden'); 
         setTimeout(() => { b.classList.remove('opacity-0'); p.classList.remove('translate-x-full'); }, 10);
         if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('view_cart');
-        // Vuelve a pintar el carrito para asegurar la reproducción de la animación de cascada al abrirlo
         renderCart();
     } else {
         b.classList.add('opacity-0'); p.classList.add('translate-x-full'); setTimeout(() => m.classList.add('hidden'), 300);
@@ -457,7 +442,7 @@ function setDelivery(t,s=true) {
     });
     document.getElementById(`btn-${t}`).classList.add('selected');
     document.getElementById(`panel-${t}`).classList.remove('hidden');
-    // Mostrar info bancaria si aplica (Foráneo siempre)
+    
     const bankInfo = document.getElementById('bank-info');
     if (t === 'foraneo') bankInfo.classList.remove('hidden'); else bankInfo.classList.add('hidden');
     if(s) savePrefs();
@@ -468,7 +453,6 @@ function setPayment(m) {
     document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
     event.target.classList.add('selected'); 
     
-    // Mostrar banco si es transferencia en Local o Foráneo
     const bankInfo = document.getElementById('bank-info');
     if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
         bankInfo.classList.remove('hidden');
