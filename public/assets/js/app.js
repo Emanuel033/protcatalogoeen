@@ -76,6 +76,7 @@ function loadProducts() {
     });
 }
 
+// === ICONOS ACTUALIZADOS (PAD, PBD, LÁMINA) ===
 function getCategoryIcon(cat) {
     const c = cat.toLowerCase();
     if(c.includes('bolsa')) return '<i class="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>';
@@ -83,6 +84,9 @@ function getCategoryIcon(cat) {
     if(c.includes('garrafa')) return '<i class="fa-solid fa-jug-detergent mr-1.5 opacity-80"></i>';
     if(c.includes('tapa')) return '<i class="fa-solid fa-circle-notch mr-1.5 opacity-80"></i>';
     if(c.includes('tambor') || c.includes('barril')) return '<i class="fa-solid fa-drum-steelpan mr-1.5 opacity-80"></i>';
+    if(c.includes('lámina') || c.includes('lamina')) return '<i class="fa-solid fa-oil-can mr-1.5 opacity-80"></i>'; // Bote de Lámina/Metal
+    if(c.includes('pad')) return '<i class="fa-solid fa-prescription-bottle mr-1.5 opacity-80"></i>'; // Plástico Alta Densidad (Rígido)
+    if(c.includes('pbd')) return '<i class="fa-solid fa-vial mr-1.5 opacity-80"></i>'; // Plástico Baja Densidad (Flexible)
     if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-recycle mr-1.5 opacity-80"></i>'; 
     if(c.includes('todos')) return '<i class="fa-solid fa-border-all mr-1.5 opacity-80"></i>';
     return '<i class="fa-solid fa-box mr-1.5 opacity-80"></i>';
@@ -295,7 +299,7 @@ function renderCart() {
     document.getElementById('cart-badge').classList.toggle('scale-0', total === 0);
     document.getElementById('cart-total').innerText = total;
 
-    // MEJORA: Estado vacío premium del carrito animado
+    // Estado vacío premium del carrito animado
     if(cart.length === 0) {
         itemsCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 m-4 py-20 fade-in">
             <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 animate-pulse"><i class="fa-solid fa-basket-shopping text-3xl"></i></div>
@@ -307,7 +311,7 @@ function renderCart() {
     }
     document.getElementById('cart-config').classList.remove('hidden');
 
-    // MEJORA: Productos en el carrito con cascada de animaciones "fade-in"
+    // Productos en el carrito con cascada de animaciones "fade-in"
     itemsCont.innerHTML = cart.map((item, idx) => {
         const prod = allProducts.find(p => p.id === item.id) || item;
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
