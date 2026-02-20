@@ -193,6 +193,12 @@
                         <input id="prodFile" oninput="previewImage(this.value)" type="text" class="flex-grow bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:border-indigo-400 focus:bg-white transition-colors">
                         <div id="imgPreviewBox" class="w-10 h-10 rounded-lg border border-slate-200 overflow-hidden hidden shrink-0"><img id="imgPreview" class="w-full h-full object-cover"></div>
                     </div>
+                    
+                    <button onclick="printFilteredQRs('inventario')" class="bg-purple-600 hover:bg-purple-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs para Cajas/Paquetes"><i class="fa-solid fa-box"></i> QRs Cajas</button>
+                    <button onclick="printFilteredQRs('vitrina')" class="bg-pink-600 hover:bg-pink-700 text-white py-1.5 px-3 rounded-lg shadow-sm text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 transition" title="Imprimir QRs URL para Vitrina/Clientes"><i class="fa-solid fa-store"></i> QRs Vitrina</button>
+                    
+                    <button onclick="filterIncomplete()" class="bg-orange-100 hover:bg-orange-200 text-orange-600 p-1.5 rounded-lg border border-orange-200 transition" title="Sin piezas"><i class="fa-solid fa-triangle-exclamation"></i></button>
+                    <button onclick="exportToExcel('catalogo')" class="bg-green-100 hover:bg-green-200 text-green-700 p-1.5 rounded-lg border border-green-200 transition" title="Excel"><i class="fa-solid fa-file-excel"></i></button>
                 </div>
                 <div class="pt-2"><button onclick="uploadProduct()" id="btnUpload" class="w-full bg-indigo-600 text-white font-bold rounded-lg py-3 shadow-md shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all text-sm">Guardar Producto</button></div>
             </div>
