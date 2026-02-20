@@ -76,17 +76,17 @@ function loadProducts() {
     });
 }
 
-// === ICONOS ACTUALIZADOS (PAD, PBD, LÁMINA) ===
+// === ICONOS ACTUALIZADOS (PAD, PBD, LÁMINA, CUBETA) ===
 function getCategoryIcon(cat) {
     const c = cat.toLowerCase();
     if(c.includes('bolsa')) return '<i class="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>';
-    if(c.includes('cubeta')) return '<i class="fa-solid fa-fill-drip mr-1.5 opacity-80"></i>';
+    if(c.includes('cubeta')) return '<i class="fa-solid fa-bucket mr-1.5 opacity-80"></i>'; // Cambiado a cubeta genérica
     if(c.includes('garrafa')) return '<i class="fa-solid fa-jug-detergent mr-1.5 opacity-80"></i>';
     if(c.includes('tapa')) return '<i class="fa-solid fa-circle-notch mr-1.5 opacity-80"></i>';
     if(c.includes('tambor') || c.includes('barril')) return '<i class="fa-solid fa-drum-steelpan mr-1.5 opacity-80"></i>';
-    if(c.includes('lámina') || c.includes('lamina')) return '<i class="fa-solid fa-oil-can mr-1.5 opacity-80"></i>'; // Bote de Lámina/Metal
-    if(c.includes('pad')) return '<i class="fa-solid fa-prescription-bottle mr-1.5 opacity-80"></i>'; // Plástico Alta Densidad (Rígido)
-    if(c.includes('pbd')) return '<i class="fa-solid fa-vial mr-1.5 opacity-80"></i>'; // Plástico Baja Densidad (Flexible)
+    if(c.includes('lámina') || c.includes('lamina')) return '<i class="fa-solid fa-fill-drip mr-1.5 opacity-80"></i>'; // Bote de pintura (Lámina)
+    if(c.includes('pad')) return '<i class="fa-solid fa-flask mr-1.5 opacity-80"></i>'; // PAD: Rígido / Químicos (Matraz)
+    if(c.includes('pbd')) return '<i class="fa-solid fa-droplet mr-1.5 opacity-80"></i>'; // PBD: Flexible / Dosificador (Gota)
     if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-recycle mr-1.5 opacity-80"></i>'; 
     if(c.includes('todos')) return '<i class="fa-solid fa-border-all mr-1.5 opacity-80"></i>';
     return '<i class="fa-solid fa-box mr-1.5 opacity-80"></i>';
