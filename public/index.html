@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo - Envases La Económica del Norte</title>
+    
+    <!-- === SEO PRINCIPAL === -->
+    <title>Catálogo - Envases La Económica del Norte | Servirle es un placer</title>
+    <meta name="description" content="Catálogo digital de Envases La Económica del Norte. Encuentra la más amplia variedad de envases industriales, garrafas, cubetas, tambores, tapas y accesorios en Monterrey y con envíos a todo México.">
+    <meta name="keywords" content="envases industriales, garrafas, cubetas, tambores, tapas, envases monterrey, plastico industrial, botellas pet, envases hdpe, la economica del norte">
+    <meta name="author" content="Envases La Económica del Norte">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://productoseen.firebaseapp.com/">
+
+    <!-- === OPEN GRAPH === -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://productoseen.firebaseapp.com/">
+    <meta property="og:title" content="Catálogo - Envases La Económica del Norte">
+    <meta property="og:description" content="Cotiza en línea envases industriales, tapas y accesorios. Calidad y servicio en Monterrey y todo el país.">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630">
     
     <!-- Íconos de la página (Favicon) -->
     <link rel="icon" href="assets/img/logoeen.ico" type="image/x-icon">
@@ -11,21 +25,22 @@
     
     <!-- CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- ¡SOLUCIÓN AQUÍ! Actualizado FontAwesome a la versión 6.5.1 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
     
     <!-- ESTILOS ADICIONALES PARA BOTONES -->
     <style>
-        /* Hace que el botón de subir aparezca correctamente */
         #scroll-top-btn { opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s ease; }
         #scroll-top-btn.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
     </style>
 
-    <!-- Librerías Firebase (CORE) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+    <!-- Librerías -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <!-- JS Propio -->
@@ -38,7 +53,6 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center justify-between w-full md:w-auto">
                 <div class="flex items-center gap-3">
-                    <!-- LOGO DE LA EMPRESA -->
                     <img src="assets/img/logoeen.png" alt="Logo Envases La Económica" class="h-10 w-10 object-contain bg-white rounded-xl p-1 shadow-sm" onerror="this.outerHTML='<div class=\'bg-white text-indigo-900 p-2 rounded-xl font-bold h-10 w-10 flex items-center justify-center\'>E</div>'">
                     
                     <div>
@@ -48,16 +62,13 @@
                 </div>
                 <div class="flex gap-2 md:hidden">
                     <button onclick="startQRScanner()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-qrcode"></i></button>
-                    <!-- Botón Tour Móvil -->
                     <button onclick="startTour()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-circle-question"></i></button>
                 </div>
             </div>
             <div class="w-full md:w-96 flex gap-2 relative">
-                <!-- BUSCADOR AZUL CLARITO -->
                 <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." class="w-full py-2.5 pl-4 pr-10 rounded-xl bg-indigo-100/20 text-white placeholder-indigo-200 focus:bg-white focus:text-slate-800 focus:placeholder-slate-400 transition-all text-sm outline-none shadow-sm border border-transparent focus:border-indigo-300">
                 <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark"></i></button>
                 
-                <!-- Botón Tour Desktop -->
                 <button onclick="startTour()" class="hidden md:flex items-center gap-2 bg-indigo-800 px-4 rounded-xl text-indigo-200 hover:text-white hover:bg-indigo-700 transition whitespace-nowrap ml-2"><i class="fa-solid fa-circle-info"></i><span class="text-xs font-bold">Ayuda</span></button>
             </div>
         </div>
@@ -85,7 +96,6 @@
         </div>
     </main>
 
-    <!-- FOOTER COMPLETO -->
     <footer class="bg-white border-t border-slate-200 mt-auto pt-10 pb-6">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -146,12 +156,10 @@
         </div>
     </footer>
 
-    <!-- Botón de Scroll hacia arriba -->
     <button onclick="scrollToTop()" id="scroll-top-btn" class="fixed bottom-36 right-6 z-40 bg-slate-800 text-white w-12 h-12 flex items-center justify-center rounded-full shadow-lg p-0">
         <i class="fa-solid fa-arrow-up text-lg"></i>
     </button>
 
-    <!-- Modal QR Scanner -->
     <div id="qr-scanner-modal" class="fixed inset-0 z-[100] hidden bg-slate-900/95 flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-sm bg-white rounded-2xl overflow-hidden relative shadow-2xl">
             <div class="p-4 bg-indigo-900 text-white flex justify-between items-center"><h3 class="font-bold">Escanear</h3><button onclick="stopQRScanner()"><i class="fa-solid fa-xmark"></i></button></div>
@@ -159,10 +167,8 @@
         </div>
     </div>
 
-    <!-- Mensaje Toast Flotante -->
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none text-sm font-medium">Msg</div>
 
-    <!-- BOTONES FLOTANTES PRINCIPALES (Perfectamente redondos) -->
     <div id="fab-container" class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
         <button onclick="openGeneralWhatsApp()" class="w-14 h-14 flex items-center justify-center bg-white text-green-500 rounded-full shadow-lg hover:scale-110 transition border border-green-100 p-0">
             <i class="fa-brands fa-whatsapp text-3xl"></i>
@@ -173,7 +179,7 @@
         </button>
     </div>
 
-    <!-- UI Carrito (MEJORADO CON CURVAS Y ESTILO PREMIUM) -->
+    <!-- UI Carrito -->
     <div id="cart-modal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0" id="cart-backdrop" onclick="toggleCart()"></div>
         <div class="absolute right-0 top-0 h-full w-full md:w-[480px] max-w-full bg-slate-50 shadow-[-20px_0_50px_rgba(0,0,0,0.15)] flex flex-col transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] md:rounded-l-[2rem] overflow-hidden" id="cart-panel">
@@ -194,10 +200,8 @@
             <div class="flex-1 overflow-y-auto bg-slate-50 relative hide-scroll">
                 <div id="cart-items" class="p-4 space-y-3"></div>
                 
-                <!-- CHECKOUT MEJORADO VISUALMENTE -->
                 <div id="cart-config" class="p-5 bg-white border-t border-slate-100 hidden">
                     
-                    <!-- CLIENTE -->
                     <div class="mb-5 relative">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Datos del Cliente</label>
                         <div class="flex items-center gap-2">
@@ -209,7 +213,6 @@
                         </div>
                     </div>
                     
-                    <!-- ENTREGA -->
                     <div class="mb-5">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Método de Entrega</label>
                         <div class="grid grid-cols-3 gap-2">
@@ -224,7 +227,6 @@
                             </button>
                         </div>
 
-                        <!-- Panel SUCURSAL -->
                         <div id="panel-recoger" class="hidden mt-3 fade-in">
                              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3 text-xs text-slate-600">
                                 <p><i class="fa-solid fa-location-dot text-indigo-500 mr-1"></i> Calzada Guadalupe Victoria 105 Oriente</p>
@@ -238,7 +240,6 @@
                              <p class="text-[10px] text-slate-400 mt-2 ml-1">* Tarjetas Débito/Crédito (No Amex)</p>
                         </div>
 
-                        <!-- Panel LOCAL -->
                         <div id="panel-local" class="hidden mt-3 fade-in">
                             <div class="relative mb-3">
                                 <i class="fa-solid fa-map-location-dot absolute left-3 top-3 text-orange-400"></i>
@@ -252,7 +253,6 @@
                             </div>
                         </div>
 
-                        <!-- Panel FORÁNEO -->
                         <div id="panel-foraneo" class="hidden mt-3 fade-in">
                             <div class="relative mb-3">
                                 <i class="fa-solid fa-truck-fast absolute left-3 top-3 text-indigo-400"></i>
@@ -289,24 +289,19 @@
                 </div>
             </div>
 
-            <!-- Footer Fijo Compacto y Siempre Visible (Flotante Premium) -->
             <div class="px-6 py-5 border-t border-slate-200/50 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0 z-20 w-full">
                 <div class="flex justify-between mb-4 items-end">
                     <span class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">Total Piezas</span>
                     <span id="cart-total" class="text-3xl font-black text-indigo-600 leading-none tracking-tighter">0</span>
                 </div>
                 
-                <!-- BOTONES DE FOOTER AJUSTADOS (No se saldrán nunca de la pantalla) -->
                 <div class="flex gap-2 relative w-full overflow-hidden">
-                     <!-- Botón Escáner QR -->
                      <button onclick="startQRScanner()" class="w-14 h-14 bg-white text-indigo-600 rounded-2xl flex items-center justify-center border-2 border-indigo-50 hover:border-indigo-200 hover:bg-indigo-50 transition shadow-sm relative shrink-0 p-0">
                         <i class="fa-solid fa-qrcode text-xl"></i>
                         <i class="fa-solid fa-plus absolute top-2 right-2 text-[8px] font-black"></i>
                      </button>
                      
-                     <!-- BOTÓN WHATSAPP PREMIUM -->
                      <button id="btn-send-wa" onclick="sendWhatsApp()" class="flex-1 min-w-0 h-14 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-bold rounded-2xl shadow-[0_8px_20px_-6px_rgba(34,197,94,0.5)] transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 relative overflow-hidden group p-0 px-2">
-                        <!-- Efecto de brillo animado con Tailwind -->
                         <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
                         <i class="fa-brands fa-whatsapp text-2xl relative z-10 shrink-0"></i> 
                         <span class="relative z-10 text-sm md:text-base truncate">Enviar Pedido</span>
@@ -320,23 +315,19 @@
         </div>
     </div>
 
-    <!-- Elementos del Tour (Overlay y Tooltips Rediseñados) -->
+    <!-- Elementos del Tour -->
     <div id="tour-overlay" onclick="endTour()" class="transition-opacity duration-300" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); z-index: 9998;"></div>
     
     <div id="tour-tooltip" style="display: none; position: fixed; z-index: 10001; width: 320px; max-width: 92vw; background: white; padding: 24px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.05);">
-        <!-- Botón cerrar (Equis) -->
         <button onclick="endTour()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"><i class="fa-solid fa-xmark"></i></button>
         
-        <!-- Encabezado con Icono Numérico -->
         <div class="flex items-center gap-3 mb-4 pr-6">
             <div id="tour-step-icon" class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-sm shrink-0">1</div>
             <h4 id="tour-title" class="font-bold text-lg text-slate-800 leading-tight">Título</h4>
         </div>
         
-        <!-- Descripción -->
         <p id="tour-desc" class="text-sm text-slate-600 mb-6 leading-relaxed"></p>
         
-        <!-- Controles Inferiores -->
         <div class="flex justify-between items-center pt-2 border-t border-slate-100">
             <span id="tour-step-count" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest"></span>
             <div class="flex gap-2">
@@ -345,7 +336,6 @@
             </div>
         </div>
         
-        <!-- Flecha direccional dinámica -->
         <div id="tour-arrow" class="absolute w-4 h-4 bg-white rotate-45 transform origin-center" style="box-shadow: -2px -2px 4px rgba(0,0,0,0.03);"></div>
     </div>
     
