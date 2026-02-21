@@ -3,7 +3,6 @@
 // ==========================================
 let allProducts = [], filteredProducts = [], cart = [];
 let currentCategory = 'Todos', currentPage = 1, latestProductIds = [];
-// Paginación dinámica (16 en móvil para cargar más rápido, 48 en desktop)
 let itemsPerPage = window.innerWidth < 768 ? 16 : 48; 
 let searchTimeout;
 let html5QrcodeScanner;
@@ -32,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
 
-        // Reajustar paginación si giran el celular o cambian tamaño de ventana
         window.addEventListener('resize', () => {
             itemsPerPage = window.innerWidth < 768 ? 16 : 48;
         });
@@ -68,7 +66,6 @@ function loadProducts() {
     });
 }
 
-// === ICONOS ACTUALIZADOS Y FUNCIONANDO (FA 6.5.1) ===
 function getCategoryIcon(cat) {
     const c = cat.toLowerCase();
     if(c.includes('bolsa')) return '<i class="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>';
@@ -76,9 +73,9 @@ function getCategoryIcon(cat) {
     if(c.includes('garrafa')) return '<i class="fa-solid fa-jug-detergent mr-1.5 opacity-80"></i>';
     if(c.includes('tapa')) return '<i class="fa-solid fa-circle-notch mr-1.5 opacity-80"></i>';
     if(c.includes('tambor') || c.includes('barril')) return '<i class="fa-solid fa-drum-steelpan mr-1.5 opacity-80"></i>';
-    if(c.includes('lámina') || c.includes('lamina')) return '<i class="fa-solid fa-fill-drip mr-1.5 opacity-80"></i>'; // Bote de pintura (Lámina)
-    if(c.includes('pad')) return '<i class="fa-solid fa-flask mr-1.5 opacity-80"></i>'; // PAD: Rígido / Químicos (Matraz)
-    if(c.includes('pbd')) return '<i class="fa-solid fa-droplet mr-1.5 opacity-80"></i>'; // PBD: Flexible / Dosificador (Gota)
+    if(c.includes('lámina') || c.includes('lamina')) return '<i class="fa-solid fa-fill-drip mr-1.5 opacity-80"></i>';
+    if(c.includes('pad')) return '<i class="fa-solid fa-flask mr-1.5 opacity-80"></i>'; 
+    if(c.includes('pbd')) return '<i class="fa-solid fa-droplet mr-1.5 opacity-80"></i>'; 
     if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-bottle-water mr-1.5 opacity-80"></i>'; 
     if(c.includes('todos')) return '<i class="fa-solid fa-border-all mr-1.5 opacity-80"></i>';
     return '<i class="fa-solid fa-box mr-1.5 opacity-80"></i>';
@@ -88,7 +85,6 @@ function renderCategories() {
     const cont = document.getElementById('categories-container');
     if(!cont) return;
     
-    // "Todos" siempre al principio, las demás ordenadas A-Z
     let uniqueCats = [...new Set(allProducts.map(p => p.category || 'Varios'))];
     uniqueCats = uniqueCats.filter(c => c.toLowerCase() !== 'todos'); 
     uniqueCats.sort((a, b) => a.localeCompare(b)); 
@@ -381,7 +377,6 @@ function stopQRScanner() {
     return html5QrcodeScanner ? html5QrcodeScanner.stop().then(() => { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }) : Promise.resolve();
 }
 
-// === LÓGICA DE WHATSAPP ===
 function getRandomPhone() {
     const phones = ['528113728493', '528118400503'];
     return phones[Math.floor(Math.random() * phones.length)];
@@ -430,67 +425,108 @@ function askProduct(id) {
     if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('ask_product', { product_id: id });
 }
 
-// === PREFERENCIAS Y PAGOS ===
-function loadPrefs() { try { const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; if(p.name) document.getElementById('client-name').value = p.name; if(p.deliveryType) setDelivery(p.deliveryType, false); } catch(e){} }
-function savePrefs() { localStorage.setItem('user_prefs_een', JSON.stringify({ name: document.getElementById('client-name').value, deliveryType: selectedDelivery, paymentMethod: selectedPayment, isOcurre: isOcurre, address: document.getElementById('delivery-address').value, fletera: document.getElementById('fletera-name').value })); }
+// === PREFERENCIAS Y PAGOS (VERSIÓN ESTABLE ORIGINAL) ===
+function loadPrefs() { 
+    try { 
+        const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; 
+        if(p.name) document.getElementById('client-name').value = p.name; 
+        if(p.deliveryType) setDelivery(p.deliveryType, false); 
+    } catch(e){} 
+}
 
-function setDelivery(t,s=true) {
+function savePrefs() { 
+    localStorage.setItem('user_prefs_een', JSON.stringify({ 
+        name: document.getElementById('client-name').value, 
+        deliveryType: selectedDelivery, 
+        paymentMethod: selectedPayment, 
+        isOcurre: isOcurre, 
+        address: document.getElementById('delivery-address').value, 
+        fletera: document.getElementById('fletera-name').value 
+    })); 
+}
+
+function setDelivery(t, s=true) {
     selectedDelivery = t;
-    ['recoger','local','foraneo'].forEach(x => {
-        document.getElementById(`btn-${x}`).classList.remove('selected');
-        document.getElementById(`panel-${x}`).classList.add('hidden');
-    });
-    document.getElementById(`btn-${t}`).classList.add('selected');
     
+    // 1. Limpiamos todas las opciones
+    ['recoger','local','foraneo'].forEach(x => {
+        const btn = document.getElementById(`btn-${x}`);
+        const pnl = document.getElementById(`panel-${x}`);
+        if(btn) btn.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+        if(pnl) pnl.classList.add('hidden');
+    });
+    
+    // 2. Iluminamos la seleccionada
+    const actBtn = document.getElementById(`btn-${t}`);
+    if(actBtn) actBtn.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+    
+    // 3. Mostramos el panel de opciones
+    const actPnl = document.getElementById(`panel-${t}`);
+    if(actPnl) actPnl.classList.remove('hidden');
+    
+    // 4. Panel bancario
     const bankInfo = document.getElementById('bank-info');
-    if (t === 'foraneo') bankInfo.classList.remove('hidden'); else bankInfo.classList.add('hidden');
+    if(bankInfo) {
+        if (t === 'foraneo') bankInfo.classList.remove('hidden'); 
+        else bankInfo.classList.add('hidden');
+    }
     if(s) savePrefs();
 }
 
-function setPayment(m) { 
+// Usa "event" (e) nativo de JS para evitar que falle el clic en PC
+function setPayment(e, m) { 
     selectedPayment = m; 
-    document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
     
-    // FIX: Usar closest() asegura que se seleccione el botón contenedor, 
-    // incluso si el usuario en PC hace clic exactamente encima de las letras
-    if (event && event.target) {
-        const btn = event.target.closest('.pay-btn');
-        if (btn) btn.classList.add('selected');
+    // Apaga los demás botones
+    document.querySelectorAll('.pay-btn').forEach(b => {
+        b.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+    }); 
+    
+    // Ilumina EXACTAMENTE el botón que fue clickeado (Infalible en PC)
+    if (e && e.currentTarget) {
+        e.currentTarget.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
     }
     
     const bankInfo = document.getElementById('bank-info');
-    if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
-        bankInfo.classList.remove('hidden');
-    } else {
-        bankInfo.classList.add('hidden');
+    if(bankInfo) {
+        if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
+            bankInfo.classList.remove('hidden');
+        } else {
+            bankInfo.classList.add('hidden');
+        }
     }
     savePrefs(); 
 }
 
-function setPublicoGeneral() { document.getElementById('client-name').value = "Público General"; savePrefs(); }
+function setPublicoGeneral() { 
+    document.getElementById('client-name').value = "Público General"; 
+    savePrefs(); 
+}
 
 function setOcurre(v) { 
     isOcurre = v; 
     const btnSi = document.getElementById('btn-ocurre-si');
     const btnNo = document.getElementById('btn-ocurre-no');
     
-    btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
-    btnSi.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
-    
-    btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
-    btnNo.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+    if(btnSi && btnNo) {
+        btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+        btnSi.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+        
+        btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+        btnNo.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
 
-    if(v) {
-        btnSi.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-        btnSi.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
-    } else {
-        btnNo.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-        btnNo.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+        if(v) {
+            btnSi.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+            btnSi.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+        } else {
+            btnNo.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+            btnNo.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+        }
     }
     savePrefs(); 
 }
 
-// === MOTOR DEL TOUR (A PRUEBA DE BALAS) ===
+// === MOTOR DEL TOUR ===
 function startTour() {
     currentTourSteps = [
         {el:'#main-nav', title:'Navegación y Búsqueda', desc:'Usa la barra superior para buscar productos rápidamente o acceder al escáner QR.'},
