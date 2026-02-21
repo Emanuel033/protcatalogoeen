@@ -447,13 +447,14 @@ function setDelivery(t,s=true) {
     if(s) savePrefs();
 }
 
-function setPayment(m) { 
+function setPayment(m, btnElement) { 
     selectedPayment = m; 
     document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
     
-    // FIX: Usar closest() asegura que se seleccione el botón contenedor, 
-    // incluso si el usuario en PC hace clic exactamente encima de las letras
-    if (event && event.target) {
+    // FORMA 100% SEGURA: Recibe el botón directo del HTML en lugar de adivinar el click
+    if (btnElement) {
+        btnElement.classList.add('selected');
+    } else if (typeof event !== 'undefined' && event && event.target) {
         const btn = event.target.closest('.pay-btn');
         if (btn) btn.classList.add('selected');
     }
