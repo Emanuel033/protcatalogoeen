@@ -431,26 +431,47 @@ function askProduct(id) {
 }
 
 // === PREFERENCIAS Y PAGOS ===
-function loadPrefs() { try { const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; if(p.name) document.getElementById('client-name').value = p.name; if(p.deliveryType) setDelivery(p.deliveryType, false); } catch(e){} }
-function savePrefs() { localStorage.setItem('user_prefs_een', JSON.stringify({ name: document.getElementById('client-name').value, deliveryType: selectedDelivery, paymentMethod: selectedPayment, isOcurre: isOcurre, address: document.getElementById('delivery-address').value, fletera: document.getElementById('fletera-name').value })); }
+function loadPrefs() { try { const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; if(p.name) { const n=document.getElementById('client-name'); if(n) n.value = p.name; } if(p.deliveryType) setDelivery(p.deliveryType, false); } catch(e){} }
+function savePrefs() { 
+    try {
+        const n = document.getElementById('client-name');
+        const d = document.getElementById('delivery-address');
+        const f = document.getElementById('fletera-name');
+        localStorage.setItem('user_prefs_een', JSON.stringify({ 
+            name: n ? n.value : '', 
+            deliveryType: selectedDelivery, 
+            paymentMethod: selectedPayment, 
+            isOcurre: isOcurre, 
+            address: d ? d.value : '', 
+            fletera: f ? f.value : '' 
+        })); 
+    } catch(e){}
+}
 
 function setDelivery(t,s=true) {
     selectedDelivery = t;
     
-    // 1. Esconder TODOS los paneles primero
+    // 1. Esconder TODOS los paneles primero (CON PROTECCIÓN ANTI-ERRORES)
     ['recoger','local','foraneo'].forEach(x => {
-        document.getElementById(`btn-${x}`).classList.remove('selected');
-        document.getElementById(`panel-${x}`).classList.add('hidden');
+        const btn = document.getElementById(`btn-${x}`);
+        const pnl = document.getElementById(`panel-${x}`);
+        if(btn) btn.classList.remove('selected');
+        if(pnl) pnl.classList.add('hidden');
     });
     
     // 2. Resaltar el botón presionado
-    document.getElementById(`btn-${t}`).classList.add('selected');
+    const actBtn = document.getElementById(`btn-${t}`);
+    if(actBtn) actBtn.classList.add('selected');
     
-    // 3. ¡LA LÍNEA RECUPERADA! Mostrar el panel correcto
-    document.getElementById(`panel-${t}`).classList.remove('hidden');
+    // 3. Mostrar el panel correcto
+    const actPnl = document.getElementById(`panel-${t}`);
+    if(actPnl) actPnl.classList.remove('hidden');
     
     const bankInfo = document.getElementById('bank-info');
-    if (t === 'foraneo') bankInfo.classList.remove('hidden'); else bankInfo.classList.add('hidden');
+    if(bankInfo) {
+        if (t === 'foraneo') bankInfo.classList.remove('hidden'); 
+        else bankInfo.classList.add('hidden');
+    }
     if(s) savePrefs();
 }
 
@@ -458,8 +479,8 @@ function setPayment(m, btnElement) {
     selectedPayment = m; 
     document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
     
-    // FORMA 100% SEGURA: Recibe el botón directo del HTML en lugar de adivinar el click
-    if (btnElement) {
+    // FORMA 100% SEGURA
+    if (btnElement && btnElement.classList) {
         btnElement.classList.add('selected');
     } else if (typeof event !== 'undefined' && event && event.target) {
         const btn = event.target.closest('.pay-btn');
@@ -467,15 +488,21 @@ function setPayment(m, btnElement) {
     }
     
     const bankInfo = document.getElementById('bank-info');
-    if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
-        bankInfo.classList.remove('hidden');
-    } else {
-        bankInfo.classList.add('hidden');
+    if(bankInfo) {
+        if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
+            bankInfo.classList.remove('hidden');
+        } else {
+            bankInfo.classList.add('hidden');
+        }
     }
     savePrefs(); 
 }
 
-function setPublicoGeneral() { document.getElementById('client-name').value = "Público General"; savePrefs(); }
+function setPublicoGeneral() { 
+    const n = document.getElementById('client-name');
+    if(n) n.value = "Público General"; 
+    savePrefs(); 
+}
 
 function setOcurre(v) { 
     isOcurre = v; 
