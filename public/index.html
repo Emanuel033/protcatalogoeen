@@ -85,7 +85,6 @@
         <div class="max-w-7xl mx-auto px-4 py-3"><div id="categories-container" class="flex gap-2 overflow-x-auto hide-scroll pb-1"></div></div>
     </div>
 
-    <!-- Contenedor Principal -->
     <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
         <div id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div class="col-span-full text-center py-20 text-slate-400">Cargando catálogo...</div>
@@ -225,35 +224,35 @@
                             </button>
                             <button onclick="setDelivery('foraneo')" id="btn-foraneo" class="option-btn rounded-xl p-3 text-xs flex flex-col items-center justify-center gap-1.5 transition-all border border-slate-100 bg-slate-50/50 hover:border-indigo-200 hover:bg-white text-slate-500 hover:text-indigo-600">
                                 <i class="fa-solid fa-truck-plane text-xl"></i> <span class="font-bold">Foráneo</span>
-                            </button>
-                        </div>
-
+                        <!-- Panel SUCURSAL -->
                         <div id="panel-recoger" class="hidden mt-3 fade-in">
                              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3 text-xs text-slate-600">
                                 <p><i class="fa-solid fa-location-dot text-indigo-500 mr-1"></i> Calzada Guadalupe Victoria 105 Oriente</p>
                              </div>
                              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Método de Pago</label>
-                             <div class="flex gap-2">
-                                 <button onclick="setPayment('Transferencia')" class="pay-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Transf.</button>
-                                 <button onclick="setPayment('Tarjeta')" class="pay-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Tarjeta</button>
-                                 <button onclick="setPayment('Cheque')" class="pay-btn flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Cheque</button>
+                             <div class="grid grid-cols-3 gap-2">
+                                 <button onclick="setPayment('Transferencia', this)" class="pay-btn py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Transf.</button>
+                                 <button onclick="setPayment('Tarjeta', this)" class="pay-btn py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Tarjeta</button>
+                                 <button onclick="setPayment('Cheque', this)" class="pay-btn py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Cheque</button>
                              </div>
                              <p class="text-[10px] text-slate-400 mt-2 ml-1">* Tarjetas Débito/Crédito (No Amex)</p>
                         </div>
 
+                        <!-- Panel LOCAL -->
                         <div id="panel-local" class="hidden mt-3 fade-in">
                             <div class="relative mb-3">
                                 <i class="fa-solid fa-map-location-dot absolute left-3 top-3 text-orange-400"></i>
                                 <input type="text" id="delivery-address" placeholder="Dirección exacta de entrega..." class="w-full pl-9 pr-3 py-2.5 border border-orange-200 bg-orange-50/30 rounded-xl text-sm outline-none focus:border-orange-400 transition" onchange="savePrefs()">
                             </div>
                             <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Método de Pago</label>
-                            <div class="flex gap-2">
-                                <button onclick="setPayment('Transferencia')" class="pay-btn flex-1 py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Transferencia<br><span class="text-[9px] font-normal text-slate-400">(Previo)</span></button>
-                                <button onclick="setPayment('Cheque')" class="pay-btn flex-1 py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Cheque<br><span class="text-[9px] font-normal text-slate-400">(C. Entrega)</span></button>
-                                <button onclick="setPayment('Efectivo')" class="pay-btn flex-1 py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition">Efectivo<br><span class="text-[9px] font-normal text-slate-400">(C. Entrega)</span></button>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setPayment('Transferencia', this)" class="pay-btn py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition leading-tight">Transf.<br><span class="text-[9px] font-normal text-slate-400">(Previo)</span></button>
+                                <button onclick="setPayment('Cheque', this)" class="pay-btn py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition leading-tight">Cheque<br><span class="text-[9px] font-normal text-slate-400">(C. Entrega)</span></button>
+                                <button onclick="setPayment('Efectivo', this)" class="pay-btn py-2 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition leading-tight">Efectivo<br><span class="text-[9px] font-normal text-slate-400">(C. Entrega)</span></button>
                             </div>
                         </div>
 
+                        <!-- Panel FORÁNEO -->
                         <div id="panel-foraneo" class="hidden mt-3 fade-in">
                             <div class="relative mb-3">
                                 <i class="fa-solid fa-truck-fast absolute left-3 top-3 text-indigo-400"></i>
@@ -269,7 +268,7 @@
                                     DOMICILIO
                                 </button>
                             </div>
-                            <button onclick="setPayment('Transferencia')" class="pay-btn w-full py-2 rounded-lg text-xs font-bold border border-indigo-200 bg-indigo-50 text-indigo-700 selected cursor-default">
+                            <button onclick="setPayment('Transferencia', this)" class="pay-btn w-full py-2.5 rounded-lg text-xs font-bold border border-indigo-200 bg-indigo-50 text-indigo-700 selected cursor-default transition">
                                 <i class="fa-solid fa-building-columns mr-1"></i> Transferencia / Depósito
                             </button>
                         </div>
