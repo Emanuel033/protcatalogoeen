@@ -441,7 +441,6 @@ function setDelivery(t,s=true) {
         document.getElementById(`panel-${x}`).classList.add('hidden');
     });
     document.getElementById(`btn-${t}`).classList.add('selected');
-    document.getElementById(`panel-${t}`).classList.remove('hidden');
     
     const bankInfo = document.getElementById('bank-info');
     if (t === 'foraneo') bankInfo.classList.remove('hidden'); else bankInfo.classList.add('hidden');
@@ -451,7 +450,13 @@ function setDelivery(t,s=true) {
 function setPayment(m) { 
     selectedPayment = m; 
     document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
-    event.target.classList.add('selected'); 
+    
+    // FIX: Usar closest() asegura que se seleccione el botón contenedor, 
+    // incluso si el usuario en PC hace clic exactamente encima de las letras
+    if (event && event.target) {
+        const btn = event.target.closest('.pay-btn');
+        if (btn) btn.classList.add('selected');
+    }
     
     const bankInfo = document.getElementById('bank-info');
     if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
