@@ -20,7 +20,14 @@ let tourIndex = 0;
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        try { cart = JSON.parse(localStorage.getItem('cart_een')) || []; } catch(e) { cart = []; }
+        // Carga de carrito segura
+        try { 
+            cart = JSON.parse(localStorage.getItem('cart_een')) || []; 
+            if(!Array.isArray(cart)) cart = []; 
+        } catch(e) { 
+            cart = []; 
+            localStorage.removeItem('cart_een'); 
+        }
         
         loadPrefs();
         loadProducts(); // Llamada a la BD
@@ -68,7 +75,6 @@ function loadProducts() {
     });
 }
 
-// === ICONOS ACTUALIZADOS Y FUNCIONANDO (FA 6.5.1) ===
 function getCategoryIcon(cat) {
     const c = cat.toLowerCase();
     if(c.includes('bolsa')) return '<i class="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>';
@@ -76,9 +82,9 @@ function getCategoryIcon(cat) {
     if(c.includes('garrafa')) return '<i class="fa-solid fa-jug-detergent mr-1.5 opacity-80"></i>';
     if(c.includes('tapa')) return '<i class="fa-solid fa-circle-notch mr-1.5 opacity-80"></i>';
     if(c.includes('tambor') || c.includes('barril')) return '<i class="fa-solid fa-drum-steelpan mr-1.5 opacity-80"></i>';
-    if(c.includes('lámina') || c.includes('lamina')) return '<i class="fa-solid fa-fill-drip mr-1.5 opacity-80"></i>'; // Bote de pintura (Lámina)
-    if(c.includes('pad')) return '<i class="fa-solid fa-flask mr-1.5 opacity-80"></i>'; // PAD: Rígido / Químicos (Matraz)
-    if(c.includes('pbd')) return '<i class="fa-solid fa-droplet mr-1.5 opacity-80"></i>'; // PBD: Flexible / Dosificador (Gota)
+    if(c.includes('lámina') || c.includes('lamina')) return '<i class="fa-solid fa-fill-drip mr-1.5 opacity-80"></i>';
+    if(c.includes('pad')) return '<i class="fa-solid fa-flask mr-1.5 opacity-80"></i>'; 
+    if(c.includes('pbd')) return '<i class="fa-solid fa-droplet mr-1.5 opacity-80"></i>'; 
     if(c.includes('botella') || c.includes('pet')) return '<i class="fa-solid fa-bottle-water mr-1.5 opacity-80"></i>'; 
     if(c.includes('todos')) return '<i class="fa-solid fa-border-all mr-1.5 opacity-80"></i>';
     return '<i class="fa-solid fa-box mr-1.5 opacity-80"></i>';
@@ -88,7 +94,6 @@ function renderCategories() {
     const cont = document.getElementById('categories-container');
     if(!cont) return;
     
-    // "Todos" siempre al principio, las demás ordenadas A-Z
     let uniqueCats = [...new Set(allProducts.map(p => p.category || 'Varios'))];
     uniqueCats = uniqueCats.filter(c => c.toLowerCase() !== 'todos'); 
     uniqueCats.sort((a, b) => a.localeCompare(b)); 
@@ -381,7 +386,6 @@ function stopQRScanner() {
     return html5QrcodeScanner ? html5QrcodeScanner.stop().then(() => { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }) : Promise.resolve();
 }
 
-// === LÓGICA DE WHATSAPP ===
 function getRandomPhone() {
     const phones = ['528113728493', '528118400503'];
     return phones[Math.floor(Math.random() * phones.length)];
@@ -430,8 +434,24 @@ function askProduct(id) {
     if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('ask_product', { product_id: id });
 }
 
-// === PREFERENCIAS Y PAGOS ===
-function loadPrefs() { try { const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; if(p.name) { const n=document.getElementById('client-name'); if(n) n.value = p.name; } if(p.deliveryType) setDelivery(p.deliveryType, false); } catch(e){} }
+// === PREFERENCIAS Y PAGOS (BLINDADOS) ===
+function loadPrefs() { 
+    try { 
+        const raw = localStorage.getItem('user_prefs_een');
+        if(!raw) return;
+        const p = JSON.parse(raw);
+        if(p.name) {
+            const n = document.getElementById('client-name');
+            if(n) n.value = p.name;
+        }
+        if(p.deliveryType) setDelivery(p.deliveryType, false); 
+    } catch(e) {
+        // Si la memoria está corrupta, la borramos para evitar congelamientos
+        localStorage.removeItem('user_prefs_een');
+        console.warn("Preferencias reiniciadas por error:", e);
+    } 
+}
+
 function savePrefs() { 
     try {
         const n = document.getElementById('client-name');
@@ -445,57 +465,69 @@ function savePrefs() {
             address: d ? d.value : '', 
             fletera: f ? f.value : '' 
         })); 
-    } catch(e){}
+    } catch(e) {
+        console.warn("No se pudieron guardar las preferencias:", e);
+    }
 }
 
-function setDelivery(t,s=true) {
-    selectedDelivery = t;
-    
-    // 1. Esconder TODOS los paneles primero (CON PROTECCIÓN ANTI-ERRORES)
-    ['recoger','local','foraneo'].forEach(x => {
-        const btn = document.getElementById(`btn-${x}`);
-        const pnl = document.getElementById(`panel-${x}`);
-        if(btn) btn.classList.remove('selected');
-        if(pnl) pnl.classList.add('hidden');
-    });
-    
-    // 2. Resaltar el botón presionado
-    const actBtn = document.getElementById(`btn-${t}`);
-    if(actBtn) actBtn.classList.add('selected');
-    
-    // 3. Mostrar el panel correcto
-    const actPnl = document.getElementById(`panel-${t}`);
-    if(actPnl) actPnl.classList.remove('hidden');
-    
-    const bankInfo = document.getElementById('bank-info');
-    if(bankInfo) {
-        if (t === 'foraneo') bankInfo.classList.remove('hidden'); 
-        else bankInfo.classList.add('hidden');
+function setDelivery(t, s=true) {
+    try {
+        selectedDelivery = t;
+        
+        // Esconder todos los paneles de forma segura
+        ['recoger','local','foraneo'].forEach(x => {
+            const btn = document.getElementById(`btn-${x}`);
+            const pnl = document.getElementById(`panel-${x}`);
+            if(btn) btn.classList.remove('selected');
+            if(pnl) pnl.classList.add('hidden');
+        });
+        
+        // Resaltar botón activo
+        const activeBtn = document.getElementById(`btn-${t}`);
+        if(activeBtn) activeBtn.classList.add('selected');
+        
+        // Mostrar panel correspondiente
+        const activePnl = document.getElementById(`panel-${t}`);
+        if(activePnl) activePnl.classList.remove('hidden');
+        
+        // Manejar Información de Banco
+        const bankInfo = document.getElementById('bank-info');
+        if(bankInfo) {
+            if (t === 'foraneo') bankInfo.classList.remove('hidden'); 
+            else bankInfo.classList.add('hidden');
+        }
+
+        if(s) savePrefs();
+    } catch (err) {
+        console.error("Error al mostrar el panel de entrega:", err);
     }
-    if(s) savePrefs();
 }
 
 function setPayment(m, btnElement) { 
-    selectedPayment = m; 
-    document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
-    
-    // FORMA 100% SEGURA
-    if (btnElement && btnElement.classList) {
-        btnElement.classList.add('selected');
-    } else if (typeof event !== 'undefined' && event && event.target) {
-        const btn = event.target.closest('.pay-btn');
-        if (btn) btn.classList.add('selected');
-    }
-    
-    const bankInfo = document.getElementById('bank-info');
-    if(bankInfo) {
-        if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
-            bankInfo.classList.remove('hidden');
-        } else {
-            bankInfo.classList.add('hidden');
+    try {
+        selectedPayment = m; 
+        document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
+        
+        // Seleccionar botón de manera ultra-segura
+        if (btnElement && btnElement.classList) {
+            btnElement.classList.add('selected');
+        } else if (typeof event !== 'undefined' && event && event.target) {
+            const btn = event.target.closest('.pay-btn');
+            if (btn) btn.classList.add('selected');
         }
+        
+        const bankInfo = document.getElementById('bank-info');
+        if(bankInfo) {
+            if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
+                bankInfo.classList.remove('hidden');
+            } else {
+                bankInfo.classList.add('hidden');
+            }
+        }
+        savePrefs(); 
+    } catch (err) {
+        console.error("Error al procesar pago:", err);
     }
-    savePrefs(); 
 }
 
 function setPublicoGeneral() { 
@@ -509,18 +541,20 @@ function setOcurre(v) {
     const btnSi = document.getElementById('btn-ocurre-si');
     const btnNo = document.getElementById('btn-ocurre-no');
     
-    btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
-    btnSi.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
-    
-    btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
-    btnNo.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+    if(btnSi && btnNo) {
+        btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
+        btnSi.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+        
+        btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
+        btnNo.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
 
-    if(v) {
-        btnSi.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-        btnSi.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
-    } else {
-        btnNo.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-        btnNo.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+        if(v) {
+            btnSi.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+            btnSi.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+        } else {
+            btnNo.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+            btnNo.classList.add('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
+        }
     }
     savePrefs(); 
 }
