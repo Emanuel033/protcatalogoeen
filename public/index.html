@@ -25,8 +25,6 @@
     
     <!-- CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- ¡SOLUCIÓN AQUÍ! Actualizado FontAwesome a la versión 6.5.1 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
     
@@ -224,7 +222,10 @@
                             </button>
                             <button onclick="setDelivery('foraneo')" id="btn-foraneo" class="option-btn rounded-xl p-3 text-xs flex flex-col items-center justify-center gap-1.5 transition-all border border-slate-100 bg-slate-50/50 hover:border-indigo-200 hover:bg-white text-slate-500 hover:text-indigo-600">
                                 <i class="fa-solid fa-truck-plane text-xl"></i> <span class="font-bold">Foráneo</span>
-                        <!-- Panel SUCURSAL -->
+                            </button>
+                        </div>
+
+                        <!-- SUCURSAL -->
                         <div id="panel-recoger" class="hidden mt-3 fade-in">
                              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl mb-3 text-xs text-slate-600">
                                 <p><i class="fa-solid fa-location-dot text-indigo-500 mr-1"></i> Calzada Guadalupe Victoria 105 Oriente</p>
@@ -238,7 +239,7 @@
                              <p class="text-[10px] text-slate-400 mt-2 ml-1">* Tarjetas Débito/Crédito (No Amex)</p>
                         </div>
 
-                        <!-- Panel LOCAL -->
+                        <!-- LOCAL -->
                         <div id="panel-local" class="hidden mt-3 fade-in">
                             <div class="relative mb-3">
                                 <i class="fa-solid fa-map-location-dot absolute left-3 top-3 text-orange-400"></i>
@@ -252,7 +253,7 @@
                             </div>
                         </div>
 
-                        <!-- Panel FORÁNEO -->
+                        <!-- FORÁNEO -->
                         <div id="panel-foraneo" class="hidden mt-3 fade-in">
                             <div class="relative mb-3">
                                 <i class="fa-solid fa-truck-fast absolute left-3 top-3 text-indigo-400"></i>
