@@ -3,7 +3,6 @@
 // ==========================================
 let allProducts = [], filteredProducts = [], cart = [];
 let currentCategory = 'Todos', currentPage = 1, latestProductIds = [];
-// Paginación dinámica (16 en móvil para cargar más rápido, 48 en desktop)
 let itemsPerPage = window.innerWidth < 768 ? 16 : 48; 
 let searchTimeout;
 let html5QrcodeScanner;
@@ -20,14 +19,7 @@ let tourIndex = 0;
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        // Carga de carrito segura
-        try { 
-            cart = JSON.parse(localStorage.getItem('cart_een')) || []; 
-            if(!Array.isArray(cart)) cart = []; 
-        } catch(e) { 
-            cart = []; 
-            localStorage.removeItem('cart_een'); 
-        }
+        try { cart = JSON.parse(localStorage.getItem('cart_een')) || []; } catch(e) { cart = []; }
         
         loadPrefs();
         loadProducts(); // Llamada a la BD
@@ -39,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if(btn) btn.classList.toggle('visible', window.scrollY > 300);
         });
 
-        // Reajustar paginación si giran el celular o cambian tamaño de ventana
         window.addEventListener('resize', () => {
             itemsPerPage = window.innerWidth < 768 ? 16 : 48;
         });
@@ -434,105 +425,81 @@ function askProduct(id) {
     if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('ask_product', { product_id: id });
 }
 
-// === PREFERENCIAS Y PAGOS (BLINDADOS) ===
+// === PREFERENCIAS Y PAGOS (VERSIÓN ESTABLE ORIGINAL) ===
 function loadPrefs() { 
     try { 
-        const raw = localStorage.getItem('user_prefs_een');
-        if(!raw) return;
-        const p = JSON.parse(raw);
-        if(p.name) {
-            const n = document.getElementById('client-name');
-            if(n) n.value = p.name;
-        }
+        const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; 
+        if(p.name) document.getElementById('client-name').value = p.name; 
         if(p.deliveryType) setDelivery(p.deliveryType, false); 
-    } catch(e) {
-        // Si la memoria está corrupta, la borramos para evitar congelamientos
-        localStorage.removeItem('user_prefs_een');
-        console.warn("Preferencias reiniciadas por error:", e);
-    } 
+    } catch(e){} 
 }
 
 function savePrefs() { 
-    try {
-        const n = document.getElementById('client-name');
-        const d = document.getElementById('delivery-address');
-        const f = document.getElementById('fletera-name');
-        localStorage.setItem('user_prefs_een', JSON.stringify({ 
-            name: n ? n.value : '', 
-            deliveryType: selectedDelivery, 
-            paymentMethod: selectedPayment, 
-            isOcurre: isOcurre, 
-            address: d ? d.value : '', 
-            fletera: f ? f.value : '' 
-        })); 
-    } catch(e) {
-        console.warn("No se pudieron guardar las preferencias:", e);
-    }
+    localStorage.setItem('user_prefs_een', JSON.stringify({ 
+        name: document.getElementById('client-name').value, 
+        deliveryType: selectedDelivery, 
+        paymentMethod: selectedPayment, 
+        isOcurre: isOcurre, 
+        address: document.getElementById('delivery-address').value, 
+        fletera: document.getElementById('fletera-name').value 
+    })); 
 }
 
 function setDelivery(t, s=true) {
-    try {
-        selectedDelivery = t;
-        
-        // Esconder todos los paneles de forma segura
-        ['recoger','local','foraneo'].forEach(x => {
-            const btn = document.getElementById(`btn-${x}`);
-            const pnl = document.getElementById(`panel-${x}`);
-            if(btn) btn.classList.remove('selected');
-            if(pnl) pnl.classList.add('hidden');
-        });
-        
-        // Resaltar botón activo
-        const activeBtn = document.getElementById(`btn-${t}`);
-        if(activeBtn) activeBtn.classList.add('selected');
-        
-        // Mostrar panel correspondiente
-        const activePnl = document.getElementById(`panel-${t}`);
-        if(activePnl) activePnl.classList.remove('hidden');
-        
-        // Manejar Información de Banco
-        const bankInfo = document.getElementById('bank-info');
-        if(bankInfo) {
-            if (t === 'foraneo') bankInfo.classList.remove('hidden'); 
-            else bankInfo.classList.add('hidden');
-        }
-
-        if(s) savePrefs();
-    } catch (err) {
-        console.error("Error al mostrar el panel de entrega:", err);
+    selectedDelivery = t;
+    
+    // 1. Limpiamos todas las opciones
+    ['recoger','local','foraneo'].forEach(x => {
+        const btn = document.getElementById(`btn-${x}`);
+        const pnl = document.getElementById(`panel-${x}`);
+        if(btn) btn.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+        if(pnl) pnl.classList.add('hidden');
+    });
+    
+    // 2. Iluminamos la seleccionada
+    const actBtn = document.getElementById(`btn-${t}`);
+    if(actBtn) actBtn.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+    
+    // 3. Mostramos el panel de opciones
+    const actPnl = document.getElementById(`panel-${t}`);
+    if(actPnl) actPnl.classList.remove('hidden');
+    
+    // 4. Panel bancario
+    const bankInfo = document.getElementById('bank-info');
+    if(bankInfo) {
+        if (t === 'foraneo') bankInfo.classList.remove('hidden'); 
+        else bankInfo.classList.add('hidden');
     }
+    if(s) savePrefs();
 }
 
-function setPayment(m, btnElement) { 
-    try {
-        selectedPayment = m; 
-        document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected')); 
-        
-        // Seleccionar botón de manera ultra-segura
-        if (btnElement && btnElement.classList) {
-            btnElement.classList.add('selected');
-        } else if (typeof event !== 'undefined' && event && event.target) {
-            const btn = event.target.closest('.pay-btn');
-            if (btn) btn.classList.add('selected');
-        }
-        
-        const bankInfo = document.getElementById('bank-info');
-        if(bankInfo) {
-            if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
-                bankInfo.classList.remove('hidden');
-            } else {
-                bankInfo.classList.add('hidden');
-            }
-        }
-        savePrefs(); 
-    } catch (err) {
-        console.error("Error al procesar pago:", err);
+// Usa "event" (e) nativo de JS para evitar que falle el clic en PC
+function setPayment(e, m) { 
+    selectedPayment = m; 
+    
+    // Apaga los demás botones
+    document.querySelectorAll('.pay-btn').forEach(b => {
+        b.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+    }); 
+    
+    // Ilumina EXACTAMENTE el botón que fue clickeado (Infalible en PC)
+    if (e && e.currentTarget) {
+        e.currentTarget.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
     }
+    
+    const bankInfo = document.getElementById('bank-info');
+    if(bankInfo) {
+        if(m === 'Transferencia' || selectedDelivery === 'foraneo') {
+            bankInfo.classList.remove('hidden');
+        } else {
+            bankInfo.classList.add('hidden');
+        }
+    }
+    savePrefs(); 
 }
 
 function setPublicoGeneral() { 
-    const n = document.getElementById('client-name');
-    if(n) n.value = "Público General"; 
+    document.getElementById('client-name').value = "Público General"; 
     savePrefs(); 
 }
 
@@ -542,10 +509,10 @@ function setOcurre(v) {
     const btnNo = document.getElementById('btn-ocurre-no');
     
     if(btnSi && btnNo) {
-        btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
+        btnSi.classList.remove('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
         btnSi.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
         
-        btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent');
+        btnNo.classList.remove('bg-indigo-600', 'text-white', 'border-transparent', 'shadow-md');
         btnNo.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
 
         if(v) {
@@ -559,7 +526,7 @@ function setOcurre(v) {
     savePrefs(); 
 }
 
-// === MOTOR DEL TOUR (A PRUEBA DE BALAS) ===
+// === MOTOR DEL TOUR ===
 function startTour() {
     currentTourSteps = [
         {el:'#main-nav', title:'Navegación y Búsqueda', desc:'Usa la barra superior para buscar productos rápidamente o acceder al escáner QR.'},
