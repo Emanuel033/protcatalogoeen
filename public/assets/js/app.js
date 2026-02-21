@@ -436,11 +436,18 @@ function savePrefs() { localStorage.setItem('user_prefs_een', JSON.stringify({ n
 
 function setDelivery(t,s=true) {
     selectedDelivery = t;
+    
+    // 1. Esconder TODOS los paneles primero
     ['recoger','local','foraneo'].forEach(x => {
         document.getElementById(`btn-${x}`).classList.remove('selected');
         document.getElementById(`panel-${x}`).classList.add('hidden');
     });
+    
+    // 2. Resaltar el botón presionado
     document.getElementById(`btn-${t}`).classList.add('selected');
+    
+    // 3. ¡LA LÍNEA RECUPERADA! Mostrar el panel correcto
+    document.getElementById(`panel-${t}`).classList.remove('hidden');
     
     const bankInfo = document.getElementById('bank-info');
     if (t === 'foraneo') bankInfo.classList.remove('hidden'); else bankInfo.classList.add('hidden');
