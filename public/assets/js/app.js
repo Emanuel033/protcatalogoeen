@@ -708,9 +708,10 @@ async function sendAIMessage() {
         removeElement(loadingId);
         appendMessage('ai', response);
     } catch (error) {
-        console.error(error);
+        console.error("Error exacto de IA:", error);
         removeElement(loadingId);
-        appendMessage('error', 'Lo siento, hubo un error de conexión con el Asesor IA. Revisa tu llave API.');
+        // Ahora mostrará el mensaje exacto de por qué falló
+        appendMessage('error', `Error de conexión: ${error.message}. (Revisa la consola con F12 para más detalles)`);
     }
 }
 
@@ -782,7 +783,13 @@ Instrucciones críticas:
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                // AQUÍ LEEMOS EL ERROR EXACTO DE GOOGLE
+                const errorData = await response.json();
+                console.error("Detalle del rechazo de Google:", errorData);
+                throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+            }
+            
             const result = await response.json();
             let text = result.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) throw new Error('Respuesta vacía');
