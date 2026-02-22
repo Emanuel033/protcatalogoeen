@@ -425,7 +425,7 @@ function askProduct(id) {
     if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('ask_product', { product_id: id });
 }
 
-// === PREFERENCIAS Y PAGOS (VERSIÓN ESTABLE ORIGINAL) ===
+// === PREFERENCIAS Y PAGOS ===
 function loadPrefs() { 
     try { 
         const p = JSON.parse(localStorage.getItem('user_prefs_een')) || {}; 
@@ -448,7 +448,6 @@ function savePrefs() {
 function setDelivery(t, s=true) {
     selectedDelivery = t;
     
-    // 1. Limpiamos todas las opciones
     ['recoger','local','foraneo'].forEach(x => {
         const btn = document.getElementById(`btn-${x}`);
         const pnl = document.getElementById(`panel-${x}`);
@@ -456,15 +455,12 @@ function setDelivery(t, s=true) {
         if(pnl) pnl.classList.add('hidden');
     });
     
-    // 2. Iluminamos la seleccionada
     const actBtn = document.getElementById(`btn-${t}`);
     if(actBtn) actBtn.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
     
-    // 3. Mostramos el panel de opciones
     const actPnl = document.getElementById(`panel-${t}`);
     if(actPnl) actPnl.classList.remove('hidden');
     
-    // 4. Panel bancario
     const bankInfo = document.getElementById('bank-info');
     if(bankInfo) {
         if (t === 'foraneo') bankInfo.classList.remove('hidden'); 
@@ -473,16 +469,13 @@ function setDelivery(t, s=true) {
     if(s) savePrefs();
 }
 
-// Usa "event" (e) nativo de JS para evitar que falle el clic en PC
 function setPayment(e, m) { 
     selectedPayment = m; 
     
-    // Apaga los demás botones
     document.querySelectorAll('.pay-btn').forEach(b => {
         b.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
     }); 
     
-    // Ilumina EXACTAMENTE el botón que fue clickeado (Infalible en PC)
     if (e && e.currentTarget) {
         e.currentTarget.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
     }
@@ -679,16 +672,24 @@ function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
 const apiKey = ""; 
 
 function openAIModal() {
-    document.getElementById('ai-modal').classList.remove('hidden');
-    setTimeout(() => document.getElementById('ai-input').focus(), 100);
+    const modal = document.getElementById('ai-modal');
+    if(modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            const input = document.getElementById('ai-input');
+            if(input) input.focus();
+        }, 100);
+    }
 }
 
 function closeAIModal() {
-    document.getElementById('ai-modal').classList.add('hidden');
+    const modal = document.getElementById('ai-modal');
+    if(modal) modal.classList.add('hidden');
 }
 
 async function sendAIMessage() {
     const input = document.getElementById('ai-input');
+    if(!input) return;
     const text = input.value.trim();
     if (!text) return;
 
@@ -702,14 +703,16 @@ async function sendAIMessage() {
         removeElement(loadingId);
         appendMessage('ai', response);
     } catch (error) {
-        console.error(error);
+        // En caso de que se superen los reintentos
         removeElement(loadingId);
-        appendMessage('error', 'Lo siento, hubo un problema de conexión con la inteligencia artificial. Por favor intenta de nuevo en unos segundos.');
+        appendMessage('error', 'Lo siento, hubo un problema de conexión con el Asesor IA. Por favor, intenta de nuevo en unos segundos.');
     }
 }
 
 function appendMessage(role, text) {
     const chatBox = document.getElementById('ai-chat-box');
+    if(!chatBox) return;
+    
     const div = document.createElement('div');
     
     if (role === 'user') {
@@ -729,6 +732,8 @@ function appendMessage(role, text) {
 
 function appendLoading() {
     const chatBox = document.getElementById('ai-chat-box');
+    if(!chatBox) return null;
+    
     const id = 'loading-' + Date.now();
     const div = document.createElement('div');
     div.id = id;
@@ -740,15 +745,16 @@ function appendLoading() {
 }
 
 function removeElement(id) {
+    if(!id) return;
     const el = document.getElementById(id);
     if (el) el.remove();
 }
 
 async function callGeminiAPI(userText, retries = 5) {
-    // 1. Extraemos tu catálogo dinámicamente para dárselo como contexto a la IA
+    // 1. Extraemos el catálogo actualizado para pasarlo a la IA
     const catalogContext = allProducts.map(p => `- ${p.name} (Categoría: ${p.category || 'Varios'})`).join('\n');
     
-    // 2. Definimos las instrucciones (Prompt Engineering)
+    // 2. Definimos las reglas para Gemini
     const systemPrompt = `Eres un experto asesor técnico de ventas para la empresa de envases industriales "Envases La Económica del Norte". 
 Tu objetivo es ayudar al cliente a elegir el envase correcto (garrafa, cubeta, tambor, botella o tapa) en base al producto que desean almacenar (ej. alimentos, agua, solventes, jabón, etc).
 Utiliza ESTE catálogo de productos para hacer tus recomendaciones (si te piden algo que no está aquí, amablemente diles que no lo manejamos):\n${catalogContext}\n
@@ -765,7 +771,7 @@ Instrucciones críticas:
     let attempt = 0;
     const delays = [1000, 2000, 4000, 8000, 16000];
 
-    // 3. Sistema de reintento con Retroceso Exponencial (Exponential Backoff)
+    // 3. Sistema de reintento con Retroceso Exponencial
     while (attempt < retries) {
         try {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
@@ -780,7 +786,7 @@ Instrucciones críticas:
             let text = result.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) throw new Error('Respuesta vacía');
             
-            // Limpiamos los bloques de código si la IA intenta mandarlos por error
+            // Limpiamos los bloques si la IA intenta mandarlos por error
             text = text.replace(/```html/g, '').replace(/```/g, '');
             return text;
             
