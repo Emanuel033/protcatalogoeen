@@ -772,8 +772,8 @@ Instrucciones críticas:
     let attempt = 0;
     const delays = [1000, 2000, 4000, 8000, 16000];
 
-    // Usamos el modelo público (flash 1.5) asumiendo que ya pusiste tu API Key real
-    const urlModelo = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Solución al error 404: Especificamos la versión "-latest" para que Google lo reconozca
+    const urlModelo = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
     while (attempt < retries) {
         try {
