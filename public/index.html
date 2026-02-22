@@ -2,7 +2,7 @@
 <html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <!-- === SEO PRINCIPAL === -->
     <title>Catálogo - Envases La Económica del Norte | Servirle es un placer</title>
@@ -34,14 +34,14 @@
         #scroll-top-btn.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
     </style>
 
-    <!-- Librerías -->
+    <!-- Librerías de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-    <!-- JS Propio -->
+    <!-- JS Propio (Conectado a tu RTDB) -->
     <script src="assets/js/firebase-config.js" defer></script>
     <script src="assets/js/app.js" defer></script>
 </head>
@@ -345,35 +345,35 @@
     
     <div id="lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/90" onclick="this.classList.add('hidden')"><img id="lightbox-img" class="max-w-[95%] max-h-[90vh] rounded" onclick="event.stopPropagation()"></div>
 
-    <!-- Modal de Asesor IA con Gemini (Optimizado para Tablets y Móviles) -->
+    <!-- =================================================================== -->
+    <!-- MODAL DE ASESOR IA OPTIMIZADO PARA TABLETS Y CONTRA BARRA NEGRA     -->
+    <!-- =================================================================== -->
     <div id="ai-modal" class="fixed inset-0 z-[100] hidden flex items-end md:items-center justify-center sm:p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeAIModal()"></div>
-        <!-- Se cambió a flex-col y 100dvh para que no se oculte detrás del teclado en tablets -->
+        
         <div class="relative w-full md:w-[500px] bg-white md:rounded-2xl shadow-2xl flex flex-col h-[100dvh] md:h-[600px] max-h-[100dvh] md:max-h-[90vh] overflow-hidden">
-            <!-- Header -->
             <div class="bg-gradient-to-r from-indigo-900 to-indigo-700 text-white p-4 flex justify-between items-center shrink-0">
                 <h3 class="font-bold flex items-center gap-2 text-lg"><i class="fa-solid fa-sparkles text-yellow-400"></i> ✨ Asesor IA</h3>
                 <button onclick="closeAIModal()" class="text-indigo-200 hover:text-white transition p-2"><i class="fa-solid fa-xmark text-2xl"></i></button>
             </div>
-            <!-- Chat Area -->
+            
             <div id="ai-chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 pb-6">
                 <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 max-w-[85%] text-sm text-slate-700 leading-relaxed">
                     ¡Hola! Soy el asistente virtual de <b>Envases La Económica del Norte</b>. <br><br>Dime, ¿qué tipo de producto necesitas envasar? Analizaré nuestro catálogo en tiempo real y te recomendaré la mejor opción.
                 </div>
             </div>
-            <!-- Input Area (Protegido contra barra negra de autocompletado) -->
-            <div class="p-3 bg-white border-t border-slate-100 flex gap-2 items-center shrink-0">
+            
+            <div class="p-3 bg-white border-t border-slate-100 flex gap-2 items-center shrink-0 pb-safe">
                 <input type="text" id="ai-input" 
-                       autocomplete="off" 
-                       autocorrect="off" 
-                       autocapitalize="sentences" 
-                       spellcheck="false" 
-                       data-form-type="other" 
-                       name="query_ia_rnd"
+                       name="chat_message_bot_interaction" 
+                       autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" 
+                       inputmode="text" data-lpignore="true" data-form-type="other" role="presentation"
                        placeholder="Ej: Necesito envasar 20 litros..." 
                        class="flex-1 border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:bg-white transition text-sm" 
                        onkeypress="if(event.key === 'Enter') sendAIMessage()">
-                <button onclick="sendAIMessage()" class="bg-indigo-600 text-white w-12 h-12 rounded-xl flex items-center justify-center hover:bg-indigo-700 transition shadow-md active:scale-95 shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
+                <button onclick="sendAIMessage()" class="bg-indigo-600 text-white w-12 h-12 rounded-xl flex items-center justify-center hover:bg-indigo-700 transition shadow-md active:scale-95 shrink-0">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
