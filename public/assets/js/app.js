@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { cart = JSON.parse(localStorage.getItem('cart_een')) || []; } catch(e) { cart = []; }
         
         loadPrefs();
-        loadProducts(); // Llamada a la BD
+        loadProducts(); // Llamada a TU BASE DE DATOS REAL (Firebase RTDB)
         renderCart();
         checkQRParam();
 
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// LÓGICA DE PRODUCTOS
+// LÓGICA DE PRODUCTOS (TU CONEXIÓN REAL)
 // ==========================================
 function loadProducts() {
     const container = document.getElementById('products-container');
@@ -669,8 +669,8 @@ function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
 // ==========================================
 // INTEGRACIÓN GEMINI API - ASESOR INTELIGENTE
 // ==========================================
-// IMPORTANTE: Ve a https://aistudio.google.com/app/apikey , crea una clave 
-// gratuita y pégala aquí dentro de las comillas para que tu servidor tenga acceso.
+
+// IMPORTANTE: Pon TU llave real aquí para que funcione en GitHub / Firebase
 const apiKey = "AIzaSyCQtCDXrIClBl6gsPbRZGM2aOJo6uZmYDM"; 
 
 function openAIModal() {
@@ -698,6 +698,9 @@ async function sendAIMessage() {
     appendMessage('user', text);
     input.value = '';
     
+    // Cerrar teclado en móviles suavemente
+    input.blur();
+    
     const loadingId = appendLoading();
 
     try {
@@ -707,14 +710,13 @@ async function sendAIMessage() {
     } catch (error) {
         console.error(error);
         removeElement(loadingId);
-        appendMessage('error', 'Lo siento, hubo un error de conexión. Si subiste esto a tu servidor, asegúrate de haber colocado tu propia API Key de Google Gemini en el archivo app.js');
+        appendMessage('error', 'Lo siento, hubo un error de conexión con el Asesor IA. Revisa tu llave API.');
     }
 }
 
 function appendMessage(role, text) {
     const chatBox = document.getElementById('ai-chat-box');
     if(!chatBox) return;
-    
     const div = document.createElement('div');
     
     if (role === 'user') {
@@ -727,7 +729,6 @@ function appendMessage(role, text) {
         div.className = 'bg-red-50 text-red-600 p-3.5 rounded-2xl rounded-tl-none shadow-sm border border-red-100 max-w-[85%] text-sm';
         div.textContent = text;
     }
-    
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -735,12 +736,11 @@ function appendMessage(role, text) {
 function appendLoading() {
     const chatBox = document.getElementById('ai-chat-box');
     if(!chatBox) return null;
-    
     const id = 'loading-' + Date.now();
     const div = document.createElement('div');
     div.id = id;
     div.className = 'bg-slate-100 p-3.5 rounded-2xl rounded-tl-none shadow-inner max-w-[85%] text-sm text-slate-500 flex items-center gap-2';
-    div.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-indigo-500"></i> Analizando el catálogo...';
+    div.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-indigo-500"></i> Analizando catálogo...';
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
     return id;
@@ -753,15 +753,15 @@ function removeElement(id) {
 }
 
 async function callGeminiAPI(userText, retries = 5) {
+    // Tomamos tu catálogo REAL extraído directamente de tu Firebase
     const catalogContext = allProducts.map(p => `- ${p.name} (Categoría: ${p.category || 'Varios'})`).join('\n');
-    
     const systemPrompt = `Eres un experto asesor técnico de ventas para la empresa de envases industriales "Envases La Económica del Norte". 
-Tu objetivo es ayudar al cliente a elegir el envase correcto (garrafa, cubeta, tambor, botella o tapa) en base al producto que desean almacenar (ej. alimentos, agua, solventes, jabón, etc).
-Utiliza ESTE catálogo de productos para hacer tus recomendaciones (si te piden algo que no está aquí, amablemente diles que no lo manejamos):\n${catalogContext}\n
+Tu objetivo es ayudar al cliente a elegir el envase correcto en base al producto que desean almacenar.
+Utiliza ESTE catálogo de productos para hacer tus recomendaciones:\n${catalogContext}\n
 Instrucciones críticas:
 1. Recomienda SOLO productos que existan en el catálogo provisto.
 2. Sé muy amable, profesional y conciso (no más de 2 o 3 párrafos cortos).
-3. Utiliza formato HTML básico para organizar tu respuesta (usa <b> para resaltar nombres de productos, <br> para saltos de línea y <ul><li> para listas). NO uses formato Markdown (asteriscos), responde estrictamente con etiquetas HTML válidas para que se vea limpio.`;
+3. Utiliza formato HTML básico para organizar tu respuesta (usa <b> para resaltar, <br> para saltos de línea y <ul><li> para listas). NO uses formato Markdown (asteriscos).`;
 
     const payload = {
         contents: [{ parts: [{ text: userText }] }],
@@ -771,10 +771,12 @@ Instrucciones críticas:
     let attempt = 0;
     const delays = [1000, 2000, 4000, 8000, 16000];
 
+    // Usamos el modelo público (flash 1.5) asumiendo que ya pusiste tu API Key real
+    const urlModelo = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
     while (attempt < retries) {
         try {
-            // Requiere que la variable apiKey (arriba) tenga contenido
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+            const response = await fetch(urlModelo, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -782,10 +784,8 @@ Instrucciones críticas:
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
-            
             let text = result.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) throw new Error('Respuesta vacía');
-            
             return text.replace(/```html/g, '').replace(/```/g, '');
             
         } catch (error) {
