@@ -669,7 +669,9 @@ function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
 // ==========================================
 // INTEGRACIÓN GEMINI API - ASESOR INTELIGENTE
 // ==========================================
-const apiKey = ""; 
+// IMPORTANTE: Ve a https://aistudio.google.com/app/apikey , crea una clave 
+// gratuita y pégala aquí dentro de las comillas para que tu servidor tenga acceso.
+const apiKey = "AIzaSyCQtCDXrIClBl6gsPbRZGM2aOJo6uZmYDM"; 
 
 function openAIModal() {
     const modal = document.getElementById('ai-modal');
@@ -703,9 +705,9 @@ async function sendAIMessage() {
         removeElement(loadingId);
         appendMessage('ai', response);
     } catch (error) {
-        // En caso de que se superen los reintentos
+        console.error(error);
         removeElement(loadingId);
-        appendMessage('error', 'Lo siento, hubo un problema de conexión con el Asesor IA. Por favor, intenta de nuevo en unos segundos.');
+        appendMessage('error', 'Lo siento, hubo un error de conexión. Si subiste esto a tu servidor, asegúrate de haber colocado tu propia API Key de Google Gemini en el archivo app.js');
     }
 }
 
@@ -751,10 +753,8 @@ function removeElement(id) {
 }
 
 async function callGeminiAPI(userText, retries = 5) {
-    // 1. Extraemos el catálogo actualizado para pasarlo a la IA
     const catalogContext = allProducts.map(p => `- ${p.name} (Categoría: ${p.category || 'Varios'})`).join('\n');
     
-    // 2. Definimos las reglas para Gemini
     const systemPrompt = `Eres un experto asesor técnico de ventas para la empresa de envases industriales "Envases La Económica del Norte". 
 Tu objetivo es ayudar al cliente a elegir el envase correcto (garrafa, cubeta, tambor, botella o tapa) en base al producto que desean almacenar (ej. alimentos, agua, solventes, jabón, etc).
 Utiliza ESTE catálogo de productos para hacer tus recomendaciones (si te piden algo que no está aquí, amablemente diles que no lo manejamos):\n${catalogContext}\n
@@ -771,9 +771,9 @@ Instrucciones críticas:
     let attempt = 0;
     const delays = [1000, 2000, 4000, 8000, 16000];
 
-    // 3. Sistema de reintento con Retroceso Exponencial
     while (attempt < retries) {
         try {
+            // Requiere que la variable apiKey (arriba) tenga contenido
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -786,9 +786,7 @@ Instrucciones críticas:
             let text = result.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) throw new Error('Respuesta vacía');
             
-            // Limpiamos los bloques si la IA intenta mandarlos por error
-            text = text.replace(/```html/g, '').replace(/```/g, '');
-            return text;
+            return text.replace(/```html/g, '').replace(/```/g, '');
             
         } catch (error) {
             attempt++;
