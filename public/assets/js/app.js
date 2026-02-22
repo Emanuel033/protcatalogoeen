@@ -764,19 +764,28 @@ Instrucciones críticas:
 2. Sé muy amable, profesional y conciso (no más de 2 o 3 párrafos cortos).
 3. Utiliza formato HTML básico para organizar tu respuesta (usa <b> para resaltar, <br> para saltos de línea y <ul><li> para listas). NO uses formato Markdown (asteriscos).`;
 
-    const payload = {
-        contents: [{ parts: [{ text: userText }] }],
-        systemInstruction: { parts: [{ text: systemPrompt }] }
-    };
-
+    let modelName = "gemini-1.5-flash"; // Intentamos primero con el modelo principal
     let attempt = 0;
     const delays = [1000, 2000, 4000, 8000, 16000];
 
-    // Solución al error 404: Especificamos la versión "-latest" para que Google lo reconozca
-    const urlModelo = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-
     while (attempt < retries) {
         try {
+            const urlModelo = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            
+            // Adaptamos el payload. Si falla y usamos gemini-pro (antiguo), no soporta la propiedad "systemInstruction",
+            // así que inyectamos las instrucciones directamente en el texto.
+            let payload;
+            if (modelName === "gemini-1.5-flash") {
+                payload = {
+                    contents: [{ parts: [{ text: userText }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                };
+            } else {
+                payload = {
+                    contents: [{ parts: [{ text: systemPrompt + "\n\nPregunta del cliente: " + userText }] }]
+                };
+            }
+
             const response = await fetch(urlModelo, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -784,9 +793,16 @@ Instrucciones críticas:
             });
 
             if (!response.ok) {
-                // AQUÍ LEEMOS EL ERROR EXACTO DE GOOGLE
                 const errorData = await response.json();
-                console.error("Detalle del rechazo de Google:", errorData);
+                console.error(`Detalle del rechazo de Google (${modelName}):`, errorData);
+                
+                // Si el modelo 1.5 no es encontrado (Error 404), cambiamos automáticamente al modelo universal gemini-pro
+                if (response.status === 404 && modelName === "gemini-1.5-flash") {
+                    console.log("Modelo 1.5 no admitido por esta llave. Cambiando automáticamente al modelo clásico gemini-pro...");
+                    modelName = "gemini-pro";
+                    continue; // Reintenta inmediatamente sin contar como error
+                }
+                
                 throw new Error(errorData.error?.message || `HTTP ${response.status}`);
             }
             
