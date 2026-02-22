@@ -41,9 +41,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-    <!-- JS Propio (Con parámetro para limpiar el caché roto) -->
+    <!-- JS Propio -->
     <script src="assets/js/firebase-config.js" defer></script>
-    <script src="assets/js/app.js?v=rollback" defer></script>
+    <script src="assets/js/app.js" defer></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
 
@@ -59,6 +59,7 @@
                     </div>
                 </div>
                 <div class="flex gap-2 md:hidden">
+                    <button onclick="openAIModal()" class="bg-gradient-to-r from-indigo-500 to-purple-500 p-2 rounded-full text-white shadow-md"><i class="fa-solid fa-sparkles"></i></button>
                     <button onclick="startQRScanner()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-qrcode"></i></button>
                     <button onclick="startTour()" class="bg-indigo-800 p-2 rounded-full text-indigo-200"><i class="fa-solid fa-circle-question"></i></button>
                 </div>
@@ -67,6 +68,7 @@
                 <input type="text" id="searchInput" onkeyup="debouncedFilter()" placeholder="Buscar producto..." class="w-full py-2.5 pl-4 pr-10 rounded-xl bg-indigo-100/20 text-white placeholder-indigo-200 focus:bg-white focus:text-slate-800 focus:placeholder-slate-400 transition-all text-sm outline-none shadow-sm border border-transparent focus:border-indigo-300">
                 <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark"></i></button>
                 
+                <button onclick="openAIModal()" class="hidden md:flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 px-4 rounded-xl text-white hover:shadow-lg transition whitespace-nowrap ml-2 shadow-md"><i class="fa-solid fa-sparkles"></i><span class="text-xs font-bold">✨ Asesor IA</span></button>
                 <button onclick="startTour()" class="hidden md:flex items-center gap-2 bg-indigo-800 px-4 rounded-xl text-indigo-200 hover:text-white hover:bg-indigo-700 transition whitespace-nowrap ml-2"><i class="fa-solid fa-circle-info"></i><span class="text-xs font-bold">Ayuda</span></button>
             </div>
         </div>
@@ -342,5 +344,28 @@
     </div>
     
     <div id="lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/90" onclick="this.classList.add('hidden')"><img id="lightbox-img" class="max-w-[95%] max-h-[90vh] rounded" onclick="event.stopPropagation()"></div>
+
+    <!-- Modal de Asesor IA con Gemini -->
+    <div id="ai-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeAIModal()"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] md:w-[500px] bg-white rounded-2xl shadow-2xl flex flex-col h-[600px] max-h-[90vh] overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-indigo-900 to-indigo-700 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold flex items-center gap-2 text-lg"><i class="fa-solid fa-sparkles text-yellow-400"></i> ✨ Asesor Inteligente</h3>
+                <button onclick="closeAIModal()" class="text-indigo-200 hover:text-white transition"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            </div>
+            <!-- Chat Area -->
+            <div id="ai-chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-slate-100 max-w-[85%] text-sm text-slate-700 leading-relaxed">
+                    ¡Hola! Soy el asistente virtual de <b>Envases La Económica del Norte</b>. <br><br>Dime, ¿qué tipo de producto necesitas envasar (químicos, alimentos, agua)? Analizaré nuestro catálogo en tiempo real y te recomendaré la mejor opción.
+                </div>
+            </div>
+            <!-- Input Area -->
+            <div class="p-4 bg-white border-t border-slate-100 flex gap-2 items-center">
+                <input type="text" id="ai-input" placeholder="Ej: Necesito envasar 20 litros de cloro..." class="flex-1 border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:bg-white transition text-sm" onkeypress="if(event.key === 'Enter') sendAIMessage()">
+                <button onclick="sendAIMessage()" class="bg-indigo-600 text-white w-12 h-12 rounded-xl flex items-center justify-center hover:bg-indigo-700 transition shadow-md active:scale-95"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
