@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin 8.5 - Menú Colapsable y Alta Densidad</title>
+    <title>Admin 8.6 - Firestore & Motor Kits</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs (Actualizados para incluir Firestore) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -48,6 +50,7 @@
         .badge-base { background-color: #e0f2fe; color: #0369a1; } 
         .badge-kit-oficial { background-color: #fef08a; color: #854d0e; } 
         .badge-kit-web { background-color: #fce7f3; color: #be185d; } 
+        .badge-warning { background-color: #ffedd5; color: #c2410c; } /* Alerta Configuración */
 
         .component-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
         
@@ -60,13 +63,11 @@
 </head>
 <body class="text-gray-800 h-screen overflow-hidden flex bg-gray-50">
 
-    <!-- Configuración Firebase ORIGINAL -->
+    <!-- ========================================== -->
+    <!-- CONFIGURACIÓN FIREBASE -->
+    <!-- ========================================== -->
     <script>
-        // ==========================================
-        // POR FAVOR, PEGA AQUÍ TUS CREDENCIALES EXACTAS
-        // DEL ARCHIVO QUE SUBISTE ORIGINALMENTE
-        // ==========================================
-       const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
             authDomain: "productoseen.firebaseapp.com",
             databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
@@ -144,7 +145,7 @@
                     <div class="stat-card glass-panel rounded-2xl p-6 border border-blue-100 relative overflow-hidden">
                         <div class="absolute -right-6 -top-6 text-blue-50 opacity-50"><i class="fas fa-boxes text-9xl"></i></div>
                         <div class="relative z-10">
-                            <p class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-1">Total Productos</p>
+                            <p class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-1">Total Productos Maestros</p>
                             <h3 class="text-4xl font-black text-gray-900" id="dashTotalProducts">0</h3>
                         </div>
                     </div>
@@ -191,11 +192,14 @@
             <div id="tab-productos" class="tab-content hidden">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
                     <div>
-                        <h2 class="text-2xl font-black text-gray-900 tracking-tight">Catálogo y Kits</h2>
-                        <p class="text-gray-500 text-sm mt-1">Gestiona tu base de datos y arma paquetes flexibles.</p>
+                        <h2 class="text-2xl font-black text-gray-900 tracking-tight">Catálogo y Kits (Firestore)</h2>
+                        <p class="text-gray-500 text-sm mt-1">Configura tus productos migrados y asigna códigos Excel o Recetas.</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <!-- Botones Masivos ORIGINALES -->
+                        <!-- Botón Nuevo: Edición Masiva -->
+                        <button onclick="openMassEditModal()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold shadow text-sm flex items-center gap-2 transition-all">
+                            <i class="fas fa-layer-group"></i> Edición Masiva
+                        </button>
                         <button onclick="openMassActions()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold shadow text-sm flex items-center gap-2 transition-all">
                             <i class="fas fa-print"></i> Acciones Masivas
                         </button>
@@ -221,6 +225,7 @@
                         <table class="w-full text-left text-sm text-gray-600 whitespace-nowrap">
                             <thead class="bg-gray-50 border-b border-gray-200">
                                 <tr>
+                                    <th class="px-4 py-3 w-8 text-center"><input type="checkbox" id="selectAllCb" onclick="toggleSelectAll()" class="rounded border-gray-300 cursor-pointer"></th>
                                     <th class="px-4 py-3">Imagen</th>
                                     <th class="px-4 py-3 w-1/3">Nombre Comercial</th>
                                     <th class="px-4 py-3">Configuración Sistema</th>
@@ -239,11 +244,11 @@
         </div>
     </main>
 
-    <!-- Modal Nuevo/Editar Producto (Integrado con Motor de Traducción) -->
+    <!-- Modal Nuevo/Editar Producto -->
     <div id="productModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col transform scale-95 transition-transform duration-200">
             <div class="flex justify-between items-center p-5 border-b border-gray-200 bg-gray-50 rounded-t-2xl">
-                <h3 class="text-xl font-bold text-gray-900" id="productModalTitle">Nuevo Artículo</h3>
+                <h3 class="text-xl font-bold text-gray-900" id="productModalTitle">Configurar Artículo</h3>
                 <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -285,6 +290,7 @@
                         <div class="md:col-span-2" id="containerCodigoSistema">
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Código de Facturación (Excel)</label>
                             <input type="text" id="productCodigoSistema" placeholder="Ej: ENV-1000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase font-mono text-sm">
+                            <p class="text-xs text-orange-600 mt-1" id="warningCodigo"><i class="fas fa-exclamation-triangle"></i> ¡Importante! Debes asignar el código para que ventas pueda cobrarlo.</p>
                         </div>
 
                         <div class="md:col-span-2 hidden bg-gray-50 p-4 rounded-xl border border-dashed border-gray-400" id="containerReceta">
@@ -315,13 +321,44 @@
             <div class="p-5 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
                 <button onclick="closeProductModal()" class="px-5 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-200 transition-colors text-sm">Cancelar</button>
                 <button onclick="saveProduct()" class="px-6 py-2 bg-blue-800 hover:bg-blue-900 text-white font-bold rounded-lg shadow-md transition-all flex items-center gap-2 text-sm">
-                    <i class="fas fa-save"></i> Guardar
+                    <i class="fas fa-save"></i> Guardar Cambios
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Acciones Masivas e Impresión QR (Rescatado de tu archivo original) -->
+    <!-- Modal Edición Masiva -->
+    <div id="massEditModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform scale-95 transition-transform duration-200">
+            <h3 class="text-lg font-bold mb-3 text-gray-900 border-b pb-2">Edición Masiva</h3>
+            <p class="text-sm text-gray-600 mb-4">Modificando <span id="massEditCount" class="font-bold text-blue-600">0</span> productos seleccionados.</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold mb-1 text-gray-700">Comportamiento en Sistema</label>
+                    <select id="massEditTipoItem" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- No modificar --</option>
+                        <option value="PIEZA_BASE">Pieza Base (Producto individual)</option>
+                        <option value="KIT_OFICIAL">Kit Oficial (Armado en Excel)</option>
+                        <option value="KIT_FLEXIBLE">Kit Flexible Web (Desglose dinámico)</option>
+                    </select>
+                    <p class="text-xs text-orange-600 mt-1 hidden" id="massEditWarning"><i class="fas fa-info-circle"></i> Al cambiar a Kit Flexible, recuerda que deberás configurar su Receta manualmente después.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1 text-gray-700">Categoría Web</label>
+                    <select id="massEditCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- No modificar --</option>
+                        <!-- Dinámico -->
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4 border-t border-gray-100">
+                    <button onclick="closeMassEditModal()" class="flex-1 text-gray-600 bg-gray-100 hover:bg-gray-200 py-2 rounded-lg text-sm font-bold transition">Cancelar</button>
+                    <button onclick="applyMassEdit()" class="flex-1 bg-yellow-500 text-white py-2 rounded-lg text-sm font-bold hover:bg-yellow-600 transition shadow-md"><i class="fas fa-check-double"></i> Aplicar a Todos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Acciones Masivas (QRs) -->
     <div id="massActionsModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 class="text-lg font-bold mb-4">Acciones Masivas (QRs)</h3>
@@ -343,10 +380,11 @@
 
     <script>
         // ==========================================
-        // VARIABLES GLOBALES
+        // VARIABLES GLOBALES (FIRESTORE)
         // ==========================================
-        const db = firebase.database();
-        const productsRef = db.ref('productos');
+        const db = firebase.firestore();
+        const productsRef = db.collection('productos_master');
+        
         let allProducts = [];
         let currentFilteredProducts = [];
         let allCategories = ["PET", "POLIETILENO", "VIDRIO", "TAPAS", "CAJAS", "KITS WEB"]; 
@@ -378,24 +416,29 @@
         }
 
         // ==========================================
-        // GESTIÓN DE PRODUCTOS
+        // LECTURA DESDE FIRESTORE EN TIEMPO REAL
         // ==========================================
-        productsRef.on('value', (snapshot) => {
+        productsRef.onSnapshot((snapshot) => {
             allProducts = [];
-            const data = snapshot.val();
-            if (data) Object.keys(data).forEach(key => allProducts.push({ id: key, ...data[key] }));
+            snapshot.forEach((doc) => {
+                allProducts.push({ id: doc.id, ...doc.data() });
+            });
             document.getElementById('dashTotalProducts').innerText = allProducts.length;
-            filterProducts(); // Mantiene la búsqueda al actualizar
+            filterProducts(); 
             populateCategorySelects();
+        }, (error) => {
+            console.error("Error leyendo Firestore: ", error);
+            showToast("Error conectando a Firestore", "error");
         });
 
         function filterProducts() {
             const term = document.getElementById('productSearch').value.toLowerCase();
             currentFilteredProducts = allProducts.filter(p => 
-                (p.name && p.name.toLowerCase().includes(term)) || 
+                (p.nombre_flexible && p.nombre_flexible.toLowerCase().includes(term)) || 
                 (p.codigo_sistema_oficial && p.codigo_sistema_oficial.toLowerCase().includes(term))
             );
             renderProducts(currentFilteredProducts);
+            document.getElementById('selectAllCb').checked = false; // resetear checkbox general
         }
 
         function renderProducts(productsList) {
@@ -407,29 +450,34 @@
                 let configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-base border border-blue-200"><i class="fas fa-cube mr-1"></i> Pieza Base</span>`;
                 let codTxt = p.codigo_sistema_oficial || '-';
                 
-                if(tipo === 'KIT_OFICIAL') configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-oficial border border-yellow-300"><i class="fas fa-box mr-1"></i> Kit Oficial</span>`;
-                if(tipo === 'KIT_FLEXIBLE') {
+                // ALERTA VISUAL DE CONFIGURACIÓN FALTANTE
+                if(tipo !== 'KIT_FLEXIBLE' && (!p.codigo_sistema_oficial || p.codigo_sistema_oficial === '')) {
+                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-warning border border-orange-200"><i class="fas fa-exclamation-triangle mr-1"></i> Falta Configurar</span>`;
+                } else if(tipo === 'KIT_OFICIAL') {
+                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-oficial border border-yellow-300"><i class="fas fa-box mr-1"></i> Kit Oficial</span>`;
+                } else if(tipo === 'KIT_FLEXIBLE') {
                     configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-web border border-pink-200"><i class="fas fa-magic mr-1"></i> Kit Web (Se desglosa)</span>`;
                     codTxt = 'N/A';
                 }
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="px-4 py-2"><img src="${p.image || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200"></td>
+                    <td class="px-4 py-2 text-center"><input type="checkbox" class="row-cb rounded border-gray-300 cursor-pointer w-4 h-4" value="${p.id}"></td>
+                    <td class="px-4 py-2"><img src="${p.imagen_url || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200"></td>
                     <td class="px-4 py-2">
-                        <div class="font-bold text-gray-900 leading-tight">${p.name}</div>
-                        <div class="text-[10px] text-gray-400 font-semibold uppercase mt-0.5">${p.category || 'S/C'}</div>
+                        <div class="font-bold text-gray-900 leading-tight">${p.nombre_flexible}</div>
+                        <div class="text-[10px] text-gray-400 font-semibold uppercase mt-0.5">${p.categoria || 'S/C'}</div>
                     </td>
                     <td class="px-4 py-2">
                         <div class="mb-1">${configHTML}</div>
                         <div class="text-xs font-mono text-gray-600 bg-gray-100 px-2 py-0.5 rounded inline-block border border-gray-200">Cód: ${codTxt}</div>
                     </td>
                     <td class="px-4 py-2 text-center">
-                        <span class="${tipo==='KIT_FLEXIBLE' ? 'text-gray-400 italic' : 'font-bold text-gray-900 text-base'}">${tipo==='KIT_FLEXIBLE' ? 'Calculado' : (p.stock || 0) + ' pz'}</span>
+                        <span class="${tipo==='KIT_FLEXIBLE' ? 'text-gray-400 italic' : 'font-bold text-gray-900 text-base'}">${tipo==='KIT_FLEXIBLE' ? 'Calculado' : (p.stock_total_piezas || 0) + ' pz'}</span>
                     </td>
                     <td class="px-4 py-2 text-center">
                         <div class="flex justify-center gap-1">
-                            <button onclick="editProduct('${p.id}')" title="Editar" class="text-blue-600 hover:bg-blue-100 p-1.5 rounded transition"><i class="fas fa-edit"></i></button>
+                            <button onclick="editProduct('${p.id}')" title="Configurar" class="text-blue-600 hover:bg-blue-100 p-1.5 rounded transition"><i class="fas fa-edit"></i></button>
                             <button onclick="cloneProduct('${p.id}')" title="Clonar" class="text-green-600 hover:bg-green-100 p-1.5 rounded transition"><i class="fas fa-copy"></i></button>
                             <button onclick="printSingleQR('${p.id}', 'inventario')" title="Imprimir QR" class="text-gray-700 hover:bg-gray-200 p-1.5 rounded transition"><i class="fas fa-qrcode"></i></button>
                             <button onclick="deleteProduct('${p.id}')" title="Eliminar" class="text-red-500 hover:bg-red-100 p-1.5 rounded transition"><i class="fas fa-trash"></i></button>
@@ -444,17 +492,93 @@
             const select = document.getElementById('productCategory');
             const currentVal = select.value;
             select.innerHTML = '';
-            allCategories.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+            
+            let catsToRender = new Set(allCategories);
+            allProducts.forEach(p => { if(p.categoria) catsToRender.add(p.categoria) });
+            
+            Array.from(catsToRender).sort().forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
             if(currentVal) select.value = currentVal;
         }
 
         // ==========================================
-        // MOTOR DE RECETAS (KITS)
+        // EDICIÓN MASIVA (NUEVO)
+        // ==========================================
+        function toggleSelectAll() {
+            const isChecked = document.getElementById('selectAllCb').checked;
+            document.querySelectorAll('.row-cb').forEach(cb => cb.checked = isChecked);
+        }
+
+        function openMassEditModal() {
+            const selected = document.querySelectorAll('.row-cb:checked');
+            if (selected.length === 0) return showToast('Selecciona al menos un producto usando las casillas', 'error');
+            
+            document.getElementById('massEditCount').innerText = selected.length;
+            document.getElementById('massEditTipoItem').value = '';
+            document.getElementById('massEditWarning').classList.add('hidden');
+            
+            // Llenar categorías en el modal masivo
+            const catSelect = document.getElementById('massEditCategory');
+            catSelect.innerHTML = '<option value="">-- No modificar --</option>';
+            let catsToRender = new Set(allCategories);
+            allProducts.forEach(p => { if(p.categoria) catsToRender.add(p.categoria) });
+            Array.from(catsToRender).sort().forEach(c => catSelect.innerHTML += `<option value="${c}">${c}</option>`);
+
+            document.getElementById('massEditModal').classList.remove('hidden');
+            setTimeout(() => document.querySelector('#massEditModal > div').classList.remove('scale-95'), 10);
+        }
+
+        function closeMassEditModal() {
+            document.querySelector('#massEditModal > div').classList.add('scale-95');
+            setTimeout(() => document.getElementById('massEditModal').classList.add('hidden'), 200);
+        }
+
+        document.getElementById('massEditTipoItem').addEventListener('change', function() {
+            document.getElementById('massEditWarning').classList.toggle('hidden', this.value !== 'KIT_FLEXIBLE');
+        });
+
+        async function applyMassEdit() {
+            const selected = document.querySelectorAll('.row-cb:checked');
+            const newTipo = document.getElementById('massEditTipoItem').value;
+            const newCat = document.getElementById('massEditCategory').value;
+            
+            if (!newTipo && !newCat) return showToast('No seleccionaste ningún cambio', 'error');
+            
+            try {
+                const batch = db.batch();
+                selected.forEach(cb => {
+                    const ref = productsRef.doc(cb.value);
+                    const updateData = {};
+                    if (newTipo) {
+                        updateData.tipo_item = newTipo;
+                        // Si lo pasan a Kit Flexible, limpiamos el código oficial por seguridad
+                        if (newTipo === 'KIT_FLEXIBLE') {
+                            updateData.codigo_sistema_oficial = null;
+                        }
+                    }
+                    if (newCat) {
+                        updateData.categoria = newCat;
+                    }
+                    batch.update(ref, updateData);
+                });
+                
+                await batch.commit();
+                showToast(`Se actualizaron ${selected.length} productos masivamente`);
+                closeMassEditModal();
+                document.getElementById('selectAllCb').checked = false; 
+            } catch (error) {
+                console.error(error);
+                showToast('Error al actualizar masivamente', 'error');
+            }
+        }
+
+        // ==========================================
+        // MOTOR DE RECETAS (KITS INDIVIDUALES)
         // ==========================================
         function toggleKitFields() {
             const tipo = document.getElementById('productTipoItem').value;
             const containerCodigo = document.getElementById('containerCodigoSistema');
             const containerReceta = document.getElementById('containerReceta');
+            const warningCode = document.getElementById('warningCodigo');
 
             if (tipo === 'KIT_FLEXIBLE') {
                 containerCodigo.classList.add('hidden');
@@ -462,13 +586,16 @@
             } else {
                 containerCodigo.classList.remove('hidden');
                 containerReceta.classList.add('hidden');
+                warningCode.style.display = document.getElementById('productCodigoSistema').value.trim() === '' ? 'block' : 'none';
             }
         }
+
+        document.getElementById('productCodigoSistema').addEventListener('keyup', toggleKitFields);
 
         function getPiezasBaseOptions() {
             const bases = allProducts.filter(p => !p.tipo_item || p.tipo_item === 'PIEZA_BASE');
             let options = `<option value="">Selecciona componente...</option>`;
-            bases.forEach(b => options += `<option value="${b.id}">${b.name}</option>`);
+            bases.forEach(b => options += `<option value="${b.id}">${b.nombre_flexible}</option>`);
             return options;
         }
 
@@ -497,7 +624,7 @@
         }
 
         // ==========================================
-        // ACCIONES CRUD Y CLONAR
+        // ACCIONES CRUD PARA FIRESTORE
         // ==========================================
         window.openProductModal = () => {
             document.getElementById('productForm').reset();
@@ -522,32 +649,30 @@
             if (tipo_item === 'KIT_FLEXIBLE' && !receta) return showToast("Un Kit Web necesita componentes.", "error");
 
             const data = {
-                name: document.getElementById('productName').value.trim(),
-                category: document.getElementById('productCategory').value,
-                image: document.getElementById('productImage').value.trim(),
-                piezas: parseInt(document.getElementById('productPiezas').value) || 1,
+                nombre_flexible: document.getElementById('productName').value.trim(),
+                categoria: document.getElementById('productCategory').value,
+                imagen_url: document.getElementById('productImage').value.trim(),
+                piezas_por_caja_original: parseInt(document.getElementById('productPiezas').value) || 1,
                 activo: document.getElementById('productActivo').checked,
                 tipo_item: tipo_item,
                 codigo_sistema_oficial: tipo_item !== 'KIT_FLEXIBLE' ? document.getElementById('productCodigoSistema').value.trim() : null,
                 receta_desglose: receta
             };
 
-            if (!data.name) return showToast('El nombre es requerido', 'error');
+            if (!data.nombre_flexible) return showToast('El nombre es requerido', 'error');
 
             try {
                 if (id) {
-                    const p = allProducts.find(x => x.id === id);
-                    if(p) data.stock = p.stock || 0;
-                    await productsRef.child(id).update(data);
-                    showToast('Artículo actualizado');
+                    await productsRef.doc(id).update(data);
+                    showToast('Artículo actualizado y configurado');
                 } else {
-                    data.createdAt = firebase.database.ServerValue.TIMESTAMP;
-                    data.stock = 0; 
-                    await productsRef.push(data);
-                    showToast('Artículo creado');
+                    data.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
+                    data.stock_total_piezas = 0; 
+                    await productsRef.add(data);
+                    showToast('Artículo creado en Firestore');
                 }
                 closeProductModal();
-            } catch (error) { showToast('Error al guardar', 'error'); }
+            } catch (error) { showToast('Error al guardar: ' + error.message, 'error'); }
         };
 
         window.editProduct = (id) => {
@@ -555,7 +680,7 @@
             if (!p) return;
             fillForm(p);
             document.getElementById('productId').value = p.id;
-            document.getElementById('productModalTitle').innerText = 'Editar: ' + p.name;
+            document.getElementById('productModalTitle').innerText = 'Configurar: ' + p.nombre_flexible;
             openModalAnimation();
         };
 
@@ -564,20 +689,21 @@
             if (!p) return;
             fillForm(p);
             document.getElementById('productId').value = '';
-            document.getElementById('productName').value = p.name + ' (Copia)';
+            document.getElementById('productName').value = p.nombre_flexible + ' (Copia)';
             document.getElementById('productModalTitle').innerText = 'Clonar Artículo';
             openModalAnimation();
         };
 
         function fillForm(p) {
-            document.getElementById('productName').value = p.name || '';
-            document.getElementById('productCategory').value = p.category || '';
-            document.getElementById('productImage').value = p.image || '';
-            document.getElementById('productPiezas').value = p.piezas || 1;
+            document.getElementById('productName').value = p.nombre_flexible || '';
+            document.getElementById('productCategory').value = p.categoria || '';
+            document.getElementById('productImage').value = p.imagen_url || '';
+            document.getElementById('productPiezas').value = p.piezas_por_caja_original || 1;
             document.getElementById('productActivo').checked = (p.activo === true || p.activo === "true");
             document.getElementById('productTipoItem').value = p.tipo_item || 'PIEZA_BASE';
             document.getElementById('productCodigoSistema').value = p.codigo_sistema_oficial || '';
             document.getElementById('recetaList').innerHTML = '';
+            
             if (p.receta_desglose) {
                 Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
             }
@@ -590,14 +716,14 @@
         }
 
         window.deleteProduct = async (id) => {
-            if (confirm('¿Eliminar artículo permanentemente?')) {
-                try { await productsRef.child(id).remove(); showToast('Eliminado'); } 
+            if (confirm('¿Eliminar artículo de Firestore permanentemente?')) {
+                try { await productsRef.doc(id).delete(); showToast('Eliminado'); } 
                 catch (e) { showToast('Error', 'error'); }
             }
         };
 
         // ==========================================
-        // FUNCIONES ORIGINALES RESTAURADAS (IMPRESIONES Y EXPORTACIÓN)
+        // IMPRESIONES Y EXPORTACIÓN
         // ==========================================
         window.openMassActions = () => { document.getElementById('massActionsModal').classList.remove('hidden'); }
         window.closeMassActions = () => { document.getElementById('massActionsModal').classList.add('hidden'); }
@@ -620,7 +746,7 @@
                 let qr = new QRious({value: qrVal, size: 200, level: 'M'});
                 for(let i=0; i<qty; i++) {
                     html += `<div class="label">
-                        <h4>${p.name}</h4>
+                        <h4>${p.nombre_flexible}</h4>
                         <img src="${qr.toDataURL()}">
                         <p>${printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : ('CÓD: ' + (p.codigo_sistema_oficial || 'KIT WEB'))}</p>
                     </div>`;
@@ -653,7 +779,7 @@
                 baseUrl = getBaseUrl(); 
                 if (!baseUrl) return showToast("URL requerida", "error"); 
             } 
-            const qty = prompt(`Etiquetas para:\n${p.name}\n\n¿Cuántas deseas imprimir?`, "1"); 
+            const qty = prompt(`Etiquetas para:\n${p.nombre_flexible}\n\n¿Cuántas deseas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
             const pw = window.open('', '_blank'); 
             pw.document.write(buildPrintHTML([p], qty, printType, baseUrl)); 
@@ -663,16 +789,16 @@
         window.exportToExcel = (tipo) => { 
             let csv = "\uFEFF"; 
             if (tipo === 'inventario') { 
-                csv += "Nombre,Categoria,Stock_Contado,Tipo_Artículo,Código_Oficial\n"; 
-                allProducts.forEach(p => csv += `"${(p.name||"").replace(/"/g,'""')}","${(p.category||"").replace(/"/g,'""')}",${p.stock||0},"${p.tipo_item||'PIEZA_BASE'}","${p.codigo_sistema_oficial||'N/A'}"\n`); 
+                csv += "Nombre_Web,Categoria,Stock_Contado,Tipo_Artículo,Código_Facturacion\n"; 
+                allProducts.forEach(p => csv += `"${(p.nombre_flexible||"").replace(/"/g,'""')}","${(p.categoria||"").replace(/"/g,'""')}",${p.stock_total_piezas||0},"${p.tipo_item||'PIEZA_BASE'}","${p.codigo_sistema_oficial||'FALTA_CONFIGURAR'}"\n`); 
             } else { 
                 csv += "Nombre,Categoria,PiezasxPaq,Activo\n"; 
-                allProducts.forEach(p => csv += `"${(p.name||"").replace(/"/g,'""')}","${(p.category||"").replace(/"/g,'""')}",${p.piezas||1},${p.activo}\n`); 
+                allProducts.forEach(p => csv += `"${(p.nombre_flexible||"").replace(/"/g,'""')}","${(p.categoria||"").replace(/"/g,'""')}",${p.piezas_por_caja_original||1},${p.activo}\n`); 
             }
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `Reporte_${tipo}_EEN.csv`;
+            link.download = `Catálogo_Firestore_${tipo}_EEN.csv`;
             link.click();
         };
 
@@ -710,8 +836,8 @@
             document.getElementById('btnStartScan').classList.remove('hidden');
             document.getElementById('btnStopScan').classList.add('hidden');
             document.getElementById('scanResult').classList.remove('hidden');
-            document.getElementById('scanProductName').innerText = p.name;
-            document.getElementById('scanProductStock').innerText = p.stock || 0;
+            document.getElementById('scanProductName').innerText = p.nombre_flexible;
+            document.getElementById('scanProductStock').innerText = p.stock_total_piezas || 0;
             document.getElementById('scanProductId').value = p.id;
         }
 
@@ -719,16 +845,16 @@
             const id = document.getElementById('scanProductId').value;
             const p = allProducts.find(x => x.id === id);
             if(!p) return;
-            const newStock = (p.stock || 0) + change;
+            const newStock = (p.stock_total_piezas || 0) + change;
             if(newStock < 0) return showToast("El stock no puede ser negativo", "error");
             try {
-                await productsRef.child(id).update({stock: newStock});
+                await productsRef.doc(id).update({stock_total_piezas: newStock});
                 document.getElementById('scanProductStock').innerText = newStock;
                 showToast(`Stock actualizado: ${newStock}`);
             } catch (error) { showToast("Error al actualizar stock", "error"); }
         };
         
-        setTimeout(()=> { document.getElementById('dashTotalProducts').innerText = "Cargando..."; populateCategorySelects(); }, 500);
+        setTimeout(()=> { document.getElementById('dashTotalProducts').innerText = "Cargando..."; }, 500);
     </script>
 </body>
 </html>
