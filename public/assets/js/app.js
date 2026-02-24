@@ -83,8 +83,8 @@ function loadProducts() {
         latestProductIds = allProducts.slice(-8).map(p => p.id);
         
         // Llamamos a tus funciones originales para pintar la pantalla
-        filterProducts(); 
-        populateCategories(); 
+        renderCategories();
+    applyFilter();
         
     }, (error) => {
         console.error("Error al cargar el catálogo de Firestore:", error);
