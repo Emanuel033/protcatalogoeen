@@ -41,28 +41,56 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 // LÓGICA DE PRODUCTOS (TU CONEXIÓN REAL)
 // ==========================================
+// ==========================================
+// LÓGICA DE PRODUCTOS (CONEXIÓN A FIRESTORE)
+// ==========================================
 function loadProducts() {
-    const container = document.getElementById('products-container');
-    if(!container) return;
+    const container = document.getElementById('products-grid');
+    if (container) {
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loader mx-auto mb-4"></div><p class="text-slate-500 font-medium">Cargando catálogo...</p></div>';
+    }
 
-    db.ref('productos').on('value', (snap) => {
+    // Inicializamos Firestore
+    const db = firebase.firestore();
+
+    // Leemos la nueva colección maestra, trayendo solo los activos
+    db.collection('productos_master')
+      .where('activo', '==', true)
+      .onSnapshot((snapshot) => {
         allProducts = [];
-        if(snap.exists()) {
-            snap.forEach(child => {
-                const val = child.val();
-                if(val.activo !== false) allProducts.push({ id: child.key, ...val });
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            // MAPEO DE SUPERVIVENCIA: 
+            // Convertimos los nuevos nombres de Firestore a las variables que usa tu carrito actual
+            allProducts.push({
+                id: doc.id,
+                name: data.nombre_flexible || 'Sin nombre',
+                category: data.categoria || 'General',
+                image: data.imagen_url || 'https://via.placeholder.com/150',
+                piezas: data.piezas_por_caja_original || 1,
+                stock: data.stock_total_piezas || 0,
+                
+                // Estos son los nuevos datos ocultos para cuando el carrito se envíe por WhatsApp
+                tipo_item: data.tipo_item || 'PIEZA_BASE',
+                codigo_sistema: data.codigo_sistema_oficial || null,
+                receta: data.receta_desglose || null
             });
-            const tempByDate = [...allProducts].sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-            latestProductIds = tempByDate.slice(0, 12).map(p => p.id);
-            allProducts.sort((a, b) => {
-                const isANew = latestProductIds.includes(a.id), isBNew = latestProductIds.includes(b.id);
-                if (isANew && !isBNew) return -1;
-                if (!isANew && isBNew) return 1;
-                return a.name.localeCompare(b.name);
-            });
+        });
+
+        // Extraemos los últimos IDs (para tu lógica de la etiqueta "NUEVO")
+        latestProductIds = allProducts.slice(-8).map(p => p.id);
+        
+        // Llamamos a tus funciones originales para pintar la pantalla
+        filterProducts(); 
+        populateCategories(); 
+        
+    }, (error) => {
+        console.error("Error al cargar el catálogo de Firestore:", error);
+        if (container) {
+            container.innerHTML = '<div class="col-span-full text-center py-12 text-red-500 font-bold"><i class="fas fa-exclamation-triangle text-3xl mb-3"></i><br>Error al cargar el catálogo. Por favor recarga la página.</div>';
         }
-        renderCategories();
-        applyFilter();
     });
 }
 
