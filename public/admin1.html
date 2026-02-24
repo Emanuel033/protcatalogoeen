@@ -40,11 +40,13 @@
         .nav-item:hover { background-color: rgba(59, 130, 246, 0.1); color: #2563eb; }
         .nav-item.active { background-color: #eff6ff; color: #2563eb; font-weight: 600; border-left: 4px solid #3b82f6; }
         
-        /* Tables (Alta Densidad) */
+        /* Tables (Alta Densidad y Responsivas) */
         .table-container { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-radius: 0.5rem; overflow: hidden; }
         th { background-color: #f8fafc; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; padding-top: 0.75rem; padding-bottom: 0.75rem;}
         td { padding-top: 0.5rem; padding-bottom: 0.5rem; }
         tr:hover { background-color: #f1f5f9; }
+        /* Permite que el texto baje de línea si no cabe */
+        .text-wrap-cell { white-space: normal; word-break: break-word; }
         
         /* Badges Motor Traducción */
         .badge-base { background-color: #e0f2fe; color: #0369a1; } 
@@ -222,15 +224,16 @@
                 <!-- Tabla Alta Densidad -->
                 <div class="table-container bg-white border border-gray-200">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-600 whitespace-nowrap">
+                        <!-- Ajuste de anchos para la tabla: table-fixed ayuda a controlar los desbordes -->
+                        <table class="w-full text-left text-sm text-gray-600 table-fixed min-w-[800px]">
                             <thead class="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th class="px-4 py-3 w-8 text-center"><input type="checkbox" id="selectAllCb" onclick="toggleSelectAll()" class="rounded border-gray-300 cursor-pointer"></th>
-                                    <th class="px-4 py-3">Imagen</th>
+                                    <th class="px-4 py-3 w-10 text-center"><input type="checkbox" id="selectAllCb" onclick="toggleSelectAll()" class="rounded border-gray-300 cursor-pointer"></th>
+                                    <th class="px-4 py-3 w-16">Img</th>
                                     <th class="px-4 py-3 w-1/3">Nombre Comercial</th>
-                                    <th class="px-4 py-3">Configuración Sistema</th>
-                                    <th class="px-4 py-3 text-center">Stock Físico</th>
-                                    <th class="px-4 py-3 text-center">Acciones</th>
+                                    <th class="px-4 py-3 w-1/4">Configuración Sistema</th>
+                                    <th class="px-4 py-3 w-20 text-center">Stock</th>
+                                    <th class="px-4 py-3 w-36 text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="productsTableBody" class="divide-y divide-gray-100">
@@ -447,16 +450,16 @@
             
             productsList.forEach(p => {
                 const tipo = p.tipo_item || 'PIEZA_BASE';
-                let configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-base border border-blue-200"><i class="fas fa-cube mr-1"></i> Pieza Base</span>`;
+                let configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-base border border-blue-200 inline-block mb-1"><i class="fas fa-cube mr-1"></i> Pieza Base</span>`;
                 let codTxt = p.codigo_sistema_oficial || '-';
                 
                 // ALERTA VISUAL DE CONFIGURACIÓN FALTANTE
                 if(tipo !== 'KIT_FLEXIBLE' && (!p.codigo_sistema_oficial || p.codigo_sistema_oficial === '')) {
-                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-warning border border-orange-200"><i class="fas fa-exclamation-triangle mr-1"></i> Falta Configurar</span>`;
+                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-warning border border-orange-200 inline-block mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> Falta Configurar</span>`;
                 } else if(tipo === 'KIT_OFICIAL') {
-                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-oficial border border-yellow-300"><i class="fas fa-box mr-1"></i> Kit Oficial</span>`;
+                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-oficial border border-yellow-300 inline-block mb-1"><i class="fas fa-box mr-1"></i> Kit Oficial</span>`;
                 } else if(tipo === 'KIT_FLEXIBLE') {
-                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-web border border-pink-200"><i class="fas fa-magic mr-1"></i> Kit Web (Se desglosa)</span>`;
+                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-web border border-pink-200 inline-block mb-1"><i class="fas fa-magic mr-1"></i> Kit Web (Se desglosa)</span>`;
                     codTxt = 'N/A';
                 }
 
@@ -464,19 +467,19 @@
                 tr.innerHTML = `
                     <td class="px-4 py-2 text-center"><input type="checkbox" class="row-cb rounded border-gray-300 cursor-pointer w-4 h-4" value="${p.id}"></td>
                     <td class="px-4 py-2"><img src="${p.imagen_url || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200"></td>
-                    <td class="px-4 py-2">
+                    <td class="px-4 py-2 text-wrap-cell">
                         <div class="font-bold text-gray-900 leading-tight">${p.nombre_flexible}</div>
                         <div class="text-[10px] text-gray-400 font-semibold uppercase mt-0.5">${p.categoria || 'S/C'}</div>
                     </td>
-                    <td class="px-4 py-2">
-                        <div class="mb-1">${configHTML}</div>
+                    <td class="px-4 py-2 text-wrap-cell">
+                        <div>${configHTML}</div>
                         <div class="text-xs font-mono text-gray-600 bg-gray-100 px-2 py-0.5 rounded inline-block border border-gray-200">Cód: ${codTxt}</div>
                     </td>
                     <td class="px-4 py-2 text-center">
-                        <span class="${tipo==='KIT_FLEXIBLE' ? 'text-gray-400 italic' : 'font-bold text-gray-900 text-base'}">${tipo==='KIT_FLEXIBLE' ? 'Calculado' : (p.stock_total_piezas || 0) + ' pz'}</span>
+                        <span class="${tipo==='KIT_FLEXIBLE' ? 'text-gray-400 italic text-xs' : 'font-bold text-gray-900 text-base'}">${tipo==='KIT_FLEXIBLE' ? 'Calculado' : (p.stock_total_piezas || 0) + ' pz'}</span>
                     </td>
                     <td class="px-4 py-2 text-center">
-                        <div class="flex justify-center gap-1">
+                        <div class="flex justify-center flex-wrap gap-1">
                             <button onclick="editProduct('${p.id}')" title="Configurar" class="text-blue-600 hover:bg-blue-100 p-1.5 rounded transition"><i class="fas fa-edit"></i></button>
                             <button onclick="cloneProduct('${p.id}')" title="Clonar" class="text-green-600 hover:bg-green-100 p-1.5 rounded transition"><i class="fas fa-copy"></i></button>
                             <button onclick="printSingleQR('${p.id}', 'inventario')" title="Imprimir QR" class="text-gray-700 hover:bg-gray-200 p-1.5 rounded transition"><i class="fas fa-qrcode"></i></button>
@@ -501,7 +504,7 @@
         }
 
         // ==========================================
-        // EDICIÓN MASIVA (NUEVO)
+        // EDICIÓN MASIVA
         // ==========================================
         function toggleSelectAll() {
             const isChecked = document.getElementById('selectAllCb').checked;
