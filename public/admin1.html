@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin 8.5 - Menú Colapsable y Alta Densidad</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; background-color: #f3f4f6; }
+        
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .stat-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        
+        /* Layout Sidebar/Content */
+        #sidebar { transition: transform 0.3s ease-in-out; z-index: 50; }
+        .content-area { transition: margin-left 0.3s ease-in-out; }
+        @media (min-width: 1024px) {
+            #sidebar { transform: translateX(0) !important; width: 260px; }
+            .content-area { margin-left: 260px; }
+            #mobile-menu-btn, #mobile-close-btn { display: none; }
+        }
+        @media (max-width: 1023px) {
+            #sidebar { width: 280px; }
+        }
+
+        /* Nav Links */
+        .nav-item { border-radius: 0.5rem; transition: all 0.2s; margin-bottom: 0.5rem; }
+        .nav-item:hover { background-color: rgba(59, 130, 246, 0.1); color: #2563eb; }
+        .nav-item.active { background-color: #eff6ff; color: #2563eb; font-weight: 600; border-left: 4px solid #3b82f6; }
+        
+        /* Tables (Alta Densidad) */
+        .table-container { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-radius: 0.5rem; overflow: hidden; }
+        th { background-color: #f8fafc; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; padding-top: 0.75rem; padding-bottom: 0.75rem;}
+        td { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        tr:hover { background-color: #f1f5f9; }
+        
+        /* Badges Motor Traducción */
+        .badge-base { background-color: #e0f2fe; color: #0369a1; } 
+        .badge-kit-oficial { background-color: #fef08a; color: #854d0e; } 
+        .badge-kit-web { background-color: #fce7f3; color: #be185d; } 
+
+        .component-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+        
+        #toast-container { z-index: 9999; }
+        .toast-enter { animation: slideInRight 0.3s forwards; }
+        .toast-leave { animation: fadeOut 0.3s forwards; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    </style>
+</head>
+<body class="text-gray-800 h-screen overflow-hidden flex bg-gray-50">
+
+    <!-- Configuración Firebase ORIGINAL -->
+    <script>
+        // ==========================================
+        // POR FAVOR, PEGA AQUÍ TUS CREDENCIALES EXACTAS
+        // DEL ARCHIVO QUE SUBISTE ORIGINALMENTE
+        // ==========================================
+       const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
+            projectId: "productoseen",
+            storageBucket: "productoseen.firebasestorage.app",
+            messagingSenderId: "1052892398028",
+            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 bg-white shadow-xl transform -translate-x-full lg:translate-x-0 flex flex-col h-full border-r border-gray-100">
+        <div class="p-6 flex items-center justify-between border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-800 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-200">
+                    <i class="fas fa-industry"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl tracking-tight text-gray-900 leading-none">Admin EEN</h1>
+                    <span class="text-xs text-blue-600 font-semibold tracking-wider uppercase">La Económica</span>
+                </div>
+            </div>
+            <button id="mobile-close-btn" class="text-gray-400 hover:text-gray-600 p-2 lg:hidden" onclick="toggleSidebar()">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
+            <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm">
+                <i class="fas fa-chart-pie w-5 text-center"></i> Dashboard
+            </a>
+            <a href="#" onclick="switchTab('inventario')" id="nav-inventario" class="nav-item flex items-center gap-3 px-4 py-3 text-sm">
+                <i class="fas fa-qrcode w-5 text-center"></i> Escáner / Inventario
+            </a>
+            <a href="#" onclick="switchTab('productos')" id="nav-productos" class="nav-item flex items-center gap-3 px-4 py-3 text-sm">
+                <i class="fas fa-boxes w-5 text-center"></i> Catálogo y Kits
+            </a>
+            <div class="mt-8 mb-4">
+                <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Ajustes</p>
+            </div>
+            <a href="#" onclick="logout()" class="nav-item flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700">
+                <i class="fas fa-sign-out-alt w-5 text-center"></i> Cerrar Sesión
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen content-area w-full relative">
+        <header class="lg:hidden bg-white shadow-sm border-b border-gray-200 p-4 flex items-center justify-between z-40 relative">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-blue-800 flex items-center justify-center text-white font-bold shadow-md">
+                    <i class="fas fa-industry text-sm"></i>
+                </div>
+                <h1 class="font-bold text-lg text-gray-800">Admin EEN</h1>
+            </div>
+            <button id="mobile-menu-btn" class="text-gray-600 hover:text-blue-600 p-2 rounded-lg bg-gray-50 border border-gray-100" onclick="toggleSidebar()">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </header>
+
+        <div id="sidebar-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+        <div class="flex-1 overflow-y-auto p-4 lg:p-8 relative custom-scrollbar">
+            
+            <!-- Dashboard Tab -->
+            <div id="tab-dashboard" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Envases La Económica del Norte</h2>
+                    <p class="text-gray-500 mt-1">Resumen general del sistema de inventario y catálogo.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="stat-card glass-panel rounded-2xl p-6 border border-blue-100 relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 text-blue-50 opacity-50"><i class="fas fa-boxes text-9xl"></i></div>
+                        <div class="relative z-10">
+                            <p class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-1">Total Productos</p>
+                            <h3 class="text-4xl font-black text-gray-900" id="dashTotalProducts">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Escáner / Inventario Tab -->
+            <div id="tab-inventario" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-black text-gray-900 tracking-tight">Control de Inventario (QR)</h2>
+                    <p class="text-gray-500 text-sm mt-1">Escanea los códigos QR de los empaques para sumar o restar piezas base.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-lg mb-4 text-center"><i class="fas fa-camera"></i> Lector QR</h3>
+                        <div id="reader" class="w-full bg-black rounded-lg overflow-hidden"></div>
+                        <div class="mt-4 flex justify-center gap-2">
+                            <button id="btnStartScan" onclick="startScanner()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow"><i class="fas fa-play"></i> Iniciar Escáner</button>
+                            <button id="btnStopScan" onclick="stopScanner()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow hidden"><i class="fas fa-stop"></i> Detener</button>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-center items-center text-center">
+                        <div id="scanResult" class="hidden w-full">
+                            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <h4 id="scanProductName" class="text-xl font-bold text-gray-900 mb-2">Producto</h4>
+                            <p class="text-gray-500 mb-6">Stock actual: <span id="scanProductStock" class="font-bold text-blue-600 text-lg">0</span> pz</p>
+                            <div class="flex gap-4 justify-center">
+                                <button onclick="updateStockFromScan(1)" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow-md"><i class="fas fa-plus"></i> Ingreso</button>
+                                <button onclick="updateStockFromScan(-1)" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold shadow-md"><i class="fas fa-minus"></i> Salida</button>
+                            </div>
+                            <input type="hidden" id="scanProductId">
+                        </div>
+                        <div id="scanIdle" class="text-gray-400">
+                            <i class="fas fa-qrcode text-6xl mb-4"></i>
+                            <p>Esperando escaneo...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catálogo y Kits Tab -->
+            <div id="tab-productos" class="tab-content hidden">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-gray-900 tracking-tight">Catálogo y Kits</h2>
+                        <p class="text-gray-500 text-sm mt-1">Gestiona tu base de datos y arma paquetes flexibles.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <!-- Botones Masivos ORIGINALES -->
+                        <button onclick="openMassActions()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold shadow text-sm flex items-center gap-2 transition-all">
+                            <i class="fas fa-print"></i> Acciones Masivas
+                        </button>
+                        <button onclick="exportToExcel('inventario')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow text-sm flex items-center gap-2 transition-all">
+                            <i class="fas fa-file-excel"></i> Exportar
+                        </button>
+                        <button onclick="openProductModal()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold shadow text-sm flex items-center gap-2 transition-all">
+                            <i class="fas fa-plus"></i> Nuevo Artículo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-2.5 text-gray-400"></i>
+                        <input type="text" id="productSearch" onkeyup="filterProducts()" placeholder="Buscar por nombre, código oficial..." class="w-full pl-11 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                    </div>
+                </div>
+
+                <!-- Tabla Alta Densidad -->
+                <div class="table-container bg-white border border-gray-200">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600 whitespace-nowrap">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3">Imagen</th>
+                                    <th class="px-4 py-3 w-1/3">Nombre Comercial</th>
+                                    <th class="px-4 py-3">Configuración Sistema</th>
+                                    <th class="px-4 py-3 text-center">Stock Físico</th>
+                                    <th class="px-4 py-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody" class="divide-y divide-gray-100">
+                                <!-- Dinámico -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Nuevo/Editar Producto (Integrado con Motor de Traducción) -->
+    <div id="productModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col transform scale-95 transition-transform duration-200">
+            <div class="flex justify-between items-center p-5 border-b border-gray-200 bg-gray-50 rounded-t-2xl">
+                <h3 class="text-xl font-bold text-gray-900" id="productModalTitle">Nuevo Artículo</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <form id="productForm" class="space-y-5">
+                    <input type="hidden" id="productId">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre Comercial <span class="text-red-500">*</span></label>
+                            <input type="text" id="productName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Categoría Web <span class="text-red-500">*</span></label>
+                            <select id="productCategory" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"></select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">URL de Imagen</label>
+                            <input type="url" id="productImage" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        </div>
+
+                        <!-- MOTOR DE TRADUCCIÓN -->
+                        <div class="md:col-span-2 pt-4 mt-2 border-t border-gray-200">
+                            <h4 class="text-sm font-bold text-blue-800 mb-3 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-cogs"></i> Integración con Facturación</h4>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Comportamiento en Sistema <span class="text-red-500">*</span></label>
+                            <select id="productTipoItem" onchange="toggleKitFields()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-blue-50 font-bold text-blue-900 outline-none text-sm">
+                                <option value="PIEZA_BASE">Pieza Base (Producto individual de Excel)</option>
+                                <option value="KIT_OFICIAL">Kit Oficial (Paquete ya armado en Excel)</option>
+                                <option value="KIT_FLEXIBLE">Kit Flexible Web (Paquete inventado web, se desglosa al cobrar)</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2" id="containerCodigoSistema">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Código de Facturación (Excel)</label>
+                            <input type="text" id="productCodigoSistema" placeholder="Ej: ENV-1000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase font-mono text-sm">
+                        </div>
+
+                        <div class="md:col-span-2 hidden bg-gray-50 p-4 rounded-xl border border-dashed border-gray-400" id="containerReceta">
+                            <label class="block text-sm font-bold text-gray-800 mb-1">Explosión de Materiales (Receta)</label>
+                            <p class="text-xs text-gray-500 mb-3">¿De qué piezas base está hecho este paquete web?</p>
+                            <div id="recetaList" class="space-y-2 mb-3"></div>
+                            <button type="button" onclick="addRecetaRow()" class="text-sm text-blue-700 font-bold hover:text-blue-900 flex items-center gap-1 bg-white px-3 py-1.5 rounded border border-blue-200 shadow-sm">
+                                <i class="fas fa-plus"></i> Añadir componente
+                            </button>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Piezas x Empaque <span class="text-xs font-normal text-gray-500">(Display)</span></label>
+                            <input type="number" id="productPiezas" min="1" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                        </div>
+
+                        <div class="flex items-center mt-6">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="productActivo" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-800"></div>
+                                <span class="ml-3 text-sm font-semibold text-gray-700">Mostrar en Tienda Web</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="p-5 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+                <button onclick="closeProductModal()" class="px-5 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-200 transition-colors text-sm">Cancelar</button>
+                <button onclick="saveProduct()" class="px-6 py-2 bg-blue-800 hover:bg-blue-900 text-white font-bold rounded-lg shadow-md transition-all flex items-center gap-2 text-sm">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Acciones Masivas e Impresión QR (Rescatado de tu archivo original) -->
+    <div id="massActionsModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 class="text-lg font-bold mb-4">Acciones Masivas (QRs)</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold mb-1">URL Base (Para QR de Vitrina)</label>
+                    <input type="text" id="vitrinaUrlInput" value="https://tu-tienda.web.app/p?id=" class="w-full px-3 py-2 border rounded text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="printAllQRs('inventario')" class="bg-gray-800 text-white py-2 rounded hover:bg-gray-900 text-sm font-bold"><i class="fas fa-boxes"></i> QRs Inventario</button>
+                    <button onclick="printAllQRs('vitrina')" class="bg-purple-600 text-white py-2 rounded hover:bg-purple-700 text-sm font-bold"><i class="fas fa-store"></i> QRs Vitrina</button>
+                </div>
+                <button onclick="closeMassActions()" class="w-full mt-2 text-gray-500 hover:bg-gray-100 py-2 rounded text-sm">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 flex flex-col gap-3"></div>
+
+    <script>
+        // ==========================================
+        // VARIABLES GLOBALES
+        // ==========================================
+        const db = firebase.database();
+        const productsRef = db.ref('productos');
+        let allProducts = [];
+        let currentFilteredProducts = [];
+        let allCategories = ["PET", "POLIETILENO", "VIDRIO", "TAPAS", "CAJAS", "KITS WEB"]; 
+        let html5QrcodeScanner = null;
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            toast.className = `toast-enter flex items-center gap-3 text-white px-5 py-3 rounded-xl shadow-xl ${bg} text-sm font-medium`;
+            toast.innerHTML = `<i class="fas ${icon} text-lg"></i> <span>${message}</span>`;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabId}`).classList.add('active');
+            if(window.innerWidth < 1024) toggleSidebar(); 
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // ==========================================
+        // GESTIÓN DE PRODUCTOS
+        // ==========================================
+        productsRef.on('value', (snapshot) => {
+            allProducts = [];
+            const data = snapshot.val();
+            if (data) Object.keys(data).forEach(key => allProducts.push({ id: key, ...data[key] }));
+            document.getElementById('dashTotalProducts').innerText = allProducts.length;
+            filterProducts(); // Mantiene la búsqueda al actualizar
+            populateCategorySelects();
+        });
+
+        function filterProducts() {
+            const term = document.getElementById('productSearch').value.toLowerCase();
+            currentFilteredProducts = allProducts.filter(p => 
+                (p.name && p.name.toLowerCase().includes(term)) || 
+                (p.codigo_sistema_oficial && p.codigo_sistema_oficial.toLowerCase().includes(term))
+            );
+            renderProducts(currentFilteredProducts);
+        }
+
+        function renderProducts(productsList) {
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = '';
+            
+            productsList.forEach(p => {
+                const tipo = p.tipo_item || 'PIEZA_BASE';
+                let configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-base border border-blue-200"><i class="fas fa-cube mr-1"></i> Pieza Base</span>`;
+                let codTxt = p.codigo_sistema_oficial || '-';
+                
+                if(tipo === 'KIT_OFICIAL') configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-oficial border border-yellow-300"><i class="fas fa-box mr-1"></i> Kit Oficial</span>`;
+                if(tipo === 'KIT_FLEXIBLE') {
+                    configHTML = `<span class="px-2 py-1 rounded text-xs font-bold badge-kit-web border border-pink-200"><i class="fas fa-magic mr-1"></i> Kit Web (Se desglosa)</span>`;
+                    codTxt = 'N/A';
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-4 py-2"><img src="${p.image || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-cover rounded shadow-sm border border-gray-200"></td>
+                    <td class="px-4 py-2">
+                        <div class="font-bold text-gray-900 leading-tight">${p.name}</div>
+                        <div class="text-[10px] text-gray-400 font-semibold uppercase mt-0.5">${p.category || 'S/C'}</div>
+                    </td>
+                    <td class="px-4 py-2">
+                        <div class="mb-1">${configHTML}</div>
+                        <div class="text-xs font-mono text-gray-600 bg-gray-100 px-2 py-0.5 rounded inline-block border border-gray-200">Cód: ${codTxt}</div>
+                    </td>
+                    <td class="px-4 py-2 text-center">
+                        <span class="${tipo==='KIT_FLEXIBLE' ? 'text-gray-400 italic' : 'font-bold text-gray-900 text-base'}">${tipo==='KIT_FLEXIBLE' ? 'Calculado' : (p.stock || 0) + ' pz'}</span>
+                    </td>
+                    <td class="px-4 py-2 text-center">
+                        <div class="flex justify-center gap-1">
+                            <button onclick="editProduct('${p.id}')" title="Editar" class="text-blue-600 hover:bg-blue-100 p-1.5 rounded transition"><i class="fas fa-edit"></i></button>
+                            <button onclick="cloneProduct('${p.id}')" title="Clonar" class="text-green-600 hover:bg-green-100 p-1.5 rounded transition"><i class="fas fa-copy"></i></button>
+                            <button onclick="printSingleQR('${p.id}', 'inventario')" title="Imprimir QR" class="text-gray-700 hover:bg-gray-200 p-1.5 rounded transition"><i class="fas fa-qrcode"></i></button>
+                            <button onclick="deleteProduct('${p.id}')" title="Eliminar" class="text-red-500 hover:bg-red-100 p-1.5 rounded transition"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function populateCategorySelects() {
+            const select = document.getElementById('productCategory');
+            const currentVal = select.value;
+            select.innerHTML = '';
+            allCategories.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+            if(currentVal) select.value = currentVal;
+        }
+
+        // ==========================================
+        // MOTOR DE RECETAS (KITS)
+        // ==========================================
+        function toggleKitFields() {
+            const tipo = document.getElementById('productTipoItem').value;
+            const containerCodigo = document.getElementById('containerCodigoSistema');
+            const containerReceta = document.getElementById('containerReceta');
+
+            if (tipo === 'KIT_FLEXIBLE') {
+                containerCodigo.classList.add('hidden');
+                containerReceta.classList.remove('hidden');
+            } else {
+                containerCodigo.classList.remove('hidden');
+                containerReceta.classList.add('hidden');
+            }
+        }
+
+        function getPiezasBaseOptions() {
+            const bases = allProducts.filter(p => !p.tipo_item || p.tipo_item === 'PIEZA_BASE');
+            let options = `<option value="">Selecciona componente...</option>`;
+            bases.forEach(b => options += `<option value="${b.id}">${b.name}</option>`);
+            return options;
+        }
+
+        function addRecetaRow(componentId = "", cantidad = 1) {
+            const list = document.getElementById('recetaList');
+            const row = document.createElement('div');
+            row.className = 'component-row';
+            row.innerHTML = `
+                <select class="flex-1 px-2 py-1.5 border border-gray-300 rounded text-xs outline-none component-select shadow-sm">${getPiezasBaseOptions()}</select>
+                <input type="number" min="1" value="${cantidad}" class="w-20 px-2 py-1.5 border border-gray-300 rounded text-xs outline-none component-qty shadow-sm text-center" placeholder="Cant.">
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700 px-2"><i class="fas fa-times"></i></button>
+            `;
+            if (componentId) row.querySelector('.component-select').value = componentId;
+            list.appendChild(row);
+        }
+
+        function extractRecetaData() {
+            if (document.getElementById('productTipoItem').value !== 'KIT_FLEXIBLE') return null;
+            const receta = {};
+            document.querySelectorAll('.component-row').forEach(row => {
+                const id = row.querySelector('.component-select').value;
+                const qty = parseInt(row.querySelector('.component-qty').value);
+                if (id && qty > 0) receta[id] = qty;
+            });
+            return Object.keys(receta).length > 0 ? receta : null;
+        }
+
+        // ==========================================
+        // ACCIONES CRUD Y CLONAR
+        // ==========================================
+        window.openProductModal = () => {
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('productModalTitle').innerText = 'Nuevo Artículo / Kit';
+            document.getElementById('recetaList').innerHTML = ''; 
+            toggleKitFields(); 
+            document.getElementById('productModal').classList.remove('hidden');
+            setTimeout(() => document.querySelector('#productModal > div').classList.remove('scale-95'), 10);
+        };
+
+        window.closeProductModal = () => {
+            document.querySelector('#productModal > div').classList.add('scale-95');
+            setTimeout(() => document.getElementById('productModal').classList.add('hidden'), 200);
+        };
+
+        window.saveProduct = async () => {
+            const id = document.getElementById('productId').value;
+            const tipo_item = document.getElementById('productTipoItem').value;
+            const receta = extractRecetaData();
+
+            if (tipo_item === 'KIT_FLEXIBLE' && !receta) return showToast("Un Kit Web necesita componentes.", "error");
+
+            const data = {
+                name: document.getElementById('productName').value.trim(),
+                category: document.getElementById('productCategory').value,
+                image: document.getElementById('productImage').value.trim(),
+                piezas: parseInt(document.getElementById('productPiezas').value) || 1,
+                activo: document.getElementById('productActivo').checked,
+                tipo_item: tipo_item,
+                codigo_sistema_oficial: tipo_item !== 'KIT_FLEXIBLE' ? document.getElementById('productCodigoSistema').value.trim() : null,
+                receta_desglose: receta
+            };
+
+            if (!data.name) return showToast('El nombre es requerido', 'error');
+
+            try {
+                if (id) {
+                    const p = allProducts.find(x => x.id === id);
+                    if(p) data.stock = p.stock || 0;
+                    await productsRef.child(id).update(data);
+                    showToast('Artículo actualizado');
+                } else {
+                    data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+                    data.stock = 0; 
+                    await productsRef.push(data);
+                    showToast('Artículo creado');
+                }
+                closeProductModal();
+            } catch (error) { showToast('Error al guardar', 'error'); }
+        };
+
+        window.editProduct = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if (!p) return;
+            fillForm(p);
+            document.getElementById('productId').value = p.id;
+            document.getElementById('productModalTitle').innerText = 'Editar: ' + p.name;
+            openModalAnimation();
+        };
+
+        window.cloneProduct = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if (!p) return;
+            fillForm(p);
+            document.getElementById('productId').value = '';
+            document.getElementById('productName').value = p.name + ' (Copia)';
+            document.getElementById('productModalTitle').innerText = 'Clonar Artículo';
+            openModalAnimation();
+        };
+
+        function fillForm(p) {
+            document.getElementById('productName').value = p.name || '';
+            document.getElementById('productCategory').value = p.category || '';
+            document.getElementById('productImage').value = p.image || '';
+            document.getElementById('productPiezas').value = p.piezas || 1;
+            document.getElementById('productActivo').checked = (p.activo === true || p.activo === "true");
+            document.getElementById('productTipoItem').value = p.tipo_item || 'PIEZA_BASE';
+            document.getElementById('productCodigoSistema').value = p.codigo_sistema_oficial || '';
+            document.getElementById('recetaList').innerHTML = '';
+            if (p.receta_desglose) {
+                Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
+            }
+            toggleKitFields();
+        }
+
+        function openModalAnimation() {
+            document.getElementById('productModal').classList.remove('hidden');
+            setTimeout(() => document.querySelector('#productModal > div').classList.remove('scale-95'), 10);
+        }
+
+        window.deleteProduct = async (id) => {
+            if (confirm('¿Eliminar artículo permanentemente?')) {
+                try { await productsRef.child(id).remove(); showToast('Eliminado'); } 
+                catch (e) { showToast('Error', 'error'); }
+            }
+        };
+
+        // ==========================================
+        // FUNCIONES ORIGINALES RESTAURADAS (IMPRESIONES Y EXPORTACIÓN)
+        // ==========================================
+        window.openMassActions = () => { document.getElementById('massActionsModal').classList.remove('hidden'); }
+        window.closeMassActions = () => { document.getElementById('massActionsModal').classList.add('hidden'); }
+
+        function getBaseUrl() {
+            return document.getElementById('vitrinaUrlInput') ? document.getElementById('vitrinaUrlInput').value : "https://tu-tienda.web.app/p?id=";
+        }
+
+        function buildPrintHTML(productsArray, qty, printType, baseUrl) {
+            let html = `<html><head><title>Imprimir QR - EEN</title><style>
+                body{font-family:sans-serif; text-align:center; padding: 20px;} 
+                .label{display:inline-block; margin:10px; padding:15px; border:2px solid #000; width:220px; border-radius: 8px; vertical-align: top;} 
+                img{width:150px; height:150px; margin: 10px auto;}
+                h4{margin: 0 0 5px 0; font-size: 14px;}
+                p{margin: 0; font-size: 10px; color: #555;}
+            </style></head><body>`;
+            
+            productsArray.forEach(p => {
+                let qrVal = printType === 'vitrina' ? baseUrl + p.id : p.id;
+                let qr = new QRious({value: qrVal, size: 200, level: 'M'});
+                for(let i=0; i<qty; i++) {
+                    html += `<div class="label">
+                        <h4>${p.name}</h4>
+                        <img src="${qr.toDataURL()}">
+                        <p>${printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : ('CÓD: ' + (p.codigo_sistema_oficial || 'KIT WEB'))}</p>
+                    </div>`;
+                }
+            });
+            html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
+            return html;
+        }
+
+        window.printAllQRs = (printType) => { 
+            if(currentFilteredProducts.length === 0) return showToast("No hay productos filtrados", "error"); 
+            let baseUrl = ""; 
+            if (printType === 'vitrina') { 
+                baseUrl = getBaseUrl(); 
+                if (!baseUrl) return showToast("URL requerida", "error"); 
+            } 
+            closeMassActions(); 
+            const qty = prompt(`¿Cuántas etiquetas POR CADA PRODUCTO filtrado?\n(Total a imprimir: ${currentFilteredProducts.length} productos)`, "1"); 
+            if (!qty || qty <= 0) return; 
+            const pw = window.open('', '_blank'); 
+            pw.document.write(buildPrintHTML(currentFilteredProducts, qty, printType, baseUrl)); 
+            pw.document.close(); 
+        };
+
+        window.printSingleQR = (id, printType) => { 
+            const p = allProducts.find(x => x.id === id); 
+            if (!p) return; 
+            let baseUrl = ""; 
+            if (printType === 'vitrina') { 
+                baseUrl = getBaseUrl(); 
+                if (!baseUrl) return showToast("URL requerida", "error"); 
+            } 
+            const qty = prompt(`Etiquetas para:\n${p.name}\n\n¿Cuántas deseas imprimir?`, "1"); 
+            if (!qty || qty <= 0) return; 
+            const pw = window.open('', '_blank'); 
+            pw.document.write(buildPrintHTML([p], qty, printType, baseUrl)); 
+            pw.document.close(); 
+        };
+
+        window.exportToExcel = (tipo) => { 
+            let csv = "\uFEFF"; 
+            if (tipo === 'inventario') { 
+                csv += "Nombre,Categoria,Stock_Contado,Tipo_Artículo,Código_Oficial\n"; 
+                allProducts.forEach(p => csv += `"${(p.name||"").replace(/"/g,'""')}","${(p.category||"").replace(/"/g,'""')}",${p.stock||0},"${p.tipo_item||'PIEZA_BASE'}","${p.codigo_sistema_oficial||'N/A'}"\n`); 
+            } else { 
+                csv += "Nombre,Categoria,PiezasxPaq,Activo\n"; 
+                allProducts.forEach(p => csv += `"${(p.name||"").replace(/"/g,'""')}","${(p.category||"").replace(/"/g,'""')}",${p.piezas||1},${p.activo}\n`); 
+            }
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Reporte_${tipo}_EEN.csv`;
+            link.click();
+        };
+
+        // ==========================================
+        // ESCÁNER DE INVENTARIO (html5-qrcode)
+        // ==========================================
+        window.startScanner = () => {
+            document.getElementById('btnStartScan').classList.add('hidden');
+            document.getElementById('btnStopScan').classList.remove('hidden');
+            document.getElementById('scanIdle').classList.add('hidden');
+            document.getElementById('scanResult').classList.add('hidden');
+
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} },
+                (decodedText) => {
+                    const p = allProducts.find(x => x.id === decodedText);
+                    if(p) {
+                        html5QrcodeScanner.stop();
+                        showScanResult(p);
+                    } else { showToast("Código no encontrado en BD", "error"); }
+                }, (err) => { }
+            ).catch(err => { showToast("Error al abrir cámara", "error"); stopScanner(); });
+        };
+
+        window.stopScanner = () => {
+            if(html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('btnStartScan').classList.remove('hidden');
+                    document.getElementById('btnStopScan').classList.add('hidden');
+                }).catch(err => console.log(err));
+            }
+        };
+
+        function showScanResult(p) {
+            document.getElementById('btnStartScan').classList.remove('hidden');
+            document.getElementById('btnStopScan').classList.add('hidden');
+            document.getElementById('scanResult').classList.remove('hidden');
+            document.getElementById('scanProductName').innerText = p.name;
+            document.getElementById('scanProductStock').innerText = p.stock || 0;
+            document.getElementById('scanProductId').value = p.id;
+        }
+
+        window.updateStockFromScan = async (change) => {
+            const id = document.getElementById('scanProductId').value;
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
+            const newStock = (p.stock || 0) + change;
+            if(newStock < 0) return showToast("El stock no puede ser negativo", "error");
+            try {
+                await productsRef.child(id).update({stock: newStock});
+                document.getElementById('scanProductStock').innerText = newStock;
+                showToast(`Stock actualizado: ${newStock}`);
+            } catch (error) { showToast("Error al actualizar stock", "error"); }
+        };
+        
+        setTimeout(()=> { document.getElementById('dashTotalProducts').innerText = "Cargando..."; populateCategorySelects(); }, 500);
+    </script>
+</body>
+</html>
