@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurador Maestro - EEN </title>
+    <title>Configurador Maestro - EEN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -58,14 +58,20 @@
                     <p class="text-xs text-slate-500 font-bold uppercase">Total Productos</p>
                     <p class="text-2xl font-black text-indigo-700" id="count-total">0</p>
                 </div>
-                <div class="bg-orange-50 p-3 rounded-lg shadow-sm border border-orange-200 text-center min-w-[120px]">
+                <div onclick="togglePendingFilter()" class="bg-orange-50 p-3 rounded-lg shadow-sm border border-orange-200 text-center min-w-[120px] cursor-pointer hover:bg-orange-100 transition" title="Clic para filtrar faltantes">
                     <p class="text-xs text-orange-600 font-bold uppercase">Falta Configurar</p>
                     <p class="text-2xl font-black text-orange-700" id="count-pending">0</p>
                 </div>
             </div>
-            <div class="relative w-full md:w-80">
-                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar producto..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none">
-                <i class="fas fa-search absolute left-3 top-3 text-slate-400"></i>
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <label class="flex items-center gap-2 cursor-pointer bg-orange-50 text-orange-700 px-3 py-2 rounded-lg border border-orange-200 font-bold text-sm shadow-sm hover:bg-orange-100 transition whitespace-nowrap">
+                    <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-4 h-4 text-orange-600 rounded border-orange-300 focus:ring-orange-500 cursor-pointer">
+                    Solo Faltantes
+                </label>
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar producto..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <i class="fas fa-search absolute left-3 top-3 text-slate-400"></i>
+                </div>
             </div>
         </div>
 
@@ -223,23 +229,40 @@
             });
 
             document.getElementById('count-total').innerText = allItems.length;
-            document.getElementById('count-pending').innerText = pendingCount;
+        document.getElementById('count-pending').innerText = pendingCount;
+        
+        filterTable();
+    });
+
+    function togglePendingFilter() {
+        const cb = document.getElementById('filterPending');
+        cb.checked = !cb.checked;
+        filterTable();
+    }
+
+    function filterTable() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const showOnlyPending = document.getElementById('filterPending').checked;
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        const filtered = allItems.filter(p => {
+            const matchSearch = (p.nombre_flexible || '').toLowerCase().includes(term) || 
+                                (p.codigo_sistema_oficial || '').toLowerCase().includes(term);
             
-            filterTable();
+            if (!matchSearch) return false;
+
+            // Si el filtro está activo, ignorar los que YA están configurados
+            if (showOnlyPending) {
+                const isPending = (p.tipo_item !== 'KIT_FLEXIBLE') && (!p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '');
+                if (!isPending) return false;
+            }
+
+            return true;
         });
 
-        function filterTable() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-
-            const filtered = allItems.filter(p => 
-                (p.nombre_flexible || '').toLowerCase().includes(term) || 
-                (p.codigo_sistema_oficial || '').toLowerCase().includes(term)
-            );
-
-            filtered.forEach(p => {
-                const tipo = p.tipo_item || 'PIEZA_BASE';
+        filtered.forEach(p => {
+            const tipo = p.tipo_item || 'PIEZA_BASE';
                 let codTxt = p.codigo_sistema_oficial || '';
                 let statusBadge = '';
 
