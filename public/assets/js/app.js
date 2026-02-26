@@ -313,11 +313,11 @@ function add(id) {
     renderCart();
     
     // ==========================================
-    // ANIMACIÓN A PRUEBA DE BALAS (!important)
+    // ANIMACIÓN CORREGIDA CON LOS IDs EXACTOS
     // ==========================================
     try {
-        // 1. Animar Burbujas (Badges)
-        const badges = document.querySelectorAll('#cart-count, .cart-badge, [id*="cart-count"]');
+        // 1. Animar Burbujas (Badges) con IDs exactos
+        const badges = document.querySelectorAll('#cartCountHeader, #cartCountMobile');
         badges.forEach(badge => {
             badge.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
             badge.style.setProperty('background-color', '#22c55e', 'important'); // Verde brillante forzado
@@ -329,19 +329,20 @@ function add(id) {
             }, 500);
         });
 
-        // 2. Animar Botones Flotantes del Carrito
-        // Buscamos todos los IDs posibles que hayas usado para el botón del carrito
-        const cartBtns = document.querySelectorAll('#floating-cart-btn, #cart-btn, #scroll-top-btn, .cart-btn-anim');
-        cartBtns.forEach(btn => {
-            btn.style.transition = 'all 0.3s ease';
-            btn.style.setProperty('background-color', '#22c55e', 'important');
-            btn.style.setProperty('transform', 'scale(1.15)', 'important');
+        // 2. Animar Botón Desktop del Carrito ('tour-cart')
+        const cartBtn = document.getElementById('tour-cart');
+        if (cartBtn) {
+            cartBtn.style.transition = 'all 0.3s ease';
+            cartBtn.style.setProperty('background-color', '#22c55e', 'important');
+            cartBtn.style.setProperty('border-color', '#22c55e', 'important');
+            cartBtn.style.setProperty('transform', 'scale(1.05)', 'important');
             
             setTimeout(() => {
-                btn.style.removeProperty('background-color');
-                btn.style.removeProperty('transform');
+                cartBtn.style.removeProperty('background-color');
+                cartBtn.style.removeProperty('border-color');
+                cartBtn.style.removeProperty('transform');
             }, 400);
-        });
+        }
     } catch(e) { console.error("Error en animación:", e); }
 
     if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
