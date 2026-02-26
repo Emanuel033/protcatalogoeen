@@ -45,76 +45,56 @@ document.addEventListener('DOMContentLoaded', () => {
 // LÓGICA DE PRODUCTOS (CONEXIÓN A FIRESTORE)
 // ==========================================
 function loadProducts() {
-    const container = document.getElementById('products-grid');
+    const container = document.getElementById('products-grid') || document.getElementById('products-container');
     if (container) {
-        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loader mx-auto mb-4"></div><p class="text-slate-500 font-medium">Cargando catálogo y paquetes...</p></div>';
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loader mx-auto mb-4"></div><p class="text-slate-500 font-medium">Cargando catálogo...</p></div>';
     }
 
-    // Inicializamos Firestore
     const db = firebase.firestore();
-
-    // Leemos la nueva colección maestra, trayendo solo los activos
     db.collection('productos_master')
       .where('activo', '==', true)
       .onSnapshot(async (snapshot) => {
         
-        // Usamos un array de promesas para esperar a que bajen todos los paquetes
         const promesasProductos = snapshot.docs.map(async (doc) => {
             const data = doc.data();
-            
-            // MAPEO DE SUPERVIVENCIA
             const producto = {
                 id: doc.id,
                 name: data.nombre_flexible || 'Sin nombre',
                 category: data.categoria || 'General',
                 image: data.imagen_url || 'https://via.placeholder.com/150',
-                piezas: data.piezas_por_caja_original || 1, // Esta es la venta unitaria
+                piezas: data.piezas_por_caja_original || 1,
                 stock: data.stock_total_piezas || 0,
                 tipo_item: data.tipo_item || 'PIEZA_BASE',
                 codigo_sistema: data.codigo_sistema_oficial || null,
                 receta: data.receta_desglose || null,
-                paquetes: [] // <-- NUEVO: Arreglo vacío para guardar la subcolección
+                paquetes: [] 
             };
 
-            // Si es una pieza base, vamos a buscar si tiene paquetes
             if (producto.tipo_item === 'PIEZA_BASE') {
                 try {
                     const paquetesSnap = await db.collection('productos_master').doc(doc.id).collection('paquetes').get();
                     if (!paquetesSnap.empty) {
                         paquetesSnap.forEach(paqDoc => {
-                            producto.paquetes.push({
-                                id: paqDoc.id,
-                                ...paqDoc.data()
-                            });
+                            producto.paquetes.push({ id: paqDoc.id, ...paqDoc.data() });
                         });
-                        // Ordenamos los paquetes de menor a mayor piezas
                         producto.paquetes.sort((a, b) => a.piezas - b.piezas);
                     }
-                } catch (error) {
-                    console.error(`Error cargando paquetes para ${producto.id}:`, error);
-                }
+                } catch (error) { console.error("Error", error); }
             }
-
             return producto;
         });
 
-        // Esperamos a que TODOS los productos hayan descargado sus paquetes
         allProducts = await Promise.all(promesasProductos);
-
-        // Extraemos los últimos IDs (para tu lógica de la etiqueta "NUEVO")
         latestProductIds = allProducts.slice(-8).map(p => p.id);
         
-        // Llamamos a tus funciones originales para pintar la pantalla
-        renderCategories();
-        applyFilter();
+        if (typeof renderCategories === 'function') renderCategories();
+        if (typeof applyFilter === 'function') applyFilter();
         
     }, (error) => {
-        console.error("Error al cargar el catálogo de Firestore:", error);
-        if (container) {
-            container.innerHTML = '<div class="col-span-full text-center py-12 text-red-500 font-bold"><i class="fas fa-exclamation-triangle text-3xl mb-3"></i><br>Error al cargar el catálogo. Por favor recarga la página.</div>';
-        }
+        console.error("Error al cargar:", error);
     });
 }
+
 function getCategoryIcon(cat) {
     const c = cat.toLowerCase();
     if(c.includes('bolsa')) return '<i class="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>';
@@ -193,21 +173,16 @@ function applyFilter() {
 function escapeHTML(str) {
     return str ? str.replace(/[&<>'"]/g, tag => ({'&': '&amp;','<': '&lt;','>': '&gt;',"'": '&#39;','"': '&quot;'}[tag])) : '';
 }
-
+// ==========================================
+// 2. DIBUJAR TARJETAS DE PRODUCTOS
+// ==========================================
 function renderGrid() {
-    const cont = document.getElementById('products-container');
+    const cont = document.getElementById('products-container') || document.getElementById('products-grid');
     const controls = document.getElementById('pagination-controls');
     if(!cont) return;
 
     if(filteredProducts.length === 0) {
-        const term = document.getElementById('searchInput')?.value || '';
-        cont.innerHTML = `
-            <div class="col-span-full text-center py-20 fade-in">
-                <i class="fa-solid fa-box-open text-5xl text-slate-300 mb-4"></i>
-                <h3 class="text-lg font-bold text-slate-700 mb-1">Sin resultados</h3>
-                <p class="text-slate-500 font-medium">No encontramos productos ${term ? `para "<span class="font-bold text-slate-800">${escapeHTML(term)}</span>"` : 'en esta categoría'}.</p>
-                <button onclick="clearSearch(); filterCat('Todos');" class="mt-6 px-6 py-2 bg-indigo-50 text-indigo-600 rounded-full font-bold text-sm hover:bg-indigo-100 transition">Ver todo el catálogo</button>
-            </div>`;
+        cont.innerHTML = `<div class="col-span-full text-center py-20 fade-in"><h3 class="text-lg font-bold text-slate-700 mb-1">Sin resultados</h3></div>`;
         if(controls) controls.classList.add('hidden');
         return;
     }
@@ -220,39 +195,31 @@ function renderGrid() {
         const paquetes = p.paquetes || [];
         const hasPack = paquetes.length > 0;
         
-        // La pieza base (suele ser 1, pero respeta si pusiste otro número en el Master)
         const basePiezas = p.piezas ? parseInt(p.piezas) : 1;
         const minText = `Min: ${basePiezas} pz${basePiezas > 1 ? 's' : ''}`;
-        
-        // Texto dinámico si tiene paquetes configurados
         const packText = hasPack ? `<span class="text-indigo-600 font-black">Varias opciones</span>` : "";
 
-        // Construcción dinámica del Selector
         let selectorHTML = '';
         if (hasPack) {
             selectorHTML = `<select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none">
                 <option value="${basePiezas}|BASE">Individual (${basePiezas} pz)</option>`;
-            
-            // Recorremos los paquetes bajados de Firestore
             paquetes.forEach(pkg => {
-                // Guardamos la cantidad Y el SKU separados por un "|" (pipe)
                 selectorHTML += `<option value="${pkg.piezas}|${pkg.sku}">Paquete/Bolsa (${pkg.piezas} pzas)</option>`;
             });
             selectorHTML += `</select>`;
         } else {
-            // Si no tiene paquetes, solo mandamos un input oculto
             selectorHTML = `<input type="hidden" id="sel-${p.id}" value="${basePiezas}|BASE">`;
         }
 
         return `
         <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
             <div class="relative h-52 p-4 cursor-pointer overflow-hidden rounded-t-2xl" onclick="openImage('${p.image}')">
-                <img src="${p.image}" loading="lazy" alt="${escapeHTML(p.name)}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300?text=Sin+Imagen'">
+                <img src="${p.image}" loading="lazy" alt="${typeof escapeHTML !== 'undefined' ? escapeHTML(p.name) : p.name}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300?text=Sin+Imagen'">
                 ${isNew ? `<span class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md badge-pulse">NUEVO</span>` : ''}
             </div>
             <div class="p-4 flex flex-col flex-1 border-t border-slate-50">
-                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">${escapeHTML(p.category || 'General')}</span>
-                <h3 class="font-bold text-xs text-slate-900 mb-2 leading-relaxed h-auto">${escapeHTML(p.name)}</h3>
+                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">${typeof escapeHTML !== 'undefined' ? escapeHTML(p.category || 'General') : (p.category || 'General')}</span>
+                <h3 class="font-bold text-xs text-slate-900 mb-2 leading-relaxed h-auto">${typeof escapeHTML !== 'undefined' ? escapeHTML(p.name) : p.name}</h3>
                 <div class="flex justify-between items-end text-[10px] font-bold text-slate-500 mb-2">
                     <span>${minText}</span>
                     ${packText}
@@ -297,8 +264,23 @@ function changePage(d) {
 // 🛒 FUNCIONES MAESTRAS DEL CARRITO (BLINDADAS)
 // ==========================================
 
-// 1. Agregar al carrito
-window.add = function(id) {
+// ==========================================
+// 3. FUNCIONES DEL CARRITO (Animación e Instantáneo)
+// ==========================================
+function saveCart() {
+    localStorage.setItem('cart_een', JSON.stringify(cart));
+}
+
+function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.querySelectorAll('#cart-count, .cart-badge').forEach(el => {
+        el.innerText = count;
+        if(count > 0) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+    });
+}
+
+function add(id) {
     const prod = allProducts.find(p => p.id === id);
     if (!prod) return;
 
@@ -327,48 +309,43 @@ window.add = function(id) {
     }
     
     saveCart();
-    window.updateCartCount();
-    if (typeof window.renderCart === 'function') window.renderCart();
+    updateCartCount();
+    renderCart();
     
-    // ==========================================
-    // 🎨 ANIMACIÓN INFALIBLE (API Nativa)
-    // ==========================================
+    // ANIMACIÓN NATIVA (INFALIBLE)
     try {
-        // Animar burbujas
-        const badges = document.querySelectorAll('#cart-count, .cart-badge, [id*="cart-count"]');
+        const badges = document.querySelectorAll('#cart-count, .cart-badge');
         badges.forEach(badge => {
             badge.animate([
-                { transform: 'scale(1)', backgroundColor: '#ef4444' },     // Rojo original
-                { transform: 'scale(1.6)', backgroundColor: '#22c55e' },   // Crece y verde
-                { transform: 'scale(1)', backgroundColor: '#ef4444' }      // Vuelve a la normalidad
-            ], { duration: 500, easing: 'ease-in-out' });
+                { transform: 'scale(1)', backgroundColor: '#ef4444' }, // Rojo
+                { transform: 'scale(1.5)', backgroundColor: '#22c55e' }, // Verde y grande
+                { transform: 'scale(1)', backgroundColor: '#ef4444' }  // Regresa a rojo
+            ], { duration: 400, easing: 'ease-in-out' });
         });
-
-        // Animar botón flotante
-        const floatBtns = document.querySelectorAll('#scroll-top-btn, #cart-btn, [id*="cart-btn"]');
-        floatBtns.forEach(btn => {
-            btn.animate([
-                { transform: 'scale(1)', backgroundColor: '' },
-                { transform: 'scale(1.15)', backgroundColor: '#22c55e' },
-                { transform: 'scale(1)', backgroundColor: '' }
-            ], { duration: 300, easing: 'ease-out' });
-        });
-    } catch(e) { console.warn("Animación no soportada", e); }
+    } catch(e) { console.log(e); }
 
     if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
-};
+}
 
-// 2. Eliminar del carrito
-window.removeItem = function(id) { 
+function remove(id) { 
     cart = cart.filter(x => x.id !== id);
     saveCart();
-    window.updateCartCount();
-    window.renderCart(); 
-};
-window.remove = window.removeItem; // Respaldo por si algún botón viejo usa "remove"
+    updateCartCount();
+    renderCart(); 
+}
 
-// 3. Actualizar cantidades en vivo (SIN parpadear el texto)
-window.updateCartItem = function(id) {
+function clearCart() {
+    if (cart.length === 0) return;
+    if (confirm('¿Estás seguro de que deseas vaciar el carrito por completo?')) {
+        cart = []; 
+        saveCart(); 
+        updateCartCount(); 
+        renderCart(); 
+        if (typeof showToast === 'function') showToast('Carrito vaciado exitosamente');
+    }
+}
+
+function updateCartItem(id) {
     const item = cart.find(x => x.id === id);
     if(!item) return;
     const prod = allProducts.find(p => p.id === id) || item; 
@@ -393,38 +370,15 @@ window.updateCartItem = function(id) {
     }
     
     if (item.quantity <= 0) {
-        window.removeItem(id); // Si es 0, sí borramos la fila entera
+        remove(id);
     } else {
         saveCart();
-        window.updateCartCount(); 
-        // ⚡ NOTA: NO llamamos renderCart() aquí para no borrarte el cursor mientras tecleas.
+        updateCartCount();
+        renderCart(); // <-- ESTO RECALCULA LA PANTALLA EN EL MOMENTO
     }
-};
+}
 
-// 4. Vaciar Carrito
-window.clearCart = function() {
-    if (cart.length === 0) return;
-    if (confirm('¿Estás seguro de que deseas vaciar el carrito por completo?')) {
-        cart = []; 
-        saveCart(); 
-        window.updateCartCount(); 
-        window.renderCart(); 
-        if (typeof showToast === 'function') showToast('Carrito vaciado exitosamente');
-    }
-};
-
-// 5. Actualizar la burbuja roja
-window.updateCartCount = function() {
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    document.querySelectorAll('#cart-count, .cart-badge').forEach(el => {
-        el.innerText = count;
-        if(count > 0) el.classList.remove('hidden');
-        else el.classList.add('hidden');
-    });
-};
-
-// 6. Dibujar el interior del carrito
-window.renderCart = function() {
+function renderCart() {
     const itemsCont = document.getElementById('cart-items');
     if (!itemsCont) return;
 
@@ -454,7 +408,7 @@ window.renderCart = function() {
         else if (isBolsas) packSize = 100; 
         else packSize = parseInt(prod.piezas) || 0;
         
-        // Cambiamos onchange por oninput para cálculo 100% instantáneo
+        // Se usa onchange: se actualizará al instante en cuanto quites el dedo del teclado o cambies con la flechita
         let inputsHTML = '';
         if (packSize > 1) {
             inputsHTML = `
@@ -463,13 +417,13 @@ window.renderCart = function() {
                     <i class="fa-solid fa-box text-indigo-500 text-sm"></i>
                     <div class="flex flex-col flex-1">
                         <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Paquetes</label>
-                        <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" oninput="window.updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
+                        <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
                     </div>
                 </div>
-                ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" oninput="window.updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
+                ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
             </div>`;
         } else {
-            inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" oninput="window.updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
+            inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
         }
 
         return `
@@ -480,13 +434,14 @@ window.renderCart = function() {
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start gap-2">
                     <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${typeof escapeHTML !== 'undefined' ? escapeHTML(item.name) : item.name}</h4>
-                    <button onclick="window.removeItem('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
                 ${inputsHTML}
             </div>
         </div>`;
     }).join('');
-};
+}
+
 function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
     if(m.classList.contains('hidden')) {
