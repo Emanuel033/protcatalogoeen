@@ -292,7 +292,6 @@ function changePage(d) {
 // ==========================================
 // CARRITO
 // ==========================================
-
 function updateCartItem(id) {
     const item = cart.find(x => x.id === id);
     if(!item) return;
@@ -311,18 +310,24 @@ function updateCartItem(id) {
     }
     
     if (packSize > 1) {
-        const packs = parseInt(document.getElementById(`inp-pack-${id}`).value) || 0;
-        let loose = isBolsas ? 0 : (parseInt(document.getElementById(`inp-loose-${id}`).value) || 0);
+        // Leemos los inputs asegurándonos de que existan en el HTML
+        const elPack = document.getElementById(`inp-pack-${id}`);
+        const elLoose = document.getElementById(`inp-loose-${id}`);
+        
+        const packs = elPack ? (parseInt(elPack.value) || 0) : 0;
+        const loose = elLoose && !isBolsas ? (parseInt(elLoose.value) || 0) : 0;
+        
         item.quantity = (packs * packSize) + loose;
     } else {
-        item.quantity = parseInt(document.getElementById(`inp-simple-${id}`).value) || 1;
+        const elSimple = document.getElementById(`inp-simple-${id}`);
+        item.quantity = elSimple ? (parseInt(elSimple.value) || 1) : 1;
     }
     
     if (item.quantity <= 0) {
-        remove(id);
+        remove(id); // Si llega a 0, se elimina
     } else {
         saveCart();
-        renderCart(); // <-- ESTO HACE QUE EL CÁLCULO SEA INSTANTÁNEO EN PANTALLA
+        renderCart(); // <-- ESTO FUERZA EL CÁLCULO VISUAL INSTANTÁNEO
         if (typeof updateCartCount === 'function') updateCartCount();
     }
 }
@@ -331,7 +336,6 @@ function add(id) {
     const prod = allProducts.find(p => p.id === id);
     if (!prod) return;
 
-    // Leemos el selector que ahora trae la "CANTIDAD|SKU"
     const selectElem = document.getElementById(`sel-${id}`);
     let qtyToAdd = 1;
     let skuOficial = prod.codigo_sistema || 'S/N'; 
@@ -339,27 +343,20 @@ function add(id) {
     if (selectElem && selectElem.value) {
         const valores = selectElem.value.split('|'); 
         qtyToAdd = parseInt(valores[0]) || 1;
-        
         if (valores[1] && valores[1] !== 'BASE') {
             skuOficial = valores[1];
         }
     }
 
-    // Buscamos si el producto ya está en el carrito
     const existingItem = cart.find(x => x.id === id);
-    
     if (existingItem) {
         existingItem.quantity += qtyToAdd;
         existingItem.sku = skuOficial; 
     } else {
         cart.push({
-            id: prod.id,
-            name: prod.name,
-            image: prod.image,
-            category: prod.category,
-            piezas: prod.piezas,
-            quantity: qtyToAdd,
-            sku: skuOficial
+            id: prod.id, name: prod.name, image: prod.image,
+            category: prod.category, piezas: prod.piezas,
+            quantity: qtyToAdd, sku: skuOficial
         });
     }
     
@@ -368,40 +365,32 @@ function add(id) {
     if (typeof renderCart === 'function') renderCart();
     
     // ==========================================
-    // ANIMACIÓN VISUAL DE REBOTE Y COLOR VERDE
+    // ANIMACIÓN ULTRA ROBUSTA (VERDE Y REBOTE)
     // ==========================================
     
-    // 1. Efecto en la burbujita roja (Badge)
-    const badges = document.querySelectorAll('#cart-count, .cart-badge');
+    // 1. Burbujas rojas de conteo
+    const badges = document.querySelectorAll('#cart-count, .cart-badge, [id*="cart-count"]');
     badges.forEach(badge => {
-        // Guardamos el color original por si es rojo, azul, etc.
-        const originalBg = Array.from(badge.classList).find(c => c.startsWith('bg-')) || 'bg-red-500';
-        
-        badge.classList.remove(originalBg);
-        badge.classList.add('bg-green-500', 'animate-bounce', 'scale-125');
-        
+        badge.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        badge.style.backgroundColor = '#22c55e'; // Verde brillante
+        badge.style.transform = 'scale(1.5)';
         setTimeout(() => {
-            badge.classList.remove('bg-green-500', 'animate-bounce', 'scale-125');
-            badge.classList.add(originalBg);
-        }, 600);
+            badge.style.backgroundColor = ''; // Regresa al rojo original
+            badge.style.transform = 'scale(1)';
+        }, 500);
     });
 
-    // 2. Efecto en el botón flotante general
-    const floatingBtn = document.getElementById('floating-cart-btn') || document.getElementById('cart-btn');
-    if (floatingBtn) {
-        const originalBgBtn = Array.from(floatingBtn.classList).find(c => c.startsWith('bg-')) || 'bg-indigo-600';
-        
-        floatingBtn.classList.remove(originalBgBtn);
-        floatingBtn.classList.add('bg-green-500', 'scale-110');
-        
-        setTimeout(() => {
-            floatingBtn.classList.remove('bg-green-500', 'scale-110');
-            floatingBtn.classList.add(originalBgBtn);
-        }, 300);
-    }
+    // 2. Botón del carrito general
+    const cartBtns = document.querySelectorAll('#floating-cart-btn, #cart-btn, [id*="cart-btn"]');
+    cartBtns.forEach(btn => {
+        btn.style.transition = 'transform 0.2s ease';
+        btn.style.transform = 'scale(1.15)';
+        setTimeout(() => btn.style.transform = 'scale(1)', 250);
+    });
 
     if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
 }
+
 // 1. Función para eliminar del carrito
 function remove(id) {
     cart = cart.filter(x => x.id !== id);
@@ -479,7 +468,22 @@ function renderCart() {
         </div>`;
     }).join('');
 }
-function clearCart() { if(confirm("¿Vaciar carrito?")) { cart = []; saveCart(); toggleCart(); } }
+
+function clearCart() {
+    if (cart.length === 0) return;
+    
+    if (confirm('¿Estás seguro de que deseas vaciar el carrito por completo?')) {
+        cart = []; // 1. Vaciamos la memoria
+        saveCart(); // 2. Vaciamos el guardado local
+        renderCart(); // 3. Limpiamos la pantalla
+        if (typeof updateCartCount === 'function') updateCartCount(); // 4. Regresamos la burbuja a 0
+        
+        if (typeof showToast === 'function') {
+            showToast('Carrito vaciado');
+        }
+    }
+}
+
 function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
     if(m.classList.contains('hidden')) {
