@@ -176,6 +176,9 @@ function escapeHTML(str) {
 // ==========================================
 // 2. DIBUJAR TARJETAS DE PRODUCTOS
 // ==========================================
+// ==========================================
+// 2. DIBUJAR TARJETAS DE PRODUCTOS
+// ==========================================
 function renderGrid() {
     const cont = document.getElementById('products-container') || document.getElementById('products-grid');
     const controls = document.getElementById('pagination-controls');
@@ -197,7 +200,16 @@ function renderGrid() {
         
         const basePiezas = p.piezas ? parseInt(p.piezas) : 1;
         const minText = `Min: ${basePiezas} pz${basePiezas > 1 ? 's' : ''}`;
-        const packText = hasPack ? `<span class="text-indigo-600 font-black">Varias opciones</span>` : "";
+        
+        // --- NUEVA LÓGICA DE TEXTO PARA PAQUETES ---
+        let packText = "";
+        if (paquetes.length === 1) {
+            // Si solo hay un paquete, muestra la cantidad exacta
+            packText = `<span class="text-indigo-600 font-black">Paquete: ${paquetes[0].piezas} pzas</span>`;
+        } else if (paquetes.length > 1) {
+            // Si hay dos o más, dice "Varias opciones"
+            packText = `<span class="text-indigo-600 font-black">Varias opciones</span>`;
+        }
 
         let selectorHTML = '';
         if (hasPack) {
