@@ -292,50 +292,15 @@ function changePage(d) {
 // ==========================================
 // CARRITO
 // ==========================================
-function updateCartItem(id) {
-    const item = cart.find(x => x.id === id);
-    if(!item) return;
-    const prod = allProducts.find(p => p.id === id) || item; 
-    
-    const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
-    const paquetes = prod.paquetes || [];
-    
-    let packSize = 1;
-    if (paquetes.length > 0) {
-        packSize = parseInt(paquetes[0].piezas);
-    } else if (isBolsas) {
-        packSize = 100;
-    } else {
-        packSize = parseInt(prod.piezas) || 0;
-    }
-    
-    if (packSize > 1) {
-        // Leemos los inputs asegurándonos de que existan en el HTML
-        const elPack = document.getElementById(`inp-pack-${id}`);
-        const elLoose = document.getElementById(`inp-loose-${id}`);
-        
-        const packs = elPack ? (parseInt(elPack.value) || 0) : 0;
-        const loose = elLoose && !isBolsas ? (parseInt(elLoose.value) || 0) : 0;
-        
-        item.quantity = (packs * packSize) + loose;
-    } else {
-        const elSimple = document.getElementById(`inp-simple-${id}`);
-        item.quantity = elSimple ? (parseInt(elSimple.value) || 1) : 1;
-    }
-    
-    if (item.quantity <= 0) {
-        remove(id); // Si llega a 0, se elimina
-    } else {
-        saveCart();
-        renderCart(); // <-- ESTO FUERZA EL CÁLCULO VISUAL INSTANTÁNEO
-        if (typeof updateCartCount === 'function') updateCartCount();
-    }
-}
+// ==========================================
+// 🛒 FUNCIONES MAESTRAS DEL CARRITO
+// ==========================================
 
 function add(id) {
     const prod = allProducts.find(p => p.id === id);
     if (!prod) return;
 
+    // 1. Leemos el selector que trae la "CANTIDAD|SKU"
     const selectElem = document.getElementById(`sel-${id}`);
     let qtyToAdd = 1;
     let skuOficial = prod.codigo_sistema || 'S/N'; 
@@ -348,56 +313,136 @@ function add(id) {
         }
     }
 
+    // 2. Buscamos si el producto ya está en el carrito
     const existingItem = cart.find(x => x.id === id);
     if (existingItem) {
         existingItem.quantity += qtyToAdd;
         existingItem.sku = skuOficial; 
     } else {
         cart.push({
-            id: prod.id, name: prod.name, image: prod.image,
-            category: prod.category, piezas: prod.piezas,
-            quantity: qtyToAdd, sku: skuOficial
+            id: prod.id, 
+            name: prod.name, 
+            image: prod.image,
+            category: prod.category, 
+            piezas: prod.piezas,
+            quantity: qtyToAdd, 
+            sku: skuOficial
         });
     }
     
+    // 3. Guardamos y actualizamos la vista
     saveCart();
-    if (typeof updateCartCount === 'function') updateCartCount();
+    updateCartCount();
     if (typeof renderCart === 'function') renderCart();
     
     // ==========================================
-    // ANIMACIÓN ULTRA ROBUSTA (VERDE Y REBOTE)
+    // 🎨 ANIMACIÓN VISUAL (VERDE Y REBOTE)
     // ==========================================
     
-    // 1. Burbujas rojas de conteo
-    const badges = document.querySelectorAll('#cart-count, .cart-badge, [id*="cart-count"]');
+    // A) Animar las burbujas rojas de conteo
+    const badges = document.querySelectorAll('#cart-count, .cart-badge');
     badges.forEach(badge => {
-        badge.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-        badge.style.backgroundColor = '#22c55e'; // Verde brillante
-        badge.style.transform = 'scale(1.5)';
+        // Forzamos clases de Tailwind
+        badge.classList.remove('bg-red-500', 'bg-red-600');
+        badge.classList.add('bg-green-500', 'animate-bounce', 'scale-125', 'transition-all');
+        
         setTimeout(() => {
-            badge.style.backgroundColor = ''; // Regresa al rojo original
-            badge.style.transform = 'scale(1)';
-        }, 500);
+            badge.classList.remove('bg-green-500', 'animate-bounce', 'scale-125');
+            badge.classList.add('bg-red-500'); // Regresa al rojo
+        }, 600);
     });
 
-    // 2. Botón del carrito general
-    const cartBtns = document.querySelectorAll('#floating-cart-btn, #cart-btn, [id*="cart-btn"]');
+    // B) Animar el botón del carrito en sí (si tienes uno flotante)
+    const cartBtns = document.querySelectorAll('#scroll-top-btn, #cart-btn'); // Agrega aquí el ID de tu botón si es distinto
     cartBtns.forEach(btn => {
-        btn.style.transition = 'transform 0.2s ease';
-        btn.style.transform = 'scale(1.15)';
-        setTimeout(() => btn.style.transform = 'scale(1)', 250);
+        btn.classList.add('bg-green-500', 'scale-110', 'transition-all');
+        setTimeout(() => {
+            btn.classList.remove('bg-green-500', 'scale-110');
+        }, 300);
     });
 
     if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
 }
 
-// 1. Función para eliminar del carrito
 function remove(id) {
+    // Filtramos el carrito dejando todo menos el ID que queremos borrar
     cart = cart.filter(x => x.id !== id);
     saveCart();
-    // Volvemos a dibujar el carrito y el grid por si cambiaron cosas
+    
+    // Refrescamos toda la pantalla instantáneamente
     renderCart(); 
-    if (typeof updateCartCount === 'function') updateCartCount();
+    updateCartCount();
+}
+
+function updateCartItem(id) {
+    const item = cart.find(x => x.id === id);
+    if(!item) return;
+    const prod = allProducts.find(p => p.id === id) || item; 
+    
+    const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
+    const paquetes = prod.paquetes || []; // Lee los paquetes de Firestore
+    
+    let packSize = 1;
+    if (paquetes.length > 0) {
+        packSize = parseInt(paquetes[0].piezas);
+    } else if (isBolsas) {
+        packSize = 100;
+    } else {
+        packSize = parseInt(prod.piezas) || 0;
+    }
+    
+    // Calculamos según los inputs
+    if (packSize > 1) {
+        const elPack = document.getElementById(`inp-pack-${id}`);
+        const elLoose = document.getElementById(`inp-loose-${id}`);
+        
+        const packs = elPack ? (parseInt(elPack.value) || 0) : 0;
+        const loose = elLoose && !isBolsas ? (parseInt(elLoose.value) || 0) : 0;
+        
+        item.quantity = (packs * packSize) + loose;
+    } else {
+        const elSimple = document.getElementById(`inp-simple-${id}`);
+        item.quantity = elSimple ? (parseInt(elSimple.value) || 1) : 1;
+    }
+    
+    // Si bajó a 0, lo eliminamos. Si no, guardamos y renderizamos en vivo
+    if (item.quantity <= 0) {
+        remove(id);
+    } else {
+        saveCart();
+        renderCart(); // <-- ESTO LOGRA EL CÁLCULO INSTANTÁNEO AL MOVER LOS NÚMEROS
+        updateCartCount();
+    }
+}
+
+function clearCart() {
+    if (cart.length === 0) return;
+    
+    if (confirm('¿Estás seguro de que deseas vaciar el carrito por completo?')) {
+        cart = []; 
+        saveCart(); 
+        renderCart(); 
+        updateCartCount(); 
+        
+        if (typeof showToast === 'function') {
+            showToast('Carrito vaciado exitosamente');
+        }
+    }
+}
+
+function updateCartCount() {
+    // Sumamos la cantidad de piezas o líneas
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    
+    // Actualizamos todas las burbujas que existan en tu HTML
+    document.querySelectorAll('#cart-count, .cart-badge').forEach(el => {
+        el.innerText = count;
+        if(count > 0) {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    });
 }
 
 // 2. Función que dibuja el carrito (Actualizada para leer paquetes de Firestore)
@@ -469,20 +514,6 @@ function renderCart() {
     }).join('');
 }
 
-function clearCart() {
-    if (cart.length === 0) return;
-    
-    if (confirm('¿Estás seguro de que deseas vaciar el carrito por completo?')) {
-        cart = []; // 1. Vaciamos la memoria
-        saveCart(); // 2. Vaciamos el guardado local
-        renderCart(); // 3. Limpiamos la pantalla
-        if (typeof updateCartCount === 'function') updateCartCount(); // 4. Regresamos la burbuja a 0
-        
-        if (typeof showToast === 'function') {
-            showToast('Carrito vaciado');
-        }
-    }
-}
 
 function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
