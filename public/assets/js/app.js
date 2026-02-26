@@ -557,32 +557,46 @@ function getRandomPhone() {
     return phones[Math.floor(Math.random() * phones.length)];
 }
 
-function sendWhatsApp() {
+unction sendWhatsApp() {
     if(cart.length === 0) return showToast("Carrito vacío");
-    const name = document.getElementById('client-name').value.trim() || "Cliente";
+    const name = document.getElementById('client-name') ? document.getElementById('client-name').value.trim() : "Cliente";
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
     
     if(selectedDelivery === 'recoger') {
-        msg += `📍 Recoger en Sucursal\n💳 Pago: ${selectedPayment||'Por definir'}\n`;
+        msg += `📍 Recoger en Sucursal\n💳 Pago: ${selectedPayment||'Por definir'}\n\n`;
     } else if(selectedDelivery === 'local') {
-        msg += `🚚 Envío Local\n📍 Dirección: ${document.getElementById('delivery-address').value}\n💳 Pago: ${selectedPayment||'Por definir'}\n`;
+        msg += `🚚 Envío Local\n📍 Dirección: ${document.getElementById('delivery-address') ? document.getElementById('delivery-address').value : 'N/A'}\n💳 Pago: ${selectedPayment||'Por definir'}\n\n`;
     } else if(selectedDelivery === 'foraneo') {
-        msg += `✈️ Envío Foráneo\n📦 Modalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${document.getElementById('fletera-name').value}\n💳 Pago: ${selectedPayment||'Transferencia'}\n`;
+        msg += `✈️ Envío Foráneo\n📦 Modalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${document.getElementById('fletera-name') ? document.getElementById('fletera-name').value : 'N/A'}\n💳 Pago: ${selectedPayment||'Transferencia'}\n\n`;
     }
 
     cart.forEach(i => {
         const prod = allProducts.find(p => p.id === i.id) || i;
-        const packSize = (prod.category||'').toLowerCase().includes('bolsa') ? 100 : (parseInt(prod.piezas)||0);
-        msg += `🔹 ${i.name}`;
+        
+        // --- NUEVA LÓGICA DE PAQUETES (FIRESTORE) ---
+        const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
+        const paquetes = prod.paquetes || [];
+        
+        let packSize = 1;
+        if (paquetes.length > 0) packSize = parseInt(paquetes[0].piezas);
+        else if (isBolsas) packSize = 100;
+        else packSize = parseInt(prod.piezas) || 0;
+        
+        // --- NUEVO: Agregamos el código de facturación al WhatsApp ---
+        const skuOficial = i.sku && i.sku !== 'S/N' ? `[${i.sku}] ` : '';
+        
+        msg += `🔹 ${skuOficial}${i.name}\n`;
+        
         if(packSize > 1) {
             const p = Math.floor(i.quantity/packSize), l = i.quantity%packSize;
-            if(p>0) msg+=`\n   📦 ${p} Paq (${packSize}c/u)`;
-            if(l>0) msg+=`\n   🧩 ${l} Pzas sueltas`;
-        } else msg += ` (${i.quantity} pzas)`;
-        msg += '\n';
+            if(p>0) msg+=`   📦 ${p} Paquete(s) de ${packSize} pz\n`;
+            if(l>0) msg+=`   🧩 ${l} Pza(s) sueltas\n`;
+        } else {
+            msg += `   📦 ${i.quantity} pzas\n`;
+        }
     });
 
-    const phone = getRandomPhone();
+    const phone = typeof getRandomPhone === 'function' ? getRandomPhone() : "528186933580";
     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     
     if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('generate_lead', { currency: 'MXN', value: 0 });
