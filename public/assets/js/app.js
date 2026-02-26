@@ -557,7 +557,7 @@ function getRandomPhone() {
     return phones[Math.floor(Math.random() * phones.length)];
 }
 
-unction sendWhatsApp() {
+function sendWhatsApp() {
     if(cart.length === 0) return showToast("Carrito vacío");
     const name = document.getElementById('client-name') ? document.getElementById('client-name').value.trim() : "Cliente";
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
