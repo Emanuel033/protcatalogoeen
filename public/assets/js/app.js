@@ -298,21 +298,18 @@ function updateCartItem(id) {
     if(!item) return;
     const prod = allProducts.find(p => p.id === id) || item; 
     
-    // 1. Verificamos si es "bolsa" vieja o si tiene paquetes nuevos en Firestore
     const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
     const paquetes = prod.paquetes || [];
     
-    // 2. Definimos el tamaño del paquete dinámicamente
     let packSize = 1;
     if (paquetes.length > 0) {
-        packSize = parseInt(paquetes[0].piezas); // Toma la cantidad del primer paquete configurado
+        packSize = parseInt(paquetes[0].piezas);
     } else if (isBolsas) {
-        packSize = 100; // Respaldo para tu regla vieja
+        packSize = 100;
     } else {
         packSize = parseInt(prod.piezas) || 0;
     }
     
-    // 3. Calculamos la nueva cantidad de piezas totales
     if (packSize > 1) {
         const packs = parseInt(document.getElementById(`inp-pack-${id}`).value) || 0;
         let loose = isBolsas ? 0 : (parseInt(document.getElementById(`inp-loose-${id}`).value) || 0);
@@ -321,8 +318,15 @@ function updateCartItem(id) {
         item.quantity = parseInt(document.getElementById(`inp-simple-${id}`).value) || 1;
     }
     
-    item.quantity <= 0 ? remove(id) : saveCart();
+    if (item.quantity <= 0) {
+        remove(id);
+    } else {
+        saveCart();
+        renderCart(); // <-- ESTO HACE QUE EL CÁLCULO SEA INSTANTÁNEO EN PANTALLA
+        if (typeof updateCartCount === 'function') updateCartCount();
+    }
 }
+
 function add(id) {
     const prod = allProducts.find(p => p.id === id);
     if (!prod) return;
@@ -330,14 +334,12 @@ function add(id) {
     // Leemos el selector que ahora trae la "CANTIDAD|SKU"
     const selectElem = document.getElementById(`sel-${id}`);
     let qtyToAdd = 1;
-    let skuOficial = prod.codigo_sistema || 'S/N'; // Por defecto toma el código de la pieza base
+    let skuOficial = prod.codigo_sistema || 'S/N'; 
 
     if (selectElem && selectElem.value) {
-        // Partimos el valor, ej: "50|ENV-001-50PZ"
         const valores = selectElem.value.split('|'); 
         qtyToAdd = parseInt(valores[0]) || 1;
         
-        // Si el SKU no dice 'BASE', usamos el SKU del paquete
         if (valores[1] && valores[1] !== 'BASE') {
             skuOficial = valores[1];
         }
@@ -348,7 +350,7 @@ function add(id) {
     
     if (existingItem) {
         existingItem.quantity += qtyToAdd;
-        existingItem.sku = skuOficial; // Actualiza con el SKU del último paquete seleccionado
+        existingItem.sku = skuOficial; 
     } else {
         cart.push({
             id: prod.id,
@@ -357,14 +359,47 @@ function add(id) {
             category: prod.category,
             piezas: prod.piezas,
             quantity: qtyToAdd,
-            sku: skuOficial // Guardamos el código exacto de facturación
+            sku: skuOficial
         });
     }
     
     saveCart();
-    
-    // Si tienes función para mostrar una notificación o renderizar el carrito, llámala aquí
+    if (typeof updateCartCount === 'function') updateCartCount();
     if (typeof renderCart === 'function') renderCart();
+    
+    // ==========================================
+    // ANIMACIÓN VISUAL DE REBOTE Y COLOR VERDE
+    // ==========================================
+    
+    // 1. Efecto en la burbujita roja (Badge)
+    const badges = document.querySelectorAll('#cart-count, .cart-badge');
+    badges.forEach(badge => {
+        // Guardamos el color original por si es rojo, azul, etc.
+        const originalBg = Array.from(badge.classList).find(c => c.startsWith('bg-')) || 'bg-red-500';
+        
+        badge.classList.remove(originalBg);
+        badge.classList.add('bg-green-500', 'animate-bounce', 'scale-125');
+        
+        setTimeout(() => {
+            badge.classList.remove('bg-green-500', 'animate-bounce', 'scale-125');
+            badge.classList.add(originalBg);
+        }, 600);
+    });
+
+    // 2. Efecto en el botón flotante general
+    const floatingBtn = document.getElementById('floating-cart-btn') || document.getElementById('cart-btn');
+    if (floatingBtn) {
+        const originalBgBtn = Array.from(floatingBtn.classList).find(c => c.startsWith('bg-')) || 'bg-indigo-600';
+        
+        floatingBtn.classList.remove(originalBgBtn);
+        floatingBtn.classList.add('bg-green-500', 'scale-110');
+        
+        setTimeout(() => {
+            floatingBtn.classList.remove('bg-green-500', 'scale-110');
+            floatingBtn.classList.add(originalBgBtn);
+        }, 300);
+    }
+
     if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
 }
 // 1. Función para eliminar del carrito
