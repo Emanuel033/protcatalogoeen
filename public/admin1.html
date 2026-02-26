@@ -7,16 +7,46 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        .toast-enter { animation: slideIn 0.3s forwards; }
-        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* Animaciones suaves */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Estilo de Inputs modernos */
+        .input-modern {
+            background-color: #f1f5f9;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .input-modern:focus {
+            background-color: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        /* Checkbox personalizado */
+        .cb-modern {
+            width: 1.15rem;
+            height: 1.15rem;
+            border-radius: 0.375rem;
+            border-color: #cbd5e1;
+            color: #2563eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cb-modern:focus { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
     </style>
 </head>
-<body class="text-slate-800 h-screen flex flex-col">
+<body class="h-screen flex flex-col overflow-hidden relative">
 
     <!-- ========================================== -->
     <!-- CREDENCIALES FIREBASE -->
@@ -32,181 +62,404 @@
             appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        
         const db = firebase.firestore();
+        const rtdb = firebase.database();
         const productsRef = db.collection('productos_master');
+        const facturacionRef = db.collection('catalogo_facturacion');
     </script>
 
-    <!-- Header -->
-    <header class="bg-indigo-900 text-white shadow-md p-4 flex justify-between items-center shrink-0">
-        <div>
-            <h1 class="text-xl font-bold flex items-center gap-2"><i class="fas fa-cogs"></i> Configurador Maestro</h1>
-            <p class="text-xs text-indigo-200">Enlace directo a Firestore (productos_master)</p>
+    <!-- Header Elegante -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-sm shadow-blue-200">
+                <i class="fas fa-layer-group text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Panel Master</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1">Gestión de Catálogo y Facturación</p>
+            </div>
         </div>
-        <div class="flex gap-2">
-            <button onclick="openMassEditModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded shadow font-semibold text-sm transition">
-                <i class="fas fa-layer-group"></i> Edición Masiva
+        <div>
+            <button onclick="openEditModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2">
+                <i class="fas fa-plus text-xs"></i> Crear Producto
             </button>
         </div>
     </header>
 
+    <!-- Controles Superiores (Pestañas y Buscador) -->
+    <div class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shrink-0 z-0">
+        <!-- Pestañas Switch Moderno -->
+        <div class="bg-slate-100 p-1 rounded-xl flex gap-1 w-full md:w-auto">
+            <button onclick="switchTab('master')" id="tabBtn-master" class="flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold text-sm text-slate-600 transition hover:text-slate-900 bg-white shadow-sm text-blue-600">
+                <i class="fas fa-database mr-1"></i> Catálogo Master
+            </button>
+            <button onclick="switchTab('import')" id="tabBtn-import" class="flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold text-sm text-slate-600 transition hover:text-slate-900 relative">
+                <i class="fas fa-cloud-download-alt mr-1"></i> Importar
+                <span id="importBadge" class="absolute top-1 right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full shadow hidden">0</span>
+            </button>
+        </div>
+
+        <!-- Buscador Global -->
+        <div class="relative w-full md:w-96 hidden" id="globalSearchContainer">
+            <i class="fas fa-search absolute left-4 top-3 text-slate-400 text-sm"></i>
+            <input type="text" id="globalSearch" onkeyup="handleGlobalSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-10 pr-4 py-2.5 rounded-xl input-modern text-sm font-medium">
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <main class="flex-1 p-6 overflow-hidden flex flex-col max-w-7xl mx-auto w-full">
-        <!-- Resumen y Filtro -->
-        <div class="flex flex-wrap justify-between items-center gap-4 mb-4 shrink-0">
-            <div class="flex gap-4">
-                <div class="bg-white p-3 rounded-lg shadow-sm border border-slate-200 text-center min-w-[120px]">
-                    <p class="text-xs text-slate-500 font-bold uppercase">Total Productos</p>
-                    <p class="text-2xl font-black text-indigo-700" id="count-total">0</p>
+    <main class="flex-1 overflow-hidden relative">
+        
+        <!-- VISTA: CATÁLOGO MASTER -->
+        <div id="view-master" class="h-full flex flex-col w-full p-6 max-w-7xl mx-auto fade-in">
+            <!-- Estadísticas y Filtro -->
+            <div class="flex flex-wrap justify-between items-end gap-4 mb-4 shrink-0">
+                <div class="flex gap-4">
+                    <div class="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-200 min-w-[140px]">
+                        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1">Productos Master</p>
+                        <p class="text-3xl font-black text-slate-800" id="count-total">0</p>
+                    </div>
+                    <div onclick="togglePendingFilter()" class="bg-white hover:bg-slate-50 cursor-pointer transition px-5 py-4 rounded-2xl shadow-sm border border-slate-200 min-w-[140px] relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-amber-500/5 transition-opacity opacity-0 group-hover:opacity-100"></div>
+                        <p class="text-[11px] text-amber-600 font-bold uppercase tracking-wider mb-1">Falta Configurar</p>
+                        <p class="text-3xl font-black text-amber-600" id="count-pending">0</p>
+                    </div>
                 </div>
-                <div onclick="togglePendingFilter()" class="bg-orange-50 p-3 rounded-lg shadow-sm border border-orange-200 text-center min-w-[120px] cursor-pointer hover:bg-orange-100 transition" title="Clic para filtrar faltantes">
-                    <p class="text-xs text-orange-600 font-bold uppercase">Falta Configurar</p>
-                    <p class="text-2xl font-black text-orange-700" id="count-pending">0</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                <label class="flex items-center gap-2 cursor-pointer bg-orange-50 text-orange-700 px-3 py-2 rounded-lg border border-orange-200 font-bold text-sm shadow-sm hover:bg-orange-100 transition whitespace-nowrap">
-                    <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-4 h-4 text-orange-600 rounded border-orange-300 focus:ring-orange-500 cursor-pointer">
-                    Solo Faltantes
+                
+                <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2.5 rounded-xl border border-slate-200 font-semibold text-sm shadow-sm hover:bg-slate-50 transition select-none">
+                    <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
+                    <span class="text-slate-700">Mostrar solo Faltantes</span>
                 </label>
-                <div class="relative w-full md:w-80">
-                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar producto..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <i class="fas fa-search absolute left-3 top-3 text-slate-400"></i>
+            </div>
+
+            <!-- Tabla Master -->
+            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative">
+                <div class="overflow-y-auto flex-1 hide-scroll p-1">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-100 sticky top-0 z-10 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="px-4 py-4 rounded-tl-xl w-12 text-center">
+                                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="cb-modern focus:ring-blue-500">
+                                </th>
+                                <th class="px-6 py-4">Producto</th>
+                                <th class="px-6 py-4">Categoría</th>
+                                <th class="px-6 py-4">Cód. Facturación</th>
+                                <th class="px-6 py-4 text-right rounded-tr-xl">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Tabla -->
-        <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-            <div class="overflow-y-auto flex-1 hide-scroll">
-                <table class="w-full text-left text-sm whitespace-nowrap">
-                    <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
-                        <tr>
-                            <th class="p-3 w-10 text-center"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="rounded"></th>
-                            <th class="p-3 w-16">Img</th>
-                            <th class="p-3">Nombre Comercial</th>
-                            <th class="p-3">Categoría</th>
-                            <th class="p-3">Tipo en Sistema</th>
-                            <th class="p-3">Cód. Facturación</th>
-                            <th class="p-3 text-center">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100">
-                        <!-- Llenado dinámico -->
-                    </tbody>
-                </table>
+        <!-- VISTA: BANDEJA DE IMPORTACIÓN -->
+        <div id="view-import" class="h-full flex flex-col w-full p-6 max-w-7xl mx-auto hidden fade-in">
+            <div class="mb-4 shrink-0 bg-blue-50 border border-blue-100 rounded-2xl p-5 flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl shrink-0">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-900 text-lg">Pendientes de Importar</h2>
+                    <p class="text-sm text-slate-600 mt-0.5">Comparamos el Catálogo de Facturación contra el Master. Aquí están los códigos que faltan registrar para la tienda web.</p>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="overflow-y-auto flex-1 hide-scroll p-1">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-100 sticky top-0 z-10 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="px-6 py-4 w-1/4 rounded-tl-xl">Cód. Facturación</th>
+                                <th class="px-6 py-4">Descripción Oficial (Admin Viejo)</th>
+                                <th class="px-6 py-4 text-right rounded-tr-xl w-32">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="importTableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
 
+    <!-- Barra Flotante para Edición Masiva -->
+    <div id="bulkActionBar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl z-40 hidden flex items-center gap-4 fade-in">
+        <span class="text-sm font-semibold flex items-center gap-2">
+            <span id="bulkCount" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-black">0</span> seleccionados
+        </span>
+        <div class="h-4 w-px bg-slate-700"></div>
+        <button onclick="openMassEditModal()" class="text-sm font-bold text-blue-400 hover:text-blue-300 transition flex items-center gap-2">
+            <i class="fas fa-magic"></i> Editar Lote
+        </button>
+        <button onclick="clearBulkSelection()" class="text-sm text-slate-400 hover:text-slate-300 transition ml-2" title="Cancelar selección">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
     <!-- ========================================== -->
-    <!-- MODAL: EDICIÓN INDIVIDUAL Y KITS -->
+    <!-- MODAL EDICIÓN MASIVA -->
     <!-- ========================================== -->
-    <div id="editModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden max-h-[90vh]">
-            <div class="bg-indigo-50 p-4 border-b border-indigo-100 flex justify-between items-center">
-                <h2 class="font-bold text-lg text-indigo-900" id="modalTitle">Configurar Producto</h2>
-                <button onclick="closeModal('editModal')" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times text-xl"></i></button>
+    <div id="massEditModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-200">
+            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900">Edición en Lote</h2>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider"><span id="massEditCount">0</span> elementos</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('massEditModal')" class="text-slate-400 hover:text-slate-600 transition"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1">
-                <input type="hidden" id="editId">
-                <div class="flex gap-4 mb-6 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <img id="editImgPreview" src="" class="w-16 h-16 object-cover rounded shadow-sm bg-white">
-                    <div class="flex-1">
-                        <label class="block text-xs font-bold text-slate-500 mb-1">Nombre Comercial Web</label>
-                        <input type="text" id="editName" class="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 outline-none text-sm font-semibold">
-                    </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-500 mb-2">Deja en blanco lo que NO quieras cambiar. Todos los productos seleccionados adoptarán los datos que llenes aquí.</p>
+                
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nueva Categoría</label>
+                    <input type="text" id="massCategory" class="w-full input-modern px-4 py-2.5 rounded-xl font-medium text-slate-900 uppercase" placeholder="Ej: TAPAS (Opcional)">
                 </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">Categoría</label>
-                        <input type="text" id="editCategory" class="w-full px-3 py-2 border border-slate-300 rounded text-sm outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">Comportamiento del Sistema</label>
-                        <select id="editTipo" onchange="toggleFormFields()" class="w-full px-3 py-2 border border-slate-300 rounded text-sm outline-none bg-indigo-50 font-semibold text-indigo-800">
-                            <option value="PIEZA_BASE">Pieza Base (Individual)</option>
-                            <option value="KIT_OFICIAL">Kit Oficial (Paquete Excel)</option>
-                            <option value="KIT_FLEXIBLE">Kit Flexible Web (Armar receta)</option>
+                
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nuevo Comportamiento</label>
+                    <div class="relative">
+                        <select id="massTipo" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 font-medium appearance-none">
+                            <option value="">-- No modificar --</option>
+                            <option value="PIEZA_BASE">Pieza Base Suelta</option>
+                            <option value="KIT_OFICIAL">Kit Oficial (Armado en Excel)</option>
+                            <option value="KIT_FLEXIBLE">Kit Flexible Web (Desglose)</option>
                         </select>
+                        <i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
                     </div>
-                </div>
-
-                <!-- Campo Código (Base y Oficial) -->
-                <div id="fieldCodigo" class="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <label class="block text-sm font-bold text-orange-900 mb-1">Código de Excel para Facturación</label>
-                    <input type="text" id="editCodigo" placeholder="Ej: ENV-001" class="w-full px-3 py-2 border border-orange-300 rounded font-mono uppercase outline-none focus:ring-2 focus:ring-orange-500">
-                    <p class="text-xs text-orange-700 mt-1"><i class="fas fa-exclamation-circle"></i> Si lo dejas vacío, el carrito no sabrá cómo cobrarlo.</p>
-                </div>
-
-                <!-- Campo Receta (Kit Flexible) -->
-                <div id="fieldReceta" class="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-300 hidden">
-                    <label class="block text-sm font-bold text-slate-800 mb-1">Receta / Explosión de Materiales</label>
-                    <p class="text-xs text-slate-500 mb-3">Agrega las piezas base que contiene este kit promocional.</p>
-                    <div id="recetaContainer" class="space-y-2 mb-3"></div>
-                    <button onclick="addRecetaRow()" class="text-xs bg-white border border-slate-300 px-3 py-1.5 rounded shadow-sm font-bold text-indigo-600 hover:bg-slate-100">
-                        <i class="fas fa-plus"></i> Añadir Componente
-                    </button>
                 </div>
             </div>
-
-            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-                <button onclick="closeModal('editModal')" class="px-4 py-2 text-slate-600 font-medium text-sm">Cancelar</button>
-                <button onclick="saveConfiguration()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold shadow-md text-sm">
-                    Guardar Configuración
+            
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                <button onclick="closeModal('massEditModal')" class="px-5 py-2.5 text-slate-600 font-semibold text-sm hover:bg-slate-200 rounded-xl transition">Cancelar</button>
+                <button onclick="applyMassEdit()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm shadow-blue-200 text-sm transition-all">
+                    Aplicar Cambios
                 </button>
             </div>
         </div>
     </div>
 
+
     <!-- ========================================== -->
-    <!-- MODAL: EDICIÓN MASIVA -->
+    <!-- MODAL PREMIUM (Edición y Creación) -->
     <!-- ========================================== -->
-    <div id="massModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden">
-            <div class="bg-amber-50 p-4 border-b border-amber-100">
-                <h2 class="font-bold text-lg text-amber-900">Edición Masiva</h2>
-                <p class="text-xs text-amber-700">Modificando <span id="massCount" class="font-black">0</span> productos</p>
-            </div>
-            <div class="p-5 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">Cambiar Tipo de Sistema a:</label>
-                    <select id="massTipo" class="w-full px-3 py-2 border border-slate-300 rounded text-sm outline-none">
-                        <option value="">-- No modificar --</option>
-                        <option value="PIEZA_BASE">Pieza Base</option>
-                        <option value="KIT_OFICIAL">Kit Oficial</option>
-                        <option value="KIT_FLEXIBLE">Kit Flexible Web</option>
-                    </select>
+    <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 lg:p-6 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-50/90 rounded-[24px] shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[95vh] slide-up border border-slate-200">
+            
+            <!-- Modal Header -->
+            <div class="bg-white px-6 py-5 border-b border-slate-200 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h2 class="font-bold text-xl text-slate-900 tracking-tight" id="modalTitle">Configurar Producto</h2>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">Cambiar Categoría a:</label>
-                    <input type="text" id="massCategory" placeholder="Escribe nueva categoría o deja vacío" class="w-full px-3 py-2 border border-slate-300 rounded text-sm outline-none">
-                </div>
+                <button onclick="closeModal('editModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="p-4 border-t border-slate-200 flex gap-2">
-                <button onclick="closeModal('massModal')" class="flex-1 px-4 py-2 bg-slate-100 text-slate-600 rounded font-medium text-sm">Cancelar</button>
-                <button onclick="applyMassEdit()" class="flex-1 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded font-bold shadow-md text-sm">Aplicar</button>
+            
+            <!-- Modal Body (Gris tenue, divide tarjetas) -->
+            <div class="p-6 overflow-y-auto flex-1 hide-scroll space-y-6">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="importOldId"> 
+                
+                <!-- Tarjeta 1: Datos Generales -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-info-circle text-slate-400"></i> Información Base</h3>
+                    
+                    <div class="flex flex-col md:flex-row gap-6 items-start">
+                        <!-- Preview Imagen -->
+                        <div class="shrink-0 flex flex-col items-center gap-2">
+                            <div class="w-24 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden relative">
+                                <img id="editImgPreview" src="https://via.placeholder.com/150" class="w-full h-full object-cover z-10">
+                                <i class="fas fa-image absolute text-slate-300 text-2xl z-0"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 w-full space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre Comercial (Tienda) <span class="text-red-500">*</span></label>
+                                    <input type="text" id="editName" class="w-full input-modern px-4 py-2.5 rounded-xl font-medium text-slate-900" placeholder="Ej: Botella PET Cuadrada 1L">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">URL de Imagen</label>
+                                    <input type="url" id="editImage" placeholder="https://..." oninput="document.getElementById('editImgPreview').src = this.value || 'https://via.placeholder.com/150'" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-600 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Categoría</label>
+                                    <input type="text" id="editCategory" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 uppercase text-sm" placeholder="Ej: PET">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Unidad Mínima <span title="La venta por defecto es unitaria" class="text-blue-500 cursor-help ml-1"><i class="fas fa-question-circle"></i></span></label>
+                                    <input type="number" id="editPiezas" value="1" readonly class="w-full bg-slate-100 px-4 py-2.5 rounded-xl text-slate-500 text-sm cursor-not-allowed border border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Facturación e Inventario -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-barcode text-slate-400"></i> Vinculación al Sistema</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Cód. Facturación Base <span class="text-red-500">*</span></label>
+                            <input type="text" id="editCodigo" placeholder="Ej: ENV-001" class="w-full input-modern px-4 py-2.5 rounded-xl font-mono uppercase text-slate-900 font-bold">
+                            <p class="text-[10px] text-slate-400 mt-1.5 ml-1">Para conectar el carrito con tu sistema físico.</p>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Comportamiento del Elemento</label>
+                            <div class="relative">
+                                <select id="editTipo" onchange="toggleFormFields()" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 font-medium appearance-none">
+                                    <option value="PIEZA_BASE">Pieza Base Suelta</option>
+                                    <option value="KIT_OFICIAL">Kit Oficial (Armado en Excel)</option>
+                                    <option value="KIT_FLEXIBLE">Kit Flexible Web (Desglose)</option>
+                                </select>
+                                <i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receta (Solo visible si es KIT_FLEXIBLE) -->
+                    <div id="fieldReceta" class="mt-4 pt-4 border-t border-slate-100 hidden">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Receta del Paquete</label>
+                        <div id="recetaContainer" class="space-y-2 mb-3"></div>
+                        <button onclick="addRecetaRow()" class="text-xs text-blue-600 font-bold hover:text-blue-700 transition flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg w-max">
+                            <i class="fas fa-plus"></i> Agregar Pieza
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Subcolección de Paquetes (Para Piezas Base) -->
+                <div id="sectionPaquetes" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-box-open text-slate-400"></i> Presentaciones (Bolsas/Paquetes)</h3>
+                    </div>
+                    
+                    <!-- Creador Rápido -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-wrap gap-3 items-end mb-5">
+                        <div class="w-24">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Piezas</label>
+                            <input type="number" id="newPkgQty" min="2" class="w-full input-modern px-3 py-2 rounded-lg text-sm text-center font-bold text-slate-700" placeholder="Ej: 50">
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">SKU de Venta</label>
+                            <div class="flex h-10">
+                                <input type="text" id="newPkgSku" class="w-full input-modern px-3 py-2 rounded-l-lg text-sm font-mono border-r-0" placeholder="Ej: ENV-001-50PZ">
+                                <button onclick="autoSkuSubcollection()" class="bg-blue-50 text-blue-600 border border-l-0 border-transparent hover:border-blue-200 px-3 rounded-r-lg font-bold text-[10px] transition uppercase tracking-wider" title="Generar: CodBase-PiezasPZ">Auto SKU</button>
+                            </div>
+                        </div>
+                        <button onclick="addPackageToSubcollection()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 rounded-lg font-bold text-sm h-10 transition">
+                            Crear
+                        </button>
+                    </div>
+
+                    <!-- Lista -->
+                    <div class="border border-slate-100 rounded-xl overflow-hidden">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-24 text-center">Contenido</th>
+                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider">SKU del Paquete</th>
+                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-20 text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subcollectionList" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Alerta Producto Nuevo -->
+                <div id="sectionNewWarning" class="hidden">
+                    <div class="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-xl flex items-center gap-3">
+                        <i class="fas fa-info-circle text-lg"></i>
+                        <p class="text-sm font-medium">Guarda la pieza base primero para habilitar la creación de presentaciones empaquetadas.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-white px-6 py-4 border-t border-slate-200 flex justify-end gap-3 shrink-0">
+                <button onclick="closeModal('editModal')" class="px-5 py-2.5 text-slate-600 font-semibold text-sm hover:bg-slate-100 rounded-xl transition">Cancelar</button>
+                <button onclick="saveBaseProduct()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm shadow-blue-200 text-sm transition-all flex items-center gap-2">
+                    <i class="fas fa-check"></i> Guardar Cambios
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl hidden z-[100] font-medium text-sm"></div>
+    <!-- Toast Elegante -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl hidden z-[100] font-semibold text-sm flex items-center gap-3 w-max">
+        <i class="fas fa-check-circle text-green-400"></i> <span id="toastMsg"></span>
+    </div>
 
     <script>
-        let allItems = [];
+        // GLOBALES
+        let allItems = []; 
+        let facturacionCatalog = []; 
         let baseItems = [];
+        let currentTab = 'master';
+        let subcollectionListener = null;
 
-        function showToast(msg) {
+        document.getElementById('globalSearchContainer').classList.remove('hidden');
+
+        function showToast(msg, type = 'success') {
             const t = document.getElementById('toast');
-            t.innerText = msg;
+            const icon = t.querySelector('i');
+            document.getElementById('toastMsg').innerText = msg;
+            
+            if(type === 'error') {
+                icon.className = "fas fa-exclamation-circle text-red-400";
+            } else {
+                icon.className = "fas fa-check-circle text-green-400";
+            }
+
             t.classList.remove('hidden');
-            t.classList.add('toast-enter');
-            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('toast-enter'); }, 3000);
+            t.classList.add('slide-up');
+            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('slide-up'); }, 3000);
         }
 
-        // 1. Cargar Datos
+        function switchTab(tab) {
+            currentTab = tab;
+            clearBulkSelection(); // Limpiar seleccion al cambiar de pestaña
+            
+            // Estilos de botones (Píldora)
+            const btnMaster = document.getElementById('tabBtn-master');
+            const btnImport = document.getElementById('tabBtn-import');
+            
+            if(tab === 'master') {
+                btnMaster.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+                btnMaster.classList.remove('hover:text-slate-900');
+                btnImport.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                btnImport.classList.add('hover:text-slate-900');
+            } else {
+                btnImport.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+                btnImport.classList.remove('hover:text-slate-900');
+                btnMaster.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                btnMaster.classList.add('hover:text-slate-900');
+            }
+            
+            document.getElementById('view-master').classList.add('hidden');
+            document.getElementById('view-import').classList.add('hidden');
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            
+            // Limpiar buscador global
+            document.getElementById('globalSearch').value = '';
+            filterTable();
+            renderImportTable();
+        }
+
+        // 1A. LECTURA MASTER
         productsRef.onSnapshot((snapshot) => {
             allItems = [];
             baseItems = [];
@@ -216,117 +469,387 @@
                 const data = doc.data();
                 const item = { id: doc.id, ...data };
                 allItems.push(item);
-                
-                // Clasificar para el select de recetas
-                if(!item.tipo_item || item.tipo_item === 'PIEZA_BASE') {
-                    baseItems.push(item);
-                }
-
-                // Contar pendientes (Base u Oficial sin código)
-                if ((item.tipo_item !== 'KIT_FLEXIBLE') && (!item.codigo_sistema_oficial || item.codigo_sistema_oficial.trim() === '')) {
-                    pendingCount++;
-                }
+                if(!item.tipo_item || item.tipo_item === 'PIEZA_BASE') baseItems.push(item);
+                if (!item.codigo_sistema_oficial || item.codigo_sistema_oficial.trim() === '') pendingCount++;
             });
 
             document.getElementById('count-total').innerText = allItems.length;
-        document.getElementById('count-pending').innerText = pendingCount;
-        
-        filterTable();
-    });
-
-    function togglePendingFilter() {
-        const cb = document.getElementById('filterPending');
-        cb.checked = !cb.checked;
-        filterTable();
-    }
-
-    function filterTable() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const showOnlyPending = document.getElementById('filterPending').checked;
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-
-        const filtered = allItems.filter(p => {
-            const matchSearch = (p.nombre_flexible || '').toLowerCase().includes(term) || 
-                                (p.codigo_sistema_oficial || '').toLowerCase().includes(term);
+            document.getElementById('count-pending').innerText = pendingCount;
             
-            if (!matchSearch) return false;
-
-            // Si el filtro está activo, ignorar los que YA están configurados
-            if (showOnlyPending) {
-                const isPending = (p.tipo_item !== 'KIT_FLEXIBLE') && (!p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '');
-                if (!isPending) return false;
-            }
-
-            return true;
+            filterTable();
+            renderImportTable(); 
         });
 
-        filtered.forEach(p => {
-            const tipo = p.tipo_item || 'PIEZA_BASE';
+        // 1B. LECTURA FACTURACIÓN
+        facturacionRef.onSnapshot((snapshot) => {
+            facturacionCatalog = [];
+            snapshot.forEach(doc => { facturacionCatalog.push({ id: doc.id, ...doc.data() }); });
+            renderImportTable();
+        });
+
+        // BUSCADOR GLOBAL (Unificado)
+        function handleGlobalSearch() {
+            clearBulkSelection(); // Limpiar seleccion al buscar
+            if(currentTab === 'master') filterTable();
+            else renderImportTable();
+        }
+
+        // 2A. TABLA MASTER Y BULK ACTIONS
+        function togglePendingFilter() {
+            const cb = document.getElementById('filterPending');
+            cb.checked = !cb.checked;
+            clearBulkSelection();
+            filterTable();
+        }
+
+        function toggleSelectAll() {
+            const checked = document.getElementById('selectAll').checked;
+            document.querySelectorAll('.row-cb').forEach(cb => cb.checked = checked);
+            updateBulkSelection();
+        }
+
+        function updateBulkSelection() {
+            const selected = document.querySelectorAll('.row-cb:checked');
+            const bulkBar = document.getElementById('bulkActionBar');
+            
+            if(selected.length > 0) {
+                document.getElementById('bulkCount').innerText = selected.length;
+                bulkBar.classList.remove('hidden');
+            } else {
+                bulkBar.classList.add('hidden');
+                document.getElementById('selectAll').checked = false;
+            }
+        }
+
+        function clearBulkSelection() {
+            document.querySelectorAll('.row-cb').forEach(cb => cb.checked = false);
+            document.getElementById('selectAll').checked = false;
+            updateBulkSelection();
+        }
+
+        function openMassEditModal() {
+            const selected = document.querySelectorAll('.row-cb:checked');
+            if(selected.length === 0) return;
+            
+            document.getElementById('massEditCount').innerText = selected.length;
+            document.getElementById('massCategory').value = '';
+            document.getElementById('massTipo').value = '';
+            
+            const modal = document.getElementById('massEditModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        async function applyMassEdit() {
+            const selected = document.querySelectorAll('.row-cb:checked');
+            const newCat = document.getElementById('massCategory').value.trim();
+            const newTipo = document.getElementById('massTipo').value;
+
+            if(!newCat && !newTipo) return showToast('No hay datos para actualizar', 'error');
+
+            try {
+                const batch = db.batch();
+                let count = 0;
+                
+                selected.forEach(cb => {
+                    const ref = productsRef.doc(cb.value);
+                    const updateData = {};
+                    if(newCat) updateData.categoria = newCat;
+                    if(newTipo) updateData.tipo_item = newTipo;
+                    
+                    batch.update(ref, updateData);
+                    count++;
+                });
+
+                await batch.commit();
+                showToast(`¡Se actualizaron ${count} productos!`);
+                closeModal('massEditModal');
+                clearBulkSelection();
+            } catch(e) {
+                console.error(e);
+                showToast('Error en guardado masivo', 'error');
+            }
+        }
+
+        function filterTable() {
+            const term = document.getElementById('globalSearch').value.toLowerCase();
+            const showOnlyPending = document.getElementById('filterPending').checked;
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const filtered = allItems.filter(p => {
+                const matchSearch = (p.nombre_flexible || '').toLowerCase().includes(term) || 
+                                    (p.codigo_sistema_oficial || '').toLowerCase().includes(term) ||
+                                    (p.categoria || '').toLowerCase().includes(term);
+                if (!matchSearch) return false;
+                if (showOnlyPending) {
+                    if (p.codigo_sistema_oficial && p.codigo_sistema_oficial.trim() !== '') return false;
+                }
+                return true;
+            });
+
+            filtered.forEach(p => {
                 let codTxt = p.codigo_sistema_oficial || '';
                 let statusBadge = '';
 
-                if (tipo !== 'KIT_FLEXIBLE' && codTxt === '') {
-                    statusBadge = `<span class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fas fa-exclamation-triangle"></i> PENDIENTE</span>`;
-                    codTxt = '<span class="text-slate-300 italic">Vacío</span>';
-                } else if (tipo === 'KIT_FLEXIBLE') {
-                    codTxt = '<span class="text-slate-400 italic">Desglose (Receta)</span>';
+                if (codTxt === '') {
+                    statusBadge = `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-exclamation-circle text-[9px]"></i> PENDIENTE</span>`;
+                    codTxt = '<span class="text-slate-300 italic text-xs">Sin asignar</span>';
+                } else if (p.tipo_item === 'KIT_FLEXIBLE') {
+                    statusBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-magic text-[9px]"></i> RECETA WEB</span>`;
                 } else {
-                    statusBadge = `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fas fa-check"></i> LISTO</span>`;
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-check text-[9px]"></i> LISTO</span>`;
                 }
 
                 const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors group";
                 tr.innerHTML = `
-                    <td class="p-3 text-center border-b border-slate-100"><input type="checkbox" class="row-cb rounded" value="${p.id}"></td>
-                    <td class="p-3 border-b border-slate-100"><img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-10 h-10 object-cover rounded shadow-sm border border-slate-200"></td>
-                    <td class="p-3 border-b border-slate-100 font-bold text-slate-800">${p.nombre_flexible || 'S/N'} <div class="mt-1">${statusBadge}</div></td>
-                    <td class="p-3 border-b border-slate-100 text-xs text-slate-500">${p.categoria || '-'}</td>
-                    <td class="p-3 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-semibold border border-slate-200">${tipo.replace('_', ' ')}</span></td>
-                    <td class="p-3 border-b border-slate-100 font-mono text-xs">${codTxt}</td>
-                    <td class="p-3 text-center border-b border-slate-100">
-                        <button onclick="openEditModal('${p.id}')" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded transition font-bold text-xs"><i class="fas fa-edit"></i> Editar</button>
+                    <td class="px-4 py-4 text-center">
+                        <input type="checkbox" class="row-cb cb-modern focus:ring-blue-500" value="${p.id}" onchange="updateBulkSelection()">
+                    </td>
+                    <td class="px-6 py-4 flex items-center gap-4">
+                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 bg-white shrink-0">
+                        <div>
+                            <p class="font-bold text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>
+                            ${statusBadge}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-[10px] font-bold border border-slate-200 uppercase tracking-wider">${p.categoria || 'N/A'}</span>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-sm font-semibold text-slate-700">${codTxt}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openEditModal('${p.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg transition-all font-bold text-xs shadow-sm">Configurar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            // Re-evaluar seleccion al redibujar
+            updateBulkSelection();
+        }
+
+        // 2B. TABLA IMPORTACIÓN
+        function renderImportTable() {
+            const tbody = document.getElementById('importTableBody');
+            const term = document.getElementById('globalSearch').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
+
+            const pendingToImport = facturacionCatalog.filter(fact => {
+                const code = fact.codigo || fact.Codigo || fact.id;
+                
+                const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto || '';
+                const name = nameRaw.toLowerCase();
+                
+                const matchSearch = name.includes(term) || code.toLowerCase().includes(term);
+                const alreadyMigrated = masterCodes.includes(code);
+                
+                return matchSearch && !alreadyMigrated;
+            });
+
+            const badge = document.getElementById('importBadge');
+            badge.innerText = pendingToImport.length;
+            if(pendingToImport.length > 0) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+
+            if(pendingToImport.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-12 text-center text-slate-500 font-medium bg-slate-50/50"><i class="fas fa-check-circle text-4xl text-emerald-400 mb-3 block"></i> Todo importado y al día.</td></tr>`;
+                return;
+            }
+
+            pendingToImport.forEach(fact => {
+                const code = fact.codigo || fact.Codigo || fact.id;
+                
+                const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto;
+                const name = nameRaw || 'Sin descripción (Verificar nombre del campo en BD)';
+                
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono font-bold text-slate-800">${code}</td>
+                    <td class="px-6 py-4 font-medium text-slate-600">${name}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="importProduct('${fact.id}')" class="text-slate-700 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 px-4 py-2 rounded-lg transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto">
+                            Importar <i class="fas fa-arrow-right"></i>
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // 2. Modales Lógica Visual
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        function toggleFormFields() {
-            const tipo = document.getElementById('editTipo').value;
-            const fCodigo = document.getElementById('fieldCodigo');
-            const fReceta = document.getElementById('fieldReceta');
-
-            if (tipo === 'KIT_FLEXIBLE') {
-                fCodigo.classList.add('hidden');
-                fReceta.classList.remove('hidden');
-            } else {
-                fCodigo.classList.remove('hidden');
-                fReceta.classList.add('hidden');
+        // MODAL Y FORMS
+        function closeModal(id) { 
+            const modal = document.getElementById(id);
+            modal.classList.add('opacity-0');
+            modal.querySelector('.slide-up').style.transform = "translateY(20px)";
+            
+            setTimeout(() => {
+                modal.classList.add('hidden'); 
+                modal.querySelector('.slide-up').style.transform = "";
+            }, 300);
+            
+            if(id === 'editModal' && subcollectionListener) {
+                subcollectionListener(); 
+                subcollectionListener = null;
             }
         }
 
-        // 3. Edición Individual
-        function openEditModal(id) {
-            const p = allItems.find(x => x.id === id);
-            if(!p) return;
+        function toggleFormFields() {
+            const tipo = document.getElementById('editTipo').value;
+            const id = document.getElementById('editId').value;
+            const fReceta = document.getElementById('fieldReceta');
+            const secPkgs = document.getElementById('sectionPaquetes');
 
-            document.getElementById('editId').value = p.id;
-            document.getElementById('editImgPreview').src = p.imagen_url || 'https://via.placeholder.com/60';
-            document.getElementById('editName').value = p.nombre_flexible || '';
-            document.getElementById('editCategory').value = p.categoria || '';
-            document.getElementById('editTipo').value = p.tipo_item || 'PIEZA_BASE';
-            document.getElementById('editCodigo').value = p.codigo_sistema_oficial || '';
+            if (tipo === 'KIT_FLEXIBLE') fReceta.classList.remove('hidden');
+            else fReceta.classList.add('hidden');
+
+            if (tipo === 'PIEZA_BASE' && id) {
+                secPkgs.classList.remove('hidden');
+                document.getElementById('sectionNewWarning').classList.add('hidden');
+            } else if (tipo === 'PIEZA_BASE' && !id) {
+                secPkgs.classList.add('hidden');
+                document.getElementById('sectionNewWarning').classList.remove('hidden');
+            } else {
+                secPkgs.classList.add('hidden');
+                document.getElementById('sectionNewWarning').classList.add('hidden');
+            }
+        }
+
+        function openEditModal(id = null) {
+            document.getElementById('importOldId').value = '';
+            document.getElementById('newPkgQty').value = '';
+            document.getElementById('newPkgSku').value = '';
+
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            if (id) {
+                const p = allItems.find(x => x.id === id);
+                if(!p) return;
+                document.getElementById('modalTitle').innerText = 'Ajustes del Producto';
+                document.getElementById('editId').value = p.id;
+                document.getElementById('editImgPreview').src = p.imagen_url || 'https://via.placeholder.com/150';
+                document.getElementById('editImage').value = p.imagen_url || '';
+                document.getElementById('editName').value = p.nombre_flexible || '';
+                document.getElementById('editCategory').value = p.categoria || '';
+                document.getElementById('editCodigo').value = p.codigo_sistema_oficial || '';
+                document.getElementById('editTipo').value = p.tipo_item || 'PIEZA_BASE';
+                
+                document.getElementById('recetaContainer').innerHTML = '';
+                if(p.receta_desglose) Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
+                
+                loadSubcollection(p.id);
+            } else {
+                document.getElementById('modalTitle').innerText = 'Nuevo Producto Base';
+                document.getElementById('editId').value = '';
+                document.getElementById('editImgPreview').src = 'https://via.placeholder.com/150';
+                document.getElementById('editImage').value = '';
+                document.getElementById('editName').value = '';
+                document.getElementById('editCategory').value = '';
+                document.getElementById('editCodigo').value = '';
+                document.getElementById('editTipo').value = 'PIEZA_BASE';
+                document.getElementById('recetaContainer').innerHTML = '';
+                if(subcollectionListener) { subcollectionListener(); subcollectionListener = null; }
+            }
+            toggleFormFields();
+        }
+
+        function importProduct(factId) {
+            const fact = facturacionCatalog.find(x => x.id === factId);
+            if(!fact) return;
+            
+            document.getElementById('importOldId').value = fact.id; 
+            document.getElementById('modalTitle').innerText = 'Completar Importación';
+            document.getElementById('editId').value = ''; 
+            
+            document.getElementById('editImgPreview').src = 'https://via.placeholder.com/150';
+            document.getElementById('editImage').value = '';
+            
+            const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto || '';
+            document.getElementById('editName').value = nameRaw;
+            
+            document.getElementById('editCategory').value = fact.categoria || fact.Categoria || fact.linea || '';
+            document.getElementById('editTipo').value = 'PIEZA_BASE'; 
+            document.getElementById('editCodigo').value = fact.codigo || fact.Codigo || fact.id; 
             
             document.getElementById('recetaContainer').innerHTML = '';
-            if(p.receta_desglose) {
-                Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
-            }
-
             toggleFormFields();
-            document.getElementById('editModal').classList.remove('hidden');
+            
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        // SUBCOLECCIÓN LÓGICA
+        function loadSubcollection(productId) {
+            if(subcollectionListener) subcollectionListener(); 
+            
+            const tbody = document.getElementById('subcollectionList');
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400"><i class="fas fa-circle-notch fa-spin text-xl text-blue-300"></i></td></tr>';
+
+            subcollectionListener = productsRef.doc(productId).collection('paquetes').onSnapshot(snap => {
+                tbody.innerHTML = '';
+                if(snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400 text-sm font-medium">Aún no hay presentaciones para este producto.</td></tr>';
+                    return;
+                }
+                
+                const pkgs = [];
+                snap.forEach(doc => pkgs.push({id: doc.id, ...doc.data()}));
+                pkgs.sort((a,b) => a.piezas - b.piezas);
+
+                pkgs.forEach(pkg => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 text-center font-black text-slate-800">${pkg.piezas} <span class="text-[10px] font-bold text-slate-400">PZ</span></td>
+                        <td class="py-3 px-4 font-mono font-medium text-slate-600 text-sm">${pkg.sku}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="deletePackage('${productId}', '${pkg.id}')" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-lg transition" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function autoSkuSubcollection() {
+            const baseSku = document.getElementById('editCodigo').value.trim();
+            const qty = document.getElementById('newPkgQty').value;
+            if(!baseSku) return showToast('Agrega el Código Base primero.', 'error');
+            if(!qty || qty < 2) return showToast('Cantidad mínima: 2.', 'error');
+            
+            document.getElementById('newPkgSku').value = `${baseSku}-${qty}PZ`;
+        }
+
+        async function addPackageToSubcollection() {
+            const productId = document.getElementById('editId').value;
+            const qty = parseInt(document.getElementById('newPkgQty').value);
+            const sku = document.getElementById('newPkgSku').value.trim();
+
+            if(!productId) return showToast('Error interno.', 'error');
+            if(!qty || qty < 2) return showToast('Falta cantidad de piezas.', 'error');
+            if(!sku) return showToast('Falta el SKU.', 'error');
+
+            try {
+                await productsRef.doc(productId).collection('paquetes').add({
+                    piezas: qty, sku: sku, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Presentación añadida');
+                document.getElementById('newPkgQty').value = '';
+                document.getElementById('newPkgSku').value = '';
+            } catch (error) { showToast('Error al añadir', 'error'); }
+        }
+
+        async function deletePackage(productId, pkgId) {
+            if(!confirm('¿Eliminar esta presentación?')) return;
+            try {
+                await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete();
+                showToast('Eliminado');
+            } catch (error) { showToast('Error al eliminar', 'error'); }
         }
 
         function getBaseOptions() {
@@ -337,17 +860,17 @@
 
         function addRecetaRow(compId = "", qty = 1) {
             const div = document.createElement('div');
-            div.className = "flex gap-2 items-center row-receta";
+            div.className = "flex gap-2 items-center row-receta mb-2";
             div.innerHTML = `
-                <select class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs outline-none r-select">${getBaseOptions()}</select>
-                <input type="number" min="1" value="${qty}" class="w-16 border border-slate-300 rounded px-2 py-1 text-xs text-center outline-none r-qty">
-                <button onclick="this.parentElement.remove()" class="text-red-500 hover:bg-red-50 p-1 rounded"><i class="fas fa-trash"></i></button>
+                <select class="flex-1 input-modern rounded-lg px-3 py-2 text-sm outline-none r-select">${getBaseOptions()}</select>
+                <input type="number" min="1" value="${qty}" class="w-20 input-modern rounded-lg px-3 py-2 text-sm text-center outline-none r-qty">
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-9 h-9 rounded-lg transition"><i class="fas fa-times"></i></button>
             `;
             if(compId) div.querySelector('.r-select').value = compId;
             document.getElementById('recetaContainer').appendChild(div);
         }
 
-        async function saveConfiguration() {
+        async function saveBaseProduct() {
             const id = document.getElementById('editId').value;
             const tipo = document.getElementById('editTipo').value;
             let receta = null;
@@ -359,65 +882,977 @@
                     const cQty = parseInt(row.querySelector('.r-qty').value);
                     if(cId && cQty > 0) receta[cId] = cQty;
                 });
-                if(Object.keys(receta).length === 0) return showToast('Agrega componentes a la receta');
+                if(Object.keys(receta).length === 0) return showToast('Receta vacía', 'error');
             }
 
+            const nombreFlexible = document.getElementById('editName').value.trim();
+            const codigoFacturacion = document.getElementById('editCodigo').value.trim();
+
+            if (!nombreFlexible) return showToast('Falta Nombre', 'error');
+            if (!codigoFacturacion) return showToast('Falta Código Base', 'error');
+
             const dataToUpdate = {
-                nombre_flexible: document.getElementById('editName').value.trim(),
+                nombre_flexible: nombreFlexible,
+                imagen_url: document.getElementById('editImage').value.trim(),
                 categoria: document.getElementById('editCategory').value.trim(),
+                codigo_sistema_oficial: codigoFacturacion,
                 tipo_item: tipo,
-                codigo_sistema_oficial: tipo === 'KIT_FLEXIBLE' ? null : document.getElementById('editCodigo').value.trim(),
-                receta_desglose: receta
+                receta_desglose: receta,
+                activo: true
             };
 
+            const wasImport = document.getElementById('importOldId').value;
+            if(wasImport) dataToUpdate.id_facturacion = wasImport;
+
             try {
-                await productsRef.doc(id).update(dataToUpdate);
-                showToast('Guardado correctamente');
+                if (id) {
+                    await productsRef.doc(id).update(dataToUpdate);
+                    showToast('Guardado con éxito');
+                } else {
+                    dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
+                    const docRef = await productsRef.add(dataToUpdate);
+                    
+                    if(wasImport) {
+                        showToast('¡Importado exitosamente!');
+                        switchTab('master'); 
+                    } else {
+                        showToast('Producto base creado. Agrega paquetes abajo.');
+                    }
+                    
+                    openEditModal(docRef.id);
+                    return; 
+                }
                 closeModal('editModal');
-            } catch (e) { showToast('Error al guardar'); console.error(e); }
+            } catch (e) { showToast('Error al guardar', 'error'); }
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurador Maestro - EEN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        
+        /* Animaciones suaves */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Estilo de Inputs modernos */
+        .input-modern {
+            background-color: #f1f5f9;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .input-modern:focus {
+            background-color: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
         }
 
-        // 4. Edición Masiva
+        /* Checkbox personalizado */
+        .cb-modern {
+            width: 1.15rem;
+            height: 1.15rem;
+            border-radius: 0.375rem;
+            border-color: #cbd5e1;
+            color: #2563eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cb-modern:focus { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden relative">
+
+    <!-- ========================================== -->
+    <!-- CREDENCIALES FIREBASE -->
+    <!-- ========================================== -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
+            projectId: "productoseen",
+            storageBucket: "productoseen.firebasestorage.app",
+            messagingSenderId: "1052892398028",
+            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        
+        const db = firebase.firestore();
+        const rtdb = firebase.database();
+        const productsRef = db.collection('productos_master');
+        const facturacionRef = db.collection('catalogo_facturacion');
+    </script>
+
+    <!-- Header Elegante -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-sm shadow-blue-200">
+                <i class="fas fa-layer-group text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Panel Master</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1">Gestión de Catálogo y Facturación</p>
+            </div>
+        </div>
+        <div>
+            <button onclick="openEditModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2">
+                <i class="fas fa-plus text-xs"></i> Crear Producto
+            </button>
+        </div>
+    </header>
+
+    <!-- Controles Superiores (Pestañas y Buscador) -->
+    <div class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shrink-0 z-0">
+        <!-- Pestañas Switch Moderno -->
+        <div class="bg-slate-100 p-1 rounded-xl flex gap-1 w-full md:w-auto">
+            <button onclick="switchTab('master')" id="tabBtn-master" class="flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold text-sm text-slate-600 transition hover:text-slate-900 bg-white shadow-sm text-blue-600">
+                <i class="fas fa-database mr-1"></i> Catálogo Master
+            </button>
+            <button onclick="switchTab('import')" id="tabBtn-import" class="flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold text-sm text-slate-600 transition hover:text-slate-900 relative">
+                <i class="fas fa-cloud-download-alt mr-1"></i> Importar
+                <span id="importBadge" class="absolute top-1 right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full shadow hidden">0</span>
+            </button>
+        </div>
+
+        <!-- Buscador Global -->
+        <div class="relative w-full md:w-96 hidden" id="globalSearchContainer">
+            <i class="fas fa-search absolute left-4 top-3 text-slate-400 text-sm"></i>
+            <input type="text" id="globalSearch" onkeyup="handleGlobalSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-10 pr-4 py-2.5 rounded-xl input-modern text-sm font-medium">
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-hidden relative">
+        
+        <!-- VISTA: CATÁLOGO MASTER -->
+        <div id="view-master" class="h-full flex flex-col w-full p-6 max-w-7xl mx-auto fade-in">
+            <!-- Estadísticas y Filtro -->
+            <div class="flex flex-wrap justify-between items-end gap-4 mb-4 shrink-0">
+                <div class="flex gap-4">
+                    <div class="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-200 min-w-[140px]">
+                        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1">Productos Master</p>
+                        <p class="text-3xl font-black text-slate-800" id="count-total">0</p>
+                    </div>
+                    <div onclick="togglePendingFilter()" class="bg-white hover:bg-slate-50 cursor-pointer transition px-5 py-4 rounded-2xl shadow-sm border border-slate-200 min-w-[140px] relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-amber-500/5 transition-opacity opacity-0 group-hover:opacity-100"></div>
+                        <p class="text-[11px] text-amber-600 font-bold uppercase tracking-wider mb-1">Falta Configurar</p>
+                        <p class="text-3xl font-black text-amber-600" id="count-pending">0</p>
+                    </div>
+                </div>
+                
+                <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2.5 rounded-xl border border-slate-200 font-semibold text-sm shadow-sm hover:bg-slate-50 transition select-none">
+                    <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
+                    <span class="text-slate-700">Mostrar solo Faltantes</span>
+                </label>
+            </div>
+
+            <!-- Tabla Master -->
+            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative">
+                <div class="overflow-y-auto flex-1 hide-scroll p-1">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-100 sticky top-0 z-10 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="px-4 py-4 rounded-tl-xl w-12 text-center">
+                                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="cb-modern focus:ring-blue-500">
+                                </th>
+                                <th class="px-6 py-4">Producto</th>
+                                <th class="px-6 py-4">Categoría</th>
+                                <th class="px-6 py-4">Cód. Facturación</th>
+                                <th class="px-6 py-4 text-right rounded-tr-xl">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: BANDEJA DE IMPORTACIÓN -->
+        <div id="view-import" class="h-full flex flex-col w-full p-6 max-w-7xl mx-auto hidden fade-in">
+            <div class="mb-4 shrink-0 bg-blue-50 border border-blue-100 rounded-2xl p-5 flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl shrink-0">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-900 text-lg">Pendientes de Importar</h2>
+                    <p class="text-sm text-slate-600 mt-0.5">Comparamos el Catálogo de Facturación contra el Master. Aquí están los códigos que faltan registrar para la tienda web.</p>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="overflow-y-auto flex-1 hide-scroll p-1">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-100 sticky top-0 z-10 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="px-6 py-4 w-1/4 rounded-tl-xl">Cód. Facturación</th>
+                                <th class="px-6 py-4">Descripción Oficial (Admin Viejo)</th>
+                                <th class="px-6 py-4 text-right rounded-tr-xl w-32">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="importTableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Barra Flotante para Edición Masiva -->
+    <div id="bulkActionBar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl z-40 hidden flex items-center gap-4 fade-in">
+        <span class="text-sm font-semibold flex items-center gap-2">
+            <span id="bulkCount" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-black">0</span> seleccionados
+        </span>
+        <div class="h-4 w-px bg-slate-700"></div>
+        <button onclick="openMassEditModal()" class="text-sm font-bold text-blue-400 hover:text-blue-300 transition flex items-center gap-2">
+            <i class="fas fa-magic"></i> Editar Lote
+        </button>
+        <button onclick="clearBulkSelection()" class="text-sm text-slate-400 hover:text-slate-300 transition ml-2" title="Cancelar selección">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL EDICIÓN MASIVA -->
+    <!-- ========================================== -->
+    <div id="massEditModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-200">
+            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900">Edición en Lote</h2>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider"><span id="massEditCount">0</span> elementos</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('massEditModal')" class="text-slate-400 hover:text-slate-600 transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-500 mb-2">Deja en blanco lo que NO quieras cambiar. Todos los productos seleccionados adoptarán los datos que llenes aquí.</p>
+                
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nueva Categoría</label>
+                    <input type="text" id="massCategory" class="w-full input-modern px-4 py-2.5 rounded-xl font-medium text-slate-900 uppercase" placeholder="Ej: TAPAS (Opcional)">
+                </div>
+                
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nuevo Comportamiento</label>
+                    <div class="relative">
+                        <select id="massTipo" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 font-medium appearance-none">
+                            <option value="">-- No modificar --</option>
+                            <option value="PIEZA_BASE">Pieza Base Suelta</option>
+                            <option value="KIT_OFICIAL">Kit Oficial (Armado en Excel)</option>
+                            <option value="KIT_FLEXIBLE">Kit Flexible Web (Desglose)</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                <button onclick="closeModal('massEditModal')" class="px-5 py-2.5 text-slate-600 font-semibold text-sm hover:bg-slate-200 rounded-xl transition">Cancelar</button>
+                <button onclick="applyMassEdit()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm shadow-blue-200 text-sm transition-all">
+                    Aplicar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL PREMIUM (Edición y Creación) -->
+    <!-- ========================================== -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 lg:p-6 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-50/90 rounded-[24px] shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[95vh] slide-up border border-slate-200">
+            
+            <!-- Modal Header -->
+            <div class="bg-white px-6 py-5 border-b border-slate-200 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h2 class="font-bold text-xl text-slate-900 tracking-tight" id="modalTitle">Configurar Producto</h2>
+                </div>
+                <button onclick="closeModal('editModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body (Gris tenue, divide tarjetas) -->
+            <div class="p-6 overflow-y-auto flex-1 hide-scroll space-y-6">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="importOldId"> 
+                
+                <!-- Tarjeta 1: Datos Generales -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-info-circle text-slate-400"></i> Información Base</h3>
+                    
+                    <div class="flex flex-col md:flex-row gap-6 items-start">
+                        <!-- Preview Imagen -->
+                        <div class="shrink-0 flex flex-col items-center gap-2">
+                            <div class="w-24 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden relative">
+                                <img id="editImgPreview" src="https://via.placeholder.com/150" class="w-full h-full object-cover z-10">
+                                <i class="fas fa-image absolute text-slate-300 text-2xl z-0"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 w-full space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre Comercial (Tienda) <span class="text-red-500">*</span></label>
+                                    <input type="text" id="editName" class="w-full input-modern px-4 py-2.5 rounded-xl font-medium text-slate-900" placeholder="Ej: Botella PET Cuadrada 1L">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">URL de Imagen</label>
+                                    <input type="url" id="editImage" placeholder="https://..." oninput="document.getElementById('editImgPreview').src = this.value || 'https://via.placeholder.com/150'" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-600 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Categoría</label>
+                                    <input type="text" id="editCategory" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 uppercase text-sm" placeholder="Ej: PET">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Unidad Mínima <span title="La venta por defecto es unitaria" class="text-blue-500 cursor-help ml-1"><i class="fas fa-question-circle"></i></span></label>
+                                    <input type="number" id="editPiezas" value="1" readonly class="w-full bg-slate-100 px-4 py-2.5 rounded-xl text-slate-500 text-sm cursor-not-allowed border border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: Facturación e Inventario -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-barcode text-slate-400"></i> Vinculación al Sistema</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Cód. Facturación Base <span class="text-red-500">*</span></label>
+                            <input type="text" id="editCodigo" placeholder="Ej: ENV-001" class="w-full input-modern px-4 py-2.5 rounded-xl font-mono uppercase text-slate-900 font-bold">
+                            <p class="text-[10px] text-slate-400 mt-1.5 ml-1">Para conectar el carrito con tu sistema físico.</p>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Comportamiento del Elemento</label>
+                            <div class="relative">
+                                <select id="editTipo" onchange="toggleFormFields()" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 font-medium appearance-none">
+                                    <option value="PIEZA_BASE">Pieza Base Suelta</option>
+                                    <option value="KIT_OFICIAL">Kit Oficial (Armado en Excel)</option>
+                                    <option value="KIT_FLEXIBLE">Kit Flexible Web (Desglose)</option>
+                                </select>
+                                <i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receta (Solo visible si es KIT_FLEXIBLE) -->
+                    <div id="fieldReceta" class="mt-4 pt-4 border-t border-slate-100 hidden">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Receta del Paquete</label>
+                        <div id="recetaContainer" class="space-y-2 mb-3"></div>
+                        <button onclick="addRecetaRow()" class="text-xs text-blue-600 font-bold hover:text-blue-700 transition flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg w-max">
+                            <i class="fas fa-plus"></i> Agregar Pieza
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3: Subcolección de Paquetes (Para Piezas Base) -->
+                <div id="sectionPaquetes" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-box-open text-slate-400"></i> Presentaciones (Bolsas/Paquetes)</h3>
+                    </div>
+                    
+                    <!-- Creador Rápido -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-wrap gap-3 items-end mb-5">
+                        <div class="w-24">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Piezas</label>
+                            <input type="number" id="newPkgQty" min="2" class="w-full input-modern px-3 py-2 rounded-lg text-sm text-center font-bold text-slate-700" placeholder="Ej: 50">
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">SKU de Venta</label>
+                            <div class="flex h-10">
+                                <input type="text" id="newPkgSku" class="w-full input-modern px-3 py-2 rounded-l-lg text-sm font-mono border-r-0" placeholder="Ej: ENV-001-50PZ">
+                                <button onclick="autoSkuSubcollection()" class="bg-blue-50 text-blue-600 border border-l-0 border-transparent hover:border-blue-200 px-3 rounded-r-lg font-bold text-[10px] transition uppercase tracking-wider" title="Generar: CodBase-PiezasPZ">Auto SKU</button>
+                            </div>
+                        </div>
+                        <button onclick="addPackageToSubcollection()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 rounded-lg font-bold text-sm h-10 transition">
+                            Crear
+                        </button>
+                    </div>
+
+                    <!-- Lista -->
+                    <div class="border border-slate-100 rounded-xl overflow-hidden">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-24 text-center">Contenido</th>
+                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider">SKU del Paquete</th>
+                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-20 text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subcollectionList" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Alerta Producto Nuevo -->
+                <div id="sectionNewWarning" class="hidden">
+                    <div class="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-xl flex items-center gap-3">
+                        <i class="fas fa-info-circle text-lg"></i>
+                        <p class="text-sm font-medium">Guarda la pieza base primero para habilitar la creación de presentaciones empaquetadas.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-white px-6 py-4 border-t border-slate-200 flex justify-end gap-3 shrink-0">
+                <button onclick="closeModal('editModal')" class="px-5 py-2.5 text-slate-600 font-semibold text-sm hover:bg-slate-100 rounded-xl transition">Cancelar</button>
+                <button onclick="saveBaseProduct()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm shadow-blue-200 text-sm transition-all flex items-center gap-2">
+                    <i class="fas fa-check"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Elegante -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl hidden z-[100] font-semibold text-sm flex items-center gap-3 w-max">
+        <i class="fas fa-check-circle text-green-400"></i> <span id="toastMsg"></span>
+    </div>
+
+    <script>
+        // GLOBALES
+        let allItems = []; 
+        let facturacionCatalog = []; 
+        let baseItems = [];
+        let currentTab = 'master';
+        let subcollectionListener = null;
+
+        document.getElementById('globalSearchContainer').classList.remove('hidden');
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            const icon = t.querySelector('i');
+            document.getElementById('toastMsg').innerText = msg;
+            
+            if(type === 'error') {
+                icon.className = "fas fa-exclamation-circle text-red-400";
+            } else {
+                icon.className = "fas fa-check-circle text-green-400";
+            }
+
+            t.classList.remove('hidden');
+            t.classList.add('slide-up');
+            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('slide-up'); }, 3000);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            clearBulkSelection(); // Limpiar seleccion al cambiar de pestaña
+            
+            // Estilos de botones (Píldora)
+            const btnMaster = document.getElementById('tabBtn-master');
+            const btnImport = document.getElementById('tabBtn-import');
+            
+            if(tab === 'master') {
+                btnMaster.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+                btnMaster.classList.remove('hover:text-slate-900');
+                btnImport.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                btnImport.classList.add('hover:text-slate-900');
+            } else {
+                btnImport.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+                btnImport.classList.remove('hover:text-slate-900');
+                btnMaster.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                btnMaster.classList.add('hover:text-slate-900');
+            }
+            
+            document.getElementById('view-master').classList.add('hidden');
+            document.getElementById('view-import').classList.add('hidden');
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            
+            // Limpiar buscador global
+            document.getElementById('globalSearch').value = '';
+            filterTable();
+            renderImportTable();
+        }
+
+        // 1A. LECTURA MASTER
+        productsRef.onSnapshot((snapshot) => {
+            allItems = [];
+            baseItems = [];
+            let pendingCount = 0;
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const item = { id: doc.id, ...data };
+                allItems.push(item);
+                if(!item.tipo_item || item.tipo_item === 'PIEZA_BASE') baseItems.push(item);
+                if (!item.codigo_sistema_oficial || item.codigo_sistema_oficial.trim() === '') pendingCount++;
+            });
+
+            document.getElementById('count-total').innerText = allItems.length;
+            document.getElementById('count-pending').innerText = pendingCount;
+            
+            filterTable();
+            renderImportTable(); 
+        });
+
+        // 1B. LECTURA FACTURACIÓN
+        facturacionRef.onSnapshot((snapshot) => {
+            facturacionCatalog = [];
+            snapshot.forEach(doc => { facturacionCatalog.push({ id: doc.id, ...doc.data() }); });
+            renderImportTable();
+        });
+
+        // BUSCADOR GLOBAL (Unificado)
+        function handleGlobalSearch() {
+            clearBulkSelection(); // Limpiar seleccion al buscar
+            if(currentTab === 'master') filterTable();
+            else renderImportTable();
+        }
+
+        // 2A. TABLA MASTER Y BULK ACTIONS
+        function togglePendingFilter() {
+            const cb = document.getElementById('filterPending');
+            cb.checked = !cb.checked;
+            clearBulkSelection();
+            filterTable();
+        }
+
         function toggleSelectAll() {
             const checked = document.getElementById('selectAll').checked;
             document.querySelectorAll('.row-cb').forEach(cb => cb.checked = checked);
+            updateBulkSelection();
+        }
+
+        function updateBulkSelection() {
+            const selected = document.querySelectorAll('.row-cb:checked');
+            const bulkBar = document.getElementById('bulkActionBar');
+            
+            if(selected.length > 0) {
+                document.getElementById('bulkCount').innerText = selected.length;
+                bulkBar.classList.remove('hidden');
+            } else {
+                bulkBar.classList.add('hidden');
+                document.getElementById('selectAll').checked = false;
+            }
+        }
+
+        function clearBulkSelection() {
+            document.querySelectorAll('.row-cb').forEach(cb => cb.checked = false);
+            document.getElementById('selectAll').checked = false;
+            updateBulkSelection();
         }
 
         function openMassEditModal() {
             const selected = document.querySelectorAll('.row-cb:checked');
-            if(selected.length === 0) return showToast('Selecciona productos en la tabla');
+            if(selected.length === 0) return;
             
-            document.getElementById('massCount').innerText = selected.length;
-            document.getElementById('massTipo').value = '';
+            document.getElementById('massEditCount').innerText = selected.length;
             document.getElementById('massCategory').value = '';
+            document.getElementById('massTipo').value = '';
             
-            document.getElementById('massModal').classList.remove('hidden');
+            const modal = document.getElementById('massEditModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
 
         async function applyMassEdit() {
             const selected = document.querySelectorAll('.row-cb:checked');
-            const newTipo = document.getElementById('massTipo').value;
             const newCat = document.getElementById('massCategory').value.trim();
+            const newTipo = document.getElementById('massTipo').value;
 
-            if(!newTipo && !newCat) return;
+            if(!newCat && !newTipo) return showToast('No hay datos para actualizar', 'error');
 
             try {
                 const batch = db.batch();
+                let count = 0;
+                
                 selected.forEach(cb => {
                     const ref = productsRef.doc(cb.value);
-                    let updateData = {};
-                    if(newTipo) { 
-                        updateData.tipo_item = newTipo; 
-                        if(newTipo === 'KIT_FLEXIBLE') updateData.codigo_sistema_oficial = null;
-                    }
+                    const updateData = {};
                     if(newCat) updateData.categoria = newCat;
+                    if(newTipo) updateData.tipo_item = newTipo;
+                    
                     batch.update(ref, updateData);
+                    count++;
                 });
+
                 await batch.commit();
-                showToast('Actualización masiva exitosa');
-                closeModal('massModal');
-                document.getElementById('selectAll').checked = false;
-            } catch(e) { showToast('Error en guardado masivo'); }
+                showToast(`¡Se actualizaron ${count} productos!`);
+                closeModal('massEditModal');
+                clearBulkSelection();
+            } catch(e) {
+                console.error(e);
+                showToast('Error en guardado masivo', 'error');
+            }
+        }
+
+        function filterTable() {
+            const term = document.getElementById('globalSearch').value.toLowerCase();
+            const showOnlyPending = document.getElementById('filterPending').checked;
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const filtered = allItems.filter(p => {
+                const matchSearch = (p.nombre_flexible || '').toLowerCase().includes(term) || 
+                                    (p.codigo_sistema_oficial || '').toLowerCase().includes(term) ||
+                                    (p.categoria || '').toLowerCase().includes(term);
+                if (!matchSearch) return false;
+                if (showOnlyPending) {
+                    if (p.codigo_sistema_oficial && p.codigo_sistema_oficial.trim() !== '') return false;
+                }
+                return true;
+            });
+
+            filtered.forEach(p => {
+                let codTxt = p.codigo_sistema_oficial || '';
+                let statusBadge = '';
+
+                if (codTxt === '') {
+                    statusBadge = `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-exclamation-circle text-[9px]"></i> PENDIENTE</span>`;
+                    codTxt = '<span class="text-slate-300 italic text-xs">Sin asignar</span>';
+                } else if (p.tipo_item === 'KIT_FLEXIBLE') {
+                    statusBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-magic text-[9px]"></i> RECETA WEB</span>`;
+                } else {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-check text-[9px]"></i> LISTO</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors group";
+                tr.innerHTML = `
+                    <td class="px-4 py-4 text-center">
+                        <input type="checkbox" class="row-cb cb-modern focus:ring-blue-500" value="${p.id}" onchange="updateBulkSelection()">
+                    </td>
+                    <td class="px-6 py-4 flex items-center gap-4">
+                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 bg-white shrink-0">
+                        <div>
+                            <p class="font-bold text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>
+                            ${statusBadge}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-[10px] font-bold border border-slate-200 uppercase tracking-wider">${p.categoria || 'N/A'}</span>
+                    </td>
+                    <td class="px-6 py-4 font-mono text-sm font-semibold text-slate-700">${codTxt}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openEditModal('${p.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg transition-all font-bold text-xs shadow-sm">Configurar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            // Re-evaluar seleccion al redibujar
+            updateBulkSelection();
+        }
+
+        // 2B. TABLA IMPORTACIÓN
+        function renderImportTable() {
+            const tbody = document.getElementById('importTableBody');
+            const term = document.getElementById('globalSearch').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
+
+            const pendingToImport = facturacionCatalog.filter(fact => {
+                const code = fact.codigo || fact.Codigo || fact.id;
+                
+                const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto || '';
+                const name = nameRaw.toLowerCase();
+                
+                const matchSearch = name.includes(term) || code.toLowerCase().includes(term);
+                const alreadyMigrated = masterCodes.includes(code);
+                
+                return matchSearch && !alreadyMigrated;
+            });
+
+            const badge = document.getElementById('importBadge');
+            badge.innerText = pendingToImport.length;
+            if(pendingToImport.length > 0) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+
+            if(pendingToImport.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-12 text-center text-slate-500 font-medium bg-slate-50/50"><i class="fas fa-check-circle text-4xl text-emerald-400 mb-3 block"></i> Todo importado y al día.</td></tr>`;
+                return;
+            }
+
+            pendingToImport.forEach(fact => {
+                const code = fact.codigo || fact.Codigo || fact.id;
+                
+                const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto;
+                const name = nameRaw || 'Sin descripción (Verificar nombre del campo en BD)';
+                
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono font-bold text-slate-800">${code}</td>
+                    <td class="px-6 py-4 font-medium text-slate-600">${name}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="importProduct('${fact.id}')" class="text-slate-700 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 px-4 py-2 rounded-lg transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto">
+                            Importar <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // MODAL Y FORMS
+        function closeModal(id) { 
+            const modal = document.getElementById(id);
+            modal.classList.add('opacity-0');
+            modal.querySelector('.slide-up').style.transform = "translateY(20px)";
+            
+            setTimeout(() => {
+                modal.classList.add('hidden'); 
+                modal.querySelector('.slide-up').style.transform = "";
+            }, 300);
+            
+            if(id === 'editModal' && subcollectionListener) {
+                subcollectionListener(); 
+                subcollectionListener = null;
+            }
+        }
+
+        function toggleFormFields() {
+            const tipo = document.getElementById('editTipo').value;
+            const id = document.getElementById('editId').value;
+            const fReceta = document.getElementById('fieldReceta');
+            const secPkgs = document.getElementById('sectionPaquetes');
+
+            if (tipo === 'KIT_FLEXIBLE') fReceta.classList.remove('hidden');
+            else fReceta.classList.add('hidden');
+
+            if (tipo === 'PIEZA_BASE' && id) {
+                secPkgs.classList.remove('hidden');
+                document.getElementById('sectionNewWarning').classList.add('hidden');
+            } else if (tipo === 'PIEZA_BASE' && !id) {
+                secPkgs.classList.add('hidden');
+                document.getElementById('sectionNewWarning').classList.remove('hidden');
+            } else {
+                secPkgs.classList.add('hidden');
+                document.getElementById('sectionNewWarning').classList.add('hidden');
+            }
+        }
+
+        function openEditModal(id = null) {
+            document.getElementById('importOldId').value = '';
+            document.getElementById('newPkgQty').value = '';
+            document.getElementById('newPkgSku').value = '';
+
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            if (id) {
+                const p = allItems.find(x => x.id === id);
+                if(!p) return;
+                document.getElementById('modalTitle').innerText = 'Ajustes del Producto';
+                document.getElementById('editId').value = p.id;
+                document.getElementById('editImgPreview').src = p.imagen_url || 'https://via.placeholder.com/150';
+                document.getElementById('editImage').value = p.imagen_url || '';
+                document.getElementById('editName').value = p.nombre_flexible || '';
+                document.getElementById('editCategory').value = p.categoria || '';
+                document.getElementById('editCodigo').value = p.codigo_sistema_oficial || '';
+                document.getElementById('editTipo').value = p.tipo_item || 'PIEZA_BASE';
+                
+                document.getElementById('recetaContainer').innerHTML = '';
+                if(p.receta_desglose) Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
+                
+                loadSubcollection(p.id);
+            } else {
+                document.getElementById('modalTitle').innerText = 'Nuevo Producto Base';
+                document.getElementById('editId').value = '';
+                document.getElementById('editImgPreview').src = 'https://via.placeholder.com/150';
+                document.getElementById('editImage').value = '';
+                document.getElementById('editName').value = '';
+                document.getElementById('editCategory').value = '';
+                document.getElementById('editCodigo').value = '';
+                document.getElementById('editTipo').value = 'PIEZA_BASE';
+                document.getElementById('recetaContainer').innerHTML = '';
+                if(subcollectionListener) { subcollectionListener(); subcollectionListener = null; }
+            }
+            toggleFormFields();
+        }
+
+        function importProduct(factId) {
+            const fact = facturacionCatalog.find(x => x.id === factId);
+            if(!fact) return;
+            
+            document.getElementById('importOldId').value = fact.id; 
+            document.getElementById('modalTitle').innerText = 'Completar Importación';
+            document.getElementById('editId').value = ''; 
+            
+            document.getElementById('editImgPreview').src = 'https://via.placeholder.com/150';
+            document.getElementById('editImage').value = '';
+            
+            const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto || '';
+            document.getElementById('editName').value = nameRaw;
+            
+            document.getElementById('editCategory').value = fact.categoria || fact.Categoria || fact.linea || '';
+            document.getElementById('editTipo').value = 'PIEZA_BASE'; 
+            document.getElementById('editCodigo').value = fact.codigo || fact.Codigo || fact.id; 
+            
+            document.getElementById('recetaContainer').innerHTML = '';
+            toggleFormFields();
+            
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        // SUBCOLECCIÓN LÓGICA
+        function loadSubcollection(productId) {
+            if(subcollectionListener) subcollectionListener(); 
+            
+            const tbody = document.getElementById('subcollectionList');
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400"><i class="fas fa-circle-notch fa-spin text-xl text-blue-300"></i></td></tr>';
+
+            subcollectionListener = productsRef.doc(productId).collection('paquetes').onSnapshot(snap => {
+                tbody.innerHTML = '';
+                if(snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400 text-sm font-medium">Aún no hay presentaciones para este producto.</td></tr>';
+                    return;
+                }
+                
+                const pkgs = [];
+                snap.forEach(doc => pkgs.push({id: doc.id, ...doc.data()}));
+                pkgs.sort((a,b) => a.piezas - b.piezas);
+
+                pkgs.forEach(pkg => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 text-center font-black text-slate-800">${pkg.piezas} <span class="text-[10px] font-bold text-slate-400">PZ</span></td>
+                        <td class="py-3 px-4 font-mono font-medium text-slate-600 text-sm">${pkg.sku}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="deletePackage('${productId}', '${pkg.id}')" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-lg transition" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function autoSkuSubcollection() {
+            const baseSku = document.getElementById('editCodigo').value.trim();
+            const qty = document.getElementById('newPkgQty').value;
+            if(!baseSku) return showToast('Agrega el Código Base primero.', 'error');
+            if(!qty || qty < 2) return showToast('Cantidad mínima: 2.', 'error');
+            
+            document.getElementById('newPkgSku').value = `${baseSku}-${qty}PZ`;
+        }
+
+        async function addPackageToSubcollection() {
+            const productId = document.getElementById('editId').value;
+            const qty = parseInt(document.getElementById('newPkgQty').value);
+            const sku = document.getElementById('newPkgSku').value.trim();
+
+            if(!productId) return showToast('Error interno.', 'error');
+            if(!qty || qty < 2) return showToast('Falta cantidad de piezas.', 'error');
+            if(!sku) return showToast('Falta el SKU.', 'error');
+
+            try {
+                await productsRef.doc(productId).collection('paquetes').add({
+                    piezas: qty, sku: sku, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Presentación añadida');
+                document.getElementById('newPkgQty').value = '';
+                document.getElementById('newPkgSku').value = '';
+            } catch (error) { showToast('Error al añadir', 'error'); }
+        }
+
+        async function deletePackage(productId, pkgId) {
+            if(!confirm('¿Eliminar esta presentación?')) return;
+            try {
+                await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete();
+                showToast('Eliminado');
+            } catch (error) { showToast('Error al eliminar', 'error'); }
+        }
+
+        function getBaseOptions() {
+            let opts = `<option value="">Selecciona pieza...</option>`;
+            baseItems.forEach(b => opts += `<option value="${b.id}">${b.nombre_flexible}</option>`);
+            return opts;
+        }
+
+        function addRecetaRow(compId = "", qty = 1) {
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center row-receta mb-2";
+            div.innerHTML = `
+                <select class="flex-1 input-modern rounded-lg px-3 py-2 text-sm outline-none r-select">${getBaseOptions()}</select>
+                <input type="number" min="1" value="${qty}" class="w-20 input-modern rounded-lg px-3 py-2 text-sm text-center outline-none r-qty">
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-9 h-9 rounded-lg transition"><i class="fas fa-times"></i></button>
+            `;
+            if(compId) div.querySelector('.r-select').value = compId;
+            document.getElementById('recetaContainer').appendChild(div);
+        }
+
+        async function saveBaseProduct() {
+            const id = document.getElementById('editId').value;
+            const tipo = document.getElementById('editTipo').value;
+            let receta = null;
+
+            if (tipo === 'KIT_FLEXIBLE') {
+                receta = {};
+                document.querySelectorAll('.row-receta').forEach(row => {
+                    const cId = row.querySelector('.r-select').value;
+                    const cQty = parseInt(row.querySelector('.r-qty').value);
+                    if(cId && cQty > 0) receta[cId] = cQty;
+                });
+                if(Object.keys(receta).length === 0) return showToast('Receta vacía', 'error');
+            }
+
+            const nombreFlexible = document.getElementById('editName').value.trim();
+            const codigoFacturacion = document.getElementById('editCodigo').value.trim();
+
+            if (!nombreFlexible) return showToast('Falta Nombre', 'error');
+            if (!codigoFacturacion) return showToast('Falta Código Base', 'error');
+
+            const dataToUpdate = {
+                nombre_flexible: nombreFlexible,
+                imagen_url: document.getElementById('editImage').value.trim(),
+                categoria: document.getElementById('editCategory').value.trim(),
+                codigo_sistema_oficial: codigoFacturacion,
+                tipo_item: tipo,
+                receta_desglose: receta,
+                activo: true
+            };
+
+            const wasImport = document.getElementById('importOldId').value;
+            if(wasImport) dataToUpdate.id_facturacion = wasImport;
+
+            try {
+                if (id) {
+                    await productsRef.doc(id).update(dataToUpdate);
+                    showToast('Guardado con éxito');
+                } else {
+                    dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
+                    const docRef = await productsRef.add(dataToUpdate);
+                    
+                    if(wasImport) {
+                        showToast('¡Importado exitosamente!');
+                        switchTab('master'); 
+                    } else {
+                        showToast('Producto base creado. Agrega paquetes abajo.');
+                    }
+                    
+                    openEditModal(docRef.id);
+                    return; 
+                }
+                closeModal('editModal');
+            } catch (e) { showToast('Error al guardar', 'error'); }
         }
     </script>
 </body>
