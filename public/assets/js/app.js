@@ -367,38 +367,83 @@ function add(id) {
     if (typeof renderCart === 'function') renderCart();
     if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
 }
-function remove(id) { cart = cart.filter(x => x.id !roductos del catálogo para comenzar</p>
+// 1. Función para eliminar del carrito
+function remove(id) {
+    cart = cart.filter(x => x.id !== id);
+    saveCart();
+    // Volvemos a dibujar el carrito y el grid por si cambiaron cosas
+    renderCart(); 
+    if (typeof updateCartCount === 'function') updateCartCount();
+}
+
+// 2. Función que dibuja el carrito (Actualizada para leer paquetes de Firestore)
+function renderCart() {
+    const itemsCont = document.getElementById('cart-items');
+    if (!itemsCont) return;
+
+    // Si el carrito está vacío
+    if (cart.length === 0) {
+        itemsCont.innerHTML = `
+        <div class="text-center py-10">
+            <i class="fa-solid fa-cart-shopping text-4xl text-slate-200 mb-3"></i>
+            <h3 class="text-lg font-bold text-slate-800">Carrito vacío</h3>
+            <p class="text-xs text-slate-500 mt-1">Agrega productos del catálogo para comenzar</p>
         </div>`;
-        document.getElementById('cart-config').classList.('hidden');
+        document.getElementById('cart-config').classList.add('hidden');
         return;
     }
+
     document.getElementById('cart-config').classList.remove('hidden');
 
     itemsCont.innerHTML = cart.map((item, idx) => {
         const prod = allProducts.find(p => p.id === item.id) || item;
-        const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
-        const packSize = isBolsas ? 100 : (parseInt(prod.piezas)||0);
+        
+        // --- LÓGICA DE PAQUETES FIRESTORE PARA EL CARRITO ---
+        const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
+        const paquetes = prod.paquetes || [];
+        
+        let packSize = 1;
+        if (paquetes.length > 0) {
+            packSize = parseInt(paquetes[0].piezas); // Tomamos el primer paquete
+        } else if (isBolsas) {
+            packSize = 100; // Respaldo antiguo
+        } else {
+            packSize = parseInt(prod.piezas) || 0;
+        }
+        
+        // Dibujar los inputs según el tamaño del paquete
         let inputsHTML = '';
         if (packSize > 1) {
             inputsHTML = `
             <div class="flex gap-2 mt-2">
                 <div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5">
                     <i class="fa-solid fa-box text-indigo-500 text-sm"></i>
-                    <div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Paquetes</label><input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div>
+                    <div class="flex flex-col flex-1">
+                        <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Paquetes</label>
+                        <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
+                    </div>
                 </div>
                 ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
             </div>`;
         } else {
              inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
         }
+
         return `
         <div class="flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm mb-3 fade-in relative transition-all duration-300 hover:shadow-md hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
-            <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border"><img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply"></div>
-            <div class="flex-1 min-w-0"><div class="flex justify-between items-start gap-2"><h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${escapeHTML(item.name)}</h4><button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button></div>${inputsHTML}</div>
+            <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border">
+                <img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply">
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start gap-2">
+                    <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${escapeHTML(item.name)}</h4>
+                    <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+                ${inputsHTML}
+            </div>
         </div>`;
     }).join('');
 }
-
 function clearCart() { if(confirm("¿Vaciar carrito?")) { cart = []; saveCart(); toggleCart(); } }
 function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
