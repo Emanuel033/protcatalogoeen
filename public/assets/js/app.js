@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadProducts() {
     const container = document.getElementById('products-grid');
     if (container) {
-        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loader mx-auto mb-4"></div><p class="text-slate-500 font-medium">Cargando catálogo...</p></div>';
+        container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loader mx-auto mb-4"></div><p class="text-slate-500 font-medium">Cargando catálogo y paquetes...</p></div>';
     }
 
     // Inicializamos Firestore
@@ -56,35 +56,57 @@ function loadProducts() {
     // Leemos la nueva colección maestra, trayendo solo los activos
     db.collection('productos_master')
       .where('activo', '==', true)
-      .onSnapshot((snapshot) => {
-        allProducts = [];
+      .onSnapshot(async (snapshot) => {
         
-        snapshot.forEach((doc) => {
+        // Usamos un array de promesas para esperar a que bajen todos los paquetes
+        const promesasProductos = snapshot.docs.map(async (doc) => {
             const data = doc.data();
             
-            // MAPEO DE SUPERVIVENCIA: 
-            // Convertimos los nuevos nombres de Firestore a las variables que usa tu carrito actual
-            allProducts.push({
+            // MAPEO DE SUPERVIVENCIA
+            const producto = {
                 id: doc.id,
                 name: data.nombre_flexible || 'Sin nombre',
                 category: data.categoria || 'General',
                 image: data.imagen_url || 'https://via.placeholder.com/150',
-                piezas: data.piezas_por_caja_original || 1,
+                piezas: data.piezas_por_caja_original || 1, // Esta es la venta unitaria
                 stock: data.stock_total_piezas || 0,
-                
-                // Estos son los nuevos datos ocultos para cuando el carrito se envíe por WhatsApp
                 tipo_item: data.tipo_item || 'PIEZA_BASE',
                 codigo_sistema: data.codigo_sistema_oficial || null,
-                receta: data.receta_desglose || null
-            });
+                receta: data.receta_desglose || null,
+                paquetes: [] // <-- NUEVO: Arreglo vacío para guardar la subcolección
+            };
+
+            // Si es una pieza base, vamos a buscar si tiene paquetes
+            if (producto.tipo_item === 'PIEZA_BASE') {
+                try {
+                    const paquetesSnap = await db.collection('productos_master').doc(doc.id).collection('paquetes').get();
+                    if (!paquetesSnap.empty) {
+                        paquetesSnap.forEach(paqDoc => {
+                            producto.paquetes.push({
+                                id: paqDoc.id,
+                                ...paqDoc.data()
+                            });
+                        });
+                        // Ordenamos los paquetes de menor a mayor piezas
+                        producto.paquetes.sort((a, b) => a.piezas - b.piezas);
+                    }
+                } catch (error) {
+                    console.error(`Error cargando paquetes para ${producto.id}:`, error);
+                }
+            }
+
+            return producto;
         });
+
+        // Esperamos a que TODOS los productos hayan descargado sus paquetes
+        allProducts = await Promise.all(promesasProductos);
 
         // Extraemos los últimos IDs (para tu lógica de la etiqueta "NUEVO")
         latestProductIds = allProducts.slice(-8).map(p => p.id);
         
         // Llamamos a tus funciones originales para pintar la pantalla
         renderCategories();
-    applyFilter();
+        applyFilter();
         
     }, (error) => {
         console.error("Error al cargar el catálogo de Firestore:", error);
@@ -93,7 +115,6 @@ function loadProducts() {
         }
     });
 }
-
 function getCategoryIcon(cat) {
     const c = cat.toLowerCase();
     if(c.includes('bolsa')) return '<i class="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>';
@@ -195,18 +216,33 @@ function renderGrid() {
     const pageItems = filteredProducts.slice(start, start + itemsPerPage);
 
     cont.innerHTML = pageItems.map((p, idx) => {
-        const isBolsas = (p.category || '').toLowerCase().includes('bolsa'); 
-        const packQty = isBolsas ? 100 : (p.piezas ? parseInt(p.piezas) : 0);
-        const hasPack = packQty > 1;
         const isNew = latestProductIds.includes(p.id);
+        const paquetes = p.paquetes || [];
+        const hasPack = paquetes.length > 0;
         
-        const minText = isBolsas ? "Min: 100 pzas" : "Min: 1 pz";
-        const packText = (hasPack && !isBolsas) ? `Paquete: ${packQty} pzas` : "";
+        // La pieza base (suele ser 1, pero respeta si pusiste otro número en el Master)
+        const basePiezas = p.piezas ? parseInt(p.piezas) : 1;
+        const minText = `Min: ${basePiezas} pz${basePiezas > 1 ? 's' : ''}`;
+        
+        // Texto dinámico si tiene paquetes configurados
+        const packText = hasPack ? `<span class="text-indigo-600 font-black">Varias opciones</span>` : "";
 
-        let selectorHTML = isBolsas 
-            ? `<select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none"><option value="100">Paquete (100 pzas)</option></select>`
-            : (hasPack ? `<select id="sel-${p.id}" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 mb-2 bg-slate-50 text-slate-700 font-medium outline-none"><option value="1">Individual</option><option value="${packQty}">Paquete completo (${packQty})</option></select>` 
-            : `<input type="hidden" id="sel-${p.id}" value="1">`);
+        // Construcción dinámica del Selector
+        let selectorHTML = '';
+        if (hasPack) {
+            selectorHTML = `<select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none">
+                <option value="${basePiezas}|BASE">Individual (${basePiezas} pz)</option>`;
+            
+            // Recorremos los paquetes bajados de Firestore
+            paquetes.forEach(pkg => {
+                // Guardamos la cantidad Y el SKU separados por un "|" (pipe)
+                selectorHTML += `<option value="${pkg.piezas}|${pkg.sku}">Paquete/Bolsa (${pkg.piezas} pzas)</option>`;
+            });
+            selectorHTML += `</select>`;
+        } else {
+            // Si no tiene paquetes, solo mandamos un input oculto
+            selectorHTML = `<input type="hidden" id="sel-${p.id}" value="${basePiezas}|BASE">`;
+        }
 
         return `
         <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
@@ -219,7 +255,7 @@ function renderGrid() {
                 <h3 class="font-bold text-xs text-slate-900 mb-2 leading-relaxed h-auto">${escapeHTML(p.name)}</h3>
                 <div class="flex justify-between items-end text-[10px] font-bold text-slate-500 mb-2">
                     <span>${minText}</span>
-                    ${packText ? `<span class="text-indigo-600 font-black">${packText}</span>` : ''}
+                    ${packText}
                 </div>
                 ${selectorHTML}
                 <div class="mt-auto flex gap-2 pt-2">
@@ -256,33 +292,27 @@ function changePage(d) {
 // ==========================================
 // CARRITO
 // ==========================================
-function add(id) {
-    const p = allProducts.find(x => x.id === id);
-    if(!p) return;
-    const sel = document.getElementById(`sel-${id}`);
-    const qty = sel ? parseInt(sel.value) : 1;
-    const exist = cart.find(x => x.id === id);
-    if(exist) exist.quantity += qty; else cart.push({ ...p, quantity: qty });
-    saveCart();
-    showToast(`Agregado (+${qty})`);
-    
-    const fab = document.getElementById('cart-fab');
-    if(fab) {
-        fab.classList.remove('animate-pop');
-        void fab.offsetWidth; 
-        fab.classList.add('animate-pop');
-    }
-
-    if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: p.name, quantity: qty }] });
-}
 
 function updateCartItem(id) {
     const item = cart.find(x => x.id === id);
     if(!item) return;
     const prod = allProducts.find(p => p.id === id) || item; 
-    const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
-    const packSize = isBolsas ? 100 : (parseInt(prod.piezas)||0);
     
+    // 1. Verificamos si es "bolsa" vieja o si tiene paquetes nuevos en Firestore
+    const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
+    const paquetes = prod.paquetes || [];
+    
+    // 2. Definimos el tamaño del paquete dinámicamente
+    let packSize = 1;
+    if (paquetes.length > 0) {
+        packSize = parseInt(paquetes[0].piezas); // Toma la cantidad del primer paquete configurado
+    } else if (isBolsas) {
+        packSize = 100; // Respaldo para tu regla vieja
+    } else {
+        packSize = parseInt(prod.piezas) || 0;
+    }
+    
+    // 3. Calculamos la nueva cantidad de piezas totales
     if (packSize > 1) {
         const packs = parseInt(document.getElementById(`inp-pack-${id}`).value) || 0;
         let loose = isBolsas ? 0 : (parseInt(document.getElementById(`inp-loose-${id}`).value) || 0);
@@ -290,34 +320,56 @@ function updateCartItem(id) {
     } else {
         item.quantity = parseInt(document.getElementById(`inp-simple-${id}`).value) || 1;
     }
+    
     item.quantity <= 0 ? remove(id) : saveCart();
 }
+function add(id) {
+    const prod = allProducts.find(p => p.id === id);
+    if (!prod) return;
 
-function remove(id) { cart = cart.filter(x => x.id !== id); saveCart(); }
+    // Leemos el selector que ahora trae la "CANTIDAD|SKU"
+    const selectElem = document.getElementById(`sel-${id}`);
+    let qtyToAdd = 1;
+    let skuOficial = prod.codigo_sistema || 'S/N'; // Por defecto toma el código de la pieza base
 
-function saveCart() {
-    try { localStorage.setItem('cart_een', JSON.stringify(cart)); } catch (e) {}
-    renderCart();
-    const b = document.getElementById('cart-badge');
-    if(b) { b.classList.remove('scale-0'); b.classList.add('scale-125'); setTimeout(() => b.classList.remove('scale-125'), 200); }
-}
+    if (selectElem && selectElem.value) {
+        // Partimos el valor, ej: "50|ENV-001-50PZ"
+        const valores = selectElem.value.split('|'); 
+        qtyToAdd = parseInt(valores[0]) || 1;
+        
+        // Si el SKU no dice 'BASE', usamos el SKU del paquete
+        if (valores[1] && valores[1] !== 'BASE') {
+            skuOficial = valores[1];
+        }
+    }
 
-function renderCart() {
-    const itemsCont = document.getElementById('cart-items');
-    if(!itemsCont) return;
+    // Buscamos si el producto ya está en el carrito
+    const existingItem = cart.find(x => x.id === id);
     
-    const total = cart.reduce((a,b) => a + b.quantity, 0);
-    document.getElementById('cart-badge').innerText = total;
-    document.getElementById('cart-badge').classList.toggle('scale-0', total === 0);
-    document.getElementById('cart-total').innerText = total;
-
-    if(cart.length === 0) {
-        itemsCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 m-4 py-20 fade-in">
-            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 animate-pulse"><i class="fa-solid fa-basket-shopping text-3xl"></i></div>
-            <p class="text-sm font-bold text-slate-500">Tu pedido está vacío</p>
-            <p class="text-[10px] text-slate-400 mt-1">Agrega productos del catálogo para comenzar</p>
+    if (existingItem) {
+        existingItem.quantity += qtyToAdd;
+        existingItem.sku = skuOficial; // Actualiza con el SKU del último paquete seleccionado
+    } else {
+        cart.push({
+            id: prod.id,
+            name: prod.name,
+            image: prod.image,
+            category: prod.category,
+            piezas: prod.piezas,
+            quantity: qtyToAdd,
+            sku: skuOficial // Guardamos el código exacto de facturación
+        });
+    }
+    
+    saveCart();
+    
+    // Si tienes función para mostrar una notificación o renderizar el carrito, llámala aquí
+    if (typeof renderCart === 'function') renderCart();
+    if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
+}
+function remove(id) { cart = cart.filter(x => x.id !roductos del catálogo para comenzar</p>
         </div>`;
-        document.getElementById('cart-config').classList.add('hidden');
+        document.getElementById('cart-config').classList.('hidden');
         return;
     }
     document.getElementById('cart-config').classList.remove('hidden');
