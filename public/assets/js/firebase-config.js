@@ -16,7 +16,11 @@ try {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-    db = firebase.database();
+    
+    // ¡EL CAMBIO MÁGICO ESTÁ AQUÍ! 
+    // Ahora le decimos que 'db' es Firestore, no la base vieja
+    db = firebase.firestore(); 
+    
     auth = firebase.auth();
     if (typeof firebase.analytics === 'function') {
         analytics = firebase.analytics();
