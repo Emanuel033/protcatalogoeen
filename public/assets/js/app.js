@@ -259,14 +259,7 @@ function changePage(d) {
 // ==========================================
 // CARRITO
 // ==========================================
-// ==========================================
-// ==========================================
-// 🛒 FUNCIONES MAESTRAS DEL CARRITO (BLINDADAS)
-// ==========================================
 
-// ==========================================
-// 3. FUNCIONES DEL CARRITO (Animación e Instantáneo)
-// ==========================================
 function saveCart() {
     localStorage.setItem('cart_een', JSON.stringify(cart));
 }
@@ -313,39 +306,38 @@ function add(id) {
     renderCart();
     
     // ==========================================
-    // ANIMACIÓN CORREGIDA CON LOS IDs EXACTOS
+    // ANIMACIÓN DEL BOTÓN FLOTANTE ORIGINAL
+    // ==========================================
+    const fab = document.getElementById('cart-fab');
+    if(fab) {
+        fab.classList.remove('animate-pop');
+        void fab.offsetWidth; 
+        fab.classList.add('animate-pop');
+    }
+    
+    // ==========================================
+    // ANIMACIÓN DE BADGES (Se ajustará en renderCart según lo indicado)
     // ==========================================
     try {
-        // 1. Animar Burbujas (Badges) con IDs exactos
         const badges = document.querySelectorAll('#cartCountHeader, #cartCountMobile');
         badges.forEach(badge => {
             badge.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            badge.style.setProperty('background-color', '#22c55e', 'important'); // Verde brillante forzado
-            badge.style.setProperty('transform', 'scale(1.6)', 'important');     // Crece forzado
+            badge.style.setProperty('background-color', '#22c55e', 'important'); 
+            badge.style.setProperty('transform', 'scale(1.6)', 'important');     
             
             setTimeout(() => {
                 badge.style.removeProperty('background-color');
                 badge.style.removeProperty('transform');
             }, 500);
         });
-
-        // 2. Animar Botón Desktop del Carrito ('tour-cart')
-        const cartBtn = document.getElementById('tour-cart');
-        if (cartBtn) {
-            cartBtn.style.transition = 'all 0.3s ease';
-            cartBtn.style.setProperty('background-color', '#22c55e', 'important');
-            cartBtn.style.setProperty('border-color', '#22c55e', 'important');
-            cartBtn.style.setProperty('transform', 'scale(1.05)', 'important');
-            
-            setTimeout(() => {
-                cartBtn.style.removeProperty('background-color');
-                cartBtn.style.removeProperty('border-color');
-                cartBtn.style.removeProperty('transform');
-            }, 400);
-        }
     } catch(e) { console.error("Error en animación:", e); }
 
-    if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
+    if (typeof showToast === 'function') showToast(`Agregado (+${qtyToAdd})`);
+    
+    // Analytics
+    if(typeof analytics !== 'undefined' && analytics) {
+        analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: prod.name, quantity: qtyToAdd }] });
+    }
 }
 
 function remove(id) { 
