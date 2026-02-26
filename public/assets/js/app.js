@@ -294,14 +294,14 @@ function changePage(d) {
 // ==========================================
 // ==========================================
 // ==========================================
-// 🛒 FUNCIONES MAESTRAS DEL CARRITO (REPARADAS)
+// 🛒 FUNCIONES MAESTRAS DEL CARRITO (BLINDADAS)
 // ==========================================
 
-function add(id) {
+// 1. Agregar al carrito
+window.add = function(id) {
     const prod = allProducts.find(p => p.id === id);
     if (!prod) return;
 
-    // 1. Extraemos la cantidad y el SKU del selector
     const selectElem = document.getElementById(`sel-${id}`);
     let qtyToAdd = 1;
     let skuOficial = prod.codigo_sistema || 'S/N'; 
@@ -314,72 +314,61 @@ function add(id) {
         }
     }
 
-    // 2. Agregamos o actualizamos en el carrito
     const existingItem = cart.find(x => x.id === id);
     if (existingItem) {
         existingItem.quantity += qtyToAdd;
         existingItem.sku = skuOficial; 
     } else {
         cart.push({
-            id: prod.id, 
-            name: prod.name, 
-            image: prod.image,
-            category: prod.category, 
-            piezas: prod.piezas,
-            quantity: qtyToAdd, 
-            sku: skuOficial
+            id: prod.id, name: prod.name, image: prod.image,
+            category: prod.category, piezas: prod.piezas,
+            quantity: qtyToAdd, sku: skuOficial
         });
     }
     
-    // 3. Guardamos y actualizamos pantalla
     saveCart();
-    updateCartCount();
-    if (typeof renderCart === 'function') renderCart();
+    window.updateCartCount();
+    if (typeof window.renderCart === 'function') window.renderCart();
     
     // ==========================================
-    // 🎨 ANIMACIÓN INFALIBLE (JavaScript Puro)
+    // 🎨 ANIMACIÓN INFALIBLE (API Nativa)
     // ==========================================
-    
-    // Animar las burbujas rojas (Badge)
-    const badges = document.querySelectorAll('#cart-count, .cart-badge');
-    badges.forEach(badge => {
-        badge.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-        badge.style.backgroundColor = '#22c55e'; // Se pone Verde
-        badge.style.transform = 'scale(1.5)';    // Rebota
-        
-        setTimeout(() => {
-            badge.style.backgroundColor = '';    // Regresa a su color (rojo)
-            badge.style.transform = 'scale(1)';  // Regresa a tamaño normal
-        }, 500);
-    });
+    try {
+        // Animar burbujas
+        const badges = document.querySelectorAll('#cart-count, .cart-badge, [id*="cart-count"]');
+        badges.forEach(badge => {
+            badge.animate([
+                { transform: 'scale(1)', backgroundColor: '#ef4444' },     // Rojo original
+                { transform: 'scale(1.6)', backgroundColor: '#22c55e' },   // Crece y verde
+                { transform: 'scale(1)', backgroundColor: '#ef4444' }      // Vuelve a la normalidad
+            ], { duration: 500, easing: 'ease-in-out' });
+        });
 
-    // Animar el botón flotante (si existe)
-    const floatBtn = document.getElementById('scroll-top-btn') || document.getElementById('cart-btn');
-    if(floatBtn) {
-        floatBtn.style.transition = 'all 0.2s ease';
-        floatBtn.style.backgroundColor = '#22c55e';
-        floatBtn.style.transform = 'scale(1.15)';
-        
-        setTimeout(() => {
-            floatBtn.style.backgroundColor = '';
-            floatBtn.style.transform = 'scale(1)';
-        }, 300);
-    }
+        // Animar botón flotante
+        const floatBtns = document.querySelectorAll('#scroll-top-btn, #cart-btn, [id*="cart-btn"]');
+        floatBtns.forEach(btn => {
+            btn.animate([
+                { transform: 'scale(1)', backgroundColor: '' },
+                { transform: 'scale(1.15)', backgroundColor: '#22c55e' },
+                { transform: 'scale(1)', backgroundColor: '' }
+            ], { duration: 300, easing: 'ease-out' });
+        });
+    } catch(e) { console.warn("Animación no soportada", e); }
 
     if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
-}
+};
 
-// Renombrado a removeItem para que no choque con funciones del navegador
+// 2. Eliminar del carrito
 window.removeItem = function(id) { 
     cart = cart.filter(x => x.id !== id);
     saveCart();
-    updateCartCount();
-    renderCart(); // Redibuja al instante
+    window.updateCartCount();
+    window.renderCart(); 
 };
-// Dejamos este alias por si algún botón viejo sigue diciendo remove()
-window.remove = window.removeItem;
+window.remove = window.removeItem; // Respaldo por si algún botón viejo usa "remove"
 
-function updateCartItem(id) {
+// 3. Actualizar cantidades en vivo (SIN parpadear el texto)
+window.updateCartItem = function(id) {
     const item = cart.find(x => x.id === id);
     if(!item) return;
     const prod = allProducts.find(p => p.id === id) || item; 
@@ -388,59 +377,54 @@ function updateCartItem(id) {
     const paquetes = prod.paquetes || []; 
     
     let packSize = 1;
-    if (paquetes.length > 0) {
-        packSize = parseInt(paquetes[0].piezas);
-    } else if (isBolsas) {
-        packSize = 100;
-    } else {
-        packSize = parseInt(prod.piezas) || 0;
-    }
+    if (paquetes.length > 0) packSize = parseInt(paquetes[0].piezas);
+    else if (isBolsas) packSize = 100;
+    else packSize = parseInt(prod.piezas) || 0;
     
-    // Cálculo en base a los inputs que están en pantalla
     if (packSize > 1) {
         const elPack = document.getElementById(`inp-pack-${id}`);
         const elLoose = document.getElementById(`inp-loose-${id}`);
-        
         const packs = elPack ? (parseInt(elPack.value) || 0) : 0;
         const loose = elLoose && !isBolsas ? (parseInt(elLoose.value) || 0) : 0;
-        
         item.quantity = (packs * packSize) + loose;
     } else {
         const elSimple = document.getElementById(`inp-simple-${id}`);
         item.quantity = elSimple ? (parseInt(elSimple.value) || 1) : 1;
     }
     
-    // Si la cantidad llega a 0, se borra. Si no, se guarda y se redibuja (Cálculo Instantáneo)
     if (item.quantity <= 0) {
-        removeItem(id);
+        window.removeItem(id); // Si es 0, sí borramos la fila entera
     } else {
         saveCart();
-        updateCartCount();
-        renderCart(); 
+        window.updateCartCount(); 
+        // ⚡ NOTA: NO llamamos renderCart() aquí para no borrarte el cursor mientras tecleas.
     }
-}
+};
 
-function clearCart() {
+// 4. Vaciar Carrito
+window.clearCart = function() {
     if (cart.length === 0) return;
     if (confirm('¿Estás seguro de que deseas vaciar el carrito por completo?')) {
         cart = []; 
         saveCart(); 
-        updateCartCount(); 
-        renderCart(); 
+        window.updateCartCount(); 
+        window.renderCart(); 
         if (typeof showToast === 'function') showToast('Carrito vaciado exitosamente');
     }
-}
+};
 
-function updateCartCount() {
+// 5. Actualizar la burbuja roja
+window.updateCartCount = function() {
     const count = cart.reduce((sum, item) => sum + item.quantity, 0);
     document.querySelectorAll('#cart-count, .cart-badge').forEach(el => {
         el.innerText = count;
         if(count > 0) el.classList.remove('hidden');
         else el.classList.add('hidden');
     });
-}
+};
 
-function renderCart() {
+// 6. Dibujar el interior del carrito
+window.renderCart = function() {
     const itemsCont = document.getElementById('cart-items');
     if (!itemsCont) return;
 
@@ -466,14 +450,11 @@ function renderCart() {
         const paquetes = prod.paquetes || [];
         
         let packSize = 1;
-        if (paquetes.length > 0) {
-            packSize = parseInt(paquetes[0].piezas); 
-        } else if (isBolsas) {
-            packSize = 100; 
-        } else {
-            packSize = parseInt(prod.piezas) || 0;
-        }
+        if (paquetes.length > 0) packSize = parseInt(paquetes[0].piezas); 
+        else if (isBolsas) packSize = 100; 
+        else packSize = parseInt(prod.piezas) || 0;
         
+        // Cambiamos onchange por oninput para cálculo 100% instantáneo
         let inputsHTML = '';
         if (packSize > 1) {
             inputsHTML = `
@@ -482,13 +463,13 @@ function renderCart() {
                     <i class="fa-solid fa-box text-indigo-500 text-sm"></i>
                     <div class="flex flex-col flex-1">
                         <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Paquetes</label>
-                        <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
+                        <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" oninput="window.updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
                     </div>
                 </div>
-                ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
+                ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" oninput="window.updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
             </div>`;
         } else {
-            inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
+            inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" oninput="window.updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
         }
 
         return `
@@ -499,16 +480,13 @@ function renderCart() {
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start gap-2">
                     <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${typeof escapeHTML !== 'undefined' ? escapeHTML(item.name) : item.name}</h4>
-                    
-                    <!-- Botón de basura con removeItem -->
-                    <button onclick="removeItem('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="window.removeItem('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
                 ${inputsHTML}
             </div>
         </div>`;
     }).join('');
-}
-
+};
 function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
     if(m.classList.contains('hidden')) {
