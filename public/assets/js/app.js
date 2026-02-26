@@ -229,70 +229,40 @@ function changePage(d) {
 // CARRITO
 // ==========================================
 function add(id) {
-    const prod = allProducts.find(p => p.id === id);
-    if (!prod) return;
-
-    const selectElem = document.getElementById(`sel-${id}`);
-    let qtyToAdd = 1;
-    let skuOficial = prod.codigo_sistema || 'S/N'; 
-
-    if (selectElem && selectElem.value) {
-        const valores = selectElem.value.split('|'); 
-        qtyToAdd = parseInt(valores[0]) || 1;
-        if (valores[1] && valores[1] !== 'BASE') {
-            skuOficial = valores[1];
-        }
-    }
-
-    const existingItem = cart.find(x => x.id === id);
-    if (existingItem) {
-        existingItem.quantity += qtyToAdd;
-        existingItem.sku = skuOficial; 
-    } else {
-        cart.push({
-            id: prod.id, name: prod.name, image: prod.image,
-            category: prod.category, piezas: prod.piezas,
-            quantity: qtyToAdd, sku: skuOficial
-        });
-    }
-    
+    const p = allProducts.find(x => x.id === id);
+    if(!p) return;
+    const sel = document.getElementById(`sel-${id}`);
+    const qty = sel ? parseInt(sel.value) : 1;
+    const exist = cart.find(x => x.id === id);
+    if(exist) exist.quantity += qty; else cart.push({ ...p, quantity: qty });
     saveCart();
-    updateCartCount();
-    renderCart();
+    showToast(`Agregado (+${qty})`);
     
-    // ==========================================
-    // ANIMACIÓN DEL BOTÓN FLOTANTE ORIGINAL
-    // ==========================================
     const fab = document.getElementById('cart-fab');
     if(fab) {
         fab.classList.remove('animate-pop');
         void fab.offsetWidth; 
         fab.classList.add('animate-pop');
     }
-    
-    // ==========================================
-    // ANIMACIÓN DE BADGES (Se ajustará en renderCart según lo indicado)
-    // ==========================================
-    try {
-        const badges = document.querySelectorAll('#cartCountHeader, #cartCountMobile');
-        badges.forEach(badge => {
-            badge.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            badge.style.setProperty('background-color', '#22c55e', 'important'); 
-            badge.style.setProperty('transform', 'scale(1.6)', 'important');     
-            
-            setTimeout(() => {
-                badge.style.removeProperty('background-color');
-                badge.style.removeProperty('transform');
-            }, 500);
-        });
-    } catch(e) { console.error("Error en animación:", e); }
 
-    if (typeof showToast === 'function') showToast(`Agregado (+${qtyToAdd})`);
+    if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: p.name, quantity: qty }] });
+}
+
+function updateCartItem(id) {
+    const item = cart.find(x => x.id === id);
+    if(!item) return;
+    const prod = allProducts.find(p => p.id === id) || item; 
+    const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
+    const packSize = isBolsas ? 100 : (parseInt(prod.piezas)||0);
     
-    // Analytics
-    if(typeof analytics !== 'undefined' && analytics) {
-        analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: prod.name, quantity: qtyToAdd }] });
+    if (packSize > 1) {
+        const packs = parseInt(document.getElementById(`inp-pack-${id}`).value) || 0;
+        let loose = isBolsas ? 0 : (parseInt(document.getElementById(`inp-loose-${id}`).value) || 0);
+        item.quantity = (packs * packSize) + loose;
+    } else {
+        item.quantity = parseInt(document.getElementById(`inp-simple-${id}`).value) || 1;
     }
+    item.quantity <= 0 ? remove(id) : saveCart();
 }
 
 function remove(id) { cart = cart.filter(x => x.id !== id); saveCart(); }
