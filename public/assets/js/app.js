@@ -570,10 +570,12 @@ function sendWhatsApp() {
         msg += `✈️ Envío Foráneo\n📦 Modalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${document.getElementById('fletera-name') ? document.getElementById('fletera-name').value : 'N/A'}\n💳 Pago: ${selectedPayment||'Transferencia'}\n\n`;
     }
 
+    msg += `*🛒 LISTA DE ARTÍCULOS:*\n`;
+
     cart.forEach(i => {
         const prod = allProducts.find(p => p.id === i.id) || i;
         
-        // --- NUEVA LÓGICA DE PAQUETES (FIRESTORE) ---
+        // Lógica de paquetes de Firestore
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
         const paquetes = prod.paquetes || [];
         
@@ -582,18 +584,21 @@ function sendWhatsApp() {
         else if (isBolsas) packSize = 100;
         else packSize = parseInt(prod.piezas) || 0;
         
-        // --- NUEVO: Agregamos el código de facturación al WhatsApp ---
+        // 1. Código del sistema y Nombre del Catálogo Web
         const skuOficial = i.sku && i.sku !== 'S/N' ? `[${i.sku}] ` : '';
+        msg += `🔹 ${skuOficial}*${i.name}*\n`;
         
-        msg += `🔹 ${skuOficial}${i.name}\n`;
-        
+        // 2. Desglose de piezas y Total
         if(packSize > 1) {
             const p = Math.floor(i.quantity/packSize), l = i.quantity%packSize;
-            if(p>0) msg+=`   📦 ${p} Paquete(s) de ${packSize} pz\n`;
-            if(l>0) msg+=`   🧩 ${l} Pza(s) sueltas\n`;
+            if(p > 0) msg += `   📦 ${p} Paquete(s) de ${packSize} pz\n`;
+            if(l > 0) msg += `   🧩 ${l} Pza(s) suelta(s)\n`;
+            msg += `   🏷️ *Total: ${i.quantity} piezas*\n`;
         } else {
-            msg += `   📦 ${i.quantity} pzas\n`;
+            // Si no tiene paquetes, solo muestra el total directo
+            msg += `   📦 *Total: ${i.quantity} piezas*\n`;
         }
+        msg += `\n`; // Espacio extra entre cada producto para que sea más legible
     });
 
     const phone = typeof getRandomPhone === 'function' ? getRandomPhone() : "528186933580";
