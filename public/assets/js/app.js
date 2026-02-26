@@ -293,14 +293,15 @@ function changePage(d) {
 // CARRITO
 // ==========================================
 // ==========================================
-// 🛒 FUNCIONES MAESTRAS DEL CARRITO
+// ==========================================
+// 🛒 FUNCIONES MAESTRAS DEL CARRITO (REPARADAS)
 // ==========================================
 
 function add(id) {
     const prod = allProducts.find(p => p.id === id);
     if (!prod) return;
 
-    // 1. Leemos el selector que trae la "CANTIDAD|SKU"
+    // 1. Extraemos la cantidad y el SKU del selector
     const selectElem = document.getElementById(`sel-${id}`);
     let qtyToAdd = 1;
     let skuOficial = prod.codigo_sistema || 'S/N'; 
@@ -313,7 +314,7 @@ function add(id) {
         }
     }
 
-    // 2. Buscamos si el producto ya está en el carrito
+    // 2. Agregamos o actualizamos en el carrito
     const existingItem = cart.find(x => x.id === id);
     if (existingItem) {
         existingItem.quantity += qtyToAdd;
@@ -330,49 +331,53 @@ function add(id) {
         });
     }
     
-    // 3. Guardamos y actualizamos la vista
+    // 3. Guardamos y actualizamos pantalla
     saveCart();
     updateCartCount();
     if (typeof renderCart === 'function') renderCart();
     
     // ==========================================
-    // 🎨 ANIMACIÓN VISUAL (VERDE Y REBOTE)
+    // 🎨 ANIMACIÓN INFALIBLE (JavaScript Puro)
     // ==========================================
     
-    // A) Animar las burbujas rojas de conteo
+    // Animar las burbujas rojas (Badge)
     const badges = document.querySelectorAll('#cart-count, .cart-badge');
     badges.forEach(badge => {
-        // Forzamos clases de Tailwind
-        badge.classList.remove('bg-red-500', 'bg-red-600');
-        badge.classList.add('bg-green-500', 'animate-bounce', 'scale-125', 'transition-all');
+        badge.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        badge.style.backgroundColor = '#22c55e'; // Se pone Verde
+        badge.style.transform = 'scale(1.5)';    // Rebota
         
         setTimeout(() => {
-            badge.classList.remove('bg-green-500', 'animate-bounce', 'scale-125');
-            badge.classList.add('bg-red-500'); // Regresa al rojo
-        }, 600);
+            badge.style.backgroundColor = '';    // Regresa a su color (rojo)
+            badge.style.transform = 'scale(1)';  // Regresa a tamaño normal
+        }, 500);
     });
 
-    // B) Animar el botón del carrito en sí (si tienes uno flotante)
-    const cartBtns = document.querySelectorAll('#scroll-top-btn, #cart-btn'); // Agrega aquí el ID de tu botón si es distinto
-    cartBtns.forEach(btn => {
-        btn.classList.add('bg-green-500', 'scale-110', 'transition-all');
+    // Animar el botón flotante (si existe)
+    const floatBtn = document.getElementById('scroll-top-btn') || document.getElementById('cart-btn');
+    if(floatBtn) {
+        floatBtn.style.transition = 'all 0.2s ease';
+        floatBtn.style.backgroundColor = '#22c55e';
+        floatBtn.style.transform = 'scale(1.15)';
+        
         setTimeout(() => {
-            btn.classList.remove('bg-green-500', 'scale-110');
+            floatBtn.style.backgroundColor = '';
+            floatBtn.style.transform = 'scale(1)';
         }, 300);
-    });
+    }
 
     if (typeof showToast === 'function') showToast('¡Agregado al carrito!');
 }
 
-function remove(id) {
-    // Filtramos el carrito dejando todo menos el ID que queremos borrar
+// Renombrado a removeItem para que no choque con funciones del navegador
+window.removeItem = function(id) { 
     cart = cart.filter(x => x.id !== id);
     saveCart();
-    
-    // Refrescamos toda la pantalla instantáneamente
-    renderCart(); 
     updateCartCount();
-}
+    renderCart(); // Redibuja al instante
+};
+// Dejamos este alias por si algún botón viejo sigue diciendo remove()
+window.remove = window.removeItem;
 
 function updateCartItem(id) {
     const item = cart.find(x => x.id === id);
@@ -380,7 +385,7 @@ function updateCartItem(id) {
     const prod = allProducts.find(p => p.id === id) || item; 
     
     const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
-    const paquetes = prod.paquetes || []; // Lee los paquetes de Firestore
+    const paquetes = prod.paquetes || []; 
     
     let packSize = 1;
     if (paquetes.length > 0) {
@@ -391,7 +396,7 @@ function updateCartItem(id) {
         packSize = parseInt(prod.piezas) || 0;
     }
     
-    // Calculamos según los inputs
+    // Cálculo en base a los inputs que están en pantalla
     if (packSize > 1) {
         const elPack = document.getElementById(`inp-pack-${id}`);
         const elLoose = document.getElementById(`inp-loose-${id}`);
@@ -405,52 +410,40 @@ function updateCartItem(id) {
         item.quantity = elSimple ? (parseInt(elSimple.value) || 1) : 1;
     }
     
-    // Si bajó a 0, lo eliminamos. Si no, guardamos y renderizamos en vivo
+    // Si la cantidad llega a 0, se borra. Si no, se guarda y se redibuja (Cálculo Instantáneo)
     if (item.quantity <= 0) {
-        remove(id);
+        removeItem(id);
     } else {
         saveCart();
-        renderCart(); // <-- ESTO LOGRA EL CÁLCULO INSTANTÁNEO AL MOVER LOS NÚMEROS
         updateCartCount();
+        renderCart(); 
     }
 }
 
 function clearCart() {
     if (cart.length === 0) return;
-    
     if (confirm('¿Estás seguro de que deseas vaciar el carrito por completo?')) {
         cart = []; 
         saveCart(); 
-        renderCart(); 
         updateCartCount(); 
-        
-        if (typeof showToast === 'function') {
-            showToast('Carrito vaciado exitosamente');
-        }
+        renderCart(); 
+        if (typeof showToast === 'function') showToast('Carrito vaciado exitosamente');
     }
 }
 
 function updateCartCount() {
-    // Sumamos la cantidad de piezas o líneas
     const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
-    // Actualizamos todas las burbujas que existan en tu HTML
     document.querySelectorAll('#cart-count, .cart-badge').forEach(el => {
         el.innerText = count;
-        if(count > 0) {
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
-        }
+        if(count > 0) el.classList.remove('hidden');
+        else el.classList.add('hidden');
     });
 }
 
-// 2. Función que dibuja el carrito (Actualizada para leer paquetes de Firestore)
 function renderCart() {
     const itemsCont = document.getElementById('cart-items');
     if (!itemsCont) return;
 
-    // Si el carrito está vacío
     if (cart.length === 0) {
         itemsCont.innerHTML = `
         <div class="text-center py-10">
@@ -458,29 +451,29 @@ function renderCart() {
             <h3 class="text-lg font-bold text-slate-800">Carrito vacío</h3>
             <p class="text-xs text-slate-500 mt-1">Agrega productos del catálogo para comenzar</p>
         </div>`;
-        document.getElementById('cart-config').classList.add('hidden');
+        const configPanel = document.getElementById('cart-config');
+        if (configPanel) configPanel.classList.add('hidden');
         return;
     }
 
-    document.getElementById('cart-config').classList.remove('hidden');
+    const configPanel = document.getElementById('cart-config');
+    if (configPanel) configPanel.classList.remove('hidden');
 
     itemsCont.innerHTML = cart.map((item, idx) => {
         const prod = allProducts.find(p => p.id === item.id) || item;
         
-        // --- LÓGICA DE PAQUETES FIRESTORE PARA EL CARRITO ---
         const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
         const paquetes = prod.paquetes || [];
         
         let packSize = 1;
         if (paquetes.length > 0) {
-            packSize = parseInt(paquetes[0].piezas); // Tomamos el primer paquete
+            packSize = parseInt(paquetes[0].piezas); 
         } else if (isBolsas) {
-            packSize = 100; // Respaldo antiguo
+            packSize = 100; 
         } else {
             packSize = parseInt(prod.piezas) || 0;
         }
         
-        // Dibujar los inputs según el tamaño del paquete
         let inputsHTML = '';
         if (packSize > 1) {
             inputsHTML = `
@@ -495,25 +488,26 @@ function renderCart() {
                 ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
             </div>`;
         } else {
-             inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
+            inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
         }
 
         return `
-        <div class="flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm mb-3 fade-in relative transition-all duration-300 hover:shadow-md hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
+        <div class="flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm mb-3 relative transition-all duration-300 hover:shadow-md hover:-translate-y-1">
             <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border">
-                <img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply">
+                <img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/60'">
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start gap-2">
-                    <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${escapeHTML(item.name)}</h4>
-                    <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
+                    <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${typeof escapeHTML !== 'undefined' ? escapeHTML(item.name) : item.name}</h4>
+                    
+                    <!-- Botón de basura con removeItem -->
+                    <button onclick="removeItem('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
                 ${inputsHTML}
             </div>
         </div>`;
     }).join('');
 }
-
 
 function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
