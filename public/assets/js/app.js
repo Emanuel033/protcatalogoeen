@@ -265,10 +265,23 @@ function saveCart() {
 }
 
 function updateCartCount() {
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    document.querySelectorAll('#cart-count, .cart-badge').forEach(el => {
-        el.innerText = count;
-        if(count > 0) el.classList.remove('hidden');
+    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+    
+    // Actualiza la burbuja principal basándose en tu código original
+    const badge = document.getElementById('cart-badge');
+    if (badge) {
+        badge.innerText = total;
+        badge.classList.toggle('scale-0', total === 0);
+    }
+    
+    // Actualiza el total interno del carrito
+    const totalEl = document.getElementById('cart-total');
+    if (totalEl) totalEl.innerText = total;
+
+    // Respaldo por si hay otros identificadores
+    document.querySelectorAll('#cartCountHeader, #cartCountMobile').forEach(el => {
+        el.innerText = total;
+        if(total > 0) el.classList.remove('hidden');
         else el.classList.add('hidden');
     });
 }
@@ -316,10 +329,11 @@ function add(id) {
     }
     
     // ==========================================
-    // ANIMACIÓN DE BADGES (Se ajustará en renderCart según lo indicado)
+    // ANIMACIÓN DE BADGES 
     // ==========================================
     try {
-        const badges = document.querySelectorAll('#cartCountHeader, #cartCountMobile');
+        // Ahora seleccionamos el 'cart-badge' exacto que usa tu tienda
+        const badges = document.querySelectorAll('#cart-badge, .cart-badge');
         badges.forEach(badge => {
             badge.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
             badge.style.setProperty('background-color', '#22c55e', 'important'); 
@@ -391,28 +405,43 @@ function updateCartItem(id) {
     }
 }
 
+// ==========================================
+// RENDER CART (Original tuyo + Integración Firestore)
+// ==========================================
 function renderCart() {
     const itemsCont = document.getElementById('cart-items');
-    if (!itemsCont) return;
+    if(!itemsCont) return;
+    
+    // Actualización de badges usando tu lógica nativa original
+    const total = cart.reduce((a,b) => a + b.quantity, 0);
+    const badge = document.getElementById('cart-badge');
+    if(badge) {
+        badge.innerText = total;
+        badge.classList.toggle('scale-0', total === 0);
+    }
+    const cartTotalEl = document.getElementById('cart-total');
+    if(cartTotalEl) cartTotalEl.innerText = total;
 
-    if (cart.length === 0) {
-        itemsCont.innerHTML = `
-        <div class="text-center py-10">
-            <i class="fa-solid fa-cart-shopping text-4xl text-slate-200 mb-3"></i>
-            <h3 class="text-lg font-bold text-slate-800">Carrito vacío</h3>
-            <p class="text-xs text-slate-500 mt-1">Agrega productos del catálogo para comenzar</p>
+    // Estado Vacío original
+    if(cart.length === 0) {
+        itemsCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 m-4 py-20 fade-in">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 animate-pulse"><i class="fa-solid fa-basket-shopping text-3xl"></i></div>
+            <p class="text-sm font-bold text-slate-500">Tu pedido está vacío</p>
+            <p class="text-[10px] text-slate-400 mt-1">Agrega productos del catálogo para comenzar</p>
         </div>`;
-        const configPanel = document.getElementById('cart-config');
-        if (configPanel) configPanel.classList.add('hidden');
+        const cartConfig = document.getElementById('cart-config');
+        if(cartConfig) cartConfig.classList.add('hidden');
         return;
     }
+    
+    const cartConfig = document.getElementById('cart-config');
+    if(cartConfig) cartConfig.classList.remove('hidden');
 
-    const configPanel = document.getElementById('cart-config');
-    if (configPanel) configPanel.classList.remove('hidden');
-
+    // Mapeo de Items (Respetando tu HTML + Agregando Firestore Paquetes)
     itemsCont.innerHTML = cart.map((item, idx) => {
         const prod = allProducts.find(p => p.id === item.id) || item;
         
+        // Lógica de paquetes de Firestore
         const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
         const paquetes = prod.paquetes || [];
         
@@ -421,7 +450,6 @@ function renderCart() {
         else if (isBolsas) packSize = 100; 
         else packSize = parseInt(prod.piezas) || 0;
         
-        // Se usa onchange: se actualizará al instante en cuanto quites el dedo del teclado o cambies con la flechita
         let inputsHTML = '';
         if (packSize > 1) {
             inputsHTML = `
@@ -436,17 +464,17 @@ function renderCart() {
                 ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
             </div>`;
         } else {
-            inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
+             inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
         }
-
+        
+        const safeName = typeof escapeHTML !== 'undefined' ? escapeHTML(item.name) : item.name;
+        
         return `
-        <div class="flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm mb-3 relative transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-            <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border">
-                <img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/60'">
-            </div>
+        <div class="flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm mb-3 fade-in relative transition-all duration-300 hover:shadow-md hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
+            <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border"><img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/60'"></div>
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start gap-2">
-                    <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${typeof escapeHTML !== 'undefined' ? escapeHTML(item.name) : item.name}</h4>
+                    <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${safeName}</h4>
                     <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
                 ${inputsHTML}
