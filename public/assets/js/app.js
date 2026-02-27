@@ -562,20 +562,20 @@ function sendWhatsApp() {
     const name = document.getElementById('client-name') ? document.getElementById('client-name').value.trim() : "Cliente";
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
     
-    if(selectedDelivery === 'recoger') {
-        msg += `📍 Recoger en Sucursal\n💳 Pago: ${selectedPayment||'Por definir'}\n\n`;
-    } else if(selectedDelivery === 'local') {
-        msg += `🚚 Envío Local\n📍 Dirección: ${document.getElementById('delivery-address') ? document.getElementById('delivery-address').value : 'N/A'}\n💳 Pago: ${selectedPayment||'Por definir'}\n\n`;
-    } else if(selectedDelivery === 'foraneo') {
-        msg += `✈️ Envío Foráneo\n📦 Modalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${document.getElementById('fletera-name') ? document.getElementById('fletera-name').value : 'N/A'}\n💳 Pago: ${selectedPayment||'Transferencia'}\n\n`;
+    if(typeof selectedDelivery !== 'undefined') {
+        if(selectedDelivery === 'recoger') {
+            msg += `📍 Recoger en Sucursal\n💳 Pago: ${typeof selectedPayment !== 'undefined' ? selectedPayment : 'Por definir'}\n\n`;
+        } else if(selectedDelivery === 'local') {
+            msg += `🚚 Envío Local\n📍 Dirección: ${document.getElementById('delivery-address') ? document.getElementById('delivery-address').value : 'N/A'}\n💳 Pago: ${typeof selectedPayment !== 'undefined' ? selectedPayment : 'Por definir'}\n\n`;
+        } else if(selectedDelivery === 'foraneo') {
+            msg += `✈️ Envío Foráneo\n📦 Modalidad: ${typeof isOcurre !== 'undefined' && isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${document.getElementById('fletera-name') ? document.getElementById('fletera-name').value : 'N/A'}\n💳 Pago: ${typeof selectedPayment !== 'undefined' ? selectedPayment : 'Transferencia'}\n\n`;
+        }
     }
 
     msg += `*🛒 LISTA DE ARTÍCULOS:*\n`;
 
     cart.forEach(i => {
         const prod = allProducts.find(p => p.id === i.id) || i;
-        
-        // Lógica de paquetes de Firestore
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
         const paquetes = prod.paquetes || [];
         
@@ -584,11 +584,10 @@ function sendWhatsApp() {
         else if (isBolsas) packSize = 100;
         else packSize = parseInt(prod.piezas) || 0;
         
-        // 1. Código Oficial
-        const skuOficial = i.sku && i.sku !== 'S/N' ? `[${i.sku}]` : `[WEB]`;
+        // EXTRACCIÓN DIRECTA DEL CÓDIGO OFICIAL DEL SISTEMA
+        const codigoOficial = prod.codigo_sistema || 'SIN_CODIGO';
         
-        // 2. Construcción de la primera línea (Resumen numérico)
-        let line1 = `🔹 ${skuOficial}`;
+        let line1 = `🔹 [${codigoOficial}]`;
         if(packSize > 1) {
             const p = Math.floor(i.quantity/packSize), l = i.quantity%packSize;
             let parts = [];
@@ -601,8 +600,7 @@ function sendWhatsApp() {
             line1 += ` - 📦 Total: ${i.quantity} pz`;
         }
         
-        // 3. Segunda línea: El nombre comercial del catálogo
-        msg += `${line1}\n   *${i.name}*\n\n`;
+        msg += `${line1}\n   *${prod.name}*\n\n`;
     });
 
     const phone = typeof getRandomPhone === 'function' ? getRandomPhone() : "528186933580";
