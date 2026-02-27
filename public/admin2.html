@@ -209,7 +209,7 @@
 
                 <!-- 1. Tabla Desglose (La de siempre) -->
                 <div id="tableContainerDesglose" class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
-                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[850px]">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px]">
                         <thead class="bg-slate-50/90 backdrop-blur sticky top-0 z-10 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
                             <tr>
                                 <th class="px-4 py-3 w-12 text-center border-b border-slate-200 bg-slate-50">
@@ -219,7 +219,7 @@
                                 <th class="px-6 py-3 border-b border-slate-200 bg-slate-50">Categoría</th>
                                 <th class="px-6 py-3 text-center border-b border-slate-200 bg-slate-50">Stock</th>
                                 <th class="px-6 py-3 border-b border-slate-200 bg-slate-50">Integración Sist.</th>
-                                <th class="px-6 py-3 text-right border-b border-slate-200 bg-slate-50 w-64">Acciones Rápidas</th>
+                                <th class="px-6 py-3 text-right border-b border-slate-200 bg-slate-50">Acciones Rápidas</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
@@ -576,20 +576,65 @@
         </div>
     </div>
 
-    <!-- Modal Impresiones -->
+    <!-- Modal Impresiones (Acciones Masivas) -->
     <div id="massActionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                <h2 class="font-black text-slate-900">Imprimir QRs</h2>
-                <button onclick="closeModal('massActionsModal')" class="w-8 h-8 bg-slate-100 rounded-full text-slate-500"><i class="fas fa-times"></i></button>
+                <h2 class="font-black text-slate-900">Imprimir QRs (Masivo)</h2>
+                <button onclick="closeModal('massActionsModal')" class="w-8 h-8 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6 space-y-6">
                 <div>
-                    <label class="block text-[11px] font-black text-slate-800 uppercase tracking-wider mb-3">Uso Interno</label>
+                    <label class="block text-[11px] font-black text-slate-800 uppercase tracking-wider mb-3">Uso Interno (Inventario)</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="printAllQRs('inventario')" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 py-4 rounded-2xl text-[11px] font-bold shadow-sm flex flex-col items-center gap-2"><i class="fas fa-cube text-xl text-slate-400"></i> Sueltas</button>
-                        <button onclick="printAllPackagesQRs()" class="bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl text-[11px] font-bold shadow-lg shadow-slate-900/20 flex flex-col items-center gap-2"><i class="fas fa-boxes text-xl text-emerald-400"></i> Paquetes</button>
+                        <button onclick="printAllQRs('inventario')" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 py-4 rounded-2xl text-[11px] font-bold shadow-sm flex flex-col items-center gap-2 transition-all"><i class="fas fa-cube text-xl text-slate-400"></i> Sueltas</button>
+                        <button onclick="printAllPackagesQRs()" class="bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl text-[11px] font-bold shadow-lg shadow-slate-900/20 flex flex-col items-center gap-2 transition-all"><i class="fas fa-boxes text-xl text-emerald-400"></i> Paquetes</button>
                     </div>
+                </div>
+                
+                <div class="pt-4 border-t border-slate-100">
+                    <label class="block text-[11px] font-black text-slate-800 uppercase tracking-wider mb-2">Tienda / Vitrina (Carrito)</label>
+                    <input type="text" id="vitrinaUrlInput" value="https://tu-tienda.web.app/?add=" class="w-full input-modern px-4 py-3 rounded-xl text-[11px] mb-3 font-mono text-slate-600" placeholder="URL Base de tu tienda">
+                    <button onclick="printAllQRs('vitrina')" class="w-full bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 py-4 rounded-2xl text-[11px] font-bold shadow-sm flex items-center justify-center gap-2 transition-all">
+                        <i class="fas fa-store text-lg"></i> QRs para Vitrina
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Modal: Seleccionar Paquete para Imprimir QR -->
+    <div id="printPackageModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fas fa-box-open text-lg"></i></div>
+                    <h2 class="font-black text-slate-900">QR Paquete</h2>
+                </div>
+                <button onclick="closeModal('printPackageModal')" class="w-8 h-8 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="printPkgProductId">
+                
+                <div id="printPkgLoading" class="text-center text-slate-400 py-6 font-bold text-sm">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2 text-emerald-500"></i><br>Buscando cajas...
+                </div>
+                
+                <div id="printPkgContent" class="hidden space-y-5">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Selecciona el Empaque</label>
+                        <div class="relative">
+                            <select id="printPkgSelect" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-sm text-slate-800 appearance-none"></select>
+                            <i class="fas fa-chevron-down absolute right-4 top-4 text-slate-400 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Cantidad de Etiquetas</label>
+                        <input type="number" id="printPkgQty" value="1" min="1" class="w-full input-modern px-4 py-3 rounded-xl font-black text-center text-sm">
+                    </div>
+                    <button onclick="executePackagePrint()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
                 </div>
             </div>
         </div>
@@ -1014,12 +1059,23 @@
                         <div class="font-mono text-[11px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-md inline-block border border-slate-100">${codTxt}</div>
                     </td>
                     <td class="px-6 py-4 text-right border-b border-slate-100">
-                        <div class="flex justify-end gap-1.5">
+                        <div class="flex justify-end items-center gap-1.5 flex-wrap w-max ml-auto">
+                            <!-- Acciones Extra -->
                             <button onclick="toggleActivo('${p.id}', ${isActivo})" class="w-8 h-8 rounded-lg ${eyeBg} transition-all shadow-sm flex items-center justify-center" title="${isActivo ? 'Ocultar de web' : 'Mostrar en web'}"><i class="fas ${eyeIcon} text-xs"></i></button>
                             <button onclick="envejecerProducto('${p.id}')" class="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 text-orange-600 hover:bg-orange-100 transition-all shadow-sm flex items-center justify-center" title="Mandar al fondo del catálogo"><i class="fas fa-arrow-down text-xs"></i></button>
                             <button onclick="cloneProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="Clonar Producto"><i class="fas fa-copy text-xs"></i></button>
-                            <button onclick="printSingleQR('${p.id}')" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center" title="Imprimir QR (Pieza Suelta)"><i class="fas fa-qrcode text-xs"></i></button>
-                            <button onclick="openEditModal('${p.id}')" class="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center justify-center" title="Editar"><i class="fas fa-pen text-xs"></i></button>
+                            
+                            <div class="w-px h-5 bg-slate-200 mx-0.5"></div>
+
+                            <!-- Impresiones QR -->
+                            <button onclick="printSingleQR('${p.id}', 'vitrina')" class="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 text-purple-600 hover:bg-purple-100 transition-all shadow-sm flex items-center justify-center" title="QR Vitrina (Carrito Web)"><i class="fas fa-store text-xs"></i></button>
+                            <button onclick="printSingleQR('${p.id}', 'inventario')" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center" title="QR Inventario (Sueltas)"><i class="fas fa-qrcode text-xs"></i></button>
+                            <button onclick="openPackagePrintSelector('${p.id}')" class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="QR Paquetes / Cajas"><i class="fas fa-box-open text-xs"></i></button>
+
+                            <div class="w-px h-5 bg-slate-200 mx-0.5"></div>
+
+                            <!-- Editar -->
+                            <button onclick="openEditModal('${p.id}')" class="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center justify-center" title="Editar / Configurar"><i class="fas fa-pen text-xs"></i></button>
                         </div>
                     </td>
                 `;
@@ -1028,7 +1084,7 @@
             updateBulkSelection();
         }
 
-        // --- NUEVAS FUNCIONES DE ACCIONES RÁPIDAS ---
+        // --- FUNCIONES DE ACCIONES RÁPIDAS ---
         window.toggleActivo = async (id, currentState) => {
             try {
                 await productsRef.doc(id).update({ activo: !currentState });
@@ -1427,7 +1483,7 @@
                 document.getElementById('editCategory').value = p.categoria || '';
                 document.getElementById('editCodigo').value = p.codigo_sistema_oficial || '';
                 document.getElementById('editTipo').value = p.tipo_item || 'PIEZA_BASE';
-                document.getElementById('editActivo').checked = p.activo !== false; // Default true
+                document.getElementById('editActivo').checked = p.activo !== false; 
                 
                 document.getElementById('recetaContainer').innerHTML = '';
                 if(p.receta_desglose) Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
@@ -1565,6 +1621,9 @@
             return document.getElementById('vitrinaUrlInput') ? document.getElementById('vitrinaUrlInput').value : "https://tu-tienda.web.app/?add=";
         }
 
+        // ==========================================
+        // FUNCIONES DE IMPRESIÓN (NUEVAS Y MEJORADAS)
+        // ==========================================
         function buildPrintHTML(dataArray, qty, isVitrina, baseUrl) {
             let html = `<html><head><title>Imprimir QR - EEN</title><style>
                 body{font-family:sans-serif; text-align:center; padding: 10px; margin:0;} 
@@ -1657,22 +1716,91 @@
             pw.document.close(); 
         };
 
-        window.printSingleQR = (id) => { 
+        window.printSingleQR = (id, printType = 'inventario') => { 
             const p = allItems.find(x => x.id === id); 
             if (!p) return; 
-            const qty = prompt(`Etiquetas para PIEZAS SUELTAS de:\n${p.nombre_flexible}\n\n¿Cuántas imprimir?`, "1"); 
+
+            let baseUrl = "";
+            if(printType === 'vitrina') {
+                baseUrl = getBaseUrl();
+                if(!baseUrl) return showToast("URL requerida en Acciones Masivas", "error");
+            }
+
+            const tipoNombre = printType === 'vitrina' ? 'VITRINA (Carrito web)' : 'PIEZAS SUELTAS (Inventario)';
+            const qty = prompt(`Etiquetas para ${tipoNombre} de:\n${p.nombre_flexible}\n\n¿Cuántas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
             
-            const dataArray = [{ id: p.id, title: p.nombre_flexible, sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)` }];
+            const dataArray = [{ 
+                id: p.id, 
+                title: p.nombre_flexible, 
+                sub: printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)` 
+            }];
+            
             const pw = window.open('', '_blank'); 
-            pw.document.write(buildPrintHTML(dataArray, qty, false, '')); 
+            pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); 
             pw.document.close(); 
         };
 
-        window.printPackageQR = (productId, sku, piezas) => {
+        // --- MINI MODAL PARA IMPRIMIR PAQUETES DE 1 PRODUCTO ---
+        window.openPackagePrintSelector = async (productId) => {
+            const p = allItems.find(x => x.id === productId);
+            if (!p) return;
+            
+            document.getElementById('printPkgProductId').value = productId;
+            document.getElementById('printPkgLoading').classList.remove('hidden');
+            document.getElementById('printPkgContent').classList.add('hidden');
+            document.getElementById('printPkgSelect').innerHTML = '';
+            document.getElementById('printPkgQty').value = '1';
+
+            const modal = document.getElementById('printPackageModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            try {
+                const snap = await productsRef.doc(productId).collection('paquetes').get();
+                if(snap.empty) {
+                    closeModal('printPackageModal');
+                    return showToast('Este producto NO tiene paquetes o cajas configuradas.', 'error');
+                }
+                
+                let options = '';
+                const pkgs = [];
+                snap.forEach(doc => pkgs.push({id: doc.id, ...doc.data()}));
+                pkgs.sort((a,b) => a.piezas - b.piezas);
+
+                pkgs.forEach(pkg => {
+                    options += `<option value="${pkg.sku}|${pkg.piezas}">${pkg.piezas} Piezas (SKU: ${pkg.sku})</option>`;
+                });
+                
+                document.getElementById('printPkgSelect').innerHTML = options;
+                document.getElementById('printPkgLoading').classList.add('hidden');
+                document.getElementById('printPkgContent').classList.remove('hidden');
+            } catch(e) {
+                closeModal('printPackageModal');
+                showToast('Error al buscar los paquetes', 'error');
+            }
+        };
+
+        window.executePackagePrint = () => {
+            const productId = document.getElementById('printPkgProductId').value;
+            const selectVal = document.getElementById('printPkgSelect').value;
+            const qty = document.getElementById('printPkgQty').value;
+
+            if(!selectVal || !qty || qty <= 0) return;
+
+            const [sku, piezas] = selectVal.split('|');
+            printPackageQR(productId, sku, piezas, qty);
+            closeModal('printPackageModal');
+        };
+
+        window.printPackageQR = (productId, sku, piezas, providedQty = null) => {
             const p = allItems.find(x => x.id === productId); 
             if (!p) return; 
-            const qty = prompt(`Etiquetas para CAJA/BOLSA:\nSKU: ${sku} (${piezas} pz)\n\n¿Cuántas imprimir?`, "1"); 
+            
+            let qty = providedQty;
+            if(!qty) {
+                qty = prompt(`Etiquetas para CAJA/BOLSA:\nSKU: ${sku} (${piezas} pz)\n\n¿Cuántas imprimir?`, "1"); 
+            }
             if (!qty || qty <= 0) return; 
             
             const qrVal = `PKG|${productId}|${sku}|${piezas}`;
@@ -1682,6 +1810,9 @@
             pw.document.close();
         };
 
+        // ==========================================
+        // GUARDADO DE PRODUCTOS
+        // ==========================================
         function toggleFormFields() {
             const tipo = document.getElementById('editTipo').value;
             const id = document.getElementById('editId').value;
