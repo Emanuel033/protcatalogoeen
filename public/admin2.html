@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurador Maestro - EEN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Configurador Maestro - Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -15,33 +15,50 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        /* Animaciones suaves */
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        :root {
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f4f4f5; 
+            color: #0f172a; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Animaciones Premium */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* Estilo de Inputs modernos */
         .input-modern {
-            background-color: #f1f5f9;
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .input-modern:focus {
             background-color: #ffffff;
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
             outline: none;
         }
 
         /* Checkbox personalizado */
         .cb-modern {
-            width: 1.15rem;
-            height: 1.15rem;
+            width: 1.25rem;
+            height: 1.25rem;
             border-radius: 0.375rem;
             border-color: #cbd5e1;
             color: #2563eb;
@@ -49,9 +66,21 @@
             transition: all 0.2s;
         }
         .cb-modern:focus { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+
+        /* Efecto Glass */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        /* Scanner Reader Overrides */
+        #reader { border: none !important; border-radius: 1rem; overflow: hidden; }
+        #reader video { object-fit: cover; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden relative">
+<body class="h-screen flex flex-col overflow-hidden relative pb-[70px] md:pb-0">
 
     <!-- ========================================== -->
     <!-- CREDENCIALES FIREBASE -->
@@ -75,90 +104,100 @@
         const bitacoraRef = db.collection('bitacora_inventario'); 
     </script>
 
-    <!-- Header Elegante -->
-    <header class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center z-10 shrink-0">
+    <!-- VISOR DE IMÁGENES (LIGHTBOX PREMIUM) -->
+    <div id="imageLightbox" class="fixed inset-0 bg-slate-900/95 z-[100] hidden flex flex-col items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="closeImageLightbox()">
+        <div class="absolute top-4 right-4 md:top-8 md:right-8 z-10">
+            <button class="w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full text-white flex items-center justify-center transition" onclick="closeImageLightbox()">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <img id="lightboxImg" src="" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+    </div>
+
+    <!-- Header Desktop/Tablet -->
+    <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex justify-between items-center z-10 shrink-0">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-sm shadow-blue-200">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200/50">
                 <i class="fas fa-layer-group text-lg"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Panel Master</h1>
-                <p class="text-xs text-slate-500 font-medium mt-1">Gestión de Catálogo y Facturación</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Panel EEN</h1>
+                <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1">Gestión Maestra</p>
             </div>
         </div>
         <div class="flex gap-2">
-            <!-- Botón Generador de QRs -->
-            <button onclick="openMassActions()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2">
-                <i class="fas fa-qrcode text-xs"></i> Imprimir QRs
+            <!-- Menú Desktop (Oculto en móvil) -->
+            <div class="hidden md:flex bg-slate-100 p-1 rounded-xl mr-4">
+                <button onclick="switchTab('master')" id="dtTab-master" class="px-5 py-2 rounded-lg font-bold text-sm transition-all text-blue-700 bg-white shadow-sm">
+                    Catálogo
+                </button>
+                <button onclick="switchTab('scanner')" id="dtTab-scanner" class="px-5 py-2 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 transition-all">
+                    Escáner
+                </button>
+                <button onclick="switchTab('import')" id="dtTab-import" class="px-5 py-2 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 transition-all relative">
+                    Importar <span id="dtImportBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full shadow hidden">0</span>
+                </button>
+            </div>
+
+            <button onclick="openMassActions()" class="hidden md:flex bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition shadow-sm items-center gap-2">
+                <i class="fas fa-qrcode"></i> QRs
             </button>
-            <button onclick="openEditModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2">
-                <i class="fas fa-plus text-xs"></i> Crear Producto
+            <button onclick="openEditModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-slate-900/20 flex items-center gap-2">
+                <i class="fas fa-plus"></i> <span class="hidden sm:inline">Nuevo</span>
             </button>
         </div>
     </header>
 
-    <!-- Controles Superiores (Pestañas y Buscador) -->
-    <div class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shrink-0 z-0">
-        <!-- Pestañas Switch Moderno -->
-        <div class="bg-slate-100 p-1 rounded-xl flex gap-1 w-full md:w-auto overflow-x-auto">
-            <button onclick="switchTab('master')" id="tabBtn-master" class="flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold text-sm transition hover:text-slate-900 bg-white shadow-sm text-blue-600">
-                <i class="fas fa-database mr-1"></i> Catálogo Master
-            </button>
-            <button onclick="switchTab('scanner')" id="tabBtn-scanner" class="flex-none px-6 py-2 rounded-lg font-semibold text-sm text-slate-600 transition hover:text-slate-900">
-                <i class="fas fa-qrcode mr-1"></i> Escáner Inventario
-            </button>
-            <button onclick="switchTab('import')" id="tabBtn-import" class="flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold text-sm text-slate-600 transition hover:text-slate-900 relative">
-                <i class="fas fa-cloud-download-alt mr-1"></i> Importar
-                <span id="importBadge" class="absolute top-1 right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full shadow hidden">0</span>
-            </button>
+    <!-- Buscador Flotante y Filtros (Global) -->
+    <div class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 shrink-0 z-0" id="globalSearchContainer">
+        <div class="relative w-full sm:max-w-md">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="globalSearch" onkeyup="handleGlobalSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-11 pr-4 py-3 rounded-2xl input-modern text-sm font-semibold shadow-sm">
         </div>
-
-        <!-- Buscador Global -->
-        <div class="relative w-full md:w-96 hidden" id="globalSearchContainer">
-            <i class="fas fa-search absolute left-4 top-3 text-slate-400 text-sm"></i>
-            <input type="text" id="globalSearch" onkeyup="handleGlobalSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-10 pr-4 py-2.5 rounded-xl input-modern text-sm font-medium">
+        <div class="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scroll">
+            <button onclick="openMassActions()" class="md:hidden flex-none bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2">
+                <i class="fas fa-qrcode"></i> QRs
+            </button>
+            <label class="flex-none flex items-center gap-2 cursor-pointer bg-white px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-xs shadow-sm hover:bg-slate-50 transition select-none">
+                <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
+                <span class="text-slate-700">Solo Faltantes</span>
+            </label>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-hidden relative">
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-hidden relative bg-slate-50/50">
         
         <!-- VISTA: CATÁLOGO MASTER -->
-        <div id="view-master" class="h-full flex flex-col w-full p-6 max-w-7xl mx-auto fade-in">
-            <!-- Estadísticas y Filtro -->
-            <div class="flex flex-wrap justify-between items-end gap-4 mb-4 shrink-0">
-                <div class="flex gap-4">
-                    <div class="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-200 min-w-[140px]">
-                        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1">Productos Master</p>
-                        <p class="text-3xl font-black text-slate-800" id="count-total">0</p>
-                    </div>
-                    <div onclick="togglePendingFilter()" class="bg-white hover:bg-slate-50 cursor-pointer transition px-5 py-4 rounded-2xl shadow-sm border border-slate-200 min-w-[140px] relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-amber-500/5 transition-opacity opacity-0 group-hover:opacity-100"></div>
-                        <p class="text-[11px] text-amber-600 font-bold uppercase tracking-wider mb-1">Falta Configurar</p>
-                        <p class="text-3xl font-black text-amber-600" id="count-pending">0</p>
-                    </div>
+        <div id="view-master" class="h-full flex flex-col w-full px-4 md:px-8 py-6 max-w-[1400px] mx-auto fade-in">
+            <!-- Estadísticas -->
+            <div class="grid grid-cols-2 md:flex gap-4 mb-6 shrink-0">
+                <div class="bg-white p-4 md:px-6 md:py-5 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 flex-1 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-5"><i class="fas fa-boxes text-8xl"></i></div>
+                    <p class="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Total Catálogo</p>
+                    <p class="text-3xl md:text-4xl font-black text-slate-800" id="count-total">0</p>
                 </div>
-                
-                <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2.5 rounded-xl border border-slate-200 font-semibold text-sm shadow-sm hover:bg-slate-50 transition select-none">
-                    <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
-                    <span class="text-slate-700">Mostrar solo Faltantes</span>
-                </label>
+                <div onclick="document.getElementById('filterPending').click()" class="bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition cursor-pointer p-4 md:px-6 md:py-5 rounded-2xl md:rounded-3xl shadow-sm border border-orange-100 flex-1 relative overflow-hidden group">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 text-orange-500 group-hover:scale-110 transition-transform"><i class="fas fa-exclamation-triangle text-8xl"></i></div>
+                    <p class="text-[10px] md:text-xs text-orange-600 font-bold uppercase tracking-wider mb-1">Por Configurar</p>
+                    <p class="text-3xl md:text-4xl font-black text-orange-600" id="count-pending">0</p>
+                </div>
             </div>
 
-            <!-- Tabla Master -->
-            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative">
-                <div class="overflow-y-auto flex-1 hide-scroll p-1">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-slate-50 border-b border-slate-100 sticky top-0 z-10 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+            <!-- Tabla Premium Responsive -->
+            <div class="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative">
+                <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
+                        <thead class="bg-slate-50/80 backdrop-blur sticky top-0 z-20 text-slate-500 text-xs uppercase tracking-wider font-bold">
                             <tr>
-                                <th class="px-4 py-4 rounded-tl-xl w-12 text-center">
+                                <th class="px-4 py-4 w-12 text-center border-b border-slate-200 bg-slate-50/80">
                                     <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="cb-modern focus:ring-blue-500">
                                 </th>
-                                <th class="px-6 py-4">Producto</th>
-                                <th class="px-6 py-4">Categoría</th>
-                                <th class="px-6 py-4 text-center">Stock</th>
-                                <th class="px-6 py-4">Cód. Facturación</th>
-                                <th class="px-6 py-4 text-right rounded-tr-xl">Acciones</th>
+                                <th class="px-6 py-4 border-b border-slate-200 bg-slate-50/80">Producto / Variante</th>
+                                <th class="px-6 py-4 border-b border-slate-200">Categoría</th>
+                                <th class="px-6 py-4 text-center border-b border-slate-200">Stock</th>
+                                <th class="px-6 py-4 border-b border-slate-200">Integración Sist.</th>
+                                <th class="px-6 py-4 text-right border-b border-slate-200">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
@@ -167,109 +206,100 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- NUEVA VISTA: ESCÁNER Y BITÁCORA -->
-        <!-- ========================================== -->
-        <div id="view-scanner" class="h-full flex flex-col w-full p-6 max-w-7xl mx-auto hidden fade-in overflow-y-auto hide-scroll bg-slate-50">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-max pb-20">
-                <!-- 1. Módulo del Lector QR -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-max">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-camera"></i></div>
-                        <div>
-                            <h2 class="font-bold text-slate-900 text-lg">Lector Multivariante</h2>
-                            <p class="text-xs text-slate-500 font-medium">Escanea un producto y ajusta todos sus paquetes a la vez.</p>
-                        </div>
-                    </div>
-                    
-                    <div id="reader" class="w-full bg-slate-900 rounded-xl overflow-hidden min-h-[280px] flex items-center justify-center relative shadow-inner">
-                        <i class="fas fa-qrcode text-slate-700 text-6xl"></i>
-                    </div>
-                    
-                    <div class="mt-6 flex justify-center gap-3">
-                        <button id="btnStartScan" onclick="startScanner()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold shadow-sm transition-all w-full flex items-center justify-center gap-2">
-                            <i class="fas fa-play"></i> Encender Cámara
-                        </button>
-                        <button id="btnStopScan" onclick="stopScanner()" class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition-all w-full flex items-center justify-center gap-2 hidden">
-                            <i class="fas fa-stop"></i> Apagar Cámara
-                        </button>
-                    </div>
-                </div>
+        <!-- VISTA: ESCÁNER Y BITÁCORA -->
+        <div id="view-scanner" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in overflow-y-auto custom-scroll pb-24 md:pb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-max">
                 
-                <!-- 2. Tarjeta de Acción / Resultados -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-start items-center relative h-max min-h-[400px]">
-                    <div id="scanIdle" class="text-slate-300 flex flex-col items-center mt-20">
-                        <i class="fas fa-box-open text-7xl mb-4"></i>
-                        <p class="font-medium text-sm text-slate-400">Esperando escaneo...</p>
+                <!-- Columna Izquierda: Escáner y Acciones (Toma más protagonismo en móvil) -->
+                <div class="lg:col-span-5 flex flex-col gap-6 h-max">
+                    <!-- Tarjeta Cámara -->
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-expand"></i></div>
+                            <div>
+                                <h2 class="font-bold text-slate-900 text-lg leading-tight">Lector Inteligente</h2>
+                                <p class="text-[11px] text-slate-500 font-semibold">Identifica variantes automáticamente.</p>
+                            </div>
+                        </div>
+                        
+                        <div id="readerWrapper" class="w-full bg-slate-900 rounded-2xl overflow-hidden aspect-square md:aspect-video flex items-center justify-center relative shadow-inner">
+                            <i class="fas fa-qrcode text-slate-700 text-6xl"></i>
+                            <div id="reader" class="absolute inset-0 w-full h-full object-cover"></div>
+                        </div>
+                        
+                        <div class="mt-4 flex gap-3">
+                            <button id="btnStartScan" onclick="startScanner()" class="bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-slate-900/20 transition-all w-full flex items-center justify-center gap-2">
+                                <i class="fas fa-camera"></i> Abrir Cámara
+                            </button>
+                            <button id="btnStopScan" onclick="stopScanner()" class="bg-red-50 hover:bg-red-100 text-red-600 py-3.5 rounded-2xl font-bold transition-all w-full flex items-center justify-center gap-2 hidden">
+                                <i class="fas fa-times"></i> Detener
+                            </button>
+                        </div>
                     </div>
 
-                    <div id="scanResult" class="hidden w-full fade-in flex flex-col">
-                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
-                            <div>
-                                <h4 id="scanProductName" class="text-xl font-black text-slate-900 mb-1 leading-tight">Producto</h4>
-                                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cód: <span id="scanProductCode" class="font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded"></span></p>
+                    <!-- Tarjeta Resultados -->
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col relative min-h-[300px] transition-all" id="resultCard">
+                        <div id="scanIdle" class="text-slate-300 flex flex-col items-center justify-center h-full my-12">
+                            <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4 border border-slate-100">
+                                <i class="fas fa-box-open text-3xl"></i>
                             </div>
-                            <div class="text-right">
-                                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Stock Físico</p>
-                                <p class="text-2xl font-black text-slate-800 leading-none" id="scanProductStock">0</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Lista Dinámica de Variantes -->
-                        <div class="mb-4">
-                            <p class="text-xs font-bold text-slate-700 mb-3"><i class="fas fa-boxes text-blue-500"></i> Ajustar cantidades detectadas:</p>
-                            <div id="scanVariantsList" class="space-y-2">
-                                <!-- Se llena dinámicamente -->
-                            </div>
+                            <p class="font-bold text-sm text-slate-400">Esperando artículo...</p>
                         </div>
 
-                        <!-- Totalizador en vivo -->
-                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 flex justify-between items-center shadow-inner">
-                            <span class="text-sm font-bold text-blue-800">Total a modificar:</span>
-                            <span class="text-2xl font-black text-blue-600"><span id="scanTotalMove">0</span> <span class="text-xs">pz</span></span>
+                        <div id="scanResult" class="hidden w-full fade-in flex flex-col">
+                            <div class="flex items-start gap-4 mb-4 border-b border-slate-100 pb-4">
+                                <img id="scanProductImg" src="https://via.placeholder.com/80" class="w-16 h-16 rounded-xl object-cover shadow-sm border border-slate-200 cursor-zoom-in" onclick="openImageLightbox(this.src)">
+                                <div class="flex-1">
+                                    <h4 id="scanProductName" class="text-lg font-black text-slate-900 leading-tight mb-1">Producto</h4>
+                                    <span id="scanProductCode" class="inline-block font-mono text-[10px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-bold border border-blue-100"></span>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Stock</p>
+                                    <p class="text-2xl font-black text-slate-800 leading-none" id="scanProductStock">0</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-5">
+                                <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-3"><i class="fas fa-layer-group text-blue-500 mr-1"></i> Detectado / Ajustes:</p>
+                                <div id="scanVariantsList" class="space-y-2"></div>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 flex justify-between items-center shadow-inner">
+                                <span class="text-sm font-bold text-slate-700">Total a procesar:</span>
+                                <span class="text-3xl font-black text-blue-600 leading-none"><span id="scanTotalMove">0</span><span class="text-[12px] text-blue-400 ml-1">pz</span></span>
+                            </div>
+                            
+                            <div class="flex gap-3 w-full">
+                                <button onclick="updateStockFromScan(1)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5">
+                                    <i class="fas fa-arrow-down text-lg"></i> <span class="text-xs uppercase tracking-wider">Ingresar</span>
+                                </button>
+                                <button onclick="updateStockFromScan(-1)" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-red-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-0.5">
+                                    <i class="fas fa-arrow-up text-lg"></i> <span class="text-xs uppercase tracking-wider">Extraer</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="scanProductId">
                         </div>
-                        
-                        <div class="flex gap-3 w-full">
-                            <button onclick="updateStockFromScan(1)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm">
-                                <i class="fas fa-arrow-down"></i> Ingresar Lote
-                            </button>
-                            <button onclick="updateStockFromScan(-1)" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm">
-                                <i class="fas fa-arrow-up"></i> Extraer Lote
-                            </button>
-                        </div>
-                        
-                        <input type="hidden" id="scanProductId">
                     </div>
                 </div>
 
-                <!-- 3. Bitácora (Tabla Histórica) -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-span-2">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-history text-slate-400"></i>
-                            <h3 class="font-bold text-slate-800">Bitácora de Movimientos</h3>
+                <!-- Columna Derecha: Bitácora -->
+                <div class="lg:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full max-h-[800px]">
+                    <div class="flex justify-between items-center mb-4 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center"><i class="fas fa-history"></i></div>
+                            <h3 class="font-bold text-slate-800">Historial de Operaciones</h3>
                         </div>
-                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-md tracking-wider uppercase flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> En Vivo
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full tracking-wider uppercase flex items-center gap-2 shadow-sm">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> En Vivo
                         </span>
                     </div>
                     
-                    <div class="border border-slate-100 rounded-xl overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm whitespace-nowrap">
-                                <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-[10px] uppercase tracking-wider font-semibold">
-                                    <tr>
-                                        <th class="px-4 py-3 w-32">Fecha y Hora</th>
-                                        <th class="px-4 py-3">Producto Afectado</th>
-                                        <th class="px-4 py-3 w-32">Cód. Base</th>
-                                        <th class="px-4 py-3 w-24 text-center">Piezas Totales</th>
-                                        <th class="px-4 py-3 w-24 text-center">Nuevo Stock</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bitacoraTableBody" class="divide-y divide-slate-50">
-                                    <tr><td colspan="5" class="text-center py-8 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando...</td></tr>
-                                </tbody>
-                            </table>
+                    <div class="border border-slate-100 rounded-2xl overflow-hidden flex-1 flex flex-col bg-slate-50/50">
+                        <div class="overflow-y-auto flex-1 custom-scroll p-2">
+                            <div class="space-y-2" id="bitacoraCards">
+                                <!-- Tarjetas de bitácora móvil friendly -->
+                                <div class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><br>Cargando...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -277,25 +307,26 @@
         </div>
 
         <!-- VISTA: BANDEJA DE IMPORTACIÓN -->
-        <div id="view-import" class="h-full flex flex-col w-full p-6 max-w-7xl mx-auto hidden fade-in">
-            <div class="mb-4 shrink-0 bg-blue-50 border border-blue-100 rounded-2xl p-5 flex items-center gap-4">
-                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl shrink-0">
-                    <i class="fas fa-sync-alt"></i>
+        <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
+            <div class="mb-6 shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-blue-500 opacity-5 rounded-full blur-3xl transform translate-x-10 -translate-y-10"></div>
+                <div class="w-14 h-14 bg-white text-blue-600 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-sm border border-blue-100 z-10">
+                    <i class="fas fa-cloud-download-alt"></i>
                 </div>
-                <div>
-                    <h2 class="font-bold text-slate-900 text-lg">Pendientes de Importar</h2>
-                    <p class="text-sm text-slate-600 mt-0.5">Comparamos el Catálogo de Facturación contra el Master. Aquí están los códigos que faltan registrar para la tienda web.</p>
+                <div class="z-10">
+                    <h2 class="font-black text-slate-900 text-xl tracking-tight">Cruce de Catálogos</h2>
+                    <p class="text-sm text-slate-600 mt-1 font-medium max-w-xl">Detectamos estos códigos en tu sistema de facturación que aún no están creados visualmente para la web o escáner.</p>
                 </div>
             </div>
 
-            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                <div class="overflow-y-auto flex-1 hide-scroll p-1">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-slate-50 border-b border-slate-100 sticky top-0 z-10 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+            <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll p-1">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[600px]">
+                        <thead class="bg-slate-50/80 backdrop-blur sticky top-0 z-10 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
                             <tr>
-                                <th class="px-6 py-4 w-1/4 rounded-tl-xl">Cód. Facturación</th>
-                                <th class="px-6 py-4">Descripción Oficial (Admin Viejo)</th>
-                                <th class="px-6 py-4 text-right rounded-tr-xl w-32">Acción</th>
+                                <th class="px-6 py-4 w-1/4 border-b border-slate-200">Cód. Facturación</th>
+                                <th class="px-6 py-4 border-b border-slate-200">Descripción Oficial (Excel)</th>
+                                <th class="px-6 py-4 text-right w-32 border-b border-slate-200">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="importTableBody" class="divide-y divide-slate-100"></tbody>
@@ -305,242 +336,269 @@
         </div>
     </main>
 
+    <!-- BARRA NAVEGACIÓN MÓVIL (BOTTOM NAV) -->
+    <nav class="md:hidden glass-nav fixed bottom-0 w-full z-40 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <div class="flex justify-around items-center h-16 px-2">
+            <button onclick="switchTab('master')" id="mbTab-master" class="flex flex-col items-center justify-center w-full h-full text-blue-600 transition-colors">
+                <i class="fas fa-layer-group text-xl mb-1 transition-transform"></i>
+                <span class="text-[10px] font-bold tracking-wide">Catálogo</span>
+            </button>
+            <button onclick="switchTab('scanner')" id="mbTab-scanner" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors">
+                <i class="fas fa-qrcode text-xl mb-1 transition-transform"></i>
+                <span class="text-[10px] font-bold tracking-wide">Escáner</span>
+            </button>
+            <button onclick="switchTab('import')" id="mbTab-import" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors relative">
+                <i class="fas fa-cloud-download-alt text-xl mb-1 transition-transform"></i>
+                <span class="text-[10px] font-bold tracking-wide">Importar</span>
+                <span id="mbImportBadge" class="absolute top-2 right-6 bg-red-500 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow hidden">0</span>
+            </button>
+        </div>
+    </nav>
+
     <!-- Barra Flotante para Edición Masiva -->
-    <div id="bulkActionBar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl z-40 hidden flex items-center gap-4 fade-in">
-        <span class="text-sm font-semibold flex items-center gap-2">
-            <span id="bulkCount" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-black">0</span> seleccionados
+    <div id="bulkActionBar" class="fixed bottom-20 md:bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-full shadow-2xl z-[60] hidden flex items-center gap-4 fade-in border border-slate-700">
+        <span class="text-sm font-bold flex items-center gap-2">
+            <span id="bulkCount" class="bg-blue-600 text-white px-2.5 py-0.5 rounded-md text-xs font-black shadow-inner">0</span> sel.
         </span>
         <div class="h-4 w-px bg-slate-700"></div>
         <button onclick="openMassEditModal()" class="text-sm font-bold text-blue-400 hover:text-blue-300 transition flex items-center gap-2">
-            <i class="fas fa-magic"></i> Editar Lote
+            <i class="fas fa-magic"></i> Editar
         </button>
-        <button onclick="clearBulkSelection()" class="text-sm text-slate-400 hover:text-slate-300 transition ml-2" title="Cancelar selección">
+        <button onclick="clearBulkSelection()" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition" title="Cancelar">
             <i class="fas fa-times"></i>
         </button>
     </div>
 
     <!-- ========================================== -->
-    <!-- MODALES (MASIVO Y EDICIÓN - ORIGINALES) -->
+    <!-- MODALES (EDICIÓN, MASIVO, QRS) -->
     <!-- ========================================== -->
-    <div id="massEditModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-200">
-            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+    
+    <!-- Modal Premium Edición Lote -->
+    <div id="massEditModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300 pb-20 md:pb-4">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fas fa-layer-group text-lg"></i></div>
                     <div>
-                        <h2 class="font-bold text-slate-900">Edición en Lote</h2>
-                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider"><span id="massEditCount">0</span> elementos</p>
+                        <h2 class="font-black text-slate-900 leading-tight">Edición en Lote</h2>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider"><span id="massEditCount">0</span> elementos</p>
                     </div>
                 </div>
-                <button onclick="closeModal('massEditModal')" class="text-slate-400 hover:text-slate-600 transition"><i class="fas fa-times"></i></button>
+                <button onclick="closeModal('massEditModal')" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="p-6 space-y-4">
-                <p class="text-xs text-slate-500 mb-2">Deja en blanco lo que NO quieras cambiar.</p>
+            <div class="p-6 space-y-5">
+                <p class="text-[11px] font-medium text-slate-500 bg-blue-50/50 p-3 rounded-xl border border-blue-100">Deja en blanco lo que NO quieras cambiar. Todos adoptarán los datos que llenes.</p>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nueva Categoría</label>
-                    <input type="text" id="massCategory" class="w-full input-modern px-4 py-2.5 rounded-xl font-medium text-slate-900 uppercase" placeholder="Ej: TAPAS (Opcional)">
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Nueva Categoría</label>
+                    <input type="text" id="massCategory" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-slate-900 uppercase text-sm" placeholder="Ej: TAPAS (Opcional)">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nuevo Comportamiento</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Comportamiento en Sistema</label>
                     <div class="relative">
-                        <select id="massTipo" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 font-medium appearance-none">
+                        <select id="massTipo" class="w-full input-modern px-4 py-3 rounded-xl text-slate-800 font-bold text-sm appearance-none">
                             <option value="">-- No modificar --</option>
                             <option value="PIEZA_BASE">Pieza Base Suelta</option>
-                            <option value="KIT_OFICIAL">Kit Oficial (Armado en Excel)</option>
+                            <option value="KIT_OFICIAL">Kit Oficial (Armado Excel)</option>
                             <option value="KIT_FLEXIBLE">Kit Flexible Web (Desglose)</option>
                         </select>
-                        <i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
+                        <i class="fas fa-chevron-down absolute right-4 top-4 text-slate-400 text-xs pointer-events-none"></i>
                     </div>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-                <button onclick="closeModal('massEditModal')" class="px-5 py-2.5 text-slate-600 font-semibold text-sm hover:bg-slate-200 rounded-xl transition">Cancelar</button>
-                <button onclick="applyMassEdit()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm shadow-blue-200 text-sm transition-all">Aplicar Cambios</button>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3">
+                <button onclick="closeModal('massEditModal')" class="flex-1 py-3 text-slate-600 font-bold text-sm hover:bg-slate-200 rounded-xl transition">Cancelar</button>
+                <button onclick="applyMassEdit()" class="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 text-sm transition-all">Aplicar Cambios</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL PREMIUM DE EDICIÓN -->
-    <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 lg:p-6 opacity-0 transition-opacity duration-300">
-        <div class="bg-slate-50/90 rounded-[24px] shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[95vh] slide-up border border-slate-200">
+    <!-- Modal Premium Edición Individual -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-2 sm:p-4 opacity-0 transition-opacity duration-300 pb-20 md:pb-4">
+        <div class="bg-[#f8fafc] sm:bg-slate-50/95 rounded-[2rem] shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[90vh] sm:max-h-[95vh] slide-up border border-slate-100 relative">
             
-            <div class="bg-white px-6 py-5 border-b border-slate-200 flex justify-between items-center shrink-0">
+            <div class="bg-white px-5 sm:px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0 z-10 sticky top-0">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <i class="fas fa-edit"></i>
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                        <i class="fas fa-sliders-h text-lg"></i>
                     </div>
-                    <h2 class="font-bold text-xl text-slate-900 tracking-tight" id="modalTitle">Configurar Producto</h2>
+                    <div>
+                        <h2 class="font-black text-lg sm:text-xl text-slate-900 tracking-tight leading-tight" id="modalTitle">Configurar</h2>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ficha de Producto</p>
+                    </div>
                 </div>
-                <button onclick="closeModal('editModal')" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                <button onclick="closeModal('editModal')" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1 hide-scroll space-y-6">
+            <div class="p-4 sm:p-6 overflow-y-auto flex-1 custom-scroll space-y-4 sm:space-y-6">
                 <input type="hidden" id="editId">
                 <input type="hidden" id="importOldId"> 
                 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-info-circle text-slate-400"></i> Información Base</h3>
-                    <div class="flex flex-col md:flex-row gap-6 items-start">
-                        <div class="shrink-0 flex flex-col items-center gap-2">
-                            <div class="w-24 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden relative">
-                                <img id="editImgPreview" src="https://via.placeholder.com/150" class="w-full h-full object-cover z-10">
-                                <i class="fas fa-image absolute text-slate-300 text-2xl z-0"></i>
+                <!-- Card 1: Info Base -->
+                <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="text-sm font-black text-slate-800 mb-5 flex items-center gap-2"><div class="w-6 h-6 rounded-md bg-blue-50 text-blue-500 flex items-center justify-center"><i class="fas fa-info text-xs"></i></div> Información Principal</h3>
+                    <div class="flex flex-col sm:flex-row gap-6 items-start">
+                        <div class="w-full sm:w-auto flex flex-col items-center gap-3 shrink-0">
+                            <div class="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden relative group cursor-zoom-in" onclick="openImageLightbox(document.getElementById('editImgPreview').src)">
+                                <img id="editImgPreview" src="https://via.placeholder.com/200" class="w-full h-full object-cover z-10 group-hover:scale-110 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-black/20 z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><i class="fas fa-search-plus text-white text-2xl"></i></div>
+                                <i class="fas fa-image absolute text-slate-300 text-3xl z-0"></i>
                             </div>
                         </div>
                         
                         <div class="flex-1 w-full space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre Comercial (Tienda) <span class="text-red-500">*</span></label>
-                                    <input type="text" id="editName" class="w-full input-modern px-4 py-2.5 rounded-xl font-medium text-slate-900">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre Comercial <span class="text-red-500">*</span></label>
+                                    <input type="text" id="editName" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-slate-900 text-sm">
                                 </div>
                                 <div class="md:col-span-2">
-                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">URL de Imagen</label>
-                                    <input type="url" id="editImage" oninput="document.getElementById('editImgPreview').src = this.value || 'https://via.placeholder.com/150'" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-600 text-sm">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">URL de Imagen</label>
+                                    <input type="url" id="editImage" oninput="document.getElementById('editImgPreview').src = this.value || 'https://via.placeholder.com/200'" class="w-full input-modern px-4 py-3 rounded-xl text-slate-600 text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Categoría</label>
-                                    <input type="text" id="editCategory" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 uppercase text-sm">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Categoría</label>
+                                    <input type="text" id="editCategory" class="w-full input-modern px-4 py-3 rounded-xl text-slate-800 uppercase font-bold text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Unidad Mínima</label>
-                                    <input type="number" id="editPiezas" value="1" readonly class="w-full bg-slate-100 px-4 py-2.5 rounded-xl text-slate-500 text-sm cursor-not-allowed border border-transparent">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Unidad Mínima</label>
+                                    <input type="number" id="editPiezas" value="1" readonly class="w-full bg-slate-50 px-4 py-3 rounded-xl text-slate-400 text-sm cursor-not-allowed border border-transparent font-bold">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-barcode text-slate-400"></i> Vinculación al Sistema</h3>
+                <!-- Card 2: Sistema -->
+                <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="text-sm font-black text-slate-800 mb-5 flex items-center gap-2"><div class="w-6 h-6 rounded-md bg-indigo-50 text-indigo-500 flex items-center justify-center"><i class="fas fa-microchip text-xs"></i></div> Comportamiento en Sistema</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Cód. Facturación Base <span class="text-red-500">*</span></label>
-                            <input type="text" id="editCodigo" class="w-full input-modern px-4 py-2.5 rounded-xl font-mono uppercase text-slate-900 font-bold">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Cód. Facturación Base <span class="text-red-500">*</span></label>
+                            <input type="text" id="editCodigo" class="w-full input-modern px-4 py-3 rounded-xl font-mono uppercase text-slate-900 font-black text-sm">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Comportamiento del Elemento</label>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tipo de Artículo</label>
                             <div class="relative">
-                                <select id="editTipo" onchange="toggleFormFields()" class="w-full input-modern px-4 py-2.5 rounded-xl text-slate-800 font-medium appearance-none">
+                                <select id="editTipo" onchange="toggleFormFields()" class="w-full input-modern px-4 py-3 rounded-xl text-indigo-700 bg-indigo-50/50 font-bold text-sm appearance-none border-indigo-100">
                                     <option value="PIEZA_BASE">Pieza Base Suelta</option>
                                     <option value="KIT_OFICIAL">Kit Oficial (Armado en Excel)</option>
                                     <option value="KIT_FLEXIBLE">Kit Flexible Web (Desglose)</option>
                                 </select>
-                                <i class="fas fa-chevron-down absolute right-4 top-3.5 text-slate-400 text-xs pointer-events-none"></i>
+                                <i class="fas fa-chevron-down absolute right-4 top-4 text-indigo-400 text-xs pointer-events-none"></i>
                             </div>
                         </div>
                     </div>
 
-                    <div id="fieldReceta" class="mt-4 pt-4 border-t border-slate-100 hidden">
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Receta del Paquete</label>
-                        <div id="recetaContainer" class="space-y-2 mb-3"></div>
-                        <button onclick="addRecetaRow()" class="text-xs text-blue-600 font-bold hover:text-blue-700 transition flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg w-max"><i class="fas fa-plus"></i> Agregar Pieza</button>
+                    <div id="fieldReceta" class="mt-5 pt-5 border-t border-slate-100 hidden">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Receta del Paquete Web</label>
+                        <div class="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-4">
+                            <div id="recetaContainer" class="space-y-2 mb-3"></div>
+                            <button onclick="addRecetaRow()" class="text-xs bg-white border border-slate-200 text-slate-700 font-bold hover:text-blue-600 hover:border-blue-200 transition-all flex items-center gap-2 px-4 py-2 rounded-xl shadow-sm"><i class="fas fa-plus"></i> Agregar Componente</button>
+                        </div>
                     </div>
                 </div>
 
-                <div id="sectionPaquetes" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-box-open text-slate-400"></i> Presentaciones (Bolsas/Paquetes)</h3>
-                    </div>
+                <!-- Card 3: Paquetes QR -->
+                <div id="sectionPaquetes" class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="text-sm font-black text-slate-800 mb-5 flex items-center gap-2"><div class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-500 flex items-center justify-center"><i class="fas fa-boxes text-xs"></i></div> Presentaciones (Bolsas/Cajas)</h3>
                     
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-wrap gap-3 items-end mb-5">
-                        <div class="w-24">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Piezas</label>
-                            <input type="number" id="newPkgQty" min="2" class="w-full input-modern px-3 py-2 rounded-lg text-sm text-center font-bold text-slate-700">
+                    <div class="bg-slate-900 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row gap-3 items-end mb-6 shadow-lg shadow-slate-900/10">
+                        <div class="w-full sm:w-28">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Piezas</label>
+                            <input type="number" id="newPkgQty" min="2" class="w-full bg-slate-800 border-none text-white px-4 py-3 rounded-xl text-sm text-center font-black focus:ring-2 focus:ring-blue-500 outline-none placeholder-slate-600" placeholder="Ej: 50">
                         </div>
-                        <div class="flex-1 min-w-[200px]">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">SKU de Venta</label>
-                            <div class="flex h-10">
-                                <input type="text" id="newPkgSku" class="w-full input-modern px-3 py-2 rounded-l-lg text-sm font-mono border-r-0">
-                                <button onclick="autoSkuSubcollection()" class="bg-blue-50 text-blue-600 border border-l-0 border-transparent hover:border-blue-200 px-3 rounded-r-lg font-bold text-[10px] transition uppercase tracking-wider">Auto SKU</button>
+                        <div class="flex-1 w-full">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">SKU Físico</label>
+                            <div class="flex">
+                                <input type="text" id="newPkgSku" class="w-full bg-slate-800 border-none text-white px-4 py-3 rounded-l-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none placeholder-slate-600">
+                                <button onclick="autoSkuSubcollection()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-r-xl font-bold text-[10px] transition uppercase tracking-wider">Auto</button>
                             </div>
                         </div>
-                        <button onclick="addPackageToSubcollection()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 rounded-lg font-bold text-sm h-10 transition">Crear</button>
+                        <button onclick="addPackageToSubcollection()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-3 rounded-xl font-black text-sm transition shadow-lg shadow-emerald-500/20">Añadir</button>
                     </div>
 
-                    <div class="border border-slate-100 rounded-xl overflow-hidden">
+                    <div class="border border-slate-100 rounded-2xl overflow-hidden bg-slate-50">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 border-b border-slate-100">
+                            <thead class="bg-slate-100/50 border-b border-slate-100">
                                 <tr>
-                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-24 text-center">Contenido</th>
-                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider">SKU del Paquete</th>
-                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-28 text-center">Acciones</th>
+                                    <th class="py-3 px-4 font-bold text-slate-500 text-[10px] uppercase tracking-wider w-20 sm:w-24 text-center">Bulto</th>
+                                    <th class="py-3 px-4 font-bold text-slate-500 text-[10px] uppercase tracking-wider">SKU Etiqueta</th>
+                                    <th class="py-3 px-4 font-bold text-slate-500 text-[10px] uppercase tracking-wider w-24 sm:w-28 text-center">Gestión</th>
                                 </tr>
                             </thead>
-                            <tbody id="subcollectionList" class="divide-y divide-slate-50"></tbody>
+                            <tbody id="subcollectionList" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
 
                 <div id="sectionNewWarning" class="hidden">
-                    <div class="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-xl flex items-center gap-3">
-                        <i class="fas fa-info-circle text-lg"></i>
-                        <p class="text-sm font-medium">Guarda la pieza base primero para habilitar la creación de presentaciones empaquetadas.</p>
+                    <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 sm:p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+                        <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0"><i class="fas fa-lock text-amber-600"></i></div>
+                        <p class="text-xs sm:text-sm font-bold leading-relaxed">Guarda la pieza base primero para habilitar la creación de presentaciones empaquetadas (Cajas/Bolsas).</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white px-6 py-4 border-t border-slate-200 flex justify-end gap-3 shrink-0">
-                <button onclick="closeModal('editModal')" class="px-5 py-2.5 text-slate-600 font-semibold text-sm hover:bg-slate-100 rounded-xl transition">Cancelar</button>
-                <button onclick="saveBaseProduct()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-sm shadow-blue-200 text-sm transition-all flex items-center gap-2">
-                    <i class="fas fa-check"></i> Guardar Cambios
+            <div class="bg-white px-4 sm:px-6 py-4 border-t border-slate-100 flex justify-end gap-3 shrink-0 z-10">
+                <button onclick="closeModal('editModal')" class="px-5 py-3 text-slate-600 font-bold text-sm hover:bg-slate-100 rounded-xl transition">Cancelar</button>
+                <button onclick="saveBaseProduct()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black shadow-lg shadow-blue-500/30 text-sm transition-all flex items-center gap-2">
+                    <i class="fas fa-check"></i> Guardar
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL IMPRESIONES MASIVAS -->
-    <div id="massActionsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md flex flex-col overflow-hidden slide-up border border-slate-200">
-            <div class="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+    <!-- Modal Impresiones Masivas QRs -->
+    <div id="massActionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300 pb-20 md:pb-4">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                        <i class="fas fa-qrcode"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center"><i class="fas fa-qrcode text-lg"></i></div>
                     <div>
-                        <h2 class="font-bold text-slate-900 leading-tight">Imprimir Códigos QR</h2>
-                        <p class="text-[10px] text-slate-500 font-medium">De tu filtro actual en Master</p>
+                        <h2 class="font-black text-slate-900 leading-tight">Imprimir QRs</h2>
+                        <p class="text-[10px] text-slate-500 font-bold tracking-wider uppercase">Filtro actual</p>
                     </div>
                 </div>
-                <button onclick="closeModal('massActionsModal')" class="text-slate-400 hover:text-slate-600 transition"><i class="fas fa-times"></i></button>
+                <button onclick="closeModal('massActionsModal')" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="p-6 space-y-5">
-                <!-- Nuevos Botones de Almacén -->
+            <div class="p-6 space-y-6">
+                <!-- Almacén -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">QRs de Almacén (Manejo de Stock)</label>
+                    <label class="block text-[11px] font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2"><i class="fas fa-warehouse text-slate-400"></i> Uso Interno (Almacén)</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="printAllQRs('inventario')" class="bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 text-sm font-bold shadow-sm transition flex flex-col items-center gap-1">
-                            <i class="fas fa-cube text-lg mb-1 text-slate-300"></i> Solo Piezas Sueltas
+                        <button onclick="printAllQRs('inventario')" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 py-4 rounded-2xl text-[11px] font-bold shadow-sm transition flex flex-col items-center gap-2">
+                            <i class="fas fa-cube text-xl text-slate-400"></i> Solo Sueltas
                         </button>
-                        <button onclick="printAllPackagesQRs()" class="bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 text-sm font-bold shadow-sm transition flex flex-col items-center gap-1 border border-slate-700">
-                            <i class="fas fa-boxes text-lg mb-1 text-emerald-400"></i> Todos los Paquetes (SKUs)
+                        <button onclick="printAllPackagesQRs()" class="bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl text-[11px] font-bold shadow-lg shadow-slate-900/20 transition flex flex-col items-center gap-2">
+                            <i class="fas fa-boxes text-xl text-emerald-400"></i> Todos los Paquetes
                         </button>
                     </div>
                 </div>
 
                 <div class="h-px w-full bg-slate-100"></div>
 
-                <!-- Botón de Vitrina -->
+                <!-- Vitrina -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">QRs de Tienda / Exhibición</label>
-                    <input type="text" id="vitrinaUrlInput" value="https://tu-tienda.web.app/?add=" class="w-full input-modern px-4 py-2.5 rounded-xl font-medium text-slate-900 text-sm mb-3">
-                    <button onclick="printAllQRs('vitrina')" class="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 text-sm font-bold shadow-sm transition flex justify-center items-center gap-2">
-                        <i class="fas fa-store"></i> QRs Vitrina (Llevan a URL)
+                    <label class="block text-[11px] font-black text-indigo-800 uppercase tracking-wider mb-3 flex items-center gap-2"><i class="fas fa-store text-indigo-400"></i> Uso Público (Vitrina/Tienda)</label>
+                    <input type="text" id="vitrinaUrlInput" value="https://tu-tienda.web.app/?add=" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-slate-600 text-[11px] mb-3 font-mono">
+                    <button onclick="printAllQRs('vitrina')" class="w-full bg-indigo-600 text-white py-4 rounded-2xl hover:bg-indigo-700 text-sm font-black shadow-lg shadow-indigo-600/30 transition flex justify-center items-center gap-2">
+                        <i class="fas fa-qrcode"></i> Generar QRs de Venta
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast Elegante -->
-    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl hidden z-[100] font-semibold text-sm flex items-center gap-3 w-max transition-all">
-        <i class="fas fa-check-circle text-green-400"></i> <span id="toastMsg"></span>
+    <!-- Toast Elegante Premium -->
+    <div id="toast" class="fixed top-6 md:top-auto md:bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] hidden z-[100] font-bold text-sm flex items-center gap-3 w-[90%] md:w-max transition-all border border-slate-700">
+        <div id="toastIconContainer" class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+            <i id="toastIcon" class="fas fa-check text-green-400"></i>
+        </div>
+        <span id="toastMsg" class="flex-1"></span>
     </div>
 
     <script>
@@ -551,23 +609,48 @@
         let currentTab = 'master';
         let subcollectionListener = null;
         let html5QrcodeScanner = null;
-        
-        // Variables para el escáner inteligente
         let currentScanVariants = []; 
 
-        document.getElementById('globalSearchContainer').classList.remove('hidden');
+        // Lightbox Functions
+        function openImageLightbox(src) {
+            if(!src || src.includes('placeholder')) return;
+            const lb = document.getElementById('imageLightbox');
+            const img = document.getElementById('lightboxImg');
+            img.src = src;
+            lb.classList.remove('hidden');
+            setTimeout(() => {
+                lb.classList.remove('opacity-0');
+                img.classList.remove('scale-95');
+            }, 10);
+        }
+        function closeImageLightbox() {
+            const lb = document.getElementById('imageLightbox');
+            const img = document.getElementById('lightboxImg');
+            lb.classList.add('opacity-0');
+            img.classList.add('scale-95');
+            setTimeout(() => lb.classList.add('hidden'), 300);
+        }
 
         function showToast(msg, type = 'success') {
             const t = document.getElementById('toast');
-            const icon = t.querySelector('i');
+            const iconC = document.getElementById('toastIconContainer');
+            const icon = document.getElementById('toastIcon');
             document.getElementById('toastMsg').innerText = msg;
             
-            if(type === 'error') icon.className = "fas fa-exclamation-circle text-red-400";
-            else if(type === 'info') icon.className = "fas fa-info-circle text-blue-400";
-            else icon.className = "fas fa-check-circle text-green-400";
+            if(type === 'error') {
+                iconC.className = "w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center shrink-0";
+                icon.className = "fas fa-exclamation text-red-400";
+            } else if(type === 'info') {
+                iconC.className = "w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0";
+                icon.className = "fas fa-info text-blue-400";
+            } else {
+                iconC.className = "w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0";
+                icon.className = "fas fa-check text-green-400";
+            }
 
-            t.classList.remove('hidden'); t.classList.add('slide-up');
-            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('slide-up'); }, 3000);
+            t.classList.remove('hidden'); 
+            t.classList.add('scale-in');
+            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('scale-in'); }, 3000);
         }
 
         function switchTab(tab) {
@@ -575,18 +658,35 @@
             clearBulkSelection();
             const tabs = ['master', 'import', 'scanner'];
             tabs.forEach(t => {
-                const btn = document.getElementById(`tabBtn-${t}`);
-                if (!btn) return;
-                if(t === tab) {
-                    btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
-                    btn.classList.remove('hover:text-slate-900', 'text-slate-600');
-                    document.getElementById(`view-${t}`).classList.remove('hidden');
-                } else {
-                    btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
-                    btn.classList.add('hover:text-slate-900', 'text-slate-600');
-                    document.getElementById(`view-${t}`).classList.add('hidden');
+                // Desktop
+                const dtBtn = document.getElementById(`dtTab-${t}`);
+                if (dtBtn) {
+                    if(t === tab) {
+                        dtBtn.className = "px-5 py-2 rounded-lg font-bold text-sm transition-all text-blue-700 bg-white shadow-sm";
+                    } else {
+                        dtBtn.className = "px-5 py-2 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 transition-all " + (t==='import'?'relative':'');
+                    }
+                }
+                // Mobile
+                const mbBtn = document.getElementById(`mbTab-${t}`);
+                if (mbBtn) {
+                    if(t === tab) {
+                        mbBtn.className = "flex flex-col items-center justify-center w-full h-full text-blue-600 transition-colors";
+                        mbBtn.querySelector('i').classList.add('-translate-y-1', 'scale-110');
+                    } else {
+                        mbBtn.className = "flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors " + (t==='import'?'relative':'');
+                        mbBtn.querySelector('i').classList.remove('-translate-y-1', 'scale-110');
+                    }
+                }
+
+                // Views
+                const view = document.getElementById(`view-${t}`);
+                if(view) {
+                    if(t === tab) view.classList.remove('hidden');
+                    else view.classList.add('hidden');
                 }
             });
+
             if(tab === 'scanner') {
                 document.getElementById('globalSearchContainer').classList.add('hidden');
             } else {
@@ -622,30 +722,48 @@
             if(currentTab === 'import') renderImportTable();
         });
 
+        // BITÁCORA REDISEÑADA PARA MÓVIL (Tarjetas)
         bitacoraRef.orderBy('fecha', 'desc').limit(20).onSnapshot(snap => {
-            const tbody = document.getElementById('bitacoraTableBody');
-            if(!tbody) return;
+            const container = document.getElementById('bitacoraCards');
+            if(!container) return;
             if(snap.empty) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400">Aún no hay registros de movimientos</td></tr>';
+                container.innerHTML = '<div class="text-center py-10 text-slate-400 font-medium text-sm">Aún no hay registros hoy.</div>';
                 return;
             }
-            tbody.innerHTML = '';
+            container.innerHTML = '';
             snap.forEach(doc => {
                 const data = doc.data();
                 const fecha = data.fecha ? data.fecha.toDate() : new Date();
-                const strFecha = fecha.toLocaleString('es-MX', {day: '2-digit', month: 'short', hour:'2-digit', minute:'2-digit'});
+                const strHora = fecha.toLocaleString('es-MX', {hour:'2-digit', minute:'2-digit'});
+                const strDia = fecha.toLocaleString('es-MX', {day: '2-digit', month: 'short'});
+                
                 const isPos = data.cambio > 0;
-                const badgeClass = isPos ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
+                const color = isPos ? 'emerald' : 'red';
                 const signo = isPos ? '+' : '';
-                const detalle = data.detalle_scan ? `<br><span class="text-[9px] text-slate-400 font-normal mt-0.5 inline-block">${data.detalle_scan}</span>` : '';
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-xs font-medium text-slate-500">${strFecha}</td>
-                        <td class="px-4 py-3 font-bold text-slate-800 text-xs leading-tight">${data.nombre_producto}${detalle}</td>
-                        <td class="px-4 py-3 font-mono text-[11px] text-blue-600 bg-blue-50/50 rounded-lg text-center border border-blue-50">${data.codigo_oficial || '-'}</td>
-                        <td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${badgeClass}">${signo}${data.cambio}</span></td>
-                        <td class="px-4 py-3 text-center font-black text-slate-800">${data.stock_nuevo} <span class="text-[9px] text-slate-400">pz</span></td>
-                    </tr>`;
+                const icon = isPos ? 'fa-arrow-down' : 'fa-arrow-up';
+                
+                let detalleHtml = '';
+                if(data.detalle_scan) {
+                    detalleHtml = `<div class="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-medium leading-relaxed">${data.detalle_scan}</div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex gap-3 items-start animate-[fadeIn_0.3s_ease-out]">
+                        <div class="w-10 h-10 rounded-xl bg-${color}-50 text-${color}-500 flex items-center justify-center shrink-0">
+                            <i class="fas ${icon} text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start mb-0.5">
+                                <h4 class="font-black text-slate-800 text-xs truncate pr-2">${data.nombre_producto}</h4>
+                                <span class="font-black text-${color}-600 text-sm shrink-0">${signo}${data.cambio}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">${data.codigo_oficial || '-'}</span>
+                                <span class="text-[10px] font-bold text-slate-400">${strDia} ${strHora}</span>
+                            </div>
+                            ${detalleHtml}
+                        </div>
+                    </div>`;
             });
         });
 
@@ -657,6 +775,8 @@
             document.getElementById('btnStopScan').classList.remove('hidden');
             document.getElementById('scanIdle').classList.add('hidden');
             document.getElementById('scanResult').classList.add('hidden');
+            // Mobile Optimization: Scroll to camera
+            document.getElementById('readerWrapper').scrollIntoView({behavior: 'smooth', block: 'start'});
 
             html5QrcodeScanner = new Html5Qrcode("reader");
             html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} },
@@ -681,9 +801,9 @@
                     if(p) {
                         html5QrcodeScanner.stop();
                         showScanResult(p, context);
-                    } else { showToast("Código no encontrado", "error"); }
+                    } else { showToast("Código no registrado en la BD", "error"); }
                 }, (err) => { }
-            ).catch(err => { showToast("Error al abrir cámara", "error"); stopScanner(); });
+            ).catch(err => { showToast("Cámara no disponible. Verifica permisos.", "error"); stopScanner(); });
         }
 
         function stopScanner() {
@@ -698,22 +818,23 @@
         async function showScanResult(p, context) {
             document.getElementById('btnStartScan').classList.remove('hidden');
             document.getElementById('btnStopScan').classList.add('hidden');
-            document.getElementById('scanResult').classList.remove('hidden');
+            
+            const resCard = document.getElementById('scanResult');
+            resCard.classList.remove('hidden');
+            document.getElementById('resultCard').scrollIntoView({behavior: 'smooth', block: 'start'});
             
             document.getElementById('scanProductName').innerText = p.nombre_flexible;
             document.getElementById('scanProductCode').innerText = p.codigo_sistema_oficial || 'N/A';
             document.getElementById('scanProductStock').innerText = p.stock_total_piezas || 0;
             document.getElementById('scanProductId').value = p.id;
+            document.getElementById('scanProductImg').src = p.imagen_url || 'https://via.placeholder.com/80';
             
             try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
 
-            // Cargar Variantes (Piezas sueltas + Paquetes)
             const listContainer = document.getElementById('scanVariantsList');
-            listContainer.innerHTML = '<div class="text-center py-2"><i class="fas fa-circle-notch fa-spin text-blue-400"></i> Cargando presentaciones...</div>';
+            listContainer.innerHTML = '<div class="text-center py-4"><i class="fas fa-circle-notch fa-spin text-blue-400 text-2xl"></i><p class="text-[10px] text-slate-400 mt-2 font-bold uppercase">Cargando Formatos...</p></div>';
             
-            currentScanVariants = []; // Reset global
-            
-            // 1. Siempre hay piezas sueltas
+            currentScanVariants = []; 
             currentScanVariants.push({
                 id: 'base',
                 label: 'Piezas Sueltas (1pz)',
@@ -722,7 +843,6 @@
                 qtyDetected: context.type === 'suelta' ? 1 : 0
             });
 
-            // 2. Traer Paquetes
             try {
                 const pkgsSnap = await productsRef.doc(p.id).collection('paquetes').get();
                 pkgsSnap.forEach(doc => {
@@ -735,9 +855,8 @@
                         qtyDetected: (context.type === 'paquete' && pkg.sku === context.sku) ? 1 : 0
                     });
                 });
-            } catch(e) { console.error("Error cargando paquetes", e); }
+            } catch(e) {}
 
-            // Ordenar por piezas ascendente
             currentScanVariants.sort((a,b) => a.piezas - b.piezas);
             renderVariantsList();
         }
@@ -748,20 +867,20 @@
             
             currentScanVariants.forEach((v, index) => {
                 const isDetected = v.qtyDetected > 0;
-                const bgClass = isDetected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white border-slate-200';
+                const bgClass = isDetected ? 'bg-blue-50/80 border-blue-200 shadow-sm' : 'bg-slate-50 border-slate-100';
                 
                 listContainer.innerHTML += `
-                    <div class="flex items-center justify-between p-3 rounded-xl border ${bgClass} transition-colors">
-                        <div class="flex-1">
-                            <p class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                    <div class="flex items-center justify-between p-3 rounded-2xl border ${bgClass} transition-colors">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <p class="font-black text-slate-800 text-xs flex items-center gap-1.5 truncate">
                                 <i class="fas ${v.piezas === 1 ? 'fa-cube' : 'fa-boxes'} ${isDetected ? 'text-blue-500' : 'text-slate-400'}"></i> ${v.label}
                             </p>
-                            <p class="text-[10px] text-slate-500 font-mono">${v.sku}</p>
+                            <p class="text-[9px] text-slate-500 font-mono mt-0.5 truncate">${v.sku}</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="changeVariantQty(${index}, -1)" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition active:scale-95"><i class="fas fa-minus"></i></button>
-                            <input type="number" min="0" value="${v.qtyDetected}" id="varInput_${index}" oninput="manualVariantQty(${index}, this.value)" class="w-14 text-center font-black text-slate-800 py-1 border-0 bg-transparent text-lg focus:ring-0 outline-none">
-                            <button onclick="changeVariantQty(${index}, 1)" class="w-8 h-8 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 flex items-center justify-center transition active:scale-95"><i class="fas fa-plus"></i></button>
+                        <div class="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-slate-100">
+                            <button onclick="changeVariantQty(${index}, -1)" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition active:scale-95"><i class="fas fa-minus text-xs"></i></button>
+                            <input type="number" min="0" value="${v.qtyDetected}" id="varInput_${index}" oninput="manualVariantQty(${index}, this.value)" class="w-10 text-center font-black text-slate-900 py-1 border-none bg-transparent text-sm focus:ring-0 outline-none">
+                            <button onclick="changeVariantQty(${index}, 1)" class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition active:scale-95"><i class="fas fa-plus text-xs"></i></button>
                         </div>
                     </div>
                 `;
@@ -776,18 +895,13 @@
             document.getElementById(`varInput_${index}`).value = newVal;
             recalculateScanTotal();
             
-            // Actualizar estilo de fila si es mayor a 0
             const row = document.getElementById(`varInput_${index}`).parentElement.parentElement;
             if(newVal > 0) {
-                row.classList.add('bg-blue-50', 'border-blue-200', 'shadow-sm');
-                row.classList.remove('bg-white', 'border-slate-200');
-                row.querySelector('i').classList.add('text-blue-500');
-                row.querySelector('i').classList.remove('text-slate-400');
+                row.className = "flex items-center justify-between p-3 rounded-2xl border bg-blue-50/80 border-blue-200 shadow-sm transition-colors";
+                row.querySelector('i.fa-cube, i.fa-boxes').className = `fas ${currentScanVariants[index].piezas === 1 ? 'fa-cube' : 'fa-boxes'} text-blue-500`;
             } else {
-                row.classList.remove('bg-blue-50', 'border-blue-200', 'shadow-sm');
-                row.classList.add('bg-white', 'border-slate-200');
-                row.querySelector('i').classList.remove('text-blue-500');
-                row.querySelector('i').classList.add('text-slate-400');
+                row.className = "flex items-center justify-between p-3 rounded-2xl border bg-slate-50 border-slate-100 transition-colors";
+                row.querySelector('i.fa-cube, i.fa-boxes').className = `fas ${currentScanVariants[index].piezas === 1 ? 'fa-cube' : 'fa-boxes'} text-slate-400`;
             }
         };
 
@@ -800,12 +914,8 @@
 
         function recalculateScanTotal() {
             let total = 0;
-            currentScanVariants.forEach(v => {
-                total += (v.piezas * v.qtyDetected);
-            });
+            currentScanVariants.forEach(v => { total += (v.piezas * v.qtyDetected); });
             document.getElementById('scanTotalMove').innerText = total;
-            
-            // Si el total es 0, desactivar botones (opcional visualmente)
         }
 
         async function updateStockFromScan(sign) {
@@ -815,7 +925,6 @@
             
             let totalChangePieces = 0;
             let detailParts = [];
-            
             currentScanVariants.forEach(v => {
                 if(v.qtyDetected > 0) {
                     totalChangePieces += (v.piezas * v.qtyDetected);
@@ -823,13 +932,13 @@
                 }
             });
 
-            if(totalChangePieces === 0) return showToast("No hay cantidades capturadas", "error");
+            if(totalChangePieces === 0) return showToast("No hay cantidades para procesar", "error");
 
             const realChange = sign * totalChangePieces;
             const currentStock = p.stock_total_piezas || 0;
             const newStock = currentStock + realChange;
             
-            if(newStock < 0) return showToast("Stock final no puede ser negativo", "error");
+            if(newStock < 0) return showToast("Movimiento inválido: El stock quedaría en negativo.", "error");
             
             const detailText = detailParts.join(", ");
 
@@ -848,20 +957,17 @@
                     cambio: realChange,
                     detalle_scan: detailText, 
                     fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                    usuario: 'Almacén Escáner'
+                    usuario: 'Almacén Móvil'
                 });
 
                 await batch.commit();
 
                 document.getElementById('scanProductStock').innerText = newStock;
-                showToast(`Inventario actualizado (+${realChange}pz).`);
+                showToast(`Stock actualizado exitosamente (+${realChange}pz)`);
                 
-                // Reset visual para seguir escaneando este mismo producto si se quiere
                 currentScanVariants.forEach(v => v.qtyDetected = 0);
                 renderVariantsList();
-            } catch (error) { 
-                showToast("Error al guardar en BD", "error"); 
-            }
+            } catch (error) { showToast("Error de conexión al guardar", "error"); }
         }
 
         // ==========================================
@@ -879,16 +985,16 @@
 
         function buildPrintHTML(dataArray, qty, isVitrina, baseUrl) {
             let html = `<html><head><title>Imprimir QR - EEN</title><style>
-                body{font-family:sans-serif; text-align:center; padding: 20px;} 
-                .label{display:inline-block; margin:10px; padding:15px; border:2px solid #000; width:220px; border-radius: 8px; vertical-align: top;} 
-                img{width:150px; height:150px; margin: 10px auto;}
-                h4{margin: 0 0 5px 0; font-size: 14px;}
-                p{margin: 0; font-size: 10px; color: #555;}
+                body{font-family:sans-serif; text-align:center; padding: 10px; margin:0;} 
+                .label{display:inline-block; margin:5px; padding:15px; border:2px solid #000; width:200px; border-radius: 12px; vertical-align: top; box-sizing: border-box;} 
+                img{width:140px; height:140px; margin: 10px auto; display: block;}
+                h4{margin: 0 0 5px 0; font-size: 13px; line-height: 1.2; font-weight: bold;}
+                p{margin: 0; font-size: 11px; color: #333; font-weight: bold;}
             </style></head><body>`;
             
             dataArray.forEach(item => {
                 let qrVal = isVitrina ? baseUrl + item.id : item.id;
-                let qr = new QRious({value: qrVal, size: 200, level: 'M'});
+                let qr = new QRious({value: qrVal, size: 250, level: 'M'});
                 for(let i=0; i<qty; i++) {
                     html += `<div class="label">
                         <h4>${item.title}</h4>
@@ -901,7 +1007,6 @@
             return html;
         }
 
-        // Obtener productos filtrados reales
         function getCurrentFilteredProducts() {
             const term = document.getElementById('globalSearch').value.toLowerCase();
             const showOnlyPending = document.getElementById('filterPending').checked;
@@ -916,18 +1021,14 @@
             });
         }
 
-        // NUEVO: Imprimir TODOS los paquetes de los productos filtrados
         window.printAllPackagesQRs = async () => {
             const filtered = getCurrentFilteredProducts();
             if(filtered.length === 0) return showToast("No hay productos filtrados", "error"); 
-            
             closeModal('massActionsModal'); 
-            showToast("Buscando paquetes, por favor espera...", "info");
+            showToast("Calculando paquetes...", "info");
             
             let dataArray = [];
-            
             try {
-                // Hacemos las peticiones en paralelo para ser rápidos
                 const promises = filtered.map(async (p) => {
                     const snap = await productsRef.doc(p.id).collection('paquetes').get();
                     snap.forEach(doc => {
@@ -939,24 +1040,16 @@
                         });
                     });
                 });
-                
                 await Promise.all(promises);
+                if(dataArray.length === 0) return showToast("No se encontraron empaques configurados.", "error");
                 
-                if(dataArray.length === 0) {
-                    return showToast("Ninguno de estos productos tiene paquetes creados.", "error");
-                }
-                
-                const qty = prompt(`Se encontraron ${dataArray.length} paquetes/SKUs distintos en tu filtro.\n¿Cuántas etiquetas POR PAQUETE deseas imprimir?`, "1"); 
+                const qty = prompt(`Se encontraron ${dataArray.length} presentaciones.\n¿Cuántas etiquetas POR PAQUETE imprimir?`, "1"); 
                 if (!qty || qty <= 0) return; 
                 
                 const pw = window.open('', '_blank'); 
                 pw.document.write(buildPrintHTML(dataArray, qty, false, '')); 
                 pw.document.close(); 
-                
-            } catch (e) {
-                console.error(e);
-                showToast("Error al obtener los paquetes.", "error");
-            }
+            } catch (e) { showToast("Error al obtener los paquetes.", "error"); }
         };
 
         window.printAllQRs = (printType) => { 
@@ -968,7 +1061,7 @@
                 if (!baseUrl) return showToast("URL requerida", "error"); 
             } 
             closeModal('massActionsModal'); 
-            const qty = prompt(`¿Cuántas etiquetas POR CADA PRODUCTO en tu filtro actual?\n(Imprimiendo ${filtered.length} productos distintos)`, "1"); 
+            const qty = prompt(`Imprimiendo ${filtered.length} productos.\n¿Cuántas etiquetas POR PRODUCTO deseas?`, "1"); 
             if (!qty || qty <= 0) return; 
             
             const dataArray = filtered.map(p => ({
@@ -985,15 +1078,10 @@
         window.printSingleQR = (id) => { 
             const p = allItems.find(x => x.id === id); 
             if (!p) return; 
-            const qty = prompt(`Etiquetas para PIEZAS SUELTAS de:\n${p.nombre_flexible}\n\n¿Cuántas deseas imprimir?`, "1"); 
+            const qty = prompt(`Etiquetas para PIEZAS SUELTAS de:\n${p.nombre_flexible}\n\n¿Cuántas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
             
-            const dataArray = [{
-                id: p.id,
-                title: p.nombre_flexible,
-                sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)`
-            }];
-
+            const dataArray = [{ id: p.id, title: p.nombre_flexible, sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)` }];
             const pw = window.open('', '_blank'); 
             pw.document.write(buildPrintHTML(dataArray, qty, false, '')); 
             pw.document.close(); 
@@ -1002,16 +1090,11 @@
         window.printPackageQR = (productId, sku, piezas) => {
             const p = allItems.find(x => x.id === productId); 
             if (!p) return; 
-            const qty = prompt(`Etiquetas para PAQUETE CERRADO:\nSKU: ${sku} (${piezas} pz)\n\n¿Cuántas deseas imprimir?`, "1"); 
+            const qty = prompt(`Etiquetas para CAJA/BOLSA:\nSKU: ${sku} (${piezas} pz)\n\n¿Cuántas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
             
             const qrVal = `PKG|${productId}|${sku}|${piezas}`;
-            const dataArray = [{
-                id: qrVal,
-                title: `${p.nombre_flexible}`,
-                sub: `SKU: ${sku} (${piezas} PZ)`
-            }];
-
+            const dataArray = [{ id: qrVal, title: `${p.nombre_flexible}`, sub: `SKU: ${sku} (${piezas} PZ)` }];
             const pw = window.open('', '_blank'); 
             pw.document.write(buildPrintHTML(dataArray, qty, false, '')); 
             pw.document.close();
@@ -1026,12 +1109,7 @@
             else if (currentTab === 'import') renderImportTable();
         }
 
-        function togglePendingFilter() {
-            const cb = document.getElementById('filterPending');
-            cb.checked = !cb.checked;
-            clearBulkSelection();
-            filterTable();
-        }
+        function togglePendingFilter() { filterTable(); }
 
         function toggleSelectAll() {
             const checked = document.getElementById('selectAll').checked;
@@ -1042,7 +1120,6 @@
         function updateBulkSelection() {
             const selected = document.querySelectorAll('.row-cb:checked');
             const bulkBar = document.getElementById('bulkActionBar');
-            
             if(selected.length > 0) {
                 document.getElementById('bulkCount').innerText = selected.length;
                 bulkBar.classList.remove('hidden');
@@ -1115,37 +1192,41 @@
                 let statusBadge = '';
 
                 if (codTxt === '') {
-                    statusBadge = `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-exclamation-circle text-[9px]"></i> PENDIENTE</span>`;
-                    codTxt = '<span class="text-slate-300 italic text-xs">Sin asignar</span>';
+                    statusBadge = `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-exclamation-triangle"></i> PENDIENTE</span>`;
+                    codTxt = '<span class="text-slate-300 italic text-xs">S/N</span>';
                 } else if (p.tipo_item === 'KIT_FLEXIBLE') {
-                    statusBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-magic text-[9px]"></i> RECETA WEB</span>`;
+                    statusBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-magic"></i> RECETA WEB</span>`;
                 } else {
-                    statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-check text-[9px]"></i> LISTO</span>`;
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-check"></i> LISTO</span>`;
                 }
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors group";
+                tr.className = "hover:bg-slate-50/80 transition-colors group";
                 tr.innerHTML = `
-                    <td class="px-4 py-4 text-center">
+                    <td class="px-4 py-4 text-center border-b border-slate-100">
                         <input type="checkbox" class="row-cb cb-modern focus:ring-blue-500" value="${p.id}" onchange="updateBulkSelection()">
                     </td>
-                    <td class="px-6 py-4 flex items-center gap-4">
-                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 bg-white shrink-0">
-                        <div>
-                            <p class="font-bold text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>
+                    <td class="px-6 py-4 flex items-center gap-4 border-b border-slate-100">
+                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform" onclick="openImageLightbox(this.src)">
+                        <div class="min-w-0 pr-4">
+                            <p class="font-black text-slate-800 text-sm truncate group-hover:text-blue-600 transition-colors cursor-pointer" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>
                             ${statusBadge}
                         </div>
                     </td>
-                    <td class="px-6 py-4">
-                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-[10px] font-bold border border-slate-200 uppercase tracking-wider">${p.categoria || 'N/A'}</span>
+                    <td class="px-6 py-4 border-b border-slate-100">
+                        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">${p.categoria || 'N/A'}</span>
                     </td>
-                    <td class="px-6 py-4 font-black text-center ${p.stock_total_piezas > 5 ? 'text-blue-600' : 'text-red-500'}">
-                        ${p.stock_total_piezas || 0}
+                    <td class="px-6 py-4 text-center border-b border-slate-100">
+                        <span class="inline-block bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl font-black ${p.stock_total_piezas > 5 ? 'text-blue-600' : 'text-red-500'}">${p.stock_total_piezas || 0}</span>
                     </td>
-                    <td class="px-6 py-4 font-mono text-sm font-semibold text-slate-700">${codTxt}</td>
-                    <td class="px-6 py-4 text-right flex justify-end gap-2">
-                        <button onclick="printSingleQR('${p.id}')" class="text-slate-400 hover:text-slate-800 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-all shadow-sm" title="Imprimir QR (Pieza Suelta)"><i class="fas fa-qrcode"></i></button>
-                        <button onclick="openEditModal('${p.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-4 py-1.5 rounded-lg transition-all font-bold text-xs shadow-sm">Configurar</button>
+                    <td class="px-6 py-4 border-b border-slate-100">
+                        <div class="font-mono text-[11px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-md inline-block border border-slate-100">${codTxt}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right border-b border-slate-100">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="printSingleQR('${p.id}')" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center" title="Imprimir QR (Pieza Suelta)"><i class="fas fa-qrcode"></i></button>
+                            <button onclick="openEditModal('${p.id}')" class="px-4 h-9 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white transition-all font-bold text-xs shadow-sm flex items-center justify-center">Editar</button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1167,27 +1248,31 @@
                 return matchSearch && !alreadyMigrated;
             });
 
-            const badge = document.getElementById('importBadge');
-            badge.innerText = pendingToImport.length;
-            if(pendingToImport.length > 0) badge.classList.remove('hidden');
-            else badge.classList.add('hidden');
+            const badges = [document.getElementById('dtImportBadge'), document.getElementById('mbImportBadge')];
+            badges.forEach(b => {
+                if(b) {
+                    b.innerText = pendingToImport.length;
+                    if(pendingToImport.length > 0) b.classList.remove('hidden');
+                    else b.classList.add('hidden');
+                }
+            });
 
             if(pendingToImport.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-12 text-center text-slate-500 font-medium bg-slate-50/50"><i class="fas fa-check-circle text-4xl text-emerald-400 mb-3 block"></i> Todo importado y al día.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-16 text-center text-slate-400 font-bold"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-emerald-400"></i></div> Todo importado y al día.</td></tr>`;
                 return;
             }
 
             pendingToImport.forEach(fact => {
                 const code = fact.codigo || fact.Codigo || fact.id;
                 const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto;
-                const name = nameRaw || 'Sin descripción (Verificar nombre del campo en BD)';
+                const name = nameRaw || 'Sin descripción (Verificar DB)';
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-blue-50/50 transition-colors";
+                tr.className = "hover:bg-blue-50/30 transition-colors";
                 tr.innerHTML = `
-                    <td class="px-6 py-4 font-mono font-bold text-slate-800">${code}</td>
-                    <td class="px-6 py-4 font-medium text-slate-600">${name}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="importProduct('${fact.id}')" class="text-slate-700 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 px-4 py-2 rounded-lg transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto">
+                    <td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-50">${code}</td>
+                    <td class="px-6 py-4 font-bold text-slate-800 text-sm border-b border-slate-50">${name}</td>
+                    <td class="px-6 py-4 text-right border-b border-slate-50">
+                        <button onclick="importProduct('${fact.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto">
                             Importar <i class="fas fa-arrow-right"></i>
                         </button>
                     </td>
@@ -1199,7 +1284,7 @@
         function closeModal(id) { 
             const modal = document.getElementById(id);
             modal.classList.add('opacity-0');
-            modal.querySelector('.slide-up').style.transform = "translateY(20px)";
+            modal.querySelector('.slide-up').style.transform = "translateY(30px)";
             setTimeout(() => {
                 modal.classList.add('hidden'); 
                 modal.querySelector('.slide-up').style.transform = "";
@@ -1243,9 +1328,9 @@
             if (id) {
                 const p = allItems.find(x => x.id === id);
                 if(!p) return;
-                document.getElementById('modalTitle').innerText = 'Ajustes del Producto';
+                document.getElementById('modalTitle').innerText = 'Configurar Producto';
                 document.getElementById('editId').value = p.id;
-                document.getElementById('editImgPreview').src = p.imagen_url || 'https://via.placeholder.com/150';
+                document.getElementById('editImgPreview').src = p.imagen_url || 'https://via.placeholder.com/200';
                 document.getElementById('editImage').value = p.imagen_url || '';
                 document.getElementById('editName').value = p.nombre_flexible || '';
                 document.getElementById('editCategory').value = p.categoria || '';
@@ -1257,9 +1342,9 @@
                 
                 loadSubcollection(p.id);
             } else {
-                document.getElementById('modalTitle').innerText = 'Nuevo Producto Base';
+                document.getElementById('modalTitle').innerText = 'Nuevo Producto';
                 document.getElementById('editId').value = '';
-                document.getElementById('editImgPreview').src = 'https://via.placeholder.com/150';
+                document.getElementById('editImgPreview').src = 'https://via.placeholder.com/200';
                 document.getElementById('editImage').value = '';
                 document.getElementById('editName').value = '';
                 document.getElementById('editCategory').value = '';
@@ -1277,7 +1362,7 @@
             document.getElementById('importOldId').value = fact.id; 
             document.getElementById('modalTitle').innerText = 'Completar Importación';
             document.getElementById('editId').value = ''; 
-            document.getElementById('editImgPreview').src = 'https://via.placeholder.com/150';
+            document.getElementById('editImgPreview').src = 'https://via.placeholder.com/200';
             document.getElementById('editImage').value = '';
             
             const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto || '';
@@ -1301,7 +1386,7 @@
             subcollectionListener = productsRef.doc(productId).collection('paquetes').onSnapshot(snap => {
                 tbody.innerHTML = '';
                 if(snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400 text-sm font-medium">Aún no hay presentaciones para este producto.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400 text-xs font-bold">Sin empaques registrados.</td></tr>';
                     return;
                 }
                 const pkgs = [];
@@ -1310,12 +1395,12 @@
 
                 pkgs.forEach(pkg => {
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition";
+                    tr.className = "hover:bg-slate-100 transition";
                     tr.innerHTML = `
-                        <td class="py-3 px-4 text-center font-black text-slate-800">${pkg.piezas} <span class="text-[10px] font-bold text-slate-400">PZ</span></td>
-                        <td class="py-3 px-4 font-mono font-medium text-slate-600 text-sm">${pkg.sku}</td>
+                        <td class="py-3 px-4 text-center font-black text-slate-900 text-sm">${pkg.piezas} <span class="text-[9px] font-bold text-slate-400">PZ</span></td>
+                        <td class="py-3 px-4 font-mono font-bold text-slate-600 text-[11px]">${pkg.sku}</td>
                         <td class="py-3 px-4 text-center flex items-center justify-center gap-1">
-                            <button onclick="printPackageQR('${productId}', '${pkg.sku}', ${pkg.piezas})" class="text-slate-400 hover:text-slate-800 bg-white border border-slate-200 w-8 h-8 rounded-lg transition" title="Imprimir QR (Paquete)"><i class="fas fa-qrcode"></i></button>
+                            <button onclick="printPackageQR('${productId}', '${pkg.sku}', ${pkg.piezas})" class="text-slate-500 hover:text-slate-900 bg-white shadow-sm border border-slate-200 w-8 h-8 rounded-lg transition" title="Imprimir QR (Paquete)"><i class="fas fa-qrcode"></i></button>
                             <button onclick="deletePackage('${productId}', '${pkg.id}')" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-lg transition" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     `;
@@ -1327,8 +1412,8 @@
         function autoSkuSubcollection() {
             const baseSku = document.getElementById('editCodigo').value.trim();
             const qty = document.getElementById('newPkgQty').value;
-            if(!baseSku) return showToast('Agrega el Código Base primero.', 'error');
-            if(!qty || qty < 2) return showToast('Cantidad mínima: 2.', 'error');
+            if(!baseSku) return showToast('Falta el Código Base', 'error');
+            if(!qty || qty < 2) return showToast('Mínimo 2 piezas', 'error');
             document.getElementById('newPkgSku').value = `${baseSku}-${qty}PZ`;
         }
 
@@ -1336,15 +1421,15 @@
             const productId = document.getElementById('editId').value;
             const qty = parseInt(document.getElementById('newPkgQty').value);
             const sku = document.getElementById('newPkgSku').value.trim();
-            if(!productId) return showToast('Error interno.', 'error');
-            if(!qty || qty < 2) return showToast('Falta cantidad de piezas.', 'error');
-            if(!sku) return showToast('Falta el SKU.', 'error');
+            if(!productId) return showToast('Guarda el producto primero', 'error');
+            if(!qty || qty < 2) return showToast('Falta cantidad', 'error');
+            if(!sku) return showToast('Falta SKU', 'error');
 
             try {
                 await productsRef.doc(productId).collection('paquetes').add({
                     piezas: qty, sku: sku, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                showToast('Presentación añadida');
+                showToast('Paquete añadido');
                 document.getElementById('newPkgQty').value = '';
                 document.getElementById('newPkgSku').value = '';
             } catch (error) { showToast('Error al añadir', 'error'); }
@@ -1354,7 +1439,7 @@
             if(!confirm('¿Eliminar esta presentación?')) return;
             try {
                 await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete();
-                showToast('Eliminado');
+                showToast('Eliminado', 'info');
             } catch (error) { showToast('Error al eliminar', 'error'); }
         }
 
@@ -1368,9 +1453,9 @@
             const div = document.createElement('div');
             div.className = "flex gap-2 items-center row-receta mb-2";
             div.innerHTML = `
-                <select class="flex-1 input-modern rounded-lg px-3 py-2 text-sm outline-none r-select">${getBaseOptions()}</select>
-                <input type="number" min="1" value="${qty}" class="w-20 input-modern rounded-lg px-3 py-2 text-sm text-center outline-none r-qty">
-                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-9 h-9 rounded-lg transition"><i class="fas fa-times"></i></button>
+                <select class="flex-1 input-modern rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 outline-none r-select shadow-sm">${getBaseOptions()}</select>
+                <input type="number" min="1" value="${qty}" class="w-16 input-modern rounded-xl px-2 py-2.5 text-sm font-black text-center outline-none r-qty shadow-sm">
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-10 h-10 flex items-center justify-center rounded-xl transition"><i class="fas fa-times"></i></button>
             `;
             if(compId) div.querySelector('.r-select').value = compId;
             document.getElementById('recetaContainer').appendChild(div);
@@ -1423,7 +1508,7 @@
                         showToast('¡Importado exitosamente!');
                         switchTab('master'); 
                     } else {
-                        showToast('Producto base creado. Agrega paquetes abajo.');
+                        showToast('Base creada. Configura cajas ahora.');
                     }
                     
                     openEditModal(docRef.id);
