@@ -158,7 +158,6 @@
             <button onclick="openMassActions()" class="md:hidden flex-none bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2">
                 <i class="fas fa-qrcode"></i> QRs
             </button>
-            <!-- NUEVO: Botón Exportar "Por Configurar" -->
             <button onclick="exportPendingMasterToExcel()" class="flex-none bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 px-3 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 transition" title="Exportar Web Por Configurar">
                 <i class="fas fa-file-excel"></i>
             </button>
@@ -202,7 +201,7 @@
                         </button>
                     </div>
 
-                    <!-- Botón Exportar (Aparece en vista agrupada) -->
+                    <!-- Botón Exportar -->
                     <button id="btnExportExcel" onclick="exportToExcel()" class="hidden bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm border border-emerald-200">
                         <i class="fas fa-file-excel text-sm"></i> <span class="hidden sm:inline">Exportar Excel</span>
                     </button>
@@ -210,7 +209,7 @@
 
                 <!-- 1. Tabla Desglose (La de siempre) -->
                 <div id="tableContainerDesglose" class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
-                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[850px]">
                         <thead class="bg-slate-50/90 backdrop-blur sticky top-0 z-10 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
                             <tr>
                                 <th class="px-4 py-3 w-12 text-center border-b border-slate-200 bg-slate-50">
@@ -220,14 +219,14 @@
                                 <th class="px-6 py-3 border-b border-slate-200 bg-slate-50">Categoría</th>
                                 <th class="px-6 py-3 text-center border-b border-slate-200 bg-slate-50">Stock</th>
                                 <th class="px-6 py-3 border-b border-slate-200 bg-slate-50">Integración Sist.</th>
-                                <th class="px-6 py-3 text-right border-b border-slate-200 bg-slate-50">Acciones</th>
+                                <th class="px-6 py-3 text-right border-b border-slate-200 bg-slate-50 w-64">Acciones Rápidas</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
 
-                <!-- 2. Tabla Agrupada (NUEVA) -->
+                <!-- 2. Tabla Agrupada -->
                 <div id="tableContainerAgrupado" class="overflow-y-auto overflow-x-auto flex-1 custom-scroll hidden bg-white">
                     <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
                         <thead class="bg-slate-50/90 backdrop-blur sticky top-0 z-10 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
@@ -393,7 +392,7 @@
         </div>
     </nav>
 
-    <!-- MODALES Y ELEMENTOS RESTANTES (Barra Masiva, Edición, Toast) -->
+    <!-- MODALES Y ELEMENTOS RESTANTES -->
     <div id="bulkActionBar" class="fixed bottom-20 md:bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-full shadow-2xl z-[60] hidden flex items-center gap-4 fade-in border border-slate-700">
         <span class="text-sm font-bold flex items-center gap-2"><span id="bulkCount" class="bg-blue-600 text-white px-2.5 py-0.5 rounded-md text-xs font-black shadow-inner">0</span> sel.</span>
         <div class="h-4 w-px bg-slate-700"></div>
@@ -403,7 +402,6 @@
 
     <!-- Modal Edición en Lote -->
     <div id="massEditModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300 pb-20 md:pb-4">
-        <!-- Contenido Modal Masivo -->
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div class="flex items-center gap-3">
@@ -476,7 +474,6 @@
                                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre Comercial <span class="text-red-500">*</span></label>
                                     <input type="text" id="editName" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-slate-900 text-sm">
                                 </div>
-                                <!-- NUEVA SECCIÓN DE IMAGEN CON SUBIDA A IMGBB -->
                                 <div class="md:col-span-2">
                                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Imagen del Producto</label>
                                     <div class="flex gap-2">
@@ -556,6 +553,18 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- SECCIÓN VISIBILIDAD -->
+                <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800">Visibilidad en Tienda</h3>
+                        <p class="text-[11px] text-slate-500 font-medium mt-0.5">Controla si este producto es visible o está oculto en tu catálogo web.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="editActivo" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
             </div>
 
             <div class="bg-white px-4 sm:px-6 py-4 border-t border-slate-100 flex justify-end gap-3 shrink-0 z-10">
@@ -595,7 +604,7 @@
         // ==========================================
         // CONFIGURACIÓN API (IMGBB)
         // ==========================================
-        const IMGBB_API_KEY = "43034dab40f80fe91cd054d4949e5d5c"; // <-- REEMPLAZA ESTO CON TU KEY DE IMGBB
+        const IMGBB_API_KEY = "PON_TU_KEY_AQUI"; // <-- REEMPLAZA ESTO CON TU KEY DE IMGBB
 
         // GLOBALES
         let allItems = []; 
@@ -644,9 +653,6 @@
             setTimeout(() => { t.classList.add('hidden'); t.classList.remove('scale-in'); }, 3000);
         }
 
-        // ==========================================
-        // FUNCIÓN SUBIDA DE IMÁGENES IMGBB
-        // ==========================================
         async function handleImageUpload(event) {
             const file = event.target.files[0];
             if(!file) return;
@@ -654,9 +660,8 @@
             const status = document.getElementById('uploadStatus');
             const urlInput = document.getElementById('editImage');
             const preview = document.getElementById('editImgPreview');
-            const btn = event.target.previousElementSibling; // El botón "Subir"
+            const btn = event.target.previousElementSibling; 
 
-            // UI Feedback
             status.classList.remove('hidden');
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -666,30 +671,25 @@
 
             try {
                 const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                    method: 'POST',
-                    body: formData
+                    method: 'POST', body: formData
                 });
-                
                 const data = await response.json();
                 
                 if(data.success) {
                     const imgUrl = data.data.url;
-                    urlInput.value = imgUrl; // Asignar URL al input
-                    preview.src = imgUrl;    // Actualizar previsualización
+                    urlInput.value = imgUrl; 
+                    preview.src = imgUrl;    
                     showToast("Imagen subida con éxito");
                 } else {
                     showToast("Error al procesar en ImgBB", "error");
-                    console.error("ImgBB Error:", data);
                 }
             } catch (error) {
                 showToast("Error de conexión al subir la imagen", "error");
-                console.error(error);
             } finally {
-                // Restaurar UI
                 status.classList.add('hidden');
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                event.target.value = ''; // Resetear el input file por si se quiere subir otra foto igual
+                event.target.value = ''; 
             }
         }
 
@@ -732,7 +732,6 @@
             }
         }
 
-        // CONTROL DE VISTAS EN MASTER (Desglose vs Agrupado)
         function switchMasterView(viewType) {
             currentMasterView = viewType;
             const btnD = document.getElementById('subTab-desglose');
@@ -748,7 +747,6 @@
                 contD.classList.remove('hidden');
                 contA.classList.add('hidden');
                 btnExcel.classList.add('hidden');
-                // Habilitar filtro de "Pendientes" en la vista normal
                 searchContainer.querySelector('label').classList.remove('hidden');
                 searchContainer.querySelector('button[title="Exportar Web Por Configurar"]').classList.remove('hidden');
             } else {
@@ -757,15 +755,13 @@
                 contA.classList.remove('hidden');
                 contD.classList.add('hidden');
                 btnExcel.classList.remove('hidden');
-                // Ocultar filtro de "Pendientes" porque en facturación todo tiene código
                 searchContainer.querySelector('label').classList.add('hidden');
                 searchContainer.querySelector('button[title="Exportar Web Por Configurar"]').classList.add('hidden');
             }
-            // Limpiamos selección al cambiar
             clearBulkSelection();
         }
 
-        // FIREBASE LISTENERS
+        // FIREBASE LISTENERS (Ordenamos por fecha creación localmente)
         productsRef.onSnapshot((snapshot) => {
             allItems = []; baseItems = []; let pendingCount = 0;
             snapshot.forEach((doc) => {
@@ -774,6 +770,14 @@
                 if(!item.tipo_item || item.tipo_item === 'PIEZA_BASE') baseItems.push(item);
                 if (!item.codigo_sistema_oficial || item.codigo_sistema_oficial.trim() === '') pendingCount++;
             });
+            
+            // ORDENAR POR FECHA DE CREACIÓN (MÁS NUEVOS PRIMERO)
+            allItems.sort((a, b) => {
+                const dateA = a.fecha_creacion ? a.fecha_creacion.toDate() : new Date(0);
+                const dateB = b.fecha_creacion ? b.fecha_creacion.toDate() : new Date(0);
+                return dateB - dateA;
+            });
+
             document.getElementById('count-total').innerText = allItems.length;
             document.getElementById('count-pending').innerText = pendingCount;
             if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
@@ -827,24 +831,19 @@
             });
         });
 
-        // ==========================================
-        // FUNCIONES DE EXPORTACIÓN (AGRUPADO Y PENDIENTES MASTER)
-        // ==========================================
         function getGroupedInventory() {
             const groups = {};
             const term = document.getElementById('globalSearch').value.toLowerCase();
 
             allItems.forEach(item => {
                 const code = item.codigo_sistema_oficial;
-                if(!code || code.trim() === '') return; // Omitimos los que no tienen código ligado
+                if(!code || code.trim() === '') return; 
 
                 if(!groups[code]) {
-                    // Buscar nombre real en el catálogo de facturación
                     const fact = facturacionCatalog.find(f => {
                         const fc = f.codigo || f.Codigo || f.id;
                         return fc === code;
                     });
-                    
                     const nameRaw = fact ? (fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto) : 'Desconocido / No importado';
 
                     groups[code] = {
@@ -858,7 +857,6 @@
                 if (item.nombre_flexible) groups[code].variantes.push(item.nombre_flexible);
             });
 
-            // Aplicar búsqueda si existe
             let results = Object.values(groups);
             if(term) {
                 results = results.filter(g => 
@@ -910,7 +908,6 @@
         function exportToExcel() {
             const results = getGroupedInventory();
             if(results.length === 0) return showToast("No hay datos para exportar", "error");
-
             showToast("Generando Excel...", "info");
 
             const dataToExport = results.map(g => ({
@@ -925,17 +922,13 @@
 
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Inventario_Agrupado");
-            
             XLSX.writeFile(workbook, `Inventario_Facturacion_${new Date().toISOString().split('T')[0]}.xlsx`);
             showToast('Excel descargado correctamente');
         }
 
-        // NUEVA FUNCIÓN: Exportar pestaña Web "Por Configurar"
         function exportPendingMasterToExcel() {
             const pending = allItems.filter(p => !p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '');
-            
             if(pending.length === 0) return showToast("No hay productos web por configurar", "info");
-
             showToast("Generando Excel de Faltantes Web...", "info");
 
             const dataToExport = pending.map(p => ({
@@ -947,29 +940,19 @@
             }));
 
             const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-            worksheet['!cols'] = [
-                {wch: 25}, // ID
-                {wch: 45}, // Nombre
-                {wch: 20}, // Categoria
-                {wch: 15}, // Stock
-                {wch: 25}  // Tipo
-            ];
+            worksheet['!cols'] = [{wch: 25}, {wch: 45}, {wch: 20}, {wch: 15}, {wch: 25}];
 
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Web_Por_Configurar");
-            
             XLSX.writeFile(workbook, `Productos_Web_Faltantes_${new Date().toISOString().split('T')[0]}.xlsx`);
             showToast('Excel de faltantes web descargado');
         }
 
-        // ==========================================
-        // TABLAS MASTER (DESGLOSE) Y BUSCADOR
-        // ==========================================
         function handleGlobalSearch() {
             clearBulkSelection();
             if(currentTab === 'master') {
-                filterTable();        // Filtra la vista 1
-                renderGroupedTable(); // Filtra la vista 2
+                filterTable();        
+                renderGroupedTable(); 
             }
             else if (currentTab === 'import') renderImportTable();
         }
@@ -1003,16 +986,21 @@
                     statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-check"></i> LISTO</span>`;
                 }
 
+                // UI Visibilidad
+                const isActivo = p.activo !== false; 
+                const eyeIcon = isActivo ? 'fa-eye text-blue-500' : 'fa-eye-slash text-slate-400';
+                const eyeBg = isActivo ? 'bg-blue-50 hover:bg-blue-100 border border-blue-100' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200';
+
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-colors group";
+                tr.className = `transition-colors group ${!isActivo ? 'opacity-75 bg-slate-50' : 'hover:bg-slate-50/80'}`;
                 tr.innerHTML = `
                     <td class="px-4 py-4 text-center border-b border-slate-100">
                         <input type="checkbox" class="row-cb cb-modern focus:ring-blue-500" value="${p.id}" onchange="updateBulkSelection()">
                     </td>
                     <td class="px-6 py-4 flex items-center gap-4 border-b border-slate-100">
-                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform" onclick="openImageLightbox(this.src)">
+                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform ${!isActivo ? 'grayscale' : ''}" onclick="openImageLightbox(this.src)">
                         <div class="min-w-0 pr-4">
-                            <p class="font-black text-slate-800 text-sm truncate group-hover:text-blue-600 transition-colors cursor-pointer" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>
+                            <p class="font-black text-slate-800 text-sm truncate group-hover:text-blue-600 transition-colors cursor-pointer ${!isActivo ? 'line-through decoration-slate-300' : ''}" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>
                             ${statusBadge}
                         </div>
                     </td>
@@ -1026,9 +1014,12 @@
                         <div class="font-mono text-[11px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-md inline-block border border-slate-100">${codTxt}</div>
                     </td>
                     <td class="px-6 py-4 text-right border-b border-slate-100">
-                        <div class="flex justify-end gap-2">
-                            <button onclick="printSingleQR('${p.id}')" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center" title="Imprimir QR (Pieza Suelta)"><i class="fas fa-qrcode"></i></button>
-                            <button onclick="openEditModal('${p.id}')" class="px-4 h-9 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white transition-all font-bold text-xs shadow-sm flex items-center justify-center">Editar</button>
+                        <div class="flex justify-end gap-1.5">
+                            <button onclick="toggleActivo('${p.id}', ${isActivo})" class="w-8 h-8 rounded-lg ${eyeBg} transition-all shadow-sm flex items-center justify-center" title="${isActivo ? 'Ocultar de web' : 'Mostrar en web'}"><i class="fas ${eyeIcon} text-xs"></i></button>
+                            <button onclick="envejecerProducto('${p.id}')" class="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 text-orange-600 hover:bg-orange-100 transition-all shadow-sm flex items-center justify-center" title="Mandar al fondo del catálogo"><i class="fas fa-arrow-down text-xs"></i></button>
+                            <button onclick="cloneProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="Clonar Producto"><i class="fas fa-copy text-xs"></i></button>
+                            <button onclick="printSingleQR('${p.id}')" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center" title="Imprimir QR (Pieza Suelta)"><i class="fas fa-qrcode text-xs"></i></button>
+                            <button onclick="openEditModal('${p.id}')" class="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center justify-center" title="Editar"><i class="fas fa-pen text-xs"></i></button>
                         </div>
                     </td>
                 `;
@@ -1036,6 +1027,53 @@
             });
             updateBulkSelection();
         }
+
+        // --- NUEVAS FUNCIONES DE ACCIONES RÁPIDAS ---
+        window.toggleActivo = async (id, currentState) => {
+            try {
+                await productsRef.doc(id).update({ activo: !currentState });
+                showToast(!currentState ? 'El producto ahora es VISIBLE' : 'El producto ha sido OCULTADO', 'info');
+            } catch(e) { showToast('Error al cambiar visibilidad', 'error'); }
+        };
+
+        window.envejecerProducto = async (id) => {
+            if(!confirm('¿Mandar este producto hasta el fondo del catálogo web? (Se le asignará fecha del 2000)')) return;
+            try {
+                // Asignar fecha del año 2000 para que se vaya al final al ordenar por fecha descendente
+                await productsRef.doc(id).update({ 
+                    fecha_creacion: firebase.firestore.Timestamp.fromDate(new Date('2000-01-01T12:00:00Z')) 
+                });
+                showToast('Producto enviado al fondo con éxito', 'info');
+            } catch(e) { showToast('Error al actualizar fecha', 'error'); }
+        };
+
+        window.cloneProduct = (id) => {
+            const p = allItems.find(x => x.id === id);
+            if(!p) return;
+            
+            // Abrimos modal limpio
+            openEditModal(); 
+            
+            // Rellenamos con datos clonados
+            document.getElementById('modalTitle').innerText = 'Clonar Producto';
+            document.getElementById('editName').value = (p.nombre_flexible || 'Sin Nombre') + ' (Copia)';
+            document.getElementById('editCategory').value = p.categoria || '';
+            document.getElementById('editImage').value = p.imagen_url || '';
+            document.getElementById('editImgPreview').src = p.imagen_url || 'https://via.placeholder.com/200';
+            document.getElementById('editCodigo').value = p.codigo_sistema_oficial ? p.codigo_sistema_oficial + '-COPIA' : '';
+            document.getElementById('editTipo').value = p.tipo_item || 'PIEZA_BASE';
+            document.getElementById('editActivo').checked = p.activo !== false;
+            
+            document.getElementById('recetaContainer').innerHTML = '';
+            if(p.receta_desglose) Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
+            
+            // Un clon es un producto nuevo, no copiamos los paquetes hijos automáticamente
+            document.getElementById('subcollectionList').innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400 text-xs font-bold">Guarda el producto primero para añadir empaques/cajas.</td></tr>';
+            if(subcollectionListener) { subcollectionListener(); subcollectionListener = null; }
+            
+            toggleFormFields();
+        };
+        // --------------------------------------------
 
         function toggleSelectAll() {
             const checked = document.getElementById('selectAll').checked;
@@ -1061,9 +1099,6 @@
             updateBulkSelection();
         }
 
-        // ==========================================
-        // IMPORTACIÓN Y EXPORTACIÓN DE FALTANTES (PESTAÑA IMPORTAR)
-        // ==========================================
         function getPendingToImport() {
             const term = document.getElementById('globalSearch').value.toLowerCase();
             const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
@@ -1107,9 +1142,7 @@
 
         function exportImportToExcel() {
             const pendingToImport = getPendingToImport();
-            
             if(pendingToImport.length === 0) return showToast("No hay datos para exportar", "error");
-
             showToast("Generando Excel...", "info");
 
             const dataToExport = pendingToImport.map(fact => ({
@@ -1118,21 +1151,14 @@
             }));
 
             const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-            worksheet['!cols'] = [
-                {wch: 25}, // Código
-                {wch: 60}  // Descripción
-            ];
+            worksheet['!cols'] = [{wch: 25}, {wch: 60}];
 
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Pendientes_Importar");
-            
             XLSX.writeFile(workbook, `Faltantes_Por_Importar_${new Date().toISOString().split('T')[0]}.xlsx`);
             showToast('Excel de faltantes descargado correctamente');
         }
 
-        // ==========================================
-        // FUNCIONES DE ESCÁNER Y EDICIÓN MASIVA
-        // ==========================================
         function startScanner() {
             document.getElementById('btnStartScan').classList.add('hidden');
             document.getElementById('btnStopScan').classList.remove('hidden');
@@ -1401,6 +1427,7 @@
                 document.getElementById('editCategory').value = p.categoria || '';
                 document.getElementById('editCodigo').value = p.codigo_sistema_oficial || '';
                 document.getElementById('editTipo').value = p.tipo_item || 'PIEZA_BASE';
+                document.getElementById('editActivo').checked = p.activo !== false; // Default true
                 
                 document.getElementById('recetaContainer').innerHTML = '';
                 if(p.receta_desglose) Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
@@ -1415,6 +1442,7 @@
                 document.getElementById('editCategory').value = '';
                 document.getElementById('editCodigo').value = '';
                 document.getElementById('editTipo').value = 'PIEZA_BASE';
+                document.getElementById('editActivo').checked = true;
                 document.getElementById('recetaContainer').innerHTML = '';
                 if(subcollectionListener) { subcollectionListener(); subcollectionListener = null; }
             }
@@ -1429,6 +1457,7 @@
             document.getElementById('editId').value = ''; 
             document.getElementById('editImgPreview').src = 'https://via.placeholder.com/200';
             document.getElementById('editImage').value = '';
+            document.getElementById('editActivo').checked = true;
             
             const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto || '';
             document.getElementById('editName').value = nameRaw;
@@ -1686,6 +1715,7 @@
 
             const nombreFlexible = document.getElementById('editName').value.trim();
             const codigoFacturacion = document.getElementById('editCodigo').value.trim();
+            const activo = document.getElementById('editActivo').checked;
 
             if (!nombreFlexible) return showToast('Falta Nombre', 'error');
             if (!codigoFacturacion && tipo !== 'KIT_FLEXIBLE') return showToast('Falta Código Base', 'error');
@@ -1697,7 +1727,7 @@
                 codigo_sistema_oficial: codigoFacturacion,
                 tipo_item: tipo,
                 receta_desglose: receta,
-                activo: true
+                activo: activo
             };
 
             const wasImport = document.getElementById('importOldId').value;
@@ -1716,7 +1746,7 @@
                         showToast('¡Importado exitosamente!');
                         switchTab('master'); 
                     } else {
-                        showToast('Base creada. Configura cajas ahora.');
+                        showToast('Producto guardado. Puedes añadir paquetes si aplica.');
                     }
                     
                     openEditModal(docRef.id);
