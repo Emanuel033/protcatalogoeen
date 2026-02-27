@@ -72,7 +72,7 @@
         const rtdb = firebase.database();
         const productsRef = db.collection('productos_master');
         const facturacionRef = db.collection('catalogo_facturacion');
-        const bitacoraRef = db.collection('bitacora_inventario'); // <-- NUEVO PARA INVENTARIO
+        const bitacoraRef = db.collection('bitacora_inventario'); 
     </script>
 
     <!-- Header Elegante -->
@@ -104,7 +104,6 @@
             <button onclick="switchTab('master')" id="tabBtn-master" class="flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold text-sm transition hover:text-slate-900 bg-white shadow-sm text-blue-600">
                 <i class="fas fa-database mr-1"></i> Catálogo Master
             </button>
-            <!-- NUEVA PESTAÑA ESCÁNER -->
             <button onclick="switchTab('scanner')" id="tabBtn-scanner" class="flex-none px-6 py-2 rounded-lg font-semibold text-sm text-slate-600 transition hover:text-slate-900">
                 <i class="fas fa-qrcode mr-1"></i> Escáner Inventario
             </button>
@@ -179,7 +178,7 @@
                         <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-camera"></i></div>
                         <div>
                             <h2 class="font-bold text-slate-900 text-lg">Lector de Almacén</h2>
-                            <p class="text-xs text-slate-500 font-medium">Escanea códigos para sumar/restar stock.</p>
+                            <p class="text-xs text-slate-500 font-medium">Escanea códigos de piezas o paquetes.</p>
                         </div>
                     </div>
                     
@@ -205,26 +204,42 @@
                     </div>
 
                     <div id="scanResult" class="hidden w-full fade-in flex flex-col items-center">
-                        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mb-4 shadow-inner ring-4 ring-emerald-50">
+                        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mb-3 shadow-inner ring-4 ring-emerald-50">
                             <i class="fas fa-check"></i>
                         </div>
                         <h4 id="scanProductName" class="text-xl font-black text-slate-900 mb-1 leading-tight">Producto</h4>
-                        <p class="text-xs text-slate-400 font-mono mb-4 bg-slate-50 px-3 py-1 rounded-md border border-slate-100" id="scanProductCode">CÓDIGO</p>
+                        <p class="text-[11px] text-slate-500 font-mono mb-4 bg-slate-100 px-3 py-1 rounded-md" id="scanProductCode">CÓDIGO (1pz)</p>
                         
-                        <div class="bg-blue-50 border border-blue-100 w-full rounded-xl py-4 mb-6">
-                            <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Stock Físico Actual</p>
-                            <p class="text-4xl font-black text-blue-700 leading-none" id="scanProductStock">0</p>
+                        <!-- Panel de Stock y Multiplicador -->
+                        <div class="grid grid-cols-2 gap-4 w-full mb-4">
+                            <div class="bg-blue-50 border border-blue-100 rounded-xl py-3 flex flex-col items-center">
+                                <p class="text-[9px] font-bold text-blue-600 uppercase tracking-wider mb-1">Stock Físico</p>
+                                <p class="text-3xl font-black text-blue-700 leading-none" id="scanProductStock">0</p>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl py-3 flex flex-col items-center justify-center">
+                                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Multiplicador QR</p>
+                                <p class="text-2xl font-black text-slate-700 leading-none">x<span id="scanMultiplierDisplay">1</span> <span class="text-[10px] text-slate-400 font-medium tracking-normal">pz</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Panel Rápido: ¿Cuántos Bultos/Piezas? -->
+                        <div class="flex items-center gap-3 mb-5 w-full bg-slate-50 p-2 rounded-xl border border-slate-100 shadow-sm">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase ml-2 flex-1 text-left leading-tight" id="lblScanQty">¿Cuántas PIEZAS escaneaste?</label>
+                            <input type="number" id="scanQty" value="1" min="1" class="w-24 text-center border border-slate-300 rounded-lg py-2 font-bold text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                         
                         <div class="flex gap-3 w-full">
-                            <button onclick="updateStockFromScan(1)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 transition-all active:scale-95 flex items-center justify-center gap-2">
-                                <i class="fas fa-plus"></i> Ingresar (1)
+                            <button onclick="updateStockFromScan(1)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-emerald-200 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm">
+                                <i class="fas fa-arrow-down"></i> <span id="btnIngresarText">Ingresar</span>
                             </button>
-                            <button onclick="updateStockFromScan(-1)" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-2">
-                                <i class="fas fa-minus"></i> Extraer (1)
+                            <button onclick="updateStockFromScan(-1)" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3.5 rounded-xl font-bold shadow-sm shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm">
+                                <i class="fas fa-arrow-up"></i> <span id="btnExtraerText">Extraer</span>
                             </button>
                         </div>
+                        
                         <input type="hidden" id="scanProductId">
+                        <input type="hidden" id="scanMultiplier" value="1">
+                        <input type="hidden" id="scanSku" value="BASE">
                     </div>
                 </div>
 
@@ -247,8 +262,8 @@
                                     <tr>
                                         <th class="px-4 py-3 w-32">Fecha y Hora</th>
                                         <th class="px-4 py-3">Producto Afectado</th>
-                                        <th class="px-4 py-3 w-32">Cód. Sistema</th>
-                                        <th class="px-4 py-3 w-24 text-center">Acción</th>
+                                        <th class="px-4 py-3 w-32">Cód. Base</th>
+                                        <th class="px-4 py-3 w-24 text-center">Piezas Totales</th>
                                         <th class="px-4 py-3 w-24 text-center">Nuevo Stock</th>
                                     </tr>
                                 </thead>
@@ -355,7 +370,7 @@
     </div>
 
 
-    <!-- MODAL PREMIUM DE EDICIÓN (Tu Original) -->
+    <!-- MODAL PREMIUM DE EDICIÓN -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 lg:p-6 opacity-0 transition-opacity duration-300">
         <div class="bg-slate-50/90 rounded-[24px] shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[95vh] slide-up border border-slate-200">
             
@@ -437,6 +452,7 @@
                     </div>
                 </div>
 
+                <!-- PAQUETES (AHORA CON BOTÓN DE QR) -->
                 <div id="sectionPaquetes" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-box-open text-slate-400"></i> Presentaciones (Bolsas/Paquetes)</h3>
@@ -463,7 +479,7 @@
                                 <tr>
                                     <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-24 text-center">Contenido</th>
                                     <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider">SKU del Paquete</th>
-                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-20 text-center">Acción</th>
+                                    <th class="py-2.5 px-4 font-semibold text-slate-500 text-[11px] uppercase tracking-wider w-28 text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="subcollectionList" class="divide-y divide-slate-50"></tbody>
@@ -489,9 +505,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- NUEVO: MODAL IMPRESIONES QR -->
-    <!-- ========================================== -->
+    <!-- MODAL IMPRESIONES MASIVAS -->
     <div id="massActionsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-200">
             <div class="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
@@ -512,7 +526,7 @@
                 
                 <div class="grid grid-cols-2 gap-3 pt-2">
                     <button onclick="printAllQRs('inventario')" class="bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 text-sm font-bold shadow-sm transition flex flex-col items-center gap-1">
-                        <i class="fas fa-boxes text-lg"></i> QRs Almacén
+                        <i class="fas fa-boxes text-lg"></i> QRs Almacén (Sueltas)
                     </button>
                     <button onclick="printAllQRs('vitrina')" class="bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 text-sm font-bold shadow-sm transition flex flex-col items-center gap-1">
                         <i class="fas fa-store text-lg"></i> QRs Vitrina
@@ -523,7 +537,7 @@
     </div>
 
     <!-- Toast Elegante -->
-    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl hidden z-[100] font-semibold text-sm flex items-center gap-3 w-max">
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl hidden z-[100] font-semibold text-sm flex items-center gap-3 w-max transition-all">
         <i class="fas fa-check-circle text-green-400"></i> <span id="toastMsg"></span>
     </div>
 
@@ -534,7 +548,7 @@
         let baseItems = [];
         let currentTab = 'master';
         let subcollectionListener = null;
-        let html5QrcodeScanner = null; // Para el escáner
+        let html5QrcodeScanner = null;
 
         document.getElementById('globalSearchContainer').classList.remove('hidden');
 
@@ -543,28 +557,22 @@
             const icon = t.querySelector('i');
             document.getElementById('toastMsg').innerText = msg;
             
-            if(type === 'error') {
-                icon.className = "fas fa-exclamation-circle text-red-400";
-            } else {
-                icon.className = "fas fa-check-circle text-green-400";
-            }
+            if(type === 'error') icon.className = "fas fa-exclamation-circle text-red-400";
+            else icon.className = "fas fa-check-circle text-green-400";
 
-            t.classList.remove('hidden');
-            t.classList.add('slide-up');
+            t.classList.remove('hidden'); t.classList.add('slide-up');
             setTimeout(() => { t.classList.add('hidden'); t.classList.remove('slide-up'); }, 3000);
         }
 
-        // CONTROL DE PESTAÑAS MEJORADO
+        // CONTROL DE PESTAÑAS
         function switchTab(tab) {
             currentTab = tab;
             clearBulkSelection();
             
             const tabs = ['master', 'import', 'scanner'];
-            
             tabs.forEach(t => {
                 const btn = document.getElementById(`tabBtn-${t}`);
                 if (!btn) return;
-                
                 if(t === tab) {
                     btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
                     btn.classList.remove('hover:text-slate-900', 'text-slate-600');
@@ -576,12 +584,13 @@
                 }
             });
             
-            // Lógica especial de buscador y cámara
             if(tab === 'scanner') {
                 document.getElementById('globalSearchContainer').classList.add('hidden');
+                // Reinicia UI escáner
+                document.getElementById('scanQty').value = 1;
             } else {
                 document.getElementById('globalSearchContainer').classList.remove('hidden');
-                stopScanner(); // Apaga la cámara si cambias de pestaña
+                stopScanner(); 
                 document.getElementById('globalSearch').value = '';
                 if(tab === 'master') filterTable();
                 if(tab === 'import') renderImportTable();
@@ -635,11 +644,14 @@
                 const isPos = data.cambio > 0;
                 const badgeClass = isPos ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
                 const signo = isPos ? '+' : '';
+                
+                // Mostrar el detalle (ej. "2 paq. x 50pz")
+                const detalle = data.detalle_scan ? `<br><span class="text-[9px] text-slate-400 font-normal mt-0.5 inline-block">${data.detalle_scan}</span>` : '';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-4 py-3 text-xs font-medium text-slate-500">${strFecha}</td>
-                        <td class="px-4 py-3 font-bold text-slate-800 text-xs">${data.nombre_producto}</td>
+                        <td class="px-4 py-3 font-bold text-slate-800 text-xs leading-tight">${data.nombre_producto}${detalle}</td>
                         <td class="px-4 py-3 font-mono text-[11px] text-blue-600 bg-blue-50/50 rounded-lg text-center border border-blue-50">${data.codigo_oficial || '-'}</td>
                         <td class="px-4 py-3 text-center">
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${badgeClass}">${signo}${data.cambio}</span>
@@ -651,13 +663,14 @@
         });
 
         // ==========================================
-        // MÓDULO ESCÁNER DE INVENTARIO
+        // MÓDULO ESCÁNER INTELIGENTE (SOPORTA PAQUETES)
         // ==========================================
         function startScanner() {
             document.getElementById('btnStartScan').classList.add('hidden');
             document.getElementById('btnStopScan').classList.remove('hidden');
             document.getElementById('scanIdle').classList.add('hidden');
             document.getElementById('scanResult').classList.add('hidden');
+            document.getElementById('scanQty').value = 1;
 
             html5QrcodeScanner = new Html5Qrcode("reader");
             html5QrcodeScanner.start(
@@ -665,19 +678,28 @@
                 { fps: 10, qrbox: {width: 250, height: 250} },
                 (decodedText) => {
                     let productId = decodedText;
+                    let context = { multiplier: 1, sku: 'BASE', type: 'suelta' };
+
                     try {
                         if (decodedText.startsWith('http')) {
                             const url = new URL(decodedText);
                             productId = url.searchParams.get('id') || decodedText.split('=').pop();
+                        } else if (decodedText.startsWith('PKG|')) {
+                            // Detectamos QR de un paquete (Ej: PKG|id123|ENV-001-50|50)
+                            const parts = decodedText.split('|');
+                            productId = parts[1];
+                            context.sku = parts[2];
+                            context.multiplier = parseInt(parts[3]) || 1;
+                            context.type = 'paquete';
                         }
                     } catch(e) {}
 
                     const p = allItems.find(x => x.id === productId);
                     if(p) {
                         html5QrcodeScanner.stop();
-                        showScanResult(p);
+                        showScanResult(p, context);
                     } else { 
-                        showToast("Código no encontrado en Maestro", "error"); 
+                        showToast("Código no encontrado", "error"); 
                     }
                 }, 
                 (err) => { }
@@ -696,32 +718,63 @@
             }
         }
 
-        function showScanResult(p) {
+        function showScanResult(p, context) {
             document.getElementById('btnStartScan').classList.remove('hidden');
             document.getElementById('btnStopScan').classList.add('hidden');
             document.getElementById('scanResult').classList.remove('hidden');
             
             document.getElementById('scanProductName').innerText = p.nombre_flexible;
-            document.getElementById('scanProductCode').innerText = p.codigo_sistema_oficial || 'N/A';
+            
+            // Adaptar Textos dependiendo si es Suelta o Paquete
+            let displayCode = p.codigo_sistema_oficial || 'N/A';
+            let labelUnidad = 'PIEZA SUELTA';
+            
+            if (context.type === 'paquete') {
+                displayCode = context.sku;
+                labelUnidad = `PAQUETE CERRADO DE ${context.multiplier} pz`;
+                document.getElementById('lblScanQty').innerText = '¿Cuántos PAQUETES escaneaste?';
+                document.getElementById('btnIngresarText').innerText = `Ingresar Paquete(s)`;
+                document.getElementById('btnExtraerText').innerText = `Extraer Paquete(s)`;
+            } else {
+                document.getElementById('lblScanQty').innerText = '¿Cuántas PIEZAS escaneaste?';
+                document.getElementById('btnIngresarText').innerText = `Ingresar Pieza(s)`;
+                document.getElementById('btnExtraerText').innerText = `Extraer Pieza(s)`;
+            }
+
+            document.getElementById('scanProductCode').innerText = `${displayCode} (${labelUnidad})`;
             document.getElementById('scanProductStock').innerText = p.stock_total_piezas || 0;
+            document.getElementById('scanMultiplierDisplay').innerText = context.multiplier;
+            
             document.getElementById('scanProductId').value = p.id;
+            document.getElementById('scanMultiplier').value = context.multiplier;
+            document.getElementById('scanSku').value = displayCode;
+            document.getElementById('scanQty').value = 1; // reset a 1 cada scan
             
             try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
         }
 
-        async function updateStockFromScan(change) {
+        async function updateStockFromScan(sign) {
             const id = document.getElementById('scanProductId').value;
+            const multiplier = parseInt(document.getElementById('scanMultiplier').value) || 1;
+            const qtyInput = parseInt(document.getElementById('scanQty').value) || 1;
+            const skuEscaneado = document.getElementById('scanSku').value;
+            
             const p = allItems.find(x => x.id === id);
             if(!p) return;
             
+            // Calculo exacto de piezas a afectar
+            const realChange = sign * (multiplier * qtyInput);
             const currentStock = p.stock_total_piezas || 0;
-            const newStock = currentStock + change;
+            const newStock = currentStock + realChange;
             
-            if(newStock < 0) return showToast("Stock no puede ser negativo", "error");
+            if(newStock < 0) return showToast("Stock final no puede ser negativo", "error");
             
+            let detailText = multiplier > 1 
+                ? `${qtyInput} paq. de ${multiplier}pz (SKU: ${skuEscaneado})` 
+                : `${qtyInput} pz. suelta(s)`;
+
             try {
                 const batch = db.batch();
-                
                 const prodRef = productsRef.doc(id);
                 batch.update(prodRef, { stock_total_piezas: newStock });
                 
@@ -732,7 +785,8 @@
                     codigo_oficial: p.codigo_sistema_oficial || 'N/A',
                     stock_anterior: currentStock,
                     stock_nuevo: newStock,
-                    cambio: change,
+                    cambio: realChange,
+                    detalle_scan: detailText, // Información super útil
                     fecha: firebase.firestore.FieldValue.serverTimestamp(),
                     usuario: 'Almacén Escáner'
                 });
@@ -740,14 +794,14 @@
                 await batch.commit();
 
                 document.getElementById('scanProductStock').innerText = newStock;
-                showToast(`Stock actualizado exitosamente.`);
+                showToast(`Inventario actualizado (+${realChange}pz).`);
             } catch (error) { 
                 showToast("Error al guardar en BD", "error"); 
             }
         }
 
         // ==========================================
-        // MÓDULO GENERADOR DE QRs
+        // GENERADOR DE QRS (ADAPTADO PARA PAQUETES)
         // ==========================================
         function openMassActions() {
             const modal = document.getElementById('massActionsModal');
@@ -759,7 +813,8 @@
             return document.getElementById('vitrinaUrlInput') ? document.getElementById('vitrinaUrlInput').value : "https://tu-tienda.web.app/p?id=";
         }
 
-        function buildPrintHTML(productsArray, qty, printType, baseUrl) {
+        // Nueva función dinámica que recibe los datos directos
+        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl) {
             let html = `<html><head><title>Imprimir QR - EEN</title><style>
                 body{font-family:sans-serif; text-align:center; padding: 20px;} 
                 .label{display:inline-block; margin:10px; padding:15px; border:2px solid #000; width:220px; border-radius: 8px; vertical-align: top;} 
@@ -768,14 +823,14 @@
                 p{margin: 0; font-size: 10px; color: #555;}
             </style></head><body>`;
             
-            productsArray.forEach(p => {
-                let qrVal = printType === 'vitrina' ? baseUrl + p.id : p.id;
+            dataArray.forEach(item => {
+                let qrVal = isVitrina ? baseUrl + item.id : item.id;
                 let qr = new QRious({value: qrVal, size: 200, level: 'M'});
                 for(let i=0; i<qty; i++) {
                     html += `<div class="label">
-                        <h4>${p.nombre_flexible}</h4>
+                        <h4>${item.title}</h4>
                         <img src="${qr.toDataURL()}">
-                        <p>${printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : ('CÓD: ' + (p.codigo_sistema_oficial || 'KIT WEB'))}</p>
+                        <p>${isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub}</p>
                     </div>`;
                 }
             });
@@ -783,6 +838,7 @@
             return html;
         }
 
+        // Para imprimir listados desde Master
         window.printAllQRs = (printType) => { 
             const term = document.getElementById('globalSearch').value.toLowerCase();
             const showOnlyPending = document.getElementById('filterPending').checked;
@@ -805,22 +861,60 @@
             closeModal('massActionsModal'); 
             const qty = prompt(`¿Cuántas etiquetas POR CADA PRODUCTO en tu filtro actual?\n(Imprimiendo ${currentFilteredProducts.length} productos distintos)`, "1"); 
             if (!qty || qty <= 0) return; 
+            
+            // Adaptar para enviarlo a la función generadora
+            const dataArray = currentFilteredProducts.map(p => ({
+                id: p.id,
+                title: p.nombre_flexible,
+                sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)`
+            }));
+
             const pw = window.open('', '_blank'); 
-            pw.document.write(buildPrintHTML(currentFilteredProducts, qty, printType, baseUrl)); 
+            pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); 
             pw.document.close(); 
         };
 
+        // Para imprimir Piezas Sueltas desde tabla Master
         window.printSingleQR = (id) => { 
             const p = allItems.find(x => x.id === id); 
             if (!p) return; 
-            const qty = prompt(`Etiquetas para Almacén de:\n${p.nombre_flexible}\n\n¿Cuántas deseas imprimir?`, "1"); 
+            const qty = prompt(`Etiquetas para PIEZAS SUELTAS de:\n${p.nombre_flexible}\n\n¿Cuántas deseas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
+            
+            const dataArray = [{
+                id: p.id,
+                title: p.nombre_flexible,
+                sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)`
+            }];
+
             const pw = window.open('', '_blank'); 
-            pw.document.write(buildPrintHTML([p], qty, 'inventario', '')); 
+            pw.document.write(buildPrintHTML(dataArray, qty, false, '')); 
             pw.document.close(); 
         };
 
-        // BUSCADOR GLOBAL Y TABLAS (Tu Original)
+        // NUEVO: Para imprimir un SKU Específico de un Paquete
+        window.printPackageQR = (productId, sku, piezas) => {
+            const p = allItems.find(x => x.id === productId); 
+            if (!p) return; 
+            const qty = prompt(`Etiquetas para PAQUETE CERRADO:\nSKU: ${sku} (${piezas} pz)\n\n¿Cuántas deseas imprimir?`, "1"); 
+            if (!qty || qty <= 0) return; 
+            
+            const qrVal = `PKG|${productId}|${sku}|${piezas}`;
+            const dataArray = [{
+                id: qrVal,
+                title: `${p.nombre_flexible}`,
+                sub: `SKU: ${sku} (${piezas} PZ)`
+            }];
+
+            const pw = window.open('', '_blank'); 
+            pw.document.write(buildPrintHTML(dataArray, qty, false, '')); 
+            pw.document.close();
+        };
+
+
+        // ==========================================
+        // TABLAS Y LISTAS MASTER
+        // ==========================================
         function handleGlobalSearch() {
             clearBulkSelection();
             if(currentTab === 'master') filterTable();
@@ -897,10 +991,7 @@
                 showToast(`¡Se actualizaron ${count} productos!`);
                 closeModal('massEditModal');
                 clearBulkSelection();
-            } catch(e) {
-                console.error(e);
-                showToast('Error en guardado masivo', 'error');
-            }
+            } catch(e) { showToast('Error en guardado masivo', 'error'); }
         }
 
         function filterTable() {
@@ -933,7 +1024,6 @@
                     statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-check text-[9px]"></i> LISTO</span>`;
                 }
 
-                // NUEVO: Agregué la columna de STOCK que tienes en tu cabecera pero no pintabas en tu JS
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition-colors group";
                 tr.innerHTML = `
@@ -955,7 +1045,7 @@
                     </td>
                     <td class="px-6 py-4 font-mono text-sm font-semibold text-slate-700">${codTxt}</td>
                     <td class="px-6 py-4 text-right flex justify-end gap-2">
-                        <button onclick="printSingleQR('${p.id}')" class="text-slate-400 hover:text-slate-800 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-all shadow-sm" title="Imprimir QR"><i class="fas fa-qrcode"></i></button>
+                        <button onclick="printSingleQR('${p.id}')" class="text-slate-400 hover:text-slate-800 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-all shadow-sm" title="Imprimir QR (Pieza Suelta)"><i class="fas fa-qrcode"></i></button>
                         <button onclick="openEditModal('${p.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-4 py-1.5 rounded-lg transition-all font-bold text-xs shadow-sm">Configurar</button>
                     </td>
                 `;
@@ -964,7 +1054,7 @@
             updateBulkSelection();
         }
 
-        // TABLA IMPORTACIÓN (Tu Original)
+        // TABLA IMPORTACIÓN
         function renderImportTable() {
             const tbody = document.getElementById('importTableBody');
             const term = document.getElementById('globalSearch').value.toLowerCase();
@@ -1013,7 +1103,9 @@
             });
         }
 
-        // MODAL Y FORMS (Tu Original)
+        // ==========================================
+        // MODALES Y FORMS DE EDICIÓN
+        // ==========================================
         function closeModal(id) { 
             const modal = document.getElementById(id);
             modal.classList.add('opacity-0');
@@ -1117,7 +1209,7 @@
             setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
 
-        // SUBCOLECCIÓN LÓGICA (Tu Original)
+        // SUBCOLECCIÓN (PAQUETES CON QR)
         function loadSubcollection(productId) {
             if(subcollectionListener) subcollectionListener(); 
             
@@ -1141,7 +1233,9 @@
                     tr.innerHTML = `
                         <td class="py-3 px-4 text-center font-black text-slate-800">${pkg.piezas} <span class="text-[10px] font-bold text-slate-400">PZ</span></td>
                         <td class="py-3 px-4 font-mono font-medium text-slate-600 text-sm">${pkg.sku}</td>
-                        <td class="py-3 px-4 text-center">
+                        <td class="py-3 px-4 text-center flex items-center justify-center gap-1">
+                            <!-- BOTÓN PARA IMPRIMIR ESTE PAQUETE EXACTO -->
+                            <button onclick="printPackageQR('${productId}', '${pkg.sku}', ${pkg.piezas})" class="text-slate-400 hover:text-slate-800 bg-white border border-slate-200 w-8 h-8 rounded-lg transition" title="Imprimir QR (Paquete)"><i class="fas fa-qrcode"></i></button>
                             <button onclick="deletePackage('${productId}', '${pkg.id}')" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-lg transition" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     `;
@@ -1244,7 +1338,7 @@
                     showToast('Guardado con éxito');
                 } else {
                     dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
-                    dataToUpdate.stock_total_piezas = 0; // Agregado para que no falle el inventario
+                    dataToUpdate.stock_total_piezas = 0; 
                     const docRef = await productsRef.add(dataToUpdate);
                     
                     if(wasImport) {
