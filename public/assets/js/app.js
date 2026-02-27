@@ -584,21 +584,25 @@ function sendWhatsApp() {
         else if (isBolsas) packSize = 100;
         else packSize = parseInt(prod.piezas) || 0;
         
-        // 1. Código del sistema y Nombre del Catálogo Web
-        const skuOficial = i.sku && i.sku !== 'S/N' ? `[${i.sku}] ` : '';
-        msg += `🔹 ${skuOficial}*${i.name}*\n`;
+        // 1. Código Oficial
+        const skuOficial = i.sku && i.sku !== 'S/N' ? `[${i.sku}]` : `[WEB]`;
         
-        // 2. Desglose de piezas y Total
+        // 2. Construcción de la primera línea (Resumen numérico)
+        let line1 = `🔹 ${skuOficial}`;
         if(packSize > 1) {
             const p = Math.floor(i.quantity/packSize), l = i.quantity%packSize;
-            if(p > 0) msg += `   📦 ${p} Paquete(s) de ${packSize} pz\n`;
-            if(l > 0) msg += `   🧩 ${l} Pza(s) suelta(s)\n`;
-            msg += `   🏷️ *Total: ${i.quantity} piezas*\n`;
+            let parts = [];
+            if(p > 0) parts.push(`📦 ${p} Paq`);
+            if(l > 0) parts.push(`🧩 ${l} Sueltas`);
+            parts.push(`🏷️ Total: ${i.quantity} pz`);
+            
+            line1 += ` - ` + parts.join(' | ');
         } else {
-            // Si no tiene paquetes, solo muestra el total directo
-            msg += `   📦 *Total: ${i.quantity} piezas*\n`;
+            line1 += ` - 📦 Total: ${i.quantity} pz`;
         }
-        msg += `\n`; // Espacio extra entre cada producto para que sea más legible
+        
+        // 3. Segunda línea: El nombre comercial del catálogo
+        msg += `${line1}\n   *${i.name}*\n\n`;
     });
 
     const phone = typeof getRandomPhone === 'function' ? getRandomPhone() : "528186933580";
@@ -606,6 +610,8 @@ function sendWhatsApp() {
     
     if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('generate_lead', { currency: 'MXN', value: 0 });
 }
+
+
 
 function openGeneralWhatsApp() {
     const phone = getRandomPhone();
