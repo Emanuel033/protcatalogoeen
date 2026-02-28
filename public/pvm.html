@@ -443,35 +443,51 @@
         }
 
         // ==========================================
-        // SEGURIDAD: GUARDAR PRIMERO, IMPRIMIR DESPUÉS
+        // SEGURIDAD Y GENERACIÓN DE FOLIOS CONSECUTIVOS
         // ==========================================
         async function processSale() {
             if (cart.length === 0) return;
             
             const btn = document.getElementById('btnCobrar'); 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando Folio...'; 
             btn.disabled = true;
 
             const total = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
-            const folio = "MOST-" + Math.random().toString(36).substr(2, 6).toUpperCase();
-
-            const saleData = {
-                folio: folio, 
-                fecha: firebase.firestore.FieldValue.serverTimestamp(), 
-                total: total,
-                articulos: cart.map(i => ({ 
-                    codigo: i.codigo, nombre: i.nombre, precio_unitario: i.precio, cantidad: i.qty, subtotal: i.precio * i.qty 
-                })),
-                vendedor: "Mostrador General", 
-                estado: "COMPLETADA"
-            };
+            let folio = "MOST-ERROR";
 
             try {
+                // Generar el folio de forma segura con transacción (evita duplicados si cobran a la vez)
+                const counterRef = db.collection('configuracion').doc('consecutivos');
+                
+                const nextSeq = await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(counterRef);
+                    let newSeq = 1;
+                    if (doc.exists && doc.data().venta_mostrador) {
+                        newSeq = doc.data().venta_mostrador + 1;
+                    }
+                    transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true });
+                    return newSeq;
+                });
+                
+                // Formato MOST-00001
+                folio = "MOST-" + String(nextSeq).padStart(5, '0');
+
+                const saleData = {
+                    folio: folio, 
+                    fecha: firebase.firestore.FieldValue.serverTimestamp(), 
+                    total: total,
+                    articulos: cart.map(i => ({ 
+                        codigo: i.codigo, nombre: i.nombre, precio_unitario: i.precio, cantidad: i.qty, subtotal: i.precio * i.qty 
+                    })),
+                    vendedor: "Mostrador General", 
+                    estado: "COMPLETADA"
+                };
+
                 // 1. REGISTRAR VENTA EN LA BASE DE DATOS PRIMERO (Anti-Robo)
                 await db.collection('ventas_mostrador').add(saleData);
                 showToast(`Venta registrada: ${folio}`);
                 
-                // Usamos la fecha actual en la memoria solo para la impresión, ya que el serverTimestamp aún no regresa al cliente en tiempo real a veces.
+                // Usamos la fecha actual en la memoria solo para la impresión.
                 const printData = { ...saleData, fecha: new Date() };
 
                 // 2. ABRIR IMPRESORA
@@ -518,7 +534,7 @@
                         <div style="width: 35%; text-align: right;">
                             <h3 style="margin:0 0 5px 0; font-size: 11px; font-weight: bold; padding: 4px; border: 2px solid #000; display: inline-block;">${copy.title}</h3>
                             <p style="margin:2px 0; font-size: 11px; font-weight: bold;">VENTA MOSTRADOR</p>
-                            <p style="margin:2px 0; font-size: 10px;">Folio: ${venta.folio}</p>
+                            <p style="margin:2px 0; font-size: 10px; font-weight: bold;">Folio: ${venta.folio}</p>
                             <p style="margin:2px 0; font-size: 10px;">${fechaStr} - ${horaStr}</p>
                         </div>
                     </div>
@@ -548,7 +564,7 @@
             try { window.print(); } catch(e) {}
         }
 
-        // HISTORIAL CON MOTIVOS DE CANCELACIÓN
+        // HISTORIAL CON MOTIVOS DE CANCELACIÓN Y REIMPRESIÓN CORREGIDA
         async function loadHistory() {
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando historial...</td></tr>';
@@ -569,6 +585,7 @@
                     const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
 
                     const tr = document.createElement('tr'); tr.className = rowClass;
+                    // Cambio: El botón de reimprimir ahora pasa solo el v.id de forma segura
                     tr.innerHTML = `
                         <td class="px-6 py-4">
                             <div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-xs">${v.folio}</div>
@@ -579,7 +596,7 @@
                         <td class="px-6 py-4 text-right font-black ${isCanceled ? 'text-slate-400 line-through' : 'text-slate-800'}">${formatMoney(v.total)}</td>
                         <td class="px-6 py-4 text-center">
                             <div class="flex items-center justify-center gap-2">
-                                <button onclick='reprintTicket(${JSON.stringify(v)})' class="text-blue-500 hover:bg-blue-100 p-2 rounded-lg transition" title="Reimprimir"><i class="fas fa-print"></i></button>
+                                <button onclick="reprintTicket('${v.id}')" class="text-blue-500 hover:bg-blue-100 p-2 rounded-lg transition" title="Reimprimir"><i class="fas fa-print"></i></button>
                                 ${!isCanceled ? `<button onclick="cancelTicket('${v.id}', '${v.folio}')" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
                             </div>
                         </td>
@@ -589,7 +606,15 @@
             } catch (error) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold">Error al cargar el historial.</td></tr>'; }
         }
 
-        window.reprintTicket = (ventaObj) => { printTicketHTML(ventaObj); }
+        // Nueva función de reimpresión segura (Busca en memoria mediante ID)
+        window.reprintTicket = (id) => { 
+            const venta = historySales.find(v => v.id === id);
+            if (venta) {
+                printTicketHTML(venta);
+            } else {
+                showToast("No se encontró el detalle de la venta.", "error");
+            }
+        }
 
         window.cancelTicket = (id, folio) => {
             showPrompt("Cancelar Venta " + folio, "Esta acción es irreversible y descontará el monto del corte del día. Escribe el motivo de la cancelación:", async (motivo) => {
