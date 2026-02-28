@@ -136,15 +136,26 @@
         </div>
     </header>
 
-    <!-- Buscador Flotante -->
+    <!-- Buscador Flotante y Filtros -->
     <div class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 shrink-0 z-0" id="globalSearchContainer">
         <div class="relative w-full sm:max-w-md">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="globalSearch" onkeyup="handleGlobalSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-11 pr-4 py-3 rounded-2xl input-modern text-sm font-semibold shadow-sm">
+            <input type="text" id="globalSearch" oninput="handleGlobalSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-11 pr-4 py-3 rounded-2xl input-modern text-sm font-semibold shadow-sm">
         </div>
         <div class="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scroll">
+            
             <button onclick="openMassActions()" class="md:hidden flex-none bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2"><i class="fas fa-qrcode"></i> QRs</button>
-            <button onclick="exportPendingMasterToExcel()" class="flex-none bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 px-3 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 transition" title="Exportar Web Por Configurar"><i class="fas fa-file-excel"></i></button>
+            <button onclick="exportPendingMasterToExcel()" class="flex-none bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 px-3 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 transition" title="Exportar Faltantes Web"><i class="fas fa-file-excel"></i></button>
+            
+            <!-- Filtro por Tipo de Producto -->
+            <select id="filterType" onchange="filterTable()" class="flex-none bg-white px-3 py-2.5 rounded-xl border border-slate-200 font-bold text-xs shadow-sm outline-none text-slate-700 appearance-none cursor-pointer">
+                <option value="ALL">📦 Todos los Tipos</option>
+                <option value="PIEZA_BASE">Cube Piezas Base</option>
+                <option value="KIT_FLEXIBLE">Árbol Kits Web</option>
+                <option value="KIT_OFICIAL">Cajas Kits Oficiales</option>
+            </select>
+
+            <!-- Checkbox de Solo Faltantes -->
             <label class="flex-none flex items-center gap-2 cursor-pointer bg-white px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-xs shadow-sm hover:bg-slate-50 transition select-none">
                 <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
                 <span class="text-slate-700">Solo Faltantes</span>
@@ -164,7 +175,7 @@
                 </div>
                 <div onclick="document.getElementById('filterPending').click()" class="bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition cursor-pointer p-4 md:px-6 md:py-5 rounded-2xl md:rounded-3xl shadow-sm border border-orange-100 flex-1 relative overflow-hidden group">
                     <div class="absolute -right-4 -bottom-4 opacity-10 text-orange-500 group-hover:scale-110 transition-transform"><i class="fas fa-exclamation-triangle text-8xl"></i></div>
-                    <p class="text-[10px] md:text-xs text-orange-600 font-bold uppercase tracking-wider mb-1">Por Configurar</p>
+                    <p class="text-[10px] md:text-xs text-orange-600 font-bold uppercase tracking-wider mb-1">Por Configurar / Heredar</p>
                     <p class="text-3xl md:text-4xl font-black text-orange-600" id="count-pending">0</p>
                 </div>
             </div>
@@ -219,8 +230,8 @@
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-expand"></i></div>
                             <div>
-                                <h2 class="font-bold text-slate-900 text-lg leading-tight">Lector Inteligente</h2>
-                                <p class="text-[11px] text-slate-500 font-semibold">Identifica variantes y árboles de Kits.</p>
+                                <h2 class="font-bold text-slate-900 text-lg leading-tight">Lector de Almacén</h2>
+                                <p class="text-[11px] text-slate-500 font-semibold">Exclusivo para modificar inventario de Piezas Base.</p>
                             </div>
                         </div>
                         
@@ -236,9 +247,9 @@
                     </div>
 
                     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col relative min-h-[300px] transition-all" id="resultCard">
-                        <div id="scanIdle" class="text-slate-300 flex flex-col items-center justify-center h-full my-12">
-                            <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4 border border-slate-100"><i class="fas fa-box-open text-3xl"></i></div>
-                            <p class="font-bold text-sm text-slate-400">Esperando artículo...</p>
+                        <div id="scanIdle" class="text-slate-300 flex flex-col items-center justify-center h-full my-12 transition-all">
+                            <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4 border border-slate-100" id="scanIdleIconContainer"><i class="fas fa-box-open text-3xl" id="scanIdleIcon"></i></div>
+                            <p class="font-bold text-sm text-slate-400" id="scanIdleText">Esperando artículo base...</p>
                         </div>
 
                         <div id="scanResult" class="hidden w-full fade-in flex flex-col">
@@ -249,7 +260,7 @@
                                     <span id="scanProductCode" class="inline-block font-mono text-[10px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-bold border border-blue-100"></span>
                                 </div>
                                 <div class="text-right shrink-0">
-                                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Stock Disp.</p>
+                                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Stock Físico</p>
                                     <p class="text-2xl font-black text-slate-800 leading-none" id="scanProductStock">0</p>
                                 </div>
                             </div>
@@ -295,7 +306,6 @@
 
         <!-- VISTA: BANDEJA DE IMPORTACIÓN -->
         <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
-            <!-- Render igual (Omitido por espacio visual del código, pero funcional) -->
             <div class="mb-6 shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 relative overflow-hidden">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-blue-500 opacity-5 rounded-full blur-3xl transform translate-x-10 -translate-y-10"></div>
                 <div class="flex items-start sm:items-center gap-5 z-10">
@@ -442,12 +452,19 @@
                         </div>
                     </div>
 
-                    <div id="fieldHeredar" class="mt-5 pt-5 border-t border-slate-100 hidden">
+                    <!-- BUSCADOR MODERNO PARA HEREDAR EMPAQUES -->
+                    <div id="fieldHeredar" class="mt-5 pt-5 border-t border-slate-100 hidden relative">
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1"><i class="fas fa-link text-blue-500 mr-1"></i> Heredar Empaques / Cajas de:</label>
-                        <p class="text-[10px] text-slate-500 font-medium mb-2">Elige el producto base (ej. Botella de Litro) para que este kit comparta sus mismas presentaciones de cajas sin tener que recrearlas.</p>
-                        <div class="relative">
-                            <select id="editHeredaEmpaques" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-sm text-slate-800 appearance-none"></select>
-                            <i class="fas fa-chevron-down absolute right-4 top-4 text-slate-400 text-xs pointer-events-none"></i>
+                        <p class="text-[10px] text-slate-500 font-medium mb-2">Busca y elige el producto base para compartir sus presentaciones de cajas.</p>
+                        <div class="relative w-full">
+                            <input type="hidden" id="editHeredaEmpaques">
+                            <input type="text" id="heredarSearchInput" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-sm text-slate-800" placeholder="Escribe para buscar un producto maestro..." autocomplete="off" onfocus="openHeredarDropdown()" oninput="filterHeredarDropdown()">
+                            <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            
+                            <!-- Lista desplegable oculta -->
+                            <ul id="heredarDropdownList" class="absolute z-[80] w-full bg-white border border-slate-200 shadow-xl rounded-xl mt-1 max-h-48 overflow-y-auto hidden custom-scroll divide-y divide-slate-100">
+                                <!-- Opciones inyectadas por JS -->
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -496,7 +513,7 @@
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center"><h2 class="font-black text-slate-900">Imprimir QRs (Masivo)</h2><button onclick="closeModal('massActionsModal')" class="w-8 h-8 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button></div>
             <div class="p-6 space-y-6">
                 <div>
-                    <label class="block text-[11px] font-black text-slate-800 uppercase tracking-wider mb-3">Uso Interno (Inventario)</label>
+                    <label class="block text-[11px] font-black text-slate-800 uppercase tracking-wider mb-3">Uso Interno (Solo Piezas Base)</label>
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="printAllQRs('inventario')" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 py-4 rounded-2xl text-[11px] font-bold shadow-sm flex flex-col items-center gap-2 transition-all"><i class="fas fa-cube text-xl text-slate-400"></i> Sueltas</button>
                         <button onclick="printAllPackagesQRs()" class="bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl text-[11px] font-bold shadow-lg shadow-slate-900/20 flex flex-col items-center gap-2 transition-all"><i class="fas fa-boxes text-xl text-emerald-400"></i> Paquetes</button>
@@ -504,7 +521,7 @@
                 </div>
                 <div class="pt-4 border-t border-slate-100">
                     <label class="block text-[11px] font-black text-slate-800 uppercase tracking-wider mb-2">Tienda / Vitrina (Carrito)</label>
-                    <input type="text" id="vitrinaUrlInput" value="https://productoseen.web.app/?add=" class="w-full input-modern px-4 py-3 rounded-xl text-[11px] mb-3 font-mono text-slate-600" placeholder="URL Base de tu tienda">
+                    <input type="text" id="vitrinaUrlInput" value="https://mi-tienda.com/?add=" class="w-full input-modern px-4 py-3 rounded-xl text-[11px] mb-3 font-mono text-slate-600" placeholder="URL Base de tu tienda">
                     <button onclick="printAllQRs('vitrina')" class="w-full bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 py-4 rounded-2xl text-[11px] font-bold shadow-sm flex items-center justify-center gap-2 transition-all"><i class="fas fa-store text-lg"></i> QRs para Vitrina</button>
                 </div>
             </div>
@@ -537,9 +554,9 @@
     <script>
         // ==========================================
         // CONFIGURACIÓN API (IMGBB) 
-        // ¡OJO! Reemplaza este valor con la llave que tienes.
         // ==========================================
         const IMGBB_API_KEY = "43034dab40f80fe91cd054d4949e5d5c"; 
+        const IMGBB_URL_ENDPOINT = "https://api.imgbb.com/1/upload";
 
         let allItems = []; 
         let facturacionCatalog = []; 
@@ -549,6 +566,17 @@
         let subcollectionListener = null;
         let html5QrcodeScanner = null;
         let currentScanVariants = []; 
+        
+        let heredarOptionsList = []; // Para el buscador del dropdown
+
+        // Cerrar Dropdown de "Heredar" si se hace clic fuera
+        document.addEventListener('click', function(event) {
+            const drop = document.getElementById('heredarDropdownList');
+            const input = document.getElementById('heredarSearchInput');
+            if (drop && !drop.contains(event.target) && event.target !== input) {
+                drop.classList.add('hidden');
+            }
+        });
 
         function openImageLightbox(src) {
             if(!src || src.includes('placeholder')) return;
@@ -585,8 +613,8 @@
         }
 
         async function handleImageUpload(event) {
-            if(IMGBB_API_KEY === "AQUI_TU_KEY_IMGBB") {
-                return showToast("Falta colocar tu API Key de ImgBB en el código", "error");
+            if(!IMGBB_API_KEY || IMGBB_API_KEY.includes("PON_TU_KEY_AQUI")) {
+                return showToast("Falta colocar tu API Key de ImgBB.", "error");
             }
 
             const file = event.target.files[0];
@@ -601,7 +629,7 @@
 
             const formData = new FormData(); formData.append('image', file);
             try {
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
+                const response = await fetch(`${IMGBB_URL_ENDPOINT}?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
                 const data = await response.json();
                 if(data.success) {
                     urlInput.value = data.data.url; preview.src = data.data.url;    
@@ -613,7 +641,7 @@
 
         // ====== LÓGICA DE RECURSIÓN PARA STOCKS ======
         function getCalculatedStock(itemId, visited = new Set()) {
-            if (visited.has(itemId)) return 0; // Prevenir loops infinitos de recetas circulares
+            if (visited.has(itemId)) return 0;
             visited.add(itemId);
             
             const item = allItems.find(x => x.id === itemId);
@@ -632,15 +660,48 @@
             return maxKits === Infinity ? 0 : maxKits;
         }
 
-        // Evalúa de forma estricta si el producto necesita ser configurado o ya es válido
+        // ====== VALIDACIÓN EXACTA DE FALTANTES ======
         function isProductPending(p) {
-            if (p.tipo_item === 'KIT_FLEXIBLE') {
-                return !p.receta_desglose || Object.keys(p.receta_desglose).length === 0;
+            const tipo = p.tipo_item || 'PIEZA_BASE';
+            
+            if (tipo === 'PIEZA_BASE') {
+                return !p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '';
             }
-            return !p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '';
-        }
-        // =============================================
+            
+            if (tipo === 'KIT_FLEXIBLE') {
+                if (!p.receta_desglose || Object.keys(p.receta_desglose).length === 0) return true;
+                if (!p.hereda_empaques_de) return true; 
+            }
 
+            if (tipo === 'KIT_OFICIAL') {
+                if (!p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '') return true;
+                if (!p.hereda_empaques_de) return true;
+            }
+
+            return false;
+        }
+
+        // ====== BADGE GLOBAL DE IMPORTACIONES PENDIENTES ======
+        function getTotalPendingToImport() {
+            const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
+            return facturacionCatalog.filter(fact => {
+                const code = fact.codigo || fact.Codigo || fact.id;
+                return !masterCodes.includes(code);
+            }).length;
+        }
+
+        function updateGlobalImportBadge() {
+            const totalPending = getTotalPendingToImport();
+            const badges = [document.getElementById('dtImportBadge'), document.getElementById('mbImportBadge')];
+            badges.forEach(b => { 
+                if(b) { 
+                    b.innerText = totalPending; 
+                    b.classList.toggle('hidden', totalPending === 0); 
+                }
+            });
+        }
+
+        // ====== LISTENERS FIREBASE ======
         productsRef.onSnapshot((snapshot) => {
             allItems = []; baseItems = []; let pendingCount = 0;
             snapshot.forEach((doc) => {
@@ -658,6 +719,9 @@
 
             document.getElementById('count-total').innerText = allItems.length;
             document.getElementById('count-pending').innerText = pendingCount;
+            
+            updateGlobalImportBadge(); // Actualiza badge independientemente de la pestaña
+
             if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
             if(currentTab === 'import') renderImportTable(); 
         });
@@ -665,6 +729,9 @@
         facturacionRef.onSnapshot((snapshot) => {
             facturacionCatalog = [];
             snapshot.forEach(doc => { facturacionCatalog.push({ id: doc.id, ...doc.data() }); });
+            
+            updateGlobalImportBadge(); // Actualiza badge independientemente de la pestaña
+
             if(currentTab === 'master') renderGroupedTable();
             if(currentTab === 'import') renderImportTable();
         });
@@ -716,7 +783,8 @@
             if(tab === 'scanner') { document.getElementById('globalSearchContainer').classList.add('hidden'); } 
             else {
                 document.getElementById('globalSearchContainer').classList.remove('hidden');
-                stopScanner(); document.getElementById('globalSearch').value = '';
+                stopScanner(); 
+                document.getElementById('globalSearch').value = '';
                 if(tab === 'master') { filterTable(); renderGroupedTable(); }
                 if(tab === 'import') renderImportTable();
             }
@@ -732,39 +800,65 @@
                 btnD.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-blue-600 shadow-sm transition-all flex items-center gap-2";
                 btnA.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all flex items-center gap-2";
                 contD.classList.remove('hidden'); contA.classList.add('hidden'); btnExcel.classList.add('hidden');
-                searchContainer.querySelector('label').classList.remove('hidden'); searchContainer.querySelector('button[title="Exportar Web Por Configurar"]').classList.remove('hidden');
+                searchContainer.querySelector('label').classList.remove('hidden'); searchContainer.querySelector('button[title="Exportar Faltantes Web"]').classList.remove('hidden');
             } else {
                 btnA.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-blue-600 shadow-sm transition-all flex items-center gap-2";
                 btnD.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all flex items-center gap-2";
                 contA.classList.remove('hidden'); contD.classList.add('hidden'); btnExcel.classList.remove('hidden');
-                searchContainer.querySelector('label').classList.add('hidden'); searchContainer.querySelector('button[title="Exportar Web Por Configurar"]').classList.add('hidden');
+                searchContainer.querySelector('label').classList.add('hidden'); searchContainer.querySelector('button[title="Exportar Faltantes Web"]').classList.add('hidden');
             }
             clearBulkSelection();
         }
 
+        function handleGlobalSearch() {
+            clearBulkSelection();
+            if(currentTab === 'master') {
+                filterTable();
+                renderGroupedTable();
+            } else if (currentTab === 'import') {
+                renderImportTable();
+            }
+        }
+
         function filterTable() {
-            const term = document.getElementById('globalSearch').value.toLowerCase();
+            const term = document.getElementById('globalSearch').value.toLowerCase().trim();
             const showOnlyPending = document.getElementById('filterPending').checked;
+            const filterType = document.getElementById('filterType').value;
+            
             const tbody = document.getElementById('tableBody');
             if(!tbody) return; tbody.innerHTML = '';
 
             const filtered = allItems.filter(p => {
-                const matchSearch = (p.nombre_flexible || '').toLowerCase().includes(term) || (p.codigo_sistema_oficial || '').toLowerCase().includes(term) || (p.categoria || '').toLowerCase().includes(term);
+                const matchSearch = term === '' || 
+                                    (p.nombre_flexible || '').toLowerCase().includes(term) || 
+                                    (p.codigo_sistema_oficial || '').toLowerCase().includes(term) || 
+                                    (p.categoria || '').toLowerCase().includes(term);
                 if (!matchSearch) return false;
+                
+                // Filtro Faltantes
                 if (showOnlyPending && !isProductPending(p)) return false;
+                
+                // Filtro Tipo
+                const pType = p.tipo_item || 'PIEZA_BASE';
+                if (filterType !== 'ALL' && pType !== filterType) return false;
+
                 return true;
             });
 
             filtered.forEach(p => {
                 let codTxt = p.codigo_sistema_oficial || '';
                 let statusBadge = '';
+                const pType = p.tipo_item || 'PIEZA_BASE';
 
                 if (isProductPending(p)) {
                     statusBadge = `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-exclamation-triangle"></i> PENDIENTE</span>`;
-                    codTxt = '<span class="text-slate-300 italic text-xs">S/N</span>';
-                } else if (p.tipo_item === 'KIT_FLEXIBLE') {
-                    statusBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-magic"></i> WEB / ÁRBOL</span>`;
+                    if(!codTxt && pType === 'PIEZA_BASE') codTxt = '<span class="text-slate-300 italic text-xs">S/N</span>';
+                    else if(!codTxt) codTxt = '<span class="text-slate-400 italic text-[10px]">Stock Receta</span>';
+                } else if (pType === 'KIT_FLEXIBLE') {
+                    statusBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-network-wired"></i> ÁRBOL WEB</span>`;
                     if(!codTxt) codTxt = '<span class="text-slate-400 italic text-[10px]">Stock Receta</span>';
+                } else if (pType === 'KIT_OFICIAL') {
+                    statusBadge = `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-boxes"></i> KIT SISTEMA</span>`;
                 } else {
                     statusBadge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide mt-1.5 inline-flex items-center gap-1"><i class="fas fa-check"></i> LISTO</span>`;
                 }
@@ -790,11 +884,10 @@
                     <td class="px-6 py-4 text-right border-b border-slate-100">
                         <div class="flex justify-end items-center gap-1.5 flex-wrap w-max ml-auto">
                             <button onclick="toggleActivo('${p.id}', ${isActivo})" class="w-8 h-8 rounded-lg ${eyeBg} transition-all shadow-sm flex items-center justify-center" title="${isActivo ? 'Ocultar de web' : 'Mostrar en web'}"><i class="fas ${eyeIcon} text-xs"></i></button>
-                            <button onclick="envejecerProducto('${p.id}')" class="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 text-orange-600 hover:bg-orange-100 transition-all shadow-sm flex items-center justify-center" title="Mandar al fondo del catálogo"><i class="fas fa-arrow-down text-xs"></i></button>
                             <button onclick="cloneProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="Clonar Producto"><i class="fas fa-copy text-xs"></i></button>
                             <div class="w-px h-5 bg-slate-200 mx-0.5"></div>
                             <button onclick="printSingleQR('${p.id}', 'vitrina')" class="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 text-purple-600 hover:bg-purple-100 transition-all shadow-sm flex items-center justify-center" title="QR Vitrina (Carrito Web)"><i class="fas fa-store text-xs"></i></button>
-                            <button onclick="printSingleQR('${p.id}', 'inventario')" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center" title="QR Inventario (Sueltas)"><i class="fas fa-qrcode text-xs"></i></button>
+                            <button onclick="printSingleQR('${p.id}', 'inventario')" class="w-8 h-8 rounded-lg ${pType === 'PIEZA_BASE' ? 'bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50' : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50'} border transition-all shadow-sm flex items-center justify-center" title="QR Inventario (Sueltas)"><i class="fas fa-qrcode text-xs"></i></button>
                             <button onclick="openPackagePrintSelector('${p.id}')" class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="QR Paquetes / Cajas"><i class="fas fa-box-open text-xs"></i></button>
                             <div class="w-px h-5 bg-slate-200 mx-0.5"></div>
                             <button onclick="openEditModal('${p.id}')" class="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center justify-center" title="Editar / Configurar"><i class="fas fa-pen text-xs"></i></button>
@@ -808,11 +901,18 @@
 
         function getGroupedInventory() {
             const groups = {};
-            const term = document.getElementById('globalSearch').value.toLowerCase();
+            const term = document.getElementById('globalSearch').value.toLowerCase().trim();
 
             allItems.forEach(item => {
                 const code = item.codigo_sistema_oficial;
                 if(!code || code.trim() === '') return; 
+                
+                const matchSearch = term === '' || 
+                                    (item.nombre_flexible || '').toLowerCase().includes(term) || 
+                                    code.toLowerCase().includes(term);
+
+                if(!matchSearch) return;
+
                 if(!groups[code]) {
                     const fact = facturacionCatalog.find(f => (f.codigo || f.Codigo || f.id) === code);
                     const nameRaw = fact ? (fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto) : 'Desconocido / No importado';
@@ -822,11 +922,7 @@
                 if (item.nombre_flexible) groups[code].variantes.push(item.nombre_flexible);
             });
 
-            let results = Object.values(groups);
-            if(term) {
-                results = results.filter(g => g.codigo.toLowerCase().includes(term) || g.descripcion_oficial.toLowerCase().includes(term) || g.variantes.join(' ').toLowerCase().includes(term));
-            }
-            return results;
+            return Object.values(groups);
         }
 
         function renderGroupedTable() {
@@ -874,10 +970,7 @@
         window.toggleActivo = async (id, currentState) => {
             try { await productsRef.doc(id).update({ activo: !currentState }); showToast(!currentState ? 'El producto ahora es VISIBLE' : 'El producto ha sido OCULTADO', 'info'); } catch(e) { showToast('Error al cambiar visibilidad', 'error'); }
         };
-        window.envejecerProducto = async (id) => {
-            if(!confirm('¿Mandar este producto hasta el fondo del catálogo web? (Se le asignará fecha del 2000)')) return;
-            try { await productsRef.doc(id).update({ fecha_creacion: firebase.firestore.Timestamp.fromDate(new Date('2000-01-01T12:00:00Z')) }); showToast('Producto enviado al fondo con éxito', 'info'); } catch(e) { showToast('Error al actualizar fecha', 'error'); }
-        };
+        
         window.cloneProduct = (id) => {
             const p = allItems.find(x => x.id === id); if(!p) return;
             openEditModal(); 
@@ -889,7 +982,11 @@
             document.getElementById('recetaContainer').innerHTML = '';
             if(p.receta_desglose) Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId]));
             
-            if(p.hereda_empaques_de) document.getElementById('editHeredaEmpaques').value = p.hereda_empaques_de;
+            if(p.hereda_empaques_de) {
+                document.getElementById('editHeredaEmpaques').value = p.hereda_empaques_de;
+                const parentItem = allItems.find(x => x.id === p.hereda_empaques_de);
+                document.getElementById('heredarSearchInput').value = parentItem ? parentItem.nombre_flexible : '';
+            }
 
             document.getElementById('subcollectionList').innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400 text-xs font-bold">Guarda el producto primero para añadir empaques/cajas.</td></tr>';
             if(subcollectionListener) { subcollectionListener(); subcollectionListener = null; }
@@ -912,23 +1009,22 @@
         }
 
         function getPendingToImport() {
-            const term = document.getElementById('globalSearch').value.toLowerCase();
+            const term = document.getElementById('globalSearch').value.toLowerCase().trim();
             const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
             return facturacionCatalog.filter(fact => {
                 const code = fact.codigo || fact.Codigo || fact.id;
                 const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || '';
-                return (nameRaw.toLowerCase().includes(term) || code.toLowerCase().includes(term)) && !masterCodes.includes(code);
+                const matchSearch = term === '' || nameRaw.toLowerCase().includes(term) || code.toLowerCase().includes(term);
+                return matchSearch && !masterCodes.includes(code);
             });
         }
 
         function renderImportTable() {
             const tbody = document.getElementById('importTableBody'); tbody.innerHTML = '';
             const pendingToImport = getPendingToImport();
-            const badges = [document.getElementById('dtImportBadge'), document.getElementById('mbImportBadge')];
-            badges.forEach(b => { if(b) { b.innerText = pendingToImport.length; b.classList.toggle('hidden', pendingToImport.length === 0); }});
 
             if(pendingToImport.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-16 text-center text-slate-400 font-bold"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-emerald-400"></i></div> Todo importado y al día.</td></tr>`; return;
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-16 text-center text-slate-400 font-bold"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-emerald-400"></i></div> Todo importado y al día o no coincide con tu búsqueda.</td></tr>`; return;
             }
             pendingToImport.forEach(fact => {
                 const code = fact.codigo || fact.Codigo || fact.id; const name = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción';
@@ -938,7 +1034,7 @@
             });
         }
 
-        // --- FUNCIONES DE ESCÁNER Y ARBOL RECURSIVO ---
+        // --- FUNCIONES DE ESCÁNER (BLOQUEO DE KITS) ---
         function startScanner() {
             document.getElementById('btnStartScan').classList.add('hidden'); document.getElementById('btnStopScan').classList.remove('hidden');
             document.getElementById('scanIdle').classList.add('hidden'); document.getElementById('scanResult').classList.add('hidden');
@@ -963,12 +1059,40 @@
         }
 
         async function showScanResult(p, context) {
+            // BLOQUEO ESTRICTO DE KITS EN EL ESCÁNER
+            if (p.tipo_item && p.tipo_item !== 'PIEZA_BASE') {
+                showToast("No se pueden escanear Kits para inventario físico.", "error");
+                document.getElementById('scanIdle').classList.remove('hidden');
+                document.getElementById('scanResult').classList.add('hidden');
+                document.getElementById('btnStartScan').classList.remove('hidden'); 
+                document.getElementById('btnStopScan').classList.add('hidden');
+                
+                // Mostrar UI de error en la tarjeta
+                const idleIconCont = document.getElementById('scanIdleIconContainer');
+                const idleIcon = document.getElementById('scanIdleIcon');
+                const idleText = document.getElementById('scanIdleText');
+                
+                idleIconCont.className = "w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mb-4 border border-red-100 transition-all";
+                idleIcon.className = "fas fa-ban text-3xl text-red-400";
+                idleText.className = "font-bold text-sm text-red-500";
+                idleText.innerText = "Error: Escanea las piezas base.";
+                
+                setTimeout(() => {
+                    idleIconCont.className = "w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4 border border-slate-100 transition-all";
+                    idleIcon.className = "fas fa-box-open text-3xl text-slate-400";
+                    idleText.className = "font-bold text-sm text-slate-400";
+                    idleText.innerText = "Esperando artículo base...";
+                }, 3500);
+                return;
+            }
+
+            // Flujo Normal (Piezas Base)
             document.getElementById('btnStartScan').classList.remove('hidden'); document.getElementById('btnStopScan').classList.add('hidden');
             const resCard = document.getElementById('scanResult'); resCard.classList.remove('hidden');
             document.getElementById('resultCard').scrollIntoView({behavior: 'smooth', block: 'start'});
             
             document.getElementById('scanProductName').innerText = p.nombre_flexible;
-            document.getElementById('scanProductCode').innerText = p.codigo_sistema_oficial || 'KITS WEB / ARBOL';
+            document.getElementById('scanProductCode').innerText = p.codigo_sistema_oficial || 'PIEZA BASE';
             document.getElementById('scanProductStock').innerText = getCalculatedStock(p.id);
             document.getElementById('scanProductId').value = p.id; document.getElementById('scanProductImg').src = p.imagen_url || 'https://via.placeholder.com/80';
             
@@ -981,11 +1105,7 @@
             currentScanVariants.push({ id: 'base', label: 'Piezas Sueltas (1pz)', sku: p.codigo_sistema_oficial || 'SUELTA', piezas: 1, qtyDetected: context.type === 'suelta' ? 1 : 0 });
 
             try {
-                // Si hereda empaques, buscar en el padre
-                let targetId = p.id;
-                if(p.tipo_item !== 'PIEZA_BASE' && p.hereda_empaques_de) targetId = p.hereda_empaques_de;
-
-                const pkgsSnap = await productsRef.doc(targetId).collection('paquetes').get();
+                const pkgsSnap = await productsRef.doc(p.id).collection('paquetes').get();
                 pkgsSnap.forEach(doc => {
                     const pkg = doc.data();
                     currentScanVariants.push({ id: doc.id, label: `Paquete (${pkg.piezas}pz)`, sku: pkg.sku, piezas: pkg.piezas, qtyDetected: (context.type === 'paquete' && pkg.sku === context.sku) ? 1 : 0 });
@@ -1036,43 +1156,20 @@
 
             const realChange = sign * totalChangePieces;
 
-            // RECURSIÓN: Calcular todas las afectaciones a piezas base
-            let updates = {}; 
-            function calculateUpdates(itemId, qtyMultiplier) {
-                const item = allItems.find(x => x.id === itemId);
-                if (!item) return;
-                if (item.tipo_item === 'KIT_FLEXIBLE') {
-                    if(item.receta_desglose) {
-                        for(const [compId, compQty] of Object.entries(item.receta_desglose)) {
-                            calculateUpdates(compId, qtyMultiplier * compQty);
-                        }
-                    }
-                } else {
-                    updates[itemId] = (updates[itemId] || 0) + qtyMultiplier;
-                }
-            }
-            
-            calculateUpdates(id, realChange);
-
             try {
                 const batch = db.batch();
+                const newStock = (p.stock_total_piezas || 0) + realChange;
+                if(newStock < 0) throw new Error("Stock insuficiente para realizar la salida.");
                 
-                // Validar y aplicar todos los updates físicos
-                for (const [itemId, change] of Object.entries(updates)) {
-                    const item = allItems.find(x => x.id === itemId);
-                    const newStock = (item.stock_total_piezas || 0) + change;
-                    if(newStock < 0) throw new Error(`El producto ${item.nombre_flexible} quedaría con stock negativo al desglosar el Kit.`);
-                    batch.update(productsRef.doc(itemId), { stock_total_piezas: newStock });
-                }
+                batch.update(productsRef.doc(id), { stock_total_piezas: newStock });
                 
-                // Guardar la bitácora registrando la acción a nivel del Kit
                 const newLogRef = bitacoraRef.doc();
                 batch.set(newLogRef, {
                     producto_id: id,
                     nombre_producto: p.nombre_flexible,
-                    codigo_oficial: p.codigo_sistema_oficial || 'KIT WEB (Desglose)',
-                    stock_anterior: getCalculatedStock(id),
-                    stock_nuevo: getCalculatedStock(id) + realChange, // Aproximado visual
+                    codigo_oficial: p.codigo_sistema_oficial || 'PIEZA BASE',
+                    stock_anterior: p.stock_total_piezas || 0,
+                    stock_nuevo: newStock,
                     cambio: realChange,
                     detalle_scan: detailParts.join(", "), 
                     fecha: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1081,7 +1178,7 @@
 
                 await batch.commit();
 
-                document.getElementById('scanProductStock').innerText = getCalculatedStock(id) + realChange; // Refresco visual rápido
+                document.getElementById('scanProductStock').innerText = newStock;
                 showToast(`Stock actualizado exitosamente (+${realChange}pz)`);
                 currentScanVariants.forEach(v => v.qtyDetected = 0);
                 renderVariantsList();
@@ -1089,6 +1186,60 @@
                 showToast(error.message || "Error de conexión al guardar", "error"); 
             }
         }
+
+        // --- LÓGICA DEL DROPDOWN BUSCADOR DE "HEREDAR EMPAQUES" ---
+        function updateHeredarOptions(excludeId) {
+            // Guardamos las opciones base en la variable global
+            heredarOptionsList = allItems.filter(b => b.id !== excludeId && (!b.tipo_item || b.tipo_item === 'PIEZA_BASE'));
+            renderHeredarDropdown(''); // Renderizamos todo limpio
+        }
+
+        function renderHeredarDropdown(filterText) {
+            const list = document.getElementById('heredarDropdownList');
+            list.innerHTML = '';
+            const lowerFilter = filterText.toLowerCase().trim();
+
+            // Opción para No Heredar (limpiar)
+            const noneLi = document.createElement('li');
+            noneLi.className = "px-4 py-3 hover:bg-red-50 cursor-pointer text-sm text-red-500 font-bold transition-colors";
+            noneLi.innerHTML = "<i class='fas fa-times-circle mr-1'></i> Ninguno / No heredar";
+            noneLi.onclick = () => selectHeredarOption('', '');
+            list.appendChild(noneLi);
+
+            // Filtrado
+            heredarOptionsList.forEach(opt => {
+                if (opt.nombre_flexible.toLowerCase().includes(lowerFilter)) {
+                    const li = document.createElement('li');
+                    li.className = "px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm font-bold text-slate-800 transition-colors";
+                    li.innerText = opt.nombre_flexible;
+                    li.onclick = () => selectHeredarOption(opt.id, opt.nombre_flexible);
+                    list.appendChild(li);
+                }
+            });
+
+            if(list.children.length === 1) { // Solo está el botón de "Ninguno"
+                const emptyLi = document.createElement('li');
+                emptyLi.className = "px-4 py-3 text-sm text-slate-400 font-medium italic";
+                emptyLi.innerText = "No se encontraron resultados...";
+                list.appendChild(emptyLi);
+            }
+        }
+
+        window.openHeredarDropdown = () => {
+            document.getElementById('heredarDropdownList').classList.remove('hidden');
+            renderHeredarDropdown(document.getElementById('heredarSearchInput').value);
+        };
+
+        window.filterHeredarDropdown = () => {
+            document.getElementById('heredarDropdownList').classList.remove('hidden');
+            renderHeredarDropdown(document.getElementById('heredarSearchInput').value);
+        };
+
+        window.selectHeredarOption = (id, name) => {
+            document.getElementById('editHeredaEmpaques').value = id;
+            document.getElementById('heredarSearchInput').value = name;
+            document.getElementById('heredarDropdownList').classList.add('hidden');
+        };
 
         // --- EDICIÓN ---
         function openMassEditModal() {
@@ -1121,23 +1272,11 @@
             return opts;
         }
 
-        function getBaseProductsOnlyOptions(excludeId = null) {
-            let opts = `<option value="">Selecciona producto maestro...</option>`;
-            allItems.forEach(b => {
-                if(b.id !== excludeId && b.tipo_item === 'PIEZA_BASE') opts += `<option value="${b.id}">${b.nombre_flexible}</option>`;
-            });
-            return opts;
-        }
-
-        function updateHeredarOptions(excludeId) {
-            document.getElementById('editHeredaEmpaques').innerHTML = getBaseProductsOnlyOptions(excludeId);
-        }
-
         function openEditModal(id = null) {
             document.getElementById('importOldId').value = ''; document.getElementById('newPkgQty').value = ''; document.getElementById('newPkgSku').value = '';
             const modal = document.getElementById('editModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
             
-            updateHeredarOptions(id);
+            updateHeredarOptions(id); // Precarga opciones del buscador de empaques
 
             if (id) {
                 const p = allItems.find(x => x.id === id); if(!p) return;
@@ -1151,6 +1290,15 @@
                 if(p.receta_desglose) Object.keys(p.receta_desglose).forEach(compId => addRecetaRow(compId, p.receta_desglose[compId], id));
                 
                 document.getElementById('editHeredaEmpaques').value = p.hereda_empaques_de || '';
+                
+                // Setear nombre en el buscador visual si hay herencia guardada
+                if(p.hereda_empaques_de) {
+                    const parentItem = allItems.find(x => x.id === p.hereda_empaques_de);
+                    document.getElementById('heredarSearchInput').value = parentItem ? parentItem.nombre_flexible : '';
+                } else {
+                    document.getElementById('heredarSearchInput').value = '';
+                }
+
                 loadSubcollection(p.id);
             } else {
                 document.getElementById('modalTitle').innerText = 'Nuevo Producto'; document.getElementById('editId').value = '';
@@ -1158,7 +1306,10 @@
                 document.getElementById('editName').value = ''; document.getElementById('editCategory').value = '';
                 document.getElementById('editCodigo').value = ''; document.getElementById('editTipo').value = 'PIEZA_BASE';
                 document.getElementById('editActivo').checked = true; document.getElementById('recetaContainer').innerHTML = '';
+                
                 document.getElementById('editHeredaEmpaques').value = '';
+                document.getElementById('heredarSearchInput').value = '';
+
                 if(subcollectionListener) { subcollectionListener(); subcollectionListener = null; }
             }
             toggleFormFields();
@@ -1172,10 +1323,8 @@
             const fHeredar = document.getElementById('fieldHeredar');
             const codStar = document.getElementById('codRequiredStar');
 
-            // Receta
             if (tipo === 'KIT_FLEXIBLE') fReceta.classList.remove('hidden'); else fReceta.classList.add('hidden');
             
-            // Paquetes y Herencia
             if (tipo === 'PIEZA_BASE') {
                 if(id) secPkgs.classList.remove('hidden'); else secPkgs.classList.add('hidden');
                 fHeredar.classList.add('hidden');
@@ -1256,6 +1405,34 @@
             } catch (e) { showToast('Error al guardar', 'error'); }
         }
 
+        function importProduct(factId) {
+            const fact = facturacionCatalog.find(x => x.id === factId);
+            if(!fact) return;
+            document.getElementById('importOldId').value = fact.id; 
+            document.getElementById('modalTitle').innerText = 'Completar Importación';
+            document.getElementById('editId').value = ''; 
+            document.getElementById('editImgPreview').src = 'https://via.placeholder.com/200';
+            document.getElementById('editImage').value = '';
+            document.getElementById('editActivo').checked = true;
+            
+            const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.name || fact.Articulo || fact.Concepto || fact.producto || '';
+            document.getElementById('editName').value = nameRaw;
+            document.getElementById('editCategory').value = fact.categoria || fact.Categoria || fact.linea || '';
+            document.getElementById('editTipo').value = 'PIEZA_BASE'; 
+            document.getElementById('editCodigo').value = fact.codigo || fact.Codigo || fact.id; 
+            document.getElementById('recetaContainer').innerHTML = '';
+            
+            document.getElementById('editHeredaEmpaques').value = '';
+            document.getElementById('heredarSearchInput').value = '';
+            
+            updateHeredarOptions(null);
+            toggleFormFields();
+            
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
         // --- PAQUETES (Cajas Propias) ---
         function loadSubcollection(productId) {
             if(subcollectionListener) subcollectionListener(); 
@@ -1327,31 +1504,43 @@
             return html;
         }
 
+        function getFilteredProductsForPrint() {
+            const term = document.getElementById('globalSearch').value.toLowerCase().trim();
+            const showOnlyPending = document.getElementById('filterPending').checked;
+            const filterType = document.getElementById('filterType').value;
+            return allItems.filter(p => {
+                const matchSearch = term === '' || (p.nombre_flexible || '').toLowerCase().includes(term) || (p.codigo_sistema_oficial || '').toLowerCase().includes(term) || (p.categoria || '').toLowerCase().includes(term);
+                if (!matchSearch) return false;
+                if (showOnlyPending && !isProductPending(p)) return false;
+                const pType = p.tipo_item || 'PIEZA_BASE';
+                if (filterType !== 'ALL' && pType !== filterType) return false;
+                return true;
+            });
+        }
+
         window.printAllPackagesQRs = async () => {
-            const filtered = allItems.filter(p => !isProductPending(p));
-            if(filtered.length === 0) return showToast("No hay productos válidos filtrados", "error"); 
+            // SOLO PIEZAS BASE para Inventario Físico
+            const filtered = getFilteredProductsForPrint().filter(p => !p.tipo_item || p.tipo_item === 'PIEZA_BASE');
+            if(filtered.length === 0) return showToast("No hay PIEZAS BASE filtradas para imprimir.", "error"); 
             closeModal('massActionsModal'); showToast("Calculando paquetes...", "info");
             
             let dataArray = [];
             try {
                 const promises = filtered.map(async (p) => {
-                    let targetId = p.id;
-                    if(p.tipo_item !== 'PIEZA_BASE' && p.hereda_empaques_de) targetId = p.hereda_empaques_de;
-
-                    const snap = await productsRef.doc(targetId).collection('paquetes').get();
+                    const snap = await productsRef.doc(p.id).collection('paquetes').get();
                     snap.forEach(doc => {
                         const pkg = doc.data();
                         dataArray.push({
-                            id: `PKG|${p.id}|${pkg.sku}|${pkg.piezas}`, // ID original del Kit/Producto, pero SKU del empaque
+                            id: `PKG|${p.id}|${pkg.sku}|${pkg.piezas}`, 
                             title: p.nombre_flexible,
                             sub: `SKU: ${pkg.sku} (${pkg.piezas} PZ)`
                         });
                     });
                 });
                 await Promise.all(promises);
-                if(dataArray.length === 0) return showToast("No se encontraron empaques configurados ni heredados.", "error");
+                if(dataArray.length === 0) return showToast("No se encontraron empaques en los productos filtrados.", "error");
                 
-                const qty = prompt(`Se encontraron ${dataArray.length} presentaciones.\n¿Cuántas etiquetas POR PAQUETE imprimir?`, "1"); 
+                const qty = prompt(`Se encontraron ${dataArray.length} cajas base.\n¿Cuántas etiquetas POR CAJA imprimir?`, "1"); 
                 if (!qty || qty <= 0) return; 
                 
                 const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '')); pw.document.close(); 
@@ -1359,29 +1548,40 @@
         };
 
         window.printAllQRs = (printType) => { 
-            const filtered = allItems.filter(p => !isProductPending(p));
-            if(filtered.length === 0) return showToast("No hay productos filtrados", "error"); 
+            let filtered = getFilteredProductsForPrint();
+            if(printType === 'inventario') {
+                filtered = filtered.filter(p => !p.tipo_item || p.tipo_item === 'PIEZA_BASE');
+                if(filtered.length === 0) return showToast("Solo las Piezas Base tienen QR de inventario interno.", "error");
+            }
+
+            if(filtered.length === 0) return showToast("No hay productos válidos filtrados", "error"); 
             let baseUrl = ""; if (printType === 'vitrina') { baseUrl = document.getElementById('vitrinaUrlInput').value; if (!baseUrl) return showToast("URL requerida", "error"); } 
+            
             closeModal('massActionsModal'); 
             const qty = prompt(`Imprimiendo ${filtered.length} productos.\n¿Cuántas etiquetas POR PRODUCTO deseas?`, "1"); 
             if (!qty || qty <= 0) return; 
             
-            const dataArray = filtered.map(p => ({ id: p.id, title: p.nombre_flexible, sub: `CÓD: ${p.codigo_sistema_oficial || 'K.WEB'} (SUELTA)` }));
+            const dataArray = filtered.map(p => ({ id: p.id, title: p.nombre_flexible, sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'}` }));
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); pw.document.close(); 
         };
 
         window.printSingleQR = (id, printType = 'inventario') => { 
             const p = allItems.find(x => x.id === id); if (!p) return; 
+            
+            if (printType === 'inventario' && p.tipo_item && p.tipo_item !== 'PIEZA_BASE') {
+                return showToast("Los Kits no llevan QR de inventario, solo las Piezas Base.", "error");
+            }
+
             let baseUrl = "";
             if(printType === 'vitrina') {
-                baseUrl = document.getElementById('vitrinaUrlInput') ? document.getElementById('vitrinaUrlInput').value : "https://productoseen.web.app/?add=";
+                baseUrl = document.getElementById('vitrinaUrlInput') ? document.getElementById('vitrinaUrlInput').value : "https://mi-tienda.com/?add=";
                 if(!baseUrl) return showToast("URL requerida en Acciones Masivas", "error");
             }
             const tipoNombre = printType === 'vitrina' ? 'VITRINA (Carrito web)' : 'PIEZAS SUELTAS (Inventario)';
             const qty = prompt(`Etiquetas para ${tipoNombre} de:\n${p.nombre_flexible}\n\n¿Cuántas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
             
-            const dataArray = [{ id: p.id, title: p.nombre_flexible, sub: printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : `CÓD: ${p.codigo_sistema_oficial || 'K.WEB'} (SUELTA)` }];
+            const dataArray = [{ id: p.id, title: p.nombre_flexible, sub: printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)` }];
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); pw.document.close(); 
         };
 
@@ -1421,6 +1621,7 @@
 
         window.printPackageQR = (productId, sku, piezas, providedQty = null) => {
             const p = allItems.find(x => x.id === productId); if (!p) return; 
+            
             let qty = providedQty;
             if(!qty) qty = prompt(`Etiquetas para CAJA/BOLSA:\nSKU: ${sku} (${piezas} pz)\n\n¿Cuántas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
