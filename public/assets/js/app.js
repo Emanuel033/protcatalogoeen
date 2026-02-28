@@ -330,54 +330,49 @@ function updateCartCount() {
 // Lógica Avanzada: Carrito y WhatsApp con Desglose
 
 //1. Reemplaza tu función `add(id)` actual Esta nueva versión guarda toda la información necesaria (recetas, códigos, tipo de ítem) en la memoria del carrito para poder usarla al final.
-
-
+// ======================================================================
+// 1. FUNCIÓN ADD ACTUALIZADA (Agrega Bultos, no piezas totales)
+// ======================================================================
 function add(id) {
     const prod = allProducts.find(p => p.id === id);
     if (!prod) return;
 
     const selectElem = document.getElementById(`sel-${id}`);
     
-    // Variables para saber exactamente qué empaque seleccionó
-    let qtyToAdd = 1; // Unidades del paquete o suelta que se van a agregar
+    // Variables por defecto para "Sueltas"
+    let bultosAAgregar = 1; // SIEMPRE es 1 clic = 1 Bulto/Renglón
     let skuPaquete = 'SUELTA';
-    let piezasPorPaquete = 1; // Cuántas piezas físicas trae esta opción
+    let piezasPorPaquete = 1; 
 
+    // Si el cliente seleccionó una caja en el dropdown
     if (selectElem && selectElem.value) {
         const valores = selectElem.value.split('|'); 
-        piezasPorPaquete = parseInt(valores[0]) || 1;
+        piezasPorPaquete = parseInt(valores[0]) || 1; // Ej. 12 piezas
         if (valores[1] && valores[1] !== 'BASE') {
-            skuPaquete = valores[1];
+            skuPaquete = valores[1]; // Ej. "ENV-12"
         }
     }
 
-    // CAMBIO VITAL: La llave única combina el ID del producto + el SKU del empaque.
-    // Así, en el carrito aparecen como renglones separados "1 Caja de 12" y "5 Sueltas"
+    // MAGIA: Creamos una llave única (ID + SKU). 
+    // Así "1 Caja de 12" y "5 Sueltas" viven en renglones separados en el carrito.
     const cartKey = `${prod.id}_${skuPaquete}`;
-
     const existingItem = cart.find(x => x.cartKey === cartKey);
     
     if (existingItem) {
-        // Si ya tenía esta misma presentación, le suma cajas/unidades
-        existingItem.quantity += qtyToAdd; 
+        existingItem.quantity += bultosAAgregar; // Le suma 1 bulto más
     } else {
-        // Si no la tenía, agrega el renglón con toda la metadata necesaria para WhatsApp
         cart.push({
             cartKey: cartKey, 
             id: prod.id, 
             name: prod.name, 
             image: prod.image,
             category: prod.category, 
-            
-            // METADATA PARA EL MOTOR DE TRADUCCIÓN:
             tipo_item: prod.tipo_item || 'PIEZA_BASE',
-            codigo_sistema: prod.codigo_sistema || 'S/N',
-            receta: prod.receta || null,
-            
-            // INFORMACIÓN FÍSICA:
+            codigo_sistema: prod.codigo_sistema || prod.codigo_sistema_oficial || 'S/N',
+            receta: prod.receta || prod.receta_desglose || null,
             piezas_por_paquete: piezasPorPaquete, 
             sku_paquete: skuPaquete,
-            quantity: qtyToAdd // Cantidad de BULTOS/CAJAS (Ej. 2 cajas)
+            quantity: bultosAAgregar // Quantity = Número de Bultos/Cajas
         });
     }
     
@@ -385,14 +380,15 @@ function add(id) {
     if(typeof updateCartCount === 'function') updateCartCount();
     if(typeof renderCart === 'function') renderCart();
     
-    // Animaciones
+    // ==========================================
+    // ANIMACIONES
+    // ==========================================
     const fab = document.getElementById('cart-fab');
     if(fab) {
         fab.classList.remove('animate-pop');
         void fab.offsetWidth; 
         fab.classList.add('animate-pop');
     }
-    
     try {
         const badges = document.querySelectorAll('#cart-badge, .cart-badge');
         badges.forEach(badge => {
@@ -407,18 +403,13 @@ function add(id) {
     } catch(e) { console.error("Error en animación:", e); }
 
     if (typeof showToast === 'function') showToast(`Agregado al carrito`);
-    
     if(typeof analytics !== 'undefined' && analytics) {
-        analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: prod.name, quantity: qtyToAdd }] });
+        analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: prod.name, quantity: 1 }] });
     }
 }
 
-function remove(id) { 
-    cart = cart.filter(x => x.id !== id);
-    saveCart();
-    updateCartCount();
-    renderCart(); 
-}
+
+
 
 function clearCart() {
     if (cart.length === 0) return;
@@ -431,47 +422,16 @@ function clearCart() {
     }
 }
 
-function updateCartItem(id) {
-    const item = cart.find(x => x.id === id);
-    if(!item) return;
-    const prod = allProducts.find(p => p.id === id) || item; 
-    
-    const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
-    const paquetes = prod.paquetes || []; 
-    
-    let packSize = 1;
-    if (paquetes.length > 0) packSize = parseInt(paquetes[0].piezas);
-    else if (isBolsas) packSize = 100;
-    else packSize = parseInt(prod.piezas) || 0;
-    
-    if (packSize > 1) {
-        const elPack = document.getElementById(`inp-pack-${id}`);
-        const elLoose = document.getElementById(`inp-loose-${id}`);
-        const packs = elPack ? (parseInt(elPack.value) || 0) : 0;
-        const loose = elLoose && !isBolsas ? (parseInt(elLoose.value) || 0) : 0;
-        item.quantity = (packs * packSize) + loose;
-    } else {
-        const elSimple = document.getElementById(`inp-simple-${id}`);
-        item.quantity = elSimple ? (parseInt(elSimple.value) || 1) : 1;
-    }
-    
-    if (item.quantity <= 0) {
-        remove(id);
-    } else {
-        saveCart();
-        updateCartCount();
-        renderCart(); // <-- ESTO RECALCULA LA PANTALLA EN EL MOMENTO
-    }
-}
 
-// ==========================================
-// RENDER CART (Original tuyo + Integración Firestore)
-// ==========================================
+// ======================================================================
+// 2. NUEVO RENDER DEL CARRITO VISUAL (Respetando tu HTML)
+// ======================================================================
 function renderCart() {
     const itemsCont = document.getElementById('cart-items');
     if(!itemsCont) return;
     
     // Actualización de badges usando tu lógica nativa original
+    // Ahora "quantity" es bultos/cajas, por lo que el badge mostrará el total de empaques agregados.
     const total = cart.reduce((a,b) => a + b.quantity, 0);
     const badge = document.getElementById('cart-badge');
     if(badge) {
@@ -483,7 +443,8 @@ function renderCart() {
 
     // Estado Vacío original
     if(cart.length === 0) {
-        itemsCont.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 m-4 py-20 fade-in">
+        itemsCont.innerHTML = `
+        <div class="h-full flex flex-col items-center justify-center text-slate-400 m-4 py-20 fade-in">
             <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 animate-pulse"><i class="fa-solid fa-basket-shopping text-3xl"></i></div>
             <p class="text-sm font-bold text-slate-500">Tu pedido está vacío</p>
             <p class="text-[10px] text-slate-400 mt-1">Agrega productos del catálogo para comenzar</p>
@@ -496,52 +457,78 @@ function renderCart() {
     const cartConfig = document.getElementById('cart-config');
     if(cartConfig) cartConfig.classList.remove('hidden');
 
-    // Mapeo de Items (Respetando tu HTML + Agregando Firestore Paquetes)
+    // Mapeo de Items 
     itemsCont.innerHTML = cart.map((item, idx) => {
-        const prod = allProducts.find(p => p.id === item.id) || item;
-        
-        // Lógica de paquetes de Firestore
-        const isBolsas = (prod.category || '').toLowerCase().includes('bolsa');
-        const paquetes = prod.paquetes || [];
-        
-        let packSize = 1;
-        if (paquetes.length > 0) packSize = parseInt(paquetes[0].piezas); 
-        else if (isBolsas) packSize = 100; 
-        else packSize = parseInt(prod.piezas) || 0;
-        
-        let inputsHTML = '';
-        if (packSize > 1) {
-            inputsHTML = `
-            <div class="flex gap-2 mt-2">
-                <div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5">
-                    <i class="fa-solid fa-box text-indigo-500 text-sm"></i>
-                    <div class="flex flex-col flex-1">
-                        <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Paquetes</label>
-                        <input type="number" id="inp-pack-${item.id}" value="${Math.floor(item.quantity/packSize)}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none">
-                    </div>
-                </div>
-                ${!isBolsas ? `<div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5"><i class="fa-solid fa-shapes text-slate-400 text-sm"></i><div class="flex flex-col flex-1"><label class="text-[9px] uppercase font-bold text-slate-400 leading-none">Pzas Sueltas</label><input type="number" id="inp-loose-${item.id}" value="${item.quantity%packSize}" min="0" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-sm outline-none"></div></div>` : ''}
-            </div>`;
-        } else {
-             inputsHTML = `<div class="flex justify-end mt-2"><div class="flex items-center gap-2 bg-slate-50 border rounded-lg px-3 py-1.5 w-32"><span class="text-[10px] font-bold text-slate-400">PZAS:</span><input type="number" id="inp-simple-${item.id}" value="${item.quantity}" min="1" onchange="updateCartItem('${item.id}')" class="w-full bg-transparent font-bold text-slate-800 text-center outline-none"></div></div>`;
-        }
-        
         const safeName = typeof escapeHTML !== 'undefined' ? escapeHTML(item.name) : item.name;
         
+        // Detectar si el renglón es una "Suelta" o una "Caja"
+        const isSuelta = item.sku_paquete === 'SUELTA' || item.sku_paquete === 'BASE' || item.piezas_por_paquete === 1;
+        
+        // Configuración visual según tipo de empaque
+        let labelTipo = isSuelta ? 'Pzas Sueltas' : 'Paquetes / Cajas';
+        let iconTipo = isSuelta ? '<i class="fa-solid fa-shapes text-slate-400 text-sm"></i>' : '<i class="fa-solid fa-box text-indigo-500 text-sm"></i>';
+        let extraInfo = isSuelta ? '' : `<span class="text-[9px] text-indigo-400 ml-1">(${item.piezas_por_paquete} pz c/u)</span>`;
+        
+        // Total físico real (Bultos * Piezas que trae el bulto)
+        const totalPiezasFisicas = item.quantity * item.piezas_por_paquete;
+
         return `
         <div class="flex gap-3 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm mb-3 fade-in relative transition-all duration-300 hover:shadow-md hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
             <div class="h-16 w-16 shrink-0 rounded-lg bg-slate-50 p-1 flex items-center justify-center border"><img src="${item.image}" class="h-full w-full object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/60'"></div>
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start gap-2">
                     <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">${safeName}</h4>
-                    <button onclick="remove('${item.id}')" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="removeCartItem(${idx})" class="text-slate-300 hover:text-red-500 transition-colors p-1"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
-                ${inputsHTML}
+                
+                <div class="flex gap-2 mt-2">
+                    <div class="flex-1 flex items-center gap-2 bg-slate-50 border rounded-lg px-2 py-1.5">
+                        ${iconTipo}
+                        <div class="flex flex-col flex-1">
+                            <label class="text-[9px] uppercase font-bold text-slate-400 leading-none">${labelTipo} ${extraInfo}</label>
+                            
+                            <!-- Controles Modernos +/- (Reemplaza a los inputs directos) -->
+                            <div class="flex items-center gap-3 mt-1.5">
+                                <button onclick="updateCartItemQty(${idx}, -1)" class="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm border border-slate-200 text-slate-400 hover:text-red-500 font-bold transition-colors">-</button>
+                                <span class="font-bold text-slate-800 text-sm min-w-[1.5rem] text-center">${item.quantity}</span>
+                                <button onclick="updateCartItemQty(${idx}, 1)" class="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm border border-slate-200 text-slate-400 hover:text-green-500 font-bold transition-colors">+</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-1 text-right">
+                    <span class="text-[9px] font-bold text-slate-400">Total físico: <strong class="text-indigo-500">${totalPiezasFisicas} pz</strong></span>
+                </div>
             </div>
         </div>`;
     }).join('');
 }
 
+// ======================================================================
+// 3. FUNCIONES DE APOYO PARA LOS BOTONES +/- DEL NUEVO CARRITO
+// Reemplazan a tu antiguo "updateCartItem" y "remove"
+// ======================================================================
+function updateCartItemQty(index, change) {
+    if (cart[index]) {
+        cart[index].quantity += change;
+        if (cart[index].quantity <= 0) {
+            cart.splice(index, 1); // Lo elimina si llega a 0
+        }
+        saveCart();
+        renderCart();
+    }
+}
+
+function removeCartItem(index) {
+    cart.splice(index, 1);
+    saveCart();
+    renderCart();
+}
+
+// ======================================================================
+// 4. FUNCIÓN ORIGINAL TOGGLE CARRITO
+// ======================================================================
 function toggleCart() {
     const m = document.getElementById('cart-modal'), b = document.getElementById('cart-backdrop'), p = document.getElementById('cart-panel');
     if(m.classList.contains('hidden')) {
