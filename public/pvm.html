@@ -772,109 +772,115 @@
             }
         }
 
-        // EXPORTAR CORTE A EXCEL SÚPER DETALLADO (BITÁCORA + DESGLOSES)
+        // EXPORTAR CORTE A EXCEL SÚPER DETALLADO (DISEÑO HORIZONTAL)
         window.exportCorteToExcel = () => {
             const dateStr = new Date().toLocaleString('es-MX');
             const fileDate = new Date().toISOString().slice(0,10);
             
-            // --- SECCIÓN 1: RESUMEN Y FÍSICO ---
-            const wsData = [
-                ['CORTE DE CAJA - ENVASES LA ECONÓMICA DEL NORTE'],
-                ['Fecha y Hora de Emisión:', dateStr],
-                [],
-                ['--- DENOMINACIONES FÍSICAS (BILLETES Y MONEDAS) ---'],
-                ['Denominación', 'Cantidad', 'Importe']
-            ];
+            // Usamos un array bidimensional para colocar datos en columnas específicas (X, Y)
+            const wsData = [];
+            const writeCell = (r, c, val) => {
+                while (wsData.length <= r) wsData.push([]);
+                wsData[r][c] = val;
+            };
 
-            let totalFisico = 0;
+            // --- ENCABEZADOS SUPERIORES ---
+            writeCell(0, 0, 'CORTE DE CAJA - ENVASES LA ECONÓMICA DEL NORTE');
+            writeCell(1, 0, 'Fecha y Hora de Emisión:');
+            writeCell(1, 1, dateStr);
+
+            // --- TÍTULOS DE LAS 4 SECCIONES (Lado a lado) ---
+            writeCell(3, 0, '--- TODAS LAS FACTURAS ---');
+            writeCell(3, 4, '--- FACTURAS EFECTIVO ---');
+            writeCell(3, 8, '--- MOSTRADOR (APP) ---');
+            writeCell(3, 12, '--- FÍSICO Y CÁLCULOS ---');
+
+            // --- SUBTÍTULOS DE COLUMNAS ---
+            writeCell(4, 0, 'Folio / Factura'); writeCell(4, 1, 'Método Detectado'); writeCell(4, 2, 'Total');
+            writeCell(4, 4, 'Folio / Factura'); writeCell(4, 5, 'Texto Original'); writeCell(4, 6, 'Monto Efectivo');
+            writeCell(4, 8, 'Folio Ticket'); writeCell(4, 9, 'Hora'); writeCell(4, 10, 'Total');
+            writeCell(4, 12, 'Denominación'); writeCell(4, 13, 'Cantidad'); writeCell(4, 14, 'Importe');
+
+            // Contadores de fila independientes para cada tabla para que bajen parejo
+            let rowGen = 5, rowEf = 5, rowMos = 5, rowDen = 5;
+
+            // 1. REPORTE GENERAL DE FACTURAS (Col 0, 1, 2)
+            let sumGen = 0;
+            if (window.reporteFacturasTodas && window.reporteFacturasTodas.length > 0) {
+                window.reporteFacturasTodas.forEach(f => {
+                    writeCell(rowGen, 0, f.folio); writeCell(rowGen, 1, f.metodo); writeCell(rowGen, 2, f.total);
+                    sumGen += f.total; rowGen++;
+                });
+            } else { writeCell(rowGen++, 0, 'Sin datos'); }
+            writeCell(rowGen, 1, 'GRAN TOTAL:'); writeCell(rowGen, 2, sumGen);
+
+            // 2. DETALLE FACTURAS EFECTIVO (Col 4, 5, 6)
+            let sumEf = 0;
+            if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) {
+                window.reporteFacturasEfectivo.forEach(f => {
+                    writeCell(rowEf, 4, f.folio); writeCell(rowEf, 5, f.metodo_original); writeCell(rowEf, 6, f.monto_efectivo);
+                    sumEf += f.monto_efectivo; rowEf++;
+                });
+            } else { writeCell(rowEf++, 4, 'Sin datos'); }
+            writeCell(rowEf, 5, 'TOTAL EFECTIVO:'); writeCell(rowEf, 6, sumEf);
+
+            // 3. VENTAS MOSTRADOR (Col 8, 9, 10)
+            let sumMos = 0;
+            if (window.reporteMostrador && window.reporteMostrador.length > 0) {
+                window.reporteMostrador.forEach(m => {
+                    writeCell(rowMos, 8, m.folio); writeCell(rowMos, 9, m.fecha); writeCell(rowMos, 10, m.total);
+                    sumMos += m.total; rowMos++;
+                });
+            } else { writeCell(rowMos++, 8, 'Sin datos'); }
+            writeCell(rowMos, 9, 'TOTAL MOSTRADOR:'); writeCell(rowMos, 10, sumMos);
+
+            // 4. DENOMINACIONES FÍSICAS (Col 12, 13, 14)
+            let sumFisico = 0;
             denominations.forEach(val => {
                 const qty = denomCounts[val] || 0;
                 const rowTotal = val * qty;
-                totalFisico += rowTotal;
-                wsData.push([`$ ${val}`, qty, rowTotal]);
+                sumFisico += rowTotal;
+                writeCell(rowDen, 12, `$ ${val}`); writeCell(rowDen, 13, qty); writeCell(rowDen, 14, rowTotal);
+                rowDen++;
             });
+            writeCell(rowDen, 12, 'TOTAL FÍSICO:'); writeCell(rowDen, 14, sumFisico);
+            rowDen += 2; // Brincar 2 espacios
 
-            wsData.push(['', '', '']);
-            wsData.push(['TOTAL FÍSICO EN CAJA:', '', totalFisico]);
-            
-            wsData.push([]);
-            wsData.push(['--- CÁLCULOS DEL SISTEMA ---']);
+            // --- CÁLCULOS DEL SISTEMA Y RESULTADO FINAL (Debajo de denominaciones) ---
+            writeCell(rowDen++, 12, '--- CÁLCULOS DEL SISTEMA ---');
             const facturado = parseFloat(document.getElementById('inputFacturado').value) || 0;
             const teorico = facturado + totalMostradorDelDia;
-            const diff = totalFisico - teorico;
+            const diff = sumFisico - teorico;
 
-            wsData.push(['Suma Facturas en Efectivo (Sistema)', '', facturado]);
-            wsData.push(['Ventas Mostrador (Tickets App)', '', totalMostradorDelDia]);
-            wsData.push(['TOTAL TEÓRICO (Lo que debería haber):', '', teorico]);
+            writeCell(rowDen, 12, 'Facturas Efectivo (Sistema)'); writeCell(rowDen++, 14, facturado);
+            writeCell(rowDen, 12, 'Ventas Mostrador (App)'); writeCell(rowDen++, 14, totalMostradorDelDia);
+            writeCell(rowDen, 12, 'TOTAL TEÓRICO (Debería haber)'); writeCell(rowDen++, 14, teorico);
             
-            wsData.push([]);
-            wsData.push(['--- RESULTADO ---']);
-            wsData.push(['DIFERENCIA (Físico - Teórico):', '', diff]);
+            rowDen++;
+            writeCell(rowDen++, 12, '--- RESULTADO ---');
+            writeCell(rowDen, 12, 'DIFERENCIA (Físico - Teórico):'); writeCell(rowDen++, 14, diff);
             
             let estadoMsg = "Cuadrada";
             if(diff > 0.1) estadoMsg = "Sobrante";
             else if(diff < -0.1) estadoMsg = "Faltante";
-            wsData.push(['Estado de la Caja:', estadoMsg]);
+            writeCell(rowDen, 12, 'Estado de la Caja:'); writeCell(rowDen++, 14, estadoMsg);
 
-            // --- SECCIÓN 2: DETALLE DE VENTAS MOSTRADOR ---
-            if (window.reporteMostrador && window.reporteMostrador.length > 0) {
-                wsData.push([]);
-                wsData.push([]);
-                wsData.push(['--- DETALLE DE VENTAS MOSTRADOR (TICKETS APP) ---']);
-                wsData.push(['Folio de Ticket', 'Hora de Venta', 'Total Cobrado']);
-                
-                let sumaVerificacionMostrador = 0;
-                window.reporteMostrador.forEach(m => {
-                    sumaVerificacionMostrador += m.total;
-                    wsData.push([m.folio, m.fecha, m.total]);
-                });
-                
-                wsData.push(['', 'TOTAL MOSTRADOR:', sumaVerificacionMostrador]);
-            }
-
-            // --- SECCIÓN 3: DETALLE DE FACTURAS EN EFECTIVO ---
-            if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) {
-                wsData.push([]);
-                wsData.push([]);
-                wsData.push(['--- DETALLE DE FACTURAS EN EFECTIVO (EXTRAÍDAS DEL SISTEMA) ---']);
-                wsData.push(['Folio / Factura', 'Texto Original en Sistema', 'Monto Efectivo Detectado']);
-                
-                let sumaVerificacionEfectivo = 0;
-                window.reporteFacturasEfectivo.forEach(f => {
-                    sumaVerificacionEfectivo += f.monto_efectivo;
-                    wsData.push([f.folio, f.metodo_original, f.monto_efectivo]);
-                });
-                
-                wsData.push(['', 'TOTAL EFECTIVO:', sumaVerificacionEfectivo]);
-            }
-
-            // --- SECCIÓN 4: TODAS LAS FACTURAS DEL SISTEMA (GENERAL) ---
-            if (window.reporteFacturasTodas && window.reporteFacturasTodas.length > 0) {
-                wsData.push([]);
-                wsData.push([]);
-                wsData.push(['--- REPORTE GENERAL DE TODAS LAS FACTURAS DEL SISTEMA (CRUZADO) ---']);
-                wsData.push(['Folio / Factura', 'Método de Pago Detectado', 'Monto Total Facturado']);
-                
-                let sumaVerificacionGeneral = 0;
-                window.reporteFacturasTodas.forEach(f => {
-                    sumaVerificacionGeneral += f.total;
-                    wsData.push([f.folio, f.metodo, f.total]);
-                });
-                
-                wsData.push(['', 'GRAN TOTAL FACTURADO:', sumaVerificacionGeneral]);
-            }
-
-            // 5. Crear libro de Excel
+            // 5. CREAR Y EXPORTAR LIBRO
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             
-            // Anchos de columna ampliados para que quepan todos los detalles bien
-            ws['!cols'] = [{wch: 45}, {wch: 40}, {wch: 25}];
+            // Ajuste Inteligente de Columnas (con "Columnas Espaciadoras" delgadas)
+            ws['!cols'] = [
+                {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, // Col 0-3 (General + Espacio)
+                {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, // Col 4-7 (Efectivo + Espacio)
+                {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, // Col 8-11 (Mostrador + Espacio)
+                {wch: 28}, {wch: 10}, {wch: 14}            // Col 12-14 (Fisico y Calculos)
+            ];
 
             XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja");
             XLSX.writeFile(wb, `Corte_Bitacora_${fileDate}.xlsx`);
             
-            showToast("Bitácora detallada exportada exitosamente.");
+            showToast("Bitácora exportada en formato horizontal.");
         }
 
         window.onload = () => { loadData(); initCorteUI(); };
