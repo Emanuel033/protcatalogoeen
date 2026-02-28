@@ -169,7 +169,7 @@
                         <p class="text-sm font-medium text-slate-500 mt-1">Verifica el efectivo físico contra lo facturado en sistema y ventas de la app.</p>
                     </div>
                     <button onclick="exportCorteToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2">
-                        <i class="fas fa-file-excel"></i> Exportar Bitácora
+                        <i class="fas fa-file-excel"></i> Exportar Bitácora Detallada
                     </button>
                 </div>
 
@@ -256,6 +256,8 @@
         // GLOBALES
         let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; let pendingSaleData = null; 
         window.reporteFacturasEfectivo = []; // Array global para exportar desglose de facturas leidas
+        window.reporteFacturasTodas = [];    // Array global para exportar TODAS las facturas leidas
+        window.reporteMostrador = [];        // Array global para exportar desglose de app mostrador
         
         const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
 
@@ -621,19 +623,32 @@
 
         window.updateDenom = (val, qty) => { denomCounts[val] = parseInt(qty) || 0; calculateCorte(); }
 
+        // Recopila datos de ventas de Mostrador (para cálculos y para exportar detalle)
         async function loadTodaySales() {
             const todayStart = new Date(); todayStart.setHours(0,0,0,0);
             document.getElementById('totalMostradorHoy').innerText = "...";
             try {
                 const snap = await db.collection('ventas_mostrador').where('fecha', '>=', todayStart).get();
                 totalMostradorDelDia = 0;
-                snap.forEach(doc => { const data = doc.data(); if (data.estado !== 'CANCELADA') totalMostradorDelDia += data.total; });
+                window.reporteMostrador = []; // Reseteamos el arreglo global
+                
+                snap.forEach(doc => { 
+                    const data = doc.data(); 
+                    if (data.estado !== 'CANCELADA') {
+                        totalMostradorDelDia += data.total; 
+                        window.reporteMostrador.push({
+                            folio: data.folio,
+                            fecha: data.fecha ? data.fecha.toDate().toLocaleTimeString('es-MX') : 'S/H',
+                            total: data.total
+                        });
+                    }
+                });
                 document.getElementById('totalMostradorHoy').innerText = formatMoney(totalMostradorDelDia);
                 calculateCorte();
             } catch(e) { showToast("Error al obtener ventas del día", "error"); }
         }
 
-        // LECTOR DE EXCEL EXTRAE NÚMEROS JUNTO A "EFECTIVO"
+        // LECTOR DE EXCEL (Extrae Efectivo y además guarda TODAS las facturas)
         window.handleExcelUpload = (event) => {
             const file = event.target.files[0];
             if(!file) return;
@@ -664,11 +679,12 @@
                             if(idxMetodo !== -1) colMetodo = idxMetodo;
                             if(idxTotal !== -1) colTotal = idxTotal;
                             
-                            if(colFolio !== -1 && colMetodo !== -1) break; // Encontramos los más importantes
+                            if(colFolio !== -1 && colMetodo !== -1) break;
                         }
                     }
 
                     window.reporteFacturasEfectivo = [];
+                    window.reporteFacturasTodas = [];
                     let totalEfectivo = 0;
 
                     // 2. Iterar filas debajo de la cabecera
@@ -676,33 +692,45 @@
                         const row = json[i];
                         if (!row || row.length === 0) continue;
                         
-                        // Buscamos en toda la fila o en la columna método específicamente
                         const textoMetodo = colMetodo !== -1 && row[colMetodo] ? String(row[colMetodo]).toLowerCase() : row.join(' ').toLowerCase();
-                        
+                        const textoMetodoOriginal = colMetodo !== -1 ? (row[colMetodo] || textoMetodo) : textoMetodo;
+                        const folioStr = colFolio !== -1 ? (row[colFolio] || 'S/F') : 'S/F';
+
+                        // Determinar monto total general de la fila
+                        let montoFila = 0;
+                        if (colTotal !== -1 && !isNaN(parseFloat(row[colTotal]))) {
+                            montoFila = parseFloat(row[colTotal]);
+                        } else {
+                            const nums = row.map(c => parseFloat(c)).filter(n => !isNaN(n));
+                            if(nums.length > 0) montoFila = Math.max(...nums);
+                        }
+
+                        // Guardar en el reporte GENERAL (si tiene folio o monto válido)
+                        if (folioStr !== 'S/F' || montoFila > 0 || textoMetodoOriginal.trim() !== '') {
+                             window.reporteFacturasTodas.push({
+                                folio: folioStr,
+                                metodo: textoMetodoOriginal,
+                                total: montoFila
+                             });
+                        }
+
+                        // Guardar en el reporte EFECTIVO (solo si detecta la palabra efectivo)
                         if (textoMetodo.includes('efectivo')) {
                             let montoExtraido = 0;
-                            
-                            // MAGIA REGEX: Busca la palabra "efectivo" seguida opcionalmente de $, espacios y saca el número
-                            // Ej. "tdebito 5000 efectivo 1000" -> saca 1000
                             const regexEfectivo = /efectivo\s*\$?\s*(\d+(?:\.\d+)?)/;
                             const match = textoMetodo.match(regexEfectivo);
                             
                             if (match && match[1]) {
                                 montoExtraido = parseFloat(match[1]);
-                            } else if (colTotal !== -1 && !isNaN(parseFloat(row[colTotal]))) {
-                                // Fallback: Si no tiene numero al lado, tomamos el total de la fila
-                                montoExtraido = parseFloat(row[colTotal]);
                             } else {
-                                // Último recurso: Busca cualquier número suelto en la fila
-                                const nums = row.map(c => parseFloat(c)).filter(n => !isNaN(n));
-                                if(nums.length > 0) montoExtraido = Math.max(...nums);
+                                montoExtraido = montoFila; // Usar el general si no hay un numero explicito al lado
                             }
 
                             if (montoExtraido > 0) {
                                 totalEfectivo += montoExtraido;
                                 window.reporteFacturasEfectivo.push({
-                                    folio: colFolio !== -1 ? (row[colFolio] || 'S/F') : 'S/F',
-                                    metodo_original: colMetodo !== -1 ? (row[colMetodo] || textoMetodo) : textoMetodo,
+                                    folio: folioStr,
+                                    metodo_original: textoMetodoOriginal,
                                     monto_efectivo: montoExtraido
                                 });
                             }
@@ -712,7 +740,7 @@
                     // 3. Escribir resultado en la interfaz
                     document.getElementById('inputFacturado').value = totalEfectivo.toFixed(2);
                     calculateCorte();
-                    showToast(`Reporte analizado. Se extrajeron $${totalEfectivo.toFixed(2)} de ${window.reporteFacturasEfectivo.length} facturas.`);
+                    showToast(`Reporte procesado. ${window.reporteFacturasEfectivo.length} en efectivo de ${window.reporteFacturasTodas.length} totales.`);
                     
                 } catch(err) {
                     console.error(err);
@@ -744,12 +772,12 @@
             }
         }
 
-        // EXPORTAR CORTE A EXCEL (BITÁCORA + DESGLOSE)
+        // EXPORTAR CORTE A EXCEL SÚPER DETALLADO (BITÁCORA + DESGLOSES)
         window.exportCorteToExcel = () => {
             const dateStr = new Date().toLocaleString('es-MX');
             const fileDate = new Date().toISOString().slice(0,10);
             
-            // 1. Construimos la matriz de datos principales para Excel
+            // --- SECCIÓN 1: RESUMEN Y FÍSICO ---
             const wsData = [
                 ['CORTE DE CAJA - ENVASES LA ECONÓMICA DEL NORTE'],
                 ['Fecha y Hora de Emisión:', dateStr],
@@ -766,7 +794,7 @@
                 wsData.push([`$ ${val}`, qty, rowTotal]);
             });
 
-            wsData.push(['', '', '']); // Espacio
+            wsData.push(['', '', '']);
             wsData.push(['TOTAL FÍSICO EN CAJA:', '', totalFisico]);
             
             wsData.push([]);
@@ -788,33 +816,65 @@
             else if(diff < -0.1) estadoMsg = "Faltante";
             wsData.push(['Estado de la Caja:', estadoMsg]);
 
-            // 2. AÑADIR EL DESGLOSE DE FACTURAS DE EFECTIVO EXTRAÍDAS
+            // --- SECCIÓN 2: DETALLE DE VENTAS MOSTRADOR ---
+            if (window.reporteMostrador && window.reporteMostrador.length > 0) {
+                wsData.push([]);
+                wsData.push([]);
+                wsData.push(['--- DETALLE DE VENTAS MOSTRADOR (TICKETS APP) ---']);
+                wsData.push(['Folio de Ticket', 'Hora de Venta', 'Total Cobrado']);
+                
+                let sumaVerificacionMostrador = 0;
+                window.reporteMostrador.forEach(m => {
+                    sumaVerificacionMostrador += m.total;
+                    wsData.push([m.folio, m.fecha, m.total]);
+                });
+                
+                wsData.push(['', 'TOTAL MOSTRADOR:', sumaVerificacionMostrador]);
+            }
+
+            // --- SECCIÓN 3: DETALLE DE FACTURAS EN EFECTIVO ---
             if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) {
                 wsData.push([]);
                 wsData.push([]);
-                wsData.push(['--- DETALLE DE FACTURAS DE EFECTIVO EXTRAÍDAS DEL SISTEMA ---']);
+                wsData.push(['--- DETALLE DE FACTURAS EN EFECTIVO (EXTRAÍDAS DEL SISTEMA) ---']);
                 wsData.push(['Folio / Factura', 'Texto Original en Sistema', 'Monto Efectivo Detectado']);
                 
-                let sumaVerificacion = 0;
+                let sumaVerificacionEfectivo = 0;
                 window.reporteFacturasEfectivo.forEach(f => {
-                    sumaVerificacion += f.monto_efectivo;
+                    sumaVerificacionEfectivo += f.monto_efectivo;
                     wsData.push([f.folio, f.metodo_original, f.monto_efectivo]);
                 });
                 
-                wsData.push(['', 'TOTAL SUMADO:', sumaVerificacion]);
+                wsData.push(['', 'TOTAL EFECTIVO:', sumaVerificacionEfectivo]);
             }
 
-            // 3. Crear libro de Excel
+            // --- SECCIÓN 4: TODAS LAS FACTURAS DEL SISTEMA (GENERAL) ---
+            if (window.reporteFacturasTodas && window.reporteFacturasTodas.length > 0) {
+                wsData.push([]);
+                wsData.push([]);
+                wsData.push(['--- REPORTE GENERAL DE TODAS LAS FACTURAS DEL SISTEMA (CRUZADO) ---']);
+                wsData.push(['Folio / Factura', 'Método de Pago Detectado', 'Monto Total Facturado']);
+                
+                let sumaVerificacionGeneral = 0;
+                window.reporteFacturasTodas.forEach(f => {
+                    sumaVerificacionGeneral += f.total;
+                    wsData.push([f.folio, f.metodo, f.total]);
+                });
+                
+                wsData.push(['', 'GRAN TOTAL FACTURADO:', sumaVerificacionGeneral]);
+            }
+
+            // 5. Crear libro de Excel
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             
-            // Anchos de columna
-            ws['!cols'] = [{wch: 45}, {wch: 35}, {wch: 25}];
+            // Anchos de columna ampliados para que quepan todos los detalles bien
+            ws['!cols'] = [{wch: 45}, {wch: 40}, {wch: 25}];
 
             XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja");
             XLSX.writeFile(wb, `Corte_Bitacora_${fileDate}.xlsx`);
             
-            showToast("Bitácora exportada exitosamente.");
+            showToast("Bitácora detallada exportada exitosamente.");
         }
 
         window.onload = () => { loadData(); initCorteUI(); };
