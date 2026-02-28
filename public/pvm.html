@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Punto de Venta - Mostrador EEN</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- Librería para leer y exportar Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #0f172a; overflow: hidden; }
+        
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Estilos de Ticket de Impresión (Adaptado a 3 Copias Tamaño Carta) */
+        #print-ticket { display: none; } 
+        
+        @media print {
+            body { display: block !important; height: auto !important; overflow: visible !important; background: white !important; }
+            aside, main, #toast, #confirmPrintModal, .no-print { display: none !important; }
+            
+            #print-ticket { 
+                display: block !important; 
+                width: 100%; 
+                padding: 0; 
+                margin: 0; 
+                font-family: 'Courier New', Courier, monospace; 
+                color: black; 
+                background: white; 
+            }
+            
+            @page { size: letter portrait; margin: 10mm; }
+            .ticket-copy { page-break-inside: avoid; margin-bottom: 8mm; padding-bottom: 8mm; border-bottom: 2px dashed #000; }
+            .ticket-copy:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        }
+    </style>
+</head>
+<body class="h-screen flex">
+
+    <!-- CREDENCIALES FIREBASE -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
+            projectId: "productoseen",
+            storageBucket: "productoseen.firebasestorage.app",
+            messagingSenderId: "1052892398028",
+            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+
+    <!-- SIDEBAR DE NAVEGACIÓN -->
+    <aside class="w-20 md:w-24 bg-slate-900 flex flex-col items-center py-6 shrink-0 z-20">
+        <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-xl mb-8 shadow-lg shadow-blue-500/30">
+            <i class="fas fa-store"></i>
+        </div>
+        
+        <nav class="flex-1 flex flex-col gap-4 w-full px-3">
+            <button onclick="switchTab('pos')" id="tab-btn-pos" class="flex flex-col items-center justify-center py-4 rounded-2xl bg-blue-600 text-white transition-colors">
+                <i class="fas fa-cash-register text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">Venta</span>
+            </button>
+            <button onclick="switchTab('historial')" id="tab-btn-historial" class="flex flex-col items-center justify-center py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                <i class="fas fa-receipt text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">Historial</span>
+            </button>
+            <button onclick="switchTab('corte')" id="tab-btn-corte" class="flex flex-col items-center justify-center py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                <i class="fas fa-coins text-xl mb-1"></i>
+                <span class="text-[10px] font-bold">Corte</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-1 h-full relative overflow-hidden flex bg-slate-50">
+        
+        <!-- PESTAÑA 1: PUNTO DE VENTA (POS) -->
+        <div id="view-pos" class="w-full h-full flex flex-col md:flex-row">
+            
+            <div class="flex-1 flex flex-col h-full border-r border-slate-200 bg-white">
+                <div class="p-4 md:p-6 border-b border-slate-100 bg-white z-10">
+                    <h2 class="text-xl font-black text-slate-800 mb-4">Venta Mostrador</h2>
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" oninput="filterCatalog()" placeholder="Buscar por código oficial o nombre..." autocomplete="off"
+                            class="w-full pl-12 pr-4 py-3.5 bg-slate-100 border-none rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-inner transition-all">
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto custom-scroll p-4 md:p-6 bg-slate-50/50">
+                    <div id="loadingProducts" class="text-center py-10 text-slate-400 font-bold">
+                        <i class="fas fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i><br>Cargando catálogo oficial y empaques...
+                    </div>
+                    <div id="productsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-3 hidden"></div>
+                </div>
+            </div>
+
+            <!-- Panel del Ticket (Carrito) -->
+            <div class="w-full md:w-[350px] lg:w-[400px] bg-white flex flex-col h-full shrink-0 shadow-[-10px_0_20px_rgba(0,0,0,0.02)] relative z-20">
+                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-black text-slate-800 flex items-center gap-2"><i class="fas fa-receipt text-blue-600"></i> Ticket Actual</h3>
+                    <button onclick="clearCart()" class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">Limpiar</button>
+                </div>
+                
+                <div id="cartItems" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-2 bg-white"></div>
+                
+                <div class="p-5 border-t border-slate-100 bg-slate-50">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-bold text-slate-500">Total a cobrar:</span>
+                        <span class="text-3xl font-black text-blue-600" id="cartTotal">$0.00</span>
+                    </div>
+                    <button onclick="processSale()" id="btnCobrar" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-black text-lg shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fas fa-cash-register"></i> Cobrar en Efectivo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2: HISTORIAL -->
+        <div id="view-historial" class="w-full h-full hidden flex-col p-6 md:p-10 overflow-y-auto custom-scroll">
+            <div class="max-w-5xl mx-auto w-full">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800">Historial de Mostrador</h2>
+                        <p class="text-sm font-medium text-slate-500 mt-1">Últimos 15 días de ventas registradas en esta caja.</p>
+                    </div>
+                    <button onclick="loadHistory()" class="bg-white border border-slate-200 text-slate-600 hover:text-blue-600 px-4 py-2 rounded-xl font-bold text-sm shadow-sm transition flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                            <tr>
+                                <th class="px-6 py-4">Folio / Fecha</th>
+                                <th class="px-6 py-4">Artículos</th>
+                                <th class="px-6 py-4 text-right">Total</th>
+                                <th class="px-6 py-4 text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3: CORTE DE CAJA -->
+        <div id="view-corte" class="w-full h-full hidden flex-col p-6 md:p-8 overflow-y-auto custom-scroll">
+            <div class="max-w-6xl mx-auto w-full">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800">Corte de Caja</h2>
+                        <p class="text-sm font-medium text-slate-500 mt-1">Verifica el efectivo físico contra lo facturado en sistema y ventas de la app.</p>
+                    </div>
+                    <button onclick="exportCorteToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2">
+                        <i class="fas fa-file-excel"></i> Exportar Bitácora
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Denominaciones -->
+                    <div class="lg:col-span-7 bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                        <h3 class="font-black text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-money-bill-wave text-emerald-500"></i> Billetes y Monedas (Físico)</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="denomContainer"></div>
+                        <div class="mt-6 pt-5 border-t border-slate-100 flex justify-between items-center bg-emerald-50 p-4 rounded-2xl">
+                            <span class="font-bold text-emerald-800">Suma Total Físico:</span>
+                            <span class="text-2xl font-black text-emerald-600" id="totalFisico">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Cálculos -->
+                    <div class="lg:col-span-5 space-y-4">
+                        
+                        <!-- Input Facturado con Lector de Excel -->
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 relative">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Facturado Efectivo (Sistema)</label>
+                                <input type="file" id="excelFileInput" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleExcelUpload(event)">
+                                <button onclick="document.getElementById('excelFileInput').click()" class="text-[10px] bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-600 px-2 py-1 rounded-md font-bold transition flex items-center gap-1">
+                                    <i class="fas fa-upload"></i> Leer Excel
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 font-bold text-slate-400">$</span>
+                                <input type="number" id="inputFacturado" value="0" oninput="calculateCorte()" class="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1">Sube el reporte del sistema o escríbelo manual.</p>
+                        </div>
+
+                        <!-- Mostrador (Automático) -->
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Ventas Mostrador (Hoy)</h4>
+                                <button onclick="loadTodaySales()" class="text-[10px] text-blue-500 hover:underline font-bold">Calcular de la base de datos</button>
+                            </div>
+                            <span class="text-xl font-black text-slate-800" id="totalMostradorHoy">$0.00</span>
+                        </div>
+
+                        <!-- Resultado Final -->
+                        <div class="bg-slate-900 p-6 rounded-3xl shadow-lg shadow-slate-900/20 text-white relative overflow-hidden">
+                            <i class="fas fa-calculator absolute -right-4 -bottom-4 text-slate-700/50 text-8xl"></i>
+                            <div class="relative z-10">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-semibold text-slate-300">Total Teórico (Debería haber):</span>
+                                    <span class="text-lg font-bold" id="totalTeorico">$0.00</span>
+                                </div>
+                                <div class="h-px bg-slate-700 w-full my-4"></div>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Diferencia (Físico - Teórico)</p>
+                                <div id="resultadoDiferencia" class="text-4xl font-black text-white">$0.00</div>
+                                <p id="textoDiferencia" class="text-sm font-bold mt-2 text-slate-300">Caja Cuadrada Perfectamente</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ÁREA DE IMPRESIÓN -->
+    <div id="print-ticket" class="bg-white"></div>
+
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity z-[100] font-medium text-sm text-center"></div>
+
+    <!-- Modales -->
+    <div id="confirmPrintModal" class="fixed inset-0 bg-slate-900/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-95 transition-transform duration-200" id="confirmPrintBox">
+            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-5 border-4 border-white shadow-md"><i class="fas fa-print"></i></div>
+            <h3 class="text-xl font-black text-slate-800 mb-2">¿Se imprimió el ticket?</h3>
+            <p class="text-sm text-slate-500 mb-6 font-medium">Verifica que las 3 copias salieron correctamente antes de registrar la venta.</p>
+            <div class="flex flex-col gap-3">
+                <button onclick="confirmAndSaveSale()" id="btnConfirmSave" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 text-lg active:scale-95">
+                    <i class="fas fa-check-circle"></i> Sí, registrar venta
+                </button>
+                <button onclick="cancelPendingPrint()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors">No, reintentar o cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Prompt Genérico (Para pedir motivo de cancelación) -->
+    <div id="genericPromptModal" class="fixed inset-0 bg-slate-900/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="genericPromptBox">
+            <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-2"><i class="fas fa-pen-nib text-blue-600"></i> <span id="genericPromptTitle">Razón</span></h3>
+            <p class="text-sm text-slate-500 mb-4" id="genericPromptText">Mensaje</p>
+            <textarea id="genericPromptInput" rows="3" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none mb-6 resize-none text-sm font-medium" placeholder="Escribe aquí el motivo de cancelación..."></textarea>
+            <div class="flex gap-3">
+                <button id="btnGenericPromptCancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors">Cancelar</button>
+                <button id="btnGenericPromptConfirm" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GLOBALES
+        let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; let pendingSaleData = null; 
+        const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+
+        // UI
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast'); t.innerText = msg;
+            t.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl transition-opacity z-[100] font-bold text-sm text-center ${type === 'error' ? 'bg-red-600 text-white' : 'bg-slate-800 text-white'}`;
+            t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 3000);
+        }
+
+        function showPrompt(title, message, onConfirmCallback) {
+            document.getElementById('genericPromptTitle').innerText = title;
+            document.getElementById('genericPromptText').innerText = message;
+            const input = document.getElementById('genericPromptInput');
+            input.value = '';
+            
+            const modal = document.getElementById('genericPromptModal');
+            const box = document.getElementById('genericPromptBox');
+
+            document.getElementById('btnGenericPromptCancel').onclick = () => {
+                box.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200);
+            };
+
+            document.getElementById('btnGenericPromptConfirm').onclick = () => {
+                const val = input.value.trim();
+                if(!val) return showToast('El motivo es obligatorio', 'error');
+                box.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200);
+                onConfirmCallback(val);
+            };
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { box.classList.remove('scale-95'); input.focus(); }, 10);
+        }
+
+        function switchTab(tabId) {
+            ['pos', 'historial', 'corte'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden'); document.getElementById(`view-${t}`).classList.remove('flex');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (t === tabId) btn.className = "flex flex-col items-center justify-center py-4 rounded-2xl bg-blue-600 text-white transition-colors shadow-inner";
+                else btn.className = "flex flex-col items-center justify-center py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors";
+            });
+            const view = document.getElementById(`view-${tabId}`);
+            view.classList.remove('hidden'); view.classList.add('flex');
+            if(tabId === 'historial') loadHistory();
+            if(tabId === 'corte') loadTodaySales();
+        }
+
+        // CARGA DE CATÁLOGO
+        async function loadData() {
+            const loadingUI = document.getElementById('loadingProducts');
+            try {
+                const factSnap = await db.collection('catalogo_facturacion').get();
+                let tempCatalog = {};
+                
+                if (factSnap.empty) throw new Error("No se encontraron productos en 'catalogo_facturacion'.");
+
+                factSnap.forEach(doc => {
+                    const data = doc.data();
+                    const code = data.codigo_oficial || data.Codigo_oficial || data.codigo || data.Codigo || doc.id;
+                    const nombre = data.descripcion_oficial || data.Descripcion_oficial || data.nombre_oficial || data.nombre || data.Nombre || data.descripcion || data.Descripcion || 'Articulo S/N';
+                    const precioStr = data.precio || data.Precio || data.precio_unitario || data.Precio_unitario || 0;
+                    tempCatalog[code] = { id_facturacion: doc.id, codigo: code, nombre: nombre, precio: parseFloat(precioStr) || 0, empaques_tips: [] };
+                });
+
+                const masterSnap = await db.collection('productos_master').where('activo', '==', true).get();
+                const masterIds = []; 
+                masterSnap.forEach(doc => {
+                    const data = doc.data();
+                    const code = data.codigo_sistema_oficial;
+                    if (code && tempCatalog[code]) {
+                        masterIds.push(doc.id);
+                        const piezasBase = parseInt(data.piezas_por_caja_original) || 1;
+                        if(piezasBase > 1) tempCatalog[code].empaques_tips.push(piezasBase);
+                    }
+                });
+
+                const promesasPaquetes = masterIds.map(async (mId) => {
+                    try {
+                        const pkgs = await db.collection('productos_master').doc(mId).collection('paquetes').get();
+                        pkgs.forEach(pDoc => {
+                            const pData = pDoc.data();
+                            const masterDoc = masterSnap.docs.find(d => d.id === mId);
+                            const cod = masterDoc.data().codigo_sistema_oficial;
+                            if (cod && tempCatalog[cod] && !tempCatalog[cod].empaques_tips.includes(pData.piezas)) {
+                                tempCatalog[cod].empaques_tips.push(pData.piezas);
+                            }
+                        });
+                    } catch(e) {}
+                });
+                await Promise.all(promesasPaquetes);
+
+                catalogProducts = Object.values(tempCatalog).sort((a,b) => String(a.nombre).localeCompare(String(b.nombre)));
+                catalogProducts.forEach(p => p.empaques_tips.sort((a,b) => a - b));
+
+                loadingUI.classList.add('hidden');
+                document.getElementById('productsGrid').classList.remove('hidden');
+                filterCatalog();
+            } catch (error) {
+                console.error(error);
+                loadingUI.innerHTML = `<span class='text-red-500 font-bold'>Error: ${error.message}</span>`;
+            }
+        }
+
+        function filterCatalog() {
+            const term = document.getElementById('searchInput').value.toLowerCase().trim();
+            const grid = document.getElementById('productsGrid'); grid.innerHTML = '';
+            filteredCatalog = catalogProducts.filter(p => String(p.nombre).toLowerCase().includes(term) || String(p.codigo).toLowerCase().includes(term));
+            
+            if (filteredCatalog.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-bold">No se encontró el producto.</div>`; return;
+            }
+
+            filteredCatalog.slice(0, 50).forEach(p => {
+                let tipsHTML = '';
+                if (p.empaques_tips.length > 0) {
+                    tipsHTML = `<div class="flex flex-wrap gap-1 mt-2">`;
+                    p.empaques_tips.forEach(pz => { tipsHTML += `<span class="bg-indigo-50 border border-indigo-100 text-indigo-700 text-[9px] font-black px-1.5 py-0.5 rounded cursor-help">📦 Caja: ${pz} pz</span>`; });
+                    tipsHTML += `</div>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 p-4 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col fade-in";
+                card.onclick = () => addToCart(p);
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="font-mono text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold border border-slate-200">${p.codigo}</span>
+                        <span class="text-sm font-black text-emerald-600">${formatMoney(p.precio)}</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm leading-tight flex-1">${p.nombre}</h4>
+                    ${tipsHTML}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // LÓGICA DEL CARRITO
+        function addToCart(product) {
+            pendingSaleData = null; 
+            const existing = cart.find(x => x.codigo === product.codigo);
+            if (existing) existing.qty += 1; else cart.push({ ...product, qty: 1 });
+            renderCart();
+            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
+        }
+
+        function updateCartQty(index, change) {
+            pendingSaleData = null;
+            if (cart[index]) {
+                cart[index].qty += change;
+                if (cart[index].qty <= 0) cart.splice(index, 1);
+                renderCart();
+            }
+        }
+
+        function clearCart() {
+            if(cart.length === 0) return;
+            if(confirm("¿Limpiar todo el ticket?")) { pendingSaleData = null; cart = []; renderCart(); }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            const btnCobrar = document.getElementById('btnCobrar');
+
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="text-center py-20 text-slate-300 font-medium text-sm flex flex-col items-center"><i class="fas fa-shopping-basket text-4xl mb-3 opacity-50"></i>Ticket vacío.</div>`;
+                totalEl.innerText = "$0.00"; btnCobrar.disabled = true; btnCobrar.classList.add('opacity-50', 'cursor-not-allowed'); return;
+            }
+
+            btnCobrar.disabled = false; btnCobrar.classList.remove('opacity-50', 'cursor-not-allowed');
+            container.innerHTML = ''; let total = 0;
+
+            cart.forEach((item, index) => {
+                const subtotal = item.precio * item.qty; total += subtotal;
+                container.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl flex flex-col relative animate-[fadeIn_0.2s_ease-out]">
+                        <div class="flex justify-between items-start mb-2"><div class="pr-6"><h5 class="text-xs font-bold text-slate-800 leading-tight">${item.nombre}</h5><span class="text-[9px] font-mono text-slate-400">${item.codigo}</span></div><button onclick="updateCartQty(${index}, -${item.qty})" class="absolute top-2 right-2 text-slate-300 hover:text-red-500"><i class="fas fa-times"></i></button></div>
+                        <div class="flex justify-between items-end mt-auto"><div class="flex items-center bg-white border border-slate-200 rounded-lg"><button onclick="updateCartQty(${index}, -1)" class="w-7 h-7 text-slate-500 hover:text-red-500 font-bold">-</button><input type="number" value="${item.qty}" onchange="manualCartQty(${index}, this.value)" class="w-10 text-center font-black text-sm text-slate-800 border-none outline-none focus:ring-0 p-0 bg-transparent"><button onclick="updateCartQty(${index}, 1)" class="w-7 h-7 text-slate-500 hover:text-blue-500 font-bold">+</button></div><div class="text-right"><div class="text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div><div class="text-sm font-black text-slate-800">${formatMoney(subtotal)}</div></div></div>
+                    </div>`;
+            });
+            totalEl.innerText = formatMoney(total);
+        }
+
+        window.manualCartQty = (index, val) => {
+            pendingSaleData = null; let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart();
+        }
+
+        // GUARDAR VENTA Y TICKET
+        async function processSale() {
+            if (cart.length === 0) return;
+            const total = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
+            const folio = "MOST-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+            pendingSaleData = {
+                folio: folio, fecha: new Date(), total: total,
+                articulos: cart.map(i => ({ codigo: i.codigo, nombre: i.nombre, precio_unitario: i.precio, cantidad: i.qty, subtotal: i.precio * i.qty })),
+                vendedor: "Mostrador General", estado: "COMPLETADA"
+            };
+            printTicketHTML(pendingSaleData, true);
+        }
+
+        async function confirmAndSaveSale() {
+            if (!pendingSaleData) return;
+            const btn = document.getElementById('btnConfirmSave'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
+            try {
+                const dataToSave = { ...pendingSaleData, fecha: firebase.firestore.FieldValue.serverTimestamp() };
+                await db.collection('ventas_mostrador').add(dataToSave);
+                showToast(`Venta exitosa: ${dataToSave.folio}`);
+                cart = []; renderCart(); pendingSaleData = null; document.getElementById('confirmPrintModal').classList.add('hidden');
+                if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
+                if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
+            } catch (error) { showToast("Error de conexión al guardar", "error"); } finally {
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Sí, registrar venta'; btn.disabled = false;
+            }
+        }
+
+        function cancelPendingPrint() {
+            document.getElementById('confirmPrintBox').classList.add('scale-95');
+            setTimeout(() => document.getElementById('confirmPrintModal').classList.add('hidden'), 200);
+        }
+
+        function printTicketHTML(venta, isNewSale = false) {
+            const printArea = document.getElementById('print-ticket');
+            const fechaObj = (venta.fecha && typeof venta.fecha.toDate === 'function') ? venta.fecha.toDate() : (venta.fecha || new Date());
+            const fechaStr = fechaObj.toLocaleDateString('es-MX'); const horaStr = fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            const total = venta.total; const subtotal = total / 1.16; const iva = total - subtotal;
+            const copies = [{ title: 'COPIA 1 - SUCURSAL' }, { title: 'COPIA 2 - ALMACÉN' }, { title: 'COPIA 3 - CLIENTE' }];
+
+            let html = '';
+            copies.forEach((copy) => {
+                html += `
+                <div class="ticket-copy">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; font-family: 'Courier New', Courier, monospace;">
+                        <div style="width: 60%;">
+                            <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px;">
+                               <img src="https://i.ibb.co/30B37g8C/LOGO-LETRA-NEGRA.png" style="max-width: 60px; height: auto;">
+                               <h2 style="margin:0; font-size: 14px; font-weight: 900;">ENVASES LA ECONÓMICA DEL NORTE</h2>
+                            </div>
+                            <p style="margin:2px 0; font-size: 10px;">Sucursal: Calzada Guadalupe Victoria, Col. Obrerista, Monterrey, N.L.</p>
+                            <p style="margin:2px 0; font-size: 10px;">Tel: 81 8374-6703 / WhatsApp: 81 1372 8493</p>
+                            <p style="margin:2px 0; font-size: 10px; font-weight: bold;">Catálogo Digital: productoseen.web.app</p>
+                        </div>
+                        <div style="width: 35%; text-align: right;">
+                            <h3 style="margin:0 0 5px 0; font-size: 11px; font-weight: bold; padding: 4px; border: 2px solid #000; display: inline-block;">${copy.title}</h3>
+                            <p style="margin:2px 0; font-size: 11px; font-weight: bold;">VENTA MOSTRADOR</p>
+                            <p style="margin:2px 0; font-size: 10px;">Folio: ${venta.folio}</p>
+                            <p style="margin:2px 0; font-size: 10px;">${fechaStr} - ${horaStr}</p>
+                        </div>
+                    </div>
+                    <table style="width: 100%; font-size: 11px; margin-bottom: 5px; font-family: 'Courier New', Courier, monospace; border-collapse: collapse;">
+                        <tr>
+                            <th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 12%;">Cant</th>
+                            <th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 48%;">Cód / Descripción</th>
+                            <th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">P.U.</th>
+                            <th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">Total</th>
+                        </tr>
+                `;
+                venta.articulos.forEach(item => {
+                    html += `<tr><td style="vertical-align: top; padding-top: 4px; font-weight: bold;">${item.cantidad}x</td><td style="vertical-align: top; padding-top: 4px; padding-right: 4px;"><b>${item.codigo}</b><br>${item.nombre}</td><td style="vertical-align: top; padding-top: 4px; text-align:right;">${formatMoney(item.precio_unitario)}</td><td style="vertical-align: top; padding-top: 4px; text-align:right; font-weight:bold;">${formatMoney(item.subtotal)}</td></tr>`;
+                });
+                html += `
+                    </table>
+                    <div style="border-top: 1px solid #000; padding-top: 8px; font-family: 'Courier New', Courier, monospace; font-size: 11px; display: flex; justify-content: flex-end;">
+                        <div style="text-align: right; width: 200px;">
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666;">Subtotal:</span> <span>${formatMoney(subtotal)}</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666;">IVA (16%):</span> <span>${formatMoney(iva)}</span></div>
+                            <div style="display: flex; justify-content: space-between; border-top: 1px solid #000; margin-top: 4px; padding-top: 4px; font-weight: 900; font-size: 13px;"><span>TOTAL:</span> <span>${formatMoney(venta.total)}</span></div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            printArea.innerHTML = html;
+            try { window.print(); } catch(e) {}
+            if (isNewSale) {
+                setTimeout(() => {
+                    const modal = document.getElementById('confirmPrintModal'); const box = document.getElementById('confirmPrintBox');
+                    modal.classList.remove('hidden'); setTimeout(() => box.classList.remove('scale-95'), 10);
+                }, 800);
+            }
+        }
+
+        // HISTORIAL CON MOTIVOS DE CANCELACIÓN
+        async function loadHistory() {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando historial...</td></tr>';
+            const date15DaysAgo = new Date(); date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+
+            try {
+                const snap = await db.collection('ventas_mostrador').where('fecha', '>=', date15DaysAgo).orderBy('fecha', 'desc').get();
+                historySales = []; snap.forEach(doc => historySales.push({id: doc.id, ...doc.data()}));
+
+                if (historySales.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400 font-bold">No hay ventas registradas.</td></tr>'; return; }
+
+                tbody.innerHTML = '';
+                historySales.forEach(v => {
+                    const fechaStr = v.fecha ? v.fecha.toDate().toLocaleString('es-MX', {day: '2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente';
+                    const itemsDesc = v.articulos.map(a => `${a.cantidad}x ${a.codigo}`).join(', ');
+                    const isCanceled = v.estado === 'CANCELADA';
+                    const motivoText = v.motivo_cancelacion ? `Motivo: ${v.motivo_cancelacion}` : '';
+                    const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
+
+                    const tr = document.createElement('tr'); tr.className = rowClass;
+                    tr.innerHTML = `
+                        <td class="px-6 py-4">
+                            <div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-xs">${v.folio}</div>
+                            <div class="text-[10px] text-slate-400 font-medium">${fechaStr}</div>
+                            ${isCanceled ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">CANCELADA</span><div class="text-[9px] text-red-500 mt-0.5 italic max-w-[150px] truncate" title="${motivoText}">${motivoText}</div>` : ''}
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-600 truncate max-w-[200px]" title="${itemsDesc}">${v.articulos.length} art. (${itemsDesc})</td>
+                        <td class="px-6 py-4 text-right font-black ${isCanceled ? 'text-slate-400 line-through' : 'text-slate-800'}">${formatMoney(v.total)}</td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick='reprintTicket(${JSON.stringify(v)})' class="text-blue-500 hover:bg-blue-100 p-2 rounded-lg transition" title="Reimprimir"><i class="fas fa-print"></i></button>
+                                ${!isCanceled ? `<button onclick="cancelTicket('${v.id}', '${v.folio}')" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold">Error al cargar el historial.</td></tr>'; }
+        }
+
+        window.reprintTicket = (ventaObj) => { pendingSaleData = null; printTicketHTML(ventaObj, false); }
+
+        window.cancelTicket = (id, folio) => {
+            showPrompt("Cancelar Venta " + folio, "Esta acción es irreversible y descontará el monto del corte del día. Escribe el motivo de la cancelación:", async (motivo) => {
+                try {
+                    await db.collection('ventas_mostrador').doc(id).update({
+                        estado: 'CANCELADA',
+                        motivo_cancelacion: motivo,
+                        fecha_cancelacion: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast(`Ticket ${folio} cancelado.`);
+                    loadHistory();
+                    if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
+                } catch(error) { showToast("No se pudo cancelar el ticket.", "error"); }
+            });
+        }
+
+        // CORTE DE CAJA Y LECTURA DE EXCEL
+        const denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50];
+        let denomCounts = {}; let totalMostradorDelDia = 0;
+
+        function initCorteUI() {
+            const container = document.getElementById('denomContainer'); container.innerHTML = '';
+            denominations.forEach(val => {
+                denomCounts[val] = 0;
+                const icon = val >= 20 ? '<i class="fas fa-money-bill-wave text-emerald-400"></i>' : '<i class="fas fa-coins text-amber-400"></i>';
+                container.innerHTML += `<div class="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between"><div class="flex items-center gap-2 font-black text-slate-700 text-sm">${icon} $${val}</div><input type="number" min="0" value="0" id="denom_${val}" oninput="updateDenom(${val}, this.value)" class="w-16 px-2 py-1 text-center font-bold text-slate-900 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"></div>`;
+            });
+        }
+
+        window.updateDenom = (val, qty) => { denomCounts[val] = parseInt(qty) || 0; calculateCorte(); }
+
+        async function loadTodaySales() {
+            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+            document.getElementById('totalMostradorHoy').innerText = "...";
+            try {
+                const snap = await db.collection('ventas_mostrador').where('fecha', '>=', todayStart).get();
+                totalMostradorDelDia = 0;
+                snap.forEach(doc => { const data = doc.data(); if (data.estado !== 'CANCELADA') totalMostradorDelDia += data.total; });
+                document.getElementById('totalMostradorHoy').innerText = formatMoney(totalMostradorDelDia);
+                calculateCorte();
+            } catch(e) { showToast("Error al obtener ventas del día", "error"); }
+        }
+
+        // LECTOR DE EXCEL INTELIGENTE (Busca fila 'efectivo' y suma totales)
+        window.handleExcelUpload = (event) => {
+            const file = event.target.files[0];
+            if(!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1}); // Lee como matriz
+                    
+                    let totalEfectivo = 0;
+                    let headerRowIndex = -1;
+                    let totalColIndex = -1;
+                    
+                    // 1. Encontrar la fila de cabeceras (Busca columna 'total', 'importe' o 'monto')
+                    for(let i=0; i < Math.min(20, json.length); i++) {
+                        if(!json[i]) continue;
+                        const rowStrArray = json[i].map(c => String(c).toLowerCase());
+                        const idx = rowStrArray.findIndex(c => c.includes('total') || c.includes('importe') || c.includes('monto'));
+                        if (idx !== -1) {
+                            headerRowIndex = i;
+                            totalColIndex = idx;
+                            break;
+                        }
+                    }
+
+                    // 2. Iterar filas debajo de la cabecera buscando "efectivo"
+                    for(let i = headerRowIndex + 1; i < json.length; i++) {
+                        const row = json[i];
+                        if (!row || row.length === 0) continue;
+                        
+                        const rowStr = row.join(' ').toLowerCase();
+                        if (rowStr.includes('efectivo')) {
+                            // Si encontró columna Total
+                            if (totalColIndex !== -1 && !isNaN(parseFloat(row[totalColIndex]))) {
+                                totalEfectivo += parseFloat(row[totalColIndex]);
+                            } else {
+                                // Fallback: Toma el número más grande de esa fila
+                                const nums = row.map(c => parseFloat(c)).filter(n => !isNaN(n));
+                                if(nums.length > 0) totalEfectivo += Math.max(...nums);
+                            }
+                        }
+                    }
+
+                    // 3. Escribir resultado
+                    document.getElementById('inputFacturado').value = totalEfectivo.toFixed(2);
+                    calculateCorte();
+                    showToast(`¡Reporte leído! Se sumaron $${totalEfectivo.toFixed(2)} de facturas en efectivo.`);
+                    
+                } catch(err) {
+                    console.error(err);
+                    showToast("Error al leer el Excel. Verifica el formato.", "error");
+                }
+                event.target.value = ''; // Resetear input
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        window.calculateCorte = () => {
+            let totalFisico = 0; denominations.forEach(val => { totalFisico += (val * denomCounts[val]); });
+            document.getElementById('totalFisico').innerText = formatMoney(totalFisico);
+
+            const facturadoInput = parseFloat(document.getElementById('inputFacturado').value) || 0;
+            const totalTeorico = facturadoInput + totalMostradorDelDia;
+            document.getElementById('totalTeorico').innerText = formatMoney(totalTeorico);
+
+            const diferencia = totalFisico - totalTeorico;
+            const resDiv = document.getElementById('resultadoDiferencia'); const txtDiv = document.getElementById('textoDiferencia');
+            resDiv.innerText = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', signDisplay: 'always' }).format(diferencia);
+
+            if (Math.abs(diferencia) < 0.1) {
+                resDiv.className = "text-4xl font-black text-emerald-400"; txtDiv.innerText = "¡Caja cuadrada perfectamente! ✅"; txtDiv.className = "text-sm font-bold mt-2 text-emerald-300";
+            } else if (diferencia > 0) {
+                resDiv.className = "text-4xl font-black text-blue-400"; txtDiv.innerText = "Sobrante en caja 📈"; txtDiv.className = "text-sm font-bold mt-2 text-blue-300";
+            } else {
+                resDiv.className = "text-4xl font-black text-red-400"; txtDiv.innerText = "Faltante en caja ⚠️"; txtDiv.className = "text-sm font-bold mt-2 text-red-300";
+            }
+        }
+
+        // EXPORTAR CORTE A EXCEL (BITÁCORA)
+        window.exportCorteToExcel = () => {
+            const dateStr = new Date().toLocaleString('es-MX');
+            const fileDate = new Date().toISOString().slice(0,10);
+            
+            // Construimos la matriz de datos para Excel
+            const wsData = [
+                ['CORTE DE CAJA - ENVASES LA ECONÓMICA DEL NORTE'],
+                ['Fecha y Hora de Emisión:', dateStr],
+                [],
+                ['--- DENOMINACIONES FÍSICAS (BILLETES Y MONEDAS) ---'],
+                ['Denominación', 'Cantidad', 'Importe']
+            ];
+
+            let totalFisico = 0;
+            denominations.forEach(val => {
+                const qty = denomCounts[val] || 0;
+                const rowTotal = val * qty;
+                totalFisico += rowTotal;
+                wsData.push([`$ ${val}`, qty, rowTotal]);
+            });
+
+            wsData.push(['', '', '']); // Espacio
+            wsData.push(['TOTAL FÍSICO EN CAJA:', '', totalFisico]);
+            
+            wsData.push([]);
+            wsData.push(['--- CÁLCULOS DEL SISTEMA ---']);
+            const facturado = parseFloat(document.getElementById('inputFacturado').value) || 0;
+            const teorico = facturado + totalMostradorDelDia;
+            const diff = totalFisico - teorico;
+
+            wsData.push(['Suma Facturas en Efectivo (Sistema)', '', facturado]);
+            wsData.push(['Ventas Mostrador (Tickets App)', '', totalMostradorDelDia]);
+            wsData.push(['TOTAL TEÓRICO (Lo que debería haber):', '', teorico]);
+            
+            wsData.push([]);
+            wsData.push(['--- RESULTADO ---']);
+            wsData.push(['DIFERENCIA (Físico - Teórico):', '', diff]);
+            
+            let estadoMsg = "Cuadrada";
+            if(diff > 0.1) estadoMsg = "Sobrante";
+            else if(diff < -0.1) estadoMsg = "Faltante";
+            wsData.push(['Estado de la Caja:', estadoMsg]);
+
+            // Crear libro de Excel
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // Anchos de columna
+            ws['!cols'] = [{wch: 40}, {wch: 15}, {wch: 20}];
+
+            XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja");
+            XLSX.writeFile(wb, `Corte_Bitacora_${fileDate}.xlsx`);
+            
+            showToast("Bitácora exportada exitosamente.");
+        }
+
+        window.onload = () => { loadData(); initCorteUI(); };
+
+    </script>
+</body>
+</html>
