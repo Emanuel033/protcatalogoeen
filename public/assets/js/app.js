@@ -55,13 +55,48 @@ function loadProducts() {
       .where('activo', '==', true)
       .onSnapshot(async (snapshot) => {
         
-        const promesasProductos = snapshot.docs.map(async (doc) => {
+        // NUEVO: 1. Recolectar la información cruda y saber a quién le buscaremos paquetes
+        let rawProducts = [];
+        let basesToFetch = new Set(); // Set evita que busquemos el mismo ID dos veces
+
+        snapshot.forEach(doc => {
             const data = doc.data();
+            rawProducts.push({ id: doc.id, ...data });
+
+            // Si es pieza base, buscamos sus propios paquetes
+            if (data.tipo_item === 'PIEZA_BASE') {
+                basesToFetch.add(doc.id);
+            } 
+            // Si hereda, anotamos el ID de su "papá" para ir a robarle sus paquetes
+            else if (data.hereda_empaques_de) {
+                basesToFetch.add(data.hereda_empaques_de);
+            }
+        });
+
+        // NUEVO: 2. Descargar TODOS los paquetes necesarios al mismo tiempo (mucho más rápido)
+        const paquetesMap = {};
+        const promesasPaquetes = Array.from(basesToFetch).map(async (baseId) => {
+            try {
+                const paqSnap = await db.collection('productos_master').doc(baseId).collection('paquetes').get();
+                paquetesMap[baseId] = [];
+                paqSnap.forEach(pDoc => {
+                    paquetesMap[baseId].push({ id: pDoc.id, ...pDoc.data() });
+                });
+                // Ordenar de menor a mayor (ej. Caja de 12 primero, Caja de 50 después)
+                paquetesMap[baseId].sort((a, b) => a.piezas - b.piezas);
+            } catch (error) { console.error("Error cargando paquetes para", baseId, error); }
+        });
+        
+        // Esperamos a que todas las descargas de cajas terminen
+        await Promise.all(promesasPaquetes);
+
+        // NUEVO: 3. Armamos la lista final asignando las cajas a cada producto
+        allProducts = rawProducts.map(data => {
             const producto = {
-                id: doc.id,
+                id: data.id,
                 name: data.nombre_flexible || 'Sin nombre',
                 category: data.categoria || 'General',
-                image: data.imagen_url || 'https://via.placeholder.com/150',
+                image: data.imagen_url || '[https://via.placeholder.com/150](https://via.placeholder.com/150)',
                 piezas: data.piezas_por_caja_original || 1,
                 stock: data.stock_total_piezas || 0,
                 tipo_item: data.tipo_item || 'PIEZA_BASE',
@@ -70,21 +105,16 @@ function loadProducts() {
                 paquetes: [] 
             };
 
+            // Aquí ocurre la herencia: le pasamos las cajas que le tocan
             if (producto.tipo_item === 'PIEZA_BASE') {
-                try {
-                    const paquetesSnap = await db.collection('productos_master').doc(doc.id).collection('paquetes').get();
-                    if (!paquetesSnap.empty) {
-                        paquetesSnap.forEach(paqDoc => {
-                            producto.paquetes.push({ id: paqDoc.id, ...paqDoc.data() });
-                        });
-                        producto.paquetes.sort((a, b) => a.piezas - b.piezas);
-                    }
-                } catch (error) { console.error("Error", error); }
+                producto.paquetes = paquetesMap[producto.id] || [];
+            } else if (data.hereda_empaques_de) {
+                producto.paquetes = paquetesMap[data.hereda_empaques_de] || [];
             }
+
             return producto;
         });
 
-        allProducts = await Promise.all(promesasProductos);
         latestProductIds = allProducts.slice(-8).map(p => p.id);
         
         if (typeof renderCategories === 'function') renderCategories();
@@ -94,6 +124,7 @@ function loadProducts() {
         console.error("Error al cargar:", error);
     });
 }
+
 
 function getCategoryIcon(cat) {
     const c = cat.toLowerCase();
@@ -176,9 +207,7 @@ function escapeHTML(str) {
 // ==========================================
 // 2. DIBUJAR TARJETAS DE PRODUCTOS
 // ==========================================
-// ==========================================
-// 2. DIBUJAR TARJETAS DE PRODUCTOS
-// ==========================================
+
 function renderGrid() {
     const cont = document.getElementById('products-container') || document.getElementById('products-grid');
     const controls = document.getElementById('pagination-controls');
@@ -204,15 +233,14 @@ function renderGrid() {
         // --- NUEVA LÓGICA DE TEXTO PARA PAQUETES ---
         let packText = "";
         if (paquetes.length === 1) {
-            // Si solo hay un paquete, muestra la cantidad exacta
             packText = `<span class="text-indigo-600 font-black">Paquete: ${paquetes[0].piezas} pzas</span>`;
         } else if (paquetes.length > 1) {
-            // Si hay dos o más, dice "Varias opciones"
             packText = `<span class="text-indigo-600 font-black">Varias opciones</span>`;
         }
 
         let selectorHTML = '';
         if (hasPack) {
+            // Este select ahora se llenará incluso si el producto es un Kit Web que heredó
             selectorHTML = `<select id="sel-${p.id}" class="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none">
                 <option value="${basePiezas}|BASE">Individual (${basePiezas} pz)</option>`;
             paquetes.forEach(pkg => {
@@ -226,7 +254,7 @@ function renderGrid() {
         return `
         <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 flex flex-col fade-in relative group transition-all duration-300 hover:-translate-y-1" style="animation-delay: ${idx * 30}ms">
             <div class="relative h-52 p-4 cursor-pointer overflow-hidden rounded-t-2xl" onclick="openImage('${p.image}')">
-                <img src="${p.image}" loading="lazy" alt="${typeof escapeHTML !== 'undefined' ? escapeHTML(p.name) : p.name}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/300?text=Sin+Imagen'">
+                <img src="${p.image}" loading="lazy" alt="${typeof escapeHTML !== 'undefined' ? escapeHTML(p.name) : p.name}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" onerror="this.src='[https://via.placeholder.com/300?text=Sin+Imagen](https://via.placeholder.com/300?text=Sin+Imagen)'">
                 ${isNew ? `<span class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-md badge-pulse">NUEVO</span>` : ''}
             </div>
             <div class="p-4 flex flex-col flex-1 border-t border-slate-50">
@@ -255,6 +283,7 @@ function renderGrid() {
         }
     }
 }
+
 
 function changePage(d) { 
     currentPage += d; 
@@ -314,21 +343,31 @@ function add(id) {
         }
     }
 
-    const existingItem = cart.find(x => x.id === id);
+    // CAMBIO VITAL: Creamos una llave única para el carrito combinando ID + SKU
+    // Esto evita que una botella suelta se mezcle con una caja de 12 botellas
+    const cartKey = `${prod.id}_${skuOficial}`;
+
+    // Buscamos si ESTA presentación específica ya está en el carrito
+    const existingItem = cart.find(x => x.cartKey === cartKey);
+    
     if (existingItem) {
-        existingItem.quantity += qtyToAdd;
-        existingItem.sku = skuOficial; 
+        existingItem.quantity += qtyToAdd; // Si ya estaba la caja, sumamos otra caja
     } else {
         cart.push({
-            id: prod.id, name: prod.name, image: prod.image,
-            category: prod.category, piezas: prod.piezas,
-            quantity: qtyToAdd, sku: skuOficial
+            cartKey: cartKey, // Guardamos la llave única
+            id: prod.id, 
+            name: prod.name, 
+            image: prod.image,
+            category: prod.category, 
+            piezas: qtyToAdd, // Ojo: Guardamos cuántas piezas trae esta presentación
+            quantity: 1, // Quantity es "Cuántos bultos/unidades agregaste"
+            sku: skuOficial
         });
     }
     
     saveCart();
-    updateCartCount();
-    renderCart();
+    if(typeof updateCartCount === 'function') updateCartCount();
+    if(typeof renderCart === 'function') renderCart();
     
     // ==========================================
     // ANIMACIÓN DEL BOTÓN FLOTANTE ORIGINAL
@@ -344,7 +383,6 @@ function add(id) {
     // ANIMACIÓN DE BADGES 
     // ==========================================
     try {
-        // Ahora seleccionamos el 'cart-badge' exacto que usa tu tienda
         const badges = document.querySelectorAll('#cart-badge, .cart-badge');
         badges.forEach(badge => {
             badge.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
@@ -358,7 +396,8 @@ function add(id) {
         });
     } catch(e) { console.error("Error en animación:", e); }
 
-    if (typeof showToast === 'function') showToast(`Agregado (+${qtyToAdd})`);
+    // Cambié el mensaje del Toast para que sea más lógico (Ej: Agregado: 12 pz)
+    if (typeof showToast === 'function') showToast(`Agregado: ${qtyToAdd} pz`);
     
     // Analytics
     if(typeof analytics !== 'undefined' && analytics) {
