@@ -327,41 +327,57 @@ function updateCartCount() {
     });
 }
 
+// Lógica Avanzada: Carrito y WhatsApp con Desglose
+
+//1. Reemplaza tu función `add(id)` actual Esta nueva versión guarda toda la información necesaria (recetas, códigos, tipo de ítem) en la memoria del carrito para poder usarla al final.
+
+
 function add(id) {
     const prod = allProducts.find(p => p.id === id);
     if (!prod) return;
 
     const selectElem = document.getElementById(`sel-${id}`);
-    let qtyToAdd = 1;
-    let skuOficial = prod.codigo_sistema || 'S/N'; 
+    
+    // Variables para saber exactamente qué empaque seleccionó
+    let qtyToAdd = 1; // Unidades del paquete o suelta que se van a agregar
+    let skuPaquete = 'SUELTA';
+    let piezasPorPaquete = 1; // Cuántas piezas físicas trae esta opción
 
     if (selectElem && selectElem.value) {
         const valores = selectElem.value.split('|'); 
-        qtyToAdd = parseInt(valores[0]) || 1;
+        piezasPorPaquete = parseInt(valores[0]) || 1;
         if (valores[1] && valores[1] !== 'BASE') {
-            skuOficial = valores[1];
+            skuPaquete = valores[1];
         }
     }
 
-    // CAMBIO VITAL: Creamos una llave única para el carrito combinando ID + SKU
-    // Esto evita que una botella suelta se mezcle con una caja de 12 botellas
-    const cartKey = `${prod.id}_${skuOficial}`;
+    // CAMBIO VITAL: La llave única combina el ID del producto + el SKU del empaque.
+    // Así, en el carrito aparecen como renglones separados "1 Caja de 12" y "5 Sueltas"
+    const cartKey = `${prod.id}_${skuPaquete}`;
 
-    // Buscamos si ESTA presentación específica ya está en el carrito
     const existingItem = cart.find(x => x.cartKey === cartKey);
     
     if (existingItem) {
-        existingItem.quantity += qtyToAdd; // Si ya estaba la caja, sumamos otra caja
+        // Si ya tenía esta misma presentación, le suma cajas/unidades
+        existingItem.quantity += qtyToAdd; 
     } else {
+        // Si no la tenía, agrega el renglón con toda la metadata necesaria para WhatsApp
         cart.push({
-            cartKey: cartKey, // Guardamos la llave única
+            cartKey: cartKey, 
             id: prod.id, 
             name: prod.name, 
             image: prod.image,
             category: prod.category, 
-            piezas: qtyToAdd, // Ojo: Guardamos cuántas piezas trae esta presentación
-            quantity: 1, // Quantity es "Cuántos bultos/unidades agregaste"
-            sku: skuOficial
+            
+            // METADATA PARA EL MOTOR DE TRADUCCIÓN:
+            tipo_item: prod.tipo_item || 'PIEZA_BASE',
+            codigo_sistema: prod.codigo_sistema || 'S/N',
+            receta: prod.receta || null,
+            
+            // INFORMACIÓN FÍSICA:
+            piezas_por_paquete: piezasPorPaquete, 
+            sku_paquete: skuPaquete,
+            quantity: qtyToAdd // Cantidad de BULTOS/CAJAS (Ej. 2 cajas)
         });
     }
     
@@ -369,9 +385,7 @@ function add(id) {
     if(typeof updateCartCount === 'function') updateCartCount();
     if(typeof renderCart === 'function') renderCart();
     
-    // ==========================================
-    // ANIMACIÓN DEL BOTÓN FLOTANTE ORIGINAL
-    // ==========================================
+    // Animaciones
     const fab = document.getElementById('cart-fab');
     if(fab) {
         fab.classList.remove('animate-pop');
@@ -379,16 +393,12 @@ function add(id) {
         fab.classList.add('animate-pop');
     }
     
-    // ==========================================
-    // ANIMACIÓN DE BADGES 
-    // ==========================================
     try {
         const badges = document.querySelectorAll('#cart-badge, .cart-badge');
         badges.forEach(badge => {
             badge.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
             badge.style.setProperty('background-color', '#22c55e', 'important'); 
             badge.style.setProperty('transform', 'scale(1.6)', 'important');     
-            
             setTimeout(() => {
                 badge.style.removeProperty('background-color');
                 badge.style.removeProperty('transform');
@@ -396,10 +406,8 @@ function add(id) {
         });
     } catch(e) { console.error("Error en animación:", e); }
 
-    // Cambié el mensaje del Toast para que sea más lógico (Ej: Agregado: 12 pz)
-    if (typeof showToast === 'function') showToast(`Agregado: ${qtyToAdd} pz`);
+    if (typeof showToast === 'function') showToast(`Agregado al carrito`);
     
-    // Analytics
     if(typeof analytics !== 'undefined' && analytics) {
         analytics.logEvent('add_to_cart', { items: [{ item_id: id, item_name: prod.name, quantity: qtyToAdd }] });
     }
@@ -596,11 +604,48 @@ function getRandomPhone() {
     return phones[Math.floor(Math.random() * phones.length)];
 }
 
+// ======================================================================
+// 1. FUNCIÓN RECURSIVA (Motor Traductor)
+// Colócala en cualquier parte de tu archivo (fuera de otras funciones)
+// ======================================================================
+function obtenerDesgloseBase(idItem, cantidadMultiplicador, catalogoGlobal, resultado = {}) {
+    const item = catalogoGlobal.find(p => p.id === idItem);
+    if (!item) return resultado;
+
+    // Si es Pieza Base o Kit Oficial, nos detenemos aquí y extraemos el código
+    if (item.tipo_item !== 'KIT_FLEXIBLE') {
+        const cod = item.codigo_sistema || item.codigo_sistema_oficial || 'SIN-CODIGO';
+        if (!resultado[cod]) {
+            resultado[cod] = { nombre: item.name || item.nombre_flexible, cantidad: 0 };
+        }
+        resultado[cod].cantidad += cantidadMultiplicador;
+    } 
+    // Si es un KIT WEB, abrimos su receta y multiplicamos sus componentes
+    else {
+        const receta = item.receta || item.receta_desglose;
+        if (receta) {
+            for (const [compId, compQty] of Object.entries(receta)) {
+                // Se vuelve a llamar a sí misma por si hay un Kit dentro de otro Kit
+                obtenerDesgloseBase(compId, cantidadMultiplicador * compQty, catalogoGlobal, resultado);
+            }
+        } else {
+            resultado['ERROR-RECETA'] = { nombre: `[Falta Receta] ${item.name || item.nombre_flexible}`, cantidad: cantidadMultiplicador };
+        }
+    }
+    return resultado;
+}
+
+// ======================================================================
+// 2. TU FUNCIÓN ACTUALIZADA
+// ======================================================================
 function sendWhatsApp() {
     if(cart.length === 0) return showToast("Carrito vacío");
+    
+    // --- 1. SALUDO ---
     const name = document.getElementById('client-name') ? document.getElementById('client-name').value.trim() : "Cliente";
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
     
+    // --- 2. LÓGICA DE ENVÍO Y PAGO (Original tuya) ---
     if(typeof selectedDelivery !== 'undefined') {
         if(selectedDelivery === 'recoger') {
             msg += `📍 Recoger en Sucursal\n💳 Pago: ${typeof selectedPayment !== 'undefined' ? selectedPayment : 'Por definir'}\n\n`;
@@ -611,43 +656,79 @@ function sendWhatsApp() {
         }
     }
 
-    msg += `*🛒 LISTA DE ARTÍCULOS:*\n`;
-
-    cart.forEach(i => {
-        const prod = allProducts.find(p => p.id === i.id) || i;
-        const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
-        const paquetes = prod.paquetes || [];
+    // --- 3. AGRUPACIÓN DE CARRITO (Unifica cajas y sueltas del mismo producto) ---
+    const grupos = {};
+    cart.forEach(item => {
+        // Buscamos el producto fresco en allProducts
+        const prod = allProducts.find(p => p.id === item.id) || item;
         
-        let packSize = 1;
-        if (paquetes.length > 0) packSize = parseInt(paquetes[0].piezas);
-        else if (isBolsas) packSize = 100;
-        else packSize = parseInt(prod.piezas) || 0;
-        
-        // EXTRACCIÓN DIRECTA DEL CÓDIGO OFICIAL DEL SISTEMA
-        const codigoOficial = prod.codigo_sistema || 'SIN_CODIGO';
-        
-        let line1 = `🔹 [${codigoOficial}]`;
-        if(packSize > 1) {
-            const p = Math.floor(i.quantity/packSize), l = i.quantity%packSize;
-            let parts = [];
-            if(p > 0) parts.push(`📦 ${p} Paq`);
-            if(l > 0) parts.push(`🧩 ${l} Sueltas`);
-            parts.push(`🏷️ Total: ${i.quantity} pz`);
-            
-            line1 += ` - ` + parts.join(' | ');
-        } else {
-            line1 += ` - 📦 Total: ${i.quantity} pz`;
+        if (!grupos[prod.id]) {
+            grupos[prod.id] = {
+                id: prod.id,
+                name: prod.name || prod.nombre_flexible,
+                tipo_item: prod.tipo_item || 'PIEZA_BASE',
+                codigo_sistema: prod.codigo_sistema || prod.codigo_sistema_oficial || 'S/N',
+                detalles_empaques: [],
+                total_piezas_fisicas: 0
+            };
         }
         
-        msg += `${line1}\n   *${prod.name}*\n\n`;
+        // Obtenemos los datos que guardamos en la nueva función add()
+        const qtyBultos = item.quantity || 1;
+        const piezasPorPaquete = item.piezas_por_paquete || parseInt(prod.piezas) || 1;
+        const skuPaquete = item.sku_paquete || item.sku || 'SUELTA';
+        
+        // Multiplicamos Bultos * Piezas por Bulto
+        const piezasEnEsteRenglon = qtyBultos * piezasPorPaquete;
+        grupos[prod.id].total_piezas_fisicas += piezasEnEsteRenglon;
+        
+        // Guardamos el texto descriptivo del empaque
+        if (skuPaquete === 'SUELTA' || skuPaquete === 'BASE' || piezasPorPaquete === 1) {
+            grupos[prod.id].detalles_empaques.push(`${qtyBultos} Pz Suelta(s)`);
+        } else {
+            grupos[prod.id].detalles_empaques.push(`${qtyBultos} Paquete(s) de ${piezasPorPaquete}pz`);
+        }
     });
 
+    // --- 4. CONSTRUCCIÓN DE LA LISTA DE ARTÍCULOS ---
+    msg += `*🛒 LISTA DE ARTÍCULOS:*\n\n`;
+
+    Object.values(grupos).forEach((grupo, index) => {
+        msg += `*${index + 1}. ${grupo.name}*\n`;
+        
+        // CASO A: PIEZA BASE O KIT OFICIAL
+        if (grupo.tipo_item === 'PIEZA_BASE' || grupo.tipo_item === 'KIT_OFICIAL') {
+            const txtTipo = grupo.tipo_item === 'PIEZA_BASE' ? 'Código' : 'Código Kit Oficial';
+            msg += `📦 ${txtTipo}: [${grupo.codigo_sistema}]\n`;
+            msg += `📝 Selección: ${grupo.detalles_empaques.join(' + ')}\n`;
+            msg += `🔢 Total: ${grupo.total_piezas_fisicas} pz\n`;
+        } 
+        // CASO B: KIT FLEXIBLE (TRADUCCIÓN A RECETA)
+        else if (grupo.tipo_item === 'KIT_FLEXIBLE') {
+            msg += `📝 Selección: ${grupo.detalles_empaques.join(' + ')}\n`;
+            msg += `🔢 Total Kits armados: ${grupo.total_piezas_fisicas}\n\n`;
+            
+            // Aquí entra la Magia Recursiva
+            msg += `   *--- DESGLOSE PARA CAPTURA ---*\n`;
+            
+            const desgloseFinal = {};
+            // Pasamos el total de kits físicos para que la función multiplique toda la receta
+            obtenerDesgloseBase(grupo.id, grupo.total_piezas_fisicas, allProducts, desgloseFinal);
+            
+            for (const [codigoOficial, info] of Object.entries(desgloseFinal)) {
+                msg += `   🔸 [${codigoOficial}] ${info.nombre}: ${info.cantidad} pz\n`;
+            }
+        }
+        
+        msg += `\n`; // Espacio entre productos
+    });
+
+    // --- 5. REDIRECCIÓN Y ANALYTICS (Tus funciones originales) ---
     const phone = typeof getRandomPhone === 'function' ? getRandomPhone() : "528186933580";
     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     
     if(typeof analytics !== 'undefined' && analytics) analytics.logEvent('generate_lead', { currency: 'MXN', value: 0 });
 }
-
 
 
 function openGeneralWhatsApp() {
