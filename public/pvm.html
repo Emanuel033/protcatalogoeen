@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <!-- Librería para leer y exportar Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Librería Avanzada para leer, modificar y dar estilo a Excels -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
@@ -24,12 +24,12 @@
         .fade-in { animation: fadeIn 0.3s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Estilos de Ticket de Impresión (Adaptado a 3 Copias Tamaño Carta) */
+        /* Estilos de Ticket de Impresión */
         #print-ticket { display: none; } 
         
         @media print {
             body { display: block !important; height: auto !important; overflow: visible !important; background: white !important; }
-            aside, main, #toast, .no-print { display: none !important; }
+            aside, main, #toast, .no-print, .modal-overlay { display: none !important; }
             
             #print-ticket { 
                 display: block !important; 
@@ -165,8 +165,8 @@
             <div class="max-w-6xl mx-auto w-full">
                 <div class="flex justify-between items-end mb-6">
                     <div>
-                        <h2 class="text-2xl font-black text-slate-800">Corte de Caja</h2>
-                        <p class="text-sm font-medium text-slate-500 mt-1">Verifica el efectivo físico contra lo facturado en sistema y ventas de la app.</p>
+                        <h2 class="text-2xl font-black text-slate-800">Corte de Caja y Utilidades</h2>
+                        <p class="text-sm font-medium text-slate-500 mt-1">Verifica el efectivo físico y da formato a tus reportes.</p>
                     </div>
                     <button onclick="exportCorteToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2">
                         <i class="fas fa-file-excel"></i> Exportar Bitácora Detallada
@@ -184,10 +184,10 @@
                         </div>
                     </div>
 
-                    <!-- Cálculos -->
+                    <!-- Cálculos y Herramientas Excel -->
                     <div class="lg:col-span-5 space-y-4">
                         
-                        <!-- Input Facturado con Lector de Excel -->
+                        <!-- Input Facturado con Lector de Excel para Cálculo -->
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 relative">
                             <div class="flex justify-between items-center mb-2">
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Facturado Efectivo (Sistema)</label>
@@ -200,7 +200,19 @@
                                 <span class="absolute left-4 top-1/2 transform -translate-y-1/2 font-bold text-slate-400">$</span>
                                 <input type="number" id="inputFacturado" value="0" oninput="calculateCorte()" class="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition">
                             </div>
-                            <p class="text-[10px] text-slate-400 mt-1">Sube el reporte del sistema o escríbelo manual.</p>
+                            <p class="text-[10px] text-slate-400 mt-1">Sube el reporte para calcular el corte.</p>
+                        </div>
+
+                        <!-- NUEVA HERRAMIENTA: Formatear Reporte -->
+                        <div class="bg-indigo-50/50 p-5 rounded-2xl shadow-sm border border-indigo-100 flex flex-col gap-3">
+                            <div>
+                                <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-1"><i class="fas fa-magic text-indigo-500 mr-1"></i> Formatear Reporte (Externo)</h4>
+                                <p class="text-[10px] text-indigo-600 font-medium">Elimina UUID, Serie, ajusta anchos, da espacio a Razón Social y agrega bordes automáticamente.</p>
+                            </div>
+                            <input type="file" id="excelFormatInput" class="hidden" accept=".xlsx, .xls, .csv" onchange="handleExcelFormat(event)">
+                            <button onclick="document.getElementById('excelFormatInput').click()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold shadow-md shadow-indigo-500/20 transition flex items-center justify-center gap-2 text-sm">
+                                <i class="fas fa-file-export"></i> Subir y Formatear Excel
+                            </button>
                         </div>
 
                         <!-- Mostrador (Automático) -->
@@ -239,8 +251,7 @@
     <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity z-[100] font-medium text-sm text-center"></div>
 
     <!-- Modales -->
-    <!-- Modal Prompt Genérico (Para pedir motivo de cancelación) -->
-    <div id="genericPromptModal" class="fixed inset-0 bg-slate-900/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="genericPromptModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="genericPromptBox">
             <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-2"><i class="fas fa-pen-nib text-blue-600"></i> <span id="genericPromptTitle">Razón</span></h3>
             <p class="text-sm text-slate-500 mb-4" id="genericPromptText">Mensaje</p>
@@ -255,16 +266,16 @@
     <script>
         // GLOBALES
         let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; let pendingSaleData = null; 
-        window.reporteFacturasEfectivo = []; // Array global para exportar desglose de facturas leidas
-        window.reporteFacturasTodas = [];    // Array global para exportar TODAS las facturas leidas
-        window.reporteMostrador = [];        // Array global para exportar desglose de app mostrador
+        window.reporteFacturasEfectivo = []; 
+        window.reporteFacturasTodas = [];    
+        window.reporteMostrador = [];        
         
         const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
 
         // UI
         function showToast(msg, type = 'success') {
             const t = document.getElementById('toast'); t.innerText = msg;
-            t.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl transition-opacity z-[100] font-bold text-sm text-center ${type === 'error' ? 'bg-red-600 text-white' : 'bg-slate-800 text-white'}`;
+            t.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl transition-opacity z-[100] font-bold text-sm text-center ${type === 'error' ? 'bg-red-600 text-white' : (type === 'info' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-white')}`;
             t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 3000);
         }
 
@@ -443,7 +454,7 @@
         }
 
         // ==========================================
-        // SEGURIDAD Y GENERACIÓN DE FOLIOS CONSECUTIVOS
+        // PROCESAMIENTO E IMPRESIÓN
         // ==========================================
         async function processSale() {
             if (cart.length === 0) return;
@@ -456,9 +467,7 @@
             let folio = "MOST-ERROR";
 
             try {
-                // Generar el folio de forma segura con transacción (evita duplicados si cobran a la vez)
                 const counterRef = db.collection('configuracion').doc('consecutivos');
-                
                 const nextSeq = await db.runTransaction(async (transaction) => {
                     const doc = await transaction.get(counterRef);
                     let newSeq = 1;
@@ -469,7 +478,6 @@
                     return newSeq;
                 });
                 
-                // Formato MOST-00001
                 folio = "MOST-" + String(nextSeq).padStart(5, '0');
 
                 const saleData = {
@@ -483,21 +491,15 @@
                     estado: "COMPLETADA"
                 };
 
-                // 1. REGISTRAR VENTA EN LA BASE DE DATOS PRIMERO (Anti-Robo)
                 await db.collection('ventas_mostrador').add(saleData);
                 showToast(`Venta registrada: ${folio}`);
                 
-                // Usamos la fecha actual en la memoria solo para la impresión.
                 const printData = { ...saleData, fecha: new Date() };
 
-                // 2. ABRIR IMPRESORA
                 printTicketHTML(printData);
                 
-                // 3. LIMPIAR INTERFAZ
-                cart = []; 
-                renderCart();
+                cart = []; renderCart();
                 
-                // Recargar pestañas si están activas
                 if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
                 if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
 
@@ -560,11 +562,16 @@
                     </div>
                 </div>`;
             });
+            
             printArea.innerHTML = html;
-            try { window.print(); } catch(e) {}
+            
+            // EL FIX DE IMPRESIÓN: Timeout para asegurar que el navegador haya renderizado el HTML oculto
+            setTimeout(() => {
+                try { window.print(); } catch(e) { console.error("Error al abrir impresión:", e); }
+            }, 300);
         }
 
-        // HISTORIAL CON MOTIVOS DE CANCELACIÓN Y REIMPRESIÓN CORREGIDA
+        // HISTORIAL CON MOTIVOS DE CANCELACIÓN Y REIMPRESIÓN
         async function loadHistory() {
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando historial...</td></tr>';
@@ -585,7 +592,6 @@
                     const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
 
                     const tr = document.createElement('tr'); tr.className = rowClass;
-                    // Cambio: El botón de reimprimir ahora pasa solo el v.id de forma segura
                     tr.innerHTML = `
                         <td class="px-6 py-4">
                             <div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-xs">${v.folio}</div>
@@ -606,10 +612,10 @@
             } catch (error) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold">Error al cargar el historial.</td></tr>'; }
         }
 
-        // Nueva función de reimpresión segura (Busca en memoria mediante ID)
         window.reprintTicket = (id) => { 
-            const venta = historySales.find(v => v.id === id);
+            const venta = historySales.find(v => String(v.id) === String(id));
             if (venta) {
+                showToast("Preparando impresión...", "info"); // Feedback visual
                 printTicketHTML(venta);
             } else {
                 showToast("No se encontró el detalle de la venta.", "error");
@@ -632,7 +638,7 @@
         }
 
         // ==========================================
-        // CORTE DE CAJA Y LECTURA DE EXCEL INTELIGENTE
+        // CORTE DE CAJA Y UTILIDADES EXCEL
         // ==========================================
         const denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50];
         let denomCounts = {}; let totalMostradorDelDia = 0;
@@ -648,14 +654,13 @@
 
         window.updateDenom = (val, qty) => { denomCounts[val] = parseInt(qty) || 0; calculateCorte(); }
 
-        // Recopila datos de ventas de Mostrador (para cálculos y para exportar detalle)
         async function loadTodaySales() {
             const todayStart = new Date(); todayStart.setHours(0,0,0,0);
             document.getElementById('totalMostradorHoy').innerText = "...";
             try {
                 const snap = await db.collection('ventas_mostrador').where('fecha', '>=', todayStart).get();
                 totalMostradorDelDia = 0;
-                window.reporteMostrador = []; // Reseteamos el arreglo global
+                window.reporteMostrador = [];
                 
                 snap.forEach(doc => { 
                     const data = doc.data(); 
@@ -673,7 +678,7 @@
             } catch(e) { showToast("Error al obtener ventas del día", "error"); }
         }
 
-        // LECTOR DE EXCEL (Extrae Efectivo y además guarda TODAS las facturas)
+        // LECTOR ORIGINAL (SOLO PARA SUMAR EFECTIVO)
         window.handleExcelUpload = (event) => {
             const file = event.target.files[0];
             if(!file) return;
@@ -684,14 +689,13 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1}); 
+                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""}); 
                     
                     let headerRowIndex = -1;
                     let colFolio = -1, colMetodo = -1, colTotal = -1;
                     
-                    // 1. Encontrar la fila de cabeceras
                     for(let i=0; i < Math.min(20, json.length); i++) {
-                        if(!json[i]) continue;
+                        if(!json[i] || json[i].length === 0) continue;
                         const rowStrArray = json[i].map(c => String(c).toLowerCase());
                         
                         const idxFolio = rowStrArray.findIndex(c => c.includes('folio') || c.includes('factura') || c.includes('documento'));
@@ -703,7 +707,6 @@
                             if(idxFolio !== -1) colFolio = idxFolio;
                             if(idxMetodo !== -1) colMetodo = idxMetodo;
                             if(idxTotal !== -1) colTotal = idxTotal;
-                            
                             if(colFolio !== -1 && colMetodo !== -1) break;
                         }
                     }
@@ -712,7 +715,6 @@
                     window.reporteFacturasTodas = [];
                     let totalEfectivo = 0;
 
-                    // 2. Iterar filas debajo de la cabecera
                     for(let i = headerRowIndex + 1; i < json.length; i++) {
                         const row = json[i];
                         if (!row || row.length === 0) continue;
@@ -721,7 +723,6 @@
                         const textoMetodoOriginal = colMetodo !== -1 ? (row[colMetodo] || textoMetodo) : textoMetodo;
                         const folioStr = colFolio !== -1 ? (row[colFolio] || 'S/F') : 'S/F';
 
-                        // Determinar monto total general de la fila
                         let montoFila = 0;
                         if (colTotal !== -1 && !isNaN(parseFloat(row[colTotal]))) {
                             montoFila = parseFloat(row[colTotal]);
@@ -730,48 +731,170 @@
                             if(nums.length > 0) montoFila = Math.max(...nums);
                         }
 
-                        // Guardar en el reporte GENERAL (si tiene folio o monto válido)
                         if (folioStr !== 'S/F' || montoFila > 0 || textoMetodoOriginal.trim() !== '') {
-                             window.reporteFacturasTodas.push({
-                                folio: folioStr,
-                                metodo: textoMetodoOriginal,
-                                total: montoFila
-                             });
+                             window.reporteFacturasTodas.push({ folio: folioStr, metodo: textoMetodoOriginal, total: montoFila });
                         }
 
-                        // Guardar en el reporte EFECTIVO (solo si detecta la palabra efectivo)
                         if (textoMetodo.includes('efectivo')) {
                             let montoExtraido = 0;
                             const regexEfectivo = /efectivo\s*\$?\s*(\d+(?:\.\d+)?)/;
                             const match = textoMetodo.match(regexEfectivo);
                             
-                            if (match && match[1]) {
-                                montoExtraido = parseFloat(match[1]);
-                            } else {
-                                montoExtraido = montoFila; // Usar el general si no hay un numero explicito al lado
-                            }
+                            if (match && match[1]) montoExtraido = parseFloat(match[1]);
+                            else montoExtraido = montoFila;
 
                             if (montoExtraido > 0) {
                                 totalEfectivo += montoExtraido;
-                                window.reporteFacturasEfectivo.push({
-                                    folio: folioStr,
-                                    metodo_original: textoMetodoOriginal,
-                                    monto_efectivo: montoExtraido
-                                });
+                                window.reporteFacturasEfectivo.push({ folio: folioStr, metodo_original: textoMetodoOriginal, monto_efectivo: montoExtraido });
                             }
                         }
                     }
 
-                    // 3. Escribir resultado en la interfaz
                     document.getElementById('inputFacturado').value = totalEfectivo.toFixed(2);
                     calculateCorte();
-                    showToast(`Reporte procesado. ${window.reporteFacturasEfectivo.length} en efectivo de ${window.reporteFacturasTodas.length} totales.`);
+                    showToast(`Reporte procesado. ${window.reporteFacturasEfectivo.length} facturas en efectivo de ${window.reporteFacturasTodas.length}.`);
                     
                 } catch(err) {
-                    console.error(err);
-                    showToast("Error al leer el Excel. Verifica el formato.", "error");
+                    console.error(err); showToast("Error al leer el Excel. Verifica el formato.", "error");
                 }
-                event.target.value = ''; // Resetear input
+                event.target.value = ''; 
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // ===============================================================
+        // NUEVA FUNCIÓN: FORMATEADOR DE EXCEL EXTERNO (ESTILOS Y BORDES)
+        // ===============================================================
+        window.handleExcelFormat = (event) => {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            showToast("Procesando y aplicando estilos...", "info");
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const rawData = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""});
+
+                    if(rawData.length === 0) { showToast("El Excel está vacío", "error"); return; }
+
+                    // 1. Encontrar la fila de cabeceras (Normalmente la primera con datos "Folio", "RFC", etc)
+                    let headerRowIdx = 0;
+                    for(let i=0; i<Math.min(20, rawData.length); i++) {
+                        if(rawData[i] && rawData[i].length > 0) {
+                            const strRow = rawData[i].map(c => String(c).toLowerCase());
+                            if(strRow.some(c => c.includes('folio') || c.includes('razon social') || c.includes('rfc'))) {
+                                headerRowIdx = i; break;
+                            }
+                        }
+                    }
+
+                    // 2. Identificar qué columnas quitar (SERIE, UUID) y cuál es RAZÓN SOCIAL
+                    const headers = rawData[headerRowIdx].map(c => String(c).trim());
+                    const colsToRemove = [];
+                    let colRazonSocialOriginal = -1;
+
+                    headers.forEach((h, idx) => {
+                        const hl = h.toLowerCase();
+                        if(hl === 'serie' || hl === 'uuid') {
+                            colsToRemove.push(idx);
+                        }
+                        if(hl.includes('razon social') || hl.includes('nombre') || hl.includes('cliente') || hl.includes('receptor')) {
+                            colRazonSocialOriginal = idx;
+                        }
+                    });
+
+                    // 3. Reconstruir los datos limpios (sin las columnas no deseadas)
+                    const newData = [];
+                    let targetRazonSocialIdx = -1; 
+                    let lastRowWithData = headerRowIdx; // Para saber hasta donde pintar bordes
+
+                    for(let i=0; i<rawData.length; i++) {
+                        const oldRow = rawData[i];
+                        const newRow = [];
+                        let hasData = false;
+
+                        for(let j=0; j<oldRow.length; j++) {
+                            if(!colsToRemove.includes(j)) {
+                                newRow.push(oldRow[j]);
+                                if(String(oldRow[j]).trim() !== '') hasData = true;
+
+                                // Guardamos la nueva posición de Razón Social en la fila de cabecera
+                                if(i === headerRowIdx && j === colRazonSocialOriginal) {
+                                    targetRazonSocialIdx = newRow.length - 1;
+                                }
+                            }
+                        }
+
+                        if (i >= headerRowIdx && hasData) lastRowWithData = newData.length; // Guardar índice de la última fila real
+                        newData.push(newRow);
+                    }
+
+                    // 4. Crear la nueva hoja de cálculo
+                    const newWs = XLSX.utils.aoa_to_sheet(newData);
+                    const finalHeaders = newData[headerRowIdx] || [];
+
+                    // 5. Calcular los anchos óptimos de columna ("Fit to Data")
+                    const colWidths = [];
+                    for(let col = 0; col < finalHeaders.length; col++) {
+                        let maxLen = String(finalHeaders[col] || "").length;
+
+                        // Buscar el texto más largo de la columna
+                        for(let row = headerRowIdx + 1; row <= lastRowWithData; row++) {
+                            if(newData[row] && newData[row][col] !== undefined) {
+                                const valLen = String(newData[row][col]).length;
+                                if(valLen > maxLen) maxLen = valLen;
+                            }
+                        }
+
+                        // Asignar el ancho (Con espacio extra para Razón Social)
+                        if(col === targetRazonSocialIdx) {
+                            colWidths[col] = { wch: Math.max(maxLen + 15, 45) }; // Extra ancho
+                        } else {
+                            colWidths[col] = { wch: maxLen + 2 }; // Ajustado al dato
+                        }
+                    }
+                    newWs['!cols'] = colWidths;
+
+                    // 6. Aplicar Bordes a todas las celdas (usando sintaxis de xlsx-js-style)
+                    const borderStyle = { style: 'thin', color: { rgb: "000000" } };
+                    const cellBorder = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+
+                    for(let r = headerRowIdx; r <= lastRowWithData; r++) {
+                        for(let c = 0; c < finalHeaders.length; c++) {
+                            const cellAddress = XLSX.utils.encode_cell({r: r, c: c});
+                            
+                            // Si la celda está vacía en el objeto interno, la creamos para que pueda tener borde
+                            if(!newWs[cellAddress]) newWs[cellAddress] = { t: 's', v: '' };
+                            
+                            // Agregamos el estilo
+                            newWs[cellAddress].s = {
+                                border: cellBorder,
+                                font: r === headerRowIdx ? { bold: true, color: {rgb: "FFFFFF"} } : {},
+                                fill: r === headerRowIdx ? { fgColor: {rgb: "4F46E5"} } : {} // Color de fondo para cabecera
+                            };
+                        }
+                    }
+
+                    // Asegurarnos que el rango (ref) cubra toda la tabla
+                    newWs['!ref'] = XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: lastRowWithData, c: finalHeaders.length - 1}});
+
+                    // 7. Descargar el archivo procesado
+                    const newWb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(newWb, newWs, "Reporte Optimizado");
+                    XLSX.writeFile(newWb, "Reporte_Facturas_Optimizado.xlsx");
+
+                    showToast("Formato Excel generado con éxito", "success");
+
+                } catch(error) {
+                    console.error("Error procesando formato:", error);
+                    showToast("Ocurrió un error al formatear el documento.", "error");
+                }
+                event.target.value = ''; // Limpiar input para permitir subir el mismo archivo otra vez
             };
             reader.readAsArrayBuffer(file);
         }
@@ -797,39 +920,29 @@
             }
         }
 
-        // EXPORTAR CORTE A EXCEL SÚPER DETALLADO (DISEÑO HORIZONTAL)
         window.exportCorteToExcel = () => {
             const dateStr = new Date().toLocaleString('es-MX');
             const fileDate = new Date().toISOString().slice(0,10);
             
-            // Usamos un array bidimensional para colocar datos en columnas específicas (X, Y)
             const wsData = [];
             const writeCell = (r, c, val) => {
                 while (wsData.length <= r) wsData.push([]);
                 wsData[r][c] = val;
             };
 
-            // --- ENCABEZADOS SUPERIORES ---
             writeCell(0, 0, 'CORTE DE CAJA - ENVASES LA ECONÓMICA DEL NORTE');
-            writeCell(1, 0, 'Fecha y Hora de Emisión:');
-            writeCell(1, 1, dateStr);
+            writeCell(1, 0, 'Fecha y Hora de Emisión:'); writeCell(1, 1, dateStr);
 
-            // --- TÍTULOS DE LAS 4 SECCIONES (Lado a lado) ---
-            writeCell(3, 0, '--- TODAS LAS FACTURAS ---');
-            writeCell(3, 4, '--- FACTURAS EFECTIVO ---');
-            writeCell(3, 8, '--- MOSTRADOR (APP) ---');
-            writeCell(3, 12, '--- FÍSICO Y CÁLCULOS ---');
+            writeCell(3, 0, '--- TODAS LAS FACTURAS ---'); writeCell(3, 4, '--- FACTURAS EFECTIVO ---');
+            writeCell(3, 8, '--- MOSTRADOR (APP) ---'); writeCell(3, 12, '--- FÍSICO Y CÁLCULOS ---');
 
-            // --- SUBTÍTULOS DE COLUMNAS ---
             writeCell(4, 0, 'Folio / Factura'); writeCell(4, 1, 'Método Detectado'); writeCell(4, 2, 'Total');
             writeCell(4, 4, 'Folio / Factura'); writeCell(4, 5, 'Texto Original'); writeCell(4, 6, 'Monto Efectivo');
             writeCell(4, 8, 'Folio Ticket'); writeCell(4, 9, 'Hora'); writeCell(4, 10, 'Total');
             writeCell(4, 12, 'Denominación'); writeCell(4, 13, 'Cantidad'); writeCell(4, 14, 'Importe');
 
-            // Contadores de fila independientes para cada tabla para que bajen parejo
             let rowGen = 5, rowEf = 5, rowMos = 5, rowDen = 5;
 
-            // 1. REPORTE GENERAL DE FACTURAS (Col 0, 1, 2)
             let sumGen = 0;
             if (window.reporteFacturasTodas && window.reporteFacturasTodas.length > 0) {
                 window.reporteFacturasTodas.forEach(f => {
@@ -839,7 +952,6 @@
             } else { writeCell(rowGen++, 0, 'Sin datos'); }
             writeCell(rowGen, 1, 'GRAN TOTAL:'); writeCell(rowGen, 2, sumGen);
 
-            // 2. DETALLE FACTURAS EFECTIVO (Col 4, 5, 6)
             let sumEf = 0;
             if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) {
                 window.reporteFacturasEfectivo.forEach(f => {
@@ -849,7 +961,6 @@
             } else { writeCell(rowEf++, 4, 'Sin datos'); }
             writeCell(rowEf, 5, 'TOTAL EFECTIVO:'); writeCell(rowEf, 6, sumEf);
 
-            // 3. VENTAS MOSTRADOR (Col 8, 9, 10)
             let sumMos = 0;
             if (window.reporteMostrador && window.reporteMostrador.length > 0) {
                 window.reporteMostrador.forEach(m => {
@@ -859,19 +970,15 @@
             } else { writeCell(rowMos++, 8, 'Sin datos'); }
             writeCell(rowMos, 9, 'TOTAL MOSTRADOR:'); writeCell(rowMos, 10, sumMos);
 
-            // 4. DENOMINACIONES FÍSICAS (Col 12, 13, 14)
             let sumFisico = 0;
             denominations.forEach(val => {
-                const qty = denomCounts[val] || 0;
-                const rowTotal = val * qty;
-                sumFisico += rowTotal;
+                const qty = denomCounts[val] || 0; const rowTotal = val * qty; sumFisico += rowTotal;
                 writeCell(rowDen, 12, `$ ${val}`); writeCell(rowDen, 13, qty); writeCell(rowDen, 14, rowTotal);
                 rowDen++;
             });
             writeCell(rowDen, 12, 'TOTAL FÍSICO:'); writeCell(rowDen, 14, sumFisico);
-            rowDen += 2; // Brincar 2 espacios
+            rowDen += 2; 
 
-            // --- CÁLCULOS DEL SISTEMA Y RESULTADO FINAL (Debajo de denominaciones) ---
             writeCell(rowDen++, 12, '--- CÁLCULOS DEL SISTEMA ---');
             const facturado = parseFloat(document.getElementById('inputFacturado').value) || 0;
             const teorico = facturado + totalMostradorDelDia;
@@ -890,16 +997,14 @@
             else if(diff < -0.1) estadoMsg = "Faltante";
             writeCell(rowDen, 12, 'Estado de la Caja:'); writeCell(rowDen++, 14, estadoMsg);
 
-            // 5. CREAR Y EXPORTAR LIBRO
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             
-            // Ajuste Inteligente de Columnas (con "Columnas Espaciadoras" delgadas)
             ws['!cols'] = [
-                {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, // Col 0-3 (General + Espacio)
-                {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, // Col 4-7 (Efectivo + Espacio)
-                {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, // Col 8-11 (Mostrador + Espacio)
-                {wch: 28}, {wch: 10}, {wch: 14}            // Col 12-14 (Fisico y Calculos)
+                {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, 
+                {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, 
+                {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, 
+                {wch: 28}, {wch: 10}, {wch: 14}            
             ];
 
             XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja");
