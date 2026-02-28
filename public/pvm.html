@@ -763,7 +763,7 @@
         }
 
         // ===============================================================
-        // NUEVA FUNCIÓN: FORMATEADOR DE EXCEL EXTERNO (ESTILOS Y BORDES)
+        // NUEVA FUNCIÓN: FORMATEADOR DE EXCEL EXTERNO (CORREGIDA)
         // ===============================================================
         window.handleExcelFormat = (event) => {
             const file = event.target.files[0];
@@ -775,14 +775,16 @@
             reader.onload = (e) => {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // CORRECCIÓN 3: cellDates: true para que Excel reconozca las celdas como Fechas reales
+                    const workbook = XLSX.read(data, {type: 'array', cellDates: true});
                     const sheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[sheetName];
                     const rawData = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""});
 
                     if(rawData.length === 0) { showToast("El Excel está vacío", "error"); return; }
 
-                    // 1. Encontrar la fila de cabeceras (Normalmente la primera con datos "Folio", "RFC", etc)
+                    // 1. Encontrar la fila de cabeceras
                     let headerRowIdx = 0;
                     for(let i=0; i<Math.min(20, rawData.length); i++) {
                         if(rawData[i] && rawData[i].length > 0) {
@@ -793,25 +795,20 @@
                         }
                     }
 
-                    // 2. Identificar qué columnas quitar (SERIE, UUID) y cuál es RAZÓN SOCIAL
+                    // 2. Identificar qué columnas quitar (SERIE, UUID)
                     const headers = rawData[headerRowIdx].map(c => String(c).trim());
                     const colsToRemove = [];
-                    let colRazonSocialOriginal = -1;
-
+                    
                     headers.forEach((h, idx) => {
                         const hl = h.toLowerCase();
                         if(hl === 'serie' || hl === 'uuid') {
                             colsToRemove.push(idx);
                         }
-                        if(hl.includes('razon social') || hl.includes('nombre') || hl.includes('cliente') || hl.includes('receptor')) {
-                            colRazonSocialOriginal = idx;
-                        }
                     });
 
                     // 3. Reconstruir los datos limpios (sin las columnas no deseadas)
                     const newData = [];
-                    let targetRazonSocialIdx = -1; 
-                    let lastRowWithData = headerRowIdx; // Para saber hasta donde pintar bordes
+                    let lastRowWithData = headerRowIdx; 
 
                     for(let i=0; i<rawData.length; i++) {
                         const oldRow = rawData[i];
@@ -822,15 +819,10 @@
                             if(!colsToRemove.includes(j)) {
                                 newRow.push(oldRow[j]);
                                 if(String(oldRow[j]).trim() !== '') hasData = true;
-
-                                // Guardamos la nueva posición de Razón Social en la fila de cabecera
-                                if(i === headerRowIdx && j === colRazonSocialOriginal) {
-                                    targetRazonSocialIdx = newRow.length - 1;
-                                }
                             }
                         }
 
-                        if (i >= headerRowIdx && hasData) lastRowWithData = newData.length; // Guardar índice de la última fila real
+                        if (i >= headerRowIdx && hasData) lastRowWithData = newData.length; 
                         newData.push(newRow);
                     }
 
@@ -838,49 +830,83 @@
                     const newWs = XLSX.utils.aoa_to_sheet(newData);
                     const finalHeaders = newData[headerRowIdx] || [];
 
-                    // 5. Calcular los anchos óptimos de columna ("Fit to Data")
+                    // CORRECCIÓN 2: Buscar Razón Social SOBRE el arreglo ya limpio de cabeceras
+                    let targetRazonSocialIdx = -1;
+                    finalHeaders.forEach((h, idx) => {
+                        const hl = String(h).toLowerCase().trim();
+                        if(hl === 'razon social' || hl === 'razón social' || hl.includes('razon social') || hl.includes('razón social')) {
+                            targetRazonSocialIdx = idx;
+                        }
+                    });
+                    
+                    // Respaldo por si se llama "Nombre" o "Cliente"
+                    if (targetRazonSocialIdx === -1) {
+                        finalHeaders.forEach((h, idx) => {
+                            const hl = String(h).toLowerCase().trim();
+                            if(hl === 'nombre' || hl.includes('cliente')) targetRazonSocialIdx = idx;
+                        });
+                    }
+
+                    // 5. Calcular los anchos óptimos de columna
                     const colWidths = [];
                     for(let col = 0; col < finalHeaders.length; col++) {
                         let maxLen = String(finalHeaders[col] || "").length;
 
-                        // Buscar el texto más largo de la columna
                         for(let row = headerRowIdx + 1; row <= lastRowWithData; row++) {
                             if(newData[row] && newData[row][col] !== undefined) {
-                                const valLen = String(newData[row][col]).length;
+                                let valLen = 0;
+                                if (newData[row][col] instanceof Date) {
+                                    valLen = 10; // Longitud promedio de una fecha dd/mm/yyyy
+                                } else {
+                                    valLen = String(newData[row][col]).length;
+                                }
                                 if(valLen > maxLen) maxLen = valLen;
                             }
                         }
 
-                        // Asignar el ancho (Con espacio extra para Razón Social)
+                        // Asignar el ancho (Con espacio extra GARANTIZADO para Razón Social)
                         if(col === targetRazonSocialIdx) {
-                            colWidths[col] = { wch: Math.max(maxLen + 15, 45) }; // Extra ancho
+                            colWidths[col] = { wch: Math.max(maxLen + 15, 45) }; 
                         } else {
-                            colWidths[col] = { wch: maxLen + 2 }; // Ajustado al dato
+                            colWidths[col] = { wch: maxLen + 2 }; 
                         }
                     }
                     newWs['!cols'] = colWidths;
 
-                    // 6. Aplicar Bordes a todas las celdas (usando sintaxis de xlsx-js-style)
+                    // 6. Aplicar Estilos, Bordes y Corregir Fechas
                     const borderStyle = { style: 'thin', color: { rgb: "000000" } };
-                    const cellBorder = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
 
-                    for(let r = headerRowIdx; r <= lastRowWithData; r++) {
+                    for(let r = 0; r <= lastRowWithData; r++) {
                         for(let c = 0; c < finalHeaders.length; c++) {
                             const cellAddress = XLSX.utils.encode_cell({r: r, c: c});
                             
-                            // Si la celda está vacía en el objeto interno, la creamos para que pueda tener borde
                             if(!newWs[cellAddress]) newWs[cellAddress] = { t: 's', v: '' };
-                            
-                            // Agregamos el estilo
-                            newWs[cellAddress].s = {
-                                border: cellBorder,
-                                font: r === headerRowIdx ? { bold: true, color: {rgb: "FFFFFF"} } : {},
-                                fill: r === headerRowIdx ? { fgColor: {rgb: "4F46E5"} } : {} // Color de fondo para cabecera
-                            };
+
+                            // Aplicar estilos y bordes SOLO de los encabezados para abajo
+                            if (r >= headerRowIdx) {
+                                // CORRECCIÓN 1: No meter objeto "fill" ni "font" vacío en celdas normales, para evitar relleno negro.
+                                const cellStyle = {
+                                    border: { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle }
+                                };
+
+                                // Si es encabezado le ponemos fondo azul y letra blanca
+                                if (r === headerRowIdx) {
+                                    cellStyle.font = { bold: true, color: { rgb: "FFFFFF" } };
+                                    cellStyle.fill = { fgColor: { rgb: "4F46E5" } };
+                                }
+                                
+                                newWs[cellAddress].s = cellStyle;
+                            }
+
+                            // CORRECCIÓN 3.b: Si el valor de esta celda original era una fecha, forzar que se muestre en formato dd/mm/yyyy
+                            if (newData[r] && newData[r][c] instanceof Date) {
+                                newWs[cellAddress].t = 'd';
+                                newWs[cellAddress].z = 'dd/mm/yyyy';
+                            }
                         }
                     }
 
-                    // Asegurarnos que el rango (ref) cubra toda la tabla
+                    // Asegurarnos que el rango (ref) cubra toda la tabla para el archivo
                     newWs['!ref'] = XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: lastRowWithData, c: finalHeaders.length - 1}});
 
                     // 7. Descargar el archivo procesado
@@ -894,7 +920,7 @@
                     console.error("Error procesando formato:", error);
                     showToast("Ocurrió un error al formatear el documento.", "error");
                 }
-                event.target.value = ''; // Limpiar input para permitir subir el mismo archivo otra vez
+                event.target.value = ''; 
             };
             reader.readAsArrayBuffer(file);
         }
