@@ -29,7 +29,7 @@
         
         @media print {
             body { display: block !important; height: auto !important; overflow: visible !important; background: white !important; }
-            aside, main, #toast, #confirmPrintModal, .no-print { display: none !important; }
+            aside, main, #toast, .no-print { display: none !important; }
             
             #print-ticket { 
                 display: block !important; 
@@ -239,20 +239,6 @@
     <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity z-[100] font-medium text-sm text-center"></div>
 
     <!-- Modales -->
-    <div id="confirmPrintModal" class="fixed inset-0 bg-slate-900/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-95 transition-transform duration-200" id="confirmPrintBox">
-            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-5 border-4 border-white shadow-md"><i class="fas fa-print"></i></div>
-            <h3 class="text-xl font-black text-slate-800 mb-2">¿Se imprimió el ticket?</h3>
-            <p class="text-sm text-slate-500 mb-6 font-medium">Verifica que las 3 copias salieron correctamente antes de registrar la venta.</p>
-            <div class="flex flex-col gap-3">
-                <button onclick="confirmAndSaveSale()" id="btnConfirmSave" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 text-lg active:scale-95">
-                    <i class="fas fa-check-circle"></i> Sí, registrar venta
-                </button>
-                <button onclick="cancelPendingPrint()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors">No, reintentar o cancelar</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Prompt Genérico (Para pedir motivo de cancelación) -->
     <div id="genericPromptModal" class="fixed inset-0 bg-slate-900/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="genericPromptBox">
@@ -269,6 +255,8 @@
     <script>
         // GLOBALES
         let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; let pendingSaleData = null; 
+        window.reporteFacturasEfectivo = []; // Array global para exportar desglose de facturas leidas
+        
         const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
 
         // UI
@@ -405,7 +393,6 @@
 
         // LÓGICA DEL CARRITO
         function addToCart(product) {
-            pendingSaleData = null; 
             const existing = cart.find(x => x.codigo === product.codigo);
             if (existing) existing.qty += 1; else cart.push({ ...product, qty: 1 });
             renderCart();
@@ -413,7 +400,6 @@
         }
 
         function updateCartQty(index, change) {
-            pendingSaleData = null;
             if (cart[index]) {
                 cart[index].qty += change;
                 if (cart[index].qty <= 0) cart.splice(index, 1);
@@ -423,7 +409,7 @@
 
         function clearCart() {
             if(cart.length === 0) return;
-            if(confirm("¿Limpiar todo el ticket?")) { pendingSaleData = null; cart = []; renderCart(); }
+            if(confirm("¿Limpiar todo el ticket?")) { cart = []; renderCart(); }
         }
 
         function renderCart() {
@@ -451,44 +437,62 @@
         }
 
         window.manualCartQty = (index, val) => {
-            pendingSaleData = null; let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart();
+            let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart();
         }
 
-        // GUARDAR VENTA Y TICKET
+        // ==========================================
+        // SEGURIDAD: GUARDAR PRIMERO, IMPRIMIR DESPUÉS
+        // ==========================================
         async function processSale() {
             if (cart.length === 0) return;
+            
+            const btn = document.getElementById('btnCobrar'); 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; 
+            btn.disabled = true;
+
             const total = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
             const folio = "MOST-" + Math.random().toString(36).substr(2, 6).toUpperCase();
 
-            pendingSaleData = {
-                folio: folio, fecha: new Date(), total: total,
-                articulos: cart.map(i => ({ codigo: i.codigo, nombre: i.nombre, precio_unitario: i.precio, cantidad: i.qty, subtotal: i.precio * i.qty })),
-                vendedor: "Mostrador General", estado: "COMPLETADA"
+            const saleData = {
+                folio: folio, 
+                fecha: firebase.firestore.FieldValue.serverTimestamp(), 
+                total: total,
+                articulos: cart.map(i => ({ 
+                    codigo: i.codigo, nombre: i.nombre, precio_unitario: i.precio, cantidad: i.qty, subtotal: i.precio * i.qty 
+                })),
+                vendedor: "Mostrador General", 
+                estado: "COMPLETADA"
             };
-            printTicketHTML(pendingSaleData, true);
-        }
 
-        async function confirmAndSaveSale() {
-            if (!pendingSaleData) return;
-            const btn = document.getElementById('btnConfirmSave'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
             try {
-                const dataToSave = { ...pendingSaleData, fecha: firebase.firestore.FieldValue.serverTimestamp() };
-                await db.collection('ventas_mostrador').add(dataToSave);
-                showToast(`Venta exitosa: ${dataToSave.folio}`);
-                cart = []; renderCart(); pendingSaleData = null; document.getElementById('confirmPrintModal').classList.add('hidden');
+                // 1. REGISTRAR VENTA EN LA BASE DE DATOS PRIMERO (Anti-Robo)
+                await db.collection('ventas_mostrador').add(saleData);
+                showToast(`Venta registrada: ${folio}`);
+                
+                // Usamos la fecha actual en la memoria solo para la impresión, ya que el serverTimestamp aún no regresa al cliente en tiempo real a veces.
+                const printData = { ...saleData, fecha: new Date() };
+
+                // 2. ABRIR IMPRESORA
+                printTicketHTML(printData);
+                
+                // 3. LIMPIAR INTERFAZ
+                cart = []; 
+                renderCart();
+                
+                // Recargar pestañas si están activas
                 if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
                 if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
-            } catch (error) { showToast("Error de conexión al guardar", "error"); } finally {
-                btn.innerHTML = '<i class="fas fa-check-circle"></i> Sí, registrar venta'; btn.disabled = false;
+
+            } catch (error) { 
+                console.error("Error al procesar venta:", error);
+                showToast("Error de conexión al guardar la venta", "error"); 
+            } finally {
+                btn.innerHTML = '<i class="fas fa-cash-register"></i> Cobrar en Efectivo'; 
+                btn.disabled = false;
             }
         }
 
-        function cancelPendingPrint() {
-            document.getElementById('confirmPrintBox').classList.add('scale-95');
-            setTimeout(() => document.getElementById('confirmPrintModal').classList.add('hidden'), 200);
-        }
-
-        function printTicketHTML(venta, isNewSale = false) {
+        function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             const fechaObj = (venta.fecha && typeof venta.fecha.toDate === 'function') ? venta.fecha.toDate() : (venta.fecha || new Date());
             const fechaStr = fechaObj.toLocaleDateString('es-MX'); const horaStr = fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
@@ -540,12 +544,6 @@
             });
             printArea.innerHTML = html;
             try { window.print(); } catch(e) {}
-            if (isNewSale) {
-                setTimeout(() => {
-                    const modal = document.getElementById('confirmPrintModal'); const box = document.getElementById('confirmPrintBox');
-                    modal.classList.remove('hidden'); setTimeout(() => box.classList.remove('scale-95'), 10);
-                }, 800);
-            }
         }
 
         // HISTORIAL CON MOTIVOS DE CANCELACIÓN
@@ -589,7 +587,7 @@
             } catch (error) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold">Error al cargar el historial.</td></tr>'; }
         }
 
-        window.reprintTicket = (ventaObj) => { pendingSaleData = null; printTicketHTML(ventaObj, false); }
+        window.reprintTicket = (ventaObj) => { printTicketHTML(ventaObj); }
 
         window.cancelTicket = (id, folio) => {
             showPrompt("Cancelar Venta " + folio, "Esta acción es irreversible y descontará el monto del corte del día. Escribe el motivo de la cancelación:", async (motivo) => {
@@ -606,7 +604,9 @@
             });
         }
 
-        // CORTE DE CAJA Y LECTURA DE EXCEL
+        // ==========================================
+        // CORTE DE CAJA Y LECTURA DE EXCEL INTELIGENTE
+        // ==========================================
         const denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50];
         let denomCounts = {}; let totalMostradorDelDia = 0;
 
@@ -633,7 +633,7 @@
             } catch(e) { showToast("Error al obtener ventas del día", "error"); }
         }
 
-        // LECTOR DE EXCEL INTELIGENTE (Busca fila 'efectivo' y suma totales)
+        // LECTOR DE EXCEL EXTRAE NÚMEROS JUNTO A "EFECTIVO"
         window.handleExcelUpload = (event) => {
             const file = event.target.files[0];
             if(!file) return;
@@ -644,46 +644,75 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1}); // Lee como matriz
+                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1}); 
                     
-                    let totalEfectivo = 0;
                     let headerRowIndex = -1;
-                    let totalColIndex = -1;
+                    let colFolio = -1, colMetodo = -1, colTotal = -1;
                     
-                    // 1. Encontrar la fila de cabeceras (Busca columna 'total', 'importe' o 'monto')
+                    // 1. Encontrar la fila de cabeceras
                     for(let i=0; i < Math.min(20, json.length); i++) {
                         if(!json[i]) continue;
                         const rowStrArray = json[i].map(c => String(c).toLowerCase());
-                        const idx = rowStrArray.findIndex(c => c.includes('total') || c.includes('importe') || c.includes('monto'));
-                        if (idx !== -1) {
+                        
+                        const idxFolio = rowStrArray.findIndex(c => c.includes('folio') || c.includes('factura') || c.includes('documento'));
+                        const idxMetodo = rowStrArray.findIndex(c => c.includes('metodo') || c.includes('pago') || c.includes('forma'));
+                        const idxTotal = rowStrArray.findIndex(c => c.includes('total') || c.includes('importe') || c.includes('monto'));
+                        
+                        if (idxFolio !== -1 || idxMetodo !== -1 || idxTotal !== -1) {
                             headerRowIndex = i;
-                            totalColIndex = idx;
-                            break;
+                            if(idxFolio !== -1) colFolio = idxFolio;
+                            if(idxMetodo !== -1) colMetodo = idxMetodo;
+                            if(idxTotal !== -1) colTotal = idxTotal;
+                            
+                            if(colFolio !== -1 && colMetodo !== -1) break; // Encontramos los más importantes
                         }
                     }
 
-                    // 2. Iterar filas debajo de la cabecera buscando "efectivo"
+                    window.reporteFacturasEfectivo = [];
+                    let totalEfectivo = 0;
+
+                    // 2. Iterar filas debajo de la cabecera
                     for(let i = headerRowIndex + 1; i < json.length; i++) {
                         const row = json[i];
                         if (!row || row.length === 0) continue;
                         
-                        const rowStr = row.join(' ').toLowerCase();
-                        if (rowStr.includes('efectivo')) {
-                            // Si encontró columna Total
-                            if (totalColIndex !== -1 && !isNaN(parseFloat(row[totalColIndex]))) {
-                                totalEfectivo += parseFloat(row[totalColIndex]);
+                        // Buscamos en toda la fila o en la columna método específicamente
+                        const textoMetodo = colMetodo !== -1 && row[colMetodo] ? String(row[colMetodo]).toLowerCase() : row.join(' ').toLowerCase();
+                        
+                        if (textoMetodo.includes('efectivo')) {
+                            let montoExtraido = 0;
+                            
+                            // MAGIA REGEX: Busca la palabra "efectivo" seguida opcionalmente de $, espacios y saca el número
+                            // Ej. "tdebito 5000 efectivo 1000" -> saca 1000
+                            const regexEfectivo = /efectivo\s*\$?\s*(\d+(?:\.\d+)?)/;
+                            const match = textoMetodo.match(regexEfectivo);
+                            
+                            if (match && match[1]) {
+                                montoExtraido = parseFloat(match[1]);
+                            } else if (colTotal !== -1 && !isNaN(parseFloat(row[colTotal]))) {
+                                // Fallback: Si no tiene numero al lado, tomamos el total de la fila
+                                montoExtraido = parseFloat(row[colTotal]);
                             } else {
-                                // Fallback: Toma el número más grande de esa fila
+                                // Último recurso: Busca cualquier número suelto en la fila
                                 const nums = row.map(c => parseFloat(c)).filter(n => !isNaN(n));
-                                if(nums.length > 0) totalEfectivo += Math.max(...nums);
+                                if(nums.length > 0) montoExtraido = Math.max(...nums);
+                            }
+
+                            if (montoExtraido > 0) {
+                                totalEfectivo += montoExtraido;
+                                window.reporteFacturasEfectivo.push({
+                                    folio: colFolio !== -1 ? (row[colFolio] || 'S/F') : 'S/F',
+                                    metodo_original: colMetodo !== -1 ? (row[colMetodo] || textoMetodo) : textoMetodo,
+                                    monto_efectivo: montoExtraido
+                                });
                             }
                         }
                     }
 
-                    // 3. Escribir resultado
+                    // 3. Escribir resultado en la interfaz
                     document.getElementById('inputFacturado').value = totalEfectivo.toFixed(2);
                     calculateCorte();
-                    showToast(`¡Reporte leído! Se sumaron $${totalEfectivo.toFixed(2)} de facturas en efectivo.`);
+                    showToast(`Reporte analizado. Se extrajeron $${totalEfectivo.toFixed(2)} de ${window.reporteFacturasEfectivo.length} facturas.`);
                     
                 } catch(err) {
                     console.error(err);
@@ -715,12 +744,12 @@
             }
         }
 
-        // EXPORTAR CORTE A EXCEL (BITÁCORA)
+        // EXPORTAR CORTE A EXCEL (BITÁCORA + DESGLOSE)
         window.exportCorteToExcel = () => {
             const dateStr = new Date().toLocaleString('es-MX');
             const fileDate = new Date().toISOString().slice(0,10);
             
-            // Construimos la matriz de datos para Excel
+            // 1. Construimos la matriz de datos principales para Excel
             const wsData = [
                 ['CORTE DE CAJA - ENVASES LA ECONÓMICA DEL NORTE'],
                 ['Fecha y Hora de Emisión:', dateStr],
@@ -759,12 +788,28 @@
             else if(diff < -0.1) estadoMsg = "Faltante";
             wsData.push(['Estado de la Caja:', estadoMsg]);
 
-            // Crear libro de Excel
+            // 2. AÑADIR EL DESGLOSE DE FACTURAS DE EFECTIVO EXTRAÍDAS
+            if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) {
+                wsData.push([]);
+                wsData.push([]);
+                wsData.push(['--- DETALLE DE FACTURAS DE EFECTIVO EXTRAÍDAS DEL SISTEMA ---']);
+                wsData.push(['Folio / Factura', 'Texto Original en Sistema', 'Monto Efectivo Detectado']);
+                
+                let sumaVerificacion = 0;
+                window.reporteFacturasEfectivo.forEach(f => {
+                    sumaVerificacion += f.monto_efectivo;
+                    wsData.push([f.folio, f.metodo_original, f.monto_efectivo]);
+                });
+                
+                wsData.push(['', 'TOTAL SUMADO:', sumaVerificacion]);
+            }
+
+            // 3. Crear libro de Excel
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             
             // Anchos de columna
-            ws['!cols'] = [{wch: 40}, {wch: 15}, {wch: 20}];
+            ws['!cols'] = [{wch: 45}, {wch: 35}, {wch: 25}];
 
             XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja");
             XLSX.writeFile(wb, `Corte_Bitacora_${fileDate}.xlsx`);
