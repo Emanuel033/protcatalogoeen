@@ -50,8 +50,17 @@
             }
             
             @page { size: letter portrait; margin: 10mm; }
-            .ticket-copy { page-break-inside: avoid; margin-bottom: 8mm; padding-bottom: 8mm; border-bottom: 2px dashed #000; }
-            .ticket-copy:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+            
+            /* Salto de página automático después de cada ticket */
+            .ticket-copy { 
+                page-break-inside: avoid; 
+                page-break-after: always; /* Fuerzo el salto a una nueva hoja */
+                padding-top: 5mm;
+            }
+            /* Al último ticket no le agregamos hoja en blanco al final */
+            .ticket-copy:last-child { 
+                page-break-after: auto; 
+            }
         }
     </style>
 </head>
@@ -122,7 +131,6 @@
                 </div>
                 
                 <!-- Grid de Productos (Scrolleable) -->
-                <!-- Se usa min-h-0 vital en flexbox para que el overflow funcione dentro de un contenedor flex -->
                 <div class="flex-1 overflow-y-auto custom-scroll p-4 bg-slate-50/50 min-h-0">
                     <div id="loadingProducts" class="text-center py-10 text-slate-400 font-bold">
                         <i class="fas fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i><br>Cargando catálogo...
@@ -132,7 +140,6 @@
             </div>
 
             <!-- PANEL DERECHO: TICKET (CARRITO) -->
-            <!-- Tamaños ajustados: w-full en móviles, 300px en tablet vertical, 400px en monitores -->
             <div class="w-full md:w-[300px] lg:w-[400px] bg-white flex flex-col h-full shrink-0 shadow-[-10px_0_20px_rgba(0,0,0,0.02)] relative z-20">
                 
                 <!-- Cabecera del Ticket (Fija) -->
@@ -142,7 +149,6 @@
                 </div>
                 
                 <!-- Área de Items (Scrolleable) -->
-                <!-- min-h-0 asegura que esta área se encoja y active el scroll, protegiendo el botón de abajo -->
                 <div id="cartItems" class="flex-1 overflow-y-auto min-h-0 custom-scroll p-3 space-y-2 bg-white"></div>
                 
                 <!-- Pie del Ticket (Fijo SIEMPRE visible al fondo) -->
@@ -201,7 +207,6 @@
                     </button>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <!-- Físico -->
                     <div class="lg:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
                         <h3 class="font-black text-slate-800 mb-4 flex items-center gap-2 text-sm md:text-base"><i class="fas fa-money-bill-wave text-emerald-500"></i> Billetes y Monedas</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3" id="denomContainer"></div>
@@ -210,7 +215,6 @@
                             <span class="text-xl md:text-2xl font-black text-emerald-600" id="totalFisico">$0.00</span>
                         </div>
                     </div>
-                    <!-- Teórico -->
                     <div class="lg:col-span-5 space-y-4">
                         <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 relative">
                             <div class="flex justify-between items-center mb-2">
@@ -288,7 +292,6 @@
             </div>
             
             <div class="p-5 md:p-6">
-                <!-- BOTONES DE PAGO RÁPIDO -->
                 <div class="grid grid-cols-3 gap-2 mb-4">
                     <button onclick="setQuickPay(50)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg transition border border-slate-200 text-sm md:text-base">$50</button>
                     <button onclick="setQuickPay(100)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg transition border border-slate-200 text-sm md:text-base">$100</button>
@@ -319,7 +322,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: PROMPT GENÉRICO PARA CANCELACIONES -->
+    <!-- MODAL 3: PROMPT GENÉRICO -->
     <div id="genericPromptModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="genericPromptBox">
             <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2 flex items-center gap-2"><i class="fas fa-pen-nib text-blue-600"></i> <span id="genericPromptTitle">Razón</span></h3>
@@ -491,10 +494,8 @@
                 loadingUI.classList.add('hidden');
                 document.getElementById('productsGrid').classList.remove('hidden');
                 filterCatalog();
-                // Retraso para enfocar sin que salte el teclado virtual feo en tablet de inmediato a veces
                 setTimeout(()=> document.getElementById('searchInput').focus(), 500); 
             } catch (error) {
-                console.error(error);
                 loadingUI.innerHTML = `<span class='text-red-500 font-bold'>Error: ${error.message}</span>`;
             }
         }
@@ -639,13 +640,20 @@
             }
         }
 
-        // --- IMPRESIÓN Y DEMÁS LOGICA ---
+        // --- IMPRESIÓN CON MEJORAS DE SALTO DE PÁGINA Y FIRMA ---
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             const fechaObj = (venta.fecha && typeof venta.fecha.toDate === 'function') ? venta.fecha.toDate() : (venta.fecha || new Date());
             const fechaStr = fechaObj.toLocaleDateString('es-MX'); const horaStr = fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             const total = venta.total; const subtotal = total / 1.16; const iva = total - subtotal;
-            const copies = [{ title: 'COPIA 1 - SUCURSAL' }, { title: 'COPIA 2 - ALMACÉN' }, { title: 'COPIA 3 - CLIENTE' }];
+            
+            // Aquí configuramos las copias y si requieren la línea de firma al final
+            const copies = [
+                { title: 'COPIA 1 - FIRMA (SUCURSAL)', requiresFirma: true }, 
+                { title: 'COPIA 2 - ALMACÉN', requiresFirma: false }, 
+                { title: 'COPIA 3 - CLIENTE', requiresFirma: false }
+            ];
+            
             let html = '';
             copies.forEach((copy) => {
                 html += `
@@ -666,8 +674,11 @@
                     <table style="width: 100%; font-size: 11px; margin-bottom: 5px; font-family: 'Courier New', Courier, monospace; border-collapse: collapse;">
                         <tr><th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 12%;">Cant</th><th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 48%;">Cód / Descripción</th><th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">P.U.</th><th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">Total</th></tr>
                 `;
+                
                 venta.articulos.forEach(item => { html += `<tr><td style="vertical-align: top; padding-top: 4px; font-weight: bold;">${item.cantidad}x</td><td style="vertical-align: top; padding-top: 4px; padding-right: 4px;"><b>${item.codigo}</b><br>${item.nombre}</td><td style="vertical-align: top; padding-top: 4px; text-align:right;">${formatMoney(item.precio_unitario)}</td><td style="vertical-align: top; padding-top: 4px; text-align:right; font-weight:bold;">${formatMoney(item.subtotal)}</td></tr>`; });
+                
                 let infoPago = ''; if(venta.efectivo_recibido) { infoPago = `<div style="display: flex; justify-content: space-between; border-top: 1px dashed #000; margin-top: 4px; padding-top: 4px; color: #555;"><span style="font-size: 10px;">Efectivo Recibido:</span> <span style="font-size: 10px;">${formatMoney(venta.efectivo_recibido)}</span></div><div style="display: flex; justify-content: space-between; color: #555;"><span style="font-size: 10px;">Cambio Entregado:</span> <span style="font-size: 10px;">${formatMoney(venta.cambio_entregado || 0)}</span></div>`; }
+                
                 html += `</table>
                     <div style="border-top: 1px solid #000; padding-top: 8px; font-family: 'Courier New', Courier, monospace; font-size: 11px; display: flex; justify-content: flex-end;">
                         <div style="text-align: right; width: 200px;">
@@ -676,8 +687,21 @@
                             <div style="display: flex; justify-content: space-between; border-top: 1px solid #000; margin-top: 4px; padding-top: 4px; font-weight: 900; font-size: 13px;"><span>TOTAL:</span> <span>${formatMoney(venta.total)}</span></div>
                             ${infoPago}
                         </div>
-                    </div></div>`;
+                    </div>`;
+
+                // Agregar la línea de firma si la copia lo requiere
+                if(copy.requiresFirma) {
+                    html += `
+                    <div style="margin-top: 50px; margin-bottom: 20px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
+                        <div style="border-top: 1px solid #000; width: 70%; margin: 0 auto; padding-top: 8px; font-weight: bold; font-size: 12px;">
+                            Nombre y Firma de Recibido / Conformidad
+                        </div>
+                    </div>`;
+                }
+
+                html += `</div>`;
             });
+            
             printArea.innerHTML = html; setTimeout(() => { try { window.print(); } catch(e) {} }, 300);
         }
 
