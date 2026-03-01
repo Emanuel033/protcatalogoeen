@@ -121,7 +121,8 @@
                     </div>
                     <div class="relative">
                         <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="searchInput" oninput="filterCatalog()" placeholder="Buscar por código o nombre (F2)..." autocomplete="off"
+                        <!-- Autocomplete off para evitar sugerencias -->
+                        <input type="text" id="searchInput" oninput="filterCatalog()" placeholder="Buscar por código o nombre (F2)..." autocomplete="off" data-lpignore="true"
                             class="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-inner transition-all">
                     </div>
                 </div>
@@ -217,7 +218,8 @@
                             </div>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 transform -translate-y-1/2 font-bold text-slate-400">$</span>
-                                <input type="number" id="inputFacturado" value="0" oninput="calculateCorte()" class="w-full pl-8 pr-4 py-2 md:py-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-base md:text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                <!-- Cambiado type="number" a type="text" para evitar autofill -->
+                                <input type="text" inputmode="decimal" id="inputFacturado" value="0" autocomplete="off" data-lpignore="true" oninput="calculateCorte()" class="w-full pl-8 pr-4 py-2 md:py-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-base md:text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition">
                             </div>
                         </div>
 
@@ -295,7 +297,8 @@
                 <label class="block text-xs md:text-sm font-bold text-slate-600 mb-2">Efectivo Recibido:</label>
                 <div class="relative mb-4 md:mb-6">
                     <span class="absolute left-4 top-1/2 transform -translate-y-1/2 font-black text-slate-400 text-xl md:text-2xl">$</span>
-                    <input type="number" id="inputEfectivoRecibido" oninput="calculateChange()" class="w-full pl-10 pr-4 py-3 md:py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-black text-2xl md:text-3xl text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    <!-- Cambiado type="number" a type="text" y añadido autocomplete="off" para bloquear popup de Chrome -->
+                    <input type="text" inputmode="decimal" id="inputEfectivoRecibido" autocomplete="off" data-lpignore="true" oninput="calculateChange()" class="w-full pl-10 pr-4 py-3 md:py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-black text-2xl md:text-3xl text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
                 </div>
 
                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 md:p-4 mb-4 md:mb-6 text-center">
@@ -386,6 +389,7 @@
         }
 
         window.calculateChange = () => {
+            // Cambiamos parse a texto seguro
             const recibido = parseFloat(document.getElementById('inputEfectivoRecibido').value) || 0;
             const display = document.getElementById('checkoutCambioDisplay');
             if (recibido === 0) { display.innerText = "$0.00"; display.className = "text-3xl md:text-4xl font-black text-slate-300"; return; }
@@ -572,10 +576,11 @@
 
             cart.forEach((item, index) => {
                 const subtotal = item.precio * item.qty; total += subtotal;
+                // input de qty cambiado a text con inputmode=numeric y autocomplete off
                 container.innerHTML += `
                     <div class="bg-slate-50 border border-slate-100 p-2 md:p-3 rounded-xl flex flex-col relative animate-[fadeIn_0.2s_ease-out]">
                         <div class="flex justify-between items-start mb-2"><div class="pr-6"><h5 class="text-[11px] md:text-xs font-bold text-slate-800 leading-tight">${item.nombre}</h5><span class="text-[8px] md:text-[9px] font-mono text-slate-400">${item.codigo}</span></div><button onclick="updateCartQty(${index}, -${item.qty})" class="absolute top-1.5 md:top-2 right-1.5 md:right-2 text-slate-300 hover:text-red-500"><i class="fas fa-times text-sm"></i></button></div>
-                        <div class="flex justify-between items-end mt-auto"><div class="flex items-center bg-white border border-slate-200 rounded-lg"><button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-red-500 font-bold text-sm">-</button><input type="number" value="${item.qty}" onchange="manualCartQty(${index}, this.value)" class="w-8 md:w-10 text-center font-black text-xs md:text-sm text-slate-800 border-none outline-none focus:ring-0 p-0 bg-transparent"><button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm">+</button></div><div class="text-right"><div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div><div class="text-xs md:text-sm font-black text-slate-800">${formatMoney(subtotal)}</div></div></div>
+                        <div class="flex justify-between items-end mt-auto"><div class="flex items-center bg-white border border-slate-200 rounded-lg"><button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-red-500 font-bold text-sm">-</button><input type="text" inputmode="numeric" autocomplete="off" data-lpignore="true" value="${item.qty}" onchange="manualCartQty(${index}, this.value)" class="w-8 md:w-10 text-center font-black text-xs md:text-sm text-slate-800 border-none outline-none focus:ring-0 p-0 bg-transparent"><button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm">+</button></div><div class="text-right"><div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div><div class="text-xs md:text-sm font-black text-slate-800">${formatMoney(subtotal)}</div></div></div>
                     </div>`;
             });
             totalEl.innerText = formatMoney(total);
@@ -584,14 +589,13 @@
         window.manualCartQty = (index, val) => { let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart(); }
 
         // ==========================================
-        // PROCESAMIENTO E IMPRESIÓN (BLINDADO EXTREMO)
+        // PROCESAMIENTO E IMPRESIÓN DIRECTA
         // ==========================================
         async function processSale() {
             if (cart.length === 0) return;
             const btnFinal = document.getElementById('btnConfirmarVentaFinal'); 
-            if (btnFinal.disabled) return; // Evitar doble ejecución
+            if (btnFinal.disabled) return; 
 
-            // 1. Sanitización estricta de variables monetarias iniciales
             const inputRecibido = document.getElementById('inputEfectivoRecibido').value;
             let recibido = parseFloat(inputRecibido);
             if (isNaN(recibido)) recibido = 0;
@@ -610,7 +614,6 @@
             let folio = "MOST-TEMP";
 
             try {
-                // 2. OBTENER FOLIO CONSECUTIVO CON TRY-CATCH AISLADO
                 try {
                     const counterRef = db.collection('configuracion').doc('consecutivos');
                     const nextSeq = await db.runTransaction(async (transaction) => {
@@ -625,12 +628,9 @@
                     folio = "MOST-" + String(nextSeq).padStart(5, '0');
                 } catch (folioErr) {
                     console.warn("Fallo el sistema de folios, usando folio de emergencia basado en la hora.", folioErr);
-                    // Si falla el folio, usamos un timestamp para no detener la venta
                     folio = "MOST-" + Math.floor(Date.now() / 1000).toString().slice(-5);
                 }
 
-                // 3. SANITIZAR ARREGLO DEL CARRITO
-                // Firebase colapsa si le mandamos variables undefined o NaN, aquí lo evitamos obligatoriamente
                 const articulosLimpios = cart.map(i => {
                     let p = Number(i.precio); if(isNaN(p)) p = 0;
                     let q = Number(i.qty); if(isNaN(q)) q = 1;
@@ -657,58 +657,45 @@
                     estado: "COMPLETADA"
                 };
 
-                // 4. GUARDAR EN FIREBASE (Aquí es donde se rompía si había un dato corrupto)
                 await db.collection('ventas_mostrador').add(saleData);
                 
-                // --- A PARTIR DE AQUÍ LA VENTA YA SE GUARDÓ EXITOSAMENTE ---
-
-                // Preparar datos para imprimir (Copiamos manualmente para no mandar objetos de Firebase a la función de HTML)
+                // Preparar datos para imprimir antes de limpiar
                 const printData = {
                     folio: saleData.folio,
-                    fecha: new Date(), // Usamos la fecha y hora de este instante para el ticket impreso
+                    fecha: new Date(), 
                     total: saleData.total,
                     efectivo_recibido: saleData.efectivo_recibido,
                     cambio_entregado: saleData.cambio_entregado,
                     articulos: saleData.articulos
                 };
 
-                // 5. CERRAR MODAL Y LIMPIAR
+                // CERRAR MODAL Y LIMPIAR
                 closeCheckoutModal(); 
-                showToast(`Venta registrada exitosamente: ${folio}`);
+                showToast(`Venta registrada: ${folio}`);
                 cart = []; 
                 renderCart(); 
 
                 if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
                 if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
 
-                // 6. IMPRIMIR LOS TICKETS CON RETRASO
-                setTimeout(() => {
-                    try {
-                        printTicketHTML(printData);
-                    } catch(errPrint) {
-                        console.error("Error al construir el HTML del ticket:", errPrint);
-                        showToast("Venta guardada, pero ocurrió un error al mandar a imprimir. Reimprima desde el historial.", "error");
-                    }
-                }, 300);
+                // IMPRIMIR TICKETS DIRECTAMENTE (Sin retraso anidado para evitar bloqueo de popups en Laptops)
+                printTicketHTML(printData);
 
                 setTimeout(() => document.getElementById('searchInput').focus(), 500);
 
             } catch (error) { 
-                // SI ENTRA AQUÍ, ES PORQUE FIREBASE RECHAZÓ LA CONEXIÓN O LA VENTA. AHORA LO SABRÁS DE INMEDIATO.
                 console.error("Error crítico de Firebase:", error); 
                 showToast("Ocurrió un error al guardar la venta: " + error.message, "error"); 
             } finally {
-                // Restauramos el botón pase lo que pase
                 btnFinal.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar'; 
                 btnFinal.disabled = false;
             }
         }
 
-        // --- IMPRESIÓN CON MEJORAS DE SALTO DE PÁGINA Y FIRMAS ESPECÍFICAS ---
+        // --- IMPRESIÓN DIRECTA SIN TIMEOUTS QUE ROMPAN NAVEGADORES ESTRICTOS ---
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             
-            // Verificación segura de la fecha
             let fechaObj = new Date();
             if (venta.fecha) {
                 if (typeof venta.fecha.toDate === 'function') {
@@ -793,7 +780,18 @@
             });
             
             printArea.innerHTML = html; 
-            setTimeout(() => { try { window.print(); } catch(e) { console.error(e); } }, 300);
+            
+            // Forzamos el refresco del DOM antes de lanzar print para que no falle en laptops
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    try { 
+                        window.print(); 
+                    } catch(e) { 
+                        console.error(e); 
+                        showToast("Venta guardada. Si no se imprimió, puede reimprimir desde el historial.", "error");
+                    }
+                });
+            });
         }
 
         async function loadHistory() {
