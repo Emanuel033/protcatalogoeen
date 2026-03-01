@@ -114,7 +114,6 @@
             
             <!-- PANEL IZQUIERDO: CATÁLOGO -->
             <div class="flex-1 flex flex-col h-full border-r border-slate-200 bg-white min-w-0">
-                <!-- Header del Catálogo (Fijo) -->
                 <div class="p-4 md:p-5 border-b border-slate-100 bg-white z-10 shrink-0 shadow-sm">
                     <div class="flex justify-between items-end mb-3">
                         <h2 class="text-lg md:text-xl font-black text-slate-800">Venta Mostrador</h2>
@@ -127,7 +126,6 @@
                     </div>
                 </div>
                 
-                <!-- Grid de Productos (Scrolleable) -->
                 <div class="flex-1 overflow-y-auto custom-scroll p-4 bg-slate-50/50 min-h-0">
                     <div id="loadingProducts" class="text-center py-10 text-slate-400 font-bold">
                         <i class="fas fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i><br>Cargando catálogo...
@@ -138,17 +136,13 @@
 
             <!-- PANEL DERECHO: TICKET (CARRITO) -->
             <div class="w-full md:w-[300px] lg:w-[400px] bg-white flex flex-col h-full shrink-0 shadow-[-10px_0_20px_rgba(0,0,0,0.02)] relative z-20">
-                
-                <!-- Cabecera del Ticket (Fija) -->
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
                     <h3 class="font-black text-slate-800 flex items-center gap-2"><i class="fas fa-receipt text-blue-600"></i> Ticket</h3>
                     <button onclick="clearCart()" class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">Limpiar</button>
                 </div>
                 
-                <!-- Área de Items (Scrolleable) -->
                 <div id="cartItems" class="flex-1 overflow-y-auto min-h-0 custom-scroll p-3 space-y-2 bg-white"></div>
                 
-                <!-- Pie del Ticket (Fijo SIEMPRE visible al fondo) -->
                 <div class="p-4 md:p-5 border-t border-slate-100 bg-slate-50 shrink-0 pb-safe">
                     <div class="flex justify-between items-center mb-3">
                         <span class="font-bold text-slate-500 text-sm">Total a cobrar:</span>
@@ -361,7 +355,6 @@
             t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 3000);
         }
 
-        // --- LÓGICA DE IMÁGENES ---
         function showImage(url, title, code) {
             document.getElementById('enlargedImg').src = url; document.getElementById('enlargedTitle').innerText = title;
             document.getElementById('enlargedCode').innerText = "CÓDIGO: " + code;
@@ -372,7 +365,6 @@
             document.getElementById('enlargedImg').src = "";
         }
 
-        // --- LÓGICA DE CALCULADORA DE CAMBIO Y PAGO RÁPIDO ---
         let currentTotalToPay = 0;
         
         function openCheckoutModal() {
@@ -434,14 +426,14 @@
             if(tabId === 'corte') loadTodaySales();
         }
 
-        // CARGA DE CATÁLOGO Y CONFIGURACIÓN MAESTRA
+        // CARGA DE CATÁLOGO Y CONFIGURACIÓN
         async function loadData() {
             const loadingUI = document.getElementById('loadingProducts');
             try {
                 try {
                     const configDoc = await db.collection('configuracion').doc('pos_settings').get();
                     if (configDoc.exists) { showInventoryConfig = configDoc.data().mostrar_inventario === true; }
-                } catch(e) { console.warn("No se pudo cargar la config de inventario"); }
+                } catch(e) {}
 
                 if(showInventoryConfig) { document.getElementById('inventoryStatusBadge').classList.remove('hidden'); }
 
@@ -592,16 +584,22 @@
         window.manualCartQty = (index, val) => { let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart(); }
 
         // ==========================================
-        // PROCESAMIENTO E IMPRESIÓN (BLINDADO)
+        // PROCESAMIENTO E IMPRESIÓN (BLINDADO EXTREMO)
         // ==========================================
         async function processSale() {
-            // Validaciones iniciales
             if (cart.length === 0) return;
             const btnFinal = document.getElementById('btnConfirmarVentaFinal'); 
             if (btnFinal.disabled) return; // Evitar doble ejecución
 
-            const recibido = parseFloat(document.getElementById('inputEfectivoRecibido').value) || 0;
-            if (recibido > 0 && recibido < currentTotalToPay) { 
+            // 1. Sanitización estricta de variables monetarias iniciales
+            const inputRecibido = document.getElementById('inputEfectivoRecibido').value;
+            let recibido = parseFloat(inputRecibido);
+            if (isNaN(recibido)) recibido = 0;
+
+            let total = Number(currentTotalToPay);
+            if (isNaN(total)) total = 0;
+
+            if (recibido > 0 && recibido < total) { 
                 showToast("El dinero recibido es menor al total", "error"); 
                 return; 
             }
@@ -609,71 +607,98 @@
             btnFinal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...'; 
             btnFinal.disabled = true;
 
-            const total = currentTotalToPay || 0; 
-            let folio = "MOST-ERROR";
+            let folio = "MOST-TEMP";
 
             try {
-                // 1. OBTENER FOLIO CONSECUTIVO
-                const counterRef = db.collection('configuracion').doc('consecutivos');
-                const nextSeq = await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(counterRef); 
-                    let newSeq = 1;
-                    if (doc.exists && doc.data().venta_mostrador) { 
-                        newSeq = doc.data().venta_mostrador + 1; 
-                    }
-                    transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true }); 
-                    return newSeq;
-                });
-                
-                folio = "MOST-" + String(nextSeq).padStart(5, '0');
+                // 2. OBTENER FOLIO CONSECUTIVO CON TRY-CATCH AISLADO
+                try {
+                    const counterRef = db.collection('configuracion').doc('consecutivos');
+                    const nextSeq = await db.runTransaction(async (transaction) => {
+                        const doc = await transaction.get(counterRef); 
+                        let newSeq = 1;
+                        if (doc.exists && doc.data().venta_mostrador) { 
+                            newSeq = doc.data().venta_mostrador + 1; 
+                        }
+                        transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true }); 
+                        return newSeq;
+                    });
+                    folio = "MOST-" + String(nextSeq).padStart(5, '0');
+                } catch (folioErr) {
+                    console.warn("Fallo el sistema de folios, usando folio de emergencia basado en la hora.", folioErr);
+                    // Si falla el folio, usamos un timestamp para no detener la venta
+                    folio = "MOST-" + Math.floor(Date.now() / 1000).toString().slice(-5);
+                }
 
-                // 2. PREPARAR DATOS SANITIZADOS PARA EVITAR ERRORES DE FIREBASE
+                // 3. SANITIZAR ARREGLO DEL CARRITO
+                // Firebase colapsa si le mandamos variables undefined o NaN, aquí lo evitamos obligatoriamente
+                const articulosLimpios = cart.map(i => {
+                    let p = Number(i.precio); if(isNaN(p)) p = 0;
+                    let q = Number(i.qty); if(isNaN(q)) q = 1;
+                    return { 
+                        codigo: String(i.codigo || 'S/C'), 
+                        nombre: String(i.nombre || 'Art.'), 
+                        precio_unitario: p, 
+                        cantidad: q, 
+                        subtotal: p * q
+                    };
+                });
+
+                let cambio = recibido > 0 ? (recibido - total) : 0;
+                if (isNaN(cambio)) cambio = 0;
+
                 const saleData = {
                     folio: folio, 
                     fecha: firebase.firestore.FieldValue.serverTimestamp(), 
                     total: total,
                     efectivo_recibido: recibido > 0 ? recibido : total, 
-                    cambio_entregado: recibido > 0 ? (recibido - total) : 0,
-                    articulos: cart.map(i => ({ 
-                        codigo: i.codigo || 'S/C', 
-                        nombre: i.nombre || 'Art.', 
-                        precio_unitario: i.precio || 0, 
-                        cantidad: i.qty || 1, 
-                        subtotal: (i.precio || 0) * (i.qty || 1) 
-                    })),
+                    cambio_entregado: cambio,
+                    articulos: articulosLimpios,
                     vendedor: "Mostrador General", 
                     estado: "COMPLETADA"
                 };
 
-                // 3. GUARDAR VENTA
+                // 4. GUARDAR EN FIREBASE (Aquí es donde se rompía si había un dato corrupto)
                 await db.collection('ventas_mostrador').add(saleData);
                 
-                // 4. LIMPIAR INTERFAZ INMEDIATAMENTE (Para que veas que sí se registró)
+                // --- A PARTIR DE AQUÍ LA VENTA YA SE GUARDÓ EXITOSAMENTE ---
+
+                // Preparar datos para imprimir (Copiamos manualmente para no mandar objetos de Firebase a la función de HTML)
+                const printData = {
+                    folio: saleData.folio,
+                    fecha: new Date(), // Usamos la fecha y hora de este instante para el ticket impreso
+                    total: saleData.total,
+                    efectivo_recibido: saleData.efectivo_recibido,
+                    cambio_entregado: saleData.cambio_entregado,
+                    articulos: saleData.articulos
+                };
+
+                // 5. CERRAR MODAL Y LIMPIAR
                 closeCheckoutModal(); 
-                showToast(`Venta registrada: ${folio}`);
+                showToast(`Venta registrada exitosamente: ${folio}`);
                 cart = []; 
                 renderCart(); 
 
                 if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
                 if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
 
-                // 5. AISLAR LA IMPRESIÓN (Si la impresión falla, la venta ya está registrada y limpia)
+                // 6. IMPRIMIR LOS TICKETS CON RETRASO
                 setTimeout(() => {
                     try {
-                        const printData = { ...saleData, fecha: new Date() }; 
                         printTicketHTML(printData);
                     } catch(errPrint) {
-                        console.error("Error aislando la impresión:", errPrint);
-                        showToast("Venta guardada, pero la impresión falló. Reimprime desde Historial.", "info");
+                        console.error("Error al construir el HTML del ticket:", errPrint);
+                        showToast("Venta guardada, pero ocurrió un error al mandar a imprimir. Reimprima desde el historial.", "error");
                     }
-                }, 100);
+                }, 300);
 
-                setTimeout(() => document.getElementById('searchInput').focus(), 400);
+                setTimeout(() => document.getElementById('searchInput').focus(), 500);
 
             } catch (error) { 
-                console.error("Error BD:", error); 
-                showToast("Error de conexión al guardar", "error"); 
+                // SI ENTRA AQUÍ, ES PORQUE FIREBASE RECHAZÓ LA CONEXIÓN O LA VENTA. AHORA LO SABRÁS DE INMEDIATO.
+                console.error("Error crítico de Firebase:", error); 
+                showToast("Ocurrió un error al guardar la venta: " + error.message, "error"); 
             } finally {
+                // Restauramos el botón pase lo que pase
                 btnFinal.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar'; 
                 btnFinal.disabled = false;
             }
@@ -682,11 +707,24 @@
         // --- IMPRESIÓN CON MEJORAS DE SALTO DE PÁGINA Y FIRMAS ESPECÍFICAS ---
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
-            const fechaObj = (venta.fecha && typeof venta.fecha.toDate === 'function') ? venta.fecha.toDate() : (venta.fecha || new Date());
-            const fechaStr = fechaObj.toLocaleDateString('es-MX'); const horaStr = fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-            const total = venta.total || 0; const subtotal = total / 1.16; const iva = total - subtotal;
             
-            // TIPOS DE FIRMA: 'client' (1 línea), 'warehouse' (2 líneas), 'none' (sin líneas)
+            // Verificación segura de la fecha
+            let fechaObj = new Date();
+            if (venta.fecha) {
+                if (typeof venta.fecha.toDate === 'function') {
+                    fechaObj = venta.fecha.toDate();
+                } else if (venta.fecha instanceof Date) {
+                    fechaObj = venta.fecha;
+                }
+            }
+            
+            const fechaStr = fechaObj.toLocaleDateString('es-MX'); 
+            const horaStr = fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            
+            const total = Number(venta.total) || 0; 
+            const subtotal = total / 1.16; 
+            const iva = total - subtotal;
+            
             const copies = [
                 { title: 'COPIA 1 - FIRMA (SUCURSAL)', signType: 'client' }, 
                 { title: 'COPIA 2 - ALMACÉN', signType: 'warehouse' }, 
@@ -728,9 +766,7 @@
                         </div>
                     </div>`;
 
-                // Agregar bloques de firma condicionales
                 if (copy.signType === 'client') {
-                    // Copia Sucursal: Una sola línea para el cliente
                     html += `
                     <div style="margin-top: 50px; margin-bottom: 20px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
                         <div style="border-top: 1px solid #000; width: 70%; margin: 0 auto; padding-top: 8px; font-weight: bold; font-size: 12px;">
@@ -738,7 +774,6 @@
                         </div>
                     </div>`;
                 } else if (copy.signType === 'warehouse') {
-                    // Copia Almacén: Dos líneas (Surtió y Revisó)
                     html += `
                     <div style="margin-top: 50px; margin-bottom: 20px; display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace;">
                         <div style="text-align: center; width: 45%;">
@@ -758,7 +793,7 @@
             });
             
             printArea.innerHTML = html; 
-            setTimeout(() => { try { window.print(); } catch(e) { console.error("Error lanzando ventana de impresión:", e); } }, 300);
+            setTimeout(() => { try { window.print(); } catch(e) { console.error(e); } }, 300);
         }
 
         async function loadHistory() {
