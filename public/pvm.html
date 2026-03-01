@@ -132,9 +132,9 @@
                     </div>
                 </div>
                 
-                <div class="flex-1 overflow-y-auto custom-scroll p-4 bg-slate-50/50 min-h-0">
-                    <div id="loadingProducts" class="text-center py-10 text-slate-400 font-bold">
-                        <i class="fas fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i><br>Cargando catálogo...
+                <div class="flex-1 overflow-y-auto custom-scroll p-4 bg-slate-50/50 min-h-0 relative">
+                    <div id="loadingProducts" class="text-center py-10 text-slate-400 font-bold absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-50/80 backdrop-blur-sm">
+                        <i class="fas fa-spinner fa-spin text-4xl mb-4 text-blue-500"></i><span>Cargando catálogo completo...</span>
                     </div>
                     <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 hidden"></div>
                 </div>
@@ -403,8 +403,13 @@
 
         window.setQuickPay = (amount) => {
             const input = document.getElementById('inputEfectivoRecibido');
-            if (amount === 'exact') { input.value = currentTotalToPay; } else { input.value = amount; }
-            calculateChange(); document.getElementById('btnConfirmarVentaFinal').focus();
+            if (amount === 'exact') { 
+                input.value = Math.round(currentTotalToPay); 
+            } else { 
+                input.value = amount; 
+            }
+            calculateChange(); 
+            document.getElementById('btnConfirmarVentaFinal').focus();
         };
 
         function showPrompt(title, message, onConfirmCallback) {
@@ -443,31 +448,60 @@
 
                 if(showInventoryConfig) { document.getElementById('inventoryStatusBadge').classList.remove('hidden'); }
 
+                // Obtenemos TODO el catálogo sin filtros de activo (porque facturación no tiene ese estatus)
                 const factSnap = await db.collection('catalogo_facturacion').get();
                 let tempCatalog = {};
-                if (factSnap.empty) throw new Error("No se encontraron productos.");
+                if (factSnap.empty) throw new Error("No se encontraron productos en catalogo_facturacion.");
 
                 factSnap.forEach(doc => {
                     const data = doc.data();
-                    const code = data.codigo_oficial || data.Codigo_oficial || data.codigo || data.Codigo || doc.id;
-                    const nombre = data.descripcion_oficial || data.Descripcion_oficial || data.nombre_oficial || data.nombre || data.Nombre || data.descripcion || data.Descripcion || 'Articulo S/N';
-                    const precioStr = data.precio || data.Precio || data.precio_unitario || data.Precio_unitario || 0;
-                    tempCatalog[code] = { id_facturacion: doc.id, codigo: code, nombre: nombre, precio: parseFloat(precioStr) || 0, empaques_tips: [], imagen: null, stock: 0 };
+                    // MEJORA: Validar mayúsculas y minúsculas por si la BD tiene nombres distintos
+                    const codeRaw = data.codigo_oficial || data.Codigo_oficial || data.codigo || data.Codigo || data.CODIGO || data.Codigo_Oficial;
+                    const code = codeRaw ? String(codeRaw).trim() : doc.id;
+                    
+                    const nombreRaw = data.descripcion_oficial || data.Descripcion_oficial || data.nombre_oficial || data.nombre || data.Nombre || data.descripcion || data.Descripcion || data.DESCRIPCION || data.Descripcion_Oficial;
+                    const nombre = nombreRaw ? String(nombreRaw).trim() : 'Articulo S/N';
+                    
+                    const precioStr = data.precio || data.Precio || data.precio_unitario || data.Precio_unitario || data.PRECIO || 0;
+                    
+                    // Si ya existe el código en tempCatalog, no lo sobreescribimos a menos que queramos el más reciente.
+                    // Para evitar perder productos por códigos duplicados erróneamente en BD, usamos el ID del doc si el código ya existe
+                    let finalCode = code;
+                    if(tempCatalog[finalCode]) { finalCode = doc.id; } // Evita sobreescritura por error de catálogo
+                    
+                    tempCatalog[finalCode] = { 
+                        id_facturacion: doc.id, 
+                        codigo: code, // Mostramos el código real aunque la llave sea el ID
+                        nombre: nombre, 
+                        precio: parseFloat(precioStr) || 0, 
+                        empaques_tips: [], 
+                        imagen: null, 
+                        stock: 0 
+                    };
                 });
 
+                // Cargamos imágenes y stock del maestro
                 const masterSnap = await db.collection('productos_master').where('activo', '==', true).get();
                 const masterIds = []; 
                 masterSnap.forEach(doc => {
-                    const data = doc.data(); const code = data.codigo_sistema_oficial;
+                    const data = doc.data(); 
+                    const codeRaw = data.codigo_sistema_oficial || data.codigo || '';
+                    const code = codeRaw ? String(codeRaw).trim() : '';
+                    
                     const imgUrl = data.imagen || data.url_imagen || data.foto || data.imagen_url || null;
                     const stockNum = parseFloat(data.inventario_actual || data.stock || data.existencia || 0);
 
-                    if (code && tempCatalog[code]) {
+                    // Buscamos si este producto maestro existe en nuestro catálogo (por código)
+                    // Como la llave de tempCatalog ahora podría ser doc.id (si había duplicados), iteramos para buscar:
+                    let catKeys = Object.keys(tempCatalog);
+                    let targetKey = catKeys.find(k => tempCatalog[k].codigo === code);
+
+                    if (code && targetKey && tempCatalog[targetKey]) {
                         masterIds.push(doc.id);
                         const piezasBase = parseInt(data.piezas_por_caja_original) || 1;
-                        if(piezasBase > 1) tempCatalog[code].empaques_tips.push(piezasBase);
-                        if (imgUrl) tempCatalog[code].imagen = imgUrl;
-                        tempCatalog[code].stock = stockNum;
+                        if(piezasBase > 1) tempCatalog[targetKey].empaques_tips.push(piezasBase);
+                        if (imgUrl) tempCatalog[targetKey].imagen = imgUrl;
+                        tempCatalog[targetKey].stock = stockNum;
                     }
                 });
 
@@ -475,9 +509,16 @@
                     try {
                         const pkgs = await db.collection('productos_master').doc(mId).collection('paquetes').get();
                         pkgs.forEach(pDoc => {
-                            const pData = pDoc.data(); const masterDoc = masterSnap.docs.find(d => d.id === mId);
-                            const cod = masterDoc.data().codigo_sistema_oficial;
-                            if (cod && tempCatalog[cod] && !tempCatalog[cod].empaques_tips.includes(pData.piezas)) { tempCatalog[cod].empaques_tips.push(pData.piezas); }
+                            const pData = pDoc.data(); 
+                            const masterDoc = masterSnap.docs.find(d => d.id === mId);
+                            const cod = String(masterDoc.data().codigo_sistema_oficial).trim();
+                            
+                            let catKeys = Object.keys(tempCatalog);
+                            let targetKey = catKeys.find(k => tempCatalog[k].codigo === cod);
+
+                            if (cod && targetKey && tempCatalog[targetKey] && !tempCatalog[targetKey].empaques_tips.includes(pData.piezas)) { 
+                                tempCatalog[targetKey].empaques_tips.push(pData.piezas); 
+                            }
                         });
                     } catch(e) {}
                 });
@@ -488,22 +529,35 @@
 
                 loadingUI.classList.add('hidden');
                 document.getElementById('productsGrid').classList.remove('hidden');
+                
                 filterCatalog();
                 setTimeout(()=> document.getElementById('searchInput').focus(), 500); 
             } catch (error) {
-                loadingUI.innerHTML = `<span class='text-red-500 font-bold'>Error: ${error.message}</span>`;
+                loadingUI.innerHTML = `<i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i><span class='text-red-500 font-bold'>Error al cargar: ${error.message}</span>`;
             }
         }
 
         // FILTRO DE CATÁLOGO 
         function filterCatalog() {
             const term = document.getElementById('searchInput').value.toLowerCase().trim();
-            const grid = document.getElementById('productsGrid'); grid.innerHTML = '';
-            filteredCatalog = catalogProducts.filter(p => String(p.nombre).toLowerCase().includes(term) || String(p.codigo).toLowerCase().includes(term));
+            const grid = document.getElementById('productsGrid'); 
+            grid.innerHTML = '';
             
-            if (filteredCatalog.length === 0) { grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-bold">No se encontró.</div>`; return; }
+            filteredCatalog = catalogProducts.filter(p => 
+                String(p.nombre).toLowerCase().includes(term) || 
+                String(p.codigo).toLowerCase().includes(term)
+            );
+            
+            if (filteredCatalog.length === 0) { 
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-bold">No se encontró ningún artículo.</div>`; 
+                return; 
+            }
 
-            filteredCatalog.slice(0, 50).forEach(p => {
+            // LIMITE VISUAL: Aumentado a 120 para que no parezca que faltan, pero protege el navegador.
+            const renderLimit = 120;
+            const displayedItems = filteredCatalog.slice(0, renderLimit);
+
+            displayedItems.forEach(p => {
                 let tipsHTML = '';
                 if (p.empaques_tips.length > 0) {
                     tipsHTML = `<div class="flex flex-wrap gap-1 mt-1.5">`;
@@ -549,6 +603,15 @@
                 `;
                 grid.appendChild(card);
             });
+
+            // MENSAJE DE PRODUCTOS OCULTOS
+            if (filteredCatalog.length > renderLimit) {
+                const hiddenCount = filteredCatalog.length - renderLimit;
+                const infoMsg = document.createElement('div');
+                infoMsg.className = "col-span-full text-center py-6 text-slate-500 font-bold text-xs md:text-sm bg-blue-50/50 rounded-2xl border border-blue-100 border-dashed mt-2";
+                infoMsg.innerHTML = `<i class="fas fa-search mb-2 text-lg text-blue-400"></i><br>Hay <b>+${hiddenCount}</b> productos adicionales.<br><span class="text-[10px] font-medium text-slate-400">Usa la barra de búsqueda para filtrarlos y encontrarlos más rápido.</span>`;
+                grid.appendChild(infoMsg);
+            }
         }
 
         // LÓGICA DEL CARRITO
@@ -692,7 +755,6 @@
             }
         }
 
-        // --- IMPRESIÓN DIRECTA CON NUEVO LOGO Y CÓDIGO QR ---
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             
@@ -722,7 +784,6 @@
             copies.forEach((copy) => {
                 html += `
                 <div class="ticket-copy">
-                    <!-- NUEVO ENCABEZADO CON EL LOGO ACTUALIZADO -->
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; font-family: 'Courier New', Courier, monospace;">
                         <div style="width: 65%; display: flex; gap: 8px; align-items: flex-start;">
                             <img src="https://i.ibb.co/dJr7BzL5/logoeen.png" style="height: 45px; width: auto; max-width: 80px; object-fit: contain; margin-top: 2px;">
@@ -742,7 +803,6 @@
                         </div>
                     </div>
                     
-                    <!-- TABLA DE ARTÍCULOS -->
                     <table style="width: 100%; font-size: 11px; margin-bottom: 5px; font-family: 'Courier New', Courier, monospace; border-collapse: collapse;">
                         <tr><th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 12%;">Cant</th><th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 48%;">Cód / Descripción</th><th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">P.U.</th><th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">Total</th></tr>
                 `;
@@ -786,7 +846,6 @@
                     html += `<div style="margin-top: 10px;"></div>`; 
                 }
 
-                // PIE DE TICKET - MEJORADO CON QR
                 html += `
                     <div style="margin-top: 10px; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 9px; line-height: 1.4; border-top: 1px dashed #000; padding-top: 10px; color: #111;">
                         <div style="font-weight: bold; font-size: 10px;">TELÉFONOS OFICINA</div>
@@ -797,7 +856,6 @@
                         
                         <div style="margin-top: 5px;"><b>Correo:</b> ventas@laeconomicamty.com</div>
                         
-                        <!-- CÓDIGO QR Y CATÁLOGO DIGITAL -->
                         <div style="margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;">
                             <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=https://productoseen.web.app" style="width: 45px; height: 45px; border: 1px solid #ccc; padding: 2px;">
                             <div style="text-align: left;">
