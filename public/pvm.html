@@ -14,14 +14,13 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         
-        /* Uso de dvh para respetar barras de navegación en móviles/tablets */
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: #f1f5f9; 
             color: #0f172a; 
             overflow: hidden; 
-            height: 100vh; /* Fallback */
-            height: 100dvh; /* Altura dinámica real */
+            height: 100vh; 
+            height: 100dvh; 
         }
         
         .hide-scroll::-webkit-scrollbar { display: none; }
@@ -51,13 +50,11 @@
             
             @page { size: letter portrait; margin: 10mm; }
             
-            /* Salto de página automático después de cada ticket */
             .ticket-copy { 
                 page-break-inside: avoid; 
-                page-break-after: always; /* Fuerzo el salto a una nueva hoja */
+                page-break-after: always; 
                 padding-top: 5mm;
             }
-            /* Al último ticket no le agregamos hoja en blanco al final */
             .ticket-copy:last-child { 
                 page-break-after: auto; 
             }
@@ -341,7 +338,7 @@
         window.reporteFacturasEfectivo = []; window.reporteFacturasTodas = []; window.reporteMostrador = [];        
         let showInventoryConfig = false;
 
-        const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+        const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
 
         // ==========================================
         // ATAJOS DE TECLADO
@@ -380,7 +377,7 @@
         
         function openCheckoutModal() {
             if (cart.length === 0) return;
-            currentTotalToPay = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
+            currentTotalToPay = cart.reduce((sum, item) => sum + ((item.precio||0) * (item.qty||1)), 0);
             document.getElementById('checkoutTotalDisplay').innerText = formatMoney(currentTotalToPay);
             document.getElementById('inputEfectivoRecibido').value = '';
             document.getElementById('checkoutCambioDisplay').innerText = "$0.00";
@@ -595,48 +592,90 @@
         window.manualCartQty = (index, val) => { let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart(); }
 
         // ==========================================
-        // PROCESAMIENTO E IMPRESIÓN
+        // PROCESAMIENTO E IMPRESIÓN (BLINDADO)
         // ==========================================
         async function processSale() {
+            // Validaciones iniciales
             if (cart.length === 0) return;
-            const recibido = parseFloat(document.getElementById('inputEfectivoRecibido').value) || 0;
-            if (recibido > 0 && recibido < currentTotalToPay) { showToast("El dinero recibido es menor al total", "error"); return; }
-
             const btnFinal = document.getElementById('btnConfirmarVentaFinal'); 
-            btnFinal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...'; btnFinal.disabled = true;
+            if (btnFinal.disabled) return; // Evitar doble ejecución
 
-            const total = currentTotalToPay; let folio = "MOST-ERROR";
+            const recibido = parseFloat(document.getElementById('inputEfectivoRecibido').value) || 0;
+            if (recibido > 0 && recibido < currentTotalToPay) { 
+                showToast("El dinero recibido es menor al total", "error"); 
+                return; 
+            }
+
+            btnFinal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...'; 
+            btnFinal.disabled = true;
+
+            const total = currentTotalToPay || 0; 
+            let folio = "MOST-ERROR";
 
             try {
+                // 1. OBTENER FOLIO CONSECUTIVO
                 const counterRef = db.collection('configuracion').doc('consecutivos');
                 const nextSeq = await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(counterRef); let newSeq = 1;
-                    if (doc.exists && doc.data().venta_mostrador) { newSeq = doc.data().venta_mostrador + 1; }
-                    transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true }); return newSeq;
+                    const doc = await transaction.get(counterRef); 
+                    let newSeq = 1;
+                    if (doc.exists && doc.data().venta_mostrador) { 
+                        newSeq = doc.data().venta_mostrador + 1; 
+                    }
+                    transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true }); 
+                    return newSeq;
                 });
                 
                 folio = "MOST-" + String(nextSeq).padStart(5, '0');
 
+                // 2. PREPARAR DATOS SANITIZADOS PARA EVITAR ERRORES DE FIREBASE
                 const saleData = {
-                    folio: folio, fecha: firebase.firestore.FieldValue.serverTimestamp(), total: total,
-                    efectivo_recibido: recibido > 0 ? recibido : total, cambio_entregado: recibido > 0 ? (recibido - total) : 0,
-                    articulos: cart.map(i => ({ codigo: i.codigo, nombre: i.nombre, precio_unitario: i.precio, cantidad: i.qty, subtotal: i.precio * i.qty })),
-                    vendedor: "Mostrador General", estado: "COMPLETADA"
+                    folio: folio, 
+                    fecha: firebase.firestore.FieldValue.serverTimestamp(), 
+                    total: total,
+                    efectivo_recibido: recibido > 0 ? recibido : total, 
+                    cambio_entregado: recibido > 0 ? (recibido - total) : 0,
+                    articulos: cart.map(i => ({ 
+                        codigo: i.codigo || 'S/C', 
+                        nombre: i.nombre || 'Art.', 
+                        precio_unitario: i.precio || 0, 
+                        cantidad: i.qty || 1, 
+                        subtotal: (i.precio || 0) * (i.qty || 1) 
+                    })),
+                    vendedor: "Mostrador General", 
+                    estado: "COMPLETADA"
                 };
 
+                // 3. GUARDAR VENTA
                 await db.collection('ventas_mostrador').add(saleData);
-                closeCheckoutModal(); showToast(`Venta registrada: ${folio}`);
                 
-                const printData = { ...saleData, fecha: new Date() }; printTicketHTML(printData);
-                cart = []; renderCart(); document.getElementById('searchInput').focus();
-                
+                // 4. LIMPIAR INTERFAZ INMEDIATAMENTE (Para que veas que sí se registró)
+                closeCheckoutModal(); 
+                showToast(`Venta registrada: ${folio}`);
+                cart = []; 
+                renderCart(); 
+
                 if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
                 if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
 
+                // 5. AISLAR LA IMPRESIÓN (Si la impresión falla, la venta ya está registrada y limpia)
+                setTimeout(() => {
+                    try {
+                        const printData = { ...saleData, fecha: new Date() }; 
+                        printTicketHTML(printData);
+                    } catch(errPrint) {
+                        console.error("Error aislando la impresión:", errPrint);
+                        showToast("Venta guardada, pero la impresión falló. Reimprime desde Historial.", "info");
+                    }
+                }, 100);
+
+                setTimeout(() => document.getElementById('searchInput').focus(), 400);
+
             } catch (error) { 
-                console.error("Error:", error); showToast("Error al guardar venta", "error"); 
+                console.error("Error BD:", error); 
+                showToast("Error de conexión al guardar", "error"); 
             } finally {
-                btnFinal.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar'; btnFinal.disabled = false;
+                btnFinal.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar'; 
+                btnFinal.disabled = false;
             }
         }
 
@@ -645,7 +684,7 @@
             const printArea = document.getElementById('print-ticket');
             const fechaObj = (venta.fecha && typeof venta.fecha.toDate === 'function') ? venta.fecha.toDate() : (venta.fecha || new Date());
             const fechaStr = fechaObj.toLocaleDateString('es-MX'); const horaStr = fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-            const total = venta.total; const subtotal = total / 1.16; const iva = total - subtotal;
+            const total = venta.total || 0; const subtotal = total / 1.16; const iva = total - subtotal;
             
             // TIPOS DE FIRMA: 'client' (1 línea), 'warehouse' (2 líneas), 'none' (sin líneas)
             const copies = [
@@ -675,7 +714,7 @@
                         <tr><th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 12%;">Cant</th><th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 48%;">Cód / Descripción</th><th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">P.U.</th><th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">Total</th></tr>
                 `;
                 
-                venta.articulos.forEach(item => { html += `<tr><td style="vertical-align: top; padding-top: 4px; font-weight: bold;">${item.cantidad}x</td><td style="vertical-align: top; padding-top: 4px; padding-right: 4px;"><b>${item.codigo}</b><br>${item.nombre}</td><td style="vertical-align: top; padding-top: 4px; text-align:right;">${formatMoney(item.precio_unitario)}</td><td style="vertical-align: top; padding-top: 4px; text-align:right; font-weight:bold;">${formatMoney(item.subtotal)}</td></tr>`; });
+                (venta.articulos || []).forEach(item => { html += `<tr><td style="vertical-align: top; padding-top: 4px; font-weight: bold;">${item.cantidad}x</td><td style="vertical-align: top; padding-top: 4px; padding-right: 4px;"><b>${item.codigo}</b><br>${item.nombre}</td><td style="vertical-align: top; padding-top: 4px; text-align:right;">${formatMoney(item.precio_unitario)}</td><td style="vertical-align: top; padding-top: 4px; text-align:right; font-weight:bold;">${formatMoney(item.subtotal)}</td></tr>`; });
                 
                 let infoPago = ''; if(venta.efectivo_recibido) { infoPago = `<div style="display: flex; justify-content: space-between; border-top: 1px dashed #000; margin-top: 4px; padding-top: 4px; color: #555;"><span style="font-size: 10px;">Efectivo Recibido:</span> <span style="font-size: 10px;">${formatMoney(venta.efectivo_recibido)}</span></div><div style="display: flex; justify-content: space-between; color: #555;"><span style="font-size: 10px;">Cambio Entregado:</span> <span style="font-size: 10px;">${formatMoney(venta.cambio_entregado || 0)}</span></div>`; }
                 
@@ -718,7 +757,8 @@
                 html += `</div>`;
             });
             
-            printArea.innerHTML = html; setTimeout(() => { try { window.print(); } catch(e) {} }, 300);
+            printArea.innerHTML = html; 
+            setTimeout(() => { try { window.print(); } catch(e) { console.error("Error lanzando ventana de impresión:", e); } }, 300);
         }
 
         async function loadHistory() {
@@ -731,11 +771,11 @@
                 tbody.innerHTML = '';
                 historySales.forEach(v => {
                     const fechaStr = v.fecha ? v.fecha.toDate().toLocaleString('es-MX', {day: '2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente';
-                    const itemsDesc = v.articulos.map(a => `${a.cantidad}x ${a.codigo}`).join(', '); const isCanceled = v.estado === 'CANCELADA';
+                    const itemsDesc = (v.articulos||[]).map(a => `${a.cantidad}x ${a.codigo}`).join(', '); const isCanceled = v.estado === 'CANCELADA';
                     const motivoText = v.motivo_cancelacion ? `Motivo: ${v.motivo_cancelacion}` : ''; const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
                     const tr = document.createElement('tr'); tr.className = rowClass;
                     tr.innerHTML = `<td class="px-4 md:px-6 py-3 md:py-4"><div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-[11px] md:text-xs">${v.folio}</div><div class="text-[9px] md:text-[10px] text-slate-400 font-medium">${fechaStr}</div>${isCanceled ? `<span class="bg-red-100 text-red-600 text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">CANCELADA</span><div class="text-[8px] md:text-[9px] text-red-500 mt-0.5 italic max-w-[150px] truncate" title="${motivoText}">${motivoText}</div>` : ''}</td>
-                        <td class="px-4 md:px-6 py-3 md:py-4 text-[11px] md:text-xs text-slate-600 truncate max-w-[150px] md:max-w-[200px] hidden sm:table-cell" title="${itemsDesc}">${v.articulos.length} art. (${itemsDesc})</td>
+                        <td class="px-4 md:px-6 py-3 md:py-4 text-[11px] md:text-xs text-slate-600 truncate max-w-[150px] md:max-w-[200px] hidden sm:table-cell" title="${itemsDesc}">${(v.articulos||[]).length} art. (${itemsDesc})</td>
                         <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-sm md:text-base ${isCanceled ? 'text-slate-400 line-through' : 'text-slate-800'}">${formatMoney(v.total)}</td>
                         <td class="px-4 md:px-6 py-3 md:py-4 text-center"><div class="flex items-center justify-center gap-1 md:gap-2"><button onclick="reprintTicket('${v.id}')" class="text-blue-500 hover:bg-blue-100 p-1.5 md:p-2 rounded-lg transition" title="Reimprimir"><i class="fas fa-print"></i></button>${!isCanceled ? `<button onclick="cancelTicket('${v.id}', '${v.folio}')" class="text-red-500 hover:bg-red-100 p-1.5 md:p-2 rounded-lg transition" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}</div></td>`;
                     tbody.appendChild(tr);
