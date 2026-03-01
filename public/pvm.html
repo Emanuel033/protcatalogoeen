@@ -640,18 +640,18 @@
             }
         }
 
-        // --- IMPRESIÓN CON MEJORAS DE SALTO DE PÁGINA Y FIRMA ---
+        // --- IMPRESIÓN CON MEJORAS DE SALTO DE PÁGINA Y FIRMAS ESPECÍFICAS ---
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             const fechaObj = (venta.fecha && typeof venta.fecha.toDate === 'function') ? venta.fecha.toDate() : (venta.fecha || new Date());
             const fechaStr = fechaObj.toLocaleDateString('es-MX'); const horaStr = fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             const total = venta.total; const subtotal = total / 1.16; const iva = total - subtotal;
             
-            // Aquí configuramos las copias y si requieren la línea de firma al final
+            // TIPOS DE FIRMA: 'client' (1 línea), 'warehouse' (2 líneas), 'none' (sin líneas)
             const copies = [
-                { title: 'COPIA 1 - FIRMA (SUCURSAL)', requiresFirma: true }, 
-                { title: 'COPIA 2 - ALMACÉN', requiresFirma: false }, 
-                { title: 'COPIA 3 - CLIENTE', requiresFirma: false }
+                { title: 'COPIA 1 - FIRMA (SUCURSAL)', signType: 'client' }, 
+                { title: 'COPIA 2 - ALMACÉN', signType: 'warehouse' }, 
+                { title: 'COPIA 3 - CLIENTE', signType: 'none' }
             ];
             
             let html = '';
@@ -689,12 +689,28 @@
                         </div>
                     </div>`;
 
-                // Agregar la línea de firma si la copia lo requiere
-                if(copy.requiresFirma) {
+                // Agregar bloques de firma condicionales
+                if (copy.signType === 'client') {
+                    // Copia Sucursal: Una sola línea para el cliente
                     html += `
                     <div style="margin-top: 50px; margin-bottom: 20px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
                         <div style="border-top: 1px solid #000; width: 70%; margin: 0 auto; padding-top: 8px; font-weight: bold; font-size: 12px;">
                             Nombre y Firma de Recibido / Conformidad
+                        </div>
+                    </div>`;
+                } else if (copy.signType === 'warehouse') {
+                    // Copia Almacén: Dos líneas (Surtió y Revisó)
+                    html += `
+                    <div style="margin-top: 50px; margin-bottom: 20px; display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace;">
+                        <div style="text-align: center; width: 45%;">
+                            <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 12px;">
+                                Surtió
+                            </div>
+                        </div>
+                        <div style="text-align: center; width: 45%;">
+                            <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 12px;">
+                                Revisó
+                            </div>
                         </div>
                     </div>`;
                 }
