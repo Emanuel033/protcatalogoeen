@@ -63,6 +63,12 @@
 </head>
 <body class="flex w-full">
 
+    <!-- TRAMPA PARA GESTORES DE CONTRASEÑAS (Evita que el navegador moleste en los otros inputs) -->
+    <div style="display:none; width:0; height:0; overflow:hidden; position:absolute;">
+        <input type="text" name="fake_username_trap" tabindex="-1">
+        <input type="password" name="fake_password_trap" tabindex="-1">
+    </div>
+
     <!-- CREDENCIALES FIREBASE -->
     <script>
         const firebaseConfig = {
@@ -121,8 +127,7 @@
                     </div>
                     <div class="relative">
                         <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                        <!-- Autocomplete off para evitar sugerencias -->
-                        <input type="text" id="searchInput" oninput="filterCatalog()" placeholder="Buscar por código o nombre (F2)..." autocomplete="off" data-lpignore="true"
+                        <input type="text" id="searchInput" oninput="filterCatalog()" placeholder="Buscar por código o nombre (F2)..." autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false"
                             class="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-inner transition-all">
                     </div>
                 </div>
@@ -218,8 +223,7 @@
                             </div>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 transform -translate-y-1/2 font-bold text-slate-400">$</span>
-                                <!-- Cambiado type="number" a type="text" para evitar autofill -->
-                                <input type="text" inputmode="decimal" id="inputFacturado" value="0" autocomplete="off" data-lpignore="true" oninput="calculateCorte()" class="w-full pl-8 pr-4 py-2 md:py-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-base md:text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                <input type="text" inputmode="decimal" id="inputFacturado" value="0" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" oninput="this.value = this.value.replace(/[^0-9.]/g, ''); calculateCorte()" class="w-full pl-8 pr-4 py-2 md:py-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-base md:text-lg text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition">
                             </div>
                         </div>
 
@@ -297,8 +301,7 @@
                 <label class="block text-xs md:text-sm font-bold text-slate-600 mb-2">Efectivo Recibido:</label>
                 <div class="relative mb-4 md:mb-6">
                     <span class="absolute left-4 top-1/2 transform -translate-y-1/2 font-black text-slate-400 text-xl md:text-2xl">$</span>
-                    <!-- Cambiado type="number" a type="text" y añadido autocomplete="off" para bloquear popup de Chrome -->
-                    <input type="text" inputmode="decimal" id="inputEfectivoRecibido" autocomplete="off" data-lpignore="true" oninput="calculateChange()" class="w-full pl-10 pr-4 py-3 md:py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-black text-2xl md:text-3xl text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    <input type="text" inputmode="decimal" id="inputEfectivoRecibido" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" oninput="this.value = this.value.replace(/[^0-9.]/g, ''); calculateChange()" class="w-full pl-10 pr-4 py-3 md:py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-black text-2xl md:text-3xl text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
                 </div>
 
                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 md:p-4 mb-4 md:mb-6 text-center">
@@ -389,7 +392,6 @@
         }
 
         window.calculateChange = () => {
-            // Cambiamos parse a texto seguro
             const recibido = parseFloat(document.getElementById('inputEfectivoRecibido').value) || 0;
             const display = document.getElementById('checkoutCambioDisplay');
             if (recibido === 0) { display.innerText = "$0.00"; display.className = "text-3xl md:text-4xl font-black text-slate-300"; return; }
@@ -576,11 +578,12 @@
 
             cart.forEach((item, index) => {
                 const subtotal = item.precio * item.qty; total += subtotal;
-                // input de qty cambiado a text con inputmode=numeric y autocomplete off
                 container.innerHTML += `
                     <div class="bg-slate-50 border border-slate-100 p-2 md:p-3 rounded-xl flex flex-col relative animate-[fadeIn_0.2s_ease-out]">
                         <div class="flex justify-between items-start mb-2"><div class="pr-6"><h5 class="text-[11px] md:text-xs font-bold text-slate-800 leading-tight">${item.nombre}</h5><span class="text-[8px] md:text-[9px] font-mono text-slate-400">${item.codigo}</span></div><button onclick="updateCartQty(${index}, -${item.qty})" class="absolute top-1.5 md:top-2 right-1.5 md:right-2 text-slate-300 hover:text-red-500"><i class="fas fa-times text-sm"></i></button></div>
-                        <div class="flex justify-between items-end mt-auto"><div class="flex items-center bg-white border border-slate-200 rounded-lg"><button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-red-500 font-bold text-sm">-</button><input type="text" inputmode="numeric" autocomplete="off" data-lpignore="true" value="${item.qty}" onchange="manualCartQty(${index}, this.value)" class="w-8 md:w-10 text-center font-black text-xs md:text-sm text-slate-800 border-none outline-none focus:ring-0 p-0 bg-transparent"><button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm">+</button></div><div class="text-right"><div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div><div class="text-xs md:text-sm font-black text-slate-800">${formatMoney(subtotal)}</div></div></div>
+                        <div class="flex justify-between items-end mt-auto"><div class="flex items-center bg-white border border-slate-200 rounded-lg"><button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-red-500 font-bold text-sm">-</button>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" value="${item.qty}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); manualCartQty(${index}, this.value)" class="w-8 md:w-10 text-center font-black text-xs md:text-sm text-slate-800 border-none outline-none focus:ring-0 p-0 bg-transparent">
+                        <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm">+</button></div><div class="text-right"><div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div><div class="text-xs md:text-sm font-black text-slate-800">${formatMoney(subtotal)}</div></div></div>
                     </div>`;
             });
             totalEl.innerText = formatMoney(total);
@@ -659,7 +662,6 @@
 
                 await db.collection('ventas_mostrador').add(saleData);
                 
-                // Preparar datos para imprimir antes de limpiar
                 const printData = {
                     folio: saleData.folio,
                     fecha: new Date(), 
@@ -669,7 +671,6 @@
                     articulos: saleData.articulos
                 };
 
-                // CERRAR MODAL Y LIMPIAR
                 closeCheckoutModal(); 
                 showToast(`Venta registrada: ${folio}`);
                 cart = []; 
@@ -678,7 +679,6 @@
                 if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
                 if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
 
-                // IMPRIMIR TICKETS DIRECTAMENTE (Sin retraso anidado para evitar bloqueo de popups en Laptops)
                 printTicketHTML(printData);
 
                 setTimeout(() => document.getElementById('searchInput').focus(), 500);
@@ -692,7 +692,7 @@
             }
         }
 
-        // --- IMPRESIÓN DIRECTA SIN TIMEOUTS QUE ROMPAN NAVEGADORES ESTRICTOS ---
+        // --- IMPRESIÓN DIRECTA CON NUEVO FORMATO DE ENCABEZADO Y PIE DE PÁGINA ---
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             
@@ -722,11 +722,18 @@
             copies.forEach((copy) => {
                 html += `
                 <div class="ticket-copy">
+                    <!-- NUEVO ENCABEZADO -->
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; font-family: 'Courier New', Courier, monospace;">
-                        <div style="width: 60%;">
-                            <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px;"><img src="https://i.ibb.co/30B37g8C/LOGO-LETRA-NEGRA.png" style="max-width: 60px; height: auto;"><h2 style="margin:0; font-size: 14px; font-weight: 900;">ENVASES LA ECONÓMICA DEL NORTE</h2></div>
-                            <p style="margin:2px 0; font-size: 10px;">Sucursal: Calzada Guadalupe Victoria, Col. Obrerista, Monterrey, N.L.</p>
-                            <p style="margin:2px 0; font-size: 10px;">Tel: 81 8374-6703 / WhatsApp: 81 1372 8493</p>
+                        <div style="width: 65%; display: flex; gap: 8px; align-items: flex-start;">
+                            <!-- Logo compacto (fallback incluido si falla tu nuevo enlace) -->
+                            <img src="https://i.ibb.co/dJr7BzL5/logoeen.png" alt="logoeen" onerror="this.src='https://i.ibb.co/30B37g8C/LOGO-LETRA-NEGRA.png'" style="width: 45px; height: 45px; object-fit: contain; margin-top: 2px;">
+                            <div>
+                                <h2 style="margin:0; font-size: 12px; font-weight: 900; line-height: 1.1;">ENVASES LA ECONÓMICA DEL NORTE</h2>
+                                <p style="margin:4px 0 0 0; font-size: 9px; line-height: 1.2;">
+                                    Calzada Guadalupe Victoria 105 Oriente,<br>
+                                    Col. Obrerista, Monterrey, N.L. C.P. 64470
+                                </p>
+                            </div>
                         </div>
                         <div style="width: 35%; text-align: right;">
                             <h3 style="margin:0 0 5px 0; font-size: 11px; font-weight: bold; padding: 4px; border: 2px solid #000; display: inline-block;">${copy.title}</h3>
@@ -735,6 +742,8 @@
                             <p style="margin:2px 0; font-size: 10px;">${fechaStr} - ${horaStr}</p>
                         </div>
                     </div>
+                    
+                    <!-- TABLA DE ARTÍCULOS -->
                     <table style="width: 100%; font-size: 11px; margin-bottom: 5px; font-family: 'Courier New', Courier, monospace; border-collapse: collapse;">
                         <tr><th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 12%;">Cant</th><th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 48%;">Cód / Descripción</th><th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">P.U.</th><th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">Total</th></tr>
                 `;
@@ -755,41 +764,52 @@
 
                 if (copy.signType === 'client') {
                     html += `
-                    <div style="margin-top: 50px; margin-bottom: 20px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
-                        <div style="border-top: 1px solid #000; width: 70%; margin: 0 auto; padding-top: 8px; font-weight: bold; font-size: 12px;">
+                    <div style="margin-top: 40px; margin-bottom: 20px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
+                        <div style="border-top: 1px solid #000; width: 70%; margin: 0 auto; padding-top: 8px; font-weight: bold; font-size: 11px;">
                             Nombre y Firma de Recibido / Conformidad
                         </div>
                     </div>`;
                 } else if (copy.signType === 'warehouse') {
                     html += `
-                    <div style="margin-top: 50px; margin-bottom: 20px; display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace;">
+                    <div style="margin-top: 40px; margin-bottom: 20px; display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace;">
                         <div style="text-align: center; width: 45%;">
-                            <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 12px;">
+                            <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 11px;">
                                 Surtió
                             </div>
                         </div>
                         <div style="text-align: center; width: 45%;">
-                            <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 12px;">
+                            <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 11px;">
                                 Revisó
                             </div>
                         </div>
                     </div>`;
+                } else {
+                    // Para copia de cliente sin firma, damos un poco de margen visual extra antes del footer de contacto
+                    html += `<div style="margin-top: 20px;"></div>`; 
                 }
+
+                // NUEVO PIE DE TICKET (Datos de contacto agregados)
+                html += `
+                    <div style="margin-top: 15px; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 9px; line-height: 1.4; border-top: 1px dashed #000; padding-top: 10px; color: #111;">
+                        <div style="font-weight: bold; font-size: 10px;">TELÉFONOS OFICINA</div>
+                        <div>81 8375 4630 &bull; 81 8372 8736 &bull; 81 8374 6703 &bull; 81 8375 1518</div>
+                        
+                        <div style="font-weight: bold; font-size: 10px; margin-top: 5px;">WHATSAPP VENTAS</div>
+                        <div>81 1372 8493 &bull; 81 1840 0503</div>
+                        
+                        <div style="margin-top: 5px;"><b>Correo:</b> ventas@laeconomicamty.com</div>
+                        <div><b>Catálogo Digital:</b> productoseen.web.app</div>
+                    </div>
+                `;
 
                 html += `</div>`;
             });
             
             printArea.innerHTML = html; 
             
-            // Forzamos el refresco del DOM antes de lanzar print para que no falle en laptops
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    try { 
-                        window.print(); 
-                    } catch(e) { 
-                        console.error(e); 
-                        showToast("Venta guardada. Si no se imprimió, puede reimprimir desde el historial.", "error");
-                    }
+                    try { window.print(); } catch(e) { console.error(e); showToast("Venta guardada. Error al imprimir.", "error"); }
                 });
             });
         }
@@ -820,7 +840,18 @@
         window.cancelTicket = (id, folio) => { showPrompt("Cancelar Venta", "Motivo:", async (motivo) => { try { await db.collection('ventas_mostrador').doc(id).update({ estado: 'CANCELADA', motivo_cancelacion: motivo, fecha_cancelacion: firebase.firestore.FieldValue.serverTimestamp() }); showToast(`Ticket cancelado.`); loadHistory(); if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales(); } catch(error) { showToast("Error al cancelar.", "error"); } }); }
 
         const denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50]; let denomCounts = {}; let totalMostradorDelDia = 0;
-        function initCorteUI() { const container = document.getElementById('denomContainer'); container.innerHTML = ''; denominations.forEach(val => { denomCounts[val] = 0; const icon = val >= 20 ? '<i class="fas fa-money-bill-wave text-emerald-400"></i>' : '<i class="fas fa-coins text-amber-400"></i>'; container.innerHTML += `<div class="bg-slate-50 border border-slate-200 p-2 md:p-3 rounded-xl flex items-center justify-between"><div class="flex items-center gap-1.5 md:gap-2 font-black text-slate-700 text-xs md:text-sm">${icon} $${val}</div><input type="number" min="0" value="0" id="denom_${val}" oninput="updateDenom(${val}, this.value)" class="w-12 md:w-16 px-1.5 md:px-2 py-1 text-center font-bold text-slate-900 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm"></div>`; }); }
+        
+        function initCorteUI() { 
+            const container = document.getElementById('denomContainer'); 
+            container.innerHTML = ''; 
+            denominations.forEach(val => { 
+                denomCounts[val] = 0; 
+                const icon = val >= 20 ? '<i class="fas fa-money-bill-wave text-emerald-400"></i>' : '<i class="fas fa-coins text-amber-400"></i>'; 
+                container.innerHTML += `<div class="bg-slate-50 border border-slate-200 p-2 md:p-3 rounded-xl flex items-center justify-between"><div class="flex items-center gap-1.5 md:gap-2 font-black text-slate-700 text-xs md:text-sm">${icon} $${val}</div>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" value="0" id="denom_${val}" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" onfocus="this.select()" oninput="this.value = this.value.replace(/[^0-9]/g, ''); updateDenom(${val}, this.value)" class="w-12 md:w-16 px-1.5 md:px-2 py-1 text-center font-bold text-slate-900 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-sm"></div>`; 
+            }); 
+        }
+        
         window.updateDenom = (val, qty) => { denomCounts[val] = parseInt(qty) || 0; calculateCorte(); }
 
         async function loadTodaySales() {
