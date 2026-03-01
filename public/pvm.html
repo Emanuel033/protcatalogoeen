@@ -63,7 +63,7 @@
 </head>
 <body class="flex w-full">
 
-    <!-- TRAMPA PARA GESTORES DE CONTRASEÑAS (Evita que el navegador moleste en los otros inputs) -->
+    <!-- TRAMPA PARA GESTORES DE CONTRASEÑAS -->
     <div style="display:none; width:0; height:0; overflow:hidden; position:absolute;">
         <input type="text" name="fake_username_trap" tabindex="-1">
         <input type="password" name="fake_password_trap" tabindex="-1">
@@ -692,7 +692,7 @@
             }
         }
 
-        // --- IMPRESIÓN DIRECTA CON NUEVO FORMATO DE ENCABEZADO Y PIE DE PÁGINA ---
+        // --- IMPRESIÓN DIRECTA CON NUEVO LOGO Y CÓDIGO QR ---
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             
@@ -722,11 +722,10 @@
             copies.forEach((copy) => {
                 html += `
                 <div class="ticket-copy">
-                    <!-- NUEVO ENCABEZADO -->
+                    <!-- NUEVO ENCABEZADO CON EL LOGO ACTUALIZADO -->
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; font-family: 'Courier New', Courier, monospace;">
                         <div style="width: 65%; display: flex; gap: 8px; align-items: flex-start;">
-                            <!-- Logo compacto (fallback incluido si falla tu nuevo enlace) -->
-                            <img src="https://i.ibb.co/dJr7BzL5/logoeen.png" alt="logoeen" onerror="this.src='https://i.ibb.co/30B37g8C/LOGO-LETRA-NEGRA.png'" style="width: 45px; height: 45px; object-fit: contain; margin-top: 2px;">
+                            <img src="https://i.ibb.co/dJr7BzL5/logoeen.png" style="height: 45px; width: auto; max-width: 80px; object-fit: contain; margin-top: 2px;">
                             <div>
                                 <h2 style="margin:0; font-size: 12px; font-weight: 900; line-height: 1.1;">ENVASES LA ECONÓMICA DEL NORTE</h2>
                                 <p style="margin:4px 0 0 0; font-size: 9px; line-height: 1.2;">
@@ -764,14 +763,14 @@
 
                 if (copy.signType === 'client') {
                     html += `
-                    <div style="margin-top: 40px; margin-bottom: 20px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
+                    <div style="margin-top: 30px; margin-bottom: 10px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
                         <div style="border-top: 1px solid #000; width: 70%; margin: 0 auto; padding-top: 8px; font-weight: bold; font-size: 11px;">
                             Nombre y Firma de Recibido / Conformidad
                         </div>
                     </div>`;
                 } else if (copy.signType === 'warehouse') {
                     html += `
-                    <div style="margin-top: 40px; margin-bottom: 20px; display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace;">
+                    <div style="margin-top: 30px; margin-bottom: 10px; display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace;">
                         <div style="text-align: center; width: 45%;">
                             <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 11px;">
                                 Surtió
@@ -784,13 +783,12 @@
                         </div>
                     </div>`;
                 } else {
-                    // Para copia de cliente sin firma, damos un poco de margen visual extra antes del footer de contacto
-                    html += `<div style="margin-top: 20px;"></div>`; 
+                    html += `<div style="margin-top: 10px;"></div>`; 
                 }
 
-                // NUEVO PIE DE TICKET (Datos de contacto agregados)
+                // PIE DE TICKET - MEJORADO CON QR
                 html += `
-                    <div style="margin-top: 15px; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 9px; line-height: 1.4; border-top: 1px dashed #000; padding-top: 10px; color: #111;">
+                    <div style="margin-top: 10px; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 9px; line-height: 1.4; border-top: 1px dashed #000; padding-top: 10px; color: #111;">
                         <div style="font-weight: bold; font-size: 10px;">TELÉFONOS OFICINA</div>
                         <div>81 8375 4630 &bull; 81 8372 8736 &bull; 81 8374 6703 &bull; 81 8375 1518</div>
                         
@@ -798,7 +796,17 @@
                         <div>81 1372 8493 &bull; 81 1840 0503</div>
                         
                         <div style="margin-top: 5px;"><b>Correo:</b> ventas@laeconomicamty.com</div>
-                        <div><b>Catálogo Digital:</b> productoseen.web.app</div>
+                        
+                        <!-- CÓDIGO QR Y CATÁLOGO DIGITAL -->
+                        <div style="margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=https://productoseen.web.app" style="width: 45px; height: 45px; border: 1px solid #ccc; padding: 2px;">
+                            <div style="text-align: left;">
+                                <div style="font-weight: 900; font-size: 10px;">¡Escanea y compra en línea!</div>
+                                <div style="font-size: 10px;">productoseen.web.app</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 12px; font-weight: bold; font-size: 11px;">¡GRACIAS POR SU PREFERENCIA!</div>
                     </div>
                 `;
 
