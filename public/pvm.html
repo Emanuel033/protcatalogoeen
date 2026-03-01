@@ -82,6 +82,12 @@
                 <span class="text-[10px] font-bold">Corte</span>
             </button>
         </nav>
+        
+        <div class="mt-auto px-2 flex flex-col items-center opacity-50">
+            <span class="text-[8px] text-slate-400 font-bold mb-1 border-b border-slate-700 pb-1">ATAJOS</span>
+            <div class="text-[9px] text-slate-400 text-center"><b class="text-white">F2</b> Buscar</div>
+            <div class="text-[9px] text-slate-400 text-center"><b class="text-white">F9</b> Cobrar</div>
+        </div>
     </aside>
 
     <!-- ÁREA PRINCIPAL -->
@@ -91,12 +97,15 @@
         <div id="view-pos" class="w-full h-full flex flex-col md:flex-row">
             
             <div class="flex-1 flex flex-col h-full border-r border-slate-200 bg-white">
-                <div class="p-4 md:p-6 border-b border-slate-100 bg-white z-10 flex justify-between items-center gap-4">
+                <div class="p-4 md:p-6 border-b border-slate-100 bg-white z-10 flex justify-between items-center gap-4 shadow-sm">
                     <div class="flex-1">
-                        <h2 class="text-xl font-black text-slate-800 mb-4">Venta Mostrador</h2>
+                        <div class="flex justify-between items-end mb-4">
+                            <h2 class="text-xl font-black text-slate-800">Venta Mostrador</h2>
+                            <span id="inventoryStatusBadge" class="hidden text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md border border-indigo-200"><i class="fas fa-eye"></i> Inventario Visible</span>
+                        </div>
                         <div class="relative">
                             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="searchInput" oninput="filterCatalog()" placeholder="Buscar por código o nombre..." autocomplete="off"
+                            <input type="text" id="searchInput" oninput="filterCatalog()" placeholder="Buscar por código o nombre (F2)..." autocomplete="off"
                                 class="w-full pl-12 pr-4 py-3.5 bg-slate-100 border-none rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-inner transition-all">
                         </div>
                     </div>
@@ -104,9 +113,9 @@
                 
                 <div class="flex-1 overflow-y-auto custom-scroll p-4 md:p-6 bg-slate-50/50">
                     <div id="loadingProducts" class="text-center py-10 text-slate-400 font-bold">
-                        <i class="fas fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i><br>Cargando catálogo oficial, imágenes y empaques...
+                        <i class="fas fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i><br>Cargando catálogo, imágenes y stock...
                     </div>
-                    <!-- GRID DE PRODUCTOS MODIFICADO PARA IMÁGENES -->
+                    <!-- GRID DE PRODUCTOS -->
                     <div id="productsGrid" class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3 hidden"></div>
                 </div>
             </div>
@@ -125,9 +134,8 @@
                         <span class="font-bold text-slate-500">Total a cobrar:</span>
                         <span class="text-3xl font-black text-blue-600" id="cartTotal">$0.00</span>
                     </div>
-                    <!-- MODIFICADO: Ahora abre el modal de cambio en lugar de cobrar directo -->
                     <button onclick="openCheckoutModal()" id="btnPrepararCobro" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-black text-lg shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fas fa-cash-register"></i> Cobrar en Efectivo
+                        <i class="fas fa-cash-register"></i> Cobrar <span class="text-xs bg-white/20 px-2 py-0.5 rounded ml-1">F9</span>
                     </button>
                 </div>
             </div>
@@ -162,7 +170,7 @@
             </div>
         </div>
 
-        <!-- PESTAÑA 3: CORTE DE CAJA (Igual que antes) -->
+        <!-- PESTAÑA 3: CORTE DE CAJA -->
         <div id="view-corte" class="w-full h-full hidden flex-col p-6 md:p-8 overflow-y-auto custom-scroll">
             <div class="max-w-6xl mx-auto w-full">
                 <div class="flex justify-between items-end mb-6">
@@ -173,7 +181,6 @@
                         <i class="fas fa-file-excel"></i> Exportar Bitácora Detallada
                     </button>
                 </div>
-                <!-- ... contenido de corte idéntico al tuyo ... -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div class="lg:col-span-7 bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                         <h3 class="font-black text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-money-bill-wave text-emerald-500"></i> Billetes y Monedas (Físico)</h3>
@@ -241,7 +248,7 @@
 
     <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity z-[100] font-medium text-sm text-center"></div>
 
-    <!-- MODAL 1: VISOR DE IMÁGENES (NUEVO) -->
+    <!-- MODAL 1: VISOR DE IMÁGENES -->
     <div id="imageModal" class="fixed inset-0 bg-black/95 z-[120] hidden flex-col items-center justify-center p-4 backdrop-blur-sm transition-opacity" onclick="closeImageModal()">
         <button class="absolute top-6 right-8 text-white/50 hover:text-white text-4xl transition-colors"><i class="fas fa-times"></i></button>
         <img id="enlargedImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl" onclick="event.stopPropagation()">
@@ -251,7 +258,7 @@
         </div>
     </div>
 
-    <!-- MODAL 2: CALCULADORA DE CAMBIO AL COBRAR (NUEVO) -->
+    <!-- MODAL 2: CALCULADORA DE CAMBIO Y PAGO RÁPIDO -->
     <div id="checkoutModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl overflow-hidden max-w-md w-full shadow-2xl transform scale-95 transition-transform duration-200" id="checkoutBox">
             <div class="bg-slate-900 p-6 text-center relative">
@@ -261,7 +268,17 @@
             </div>
             
             <div class="p-6">
-                <label class="block text-sm font-bold text-slate-600 mb-2">Efectivo Recibido:</label>
+                <!-- BOTONES DE PAGO RÁPIDO -->
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <button onclick="setQuickPay(50)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg transition border border-slate-200">$50</button>
+                    <button onclick="setQuickPay(100)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg transition border border-slate-200">$100</button>
+                    <button onclick="setQuickPay(200)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg transition border border-slate-200">$200</button>
+                    <button onclick="setQuickPay(500)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg transition border border-slate-200">$500</button>
+                    <button onclick="setQuickPay(1000)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg transition border border-slate-200">$1000</button>
+                    <button onclick="setQuickPay('exact')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 font-black py-2 rounded-lg transition border border-blue-200">Exacto</button>
+                </div>
+
+                <label class="block text-sm font-bold text-slate-600 mb-2">Efectivo Recibido (Manual):</label>
                 <div class="relative mb-6">
                     <span class="absolute left-4 top-1/2 transform -translate-y-1/2 font-black text-slate-400 text-2xl">$</span>
                     <input type="number" id="inputEfectivoRecibido" oninput="calculateChange()" class="w-full pl-10 pr-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-black text-3xl text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
@@ -275,7 +292,7 @@
                 <div class="flex gap-3">
                     <button onclick="closeCheckoutModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-xl transition-colors">Cancelar</button>
                     <button id="btnConfirmarVentaFinal" onclick="processSale()" class="flex-[2] bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg py-4 rounded-xl transition-colors shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2">
-                        <i class="fas fa-check-circle"></i> Confirmar Venta
+                        <i class="fas fa-check-circle"></i> Confirmar <span class="text-xs bg-black/20 px-1.5 py-0.5 rounded ml-1">Enter</span>
                     </button>
                 </div>
             </div>
@@ -297,10 +314,41 @@
 
     <script>
         // GLOBALES
-        let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; let pendingSaleData = null; 
+        let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; 
         window.reporteFacturasEfectivo = []; window.reporteFacturasTodas = []; window.reporteMostrador = [];        
-        
+        let showInventoryConfig = false; // Variable global para saber si mostrar inventario o no
+
         const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+
+        // ==========================================
+        // ATAJOS DE TECLADO
+        // ==========================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+            if (e.key === 'F9') {
+                e.preventDefault();
+                if(cart.length > 0 && document.getElementById('checkoutModal').classList.contains('hidden')) {
+                    openCheckoutModal();
+                }
+            }
+            if (e.key === 'Enter') {
+                if (!document.getElementById('checkoutModal').classList.contains('hidden')) {
+                    e.preventDefault();
+                    processSale();
+                }
+            }
+            if (e.key === 'Escape') {
+                closeCheckoutModal();
+                closeImageModal();
+                const genericModal = document.getElementById('genericPromptModal');
+                if(!genericModal.classList.contains('hidden')) {
+                    document.getElementById('btnGenericPromptCancel').click();
+                }
+            }
+        });
 
         // UI & MODALES
         function showToast(msg, type = 'success') {
@@ -324,8 +372,9 @@
             document.getElementById('enlargedImg').src = "";
         }
 
-        // --- LÓGICA DE CALCULADORA DE CAMBIO ---
+        // --- LÓGICA DE CALCULADORA DE CAMBIO Y PAGO RÁPIDO ---
         let currentTotalToPay = 0;
+        
         function openCheckoutModal() {
             if (cart.length === 0) return;
             currentTotalToPay = cart.reduce((sum, item) => sum + (item.precio * item.qty), 0);
@@ -356,36 +405,34 @@
             const display = document.getElementById('checkoutCambioDisplay');
             
             if (recibido === 0) {
-                display.innerText = "$0.00";
-                display.className = "text-4xl font-black text-slate-300";
-                return;
+                display.innerText = "$0.00"; display.className = "text-4xl font-black text-slate-300"; return;
             }
 
             const cambio = recibido - currentTotalToPay;
             display.innerText = formatMoney(cambio);
 
-            if (cambio < 0) {
-                display.className = "text-4xl font-black text-red-500"; // Falta dinero
-            } else {
-                display.className = "text-4xl font-black text-blue-600"; // Cambio a entregar
-            }
+            if (cambio < 0) { display.className = "text-4xl font-black text-red-500"; } 
+            else { display.className = "text-4xl font-black text-blue-600"; }
         }
+
+        window.setQuickPay = (amount) => {
+            const input = document.getElementById('inputEfectivoRecibido');
+            if (amount === 'exact') { input.value = currentTotalToPay; } 
+            else { input.value = amount; }
+            calculateChange();
+            document.getElementById('btnConfirmarVentaFinal').focus();
+        };
 
 
         function showPrompt(title, message, onConfirmCallback) {
-            document.getElementById('genericPromptTitle').innerText = title;
-            document.getElementById('genericPromptText').innerText = message;
+            document.getElementById('genericPromptTitle').innerText = title; document.getElementById('genericPromptText').innerText = message;
             const input = document.getElementById('genericPromptInput'); input.value = '';
             const modal = document.getElementById('genericPromptModal'); const box = document.getElementById('genericPromptBox');
-
             document.getElementById('btnGenericPromptCancel').onclick = () => { box.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200); };
             document.getElementById('btnGenericPromptConfirm').onclick = () => {
-                const val = input.value.trim();
-                if(!val) return showToast('El motivo es obligatorio', 'error');
-                box.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200);
-                onConfirmCallback(val);
+                const val = input.value.trim(); if(!val) return showToast('El motivo es obligatorio', 'error');
+                box.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200); onConfirmCallback(val);
             };
-
             modal.classList.remove('hidden'); setTimeout(() => { box.classList.remove('scale-95'); input.focus(); }, 10);
         }
 
@@ -402,10 +449,19 @@
             if(tabId === 'corte') loadTodaySales();
         }
 
-        // CARGA DE CATÁLOGO (MODIFICADO PARA BUSCAR IMÁGENES)
+        // CARGA DE CATÁLOGO Y CONFIGURACIÓN MAESTRA
         async function loadData() {
             const loadingUI = document.getElementById('loadingProducts');
             try {
+                // 1. Obtener Configuración de Inventario
+                try {
+                    const configDoc = await db.collection('configuracion').doc('pos_settings').get();
+                    if (configDoc.exists) { showInventoryConfig = configDoc.data().mostrar_inventario === true; }
+                } catch(e) { console.warn("No se pudo cargar la config de inventario"); }
+
+                if(showInventoryConfig) { document.getElementById('inventoryStatusBadge').classList.remove('hidden'); }
+
+                // 2. Obtener Catálogo
                 const factSnap = await db.collection('catalogo_facturacion').get();
                 let tempCatalog = {};
                 
@@ -417,29 +473,29 @@
                     const nombre = data.descripcion_oficial || data.Descripcion_oficial || data.nombre_oficial || data.nombre || data.Nombre || data.descripcion || data.Descripcion || 'Articulo S/N';
                     const precioStr = data.precio || data.Precio || data.precio_unitario || data.Precio_unitario || 0;
                     
-                    // Inicializamos con imagen nula
-                    tempCatalog[code] = { id_facturacion: doc.id, codigo: code, nombre: nombre, precio: parseFloat(precioStr) || 0, empaques_tips: [], imagen: null };
+                    tempCatalog[code] = { id_facturacion: doc.id, codigo: code, nombre: nombre, precio: parseFloat(precioStr) || 0, empaques_tips: [], imagen: null, stock: 0 };
                 });
 
+                // 3. Cruzar con Productos Master (Extraer Imágenes y Stock)
                 const masterSnap = await db.collection('productos_master').where('activo', '==', true).get();
                 const masterIds = []; 
                 masterSnap.forEach(doc => {
                     const data = doc.data();
                     const code = data.codigo_sistema_oficial;
-                    
-                    // Buscamos la imagen en los campos más comunes
                     const imgUrl = data.imagen || data.url_imagen || data.foto || data.imagen_url || null;
+                    const stockNum = parseFloat(data.inventario_actual || data.stock || data.existencia || 0);
 
                     if (code && tempCatalog[code]) {
                         masterIds.push(doc.id);
                         const piezasBase = parseInt(data.piezas_por_caja_original) || 1;
                         if(piezasBase > 1) tempCatalog[code].empaques_tips.push(piezasBase);
                         
-                        // Si encontramos URL de imagen en el master, se la asignamos al catálogo
                         if (imgUrl) tempCatalog[code].imagen = imgUrl;
+                        tempCatalog[code].stock = stockNum;
                     }
                 });
 
+                // 4. Extraer Empaques (Paquetes)
                 const promesasPaquetes = masterIds.map(async (mId) => {
                     try {
                         const pkgs = await db.collection('productos_master').doc(mId).collection('paquetes').get();
@@ -461,21 +517,20 @@
                 loadingUI.classList.add('hidden');
                 document.getElementById('productsGrid').classList.remove('hidden');
                 filterCatalog();
+                document.getElementById('searchInput').focus(); // Auto enfocar la búsqueda al iniciar
             } catch (error) {
                 console.error(error);
                 loadingUI.innerHTML = `<span class='text-red-500 font-bold'>Error: ${error.message}</span>`;
             }
         }
 
-        // FILTRO DE CATÁLOGO (MODIFICADO PARA RENDERIZAR IMÁGENES)
+        // FILTRO DE CATÁLOGO (CON SOPORTE PARA MOSTRAR INVENTARIO)
         function filterCatalog() {
             const term = document.getElementById('searchInput').value.toLowerCase().trim();
             const grid = document.getElementById('productsGrid'); grid.innerHTML = '';
             filteredCatalog = catalogProducts.filter(p => String(p.nombre).toLowerCase().includes(term) || String(p.codigo).toLowerCase().includes(term));
             
-            if (filteredCatalog.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-bold">No se encontró el producto.</div>`; return;
-            }
+            if (filteredCatalog.length === 0) { grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-bold">No se encontró el producto.</div>`; return; }
 
             filteredCatalog.slice(0, 50).forEach(p => {
                 let tipsHTML = '';
@@ -485,40 +540,41 @@
                     tipsHTML += `</div>`;
                 }
 
+                // LÓGICA DE INVENTARIO
+                let inventoryBadge = '';
+                if (showInventoryConfig) {
+                    if (p.stock <= 5) {
+                        inventoryBadge = `<span class="text-[9px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded border border-red-200" title="Inventario Bajo"><i class="fas fa-exclamation-triangle mr-1"></i>${p.stock}</span>`;
+                    } else {
+                        inventoryBadge = `<span class="text-[9px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200" title="En Inventario"><i class="fas fa-cubes mr-1"></i>${p.stock}</span>`;
+                    }
+                }
+
                 const safeName = p.nombre.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                
-                // Determinamos qué mostrar como imagen
                 let imageBlock = '';
                 if (p.imagen) {
-                    // Si tiene imagen, mostramos la miniatura y el botón de zoom
                     imageBlock = `
                         <div class="w-16 h-16 shrink-0 relative group rounded-xl overflow-hidden border border-slate-200" 
                              onclick="event.stopPropagation(); showImage('${p.imagen}', '${safeName}', '${p.codigo}')">
                             <img src="${p.imagen}" class="w-full h-full object-cover group-hover:scale-110 transition-transform cursor-zoom-in" onerror="this.src='https://placehold.co/100x100/f1f5f9/94a3b8?text=Error'">
-                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-zoom-in">
-                                <i class="fas fa-search-plus text-white"></i>
-                            </div>
-                        </div>
-                    `;
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-zoom-in"><i class="fas fa-search-plus text-white"></i></div>
+                        </div>`;
                 } else {
-                    // Placeholder si no hay imagen
-                    imageBlock = `
-                        <div class="w-16 h-16 shrink-0 bg-slate-100 border border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-300">
-                            <i class="fas fa-box text-xl mb-1"></i>
-                            <span class="text-[8px] font-bold">S/I</span>
-                        </div>
-                    `;
+                    imageBlock = `<div class="w-16 h-16 shrink-0 bg-slate-100 border border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-300"><i class="fas fa-box text-xl mb-1"></i><span class="text-[8px] font-bold">S/I</span></div>`;
                 }
 
                 const card = document.createElement('div');
-                card.className = "bg-white border border-slate-200 p-3 rounded-2xl shadow-sm hover:border-blue-300 hover:shadow-md transition cursor-pointer flex gap-3 fade-in";
-                card.onclick = () => addToCart(p); // Clic en toda la tarjeta (excepto la foto) agrega al carrito
+                card.className = "bg-white border border-slate-200 p-3 rounded-2xl shadow-sm hover:border-blue-300 hover:shadow-md transition cursor-pointer flex gap-3 fade-in relative overflow-hidden";
+                card.onclick = () => addToCart(p);
                 
                 card.innerHTML = `
                     ${imageBlock}
-                    <div class="flex-1 flex flex-col justify-center">
+                    <div class="flex-1 flex flex-col justify-center min-w-0">
                         <div class="flex justify-between items-start mb-1 gap-2">
-                            <span class="font-mono text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold border border-slate-200 truncate max-w-[100px]">${p.codigo}</span>
+                            <div class="flex items-center gap-1 overflow-hidden">
+                                <span class="font-mono text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold border border-slate-200 truncate max-w-[80px]">${p.codigo}</span>
+                                ${inventoryBadge}
+                            </div>
                             <span class="text-sm font-black text-emerald-600 shrink-0">${formatMoney(p.precio)}</span>
                         </div>
                         <h4 class="font-bold text-slate-800 text-[12px] leading-tight flex-1 line-clamp-2" title="${p.nombre}">${p.nombre}</h4>
@@ -538,23 +594,15 @@
         }
 
         function updateCartQty(index, change) {
-            if (cart[index]) {
-                cart[index].qty += change;
-                if (cart[index].qty <= 0) cart.splice(index, 1);
-                renderCart();
-            }
+            if (cart[index]) { cart[index].qty += change; if (cart[index].qty <= 0) cart.splice(index, 1); renderCart(); }
         }
 
         function clearCart() {
-            if(cart.length === 0) return;
-            if(confirm("¿Limpiar todo el ticket?")) { cart = []; renderCart(); }
+            if(cart.length === 0) return; if(confirm("¿Limpiar todo el ticket?")) { cart = []; renderCart(); document.getElementById('searchInput').focus(); }
         }
 
         function renderCart() {
-            const container = document.getElementById('cartItems');
-            const totalEl = document.getElementById('cartTotal');
-            const btnPreparar = document.getElementById('btnPrepararCobro');
-
+            const container = document.getElementById('cartItems'); const totalEl = document.getElementById('cartTotal'); const btnPreparar = document.getElementById('btnPrepararCobro');
             if (cart.length === 0) {
                 container.innerHTML = `<div class="text-center py-20 text-slate-300 font-medium text-sm flex flex-col items-center"><i class="fas fa-shopping-basket text-4xl mb-3 opacity-50"></i>Ticket vacío.</div>`;
                 totalEl.innerText = "$0.00"; btnPreparar.disabled = true; btnPreparar.classList.add('opacity-50', 'cursor-not-allowed'); return;
@@ -574,79 +622,58 @@
             totalEl.innerText = formatMoney(total);
         }
 
-        window.manualCartQty = (index, val) => {
-            let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart();
-        }
+        window.manualCartQty = (index, val) => { let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart(); }
 
         // ==========================================
         // PROCESAMIENTO E IMPRESIÓN
         // ==========================================
         async function processSale() {
             if (cart.length === 0) return;
-            
-            // Verificamos si pagan menos
             const recibido = parseFloat(document.getElementById('inputEfectivoRecibido').value) || 0;
-            if (recibido > 0 && recibido < currentTotalToPay) {
-                showToast("El dinero recibido es menor al total a cobrar", "error");
-                return;
-            }
+            if (recibido > 0 && recibido < currentTotalToPay) { showToast("El dinero recibido es menor al total", "error"); return; }
 
             const btnFinal = document.getElementById('btnConfirmarVentaFinal'); 
-            btnFinal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...'; 
-            btnFinal.disabled = true;
+            btnFinal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...'; btnFinal.disabled = true;
 
-            const total = currentTotalToPay;
-            let folio = "MOST-ERROR";
+            const total = currentTotalToPay; let folio = "MOST-ERROR";
 
             try {
                 const counterRef = db.collection('configuracion').doc('consecutivos');
                 const nextSeq = await db.runTransaction(async (transaction) => {
-                    const doc = await transaction.get(counterRef);
-                    let newSeq = 1;
-                    if (doc.exists && doc.data().venta_mostrador) {
-                        newSeq = doc.data().venta_mostrador + 1;
-                    }
-                    transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true });
-                    return newSeq;
+                    const doc = await transaction.get(counterRef); let newSeq = 1;
+                    if (doc.exists && doc.data().venta_mostrador) { newSeq = doc.data().venta_mostrador + 1; }
+                    transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true }); return newSeq;
                 });
                 
                 folio = "MOST-" + String(nextSeq).padStart(5, '0');
 
                 const saleData = {
-                    folio: folio, 
-                    fecha: firebase.firestore.FieldValue.serverTimestamp(), 
-                    total: total,
-                    efectivo_recibido: recibido > 0 ? recibido : total,
-                    cambio_entregado: recibido > 0 ? (recibido - total) : 0,
-                    articulos: cart.map(i => ({ 
-                        codigo: i.codigo, nombre: i.nombre, precio_unitario: i.precio, cantidad: i.qty, subtotal: i.precio * i.qty 
-                    })),
-                    vendedor: "Mostrador General", 
-                    estado: "COMPLETADA"
+                    folio: folio, fecha: firebase.firestore.FieldValue.serverTimestamp(), total: total,
+                    efectivo_recibido: recibido > 0 ? recibido : total, cambio_entregado: recibido > 0 ? (recibido - total) : 0,
+                    articulos: cart.map(i => ({ codigo: i.codigo, nombre: i.nombre, precio_unitario: i.precio, cantidad: i.qty, subtotal: i.precio * i.qty })),
+                    vendedor: "Mostrador General", estado: "COMPLETADA"
                 };
 
                 await db.collection('ventas_mostrador').add(saleData);
-                closeCheckoutModal();
-                showToast(`Venta registrada: ${folio}`);
+                closeCheckoutModal(); showToast(`Venta registrada: ${folio}`);
                 
-                const printData = { ...saleData, fecha: new Date() };
-                printTicketHTML(printData);
+                // Si el inventario estaba visible, se podría descontar aquí, pero idealmente se hace desde el backend.
                 
+                const printData = { ...saleData, fecha: new Date() }; printTicketHTML(printData);
                 cart = []; renderCart();
+                document.getElementById('searchInput').focus(); // Enfocar para el siguiente cliente
                 
                 if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
                 if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
 
             } catch (error) { 
-                console.error("Error al procesar venta:", error);
-                showToast("Error de conexión al guardar la venta", "error"); 
+                console.error("Error al procesar:", error); showToast("Error al guardar venta", "error"); 
             } finally {
-                btnFinal.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar Venta'; 
-                btnFinal.disabled = false;
+                btnFinal.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar <span class="text-xs bg-black/20 px-1.5 py-0.5 rounded ml-1">Enter</span>'; btnFinal.disabled = false;
             }
         }
 
-        // Impresión... (igual a las versiones anteriores)
+        // --- IMPRESIÓN, HISTORIAL Y CORTE (SIN CAMBIOS) ---
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             const fechaObj = (venta.fecha && typeof venta.fecha.toDate === 'function') ? venta.fecha.toDate() : (venta.fecha || new Date());
@@ -683,11 +710,7 @@
                             <th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">Total</th>
                         </tr>
                 `;
-                venta.articulos.forEach(item => {
-                    html += `<tr><td style="vertical-align: top; padding-top: 4px; font-weight: bold;">${item.cantidad}x</td><td style="vertical-align: top; padding-top: 4px; padding-right: 4px;"><b>${item.codigo}</b><br>${item.nombre}</td><td style="vertical-align: top; padding-top: 4px; text-align:right;">${formatMoney(item.precio_unitario)}</td><td style="vertical-align: top; padding-top: 4px; text-align:right; font-weight:bold;">${formatMoney(item.subtotal)}</td></tr>`;
-                });
-                
-                // Mostrar Efectivo recibido y Cambio si existen en la data
+                venta.articulos.forEach(item => { html += `<tr><td style="vertical-align: top; padding-top: 4px; font-weight: bold;">${item.cantidad}x</td><td style="vertical-align: top; padding-top: 4px; padding-right: 4px;"><b>${item.codigo}</b><br>${item.nombre}</td><td style="vertical-align: top; padding-top: 4px; text-align:right;">${formatMoney(item.precio_unitario)}</td><td style="vertical-align: top; padding-top: 4px; text-align:right; font-weight:bold;">${formatMoney(item.subtotal)}</td></tr>`; });
                 let infoPago = '';
                 if(venta.efectivo_recibido) {
                     infoPago = `
@@ -695,7 +718,6 @@
                         <div style="display: flex; justify-content: space-between; color: #555;"><span style="font-size: 10px;">Cambio Entregado:</span> <span style="font-size: 10px;">${formatMoney(venta.cambio_entregado || 0)}</span></div>
                     `;
                 }
-
                 html += `
                     </table>
                     <div style="border-top: 1px solid #000; padding-top: 8px; font-family: 'Courier New', Courier, monospace; font-size: 11px; display: flex; justify-content: flex-end;">
@@ -708,280 +730,132 @@
                     </div>
                 </div>`;
             });
-            
-            printArea.innerHTML = html;
-            setTimeout(() => { try { window.print(); } catch(e) { console.error("Error al abrir impresión:", e); } }, 300);
+            printArea.innerHTML = html; setTimeout(() => { try { window.print(); } catch(e) { console.error("Error al abrir impresión:", e); } }, 300);
         }
 
-        // --- LAS DEMÁS FUNCIONES (Historial, Formatear Excel, Corte de Caja) SON LAS MISMAS ---
         async function loadHistory() {
-            const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando historial...</td></tr>';
+            const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando historial...</td></tr>';
             const date15DaysAgo = new Date(); date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
-
             try {
                 const snap = await db.collection('ventas_mostrador').where('fecha', '>=', date15DaysAgo).orderBy('fecha', 'desc').get();
                 historySales = []; snap.forEach(doc => historySales.push({id: doc.id, ...doc.data()}));
-
                 if (historySales.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400 font-bold">No hay ventas registradas.</td></tr>'; return; }
-
                 tbody.innerHTML = '';
                 historySales.forEach(v => {
                     const fechaStr = v.fecha ? v.fecha.toDate().toLocaleString('es-MX', {day: '2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente';
-                    const itemsDesc = v.articulos.map(a => `${a.cantidad}x ${a.codigo}`).join(', ');
-                    const isCanceled = v.estado === 'CANCELADA';
-                    const motivoText = v.motivo_cancelacion ? `Motivo: ${v.motivo_cancelacion}` : '';
-                    const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
-
+                    const itemsDesc = v.articulos.map(a => `${a.cantidad}x ${a.codigo}`).join(', '); const isCanceled = v.estado === 'CANCELADA';
+                    const motivoText = v.motivo_cancelacion ? `Motivo: ${v.motivo_cancelacion}` : ''; const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
                     const tr = document.createElement('tr'); tr.className = rowClass;
                     tr.innerHTML = `
-                        <td class="px-6 py-4">
-                            <div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-xs">${v.folio}</div>
-                            <div class="text-[10px] text-slate-400 font-medium">${fechaStr}</div>
-                            ${isCanceled ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">CANCELADA</span><div class="text-[9px] text-red-500 mt-0.5 italic max-w-[150px] truncate" title="${motivoText}">${motivoText}</div>` : ''}
-                        </td>
+                        <td class="px-6 py-4"><div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-xs">${v.folio}</div><div class="text-[10px] text-slate-400 font-medium">${fechaStr}</div>${isCanceled ? `<span class="bg-red-100 text-red-600 text-[9px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">CANCELADA</span><div class="text-[9px] text-red-500 mt-0.5 italic max-w-[150px] truncate" title="${motivoText}">${motivoText}</div>` : ''}</td>
                         <td class="px-6 py-4 text-xs text-slate-600 truncate max-w-[200px]" title="${itemsDesc}">${v.articulos.length} art. (${itemsDesc})</td>
                         <td class="px-6 py-4 text-right font-black ${isCanceled ? 'text-slate-400 line-through' : 'text-slate-800'}">${formatMoney(v.total)}</td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="flex items-center justify-center gap-2">
-                                <button onclick="reprintTicket('${v.id}')" class="text-blue-500 hover:bg-blue-100 p-2 rounded-lg transition" title="Reimprimir"><i class="fas fa-print"></i></button>
-                                ${!isCanceled ? `<button onclick="cancelTicket('${v.id}', '${v.folio}')" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
-                            </div>
-                        </td>
+                        <td class="px-6 py-4 text-center"><div class="flex items-center justify-center gap-2"><button onclick="reprintTicket('${v.id}')" class="text-blue-500 hover:bg-blue-100 p-2 rounded-lg transition" title="Reimprimir"><i class="fas fa-print"></i></button>${!isCanceled ? `<button onclick="cancelTicket('${v.id}', '${v.folio}')" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}</div></td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (error) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold">Error al cargar el historial.</td></tr>'; }
         }
 
-        window.reprintTicket = (id) => { 
-            const venta = historySales.find(v => String(v.id) === String(id));
-            if (venta) { showToast("Preparando impresión...", "info"); printTicketHTML(venta); } 
-            else { showToast("No se encontró el detalle de la venta.", "error"); }
-        }
+        window.reprintTicket = (id) => { const venta = historySales.find(v => String(v.id) === String(id)); if (venta) { showToast("Preparando impresión...", "info"); printTicketHTML(venta); } else { showToast("No se encontró el detalle de la venta.", "error"); } }
+        window.cancelTicket = (id, folio) => { showPrompt("Cancelar Venta " + folio, "Esta acción es irreversible. Escribe el motivo:", async (motivo) => { try { await db.collection('ventas_mostrador').doc(id).update({ estado: 'CANCELADA', motivo_cancelacion: motivo, fecha_cancelacion: firebase.firestore.FieldValue.serverTimestamp() }); showToast(`Ticket ${folio} cancelado.`); loadHistory(); if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales(); } catch(error) { showToast("No se pudo cancelar el ticket.", "error"); } }); }
 
-        window.cancelTicket = (id, folio) => {
-            showPrompt("Cancelar Venta " + folio, "Esta acción es irreversible. Escribe el motivo:", async (motivo) => {
-                try {
-                    await db.collection('ventas_mostrador').doc(id).update({ estado: 'CANCELADA', motivo_cancelacion: motivo, fecha_cancelacion: firebase.firestore.FieldValue.serverTimestamp() });
-                    showToast(`Ticket ${folio} cancelado.`); loadHistory(); if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
-                } catch(error) { showToast("No se pudo cancelar el ticket.", "error"); }
-            });
-        }
-
-        const denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50];
-        let denomCounts = {}; let totalMostradorDelDia = 0;
-
-        function initCorteUI() {
-            const container = document.getElementById('denomContainer'); container.innerHTML = '';
-            denominations.forEach(val => {
-                denomCounts[val] = 0;
-                const icon = val >= 20 ? '<i class="fas fa-money-bill-wave text-emerald-400"></i>' : '<i class="fas fa-coins text-amber-400"></i>';
-                container.innerHTML += `<div class="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between"><div class="flex items-center gap-2 font-black text-slate-700 text-sm">${icon} $${val}</div><input type="number" min="0" value="0" id="denom_${val}" oninput="updateDenom(${val}, this.value)" class="w-16 px-2 py-1 text-center font-bold text-slate-900 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"></div>`;
-            });
-        }
-
+        const denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50]; let denomCounts = {}; let totalMostradorDelDia = 0;
+        function initCorteUI() { const container = document.getElementById('denomContainer'); container.innerHTML = ''; denominations.forEach(val => { denomCounts[val] = 0; const icon = val >= 20 ? '<i class="fas fa-money-bill-wave text-emerald-400"></i>' : '<i class="fas fa-coins text-amber-400"></i>'; container.innerHTML += `<div class="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between"><div class="flex items-center gap-2 font-black text-slate-700 text-sm">${icon} $${val}</div><input type="number" min="0" value="0" id="denom_${val}" oninput="updateDenom(${val}, this.value)" class="w-16 px-2 py-1 text-center font-bold text-slate-900 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"></div>`; }); }
         window.updateDenom = (val, qty) => { denomCounts[val] = parseInt(qty) || 0; calculateCorte(); }
 
         async function loadTodaySales() {
-            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-            document.getElementById('totalMostradorHoy').innerText = "...";
+            const todayStart = new Date(); todayStart.setHours(0,0,0,0); document.getElementById('totalMostradorHoy').innerText = "...";
             try {
                 const snap = await db.collection('ventas_mostrador').where('fecha', '>=', todayStart).get();
                 totalMostradorDelDia = 0; window.reporteMostrador = [];
-                snap.forEach(doc => { 
-                    const data = doc.data(); 
-                    if (data.estado !== 'CANCELADA') {
-                        totalMostradorDelDia += data.total; 
-                        window.reporteMostrador.push({ folio: data.folio, fecha: data.fecha ? data.fecha.toDate().toLocaleTimeString('es-MX') : 'S/H', total: data.total });
-                    }
-                });
-                document.getElementById('totalMostradorHoy').innerText = formatMoney(totalMostradorDelDia);
-                calculateCorte();
+                snap.forEach(doc => { const data = doc.data(); if (data.estado !== 'CANCELADA') { totalMostradorDelDia += data.total; window.reporteMostrador.push({ folio: data.folio, fecha: data.fecha ? data.fecha.toDate().toLocaleTimeString('es-MX') : 'S/H', total: data.total }); } });
+                document.getElementById('totalMostradorHoy').innerText = formatMoney(totalMostradorDelDia); calculateCorte();
             } catch(e) { showToast("Error al obtener ventas del día", "error"); }
         }
 
         window.handleExcelUpload = (event) => {
-            const file = event.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
+            const file = event.target.files[0]; if(!file) return; const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]]; const json = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""}); 
                     let headerRowIndex = -1; let colFolio = -1, colMetodo = -1, colTotal = -1;
                     for(let i=0; i < Math.min(20, json.length); i++) {
-                        if(!json[i] || json[i].length === 0) continue;
-                        const rowStrArray = json[i].map(c => String(c).toLowerCase());
+                        if(!json[i] || json[i].length === 0) continue; const rowStrArray = json[i].map(c => String(c).toLowerCase());
                         const idxFolio = rowStrArray.findIndex(c => c.includes('folio') || c.includes('factura') || c.includes('documento'));
                         const idxMetodo = rowStrArray.findIndex(c => c.includes('metodo') || c.includes('pago') || c.includes('forma'));
                         const idxTotal = rowStrArray.findIndex(c => c.includes('total') || c.includes('importe') || c.includes('monto'));
-                        if (idxFolio !== -1 || idxMetodo !== -1 || idxTotal !== -1) {
-                            headerRowIndex = i; if(idxFolio !== -1) colFolio = idxFolio; if(idxMetodo !== -1) colMetodo = idxMetodo; if(idxTotal !== -1) colTotal = idxTotal;
-                            if(colFolio !== -1 && colMetodo !== -1) break;
-                        }
+                        if (idxFolio !== -1 || idxMetodo !== -1 || idxTotal !== -1) { headerRowIndex = i; if(idxFolio !== -1) colFolio = idxFolio; if(idxMetodo !== -1) colMetodo = idxMetodo; if(idxTotal !== -1) colTotal = idxTotal; if(colFolio !== -1 && colMetodo !== -1) break; }
                     }
                     window.reporteFacturasEfectivo = []; window.reporteFacturasTodas = []; let totalEfectivo = 0;
                     for(let i = headerRowIndex + 1; i < json.length; i++) {
                         const row = json[i]; if (!row || row.length === 0) continue;
                         const textoMetodo = colMetodo !== -1 && row[colMetodo] ? String(row[colMetodo]).toLowerCase() : row.join(' ').toLowerCase();
-                        const textoMetodoOriginal = colMetodo !== -1 ? (row[colMetodo] || textoMetodo) : textoMetodo;
-                        const folioStr = colFolio !== -1 ? (row[colFolio] || 'S/F') : 'S/F';
-                        let montoFila = 0;
-                        if (colTotal !== -1 && !isNaN(parseFloat(row[colTotal]))) { montoFila = parseFloat(row[colTotal]); } 
-                        else { const nums = row.map(c => parseFloat(c)).filter(n => !isNaN(n)); if(nums.length > 0) montoFila = Math.max(...nums); }
+                        const textoMetodoOriginal = colMetodo !== -1 ? (row[colMetodo] || textoMetodo) : textoMetodo; const folioStr = colFolio !== -1 ? (row[colFolio] || 'S/F') : 'S/F';
+                        let montoFila = 0; if (colTotal !== -1 && !isNaN(parseFloat(row[colTotal]))) { montoFila = parseFloat(row[colTotal]); } else { const nums = row.map(c => parseFloat(c)).filter(n => !isNaN(n)); if(nums.length > 0) montoFila = Math.max(...nums); }
                         if (folioStr !== 'S/F' || montoFila > 0 || textoMetodoOriginal.trim() !== '') { window.reporteFacturasTodas.push({ folio: folioStr, metodo: textoMetodoOriginal, total: montoFila }); }
-                        if (textoMetodo.includes('efectivo')) {
-                            let montoExtraido = 0; const regexEfectivo = /efectivo\s*\$?\s*(\d+(?:\.\d+)?)/; const match = textoMetodo.match(regexEfectivo);
-                            if (match && match[1]) montoExtraido = parseFloat(match[1]); else montoExtraido = montoFila;
-                            if (montoExtraido > 0) { totalEfectivo += montoExtraido; window.reporteFacturasEfectivo.push({ folio: folioStr, metodo_original: textoMetodoOriginal, monto_efectivo: montoExtraido }); }
-                        }
+                        if (textoMetodo.includes('efectivo')) { let montoExtraido = 0; const regexEfectivo = /efectivo\s*\$?\s*(\d+(?:\.\d+)?)/; const match = textoMetodo.match(regexEfectivo); if (match && match[1]) montoExtraido = parseFloat(match[1]); else montoExtraido = montoFila; if (montoExtraido > 0) { totalEfectivo += montoExtraido; window.reporteFacturasEfectivo.push({ folio: folioStr, metodo_original: textoMetodoOriginal, monto_efectivo: montoExtraido }); } }
                     }
-                    document.getElementById('inputFacturado').value = totalEfectivo.toFixed(2); calculateCorte();
-                    showToast(`Reporte procesado. ${window.reporteFacturasEfectivo.length} facturas en efectivo de ${window.reporteFacturasTodas.length}.`);
-                } catch(err) { console.error(err); showToast("Error al leer el Excel. Verifica el formato.", "error"); }
+                    document.getElementById('inputFacturado').value = totalEfectivo.toFixed(2); calculateCorte(); showToast(`Reporte procesado. ${window.reporteFacturasEfectivo.length} facturas en efectivo.`);
+                } catch(err) { console.error(err); showToast("Error al leer el Excel.", "error"); }
                 event.target.value = ''; 
-            };
-            reader.readAsArrayBuffer(file);
+            }; reader.readAsArrayBuffer(file);
         }
 
         window.handleExcelFormat = (event) => {
-            const file = event.target.files[0]; if(!file) return;
-            showToast("Procesando y aplicando estilos...", "info");
-            const reader = new FileReader();
+            const file = event.target.files[0]; if(!file) return; showToast("Procesando y aplicando estilos...", "info"); const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array', cellDates: true});
-                    const sheetName = workbook.SheetNames[0]; const worksheet = workbook.Sheets[sheetName];
-                    const rawData = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""});
+                    const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array', cellDates: true});
+                    const sheetName = workbook.SheetNames[0]; const worksheet = workbook.Sheets[sheetName]; const rawData = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ""});
                     if(rawData.length === 0) { showToast("El Excel está vacío", "error"); return; }
                     let headerRowIdx = 0;
-                    for(let i=0; i<Math.min(20, rawData.length); i++) {
-                        if(rawData[i] && rawData[i].length > 0) {
-                            const strRow = rawData[i].map(c => String(c).toLowerCase());
-                            if(strRow.some(c => c.includes('folio') || c.includes('razon social') || c.includes('rfc'))) { headerRowIdx = i; break; }
-                        }
-                    }
+                    for(let i=0; i<Math.min(20, rawData.length); i++) { if(rawData[i] && rawData[i].length > 0) { const strRow = rawData[i].map(c => String(c).toLowerCase()); if(strRow.some(c => c.includes('folio') || c.includes('razon social') || c.includes('rfc'))) { headerRowIdx = i; break; } } }
                     const headers = rawData[headerRowIdx].map(c => String(c).trim()); const colsToRemove = [];
                     headers.forEach((h, idx) => { const hl = h.toLowerCase(); if(hl === 'serie' || hl === 'uuid') { colsToRemove.push(idx); } });
                     const newData = []; let lastRowWithData = headerRowIdx; 
-                    for(let i=0; i<rawData.length; i++) {
-                        const oldRow = rawData[i]; const newRow = []; let hasData = false;
-                        for(let j=0; j<oldRow.length; j++) { if(!colsToRemove.includes(j)) { newRow.push(oldRow[j]); if(String(oldRow[j]).trim() !== '') hasData = true; } }
-                        if (i >= headerRowIdx && hasData) lastRowWithData = newData.length; newData.push(newRow);
-                    }
-                    const newWs = XLSX.utils.aoa_to_sheet(newData); const finalHeaders = newData[headerRowIdx] || [];
-                    let targetRazonSocialIdx = -1;
+                    for(let i=0; i<rawData.length; i++) { const oldRow = rawData[i]; const newRow = []; let hasData = false; for(let j=0; j<oldRow.length; j++) { if(!colsToRemove.includes(j)) { newRow.push(oldRow[j]); if(String(oldRow[j]).trim() !== '') hasData = true; } } if (i >= headerRowIdx && hasData) lastRowWithData = newData.length; newData.push(newRow); }
+                    const newWs = XLSX.utils.aoa_to_sheet(newData); const finalHeaders = newData[headerRowIdx] || []; let targetRazonSocialIdx = -1;
                     finalHeaders.forEach((h, idx) => { const hl = String(h).toLowerCase().trim(); if(hl === 'razon social' || hl === 'razón social' || hl.includes('razon social')) { targetRazonSocialIdx = idx; } });
                     if (targetRazonSocialIdx === -1) { finalHeaders.forEach((h, idx) => { const hl = String(h).toLowerCase().trim(); if(hl === 'nombre' || hl.includes('cliente')) targetRazonSocialIdx = idx; }); }
                     const colWidths = [];
                     for(let col = 0; col < finalHeaders.length; col++) {
                         let maxLen = String(finalHeaders[col] || "").length;
-                        for(let row = headerRowIdx + 1; row <= lastRowWithData; row++) {
-                            if(newData[row] && newData[row][col] !== undefined) {
-                                let valLen = 0;
-                                if (newData[row][col] instanceof Date) { valLen = 10; } else { valLen = String(newData[row][col]).length; }
-                                if(valLen > maxLen) maxLen = valLen;
-                            }
-                        }
-                        // Ancho gigantesco garantizado para Razón Social
-                        if(col === targetRazonSocialIdx) { colWidths[col] = { wch: Math.max(maxLen + 30, 70) }; } 
-                        else { colWidths[col] = { wch: maxLen + 2 }; }
+                        for(let row = headerRowIdx + 1; row <= lastRowWithData; row++) { if(newData[row] && newData[row][col] !== undefined) { let valLen = 0; if (newData[row][col] instanceof Date) { valLen = 10; } else { valLen = String(newData[row][col]).length; } if(valLen > maxLen) maxLen = valLen; } }
+                        if(col === targetRazonSocialIdx) { colWidths[col] = { wch: Math.max(maxLen + 30, 70) }; } else { colWidths[col] = { wch: maxLen + 2 }; }
                     }
-                    newWs['!cols'] = colWidths;
-                    const borderStyle = { style: 'thin', color: { rgb: "000000" } };
-                    for(let r = 0; r <= lastRowWithData; r++) {
-                        for(let c = 0; c < finalHeaders.length; c++) {
-                            const cellAddress = XLSX.utils.encode_cell({r: r, c: c});
-                            if(!newWs[cellAddress]) newWs[cellAddress] = { t: 's', v: '' };
-                            if (r >= headerRowIdx) {
-                                const cellStyle = { border: { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle } };
-                                if (r === headerRowIdx) { cellStyle.font = { bold: true, color: { rgb: "FFFFFF" } }; cellStyle.fill = { fgColor: { rgb: "4F46E5" } }; }
-                                newWs[cellAddress].s = cellStyle;
-                            }
-                            if (newData[r] && newData[r][c] instanceof Date) { newWs[cellAddress].t = 'd'; newWs[cellAddress].z = 'dd/mm/yyyy'; }
-                        }
-                    }
-                    newWs['!ref'] = XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: lastRowWithData, c: finalHeaders.length - 1}});
-                    const newWb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(newWb, newWs, "Reporte Optimizado"); XLSX.writeFile(newWb, "Reporte_Facturas_Optimizado.xlsx");
-                    showToast("Formato Excel generado con éxito", "success");
-                } catch(error) { console.error("Error procesando formato:", error); showToast("Ocurrió un error al formatear el documento.", "error"); }
+                    newWs['!cols'] = colWidths; const borderStyle = { style: 'thin', color: { rgb: "000000" } };
+                    for(let r = 0; r <= lastRowWithData; r++) { for(let c = 0; c < finalHeaders.length; c++) { const cellAddress = XLSX.utils.encode_cell({r: r, c: c}); if(!newWs[cellAddress]) newWs[cellAddress] = { t: 's', v: '' }; if (r >= headerRowIdx) { const cellStyle = { border: { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle } }; if (r === headerRowIdx) { cellStyle.font = { bold: true, color: { rgb: "FFFFFF" } }; cellStyle.fill = { fgColor: { rgb: "4F46E5" } }; } newWs[cellAddress].s = cellStyle; } if (newData[r] && newData[r][c] instanceof Date) { newWs[cellAddress].t = 'd'; newWs[cellAddress].z = 'dd/mm/yyyy'; } } }
+                    newWs['!ref'] = XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: lastRowWithData, c: finalHeaders.length - 1}}); const newWb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(newWb, newWs, "Reporte Optimizado"); XLSX.writeFile(newWb, "Reporte_Facturas_Optimizado.xlsx"); showToast("Formato Excel generado con éxito", "success");
+                } catch(error) { console.error("Error:", error); showToast("Error al formatear documento.", "error"); }
                 event.target.value = ''; 
-            };
-            reader.readAsArrayBuffer(file);
+            }; reader.readAsArrayBuffer(file);
         }
 
         window.calculateCorte = () => {
-            let totalFisico = 0; denominations.forEach(val => { totalFisico += (val * denomCounts[val]); });
-            document.getElementById('totalFisico').innerText = formatMoney(totalFisico);
-            const facturadoInput = parseFloat(document.getElementById('inputFacturado').value) || 0;
-            const totalTeorico = facturadoInput + totalMostradorDelDia;
-            document.getElementById('totalTeorico').innerText = formatMoney(totalTeorico);
-            const diferencia = totalFisico - totalTeorico;
-            const resDiv = document.getElementById('resultadoDiferencia'); const txtDiv = document.getElementById('textoDiferencia');
+            let totalFisico = 0; denominations.forEach(val => { totalFisico += (val * denomCounts[val]); }); document.getElementById('totalFisico').innerText = formatMoney(totalFisico);
+            const facturadoInput = parseFloat(document.getElementById('inputFacturado').value) || 0; const totalTeorico = facturadoInput + totalMostradorDelDia; document.getElementById('totalTeorico').innerText = formatMoney(totalTeorico);
+            const diferencia = totalFisico - totalTeorico; const resDiv = document.getElementById('resultadoDiferencia'); const txtDiv = document.getElementById('textoDiferencia');
             resDiv.innerText = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', signDisplay: 'always' }).format(diferencia);
-            if (Math.abs(diferencia) < 0.1) {
-                resDiv.className = "text-4xl font-black text-emerald-400"; txtDiv.innerText = "¡Caja cuadrada perfectamente! ✅"; txtDiv.className = "text-sm font-bold mt-2 text-emerald-300";
-            } else if (diferencia > 0) {
-                resDiv.className = "text-4xl font-black text-blue-400"; txtDiv.innerText = "Sobrante en caja 📈"; txtDiv.className = "text-sm font-bold mt-2 text-blue-300";
-            } else {
-                resDiv.className = "text-4xl font-black text-red-400"; txtDiv.innerText = "Faltante en caja ⚠️"; txtDiv.className = "text-sm font-bold mt-2 text-red-300";
-            }
+            if (Math.abs(diferencia) < 0.1) { resDiv.className = "text-4xl font-black text-emerald-400"; txtDiv.innerText = "¡Caja cuadrada perfectamente! ✅"; txtDiv.className = "text-sm font-bold mt-2 text-emerald-300"; } 
+            else if (diferencia > 0) { resDiv.className = "text-4xl font-black text-blue-400"; txtDiv.innerText = "Sobrante en caja 📈"; txtDiv.className = "text-sm font-bold mt-2 text-blue-300"; } 
+            else { resDiv.className = "text-4xl font-black text-red-400"; txtDiv.innerText = "Faltante en caja ⚠️"; txtDiv.className = "text-sm font-bold mt-2 text-red-300"; }
         }
 
         window.exportCorteToExcel = () => {
-            const dateStr = new Date().toLocaleString('es-MX'); const fileDate = new Date().toISOString().slice(0,10);
-            const wsData = [];
+            const dateStr = new Date().toLocaleString('es-MX'); const fileDate = new Date().toISOString().slice(0,10); const wsData = [];
             const writeCell = (r, c, val) => { while (wsData.length <= r) wsData.push([]); wsData[r][c] = val; };
-            writeCell(0, 0, 'CORTE DE CAJA - ENVASES LA ECONÓMICA DEL NORTE'); writeCell(1, 0, 'Fecha y Hora de Emisión:'); writeCell(1, 1, dateStr);
-            writeCell(3, 0, '--- TODAS LAS FACTURAS ---'); writeCell(3, 4, '--- FACTURAS EFECTIVO ---');
-            writeCell(3, 8, '--- MOSTRADOR (APP) ---'); writeCell(3, 12, '--- FÍSICO Y CÁLCULOS ---');
-            writeCell(4, 0, 'Folio / Factura'); writeCell(4, 1, 'Método Detectado'); writeCell(4, 2, 'Total');
-            writeCell(4, 4, 'Folio / Factura'); writeCell(4, 5, 'Texto Original'); writeCell(4, 6, 'Monto Efectivo');
-            writeCell(4, 8, 'Folio Ticket'); writeCell(4, 9, 'Hora'); writeCell(4, 10, 'Total');
-            writeCell(4, 12, 'Denominación'); writeCell(4, 13, 'Cantidad'); writeCell(4, 14, 'Importe');
-
+            writeCell(0, 0, 'CORTE DE CAJA'); writeCell(1, 0, 'Fecha y Hora de Emisión:'); writeCell(1, 1, dateStr);
+            writeCell(3, 0, '--- TODAS LAS FACTURAS ---'); writeCell(3, 4, '--- FACTURAS EFECTIVO ---'); writeCell(3, 8, '--- MOSTRADOR (APP) ---'); writeCell(3, 12, '--- FÍSICO Y CÁLCULOS ---');
+            writeCell(4, 0, 'Folio / Factura'); writeCell(4, 1, 'Método Detectado'); writeCell(4, 2, 'Total'); writeCell(4, 4, 'Folio / Factura'); writeCell(4, 5, 'Texto Original'); writeCell(4, 6, 'Monto Efectivo'); writeCell(4, 8, 'Folio Ticket'); writeCell(4, 9, 'Hora'); writeCell(4, 10, 'Total'); writeCell(4, 12, 'Denominación'); writeCell(4, 13, 'Cantidad'); writeCell(4, 14, 'Importe');
             let rowGen = 5, rowEf = 5, rowMos = 5, rowDen = 5; let sumGen = 0;
-            if (window.reporteFacturasTodas && window.reporteFacturasTodas.length > 0) {
-                window.reporteFacturasTodas.forEach(f => { writeCell(rowGen, 0, f.folio); writeCell(rowGen, 1, f.metodo); writeCell(rowGen, 2, f.total); sumGen += f.total; rowGen++; });
-            } else { writeCell(rowGen++, 0, 'Sin datos'); }
-            writeCell(rowGen, 1, 'GRAN TOTAL:'); writeCell(rowGen, 2, sumGen);
-
-            let sumEf = 0;
-            if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) {
-                window.reporteFacturasEfectivo.forEach(f => { writeCell(rowEf, 4, f.folio); writeCell(rowEf, 5, f.metodo_original); writeCell(rowEf, 6, f.monto_efectivo); sumEf += f.monto_efectivo; rowEf++; });
-            } else { writeCell(rowEf++, 4, 'Sin datos'); }
-            writeCell(rowEf, 5, 'TOTAL EFECTIVO:'); writeCell(rowEf, 6, sumEf);
-
-            let sumMos = 0;
-            if (window.reporteMostrador && window.reporteMostrador.length > 0) {
-                window.reporteMostrador.forEach(m => { writeCell(rowMos, 8, m.folio); writeCell(rowMos, 9, m.fecha); writeCell(rowMos, 10, m.total); sumMos += m.total; rowMos++; });
-            } else { writeCell(rowMos++, 8, 'Sin datos'); }
-            writeCell(rowMos, 9, 'TOTAL MOSTRADOR:'); writeCell(rowMos, 10, sumMos);
-
-            let sumFisico = 0;
-            denominations.forEach(val => {
-                const qty = denomCounts[val] || 0; const rowTotal = val * qty; sumFisico += rowTotal;
-                writeCell(rowDen, 12, `$ ${val}`); writeCell(rowDen, 13, qty); writeCell(rowDen, 14, rowTotal); rowDen++;
-            });
-            writeCell(rowDen, 12, 'TOTAL FÍSICO:'); writeCell(rowDen, 14, sumFisico); rowDen += 2; 
-
-            writeCell(rowDen++, 12, '--- CÁLCULOS DEL SISTEMA ---');
-            const facturado = parseFloat(document.getElementById('inputFacturado').value) || 0;
-            const teorico = facturado + totalMostradorDelDia; const diff = sumFisico - teorico;
-            writeCell(rowDen, 12, 'Facturas Efectivo (Sistema)'); writeCell(rowDen++, 14, facturado);
-            writeCell(rowDen, 12, 'Ventas Mostrador (App)'); writeCell(rowDen++, 14, totalMostradorDelDia);
-            writeCell(rowDen, 12, 'TOTAL TEÓRICO (Debería haber)'); writeCell(rowDen++, 14, teorico); rowDen++;
-            writeCell(rowDen++, 12, '--- RESULTADO ---');
-            writeCell(rowDen, 12, 'DIFERENCIA (Físico - Teórico):'); writeCell(rowDen++, 14, diff);
-            let estadoMsg = "Cuadrada"; if(diff > 0.1) estadoMsg = "Sobrante"; else if(diff < -0.1) estadoMsg = "Faltante";
-            writeCell(rowDen, 12, 'Estado de la Caja:'); writeCell(rowDen++, 14, estadoMsg);
-
-            const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(wsData);
-            ws['!cols'] = [ {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, {wch: 28}, {wch: 10}, {wch: 14} ];
-            XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja"); XLSX.writeFile(wb, `Corte_Bitacora_${fileDate}.xlsx`);
-            showToast("Bitácora exportada en formato horizontal.");
+            if (window.reporteFacturasTodas && window.reporteFacturasTodas.length > 0) { window.reporteFacturasTodas.forEach(f => { writeCell(rowGen, 0, f.folio); writeCell(rowGen, 1, f.metodo); writeCell(rowGen, 2, f.total); sumGen += f.total; rowGen++; }); } else { writeCell(rowGen++, 0, 'Sin datos'); } writeCell(rowGen, 1, 'GRAN TOTAL:'); writeCell(rowGen, 2, sumGen);
+            let sumEf = 0; if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) { window.reporteFacturasEfectivo.forEach(f => { writeCell(rowEf, 4, f.folio); writeCell(rowEf, 5, f.metodo_original); writeCell(rowEf, 6, f.monto_efectivo); sumEf += f.monto_efectivo; rowEf++; }); } else { writeCell(rowEf++, 4, 'Sin datos'); } writeCell(rowEf, 5, 'TOTAL EFECTIVO:'); writeCell(rowEf, 6, sumEf);
+            let sumMos = 0; if (window.reporteMostrador && window.reporteMostrador.length > 0) { window.reporteMostrador.forEach(m => { writeCell(rowMos, 8, m.folio); writeCell(rowMos, 9, m.fecha); writeCell(rowMos, 10, m.total); sumMos += m.total; rowMos++; }); } else { writeCell(rowMos++, 8, 'Sin datos'); } writeCell(rowMos, 9, 'TOTAL MOSTRADOR:'); writeCell(rowMos, 10, sumMos);
+            let sumFisico = 0; denominations.forEach(val => { const qty = denomCounts[val] || 0; const rowTotal = val * qty; sumFisico += rowTotal; writeCell(rowDen, 12, `$ ${val}`); writeCell(rowDen, 13, qty); writeCell(rowDen, 14, rowTotal); rowDen++; }); writeCell(rowDen, 12, 'TOTAL FÍSICO:'); writeCell(rowDen, 14, sumFisico); rowDen += 2; 
+            writeCell(rowDen++, 12, '--- CÁLCULOS DEL SISTEMA ---'); const facturado = parseFloat(document.getElementById('inputFacturado').value) || 0; const teorico = facturado + totalMostradorDelDia; const diff = sumFisico - teorico; writeCell(rowDen, 12, 'Facturas Efectivo (Sistema)'); writeCell(rowDen++, 14, facturado); writeCell(rowDen, 12, 'Ventas Mostrador (App)'); writeCell(rowDen++, 14, totalMostradorDelDia); writeCell(rowDen, 12, 'TOTAL TEÓRICO'); writeCell(rowDen++, 14, teorico); rowDen++; writeCell(rowDen++, 12, '--- RESULTADO ---'); writeCell(rowDen, 12, 'DIFERENCIA (Físico - Teórico):'); writeCell(rowDen++, 14, diff); let estadoMsg = "Cuadrada"; if(diff > 0.1) estadoMsg = "Sobrante"; else if(diff < -0.1) estadoMsg = "Faltante"; writeCell(rowDen, 12, 'Estado de la Caja:'); writeCell(rowDen++, 14, estadoMsg);
+            const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(wsData); ws['!cols'] = [ {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, {wch: 28}, {wch: 10}, {wch: 14} ]; XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja"); XLSX.writeFile(wb, `Corte_Bitacora_${fileDate}.xlsx`); showToast("Bitácora exportada.");
         }
 
         window.onload = () => { loadData(); initCorteUI(); };
