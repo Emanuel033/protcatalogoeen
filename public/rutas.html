@@ -69,10 +69,13 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
+                <!-- BOTÓN NUEVO ENVÍO (MANUAL) -->
+                <button onclick="abrirFormulario()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-1">
+                    <i class="fas fa-plus"></i> Nuevo Envío
+                </button>
                 <button onclick="generarDatosPrueba()" class="text-amber-400 hover:text-amber-300 p-2" title="Generar datos de prueba">
                     <i class="fas fa-bolt"></i>
                 </button>
-                <span class="bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-bold" id="total-rutas">0 viajes</span>
             </div>
         </div>
 
@@ -136,7 +139,7 @@
                 </div>
                 
                 <div class="bg-white border border-slate-200 rounded-xl p-3 mb-5 shadow-sm">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-1">Desglose de Carga:</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-1">Facturas a Entregar:</p>
                     <ul id="det-articulos" class="text-xs text-slate-700 font-medium space-y-2"></ul>
                 </div>
 
@@ -172,6 +175,61 @@
         </div>
     </main>
 
+    <!-- ========================================== -->
+    <!-- MODAL FORMULARIO DE INGRESO MANUAL -->
+    <!-- ========================================== -->
+    <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300" id="modal-formulario-content">
+            <div class="bg-slate-900 p-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-lg"><i class="fas fa-clipboard-list text-blue-400 mr-2"></i> Capturar Nuevo Envío</h3>
+                <button onclick="cerrarFormulario()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Folio Factura <span class="text-red-500">*</span></label>
+                        <input type="text" id="form-factura" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold text-blue-700 uppercase" placeholder="Ej. F-1029">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Cód. Cliente <span class="text-red-500">*</span></label>
+                        <input type="text" id="form-cliente-codigo" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold uppercase" placeholder="Ej. CLI-001">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre del Cliente / Empresa <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-cliente" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" placeholder="Ej. Químicos Monterrey">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Tipo de Entrega <span class="text-red-500">*</span></label>
+                    <select id="form-tipo" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" onchange="togglePaqueteria()">
+                        <option value="bodega_cliente">Entrega Local (Bodega Cliente)</option>
+                        <option value="paqueteria">Envío Foráneo (Consolidar en Paquetería)</option>
+                    </select>
+                </div>
+
+                <div id="div-paqueteria" class="hidden">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre de la Paquetería <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-paqueteria" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" placeholder="Ej. Transportes Castores, Tres Guerras...">
+                    <p class="text-[10px] text-blue-600 font-bold mt-1"><i class="fas fa-info-circle"></i> Escribe el nombre exacto para que el sistema agrupe facturas que van a la misma paquetería.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dirección de Entrega <span class="text-red-500">*</span></label>
+                    <textarea id="form-direccion" rows="2" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Calle, Número, Colonia, Municipio..."></textarea>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100">
+                    <button onclick="guardarEnvioManual()" id="btn-guardar-manual" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition-all flex justify-center items-center gap-2">
+                        <i class="fas fa-save"></i> Registrar en Bandeja
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString('es-MX', opcionesFecha);
@@ -179,9 +237,9 @@
         let map;
         let marcadores = {};
         let rutasTrazadas = null;
-        let viajesAgrupados = []; // Aquí guardaremos la lógica consolidada
+        let viajesAgrupados = []; 
         let filtroActual = 'todos';
-        let viajeSeleccionado = null; // Puede ser 1 pedido o 1 grupo de pedidos (Paquetería)
+        let viajeSeleccionado = null; 
 
         // Zonas restringidas en MTY (Aprox)
         const zonasRestringidas = [
@@ -211,12 +269,9 @@
         // LÓGICA DE NEGOCIO: CONSOLIDACIÓN
         // ==========================================
         function cargarPedidosRuta() {
-            // Escuchamos la colección "rutas_logistica" que simularemos
             db.collection('rutas_logistica').onSnapshot(snapshot => {
                 const pedidosRaw = [];
                 snapshot.forEach(doc => pedidosRaw.push({ id: doc.id, ...doc.data() }));
-                
-                // MAGIA DE CONSOLIDACIÓN
                 agruparYConsolidar(pedidosRaw);
             });
         }
@@ -227,7 +282,7 @@
 
             pedidosRaw.forEach(p => {
                 if (p.tipo_destino === 'paqueteria') {
-                    // Si va a paquetería, agrupamos por nombre de la paquetería y estado
+                    // Agrupamos por nombre de paquetería y estado
                     const key = `${p.nombre_paqueteria}_${p.estado}`;
                     if (!paqueteriasMap[key]) {
                         paqueteriasMap[key] = {
@@ -244,10 +299,8 @@
                         };
                     }
                     paqueteriasMap[key].pedidos_incluidos.push(p);
-                    // Sumar artículos al total del camión
                     if(p.articulos) paqueteriasMap[key].articulos_totales.push(...p.articulos);
                 } else {
-                    // Si es bodega de cliente directo, es un viaje individual
                     viajesAgrupados.push({
                         es_grupo: false,
                         id: p.id,
@@ -264,10 +317,8 @@
                 }
             });
 
-            // Añadir los grupos de paquetería al arreglo final
             Object.values(paqueteriasMap).forEach(grupo => viajesAgrupados.push(grupo));
 
-            // Ordenar: Pendientes > Camino > Entregados
             viajesAgrupados.sort((a,b) => {
                 const order = { 'pendiente': 1, 'camino': 2, 'entregado': 3 };
                 return (order[a.estado] || 4) - (order[b.estado] || 4);
@@ -328,7 +379,7 @@
                         <p class="text-[10px] text-slate-500 truncate mb-3"><i class="fas fa-map-marker-alt text-red-400 w-4"></i> ${viaje.direccion}</p>
                         
                         <div class="flex justify-between items-center pt-2 border-t border-slate-200">
-                            <span class="text-[10px] font-bold text-slate-600">${viaje.pedidos_incluidos.length} Factura(s) | ${viaje.articulos_totales.length} Partidas</span>
+                            <span class="text-[10px] font-bold text-slate-600">${viaje.pedidos_incluidos.length} Factura(s) en este viaje</span>
                             ${vehiculoText}
                         </div>
                     </div>
@@ -361,7 +412,6 @@
         }
 
         function isPointInPolygon(point, vs) {
-            // Algoritmo Ray-Casting para saber si una coordenada está dentro de una zona restringida
             let x = point[0], y = point[1];
             let inside = false;
             for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
@@ -376,7 +426,7 @@
         function revisarRestricciones(coordenadas) {
             for (let zona of zonasRestringidas) {
                 if (isPointInPolygon([coordenadas.lat, coordenadas.lng], zona.coords)) {
-                    return true; // Está en zona restringida
+                    return true;
                 }
             }
             return false;
@@ -388,45 +438,38 @@
             
             renderizarLista(); 
 
-            // Centrar Mapa y dibujar línea simulada desde la planta EEN
             if(viajeSeleccionado.coordenadas) {
                 const coordDestino = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
-                const coordPlanta = L.latLng(25.6980, -100.3150); // Coordenada ficticia Planta EEN
+                const coordPlanta = L.latLng(25.6980, -100.3150); 
                 
                 map.setView(coordDestino, 13, { animate: true });
 
                 if(rutasTrazadas) map.removeControl(rutasTrazadas);
                 
-                // Usamos Leaflet Routing Machine solo para mostrar la línea visual del trayecto
                 rutasTrazadas = L.Routing.control({
                     waypoints: [coordPlanta, coordDestino],
                     lineOptions: { styles: [{color: '#3b82f6', weight: 4, opacity: 0.7}] },
-                    createMarker: function() { return null; }, // No crear marcadores extra
+                    createMarker: function() { return null; },
                     fitSelectedRoutes: false,
-                    show: false // Oculta el panel de texto con las direcciones paso a paso
+                    show: false 
                 }).addTo(map);
             }
 
-            // Llenar Modal
             document.getElementById('det-folio').innerText = viajeSeleccionado.id;
             document.getElementById('det-cliente').innerText = viajeSeleccionado.cliente_nombre;
             document.getElementById('det-tipo-destino').innerText = viajeSeleccionado.tipo_destino === 'paqueteria' ? '📍 Consolidado a Paquetería' : '🏢 Entrega a Bodega Directa';
             document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
             
-            // Revisar restricciones
-            const estaRestringido = revisarRestricciones(viajeSeleccionado.coordenadas);
+            const estaRestringido = viajeSeleccionado.coordenadas ? revisarRestricciones(viajeSeleccionado.coordenadas) : false;
             const alertaRes = document.getElementById('det-restriccion-alerta');
             if(estaRestringido) {
                 alertaRes.classList.remove('hidden');
-                // Si está restringido y no tiene vehículo, pre-seleccionar estaquitas visualmente
                 if(viajeSeleccionado.estado === 'pendiente') seleccionarVehiculo('estaquitas');
             } else {
                 alertaRes.classList.add('hidden');
-                // Limpiar pre-selección
                 if(viajeSeleccionado.estado === 'pendiente') document.getElementById('vehiculo-seleccionado').value = '';
             }
             
-            // Estado y Botones
             const badgeStatus = document.getElementById('det-status');
             const selectorVehiculo = document.getElementById('selector-vehiculo-container');
             const btnIniciar = document.getElementById('btn-iniciar');
@@ -437,7 +480,6 @@
                 selectorVehiculo.classList.remove('hidden');
                 btnIniciar.classList.remove('hidden'); btnEntregar.classList.add('hidden');
                 
-                // Limpiar botones de vehículo
                 document.querySelectorAll('.btn-vehiculo').forEach(b => {
                     b.classList.remove('border-blue-500', 'bg-blue-50');
                     b.classList.add('border-slate-200', 'bg-white');
@@ -454,26 +496,19 @@
                 btnIniciar.classList.add('hidden'); btnEntregar.classList.add('hidden');
             }
 
-            // Llenar artículos (Agrupando si hay varias facturas)
             const listaArts = document.getElementById('det-articulos');
             listaArts.innerHTML = '';
             
             if (viajeSeleccionado.es_grupo) {
-                // Es un viaje a paquetería con varias facturas
                 viajeSeleccionado.pedidos_incluidos.forEach(ped => {
-                    listaArts.innerHTML += `<li class="text-[10px] font-bold text-slate-400 mt-2 border-b border-slate-100 pb-1">Factura: ${ped.id} - ${ped.cliente_nombre}</li>`;
-                    (ped.articulos || []).forEach(art => {
-                        listaArts.innerHTML += `<li class="pl-2"><span class="font-black text-purple-600">${art.cantidad}x</span> ${art.nombre}</li>`;
-                    });
+                    listaArts.innerHTML += `<li class="text-[11px] font-bold text-slate-700 mt-2 border-b border-slate-100 pb-2"><i class="fas fa-file-invoice text-blue-500 mr-1"></i> Factura: <span class="font-black text-blue-600">${ped.id}</span><br><span class="text-[9px] text-slate-400 ml-4">${ped.cliente_nombre} (${ped.cliente_codigo})</span></li>`;
                 });
             } else {
-                // Es una bodega normal
-                (viajeSeleccionado.articulos_totales || []).forEach(art => {
-                    listaArts.innerHTML += `<li><span class="font-black text-blue-600">${art.cantidad}x</span> ${art.nombre}</li>`;
+                viajeSeleccionado.pedidos_incluidos.forEach(ped => {
+                    listaArts.innerHTML += `<li class="text-[11px] font-bold text-slate-700 mt-2 border-b border-slate-100 pb-2"><i class="fas fa-file-invoice text-blue-500 mr-1"></i> Factura: <span class="font-black text-blue-600">${ped.id}</span></li>`;
                 });
             }
 
-            // Mostrar modal
             const card = document.getElementById('detalle-flotante');
             card.classList.remove('hidden');
             setTimeout(() => card.classList.remove('translate-y-10', 'opacity-0'), 10);
@@ -488,13 +523,10 @@
             setTimeout(() => card.classList.add('hidden'), 300);
         }
 
-        // ==========================================
-        // ACCIONES DEL DESPACHADOR
-        // ==========================================
         window.seleccionarVehiculo = (tipo) => {
             if(viajeSeleccionado && viajeSeleccionado.estado !== 'pendiente') return;
             
-            const estaRestringido = revisarRestricciones(viajeSeleccionado.coordenadas);
+            const estaRestringido = viajeSeleccionado.coordenadas ? revisarRestricciones(viajeSeleccionado.coordenadas) : false;
             if(estaRestringido && tipo !== 'estaquitas') {
                 alert("⚠️ ZONA RESTRINGIDA: Para evitar multas en el Centro/Vías rápidas, se recomienda usar Nissan Estaquitas. Se requiere permiso especial para unidades pesadas.");
             }
@@ -526,7 +558,6 @@
         function actualizarEstadoLote(nuevoEstado, vehiculo) {
             if(!viajeSeleccionado) return;
             
-            // Como puede ser 1 pedido o un grupo de 5 pedidos, actualizamos todos en Firebase
             const batch = db.batch();
             viajeSeleccionado.pedidos_incluidos.forEach(ped => {
                 const ref = db.collection('rutas_logistica').doc(ped.id);
@@ -539,12 +570,104 @@
 
             batch.commit().then(() => {
                 cerrarDetalle();
-                // La UI se recarga sola por el onSnapshot
             }).catch(e => alert("Error al actualizar: " + e.message));
         }
 
         // ==========================================
-        // SIMULADOR (Para poblar desde cero y probar)
+        // FUNCIONES DE FORMULARIO MANUAL
+        // ==========================================
+        window.abrirFormulario = () => {
+            const modal = document.getElementById('modal-formulario');
+            const content = document.getElementById('modal-formulario-content');
+            
+            // Limpiar campos
+            document.getElementById('form-factura').value = '';
+            document.getElementById('form-cliente-codigo').value = '';
+            document.getElementById('form-cliente').value = '';
+            document.getElementById('form-tipo').value = 'bodega_cliente';
+            document.getElementById('form-paqueteria').value = '';
+            document.getElementById('form-direccion').value = '';
+            togglePaqueteria();
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        };
+
+        window.cerrarFormulario = () => {
+            const modal = document.getElementById('modal-formulario');
+            const content = document.getElementById('modal-formulario-content');
+            
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        window.togglePaqueteria = () => {
+            const val = document.getElementById('form-tipo').value;
+            const divPaq = document.getElementById('div-paqueteria');
+            if (val === 'paqueteria') {
+                divPaq.classList.remove('hidden');
+            } else {
+                divPaq.classList.add('hidden');
+                document.getElementById('form-paqueteria').value = '';
+            }
+        };
+
+        window.guardarEnvioManual = () => {
+            const factura = document.getElementById('form-factura').value.trim().toUpperCase();
+            const clienteCodigo = document.getElementById('form-cliente-codigo').value.trim().toUpperCase();
+            const cliente = document.getElementById('form-cliente').value.trim();
+            const tipo = document.getElementById('form-tipo').value;
+            const paqueteria = document.getElementById('form-paqueteria').value.trim();
+            const direccion = document.getElementById('form-direccion').value.trim();
+
+            if(!factura) return alert("Falta el Folio de Factura.");
+            if(!clienteCodigo) return alert("Falta el Código del Cliente.");
+            if(!cliente) return alert("Falta el Nombre del Cliente.");
+            if(!direccion) return alert("Falta la Dirección de Entrega.");
+            if(tipo === 'paqueteria' && !paqueteria) return alert("Falta el nombre de la paquetería a consolidar.");
+
+            const btn = document.getElementById('btn-guardar-manual');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btn.disabled = true;
+
+            const nuevoDoc = {
+                cliente_codigo: clienteCodigo,
+                cliente_nombre: cliente,
+                tipo_destino: tipo,
+                direccion: direccion,
+                estado: "pendiente",
+                vehiculo_asignado: null,
+                fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if(tipo === 'paqueteria') {
+                nuevoDoc.nombre_paqueteria = paqueteria;
+            }
+
+            // Simular coordenadas (Para que aparezca en el mapa por MTY). 
+            nuevoDoc.coordenadas = {
+                lat: 25.6866 + (Math.random() - 0.5) * 0.05,
+                lng: -100.3161 + (Math.random() - 0.5) * 0.05
+            };
+
+            // USAMOS EL FOLIO DE FACTURA COMO ID EN FIRESTORE
+            db.collection('rutas_logistica').doc(factura).set(nuevoDoc).then(() => {
+                alert("¡Envío registrado con éxito!");
+                cerrarFormulario();
+            }).catch(e => {
+                alert("Error al guardar: " + e.message);
+            }).finally(() => {
+                btn.innerHTML = '<i class="fas fa-save"></i> Registrar en Bandeja';
+                btn.disabled = false;
+            });
+        };
+
+        // ==========================================
+        // SIMULADOR
         // ==========================================
         window.generarDatosPrueba = async () => {
             if(!confirm("Esto inyectará pedidos de prueba a Firestore para probar la logística. ¿Continuar?")) return;
@@ -552,42 +675,30 @@
             const batch = db.batch();
             const coll = db.collection('rutas_logistica');
 
-            // 1. Cliente Directo MTY (Fuera del centro - OK para Torton)
-            batch.set(coll.doc("FAC-9001"), {
+            // Los IDs del documento ahora son directamente los folios de factura
+            batch.set(coll.doc("F-10290"), {
                 cliente_codigo: "CLI-001", cliente_nombre: "Químicos Monterrey SA",
                 tipo_destino: "bodega_cliente", direccion: "Av. Ruiz Cortines 1234, Parque Industrial",
-                coordenadas: { lat: 25.7100, lng: -100.2500 }, estado: "pendiente", vehiculo_asignado: null,
-                articulos: [{nombre: "Tambor 200L Azul", cantidad: 50}]
+                coordenadas: { lat: 25.7100, lng: -100.2500 }, estado: "pendiente", vehiculo_asignado: null
             });
 
-            // 2. Cliente Directo en el CENTRO (Multa si va pesado)
-            batch.set(coll.doc("FAC-9002"), {
+            batch.set(coll.doc("F-10291"), {
                 cliente_codigo: "CLI-002", cliente_nombre: "Laboratorios Alfa",
                 tipo_destino: "bodega_cliente", direccion: "Modesto Arreola 500, Centro, Monterrey",
-                coordenadas: { lat: 25.6750, lng: -100.3120 }, estado: "pendiente", vehiculo_asignado: null,
-                articulos: [{nombre: "Caja Envases PET 500ml", cantidad: 10}]
+                coordenadas: { lat: 25.6750, lng: -100.3120 }, estado: "pendiente", vehiculo_asignado: null
             });
 
-            // 3, 4 y 5. Pedidos Foráneos que van a LA MISMA PAQUETERÍA (Deben agruparse)
-            const coordsCastores = { lat: 25.7400, lng: -100.2800 }; // Bodega Castores Escobedo
+            const coordsCastores = { lat: 25.7400, lng: -100.2800 }; 
             
-            batch.set(coll.doc("FAC-9003"), {
+            batch.set(coll.doc("F-10292"), {
                 cliente_codigo: "FOR-100", cliente_nombre: "Distribuidora Saltillo",
                 tipo_destino: "paqueteria", nombre_paqueteria: "Transportes Castores", direccion: "Bodega Castores Escobedo NL",
-                coordenadas: coordsCastores, estado: "pendiente", vehiculo_asignado: null,
-                articulos: [{nombre: "Porrones 20L", cantidad: 100}]
+                coordenadas: coordsCastores, estado: "pendiente", vehiculo_asignado: null
             });
-            batch.set(coll.doc("FAC-9004"), {
+            batch.set(coll.doc("F-10293"), {
                 cliente_codigo: "FOR-200", cliente_nombre: "Limpieza Reynosa",
                 tipo_destino: "paqueteria", nombre_paqueteria: "Transportes Castores", direccion: "Bodega Castores Escobedo NL",
-                coordenadas: coordsCastores, estado: "pendiente", vehiculo_asignado: null,
-                articulos: [{nombre: "Cubeta 19L Blanca", cantidad: 45}]
-            });
-            batch.set(coll.doc("FAC-9005"), {
-                cliente_codigo: "FOR-300", cliente_nombre: "Agro Torreón",
-                tipo_destino: "paqueteria", nombre_paqueteria: "Transportes Castores", direccion: "Bodega Castores Escobedo NL",
-                coordenadas: coordsCastores, estado: "camino", vehiculo_asignado: "torton", // Este grupo ya salió
-                articulos: [{nombre: "Tapa R-38", cantidad: 5000}]
+                coordenadas: coordsCastores, estado: "pendiente", vehiculo_asignado: null
             });
 
             await batch.commit();
