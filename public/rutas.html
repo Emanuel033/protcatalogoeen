@@ -41,6 +41,13 @@
         
         /* Loading Overlay */
         #global-loader { z-index: 9999; }
+
+        /* Toast CSS */
+        #toast-container { z-index: 9999; pointer-events: none; }
+        .toast-enter { animation: slideInUp 0.3s forwards; }
+        .toast-leave { animation: fadeOut 0.3s forwards; }
+        @keyframes slideInUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
 </head>
 <body class="h-screen flex flex-col md:flex-row">
@@ -106,10 +113,13 @@
             <div class="flex items-center gap-2 text-xs font-semibold text-slate-600 mb-1">
                 <div class="w-3 h-3 bg-red-500/50 border border-red-500 rounded"></div> Zona Centro (Estaquitas)
             </div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                <div class="w-3 h-3 bg-amber-500 rounded-full"></div> Puentes Bajos / Peligro
+            </div>
         </div>
 
-        <!-- MODAL DE ASIGNACIÓN Y DETALLE -->
-        <div id="detalle-flotante" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 md:left-6 md:translate-x-0 w-[95%] md:w-[400px] bg-white rounded-2xl shadow-2xl border border-slate-200 z-[1000] overflow-hidden hidden transition-all duration-300 translate-y-10 opacity-0 flex flex-col max-h-[80vh]">
+        <!-- MODAL DE ASIGNACIÓN Y DETALLE (REDISEÑO RESPONSIVO BOTTOM-SHEET) -->
+        <div id="detalle-flotante" class="fixed bottom-0 left-0 w-full md:absolute md:bottom-6 md:left-6 md:w-[400px] bg-white rounded-t-3xl md:rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] z-[1000] overflow-hidden hidden transition-all duration-300 translate-y-full md:translate-y-10 opacity-0 flex flex-col max-h-[85vh] md:max-h-[80vh]">
             
             <div class="bg-slate-900 p-4 relative shrink-0">
                 <button onclick="cerrarDetalle()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition"><i class="fas fa-times text-lg"></i></button>
@@ -167,11 +177,11 @@
                 </div>
             </div>
 
-            <!-- FOOTER FIJO PARA BOTONES (NUNCA SE OCULTAN) -->
-            <div class="bg-white p-4 border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
+            <!-- FOOTER FIJO PARA BOTONES CON EXTRA PADDING MÓVIL -->
+            <div class="bg-white p-4 pb-8 md:pb-4 border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
                 <div class="flex gap-2">
-                    <button id="btn-iniciar" onclick="iniciarRuta()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-play"></i> Despachar Unidad</button>
-                    <button id="btn-entregar" onclick="marcarEntregado()" class="hidden flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-check-double"></i> Marcar Entregado</button>
+                    <button id="btn-iniciar" onclick="iniciarRuta()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-play"></i> Despachar</button>
+                    <button id="btn-entregar" onclick="marcarEntregado()" class="hidden flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-check-double"></i> Entregado</button>
                 </div>
             </div>
         </div>
@@ -180,8 +190,8 @@
     <!-- ========================================== -->
     <!-- MODAL FORMULARIO DE INGRESO MANUAL -->
     <!-- ========================================== -->
-    <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]" id="modal-formulario-content">
+    <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-end justify-center md:items-center p-0 md:p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-300 flex flex-col max-h-[90vh] absolute bottom-0 md:relative md:bottom-auto" id="modal-formulario-content">
             <div class="bg-slate-900 p-4 flex justify-between items-center text-white shrink-0">
                 <h3 class="font-bold text-lg"><i class="fas fa-clipboard-list text-blue-400 mr-2"></i> Capturar Nuevo Envío</h3>
                 <button onclick="cerrarFormulario()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
@@ -241,8 +251,8 @@
                 </div>
             </div>
 
-            <!-- FOOTER FIJO PARA BOTÓN GUARDAR -->
-            <div class="p-4 bg-white border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
+            <!-- FOOTER FIJO PARA BOTÓN GUARDAR (RESPONSIVO) -->
+            <div class="p-4 pb-8 md:pb-4 bg-white border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
                 <button onclick="guardarEnvioManual()" id="btn-guardar-manual" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 active:scale-95">
                     <i class="fas fa-save"></i> Registrar en Bandeja
                 </button>
@@ -293,6 +303,9 @@
         </div>
     </div>
 
+    <!-- Contenedor para Notificaciones Flotantes (Toasts) -->
+    <div id="toast-container" class="fixed bottom-20 md:bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col gap-2 w-[90%] md:w-max"></div>
+
     <script>
         const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString('es-MX', opcionesFecha);
@@ -310,6 +323,19 @@
             { nombre: "Centro MTY", color: "#ef4444", coords: [[25.6811, -100.3259], [25.6811, -100.3019], [25.6631, -100.3019], [25.6631, -100.3259]] }
         ];
 
+        // Función para Alertas Visuales (Reemplaza los alert molestos en logística visual)
+        window.showToast = (msg, type='success') => {
+            const toast = document.createElement('div');
+            const bg = type === 'error' ? 'bg-red-600' : 'bg-slate-800';
+            toast.className = `toast-enter text-white px-5 py-3 rounded-xl shadow-2xl ${bg} text-xs font-bold text-center border border-white/10 pointer-events-auto`;
+            toast.innerHTML = msg;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-leave');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        };
+
         const icons = {
             bodega: L.divIcon({ className: 'custom-icon', html: `<div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white"><i class="fas fa-building text-sm"></i></div>`, iconSize: [32, 32], iconAnchor: [16, 32] }),
             paqueteria: L.divIcon({ className: 'custom-icon', html: `<div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white"><i class="fas fa-boxes text-sm"></i></div>`, iconSize: [32, 32], iconAnchor: [16, 32] }),
@@ -325,45 +351,15 @@
                 L.polygon(zona.coords, { color: zona.color, fillColor: zona.color, fillOpacity: 0.2, weight: 2 })
                  .addTo(map).bindPopup(`<b>ZONA RESTRINGIDA:</b> ${zona.nombre}<br>Solo unidades pequeñas (Estaquitas).`);
             });
-        }
 
-        // ==========================================
-        // CARGA DE DATOS BASES (Flota, Choferes, Clientes, Rutas)
-        // ==========================================
-        function cargarDatosMaestros() {
-            // Escuchar Clientes
-            db.collection('clientes_logistica').onSnapshot(snap => {
-                clientesDB = [];
-                const datalist = document.getElementById('clientes-list');
-                datalist.innerHTML = '';
-                snap.forEach(doc => {
-                    const c = { codigo: doc.id, ...doc.data() };
-                    clientesDB.push(c);
-                    datalist.innerHTML += `<option value="${c.codigo}">${c.nombre}</option>`;
-                });
-            });
-
-            // Escuchar Flota
-            db.collection('flota').onSnapshot(snap => {
-                flotaDB = [];
-                snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() }));
-                renderizarFlotaUI();
-                renderizarOpcionesDespacho();
-            });
-
-            // Escuchar Choferes
-            db.collection('choferes').onSnapshot(snap => {
-                choferesDB = [];
-                snap.forEach(doc => choferesDB.push({ id: doc.id, ...doc.data() }));
-                renderizarChoferesUI();
-                renderizarOpcionesDespacho();
-            });
-
-            // Escuchar Rutas
-            db.collection('rutas_logistica').onSnapshot(snapshot => {
-                const pedidosRaw = [];
-                snapshot.forEach(doc => pedidosRaw.push({ id: doc.id, ...doc.data() }));
-                agruparYConsolidar(pedidosRaw);
+            // NUEVO: Marcadores de Puentes Bajos / Vialidades problemáticas
+            const puentesBajos = [
+                { lat: 25.7052, lng: -100.3155, nombre: "Puente Bajo Fidel Velázquez (Max 3.5m)" },
+                { lat: 25.6815, lng: -100.3120, nombre: "Túnel Loma Larga (Restricción pesados)" }
+            ];
+            puentesBajos.forEach(p => {
+                L.circleMarker([p.lat, p.lng], { radius: 6, color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 1, weight: 2 })
+                 .addTo(map).bindPopup(`<b class="text-amber-600"><i class="fas fa-exclamation-triangle"></i> PRECAUCIÓN VIAL:</b><br>${p.nombre}`);
             });
         }
 
@@ -544,16 +540,55 @@
 
             if(viajeSeleccionado.coordenadas) {
                 const coordDestino = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
-                const coordPlanta = L.latLng(25.6980, -100.3150); 
+                const coordPlanta = L.latLng(25.6980, -100.3150); // Planta Obrerista
                 map.setView(coordDestino, 13, { animate: true });
                 if(rutasTrazadas) map.removeControl(rutasTrazadas);
                 
-                rutasTrazadas = L.Routing.control({
-                    waypoints: [coordPlanta, coordDestino],
-                    lineOptions: { styles: [{color: '#3b82f6', weight: 4, opacity: 0.7}] },
-                    createMarker: function() { return null; },
-                    fitSelectedRoutes: false, show: false 
-                }).addTo(map);
+                // LÓGICA DE RUTAS MULTI-PARADA
+                if (viajeSeleccionado.estado === 'camino' || viajeSeleccionado.estado === 'entregado') {
+                    // Si ya tiene chofer, agrupa todos sus destinos para dibujar el circuito
+                    const viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+                    
+                    let wps = [coordPlanta]; // 1. Inicia en Sucursal
+                    viajesMismoCamion.forEach(v => wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng))); // 2. Agrega todas las entregas
+                    wps.push(coordPlanta); // 3. Retorna a Sucursal
+
+                    rutasTrazadas = L.Routing.control({
+                        waypoints: wps,
+                        lineOptions: { styles: [{color: '#8b5cf6', weight: 5, opacity: 0.8}] }, // Color morado para circuito
+                        createMarker: function() { return null; },
+                        fitSelectedRoutes: true, show: false, language: 'es'
+                    }).addTo(map);
+
+                } else {
+                    // Si es planeación (pendiente), traza solo del punto A al B
+                    rutasTrazadas = L.Routing.control({
+                        waypoints: [coordPlanta, coordDestino],
+                        lineOptions: { styles: [{color: '#3b82f6', weight: 4, opacity: 0.7}] }, // Color azul normal
+                        createMarker: function() { return null; },
+                        fitSelectedRoutes: true, show: false, language: 'es'
+                    }).addTo(map);
+                }
+
+                // SISTEMA DE ALERTA DE MULTAS Y RESTRICCIONES VIALES
+                rutasTrazadas.on('routesfound', function(e) {
+                    const route = e.routes[0];
+                    let pasaCentro = false;
+                    // Escanear la ruta para ver si cruza el polígono rojo
+                    for(let i = 0; i < route.coordinates.length; i += 15) {
+                        if(isPointInPolygon([route.coordinates[i].lat, route.coordinates[i].lng], zonasRestringidas[0].coords)){
+                            pasaCentro = true; break;
+                        }
+                    }
+                    if(pasaCentro) {
+                        const vehiculo = viajeSeleccionado.vehiculo_asignado ? flotaDB.find(f => f.id === viajeSeleccionado.vehiculo_asignado) : null;
+                        if(vehiculo && vehiculo.tipo !== 'estaquitas') {
+                            showToast("⚠️ RUTA PELIGROSA: El camión asignado es pesado y la ruta trazada cruza el Centro (Riesgo de Multa).", "error");
+                        } else if (!vehiculo) {
+                            showToast("⚠️ ZONA RESTRINGIDA: La ruta cruza el Centro de MTY. Asegúrate de asignar unidad pequeña (Estaquitas).", "error");
+                        }
+                    }
+                });
             }
 
             document.getElementById('det-folio').innerText = viajeSeleccionado.id;
@@ -623,7 +658,8 @@
 
             const card = document.getElementById('detalle-flotante');
             card.classList.remove('hidden');
-            setTimeout(() => card.classList.remove('translate-y-10', 'opacity-0'), 10);
+            // Animación inferior (Bottom-Sheet style)
+            setTimeout(() => card.classList.remove('translate-y-full', 'md:translate-y-10', 'opacity-0'), 10);
         }
 
         function cerrarDetalle() {
@@ -631,7 +667,7 @@
             renderizarLista();
             if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; }
             const card = document.getElementById('detalle-flotante');
-            card.classList.add('translate-y-10', 'opacity-0');
+            card.classList.add('translate-y-full', 'md:translate-y-10', 'opacity-0');
             setTimeout(() => card.classList.add('hidden'), 300);
         }
 
@@ -754,13 +790,17 @@
             togglePaqueteria();
 
             modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+            setTimeout(() => { 
+                modal.classList.remove('opacity-0'); 
+                content.classList.remove('translate-y-full', 'md:translate-y-0', 'md:scale-95'); 
+            }, 10);
         };
 
         window.cerrarFormulario = () => {
             const modal = document.getElementById('modal-formulario');
             const content = document.getElementById('modal-formulario-content');
-            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            modal.classList.add('opacity-0'); 
+            content.classList.add('translate-y-full', 'md:translate-y-0', 'md:scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
