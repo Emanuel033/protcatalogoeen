@@ -50,7 +50,7 @@
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
 </head>
-<body class="h-screen flex flex-col md:flex-row">
+<body class="h-screen flex flex-col lg:flex-row overflow-hidden">
 
     <!-- Configuración Firebase -->
     <script>
@@ -64,7 +64,7 @@
     </script>
 
     <!-- SIDEBAR DE PEDIDOS -->
-    <aside class="w-full md:w-[450px] h-1/2 md:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg relative">
+    <aside class="w-full lg:w-[420px] h-1/2 lg:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg relative">
         <!-- Header Sidebar -->
         <div class="p-5 border-b border-slate-100 bg-slate-900 flex justify-between items-center text-white">
             <div class="flex items-center gap-3">
@@ -104,8 +104,8 @@
     </aside>
 
     <!-- ÁREA DEL MAPA Y DETALLE -->
-    <main class="flex-1 h-1/2 md:h-full relative flex flex-col">
-        <div id="map" class="flex-1 w-full bg-slate-200"></div>
+    <main class="flex-1 h-1/2 lg:h-full relative flex flex-col overflow-hidden">
+        <div id="map" class="flex-1 w-full bg-slate-200 z-0"></div>
 
         <!-- Leyenda -->
         <div class="absolute top-4 left-4 z-[400] bg-white/90 backdrop-blur p-3 rounded-xl shadow-md border border-slate-200 pointer-events-none">
@@ -118,70 +118,83 @@
             </div>
         </div>
 
-        <!-- MODAL DE ASIGNACIÓN Y DETALLE (REDISEÑO RESPONSIVO BOTTOM-SHEET) -->
-        <div id="detalle-flotante" class="fixed bottom-0 left-0 w-full md:absolute md:bottom-6 md:left-6 md:w-[400px] bg-white rounded-t-3xl md:rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] z-[1000] overflow-hidden hidden transition-all duration-300 translate-y-full md:translate-y-10 opacity-0 flex flex-col max-h-[85vh] md:max-h-[80vh]">
+        <!-- MODAL DE ASIGNACIÓN Y DETALLE (Side Panel en Desktop / Bottom-Sheet en Móvil) -->
+        <div id="detalle-flotante" class="fixed bottom-0 left-0 w-full lg:absolute lg:top-0 lg:right-0 lg:left-auto lg:h-full lg:w-[420px] bg-white rounded-t-3xl lg:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.2)] lg:shadow-[-10px_0_40px_rgba(0,0,0,0.1)] z-[1000] overflow-hidden hidden transition-transform duration-300 translate-y-full lg:translate-y-0 lg:translate-x-full flex flex-col max-h-[85vh] lg:max-h-full">
             
-            <div class="bg-slate-900 p-4 relative shrink-0">
-                <button onclick="cerrarDetalle()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition"><i class="fas fa-times text-lg"></i></button>
-                <div class="flex justify-between items-start mb-2 pr-6">
-                    <span id="det-folio" class="text-xs font-mono font-bold text-slate-300">FOLIO / GRUPO</span>
-                    <span id="det-status" class="text-[9px] font-black uppercase px-2 py-1 rounded">ESTADO</span>
+            <div class="bg-slate-900 p-5 relative shrink-0">
+                <button onclick="cerrarDetalle()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition bg-white/10 w-8 h-8 rounded-full flex items-center justify-center"><i class="fas fa-times"></i></button>
+                <div class="flex justify-between items-start mb-2 pr-10">
+                    <span id="det-folio" class="text-xs font-mono font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded">FOLIO</span>
+                    <span id="det-status" class="text-[10px] font-black uppercase px-2 py-1 rounded">ESTADO</span>
                 </div>
-                <h3 id="det-cliente" class="text-xl font-black text-white leading-tight">Cliente o Paquetería</h3>
-                <p class="text-[10px] text-blue-400 font-bold mt-1 uppercase" id="det-tipo-destino">TIPO DESTINO</p>
+                <h3 id="det-cliente" class="text-xl font-black text-white leading-tight mt-2">Cliente o Paquetería</h3>
+                <p class="text-[11px] text-blue-400 font-bold mt-1 uppercase tracking-wider" id="det-tipo-destino">TIPO DESTINO</p>
             </div>
             
             <div class="p-5 overflow-y-auto custom-scroll flex-1 bg-slate-50">
-                <div class="flex items-start gap-3 mb-4 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex items-start gap-3 mb-5 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mt-0.5 text-red-500"><i class="fas fa-map-marker-alt text-lg"></i></div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase">Dirección de Entrega</p>
-                        <p id="det-direccion" class="text-sm text-slate-700 font-medium leading-snug">Cargando dirección...</p>
-                        <p id="det-restriccion-alerta" class="text-xs font-bold text-red-600 mt-1 hidden"><i class="fas fa-exclamation-triangle"></i> Zona Restringida para Carga Pesada</p>
+                        <p id="det-direccion" class="text-sm text-slate-700 font-medium leading-snug mt-0.5">Cargando dirección...</p>
+                        <p id="det-restriccion-alerta" class="text-xs font-bold text-red-600 mt-2 hidden bg-red-50 p-2 rounded border border-red-100"><i class="fas fa-exclamation-triangle"></i> Zona Restringida para Carga Pesada</p>
                         
                         <!-- HORARIO Y AVISOS -->
-                        <div id="det-horario-container" class="mt-2 text-[10px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 hidden">
+                        <div id="det-horario-container" class="mt-3 text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 hidden">
                             <p class="font-bold"><i class="fas fa-clock text-blue-500 mr-1"></i> Horario: <span id="det-horario" class="font-normal"></span></p>
-                            <p id="det-excepcion-p" class="font-bold text-amber-600 mt-1 hidden"><i class="fas fa-exclamation-circle mr-1"></i> <span id="det-excepcion"></span></p>
+                            <p id="det-excepcion-p" class="font-bold text-amber-600 mt-1.5 hidden border-t border-slate-200 pt-1.5"><i class="fas fa-exclamation-circle mr-1"></i> <span id="det-excepcion"></span></p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white border border-slate-200 rounded-xl p-3 mb-5 shadow-sm">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-1">Facturas a Entregar:</p>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 mb-5 shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 border-b border-slate-100 pb-2">Facturas a Entregar:</p>
                     <ul id="det-articulos" class="text-xs text-slate-700 font-medium space-y-2"></ul>
                 </div>
 
+                <!-- SECUENCIA DE RUTA (PLAN DE CARGA) -->
+                <div id="det-ruta-secuencia" class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-5 shadow-sm hidden">
+                    <p class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider mb-3 border-b border-indigo-100/50 pb-2"><i class="fas fa-route mr-1"></i> Secuencia de Ruta (Plan de Carga)</p>
+                    <ul id="lista-secuencia" class="text-xs text-indigo-900 font-medium space-y-2 pl-1"></ul>
+                    <p class="text-[10px] text-indigo-600 mt-3 font-bold leading-tight bg-white/50 p-2 rounded-lg"><i class="fas fa-info-circle text-indigo-500"></i> LIFO: Carga al fondo del camión lo <b>último</b> que vas a entregar.</p>
+                </div>
+
                 <!-- CONTROLES PARA DESPACHADOR -->
-                <div id="controles-despacho">
-                    
-                    <div id="selector-vehiculo-container" class="space-y-3">
-                        <!-- Seleccion Chofer -->
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Chofer Asignado <span class="text-red-500">*</span></label>
-                            <select id="selector-chofer" class="w-full border border-slate-300 bg-white p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold text-slate-700">
-                                <option value="">-- Selecciona un chofer --</option>
-                                <!-- Se llena dinámicamente -->
-                            </select>
-                        </div>
+                <div id="controles-despacho" class="mt-2">
+                    <div id="selector-vehiculo-container" class="bg-blue-50/50 border border-blue-100 rounded-xl p-4 space-y-5">
+                        <h4 class="text-[11px] font-black text-blue-800 uppercase tracking-wider border-b border-blue-100 pb-2 flex justify-between items-center">
+                            <span><i class="fas fa-clipboard-check mr-1"></i> Panel de Asignación</span>
+                        </h4>
                         
                         <!-- Seleccion Vehiculo -->
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Unidad de Transporte <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-2 gap-2" id="grid-vehiculos">
-                                <!-- Se llena dinámicamente de Firebase -->
+                            <label class="block text-[11px] font-bold text-slate-600 uppercase mb-2">Paso 1: Unidad de Transporte <span class="text-red-500">*</span></label>
+                            <div class="grid grid-cols-2 gap-2.5" id="grid-vehiculos">
+                                <!-- Se llena dinámicamente -->
                             </div>
                             <input type="hidden" id="vehiculo-seleccionado" value="">
+                        </div>
+
+                        <!-- Seleccion Chofer -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 uppercase mb-2">Paso 2: Asignar Operador <span class="text-red-500">*</span></label>
+                            <select id="selector-chofer" class="w-full border-2 border-slate-200 bg-white p-3 rounded-xl focus:ring-0 focus:border-blue-500 outline-none text-sm font-bold text-slate-700 transition cursor-pointer shadow-sm">
+                                <option value="">-- Despliega para seleccionar --</option>
+                                <!-- Se llena dinámicamente -->
+                            </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- FOOTER FIJO PARA BOTONES CON EXTRA PADDING MÓVIL -->
-            <div class="bg-white p-4 pb-8 md:pb-4 border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
+            <!-- FOOTER FIJO PARA BOTONES -->
+            <div class="bg-white p-5 border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
+                <div class="flex justify-between items-center mb-3 hidden" id="controles-edicion">
+                    <button id="btn-eliminar-viaje" onclick="eliminarViajeActual()" class="text-red-500 hover:text-red-600 font-bold text-xs flex items-center gap-1 transition"><i class="fas fa-trash-alt"></i> Eliminar Viaje</button>
+                </div>
                 <div class="flex gap-2">
-                    <button id="btn-iniciar" onclick="iniciarRuta()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-play"></i> Despachar</button>
-                    <button id="btn-entregar" onclick="marcarEntregado()" class="hidden flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-check-double"></i> Entregado</button>
+                    <button id="btn-iniciar" onclick="iniciarRuta()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-sm font-black transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 uppercase tracking-wide"><i class="fas fa-play-circle text-lg"></i> Iniciar Ruta</button>
+                    <button id="btn-entregar" onclick="marcarEntregado()" class="hidden flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl text-sm font-black transition shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 active:scale-95 uppercase tracking-wide"><i class="fas fa-check-double text-lg"></i> Registrar Entrega</button>
                 </div>
             </div>
         </div>
@@ -190,20 +203,7 @@
     <!-- ========================================== -->
     <!-- MODAL FORMULARIO DE INGRESO MANUAL -->
     <!-- ========================================== -->
-    <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-end justify-center md:items-center p-0 md:p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full md:translate-y-0 md:scale-95 transition-transform duration-300 flex flex-col max-h-[90vh] absolute bottom-0 md:relative md:bottom-auto" id="modal-formulario-content">
-            <div class="bg-slate-900 p-4 flex justify-between items-center text-white shrink-0">
-                <h3 class="font-bold text-lg"><i class="fas fa-clipboard-list text-blue-400 mr-2"></i> Capturar Nuevo Envío</h3>
-                <button onclick="cerrarFormulario()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
-            </div>
-            
-            <div class="p-5 space-y-4 overflow-y-auto custom-scroll flex-1 bg-slate-50">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Folio Factura <span class="text-red-500">*</span></label>
-                    <input type="text" id="form-factura" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold text-blue-700 uppercase" placeholder="Ej. F-1029">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
+    <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-end justify-center lg:items-center p-0 lg:p-4 opacity-0 transition-opacity duration-300">
                     <div class="col-span-2 relative">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Cód. Cliente (Autocompleta) <span class="text-red-500">*</span></label>
                         <input type="text" id="form-cliente-codigo" list="clientes-list" oninput="buscarCliente()" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold uppercase" placeholder="Ej. CLI-001">
@@ -682,8 +682,12 @@
 
             const card = document.getElementById('detalle-flotante');
             card.classList.remove('hidden');
-            // Animación inferior (Bottom-Sheet style) adaptada a Lg
-            setTimeout(() => card.classList.remove('translate-y-full', 'lg:translate-y-10', 'opacity-0'), 10);
+            // Forzar reflow para que corra la transición
+            void card.offsetWidth;
+            // Animación inferior en móvil, lateral en desktop
+            card.classList.remove('translate-y-full', 'lg:translate-x-full');
+            
+            document.getElementById('controles-edicion').classList.remove('hidden');
         }
 
         function cerrarDetalle() {
@@ -691,7 +695,7 @@
             renderizarLista();
             if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; }
             const card = document.getElementById('detalle-flotante');
-            card.classList.add('translate-y-full', 'lg:translate-y-10', 'opacity-0');
+            card.classList.add('translate-y-full', 'lg:translate-x-full');
             setTimeout(() => card.classList.add('hidden'), 300);
         }
 
@@ -1006,20 +1010,30 @@
             // Choferes
             const selChofer = document.getElementById('selector-chofer');
             const choferActual = selChofer.value;
-            selChofer.innerHTML = '<option value="">-- Selecciona un chofer --</option>';
-            choferesDB.forEach(c => selChofer.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+            selChofer.innerHTML = '<option value="">-- Despliega para seleccionar --</option>';
+            
+            if(choferesDB.length === 0) {
+                selChofer.innerHTML += `<option value="" disabled>⚠️ Agrega operadores en Configuración ⚙️</option>`;
+            } else {
+                choferesDB.forEach(c => selChofer.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+            }
             if(choferActual) selChofer.value = choferActual;
 
             // Vehiculos (Grid de botones)
             const grid = document.getElementById('grid-vehiculos');
+            if(flotaDB.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 font-bold flex items-center gap-2"><i class="fas fa-exclamation-circle"></i> No hay vehículos. Ve al engrane ⚙️ para agregar uno.</div>`;
+                return;
+            }
+
             grid.innerHTML = flotaDB.map(v => {
                 const isEstaquitas = v.tipo === 'estaquitas';
                 const icon = isEstaquitas ? 'fa-truck-pickup' : 'fa-truck';
-                const desc = isEstaquitas ? 'Pequeño' : 'Pesado';
+                const desc = isEstaquitas ? 'Unidad Pequeña' : 'Unidad Pesada';
                 return `
-                <button onclick="seleccionarVehiculo('${v.id}', '${v.tipo}')" class="btn-vehiculo flex flex-col items-center justify-center p-2 rounded-lg border-2 border-slate-200 bg-white hover:border-blue-500 transition" data-vehiculo="${v.id}">
-                    <i class="fas ${icon} text-slate-600 text-xl mb-1"></i>
-                    <span class="text-[9px] font-bold text-slate-600 text-center leading-tight">${v.nombre}<br><span class="text-[8px] font-normal">${desc}</span></span>
+                <button onclick="seleccionarVehiculo('${v.id}', '${v.tipo}')" class="btn-vehiculo flex flex-col items-center justify-center p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50 transition" data-vehiculo="${v.id}">
+                    <i class="fas ${icon} text-slate-500 text-2xl mb-1.5"></i>
+                    <span class="text-[10px] font-black text-slate-700 text-center leading-tight uppercase tracking-wider">${v.nombre}<br><span class="text-[9px] font-semibold text-slate-400 normal-case mt-0.5 inline-block">${desc}</span></span>
                 </button>
                 `;
             }).join('');
