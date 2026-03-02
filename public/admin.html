@@ -317,10 +317,10 @@
                         <p class="text-sm text-slate-600 mt-1 font-medium max-w-xl">Detectamos estos códigos en tu sistema de facturación que aún no están creados visualmente.</p>
                     </div>
                 </div>
-                <div class="z-10 flex flex-wrap gap-3">
-                    <button onclick="document.getElementById('csvUploadInput').click()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 shadow-md whitespace-nowrap"><i class="fas fa-sync-alt"></i> <span class="hidden sm:inline">Sincronizar CSV</span></button>
-                    <input type="file" id="csvUploadInput" accept=".csv,.xlsx" class="hidden" onchange="handleCSVSync(event)">
-                    <button onclick="exportImportToExcel()" class="bg-white hover:bg-emerald-50 text-emerald-600 px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 shadow-sm border border-emerald-100 whitespace-nowrap"><i class="fas fa-file-excel text-lg"></i> <span class="hidden sm:inline">Exportar Pendientes</span></button>
+                <div class="flex flex-col sm:flex-row gap-3 z-10 w-full sm:w-auto">
+                    <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event)">
+                    <button onclick="document.getElementById('csvSyncInput').click()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"><i class="fas fa-upload text-lg"></i> <span class="hidden sm:inline">Sincronizar CSV</span></button>
+                    <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-white hover:bg-emerald-50 text-emerald-600 px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm border border-emerald-100 whitespace-nowrap"><i class="fas fa-file-excel text-lg"></i> <span class="hidden sm:inline">Exportar Pendientes</span></button>
                 </div>
             </div>
             <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
@@ -555,7 +555,7 @@
         </div>
     </div>
 
-    <!-- Custom Dialog Modal (Reemplaza alert/confirm/prompt nativos) -->
+    <!-- Custom Dialog Modal -->
     <div id="customDialogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100 p-6">
             <h3 id="customDialogMsg" class="font-black text-slate-800 text-sm mb-4 whitespace-pre-line text-center"></h3>
@@ -565,6 +565,13 @@
                 <button id="customDialogConfirm" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 text-sm transition-all w-full">Aceptar</button>
             </div>
         </div>
+    </div>
+
+    <!-- Overlay de Sincronización -->
+    <div id="syncOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[300] hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <i class="fas fa-sync fa-spin text-6xl text-blue-500 mb-6 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"></i>
+        <h2 class="text-white font-black text-2xl mb-2 tracking-tight">Sincronizando...</h2>
+        <p id="syncStatusText" class="text-blue-200 font-bold text-sm text-center max-w-sm bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700">Analizando archivo</p>
     </div>
 
     <div id="toast" class="fixed top-6 md:top-auto md:bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] hidden z-[100] font-bold text-sm flex items-center gap-3 w-[90%] md:w-max transition-all border border-slate-700">
@@ -588,9 +595,8 @@
         let html5QrcodeScanner = null;
         let currentScanVariants = []; 
         
-        let heredarOptionsList = []; // Para el buscador del dropdown
+        let heredarOptionsList = []; 
 
-        // Cerrar Dropdown de "Heredar" si se hace clic fuera
         document.addEventListener('click', function(event) {
             const drop = document.getElementById('heredarDropdownList');
             const input = document.getElementById('heredarSearchInput');
@@ -599,7 +605,6 @@
             }
         });
 
-        // --- SISTEMA DE MODALES PERSONALIZADOS (Evita alert/prompt bloqueantes) ---
         function customConfirm(msg) {
             return new Promise(resolve => {
                 const modal = document.getElementById('customDialogModal');
@@ -714,7 +719,6 @@
             } finally { status.classList.add('hidden'); btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); event.target.value = ''; }
         }
 
-        // ====== LÓGICA DE RECURSIÓN PARA STOCKS ======
         function getCalculatedStock(itemId, visited = new Set()) {
             if (visited.has(itemId)) return 0;
             visited.add(itemId);
@@ -735,12 +739,11 @@
             return maxKits === Infinity ? 0 : maxKits;
         }
 
-        // ====== VALIDACIÓN EXACTA DE FALTANTES ======
         function isProductPending(p) {
             const tipo = p.tipo_item || 'PIEZA_BASE';
             
             if (tipo === 'PIEZA_BASE') {
-                return !p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '';
+                return !p.codigo_sistema_oficial || String(p.codigo_sistema_oficial).trim() === '';
             }
             
             if (tipo === 'KIT_FLEXIBLE') {
@@ -749,18 +752,18 @@
             }
 
             if (tipo === 'KIT_OFICIAL') {
-                if (!p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '') return true;
+                if (!p.codigo_sistema_oficial || String(p.codigo_sistema_oficial).trim() === '') return true;
                 if (!p.hereda_empaques_de) return true;
             }
 
             return false;
         }
 
-        // ====== BADGE GLOBAL DE IMPORTACIONES PENDIENTES ======
         function getTotalPendingToImport() {
-            const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
+            // Protección contra errores en filter
+            const masterCodes = allItems.map(p => String(p.codigo_sistema_oficial || '')).filter(Boolean);
             return facturacionCatalog.filter(fact => {
-                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id;
+                const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || '');
                 return !masterCodes.includes(code);
             }).length;
         }
@@ -776,7 +779,6 @@
             });
         }
 
-        // ====== LISTENERS FIREBASE ======
         productsRef.onSnapshot((snapshot) => {
             allItems = []; baseItems = []; let pendingCount = 0;
             snapshot.forEach((doc) => {
@@ -786,16 +788,18 @@
             });
             
             allItems.forEach(p => { if(isProductPending(p)) pendingCount++; });
+            
+            // BLINDAJE DE FECHAS: Protege si fecha_creacion viene en string o nulo
             allItems.sort((a, b) => {
-                const dateA = a.fecha_creacion ? a.fecha_creacion.toDate() : new Date(0);
-                const dateB = b.fecha_creacion ? b.fecha_creacion.toDate() : new Date(0);
+                const dateA = (a.fecha_creacion && typeof a.fecha_creacion.toDate === 'function') ? a.fecha_creacion.toDate() : new Date(a.fecha_creacion || 0);
+                const dateB = (b.fecha_creacion && typeof b.fecha_creacion.toDate === 'function') ? b.fecha_creacion.toDate() : new Date(b.fecha_creacion || 0);
                 return dateB - dateA;
             });
 
             document.getElementById('count-total').innerText = allItems.length;
             document.getElementById('count-pending').innerText = pendingCount;
             
-            updateGlobalImportBadge(); // Actualiza badge independientemente de la pestaña
+            updateGlobalImportBadge();
 
             if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
             if(currentTab === 'import') renderImportTable(); 
@@ -805,7 +809,7 @@
             facturacionCatalog = [];
             snapshot.forEach(doc => { facturacionCatalog.push({ id: doc.id, ...doc.data() }); });
             
-            updateGlobalImportBadge(); // Actualiza badge independientemente de la pestaña
+            updateGlobalImportBadge();
 
             if(currentTab === 'master') renderGroupedTable();
             if(currentTab === 'import') renderImportTable();
@@ -824,7 +828,7 @@
             container.innerHTML = '';
             snap.forEach(doc => {
                 const data = doc.data();
-                const fecha = data.fecha ? data.fecha.toDate() : new Date();
+                const fecha = (data.fecha && typeof data.fecha.toDate === 'function') ? data.fecha.toDate() : new Date();
                 const strHora = fecha.toLocaleString('es-MX', {hour:'2-digit', minute:'2-digit'});
                 const strDia = fecha.toLocaleString('es-MX', {day: '2-digit', month: 'short'});
                 const isPos = data.cambio > 0;
@@ -847,29 +851,42 @@
         });
 
         function switchTab(tab) {
-            currentTab = tab; clearBulkSelection();
+            currentTab = tab; 
+            clearBulkSelection();
             const tabs = ['master', 'import', 'scanner', 'cashiers'];
+            
             tabs.forEach(t => {
                 const dtBtn = document.getElementById(`dtTab-${t}`);
                 if (dtBtn) dtBtn.className = t === tab ? "px-5 py-2 rounded-lg font-bold text-sm transition-all text-blue-700 bg-white shadow-sm" : "px-5 py-2 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 transition-all " + (t==='import'?'relative':'');
+                
                 const mbBtn = document.getElementById(`mbTab-${t}`);
                 if (mbBtn) {
                     mbBtn.className = t === tab ? "flex flex-col items-center justify-center w-full h-full text-blue-600 transition-colors" : "flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors " + (t==='import'?'relative':'');
                     if(t===tab) mbBtn.querySelector('i').classList.add('-translate-y-1', 'scale-110'); else mbBtn.querySelector('i').classList.remove('-translate-y-1', 'scale-110');
                 }
+                
                 const view = document.getElementById(`view-${t}`);
-                if(view) t === tab ? view.classList.remove('hidden') : view.classList.add('hidden');
+                if(view) {
+                    if (t === tab) {
+                        view.classList.remove('hidden');
+                    } else {
+                        view.classList.add('hidden');
+                    }
+                }
             });
 
-            if(tab === 'scanner' || tab === 'cashiers') { document.getElementById('globalSearchContainer').classList.add('hidden'); } 
-            else {
+            if(tab === 'scanner' || tab === 'cashiers') { 
+                document.getElementById('globalSearchContainer').classList.add('hidden'); 
+            } else {
                 document.getElementById('globalSearchContainer').classList.remove('hidden');
-                stopScanner(); 
+                stopScanner();
                 document.getElementById('globalSearch').value = '';
                 if(tab === 'master') { filterTable(); renderGroupedTable(); }
                 if(tab === 'import') renderImportTable();
             }
-            if(tab === 'cashiers') renderCashiers();
+            if(tab === 'cashiers') {
+                renderCashiers();
+            }
         }
 
         function switchMasterView(viewType) {
@@ -911,16 +928,16 @@
             if(!tbody) return; tbody.innerHTML = '';
 
             const filtered = allItems.filter(p => {
-                const matchSearch = term === '' || 
-                                    (p.nombre_flexible || '').toLowerCase().includes(term) || 
-                                    (p.codigo_sistema_oficial || '').toLowerCase().includes(term) || 
-                                    (p.categoria || '').toLowerCase().includes(term);
+                // BLINDAJE CON String(...)
+                const flexName = String(p.nombre_flexible || '').toLowerCase();
+                const sysCode = String(p.codigo_sistema_oficial || '').toLowerCase();
+                const cat = String(p.categoria || '').toLowerCase();
+                
+                const matchSearch = term === '' || flexName.includes(term) || sysCode.includes(term) || cat.includes(term);
                 if (!matchSearch) return false;
                 
-                // Filtro Faltantes
                 if (showOnlyPending && !isProductPending(p)) return false;
                 
-                // Filtro Tipo
                 const pType = p.tipo_item || 'PIEZA_BASE';
                 if (filterType !== 'ALL' && pType !== filterType) return false;
 
@@ -949,7 +966,6 @@
                 const eyeIcon = isActivo ? 'fa-eye text-blue-500' : 'fa-eye-slash text-slate-400';
                 const eyeBg = isActivo ? 'bg-blue-50 hover:bg-blue-100 border border-blue-100' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200';
                 
-                // Usar cálculo en tiempo real
                 const realStock = getCalculatedStock(p.id);
 
                 const tr = document.createElement('tr');
@@ -986,18 +1002,17 @@
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
 
             allItems.forEach(item => {
-                const code = item.codigo_sistema_oficial;
+                const code = String(item.codigo_sistema_oficial || '');
                 if(!code || code.trim() === '') return; 
                 
-                const matchSearch = term === '' || 
-                                    (item.nombre_flexible || '').toLowerCase().includes(term) || 
-                                    code.toLowerCase().includes(term);
+                const flexName = String(item.nombre_flexible || '').toLowerCase();
+                const matchSearch = term === '' || flexName.includes(term) || code.toLowerCase().includes(term);
 
                 if(!matchSearch) return;
 
                 if(!groups[code]) {
-                    const fact = facturacionCatalog.find(f => (f.codigo_sistema_oficial || f.codigo || f.Codigo || f.id) === code);
-                    const nameRaw = fact ? (fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto) : 'Desconocido / No importado';
+                    const fact = facturacionCatalog.find(f => String(f.codigo_sistema_oficial || f.codigo || f.Codigo || f.id || '') === code);
+                    const nameRaw = fact ? String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || '') : 'Desconocido / No importado';
                     groups[code] = { codigo: code, descripcion_oficial: nameRaw, stock_total: 0, variantes: [] };
                 }
                 groups[code].stock_total += getCalculatedStock(item.id);
@@ -1048,124 +1063,23 @@
             showToast('Excel de faltantes web descargado');
         }
 
-        async function handleCSVSync(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (!(await customConfirm(`¿Sincronizar el archivo ${file.name} con Firebase?\n\nEsto actualizará los datos y eliminará los productos descontinuados automáticamente.`))) {
-                event.target.value = '';
-                return;
-            }
-
-            showToast('Leyendo archivo y procesando datos...', 'info');
+        // --- FUNCIÓN DE EXPORTACIÓN A EXCEL EN IMPORTAR ---
+        window.exportImportToExcel = () => {
+            const pendingToImport = getPendingToImport();
+            if(pendingToImport.length === 0) return showToast("No hay datos para exportar", "error");
             
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    // Usamos XLSX (que ya tienes importado) para parsear el CSV o Excel
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheet = workbook.SheetNames[0];
-                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
-
-                    if (rows.length === 0) {
-                        showToast('El archivo está vacío o no se pudo leer correctamente.', 'error');
-                        event.target.value = '';
-                        return;
-                    }
-
-                    const productosCSV = [];
-                    const idsOficialesCSV = new Set();
-
-                    // Función auxiliar para buscar columnas ignorando mayúsculas/minúsculas
-                    const getVal = (row, key) => row[key] || row[key.toLowerCase()] || row[key.toUpperCase()] || row[Object.keys(row).find(k => k.toLowerCase() === key.toLowerCase())];
-
-                    rows.forEach(row => {
-                        let codigo = getVal(row, 'codigo_sistema') || getVal(row, 'codigo');
-                        
-                        if (codigo) {
-                            codigo = String(codigo);
-                            let precioRaw = getVal(row, 'precio');
-                            let precioNumerico = parseFloat(precioRaw);
-                            if (isNaN(precioNumerico)) precioNumerico = 0;
-
-                            // LIMPIEZA PARA EL ID DE FIRESTORE
-                            const idSeguroFirebase = codigo.replace(/\//g, '-').replace(/\\/g, '-');
-                            idsOficialesCSV.add(idSeguroFirebase);
-
-                            productosCSV.push({
-                                id: idSeguroFirebase,
-                                datos: {
-                                    codigo_sistema_oficial: codigo,
-                                    descripcion_oficial: getVal(row, 'descripcion_oficial') || getVal(row, 'descripcion') || '',
-                                    precio: precioNumerico,
-                                    tipo_articulo_sistema: getVal(row, 'tipo_articulo_sistema') || 'PIEZA_BASE'
-                                }
-                            });
-                        }
-                    });
-
-                    showToast(`Analizando diferencias con la base de datos...`, 'info');
-
-                    // Obtener colección actual
-                    const snapshotActual = await facturacionRef.get();
-                    const idsAEliminar = [];
-
-                    // Identificar eliminados
-                    snapshotActual.forEach((doc) => {
-                        if (!idsOficialesCSV.has(doc.id)) {
-                            idsAEliminar.push(doc.id);
-                        }
-                    });
-
-                    const dividirEnLotes = (arreglo, tamaño = 500) => {
-                        const lotes = [];
-                        for (let i = 0; i < arreglo.length; i += tamaño) {
-                            lotes.push(arreglo.slice(i, i + tamaño));
-                        }
-                        return lotes;
-                    };
-
-                    // Eliminar descontinuados (Lotes 500)
-                    if (idsAEliminar.length > 0) {
-                        const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
-                        for (const lote of lotesBorrado) {
-                            const batch = db.batch();
-                            lote.forEach((id) => {
-                                const docRef = facturacionRef.doc(id);
-                                batch.delete(docRef);
-                            });
-                            await batch.commit();
-                        }
-                    }
-
-                    // Actualizar/Insertar (Lotes 500)
-                    const lotesSubida = dividirEnLotes(productosCSV, 500);
-                    for (let i = 0; i < lotesSubida.length; i++) {
-                        const batch = db.batch();
-                        lotesSubida[i].forEach((producto) => {
-                            const docRef = facturacionRef.doc(producto.id);
-                            batch.set(docRef, producto.datos, { merge: true });
-                        });
-                        await batch.commit();
-                    }
-
-                    showToast(`¡Sincronización exitosa! (+${productosCSV.length} act. / -${idsAEliminar.length} elim.)`, 'success');
-                } catch (error) {
-                    console.error('Error en sincronización:', error);
-                    showToast('Error en la sincronización. Revisa la consola.', 'error');
-                } finally {
-                    event.target.value = ''; // Resetear el input file
-                }
-            };
+            const dataToExport = pendingToImport.map(fact => ({ 
+                "Cód. Facturación": String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || ''), 
+                "Descripción Oficial": String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción')
+            }));
             
-            reader.onerror = () => {
-                showToast('Hubo un problema al leer el archivo', 'error');
-                event.target.value = '';
-            };
-            
-            reader.readAsArrayBuffer(file);
-        }
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport); 
+            worksheet['!cols'] = [{wch: 25}, {wch: 60}];
+            const workbook = XLSX.utils.book_new(); 
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Pendientes_Importar");
+            XLSX.writeFile(workbook, `Pendientes_Importar_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast('Excel descargado correctamente');
+        };
 
         // --- ACCIONES RÁPIDAS ---
         window.toggleActivo = async (id, currentState) => {
@@ -1211,10 +1125,13 @@
 
         function getPendingToImport() {
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
-            const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
+            const masterCodes = allItems.map(p => String(p.codigo_sistema_oficial || '')).filter(Boolean);
+            
             return facturacionCatalog.filter(fact => {
-                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id;
-                const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || '';
+                // BLINDAJE CON String(...)
+                const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || '');
+                const nameRaw = String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || '');
+                
                 const matchSearch = term === '' || nameRaw.toLowerCase().includes(term) || code.toLowerCase().includes(term);
                 return matchSearch && !masterCodes.includes(code);
             });
@@ -1228,7 +1145,9 @@
                 tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-16 text-center text-slate-400 font-bold"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-emerald-400"></i></div> Todo importado y al día o no coincide con tu búsqueda.</td></tr>`; return;
             }
             pendingToImport.forEach(fact => {
-                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id; const name = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción';
+                const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || ''); 
+                const name = String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción');
+                
                 const tr = document.createElement('tr'); tr.className = "hover:bg-blue-50/30 transition-colors";
                 tr.innerHTML = `<td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-50">${code}</td><td class="px-6 py-4 font-bold text-slate-800 text-sm border-b border-slate-50">${name}</td><td class="px-6 py-4 text-right border-b border-slate-50"><button onclick="importProduct('${fact.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto">Importar <i class="fas fa-arrow-right"></i></button></td>`;
                 tbody.appendChild(tr);
@@ -1260,7 +1179,6 @@
         }
 
         async function showScanResult(p, context) {
-            // BLOQUEO ESTRICTO DE KITS EN EL ESCÁNER
             if (p.tipo_item && p.tipo_item !== 'PIEZA_BASE') {
                 showToast("No se pueden escanear Kits para inventario físico.", "error");
                 document.getElementById('scanIdle').classList.remove('hidden');
@@ -1268,7 +1186,6 @@
                 document.getElementById('btnStartScan').classList.remove('hidden'); 
                 document.getElementById('btnStopScan').classList.add('hidden');
                 
-                // Mostrar UI de error en la tarjeta
                 const idleIconCont = document.getElementById('scanIdleIconContainer');
                 const idleIcon = document.getElementById('scanIdleIcon');
                 const idleText = document.getElementById('scanIdleText');
@@ -1287,7 +1204,6 @@
                 return;
             }
 
-            // Flujo Normal (Piezas Base)
             document.getElementById('btnStartScan').classList.remove('hidden'); document.getElementById('btnStopScan').classList.add('hidden');
             const resCard = document.getElementById('scanResult'); resCard.classList.remove('hidden');
             document.getElementById('resultCard').scrollIntoView({behavior: 'smooth', block: 'start'});
@@ -1390,9 +1306,8 @@
 
         // --- LÓGICA DEL DROPDOWN BUSCADOR DE "HEREDAR EMPAQUES" ---
         function updateHeredarOptions(excludeId) {
-            // Guardamos las opciones base en la variable global
             heredarOptionsList = allItems.filter(b => b.id !== excludeId && (!b.tipo_item || b.tipo_item === 'PIEZA_BASE'));
-            renderHeredarDropdown(''); // Renderizamos todo limpio
+            renderHeredarDropdown(''); 
         }
 
         function renderHeredarDropdown(filterText) {
@@ -1400,16 +1315,14 @@
             list.innerHTML = '';
             const lowerFilter = filterText.toLowerCase().trim();
 
-            // Opción para No Heredar (limpiar)
             const noneLi = document.createElement('li');
             noneLi.className = "px-4 py-3 hover:bg-red-50 cursor-pointer text-sm text-red-500 font-bold transition-colors";
             noneLi.innerHTML = "<i class='fas fa-times-circle mr-1'></i> Ninguno / No heredar";
             noneLi.onclick = () => selectHeredarOption('', '');
             list.appendChild(noneLi);
 
-            // Filtrado
             heredarOptionsList.forEach(opt => {
-                if (opt.nombre_flexible.toLowerCase().includes(lowerFilter)) {
+                if (String(opt.nombre_flexible || '').toLowerCase().includes(lowerFilter)) {
                     const li = document.createElement('li');
                     li.className = "px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm font-bold text-slate-800 transition-colors";
                     li.innerText = opt.nombre_flexible;
@@ -1418,7 +1331,7 @@
                 }
             });
 
-            if(list.children.length === 1) { // Solo está el botón de "Ninguno"
+            if(list.children.length === 1) { 
                 const emptyLi = document.createElement('li');
                 emptyLi.className = "px-4 py-3 text-sm text-slate-400 font-medium italic";
                 emptyLi.innerText = "No se encontraron resultados...";
@@ -1477,7 +1390,7 @@
             document.getElementById('importOldId').value = ''; document.getElementById('newPkgQty').value = ''; document.getElementById('newPkgSku').value = '';
             const modal = document.getElementById('editModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
             
-            updateHeredarOptions(id); // Precarga opciones del buscador de empaques
+            updateHeredarOptions(id);
 
             if (id) {
                 const p = allItems.find(x => x.id === id); if(!p) return;
@@ -1492,7 +1405,6 @@
                 
                 document.getElementById('editHeredaEmpaques').value = p.hereda_empaques_de || '';
                 
-                // Setear nombre en el buscador visual si hay herencia guardada
                 if(p.hereda_empaques_de) {
                     const parentItem = allItems.find(x => x.id === p.hereda_empaques_de);
                     document.getElementById('heredarSearchInput').value = parentItem ? parentItem.nombre_flexible : '';
@@ -1680,14 +1592,14 @@
             try { await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete(); showToast('Eliminado', 'info'); } catch (error) { showToast('Error al eliminar', 'error'); }
         };
 
-        // --- CAJEROS (USUARIOS POS) ---
+        // --- CAJEROS (USUARIOS POS) BLINDADO ---
         function renderCashiers() {
             const tbody = document.getElementById('cashiersTableBody');
             if(!tbody) return;
             tbody.innerHTML = '';
             
-            // Ordenar por nombre
-            const sorted = [...cashiersList].sort((a,b) => (a.nombre || '').localeCompare(b.nombre || ''));
+            // BLINDAJE CON String(...)
+            const sorted = [...cashiersList].sort((a,b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
 
             if(sorted.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold"><div class="text-3xl mb-2">👤</div>No hay cajeros registrados aún.</td></tr>';
@@ -1704,8 +1616,8 @@
                 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4 border-b border-slate-100 font-bold text-slate-800 text-sm">${c.nombre || 'Sin Nombre'}</td>
-                        <td class="px-6 py-4 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 font-mono font-black px-3 py-1.5 rounded-lg text-xs tracking-widest">${c.pin || '----'}</span></td>
+                        <td class="px-6 py-4 border-b border-slate-100 font-bold text-slate-800 text-sm">${String(c.nombre || 'Sin Nombre')}</td>
+                        <td class="px-6 py-4 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 font-mono font-black px-3 py-1.5 rounded-lg text-xs tracking-widest">${String(c.pin || '----')}</span></td>
                         <td class="px-6 py-4 border-b border-slate-100 text-center">${statusBadge}</td>
                         <td class="px-6 py-4 border-b border-slate-100 text-right">
                             <div class="flex justify-end items-center gap-2">
@@ -1791,7 +1703,11 @@
             const showOnlyPending = document.getElementById('filterPending').checked;
             const filterType = document.getElementById('filterType').value;
             return allItems.filter(p => {
-                const matchSearch = term === '' || (p.nombre_flexible || '').toLowerCase().includes(term) || (p.codigo_sistema_oficial || '').toLowerCase().includes(term) || (p.categoria || '').toLowerCase().includes(term);
+                const flexName = String(p.nombre_flexible || '').toLowerCase();
+                const sysCode = String(p.codigo_sistema_oficial || '').toLowerCase();
+                const cat = String(p.categoria || '').toLowerCase();
+
+                const matchSearch = term === '' || flexName.includes(term) || sysCode.includes(term) || cat.includes(term);
                 if (!matchSearch) return false;
                 if (showOnlyPending && !isProductPending(p)) return false;
                 const pType = p.tipo_item || 'PIEZA_BASE';
@@ -1801,7 +1717,6 @@
         }
 
         window.printAllPackagesQRs = async () => {
-            // SOLO PIEZAS BASE para Inventario Físico
             const filtered = getFilteredProductsForPrint().filter(p => !p.tipo_item || p.tipo_item === 'PIEZA_BASE');
             if(filtered.length === 0) return showToast("No hay PIEZAS BASE filtradas para imprimir.", "error"); 
             closeModal('massActionsModal'); showToast("Calculando paquetes...", "info");
@@ -1912,6 +1827,117 @@
             const dataArray = [{ id: qrVal, title: `${p.nombre_flexible}`, sub: `SKU: ${sku} (${piezas} PZ)` }];
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '')); pw.document.close();
         };
+
+        // --- NUEVA LÓGICA: SINCRONIZAR CSV/EXCEL DESDE LA WEB ---
+        async function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const overlay = document.getElementById('syncOverlay');
+            const statusText = document.getElementById('syncStatusText');
+            
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            statusText.innerText = "Leyendo archivo...";
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = e.target.result;
+                    // XLSX puede leer tanto CSV como hojas de cálculo
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+
+                    const productosCSV = [];
+                    const idsOficialesCSV = new Set();
+
+                    statusText.innerText = "Procesando filas del archivo...";
+
+                    jsonRows.forEach(row => {
+                        // Soporte para variaciones en el nombre de las columnas (minúsculas/mayúsculas)
+                        const codigo = row.codigo_sistema || row.codigo || row.Codigo || row.CODIGO;
+                        if (codigo) {
+                            let precioNumerico = parseFloat(row.precio || row.Precio || 0);
+                            if (isNaN(precioNumerico)) precioNumerico = 0;
+
+                            // 1. LIMPIEZA PARA EL ID DE FIRESTORE (Cambia diagonales por guiones)
+                            const idSeguroFirebase = String(codigo).replace(/\//g, '-').replace(/\\/g, '-');
+                            idsOficialesCSV.add(idSeguroFirebase);
+
+                            productosCSV.push({
+                                id: idSeguroFirebase,
+                                datos: {
+                                    codigo_sistema_oficial: String(codigo),
+                                    descripcion_oficial: row.descripcion_oficial || row.descripcion || row.Descripcion || row.nombre || '',
+                                    precio: precioNumerico,
+                                    tipo_articulo_sistema: row.tipo_articulo_sistema || row.tipo || 'PIEZA_BASE'
+                                }
+                            });
+                        }
+                    });
+
+                    statusText.innerText = `Comparando ${productosCSV.length} productos con la base de datos...`;
+
+                    const coleccion = 'catalogo_facturacion';
+                    const snapshotActual = await db.collection(coleccion).get();
+                    const idsAEliminar = [];
+
+                    snapshotActual.forEach(doc => {
+                        if (!idsOficialesCSV.has(doc.id)) {
+                            idsAEliminar.push(doc.id);
+                        }
+                    });
+
+                    // Función para dividir arreglos en grupos
+                    const dividirEnLotes = (arreglo, tamano = 500) => {
+                        const lotes = [];
+                        for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano));
+                        return lotes;
+                    };
+
+                    // 2. Borrar descontinuados
+                    if (idsAEliminar.length > 0) {
+                        statusText.innerText = `Eliminando ${idsAEliminar.length} productos descontinuados...`;
+                        const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
+                        for (const lote of lotesBorrado) {
+                            const batch = db.batch();
+                            lote.forEach(id => {
+                                batch.delete(db.collection(coleccion).doc(id));
+                            });
+                            await batch.commit();
+                        }
+                    }
+
+                    // 3. Actualizar / Insertar nuevos
+                    statusText.innerText = `Subiendo ${productosCSV.length} productos actualizados...`;
+                    const lotesSubida = dividirEnLotes(productosCSV, 500);
+                    for (let i = 0; i < lotesSubida.length; i++) {
+                        statusText.innerText = `Procesando lote ${i + 1} de ${lotesSubida.length}...`;
+                        const batch = db.batch();
+                        lotesSubida[i].forEach(producto => {
+                            const docRef = db.collection(coleccion).doc(producto.id);
+                            batch.set(docRef, producto.datos, { merge: true });
+                        });
+                        await batch.commit();
+                    }
+
+                    showToast('¡Sincronización finalizada exitosamente!', 'success');
+
+                } catch (error) {
+                    console.error("Error en sincronización:", error);
+                    showToast("Ocurrió un error en la sincronización.", "error");
+                } finally {
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                    event.target.value = ''; // Limpiar el input para permitir volver a subir el mismo archivo
+                }
+            };
+            
+            // Usar readAsArrayBuffer para compatibilidad total de XLSX y CSV
+            reader.readAsArrayBuffer(file);
+        }
     </script>
 </body>
 </html>
