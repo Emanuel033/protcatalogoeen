@@ -62,7 +62,6 @@
 
     <!-- SIDEBAR DE PEDIDOS -->
     <aside class="w-full lg:w-[420px] h-1/2 lg:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg relative">
-        <!-- Header Sidebar -->
         <div class="p-5 border-b border-slate-100 bg-slate-900 flex justify-between items-center text-white shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center font-black text-xl shadow-md cursor-pointer hover:bg-blue-400 transition" onclick="abrirConfiguracion()" title="Configurar Flota y Choferes">
@@ -80,7 +79,6 @@
             </div>
         </div>
 
-        <!-- Filtros Rápidos -->
         <div class="flex p-3 gap-2 bg-slate-50 border-b border-slate-200 overflow-x-auto hide-scroll shadow-inner shrink-0">
             <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition-colors">Todos</button>
             <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">Por Asignar</button>
@@ -88,7 +86,6 @@
             <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">Bitácora / Completados</button>
         </div>
 
-        <!-- Lista de Pedidos -->
         <div class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3 bg-slate-100/50" id="lista-pedidos">
             <div class="text-center py-10">
                 <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-3"></i>
@@ -101,7 +98,6 @@
     <main class="flex-1 h-1/2 lg:h-full relative flex flex-col overflow-hidden">
         <div id="map" class="flex-1 w-full bg-slate-200 z-[10]"></div>
 
-        <!-- Leyenda -->
         <div class="absolute top-4 left-4 z-[40] bg-white/90 backdrop-blur p-3 rounded-xl shadow-md border border-slate-200 pointer-events-none">
             <h4 class="text-[10px] font-black uppercase text-slate-800 mb-2">Restricciones MTY</h4>
             <div class="flex items-center gap-2 text-xs font-semibold text-slate-600 mb-1">
@@ -112,7 +108,7 @@
             </div>
         </div>
 
-        <!-- MODAL DE ASIGNACIÓN Y DETALLE (Side Panel en Desktop / Bottom-Sheet en Móvil) -->
+        <!-- MODAL DE ASIGNACIÓN Y DETALLE -->
         <div id="detalle-flotante" class="fixed bottom-0 left-0 w-full lg:absolute lg:top-0 lg:right-0 lg:left-auto lg:h-full lg:w-[420px] bg-white rounded-t-3xl lg:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.2)] lg:shadow-[-10px_0_40px_rgba(0,0,0,0.1)] z-[1000] overflow-hidden hidden transition-transform duration-300 translate-y-full lg:translate-y-0 lg:translate-x-full flex flex-col max-h-[85vh] lg:max-h-full">
             
             <div class="bg-slate-900 p-5 relative shrink-0">
@@ -129,12 +125,24 @@
             </div>
             
             <div class="p-5 overflow-y-auto custom-scroll flex-1 bg-slate-50">
+                <!-- Direccion y Contacto -->
                 <div class="flex items-start gap-3 mb-5 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mt-0.5 text-red-500"><i class="fas fa-map-marker-alt text-lg"></i></div>
-                    <div>
+                    <div class="w-full">
                         <p class="text-[10px] font-bold text-slate-400 uppercase">Dirección de Entrega</p>
                         <p id="det-direccion" class="text-sm text-slate-700 font-medium leading-snug mt-0.5">Cargando dirección...</p>
-                        <p id="det-restriccion-alerta" class="text-xs font-bold text-red-600 mt-2 hidden bg-red-50 p-2 rounded border border-red-100"><i class="fas fa-exclamation-triangle"></i> Zona Restringida para Carga Pesada</p>
+                        
+                        <!-- Botones de Contacto y Maps -->
+                        <div id="det-contacto-container" class="mt-3 flex gap-2 hidden border-t border-slate-100 pt-3">
+                            <a id="det-btn-llamar" href="#" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition hidden border border-emerald-200">
+                                <i class="fas fa-phone"></i> Llamar
+                            </a>
+                            <a id="det-btn-maps" href="#" target="_blank" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition hidden border border-blue-200">
+                                <i class="fas fa-map-marked-alt"></i> GPS
+                            </a>
+                        </div>
+
+                        <p id="det-restriccion-alerta" class="text-xs font-bold text-red-600 mt-3 hidden bg-red-50 p-2 rounded border border-red-100"><i class="fas fa-exclamation-triangle"></i> Zona Restringida para Carga Pesada</p>
                         
                         <!-- HORARIO Y AVISOS -->
                         <div id="det-horario-container" class="mt-3 text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 hidden">
@@ -163,16 +171,12 @@
                             <span><i class="fas fa-clipboard-check mr-1"></i> Panel de Asignación</span>
                         </h4>
                         
-                        <!-- Seleccion Vehiculo -->
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 uppercase mb-2">Paso 1: Unidad de Transporte <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-2 gap-2.5" id="grid-vehiculos">
-                                <!-- Se llena dinámicamente -->
-                            </div>
+                            <div class="grid grid-cols-2 gap-2.5" id="grid-vehiculos"></div>
                             <input type="hidden" id="vehiculo-seleccionado" value="">
                         </div>
 
-                        <!-- Seleccion Chofer -->
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 uppercase mb-2">Paso 2: Asignar Operador <span class="text-red-500">*</span></label>
                             <select id="selector-chofer" class="w-full border-2 border-slate-200 bg-white p-3 rounded-xl focus:ring-0 focus:border-blue-500 outline-none text-sm font-bold text-slate-700 transition cursor-pointer shadow-sm">
@@ -235,23 +239,37 @@
                     <input type="text" id="form-paqueteria" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" placeholder="Ej. Transportes Castores...">
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 flex justify-between">
-                        <span>Dirección de Entrega <span class="text-red-500">*</span></span>
+                <!-- SECCIÓN DIRECCIÓN Y CONTACTO -->
+                <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                    <label class="block text-xs font-bold text-blue-800 uppercase tracking-wider mb-2 border-b border-blue-200 pb-1">
+                        <i class="fas fa-map-marker-alt"></i> Datos de Entrega
                     </label>
-                    <select id="form-direcciones-guardadas" onchange="seleccionarDireccionGuardada()" class="w-full border border-slate-300 bg-blue-50 p-2 rounded-lg text-sm font-semibold text-blue-800 mb-2 hidden outline-none">
-                        <option value="">-- Seleccionar Bodega Guardada --</option>
-                    </select>
-                    <textarea id="form-direccion" rows="2" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Calle, Número, Colonia, Municipio..."></textarea>
                     
-                    <div class="grid grid-cols-2 gap-4 mt-4">
+                    <select id="form-direcciones-guardadas" onchange="seleccionarDireccionGuardada()" class="w-full border border-blue-300 bg-white p-2 rounded-lg text-sm font-semibold text-blue-800 mb-3 hidden outline-none shadow-sm">
+                        <option value="">-- Cargar Bodega Guardada --</option>
+                    </select>
+
+                    <textarea id="form-direccion" rows="2" class="w-full border border-slate-300 bg-white p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm mb-3" placeholder="Calle, Número, Colonia, Municipio... *"></textarea>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Horario Recepción</label>
-                            <input type="text" id="form-horario" class="w-full border border-slate-300 bg-white p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs" placeholder="Ej. L-V 9 a 5pm">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Teléfono Contacto</label>
+                            <input type="tel" id="form-telefono" class="w-full border border-slate-300 bg-white p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs" placeholder="Ej. 81 1234 5678">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Excepción</label>
-                            <input type="text" id="form-excepcion" class="w-full border border-amber-300 bg-amber-50 p-2.5 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-semibold text-amber-800" placeholder="Ej. Hoy salen 2pm">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Link de Maps/Waze</label>
+                            <input type="url" id="form-link-maps" class="w-full border border-slate-300 bg-white p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs" placeholder="https://maps.app.goo.gl/...">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Horario Recepción</label>
+                            <input type="text" id="form-horario" class="w-full border border-slate-300 bg-white p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs" placeholder="Ej. L-V 9 a 5pm">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Avisos / Excepción</label>
+                            <input type="text" id="form-excepcion" class="w-full border border-amber-300 bg-amber-50 p-2 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-semibold text-amber-800" placeholder="Ej. Llamar antes de ir">
                         </div>
                     </div>
                 </div>
@@ -376,6 +394,8 @@
                             direccion: p.direccion,
                             horario: p.horario,
                             excepcion: p.excepcion,
+                            telefono: p.telefono || '', // Toma el del primero si existe
+                            link_maps: p.link_maps || '', 
                             coordenadas: p.coordenadas,
                             estado: p.estado,
                             vehiculo_asignado: p.vehiculo_asignado,
@@ -395,6 +415,8 @@
                         direccion: p.direccion,
                         horario: p.horario,
                         excepcion: p.excepcion,
+                        telefono: p.telefono || '',
+                        link_maps: p.link_maps || '',
                         coordenadas: p.coordenadas,
                         estado: p.estado,
                         vehiculo_asignado: p.vehiculo_asignado,
@@ -590,6 +612,36 @@
             document.getElementById('det-tipo-destino').innerText = viajeSeleccionado.tipo_destino === 'paqueteria' ? '📍 Consolidado a Paquetería' : '🏢 Entrega a Bodega Directa';
             document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
             
+            // Lógica de Botones de Contacto (Maps y Teléfono)
+            const contContacto = document.getElementById('det-contacto-container');
+            const btnLlamar = document.getElementById('det-btn-llamar');
+            const btnMaps = document.getElementById('det-btn-maps');
+            let muestraContacto = false;
+
+            if (viajeSeleccionado.telefono) {
+                btnLlamar.href = `tel:${viajeSeleccionado.telefono.replace(/\s+/g, '')}`; // Quita espacios para el href
+                btnLlamar.innerHTML = `<i class="fas fa-phone"></i> Llamar al ${viajeSeleccionado.telefono}`;
+                btnLlamar.classList.remove('hidden');
+                muestraContacto = true;
+            } else {
+                btnLlamar.classList.add('hidden');
+            }
+
+            if (viajeSeleccionado.link_maps) {
+                btnMaps.href = viajeSeleccionado.link_maps;
+                btnMaps.classList.remove('hidden');
+                muestraContacto = true;
+            } else {
+                btnMaps.classList.add('hidden');
+            }
+
+            if (muestraContacto) {
+                contContacto.classList.remove('hidden');
+            } else {
+                contContacto.classList.add('hidden');
+            }
+
+
             const contHorario = document.getElementById('det-horario-container');
             if (viajeSeleccionado.horario || viajeSeleccionado.excepcion) {
                 contHorario.classList.remove('hidden');
@@ -711,7 +763,7 @@
             if (cliente) {
                 document.getElementById('form-cliente').value = cliente.nombre;
                 if(cliente.direcciones && cliente.direcciones.length > 0) {
-                    selectDir.innerHTML = '<option value="">-- Seleccionar Bodega Guardada --</option>';
+                    selectDir.innerHTML = '<option value="">-- Cargar Bodega Guardada --</option>';
                     cliente.direcciones.forEach((d, index) => {
                         const dirText = typeof d === 'string' ? d : d.direccion;
                         selectDir.innerHTML += `<option value="${index}">${dirText}</option>`;
@@ -726,16 +778,34 @@
             if(index !== "" && window.clienteActualEnForm) {
                 const dirObj = window.clienteActualEnForm.direcciones[index];
                 if(typeof dirObj === 'string') {
-                    document.getElementById('form-direccion').value = dirObj; document.getElementById('form-horario').value = ""; document.getElementById('form-excepcion').value = "";
+                    document.getElementById('form-direccion').value = dirObj; 
+                    document.getElementById('form-horario').value = ""; 
+                    document.getElementById('form-excepcion').value = "";
+                    document.getElementById('form-telefono').value = "";
+                    document.getElementById('form-link-maps').value = "";
                 } else {
-                    document.getElementById('form-direccion').value = dirObj.direccion || ""; document.getElementById('form-horario').value = dirObj.horario || ""; document.getElementById('form-excepcion').value = dirObj.excepcion || "";
+                    document.getElementById('form-direccion').value = dirObj.direccion || ""; 
+                    document.getElementById('form-horario').value = dirObj.horario || ""; 
+                    document.getElementById('form-excepcion').value = dirObj.excepcion || "";
+                    document.getElementById('form-telefono').value = dirObj.telefono || "";
+                    document.getElementById('form-link-maps').value = dirObj.linkMaps || ""; // Cargo link si existe
                 }
             }
         };
 
         window.abrirFormulario = () => {
             const modal = document.getElementById('modal-formulario'); const content = document.getElementById('modal-formulario-content');
-            document.getElementById('form-factura').value = ''; document.getElementById('form-cliente-codigo').value = ''; document.getElementById('form-cliente').value = ''; document.getElementById('form-tipo').value = 'bodega_cliente'; document.getElementById('form-paqueteria').value = ''; document.getElementById('form-direccion').value = ''; document.getElementById('form-horario').value = ''; document.getElementById('form-excepcion').value = ''; document.getElementById('form-direcciones-guardadas').classList.add('hidden');
+            document.getElementById('form-factura').value = ''; 
+            document.getElementById('form-cliente-codigo').value = ''; 
+            document.getElementById('form-cliente').value = ''; 
+            document.getElementById('form-tipo').value = 'bodega_cliente'; 
+            document.getElementById('form-paqueteria').value = ''; 
+            document.getElementById('form-direccion').value = ''; 
+            document.getElementById('form-horario').value = ''; 
+            document.getElementById('form-excepcion').value = ''; 
+            document.getElementById('form-telefono').value = ''; 
+            document.getElementById('form-link-maps').value = ''; 
+            document.getElementById('form-direcciones-guardadas').classList.add('hidden');
             togglePaqueteria();
             modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full', 'lg:translate-y-0', 'lg:scale-95'); }, 10);
         };
@@ -753,8 +823,22 @@
         };
 
         window.guardarEnvioManual = async () => {
-            const factura = document.getElementById('form-factura').value.trim().toUpperCase(); const clienteCodigo = document.getElementById('form-cliente-codigo').value.trim().toUpperCase(); const clienteNombre = document.getElementById('form-cliente').value.trim(); const tipo = document.getElementById('form-tipo').value; const paqueteria = document.getElementById('form-paqueteria').value.trim(); const direccion = document.getElementById('form-direccion').value.trim(); const horario = document.getElementById('form-horario').value.trim(); const excepcion = document.getElementById('form-excepcion').value.trim();
-            if(!factura) return showToast("Falta el Folio", "error"); if(!clienteCodigo) return showToast("Falta el Código del Cliente", "error"); if(!clienteNombre) return showToast("Falta el Nombre", "error"); if(!direccion) return showToast("Falta la Dirección", "error"); if(tipo === 'paqueteria' && !paqueteria) return showToast("Falta paquetería", "error");
+            const factura = document.getElementById('form-factura').value.trim().toUpperCase(); 
+            const clienteCodigo = document.getElementById('form-cliente-codigo').value.trim().toUpperCase(); 
+            const clienteNombre = document.getElementById('form-cliente').value.trim(); 
+            const tipo = document.getElementById('form-tipo').value; 
+            const paqueteria = document.getElementById('form-paqueteria').value.trim(); 
+            const direccion = document.getElementById('form-direccion').value.trim(); 
+            const horario = document.getElementById('form-horario').value.trim(); 
+            const excepcion = document.getElementById('form-excepcion').value.trim();
+            const telefono = document.getElementById('form-telefono').value.trim();
+            const linkMaps = document.getElementById('form-link-maps').value.trim();
+
+            if(!factura) return showToast("Falta el Folio", "error"); 
+            if(!clienteCodigo) return showToast("Falta el Código del Cliente", "error"); 
+            if(!clienteNombre) return showToast("Falta el Nombre", "error"); 
+            if(!direccion) return showToast("Falta la Dirección", "error"); 
+            if(tipo === 'paqueteria' && !paqueteria) return showToast("Falta paquetería", "error");
 
             const btn = document.getElementById('btn-guardar-manual'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
 
@@ -765,11 +849,28 @@
                     dirsGuardadas = docCliente.data().direcciones || [];
                     dirsGuardadas = dirsGuardadas.filter(d => { const dTxt = typeof d === 'string' ? d : d.direccion; return dTxt !== direccion; });
                 }
-                dirsGuardadas.push({ direccion, horario, excepcion });
+                // Guardamos la nueva dirección con el link y teléfono al historial del cliente
+                dirsGuardadas.push({ direccion, horario, excepcion, telefono, linkMaps });
                 await refCliente.set({ nombre: clienteNombre, direcciones: dirsGuardadas }, { merge: true });
 
-                const nuevoDoc = { cliente_codigo: clienteCodigo, cliente_nombre: clienteNombre, tipo_destino: tipo, direccion: direccion, horario: horario, excepcion: excepcion, estado: "pendiente", vehiculo_asignado: null, chofer_asignado: null, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() };
+                const nuevoDoc = { 
+                    cliente_codigo: clienteCodigo, 
+                    cliente_nombre: clienteNombre, 
+                    tipo_destino: tipo, 
+                    direccion: direccion, 
+                    horario: horario, 
+                    excepcion: excepcion, 
+                    telefono: telefono,
+                    link_maps: linkMaps,
+                    estado: "pendiente", 
+                    vehiculo_asignado: null, 
+                    chofer_asignado: null, 
+                    fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() 
+                };
+                
                 if(tipo === 'paqueteria') nuevoDoc.nombre_paqueteria = paqueteria;
+                
+                // Simulación de coordenadas para demostración (esto asume que se rellenará real por back end eventualmente)
                 nuevoDoc.coordenadas = { lat: 25.6866 + (Math.random() - 0.5) * 0.05, lng: -100.3161 + (Math.random() - 0.5) * 0.05 };
 
                 await db.collection('rutas_logistica').doc(factura).set(nuevoDoc);
