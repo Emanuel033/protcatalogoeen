@@ -39,9 +39,6 @@
         .leaflet-routing-container { display: none !important; } 
         .paqueteria-group { border-left: 4px solid #8b5cf6; background: #f5f3ff; }
         
-        /* Loading Overlay */
-        #global-loader { z-index: 9999; }
-
         /* Toast CSS */
         #toast-container { z-index: 9999; pointer-events: none; }
         .toast-enter { animation: slideInUp 0.3s forwards; }
@@ -66,7 +63,7 @@
     <!-- SIDEBAR DE PEDIDOS -->
     <aside class="w-full lg:w-[420px] h-1/2 lg:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg relative">
         <!-- Header Sidebar -->
-        <div class="p-5 border-b border-slate-100 bg-slate-900 flex justify-between items-center text-white">
+        <div class="p-5 border-b border-slate-100 bg-slate-900 flex justify-between items-center text-white shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center font-black text-xl shadow-md cursor-pointer hover:bg-blue-400 transition" onclick="abrirConfiguracion()" title="Configurar Flota y Choferes">
                     <i class="fas fa-cog"></i>
@@ -80,14 +77,11 @@
                 <button onclick="abrirFormulario()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-1">
                     <i class="fas fa-plus"></i> Nuevo Envío
                 </button>
-                <button onclick="generarDatosPrueba()" class="text-amber-400 hover:text-amber-300 p-2" title="Generar datos de prueba">
-                    <i class="fas fa-bolt"></i>
-                </button>
             </div>
         </div>
 
         <!-- Filtros Rápidos -->
-        <div class="flex p-3 gap-2 bg-slate-50 border-b border-slate-200 overflow-x-auto hide-scroll shadow-inner">
+        <div class="flex p-3 gap-2 bg-slate-50 border-b border-slate-200 overflow-x-auto hide-scroll shadow-inner shrink-0">
             <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition-colors">Todos</button>
             <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">Por Asignar</button>
             <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">En Ruta</button>
@@ -105,10 +99,10 @@
 
     <!-- ÁREA DEL MAPA Y DETALLE -->
     <main class="flex-1 h-1/2 lg:h-full relative flex flex-col overflow-hidden">
-        <div id="map" class="flex-1 w-full bg-slate-200 z-0"></div>
+        <div id="map" class="flex-1 w-full bg-slate-200 z-[10]"></div>
 
         <!-- Leyenda -->
-        <div class="absolute top-4 left-4 z-[400] bg-white/90 backdrop-blur p-3 rounded-xl shadow-md border border-slate-200 pointer-events-none">
+        <div class="absolute top-4 left-4 z-[40] bg-white/90 backdrop-blur p-3 rounded-xl shadow-md border border-slate-200 pointer-events-none">
             <h4 class="text-[10px] font-black uppercase text-slate-800 mb-2">Restricciones MTY</h4>
             <div class="flex items-center gap-2 text-xs font-semibold text-slate-600 mb-1">
                 <div class="w-3 h-3 bg-red-500/50 border border-red-500 rounded"></div> Zona Centro (Estaquitas)
@@ -124,7 +118,10 @@
             <div class="bg-slate-900 p-5 relative shrink-0">
                 <button onclick="cerrarDetalle()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition bg-white/10 w-8 h-8 rounded-full flex items-center justify-center"><i class="fas fa-times"></i></button>
                 <div class="flex justify-between items-start mb-2 pr-10">
-                    <span id="det-folio" class="text-xs font-mono font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded">FOLIO</span>
+                    <div class="flex gap-2 items-center">
+                        <span id="det-folio" class="text-xs font-mono font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded">FOLIO</span>
+                        <button id="btn-eliminar-viaje" onclick="eliminarViajeActual()" class="text-red-400 hover:text-red-500 bg-red-500/10 px-2 py-0.5 rounded text-[10px] font-bold transition flex items-center gap-1"><i class="fas fa-trash-alt"></i> Borrar</button>
+                    </div>
                     <span id="det-status" class="text-[10px] font-black uppercase px-2 py-1 rounded">ESTADO</span>
                 </div>
                 <h3 id="det-cliente" class="text-xl font-black text-white leading-tight mt-2">Cliente o Paquetería</h3>
@@ -156,7 +153,7 @@
                 <div id="det-ruta-secuencia" class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-5 shadow-sm hidden">
                     <p class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider mb-3 border-b border-indigo-100/50 pb-2"><i class="fas fa-route mr-1"></i> Secuencia de Ruta (Plan de Carga)</p>
                     <ul id="lista-secuencia" class="text-xs text-indigo-900 font-medium space-y-2 pl-1"></ul>
-                    <p class="text-[10px] text-indigo-600 mt-3 font-bold leading-tight bg-white/50 p-2 rounded-lg"><i class="fas fa-info-circle text-indigo-500"></i> LIFO: Carga al fondo del camión lo <b>último</b> que vas a entregar.</p>
+                    <p class="text-[10px] text-indigo-600 mt-3 font-bold leading-tight bg-white/50 p-2 rounded-lg"><i class="fas fa-info-circle text-indigo-500"></i> Tip Logística: Carga al fondo del camión lo <b>último</b> que vas a entregar.</p>
                 </div>
 
                 <!-- CONTROLES PARA DESPACHADOR -->
@@ -180,7 +177,6 @@
                             <label class="block text-[11px] font-bold text-slate-600 uppercase mb-2">Paso 2: Asignar Operador <span class="text-red-500">*</span></label>
                             <select id="selector-chofer" class="w-full border-2 border-slate-200 bg-white p-3 rounded-xl focus:ring-0 focus:border-blue-500 outline-none text-sm font-bold text-slate-700 transition cursor-pointer shadow-sm">
                                 <option value="">-- Despliega para seleccionar --</option>
-                                <!-- Se llena dinámicamente -->
                             </select>
                         </div>
                     </div>
@@ -189,9 +185,6 @@
 
             <!-- FOOTER FIJO PARA BOTONES -->
             <div class="bg-white p-5 border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
-                <div class="flex justify-between items-center mb-3 hidden" id="controles-edicion">
-                    <button id="btn-eliminar-viaje" onclick="eliminarViajeActual()" class="text-red-500 hover:text-red-600 font-bold text-xs flex items-center gap-1 transition"><i class="fas fa-trash-alt"></i> Eliminar Viaje</button>
-                </div>
                 <div class="flex gap-2">
                     <button id="btn-iniciar" onclick="iniciarRuta()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-sm font-black transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 uppercase tracking-wide"><i class="fas fa-play-circle text-lg"></i> Iniciar Ruta</button>
                     <button id="btn-entregar" onclick="marcarEntregado()" class="hidden flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl text-sm font-black transition shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 active:scale-95 uppercase tracking-wide"><i class="fas fa-check-double text-lg"></i> Registrar Entrega</button>
@@ -204,6 +197,19 @@
     <!-- MODAL FORMULARIO DE INGRESO MANUAL -->
     <!-- ========================================== -->
     <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-end justify-center lg:items-center p-0 lg:p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-t-3xl lg:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full lg:translate-y-0 lg:scale-95 transition-transform duration-300 flex flex-col max-h-[90vh] absolute bottom-0 lg:relative lg:bottom-auto" id="modal-formulario-content">
+            
+            <div class="bg-slate-900 p-4 flex justify-between items-center text-white shrink-0">
+                <h3 class="font-bold text-lg"><i class="fas fa-clipboard-list text-blue-400 mr-2"></i> Nuevo Envío</h3>
+                <button onclick="cerrarFormulario()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+
+            <div class="p-5 overflow-y-auto custom-scroll flex-1 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Folio de Factura <span class="text-red-500">*</span></label>
+                        <input type="text" id="form-factura" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold uppercase" placeholder="Ej. F-10290">
+                    </div>
                     <div class="col-span-2 relative">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Cód. Cliente (Autocompleta) <span class="text-red-500">*</span></label>
                         <input type="text" id="form-cliente-codigo" list="clientes-list" oninput="buscarCliente()" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold uppercase" placeholder="Ej. CLI-001">
@@ -233,26 +239,25 @@
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 flex justify-between">
                         <span>Dirección de Entrega <span class="text-red-500">*</span></span>
                     </label>
-                    <!-- Selector de direcciones previas -->
                     <select id="form-direcciones-guardadas" onchange="seleccionarDireccionGuardada()" class="w-full border border-slate-300 bg-blue-50 p-2 rounded-lg text-sm font-semibold text-blue-800 mb-2 hidden outline-none">
                         <option value="">-- Seleccionar Bodega Guardada --</option>
                     </select>
                     <textarea id="form-direccion" rows="2" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Calle, Número, Colonia, Municipio..."></textarea>
-                    <div class="grid grid-cols-2 gap-4">
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Horario Recepción</label>
                             <input type="text" id="form-horario" class="w-full border border-slate-300 bg-white p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs" placeholder="Ej. L-V 9 a 5pm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Día festivo / Excepción</label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Excepción</label>
                             <input type="text" id="form-excepcion" class="w-full border border-amber-300 bg-amber-50 p-2.5 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-semibold text-amber-800" placeholder="Ej. Hoy salen 2pm">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- FOOTER FIJO PARA BOTÓN GUARDAR (RESPONSIVO) -->
-            <div class="p-4 pb-8 md:pb-4 bg-white border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
+            <div class="p-4 pb-8 lg:pb-4 bg-white border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
                 <button onclick="guardarEnvioManual()" id="btn-guardar-manual" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 active:scale-95">
                     <i class="fas fa-save"></i> Registrar en Bandeja
                 </button>
@@ -276,7 +281,6 @@
             </div>
 
             <div class="p-5 h-[400px] overflow-y-auto custom-scroll bg-slate-50">
-                
                 <!-- TAB FLOTA -->
                 <div id="tab-flota" class="space-y-4">
                     <div class="flex gap-2">
@@ -298,32 +302,25 @@
                     </div>
                     <div id="lista-choferes-config" class="space-y-2"></div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- Contenedor para Notificaciones Flotantes (Toasts) -->
+    <!-- Contenedor Toasts -->
     <div id="toast-container" class="fixed bottom-20 md:bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col gap-2 w-[90%] md:w-max"></div>
 
     <script>
         const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString('es-MX', opcionesFecha);
 
-        // Variables Globales y Firebase
         let map, marcadores = {}, rutasTrazadas = null;
         let viajesAgrupados = [], filtroActual = 'todos', viajeSeleccionado = null; 
-        
-        let clientesDB = [];
-        let flotaDB = [];
-        let choferesDB = [];
+        let clientesDB = [], flotaDB = [], choferesDB = [];
 
-        // Zonas restringidas en MTY (Centro)
         const zonasRestringidas = [
             { nombre: "Centro MTY", color: "#ef4444", coords: [[25.6811, -100.3259], [25.6811, -100.3019], [25.6631, -100.3019], [25.6631, -100.3259]] }
         ];
 
-        // Función para Alertas Visuales (Reemplaza los alert molestos en logística visual)
         window.showToast = (msg, type='success') => {
             const toast = document.createElement('div');
             const bg = type === 'error' ? 'bg-red-600' : 'bg-slate-800';
@@ -352,7 +349,6 @@
                  .addTo(map).bindPopup(`<b>ZONA RESTRINGIDA:</b> ${zona.nombre}<br>Solo unidades pequeñas (Estaquitas).`);
             });
 
-            // NUEVO: Marcadores de Puentes Bajos / Vialidades problemáticas
             const puentesBajos = [
                 { lat: 25.7052, lng: -100.3155, nombre: "Puente Bajo Fidel Velázquez (Max 3.5m)" },
                 { lat: 25.6815, lng: -100.3120, nombre: "Túnel Loma Larga (Restricción pesados)" }
@@ -363,9 +359,6 @@
             });
         }
 
-        // ==========================================
-        // LÓGICA DE RUTAS Y CONSOLIDACIÓN
-        // ==========================================
         function agruparYConsolidar(pedidosRaw) {
             viajesAgrupados = [];
             const paqueteriasMap = {};
@@ -414,20 +407,16 @@
 
             Object.values(paqueteriasMap).forEach(grupo => viajesAgrupados.push(grupo));
 
-            // Ordenar: Pendientes > Camino > Entregados
             viajesAgrupados.sort((a,b) => {
                 const order = { 'pendiente': 1, 'camino': 2, 'entregado': 3 };
                 return (order[a.estado] || 4) - (order[b.estado] || 4);
             });
 
-            const totalRutasEl = document.getElementById('total-rutas');
-            if(totalRutasEl) totalRutasEl.innerText = `${viajesAgrupados.length} Viajes Necesarios`;
-            
             renderizarLista();
             actualizarMapa();
         }
 
-        function setFilter(filtro) {
+        window.setFilter = (filtro) => {
             filtroActual = filtro;
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.className = "filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors";
@@ -461,23 +450,14 @@
                 const tipoDestinoText = viaje.tipo_destino === 'paqueteria' ? '<i class="fas fa-boxes text-purple-500"></i> PAQUETERÍA' : '<i class="fas fa-building text-blue-500"></i> BODEGA CLIENTE';
                 const customBg = viaje.es_grupo ? 'paqueteria-group' : 'bg-white';
                 
-                // Bitácora info (vehículo y chofer)
                 let bitacoraHTML = '';
                 if (viaje.estado !== 'pendiente' && viaje.vehiculo_asignado) {
                     const vehName = flotaDB.find(v => v.id === viaje.vehiculo_asignado)?.nombre || 'Vehículo';
                     const choferName = choferesDB.find(c => c.id === viaje.chofer_asignado)?.nombre || 'Chofer';
-                    
-                    let fechaStr = '';
-                    if(viaje.fecha_actualizacion && typeof viaje.fecha_actualizacion.toDate === 'function') {
-                        const d = viaje.fecha_actualizacion.toDate();
-                        fechaStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    }
-
                     bitacoraHTML = `
                         <div class="mt-2 pt-2 border-t border-slate-100 flex flex-wrap gap-2 items-center text-[9px] font-bold text-slate-500">
                             <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded"><i class="fas fa-truck text-blue-400"></i> ${vehName}</span>
                             <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded"><i class="fas fa-id-card text-slate-400"></i> ${choferName}</span>
-                            ${fechaStr ? `<span class="ml-auto font-mono text-slate-400">${fechaStr}</span>` : ''}
                         </div>
                     `;
                 } else {
@@ -522,9 +502,6 @@
             }
         }
 
-        // ==========================================
-        // SELECCIÓN Y DESPACHO
-        // ==========================================
         function isPointInPolygon(point, vs) {
             let x = point[0], y = point[1], inside = false;
             for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
@@ -535,7 +512,7 @@
             return inside;
         }
 
-        function seleccionarViaje(id) {
+        window.seleccionarViaje = (id) => {
             viajeSeleccionado = viajesAgrupados.find(x => x.id === id);
             if(!viajeSeleccionado) return;
             
@@ -543,19 +520,16 @@
 
             if(viajeSeleccionado.coordenadas) {
                 const coordDestino = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
-                const coordPlanta = L.latLng(25.6946, -100.3142); // Hesa Monterrey (Calzada Guadalupe Victoria 105)
+                const coordPlanta = L.latLng(25.6946, -100.3142); 
                 map.setView(coordDestino, 13, { animate: true });
                 if(rutasTrazadas) map.removeControl(rutasTrazadas);
                 
-                // LÓGICA DE RUTAS Y SECUENCIA
                 const contSecuencia = document.getElementById('det-ruta-secuencia');
                 const listaSecuencia = document.getElementById('lista-secuencia');
                 listaSecuencia.innerHTML = '';
 
                 if (viajeSeleccionado.estado === 'camino' || viajeSeleccionado.estado === 'entregado') {
-                    // Si ya tiene chofer, agrupa todos sus destinos para dibujar el circuito
                     const viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
-                    
                     let wps = [coordPlanta]; 
                     listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pb-1 border-b border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">Hesa Monterrey</b> <span class="text-indigo-400 text-[10px]">(Carga)</span></span></li>`;
                     
@@ -566,7 +540,6 @@
                     
                     wps.push(coordPlanta); 
                     listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pt-1 border-t border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-flag-checkered"></i></div> <span><b class="text-indigo-900">Hesa Monterrey</b> <span class="text-indigo-400 text-[10px]">(Retorno)</span></span></li>`;
-                    
                     contSecuencia.classList.remove('hidden');
 
                     rutasTrazadas = L.Routing.control({
@@ -579,7 +552,6 @@
                         },
                         fitSelectedRoutes: true, show: false, language: 'es'
                     }).addTo(map);
-
                 } else {
                     contSecuencia.classList.add('hidden');
                     rutasTrazadas = L.Routing.control({
@@ -594,11 +566,9 @@
                     }).addTo(map);
                 }
 
-                // SISTEMA DE ALERTA DE MULTAS Y RESTRICCIONES VIALES
                 rutasTrazadas.on('routesfound', function(e) {
                     const route = e.routes[0];
                     let pasaCentro = false;
-                    // Escanear la ruta para ver si cruza el polígono rojo
                     for(let i = 0; i < route.coordinates.length; i += 15) {
                         if(isPointInPolygon([route.coordinates[i].lat, route.coordinates[i].lng], zonasRestringidas[0].coords)){
                             pasaCentro = true; break;
@@ -607,9 +577,9 @@
                     if(pasaCentro) {
                         const vehiculo = viajeSeleccionado.vehiculo_asignado ? flotaDB.find(f => f.id === viajeSeleccionado.vehiculo_asignado) : null;
                         if(vehiculo && vehiculo.tipo !== 'estaquitas') {
-                            showToast("⚠️ RUTA PELIGROSA: El camión asignado es pesado y la ruta trazada cruza el Centro (Riesgo de Multa).", "error");
+                            showToast("⚠️ RUTA PELIGROSA: El camión pesado cruza el Centro (Riesgo Multa).", "error");
                         } else if (!vehiculo) {
-                            showToast("⚠️ ZONA RESTRINGIDA: La ruta cruza el Centro de MTY. Asegúrate de asignar unidad pequeña (Estaquitas).", "error");
+                            showToast("⚠️ ZONA RESTRINGIDA: Requiere unidad pequeña (Estaquitas).", "error");
                         }
                     }
                 });
@@ -620,7 +590,6 @@
             document.getElementById('det-tipo-destino').innerText = viajeSeleccionado.tipo_destino === 'paqueteria' ? '📍 Consolidado a Paquetería' : '🏢 Entrega a Bodega Directa';
             document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
             
-            // Mostrar Horarios y Excepciones
             const contHorario = document.getElementById('det-horario-container');
             if (viajeSeleccionado.horario || viajeSeleccionado.excepcion) {
                 contHorario.classList.remove('hidden');
@@ -629,12 +598,8 @@
                 if (viajeSeleccionado.excepcion) {
                     pExcep.classList.remove('hidden');
                     document.getElementById('det-excepcion').innerText = viajeSeleccionado.excepcion;
-                } else {
-                    pExcep.classList.add('hidden');
-                }
-            } else {
-                contHorario.classList.add('hidden');
-            }
+                } else { pExcep.classList.add('hidden'); }
+            } else { contHorario.classList.add('hidden'); }
 
             const estaRestringido = viajeSeleccionado.coordenadas ? isPointInPolygon([viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng], zonasRestringidas[0].coords) : false;
             document.getElementById('det-restriccion-alerta').classList.toggle('hidden', !estaRestringido);
@@ -645,52 +610,36 @@
             const btnEntregar = document.getElementById('btn-entregar');
 
             if(viajeSeleccionado.estado === 'pendiente') { 
-                badgeStatus.className = 'text-[9px] font-black uppercase px-2 py-1 rounded status-pendiente'; badgeStatus.innerText = 'Por Asignar'; 
+                badgeStatus.className = 'text-[10px] font-black uppercase px-2 py-1 rounded status-pendiente'; badgeStatus.innerText = 'Por Asignar'; 
                 selectorCont.classList.remove('hidden');
                 btnIniciar.classList.remove('hidden'); btnEntregar.classList.add('hidden');
-                
-                document.querySelectorAll('.btn-vehiculo').forEach(b => {
-                    b.classList.remove('border-blue-500', 'bg-blue-50');
-                    b.classList.add('border-slate-200', 'bg-white');
-                });
-                document.getElementById('vehiculo-seleccionado').value = '';
-                document.getElementById('selector-chofer').value = '';
+                document.querySelectorAll('.btn-vehiculo').forEach(b => { b.classList.remove('border-blue-500', 'bg-blue-50'); b.classList.add('border-slate-200', 'bg-white'); });
+                document.getElementById('vehiculo-seleccionado').value = ''; document.getElementById('selector-chofer').value = '';
             }
             else if(viajeSeleccionado.estado === 'camino') { 
-                badgeStatus.className = 'text-[9px] font-black uppercase px-2 py-1 rounded status-camino'; badgeStatus.innerText = 'En Ruta'; 
+                badgeStatus.className = 'text-[10px] font-black uppercase px-2 py-1 rounded status-camino'; badgeStatus.innerText = 'En Ruta'; 
                 selectorCont.classList.add('hidden');
                 btnIniciar.classList.add('hidden'); btnEntregar.classList.remove('hidden');
             }
             else { 
-                badgeStatus.className = 'text-[9px] font-black uppercase px-2 py-1 rounded status-entregado'; badgeStatus.innerText = 'Entregado'; 
+                badgeStatus.className = 'text-[10px] font-black uppercase px-2 py-1 rounded status-entregado'; badgeStatus.innerText = 'Entregado'; 
                 selectorCont.classList.add('hidden');
                 btnIniciar.classList.add('hidden'); btnEntregar.classList.add('hidden');
             }
 
             const listaArts = document.getElementById('det-articulos');
             listaArts.innerHTML = '';
-            
-            if (viajeSeleccionado.es_grupo) {
-                viajeSeleccionado.pedidos_incluidos.forEach(ped => {
-                    listaArts.innerHTML += `<li class="text-[11px] font-bold text-slate-700 mt-2 border-b border-slate-100 pb-2"><i class="fas fa-file-invoice text-blue-500 mr-1"></i> Factura: <span class="font-black text-blue-600">${ped.id}</span><br><span class="text-[9px] text-slate-400 ml-4">${ped.cliente_nombre} (${ped.cliente_codigo})</span></li>`;
-                });
-            } else {
-                viajeSeleccionado.pedidos_incluidos.forEach(ped => {
-                    listaArts.innerHTML += `<li class="text-[11px] font-bold text-slate-700 mt-2 border-b border-slate-100 pb-2"><i class="fas fa-file-invoice text-blue-500 mr-1"></i> Factura: <span class="font-black text-blue-600">${ped.id}</span></li>`;
-                });
-            }
+            viajeSeleccionado.pedidos_incluidos.forEach(ped => {
+                listaArts.innerHTML += `<li class="text-[11px] font-bold text-slate-700 mt-2 border-b border-slate-100 pb-2"><i class="fas fa-file-invoice text-blue-500 mr-1"></i> Factura: <span class="font-black text-blue-600">${ped.id}</span>${viajeSeleccionado.es_grupo ? `<br><span class="text-[9px] text-slate-400 ml-4">${ped.cliente_nombre}</span>` : ''}</li>`;
+            });
 
             const card = document.getElementById('detalle-flotante');
             card.classList.remove('hidden');
-            // Forzar reflow para que corra la transición
             void card.offsetWidth;
-            // Animación inferior en móvil, lateral en desktop
             card.classList.remove('translate-y-full', 'lg:translate-x-full');
-            
-            document.getElementById('controles-edicion').classList.remove('hidden');
         }
 
-        function cerrarDetalle() {
+        window.cerrarDetalle = () => {
             viajeSeleccionado = null;
             renderizarLista();
             if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; }
@@ -699,116 +648,77 @@
             setTimeout(() => card.classList.add('hidden'), 300);
         }
 
-        // ==========================================
-        // BORRAR VIAJE
-        // ==========================================
         window.eliminarViajeActual = async () => {
             if(!viajeSeleccionado) return;
-            if(!confirm(`¿Estás seguro de eliminar permanentemente la orden de ${viajeSeleccionado.cliente_nombre}?`)) return;
-
+            if(!confirm(`¿Eliminar permanentemente la orden de ${viajeSeleccionado.cliente_nombre}?`)) return;
             const btn = document.getElementById('btn-eliminar-viaje');
             if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
             try {
                 if (viajeSeleccionado.es_grupo) {
                     const batch = db.batch();
-                    viajeSeleccionado.pedidos_incluidos.forEach(p => {
-                        batch.delete(db.collection('rutas_logistica').doc(p.id));
-                    });
+                    viajeSeleccionado.pedidos_incluidos.forEach(p => { batch.delete(db.collection('rutas_logistica').doc(p.id)); });
                     await batch.commit();
                 } else {
                     await db.collection('rutas_logistica').doc(viajeSeleccionado.id).delete();
                 }
-                showToast("Entrega borrada con éxito.", "success");
+                showToast("Entrega borrada.", "success");
                 cerrarDetalle();
             } catch (e) {
-                showToast("Error al eliminar: " + e.message, "error");
+                showToast("Error al borrar: " + e.message, "error");
                 if(btn) btn.innerHTML = '<i class="fas fa-trash-alt"></i> Borrar';
             }
         };
 
         window.seleccionarVehiculo = (idVehiculo, tipoVehiculo) => {
             if(viajeSeleccionado && viajeSeleccionado.estado !== 'pendiente') return;
-            
             const estaRestringido = viajeSeleccionado.coordenadas ? isPointInPolygon([viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng], zonasRestringidas[0].coords) : false;
-            if(estaRestringido && tipoVehiculo !== 'estaquitas') {
-                alert("⚠️ ZONA RESTRINGIDA: Para evitar multas en el Centro, se requiere unidad pequeña (Estaquitas).");
-            }
-
-            document.querySelectorAll('.btn-vehiculo').forEach(b => {
-                b.classList.remove('border-blue-500', 'bg-blue-50');
-                b.classList.add('border-slate-200', 'bg-white');
-            });
+            if(estaRestringido && tipoVehiculo !== 'estaquitas') { alert("⚠️ ZONA RESTRINGIDA: Se requiere unidad pequeña (Estaquitas)."); }
+            document.querySelectorAll('.btn-vehiculo').forEach(b => { b.classList.remove('border-blue-500', 'bg-blue-50'); b.classList.add('border-slate-200', 'bg-white'); });
             const btn = document.querySelector(`.btn-vehiculo[data-vehiculo="${idVehiculo}"]`);
-            if(btn) {
-                btn.classList.add('border-blue-500', 'bg-blue-50');
-                btn.classList.remove('border-slate-200', 'bg-white');
-            }
+            if(btn) { btn.classList.add('border-blue-500', 'bg-blue-50'); btn.classList.remove('border-slate-200', 'bg-white'); }
             document.getElementById('vehiculo-seleccionado').value = idVehiculo;
         };
 
         window.iniciarRuta = () => {
             const vehiculo = document.getElementById('vehiculo-seleccionado').value;
             const chofer = document.getElementById('selector-chofer').value;
-            
-            if(!vehiculo) { alert("Debes asignar una unidad de transporte."); return; }
-            if(!chofer) { alert("Debes asignar un chofer."); return; }
-            
+            if(!vehiculo) { alert("Asigna unidad de transporte."); return; }
+            if(!chofer) { alert("Asigna operador."); return; }
             actualizarEstadoLote('camino', vehiculo, chofer);
         };
 
         window.marcarEntregado = () => {
-            if(confirm("¿Confirmar entrega completada?")) {
-                actualizarEstadoLote('entregado', viajeSeleccionado.vehiculo_asignado, viajeSeleccionado.chofer_asignado);
-            }
+            if(confirm("¿Confirmar entrega completada?")) { actualizarEstadoLote('entregado', viajeSeleccionado.vehiculo_asignado, viajeSeleccionado.chofer_asignado); }
         };
 
         function actualizarEstadoLote(nuevoEstado, vehiculo, chofer) {
             if(!viajeSeleccionado) return;
-            
             const batch = db.batch();
             viajeSeleccionado.pedidos_incluidos.forEach(ped => {
                 const ref = db.collection('rutas_logistica').doc(ped.id);
-                batch.update(ref, { 
-                    estado: nuevoEstado, 
-                    vehiculo_asignado: vehiculo,
-                    chofer_asignado: chofer,
-                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                batch.update(ref, { estado: nuevoEstado, vehiculo_asignado: vehiculo, chofer_asignado: chofer, fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() });
             });
-
-            batch.commit().then(() => {
-                cerrarDetalle();
-            }).catch(e => alert("Error al actualizar: " + e.message));
+            batch.commit().then(() => { cerrarDetalle(); }).catch(e => alert("Error: " + e.message));
         }
 
         // ==========================================
-        // CLIENTES: AUTOCOMPLETAR Y GUARDAR
+        // CLIENTES Y FORMULARIO
         // ==========================================
         window.buscarCliente = () => {
             const val = document.getElementById('form-cliente-codigo').value.trim().toUpperCase();
             const cliente = clientesDB.find(c => c.codigo === val);
-            
             const selectDir = document.getElementById('form-direcciones-guardadas');
-            
             if (cliente) {
                 document.getElementById('form-cliente').value = cliente.nombre;
-                
-                // Llenar direcciones
                 if(cliente.direcciones && cliente.direcciones.length > 0) {
                     selectDir.innerHTML = '<option value="">-- Seleccionar Bodega Guardada --</option>';
                     cliente.direcciones.forEach((d, index) => {
                         const dirText = typeof d === 'string' ? d : d.direccion;
                         selectDir.innerHTML += `<option value="${index}">${dirText}</option>`;
                     });
-                    window.clienteActualEnForm = cliente;
-                    selectDir.classList.remove('hidden');
-                } else {
-                    selectDir.classList.add('hidden');
-                }
-            } else {
-                selectDir.classList.add('hidden');
-            }
+                    window.clienteActualEnForm = cliente; selectDir.classList.remove('hidden');
+                } else { selectDir.classList.add('hidden'); }
+            } else { selectDir.classList.add('hidden'); }
         };
 
         window.seleccionarDireccionGuardada = () => {
@@ -816,47 +726,23 @@
             if(index !== "" && window.clienteActualEnForm) {
                 const dirObj = window.clienteActualEnForm.direcciones[index];
                 if(typeof dirObj === 'string') {
-                    document.getElementById('form-direccion').value = dirObj;
-                    document.getElementById('form-horario').value = "";
-                    document.getElementById('form-excepcion').value = "";
+                    document.getElementById('form-direccion').value = dirObj; document.getElementById('form-horario').value = ""; document.getElementById('form-excepcion').value = "";
                 } else {
-                    document.getElementById('form-direccion').value = dirObj.direccion || "";
-                    document.getElementById('form-horario').value = dirObj.horario || "";
-                    document.getElementById('form-excepcion').value = dirObj.excepcion || "";
+                    document.getElementById('form-direccion').value = dirObj.direccion || ""; document.getElementById('form-horario').value = dirObj.horario || ""; document.getElementById('form-excepcion').value = dirObj.excepcion || "";
                 }
             }
         };
 
-        // ==========================================
-        // FUNCIONES DE FORMULARIO MANUAL
-        // ==========================================
         window.abrirFormulario = () => {
-            const modal = document.getElementById('modal-formulario');
-            const content = document.getElementById('modal-formulario-content');
-            
-            document.getElementById('form-factura').value = '';
-            document.getElementById('form-cliente-codigo').value = '';
-            document.getElementById('form-cliente').value = '';
-            document.getElementById('form-tipo').value = 'bodega_cliente';
-            document.getElementById('form-paqueteria').value = '';
-            document.getElementById('form-direccion').value = '';
-            document.getElementById('form-horario').value = '';
-            document.getElementById('form-excepcion').value = '';
-            document.getElementById('form-direcciones-guardadas').classList.add('hidden');
+            const modal = document.getElementById('modal-formulario'); const content = document.getElementById('modal-formulario-content');
+            document.getElementById('form-factura').value = ''; document.getElementById('form-cliente-codigo').value = ''; document.getElementById('form-cliente').value = ''; document.getElementById('form-tipo').value = 'bodega_cliente'; document.getElementById('form-paqueteria').value = ''; document.getElementById('form-direccion').value = ''; document.getElementById('form-horario').value = ''; document.getElementById('form-excepcion').value = ''; document.getElementById('form-direcciones-guardadas').classList.add('hidden');
             togglePaqueteria();
-
-            modal.classList.remove('hidden');
-            setTimeout(() => { 
-                modal.classList.remove('opacity-0'); 
-                content.classList.remove('translate-y-full', 'lg:translate-y-0', 'lg:scale-95'); 
-            }, 10);
+            modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full', 'lg:translate-y-0', 'lg:scale-95'); }, 10);
         };
 
         window.cerrarFormulario = () => {
-            const modal = document.getElementById('modal-formulario');
-            const content = document.getElementById('modal-formulario-content');
-            modal.classList.add('opacity-0'); 
-            content.classList.add('translate-y-full', 'lg:translate-y-0', 'lg:scale-95');
+            const modal = document.getElementById('modal-formulario'); const content = document.getElementById('modal-formulario-content');
+            modal.classList.add('opacity-0'); content.classList.add('translate-y-full', 'lg:translate-y-0', 'lg:scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
@@ -867,264 +753,83 @@
         };
 
         window.guardarEnvioManual = async () => {
-            const factura = document.getElementById('form-factura').value.trim().toUpperCase();
-            const clienteCodigo = document.getElementById('form-cliente-codigo').value.trim().toUpperCase();
-            const clienteNombre = document.getElementById('form-cliente').value.trim();
-            const tipo = document.getElementById('form-tipo').value;
-            const paqueteria = document.getElementById('form-paqueteria').value.trim();
-            const direccion = document.getElementById('form-direccion').value.trim();
-            const horario = document.getElementById('form-horario').value.trim();
-            const excepcion = document.getElementById('form-excepcion').value.trim();
+            const factura = document.getElementById('form-factura').value.trim().toUpperCase(); const clienteCodigo = document.getElementById('form-cliente-codigo').value.trim().toUpperCase(); const clienteNombre = document.getElementById('form-cliente').value.trim(); const tipo = document.getElementById('form-tipo').value; const paqueteria = document.getElementById('form-paqueteria').value.trim(); const direccion = document.getElementById('form-direccion').value.trim(); const horario = document.getElementById('form-horario').value.trim(); const excepcion = document.getElementById('form-excepcion').value.trim();
+            if(!factura) return showToast("Falta el Folio", "error"); if(!clienteCodigo) return showToast("Falta el Código del Cliente", "error"); if(!clienteNombre) return showToast("Falta el Nombre", "error"); if(!direccion) return showToast("Falta la Dirección", "error"); if(tipo === 'paqueteria' && !paqueteria) return showToast("Falta paquetería", "error");
 
-            if(!factura) return alert("Falta el Folio de Factura.");
-            if(!clienteCodigo) return alert("Falta el Código del Cliente.");
-            if(!clienteNombre) return alert("Falta el Nombre del Cliente.");
-            if(!direccion) return alert("Falta la Dirección de Entrega.");
-            if(tipo === 'paqueteria' && !paqueteria) return alert("Falta paquetería.");
-
-            const btn = document.getElementById('btn-guardar-manual');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
+            const btn = document.getElementById('btn-guardar-manual'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
 
             try {
-                // 1. Guardar/Actualizar la Base de Datos del Cliente (Bitácora de clientes)
-                const refCliente = db.collection('clientes_logistica').doc(clienteCodigo);
-                const docCliente = await refCliente.get();
-                
+                const refCliente = db.collection('clientes_logistica').doc(clienteCodigo); const docCliente = await refCliente.get();
                 let dirsGuardadas = [];
                 if (docCliente.exists) {
                     dirsGuardadas = docCliente.data().direcciones || [];
-                    // Remover versiones previas de la misma direccion para actualizar horarios y no duplicar
-                    dirsGuardadas = dirsGuardadas.filter(d => {
-                        const dTxt = typeof d === 'string' ? d : d.direccion;
-                        return dTxt !== direccion;
-                    });
+                    dirsGuardadas = dirsGuardadas.filter(d => { const dTxt = typeof d === 'string' ? d : d.direccion; return dTxt !== direccion; });
                 }
-                
-                // Agregamos la direccion en formato de Objeto
                 dirsGuardadas.push({ direccion, horario, excepcion });
-                
-                await refCliente.set({
-                    nombre: clienteNombre,
-                    direcciones: dirsGuardadas
-                }, { merge: true });
+                await refCliente.set({ nombre: clienteNombre, direcciones: dirsGuardadas }, { merge: true });
 
-                // 2. Crear la orden de ruta
-                const nuevoDoc = {
-                    cliente_codigo: clienteCodigo,
-                    cliente_nombre: clienteNombre,
-                    tipo_destino: tipo,
-                    direccion: direccion,
-                    horario: horario,
-                    excepcion: excepcion,
-                    estado: "pendiente",
-                    vehiculo_asignado: null,
-                    chofer_asignado: null,
-                    fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
+                const nuevoDoc = { cliente_codigo: clienteCodigo, cliente_nombre: clienteNombre, tipo_destino: tipo, direccion: direccion, horario: horario, excepcion: excepcion, estado: "pendiente", vehiculo_asignado: null, chofer_asignado: null, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() };
                 if(tipo === 'paqueteria') nuevoDoc.nombre_paqueteria = paqueteria;
-
-                // Coordenadas simuladas MTY
                 nuevoDoc.coordenadas = { lat: 25.6866 + (Math.random() - 0.5) * 0.05, lng: -100.3161 + (Math.random() - 0.5) * 0.05 };
 
                 await db.collection('rutas_logistica').doc(factura).set(nuevoDoc);
-                
-                alert("¡Envío y datos del cliente registrados con éxito!");
-                cerrarFormulario();
-            } catch(e) {
-                alert("Error al guardar: " + e.message);
-            } finally {
-                btn.innerHTML = '<i class="fas fa-save"></i> Registrar en Bandeja'; btn.disabled = false;
-            }
+                showToast("¡Envío registrado con éxito!"); cerrarFormulario();
+            } catch(e) { showToast("Error al guardar: " + e.message, "error"); } finally { btn.innerHTML = '<i class="fas fa-save"></i> Registrar en Bandeja'; btn.disabled = false; }
         };
 
         // ==========================================
-        // CONFIGURACIÓN DE FLOTA Y CHOFERES (CRUD)
+        // CONFIGURACIÓN (FLOTA Y CHOFERES)
         // ==========================================
-        window.abrirConfiguracion = () => {
-            const m = document.getElementById('modal-config');
-            const c = document.getElementById('modal-config-content');
-            m.classList.remove('hidden');
-            setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10);
-        };
-        window.cerrarConfiguracion = () => {
-            const m = document.getElementById('modal-config');
-            const c = document.getElementById('modal-config-content');
-            m.classList.add('opacity-0'); c.classList.add('scale-95');
-            setTimeout(() => m.classList.add('hidden'), 300);
-        };
+        window.abrirConfiguracion = () => { const m = document.getElementById('modal-config'); const c = document.getElementById('modal-config-content'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10); };
+        window.cerrarConfiguracion = () => { const m = document.getElementById('modal-config'); const c = document.getElementById('modal-config-content'); m.classList.add('opacity-0'); c.classList.add('scale-95'); setTimeout(() => m.classList.add('hidden'), 300); };
         window.switchTabConfig = (tab) => {
-            document.getElementById('tab-flota').classList.toggle('hidden', tab !== 'flota');
-            document.getElementById('tab-choferes').classList.toggle('hidden', tab !== 'choferes');
-            
-            document.getElementById('tab-btn-flota').className = tab === 'flota' ? "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600" : "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700";
-            document.getElementById('tab-btn-choferes').className = tab === 'choferes' ? "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600" : "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700";
+            document.getElementById('tab-flota').classList.toggle('hidden', tab !== 'flota'); document.getElementById('tab-choferes').classList.toggle('hidden', tab !== 'choferes');
+            document.getElementById('tab-btn-flota').className = tab === 'flota' ? "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600" : "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700"; document.getElementById('tab-btn-choferes').className = tab === 'choferes' ? "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600" : "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700";
         };
 
-        // Vehículos
-        window.agregarVehiculo = () => {
-            const nombre = document.getElementById('nueva-flota-nombre').value.trim();
-            const tipo = document.getElementById('nueva-flota-tipo').value;
-            if(!nombre) return;
-            db.collection('flota').add({ nombre, tipo, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() })
-              .then(() => document.getElementById('nueva-flota-nombre').value = '');
-        };
-        window.eliminarVehiculo = (id) => {
-            if(confirm("¿Eliminar este vehículo?")) db.collection('flota').doc(id).delete();
-        };
+        window.agregarVehiculo = () => { const nombre = document.getElementById('nueva-flota-nombre').value.trim(); const tipo = document.getElementById('nueva-flota-tipo').value; if(!nombre) return; db.collection('flota').add({ nombre, tipo, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() }).then(() => document.getElementById('nueva-flota-nombre').value = ''); };
+        window.eliminarVehiculo = (id) => { if(confirm("¿Eliminar este vehículo?")) db.collection('flota').doc(id).delete(); };
         function renderizarFlotaUI() {
             const list = document.getElementById('lista-flota-config');
-            list.innerHTML = flotaDB.map(v => `
-                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                    <div>
-                        <p class="font-bold text-sm text-slate-800"><i class="fas fa-truck text-slate-400 mr-2"></i>${v.nombre}</p>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">${v.tipo === 'estaquitas' ? 'Pequeña / Sin Restricción' : 'Pesada / Restringida'}</p>
-                    </div>
-                    <button onclick="eliminarVehiculo('${v.id}')" class="text-red-500 hover:text-red-700 p-2"><i class="fas fa-trash"></i></button>
-                </div>
-            `).join('');
+            list.innerHTML = flotaDB.map(v => `<div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm"><div><p class="font-bold text-sm text-slate-800"><i class="fas fa-truck text-slate-400 mr-2"></i>${v.nombre}</p><p class="text-[10px] text-slate-500 uppercase tracking-widest">${v.tipo === 'estaquitas' ? 'Pequeña' : 'Pesada'}</p></div><button onclick="eliminarVehiculo('${v.id}')" class="text-red-500 hover:text-red-700 p-2"><i class="fas fa-trash"></i></button></div>`).join('');
         }
 
-        // Choferes
-        window.agregarChofer = () => {
-            const nombre = document.getElementById('nuevo-chofer-nombre').value.trim();
-            if(!nombre) return;
-            db.collection('choferes').add({ nombre, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() })
-              .then(() => document.getElementById('nuevo-chofer-nombre').value = '');
-        };
-        window.eliminarChofer = (id) => {
-            if(confirm("¿Eliminar este chofer?")) db.collection('choferes').doc(id).delete();
-        };
+        window.agregarChofer = () => { const nombre = document.getElementById('nuevo-chofer-nombre').value.trim(); if(!nombre) return; db.collection('choferes').add({ nombre, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() }).then(() => document.getElementById('nuevo-chofer-nombre').value = ''); };
+        window.eliminarChofer = (id) => { if(confirm("¿Eliminar este chofer?")) db.collection('choferes').doc(id).delete(); };
         function renderizarChoferesUI() {
             const list = document.getElementById('lista-choferes-config');
-            list.innerHTML = choferesDB.map(c => `
-                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                    <p class="font-bold text-sm text-slate-800"><i class="fas fa-id-card text-slate-400 mr-2"></i>${c.nombre}</p>
-                    <button onclick="eliminarChofer('${c.id}')" class="text-red-500 hover:text-red-700 p-2"><i class="fas fa-trash"></i></button>
-                </div>
-            `).join('');
+            list.innerHTML = choferesDB.map(c => `<div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm"><p class="font-bold text-sm text-slate-800"><i class="fas fa-id-card text-slate-400 mr-2"></i>${c.nombre}</p><button onclick="eliminarChofer('${c.id}')" class="text-red-500 hover:text-red-700 p-2"><i class="fas fa-trash"></i></button></div>`).join('');
         }
 
-        // Renderizar dinámicamente en el modal de despacho
         function renderizarOpcionesDespacho() {
-            // Choferes
-            const selChofer = document.getElementById('selector-chofer');
-            const choferActual = selChofer.value;
+            const selChofer = document.getElementById('selector-chofer'); const choferActual = selChofer.value;
             selChofer.innerHTML = '<option value="">-- Despliega para seleccionar --</option>';
-            
-            if(choferesDB.length === 0) {
-                selChofer.innerHTML += `<option value="" disabled>⚠️ Agrega operadores en Configuración ⚙️</option>`;
-            } else {
-                choferesDB.forEach(c => selChofer.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
-            }
+            if(choferesDB.length === 0) { selChofer.innerHTML += `<option value="" disabled>⚠️ Agrega operadores en Configuración ⚙️</option>`; } else { choferesDB.forEach(c => selChofer.innerHTML += `<option value="${c.id}">${c.nombre}</option>`); }
             if(choferActual) selChofer.value = choferActual;
 
-            // Vehiculos (Grid de botones)
             const grid = document.getElementById('grid-vehiculos');
-            if(flotaDB.length === 0) {
-                grid.innerHTML = `<div class="col-span-2 text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 font-bold flex items-center gap-2"><i class="fas fa-exclamation-circle"></i> No hay vehículos. Ve al engrane ⚙️ para agregar uno.</div>`;
-                return;
-            }
-
+            if(flotaDB.length === 0) { grid.innerHTML = `<div class="col-span-2 text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 font-bold flex items-center gap-2"><i class="fas fa-exclamation-circle"></i> No hay vehículos. Ve al engrane ⚙️.</div>`; return; }
             grid.innerHTML = flotaDB.map(v => {
-                const isEstaquitas = v.tipo === 'estaquitas';
-                const icon = isEstaquitas ? 'fa-truck-pickup' : 'fa-truck';
-                const desc = isEstaquitas ? 'Unidad Pequeña' : 'Unidad Pesada';
-                return `
-                <button onclick="seleccionarVehiculo('${v.id}', '${v.tipo}')" class="btn-vehiculo flex flex-col items-center justify-center p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50 transition" data-vehiculo="${v.id}">
-                    <i class="fas ${icon} text-slate-500 text-2xl mb-1.5"></i>
-                    <span class="text-[10px] font-black text-slate-700 text-center leading-tight uppercase tracking-wider">${v.nombre}<br><span class="text-[9px] font-semibold text-slate-400 normal-case mt-0.5 inline-block">${desc}</span></span>
-                </button>
-                `;
+                const icon = v.tipo === 'estaquitas' ? 'fa-truck-pickup' : 'fa-truck'; const desc = v.tipo === 'estaquitas' ? 'Unidad Pequeña' : 'Unidad Pesada';
+                return `<button onclick="seleccionarVehiculo('${v.id}', '${v.tipo}')" class="btn-vehiculo flex flex-col items-center justify-center p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50 transition" data-vehiculo="${v.id}"><i class="fas ${icon} text-slate-500 text-2xl mb-1.5"></i><span class="text-[10px] font-black text-slate-700 text-center leading-tight uppercase tracking-wider">${v.nombre}<br><span class="text-[9px] font-semibold text-slate-400 normal-case mt-0.5 inline-block">${desc}</span></span></button>`;
             }).join('');
         }
 
-        // ==========================================
-        // SIMULADOR
-        // ==========================================
-        window.generarDatosPrueba = async () => {
-            if(!confirm("Esto inyectará pedidos de prueba a Firestore para probar la logística. ¿Continuar?")) return;
-            
-            const batch = db.batch();
-            
-            // Inyectar un chofer de prueba si no hay
-            if(choferesDB.length === 0) {
-                batch.set(db.collection('choferes').doc('CH-01'), { nombre: "Juan Pérez (Piloto de Prueba)" });
-            }
-            // Inyectar un par de vehículos de prueba si no hay
-            if(flotaDB.length === 0) {
-                batch.set(db.collection('flota').doc('V-EST'), { nombre: "Estaquitas #1", tipo: "estaquitas" });
-                batch.set(db.collection('flota').doc('V-35'), { nombre: "Camión 3.5 Tons #2", tipo: "pesado" });
-            }
-
-            const coll = db.collection('rutas_logistica');
-            batch.set(coll.doc("F-10290"), {
-                cliente_codigo: "CLI-001", cliente_nombre: "Químicos Monterrey SA",
-                tipo_destino: "bodega_cliente", direccion: "Av. Ruiz Cortines 1234, Parque Industrial",
-                coordenadas: { lat: 25.7100, lng: -100.2500 }, estado: "pendiente", vehiculo_asignado: null, chofer_asignado: null
-            });
-            batch.set(coll.doc("F-10291"), {
-                cliente_codigo: "CLI-002", cliente_nombre: "Laboratorios Alfa",
-                tipo_destino: "bodega_cliente", direccion: "Modesto Arreola 500, Centro, Monterrey",
-                coordenadas: { lat: 25.6750, lng: -100.3120 }, estado: "pendiente", vehiculo_asignado: null, chofer_asignado: null
-            });
-            batch.set(coll.doc("F-10292"), {
-                cliente_codigo: "FOR-100", cliente_nombre: "Distribuidora Saltillo",
-                tipo_destino: "paqueteria", nombre_paqueteria: "Transportes Castores", direccion: "Bodega Castores Escobedo NL",
-                coordenadas: { lat: 25.7400, lng: -100.2800 }, estado: "pendiente", vehiculo_asignado: null, chofer_asignado: null
-            });
-
-            await batch.commit();
-            alert("¡Datos generados! Revisa el panel izquierdo.");
-        };
-
-        // ==========================================
-        // MOTOR DE DESCARGA (FALTABA ESTA FUNCIÓN)
-        // ==========================================
         function cargarDatosMaestros() {
-            // 1. Cargar Catálogo de Clientes (Autocompletado)
             db.collection('clientes_logistica').onSnapshot(snap => {
-                clientesDB = [];
-                snap.forEach(doc => clientesDB.push({ codigo: doc.id, ...doc.data() }));
-                const dl = document.getElementById('clientes-list');
-                if(dl) {
-                    dl.innerHTML = '';
-                    clientesDB.forEach(c => dl.innerHTML += `<option value="${c.codigo}">${c.nombre}</option>`);
-                }
+                clientesDB = []; snap.forEach(doc => clientesDB.push({ codigo: doc.id, ...doc.data() }));
+                const dl = document.getElementById('clientes-list'); if(dl) { dl.innerHTML = ''; clientesDB.forEach(c => dl.innerHTML += `<option value="${c.codigo}">${c.nombre}</option>`); }
             });
-
-            // 2. Cargar Flota (Vehículos)
-            db.collection('flota').onSnapshot(snap => {
-                flotaDB = [];
-                snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() }));
-                renderizarFlotaUI();
-                renderizarOpcionesDespacho();
-            });
-
-            // 3. Cargar Personal (Choferes)
-            db.collection('choferes').onSnapshot(snap => {
-                choferesDB = [];
-                snap.forEach(doc => choferesDB.push({ id: doc.id, ...doc.data() }));
-                renderizarChoferesUI();
-                renderizarOpcionesDespacho();
-            });
-
-            // 4. Escuchar las Rutas en tiempo real
+            db.collection('flota').onSnapshot(snap => { flotaDB = []; snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() })); renderizarFlotaUI(); renderizarOpcionesDespacho(); });
+            db.collection('choferes').onSnapshot(snap => { choferesDB = []; snap.forEach(doc => choferesDB.push({ id: doc.id, ...doc.data() })); renderizarChoferesUI(); renderizarOpcionesDespacho(); });
             db.collection('rutas_logistica').onSnapshot(snap => {
-                const pedidosRaw = [];
-                snap.forEach(doc => pedidosRaw.push({ id: doc.id, ...doc.data() }));
-                agruparYConsolidar(pedidosRaw);
+                const pedidosRaw = []; snap.forEach(doc => pedidosRaw.push({ id: doc.id, ...doc.data() })); agruparYConsolidar(pedidosRaw);
             }, error => {
-                console.error("Error al cargar rutas:", error);
-                const container = document.getElementById('lista-pedidos');
-                if(container) container.innerHTML = `<div class="text-center py-10 text-red-500 font-bold"><i class="fas fa-exclamation-triangle text-3xl mb-3"></i><br>Error de conexión.</div>`;
+                const container = document.getElementById('lista-pedidos'); if(container) container.innerHTML = `<div class="text-center py-10 text-red-500 font-bold"><i class="fas fa-exclamation-triangle text-3xl mb-3"></i><br>Error de conexión.</div>`;
             });
         }
 
-        window.onload = () => {
-            initMap();
-            cargarDatosMaestros();
-        };
+        window.onload = () => { initMap(); cargarDatosMaestros(); };
     </script>
 </body>
 </html>
