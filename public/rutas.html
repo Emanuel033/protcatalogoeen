@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Logística y Rutas - EEN</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Leaflet para el Mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Rutas de Leaflet (Routing Machine) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; overflow: hidden; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        #map { z-index: 10; }
+        
+        .pedido-card { transition: all 0.2s ease; border-left: 4px solid transparent; }
+        .pedido-card:hover { transform: translateX(4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .pedido-card.active { border-left-color: #3b82f6; background-color: #eff6ff; }
+        
+        .status-pendiente { background-color: #fef3c7; color: #d97706; }
+        .status-camino { background-color: #dbeafe; color: #2563eb; }
+        .status-entregado { background-color: #d1fae5; color: #059669; }
+
+        /* Estilos para el ruteo de Leaflet */
+        .leaflet-routing-container { display: none !important; } /* Ocultar panel de texto de ruta por defecto */
+        
+        .paqueteria-group { border-left: 4px solid #8b5cf6; background: #f5f3ff; }
+    </style>
+</head>
+<body class="h-screen flex flex-col md:flex-row">
+
+    <!-- Configuración Firebase -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            projectId: "productoseen",
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+
+    <!-- SIDEBAR DE PEDIDOS -->
+    <aside class="w-full md:w-[450px] h-1/2 md:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg relative">
+        <!-- Header Sidebar -->
+        <div class="p-5 border-b border-slate-100 bg-slate-900 flex justify-between items-center text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center font-black text-xl shadow-md">
+                    <i class="fas fa-route"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black tracking-tight leading-none">Logística EEN</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1" id="fecha-hoy">Cargando...</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="generarDatosPrueba()" class="text-amber-400 hover:text-amber-300 p-2" title="Generar datos de prueba">
+                    <i class="fas fa-bolt"></i>
+                </button>
+                <span class="bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs font-bold" id="total-rutas">0 viajes</span>
+            </div>
+        </div>
+
+        <!-- Filtros Rápidos -->
+        <div class="flex p-3 gap-2 bg-slate-50 border-b border-slate-200 overflow-x-auto hide-scroll shadow-inner">
+            <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition-colors">Todos</button>
+            <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">Por Asignar</button>
+            <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">En Ruta</button>
+            <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">Completados</button>
+        </div>
+
+        <!-- Lista de Pedidos -->
+        <div class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3 bg-slate-100/50" id="lista-pedidos">
+            <div class="text-center py-10">
+                <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-3"></i>
+                <p class="text-slate-500 text-sm font-semibold">Sincronizando logística...</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ÁREA DEL MAPA Y DETALLE -->
+    <main class="flex-1 h-1/2 md:h-full relative flex flex-col">
+        <!-- Mapa de Leaflet -->
+        <div id="map" class="flex-1 w-full bg-slate-200"></div>
+
+        <!-- Polígonos de Restricción Leyenda -->
+        <div class="absolute top-4 left-4 z-[400] bg-white/90 backdrop-blur p-3 rounded-xl shadow-md border border-slate-200 pointer-events-none">
+            <h4 class="text-[10px] font-black uppercase text-slate-800 mb-2">Restricciones de Tránsito MTY</h4>
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-600 mb-1">
+                <div class="w-3 h-3 bg-red-500/50 border border-red-500 rounded"></div> Zona Centro (Solo Estaquitas)
+            </div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                <div class="w-3 h-3 bg-orange-500/50 border border-orange-500 rounded"></div> Carga Pesada Restringida
+            </div>
+        </div>
+
+        <!-- MODAL DE ASIGNACIÓN Y DETALLE -->
+        <div id="detalle-flotante" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 md:left-6 md:translate-x-0 w-[95%] md:w-[400px] bg-white rounded-2xl shadow-2xl border border-slate-200 z-[1000] overflow-hidden hidden transition-all duration-300 translate-y-10 opacity-0 flex flex-col max-h-[80vh]">
+            
+            <!-- Header Modal -->
+            <div class="bg-slate-900 p-4 relative shrink-0">
+                <button onclick="cerrarDetalle()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition"><i class="fas fa-times text-lg"></i></button>
+                <div class="flex justify-between items-start mb-2 pr-6">
+                    <span id="det-folio" class="text-xs font-mono font-bold text-slate-300">FOLIO / GRUPO</span>
+                    <span id="det-status" class="text-[9px] font-black uppercase px-2 py-1 rounded">ESTADO</span>
+                </div>
+                <h3 id="det-cliente" class="text-xl font-black text-white leading-tight">Cliente o Paquetería</h3>
+                <p class="text-[10px] text-blue-400 font-bold mt-1 uppercase" id="det-tipo-destino">TIPO DESTINO</p>
+            </div>
+            
+            <!-- Body Modal (Scrollable) -->
+            <div class="p-5 overflow-y-auto custom-scroll flex-1 bg-slate-50">
+                
+                <div class="flex items-start gap-3 mb-4 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="mt-0.5 text-red-500"><i class="fas fa-map-marker-alt text-lg"></i></div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Dirección de Entrega</p>
+                        <p id="det-direccion" class="text-sm text-slate-700 font-medium leading-snug">Cargando dirección...</p>
+                        <p id="det-restriccion-alerta" class="text-xs font-bold text-red-600 mt-1 hidden"><i class="fas fa-exclamation-triangle"></i> Zona Restringida para Carga Pesada</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-slate-200 rounded-xl p-3 mb-5 shadow-sm">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-1">Desglose de Carga:</p>
+                    <ul id="det-articulos" class="text-xs text-slate-700 font-medium space-y-2"></ul>
+                </div>
+
+                <!-- CONTROLES PARA DESPACHADOR / CHOFER -->
+                <div id="controles-despacho" class="space-y-4">
+                    
+                    <!-- Seleccion de Vehículo -->
+                    <div id="selector-vehiculo-container">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Asignar Unidad <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="seleccionarVehiculo('estaquitas')" class="btn-vehiculo flex flex-col items-center justify-center p-2 rounded-lg border-2 border-slate-200 bg-white hover:border-blue-500 transition" data-vehiculo="estaquitas">
+                                <i class="fas fa-truck-pickup text-slate-600 text-xl mb-1"></i>
+                                <span class="text-[9px] font-bold text-slate-600 text-center leading-tight">Nissan<br>Estaquitas</span>
+                            </button>
+                            <button onclick="seleccionarVehiculo('camion35')" class="btn-vehiculo flex flex-col items-center justify-center p-2 rounded-lg border-2 border-slate-200 bg-white hover:border-blue-500 transition" data-vehiculo="camion35">
+                                <i class="fas fa-truck text-slate-600 text-xl mb-1"></i>
+                                <span class="text-[9px] font-bold text-slate-600 text-center leading-tight">Camión<br>3.5 Tons</span>
+                            </button>
+                            <button onclick="seleccionarVehiculo('torton')" class="btn-vehiculo flex flex-col items-center justify-center p-2 rounded-lg border-2 border-slate-200 bg-white hover:border-blue-500 transition" data-vehiculo="torton">
+                                <i class="fas fa-truck-moving text-slate-600 text-xl mb-1"></i>
+                                <span class="text-[9px] font-bold text-slate-600 text-center leading-tight">Torton<br>Pesado</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="vehiculo-seleccionado" value="">
+                    </div>
+
+                    <div class="flex gap-2 pt-2 border-t border-slate-200">
+                        <button id="btn-iniciar" onclick="iniciarRuta()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2"><i class="fas fa-play"></i> Despachar Unidad</button>
+                        <button id="btn-entregar" onclick="marcarEntregado()" class="hidden flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2"><i class="fas fa-check-double"></i> Marcar Entregado</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString('es-MX', opcionesFecha);
+
+        let map;
+        let marcadores = {};
+        let rutasTrazadas = null;
+        let viajesAgrupados = []; // Aquí guardaremos la lógica consolidada
+        let filtroActual = 'todos';
+        let viajeSeleccionado = null; // Puede ser 1 pedido o 1 grupo de pedidos (Paquetería)
+
+        // Zonas restringidas en MTY (Aprox)
+        const zonasRestringidas = [
+            { nombre: "Centro MTY", color: "#ef4444", coords: [[25.6811, -100.3259], [25.6811, -100.3019], [25.6631, -100.3019], [25.6631, -100.3259]] },
+            { nombre: "Morones Prieto (Carril Exprés)", color: "#f97316", coords: [[25.6700, -100.3500], [25.6650, -100.3000], [25.6680, -100.2800], [25.6720, -100.2800], [25.6750, -100.3500]] }
+        ];
+
+        const icons = {
+            bodega: L.divIcon({ className: 'custom-icon', html: `<div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white"><i class="fas fa-building text-sm"></i></div>`, iconSize: [32, 32], iconAnchor: [16, 32] }),
+            paqueteria: L.divIcon({ className: 'custom-icon', html: `<div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white"><i class="fas fa-boxes text-sm"></i></div>`, iconSize: [32, 32], iconAnchor: [16, 32] }),
+            entregado: L.divIcon({ className: 'custom-icon', html: `<div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white"><i class="fas fa-check text-sm"></i></div>`, iconSize: [32, 32], iconAnchor: [16, 32] })
+        };
+
+        function initMap() {
+            map = L.map('map', { zoomControl: false }).setView([25.6866, -100.3161], 12);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+
+            // Dibujar zonas restringidas
+            zonasRestringidas.forEach(zona => {
+                L.polygon(zona.coords, { color: zona.color, fillColor: zona.color, fillOpacity: 0.2, weight: 2 })
+                 .addTo(map).bindPopup(`<b>ZONA RESTRINGIDA:</b> ${zona.nombre}<br>Solo unidades pequeñas (Estaquitas).`);
+            });
+        }
+
+        // ==========================================
+        // LÓGICA DE NEGOCIO: CONSOLIDACIÓN
+        // ==========================================
+        function cargarPedidosRuta() {
+            // Escuchamos la colección "rutas_logistica" que simularemos
+            db.collection('rutas_logistica').onSnapshot(snapshot => {
+                const pedidosRaw = [];
+                snapshot.forEach(doc => pedidosRaw.push({ id: doc.id, ...doc.data() }));
+                
+                // MAGIA DE CONSOLIDACIÓN
+                agruparYConsolidar(pedidosRaw);
+            });
+        }
+
+        function agruparYConsolidar(pedidosRaw) {
+            viajesAgrupados = [];
+            const paqueteriasMap = {};
+
+            pedidosRaw.forEach(p => {
+                if (p.tipo_destino === 'paqueteria') {
+                    // Si va a paquetería, agrupamos por nombre de la paquetería y estado
+                    const key = `${p.nombre_paqueteria}_${p.estado}`;
+                    if (!paqueteriasMap[key]) {
+                        paqueteriasMap[key] = {
+                            es_grupo: true,
+                            id: `GRUPO-${p.nombre_paqueteria.replace(/\s/g,'').toUpperCase()}`,
+                            cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`,
+                            tipo_destino: 'paqueteria',
+                            direccion: p.direccion,
+                            coordenadas: p.coordenadas,
+                            estado: p.estado,
+                            vehiculo_asignado: p.vehiculo_asignado,
+                            pedidos_incluidos: [],
+                            articulos_totales: []
+                        };
+                    }
+                    paqueteriasMap[key].pedidos_incluidos.push(p);
+                    // Sumar artículos al total del camión
+                    if(p.articulos) paqueteriasMap[key].articulos_totales.push(...p.articulos);
+                } else {
+                    // Si es bodega de cliente directo, es un viaje individual
+                    viajesAgrupados.push({
+                        es_grupo: false,
+                        id: p.id,
+                        cliente_codigo: p.cliente_codigo,
+                        cliente_nombre: p.cliente_nombre,
+                        tipo_destino: 'bodega_cliente',
+                        direccion: p.direccion,
+                        coordenadas: p.coordenadas,
+                        estado: p.estado,
+                        vehiculo_asignado: p.vehiculo_asignado,
+                        pedidos_incluidos: [p],
+                        articulos_totales: p.articulos || []
+                    });
+                }
+            });
+
+            // Añadir los grupos de paquetería al arreglo final
+            Object.values(paqueteriasMap).forEach(grupo => viajesAgrupados.push(grupo));
+
+            // Ordenar: Pendientes > Camino > Entregados
+            viajesAgrupados.sort((a,b) => {
+                const order = { 'pendiente': 1, 'camino': 2, 'entregado': 3 };
+                return (order[a.estado] || 4) - (order[b.estado] || 4);
+            });
+
+            document.getElementById('total-rutas').innerText = `${viajesAgrupados.length} Viajes Necesarios`;
+            renderizarLista();
+            actualizarMapa();
+        }
+
+        function setFilter(filtro) {
+            filtroActual = filtro;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors";
+            });
+            const activeBtn = document.getElementById(`filter-${filtro}`);
+            activeBtn.className = "filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition-colors shadow-inner";
+            renderizarLista();
+            actualizarMapa();
+            cerrarDetalle();
+        }
+
+        function renderizarLista() {
+            const container = document.getElementById('lista-pedidos');
+            container.innerHTML = '';
+
+            const filtrados = filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual);
+
+            if(filtrados.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold"><i class="fas fa-check-circle text-4xl mb-3 text-slate-300"></i><br>Bandeja limpia.</div>`;
+                return;
+            }
+
+            filtrados.forEach(viaje => {
+                const isActive = viajeSeleccionado && viaje.id === viajeSeleccionado.id ? 'active' : '';
+                
+                let statusClass, statusText, iconClass;
+                if(viaje.estado === 'pendiente') { statusClass = 'status-pendiente'; statusText = 'Por Asignar'; iconClass = 'fa-clock'; }
+                else if(viaje.estado === 'camino') { statusClass = 'status-camino'; statusText = 'En Ruta'; iconClass = 'fa-truck-fast'; }
+                else { statusClass = 'status-entregado'; statusText = 'Entregado'; iconClass = 'fa-check-double'; }
+
+                const tipoDestinoText = viaje.tipo_destino === 'paqueteria' ? '<i class="fas fa-boxes text-purple-500"></i> PAQUETERÍA' : '<i class="fas fa-building text-blue-500"></i> BODEGA CLIENTE';
+                const customBg = viaje.es_grupo ? 'paqueteria-group' : 'bg-white';
+                
+                let vehiculoText = '';
+                if (viaje.vehiculo_asignado) {
+                    const vNames = { 'estaquitas': 'Estaquitas', 'camion35': 'Camión 3.5', 'torton': 'Torton' };
+                    vehiculoText = `<span class="bg-slate-100 border border-slate-200 text-slate-600 text-[9px] px-2 py-0.5 rounded font-bold"><i class="fas fa-truck text-slate-400"></i> ${vNames[viaje.vehiculo_asignado]}</span>`;
+                }
+
+                container.innerHTML += `
+                    <div onclick="seleccionarViaje('${viaje.id}')" class="pedido-card ${isActive} ${customBg} p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[9px] font-black tracking-wider">${tipoDestinoText}</span>
+                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${statusClass} flex items-center gap-1"><i class="fas ${iconClass}"></i> ${statusText}</span>
+                        </div>
+                        <h4 class="font-black text-slate-800 text-sm truncate mb-1">${viaje.cliente_nombre}</h4>
+                        <p class="text-[10px] text-slate-500 truncate mb-3"><i class="fas fa-map-marker-alt text-red-400 w-4"></i> ${viaje.direccion}</p>
+                        
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-200">
+                            <span class="text-[10px] font-bold text-slate-600">${viaje.pedidos_incluidos.length} Factura(s) | ${viaje.articulos_totales.length} Partidas</span>
+                            ${vehiculoText}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function actualizarMapa() {
+            Object.values(marcadores).forEach(m => map.removeLayer(m));
+            if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; }
+            marcadores = {};
+
+            const filtrados = filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual);
+            const bounds = [];
+
+            filtrados.forEach(v => {
+                if(!v.coordenadas) return;
+                const iconToUse = v.estado === 'entregado' ? icons.entregado : (v.tipo_destino === 'paqueteria' ? icons.paqueteria : icons.bodega);
+                
+                const marker = L.marker([v.coordenadas.lat, v.coordenadas.lng], { icon: iconToUse }).addTo(map);
+                marker.on('click', () => seleccionarViaje(v.id));
+                
+                marcadores[v.id] = marker;
+                bounds.push([v.coordenadas.lat, v.coordenadas.lng]);
+            });
+
+            if(bounds.length > 0 && !viajeSeleccionado) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+
+        function isPointInPolygon(point, vs) {
+            // Algoritmo Ray-Casting para saber si una coordenada está dentro de una zona restringida
+            let x = point[0], y = point[1];
+            let inside = false;
+            for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+                let xi = vs[i][0], yi = vs[i][1];
+                let xj = vs[j][0], yj = vs[j][1];
+                let intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        function revisarRestricciones(coordenadas) {
+            for (let zona of zonasRestringidas) {
+                if (isPointInPolygon([coordenadas.lat, coordenadas.lng], zona.coords)) {
+                    return true; // Está en zona restringida
+                }
+            }
+            return false;
+        }
+
+        function seleccionarViaje(id) {
+            viajeSeleccionado = viajesAgrupados.find(x => x.id === id);
+            if(!viajeSeleccionado) return;
+            
+            renderizarLista(); 
+
+            // Centrar Mapa y dibujar línea simulada desde la planta EEN
+            if(viajeSeleccionado.coordenadas) {
+                const coordDestino = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
+                const coordPlanta = L.latLng(25.6980, -100.3150); // Coordenada ficticia Planta EEN
+                
+                map.setView(coordDestino, 13, { animate: true });
+
+                if(rutasTrazadas) map.removeControl(rutasTrazadas);
+                
+                // Usamos Leaflet Routing Machine solo para mostrar la línea visual del trayecto
+                rutasTrazadas = L.Routing.control({
+                    waypoints: [coordPlanta, coordDestino],
+                    lineOptions: { styles: [{color: '#3b82f6', weight: 4, opacity: 0.7}] },
+                    createMarker: function() { return null; }, // No crear marcadores extra
+                    fitSelectedRoutes: false,
+                    show: false // Oculta el panel de texto con las direcciones paso a paso
+                }).addTo(map);
+            }
+
+            // Llenar Modal
+            document.getElementById('det-folio').innerText = viajeSeleccionado.id;
+            document.getElementById('det-cliente').innerText = viajeSeleccionado.cliente_nombre;
+            document.getElementById('det-tipo-destino').innerText = viajeSeleccionado.tipo_destino === 'paqueteria' ? '📍 Consolidado a Paquetería' : '🏢 Entrega a Bodega Directa';
+            document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
+            
+            // Revisar restricciones
+            const estaRestringido = revisarRestricciones(viajeSeleccionado.coordenadas);
+            const alertaRes = document.getElementById('det-restriccion-alerta');
+            if(estaRestringido) {
+                alertaRes.classList.remove('hidden');
+                // Si está restringido y no tiene vehículo, pre-seleccionar estaquitas visualmente
+                if(viajeSeleccionado.estado === 'pendiente') seleccionarVehiculo('estaquitas');
+            } else {
+                alertaRes.classList.add('hidden');
+                // Limpiar pre-selección
+                if(viajeSeleccionado.estado === 'pendiente') document.getElementById('vehiculo-seleccionado').value = '';
+            }
+            
+            // Estado y Botones
+            const badgeStatus = document.getElementById('det-status');
+            const selectorVehiculo = document.getElementById('selector-vehiculo-container');
+            const btnIniciar = document.getElementById('btn-iniciar');
+            const btnEntregar = document.getElementById('btn-entregar');
+
+            if(viajeSeleccionado.estado === 'pendiente') { 
+                badgeStatus.className = 'text-[9px] font-black uppercase px-2 py-1 rounded status-pendiente'; badgeStatus.innerText = 'Por Asignar'; 
+                selectorVehiculo.classList.remove('hidden');
+                btnIniciar.classList.remove('hidden'); btnEntregar.classList.add('hidden');
+                
+                // Limpiar botones de vehículo
+                document.querySelectorAll('.btn-vehiculo').forEach(b => {
+                    b.classList.remove('border-blue-500', 'bg-blue-50');
+                    b.classList.add('border-slate-200', 'bg-white');
+                });
+            }
+            else if(viajeSeleccionado.estado === 'camino') { 
+                badgeStatus.className = 'text-[9px] font-black uppercase px-2 py-1 rounded status-camino'; badgeStatus.innerText = 'En Ruta (' + viajeSeleccionado.vehiculo_asignado + ')'; 
+                selectorVehiculo.classList.add('hidden');
+                btnIniciar.classList.add('hidden'); btnEntregar.classList.remove('hidden');
+            }
+            else { 
+                badgeStatus.className = 'text-[9px] font-black uppercase px-2 py-1 rounded status-entregado'; badgeStatus.innerText = 'Entregado'; 
+                selectorVehiculo.classList.add('hidden');
+                btnIniciar.classList.add('hidden'); btnEntregar.classList.add('hidden');
+            }
+
+            // Llenar artículos (Agrupando si hay varias facturas)
+            const listaArts = document.getElementById('det-articulos');
+            listaArts.innerHTML = '';
+            
+            if (viajeSeleccionado.es_grupo) {
+                // Es un viaje a paquetería con varias facturas
+                viajeSeleccionado.pedidos_incluidos.forEach(ped => {
+                    listaArts.innerHTML += `<li class="text-[10px] font-bold text-slate-400 mt-2 border-b border-slate-100 pb-1">Factura: ${ped.id} - ${ped.cliente_nombre}</li>`;
+                    (ped.articulos || []).forEach(art => {
+                        listaArts.innerHTML += `<li class="pl-2"><span class="font-black text-purple-600">${art.cantidad}x</span> ${art.nombre}</li>`;
+                    });
+                });
+            } else {
+                // Es una bodega normal
+                (viajeSeleccionado.articulos_totales || []).forEach(art => {
+                    listaArts.innerHTML += `<li><span class="font-black text-blue-600">${art.cantidad}x</span> ${art.nombre}</li>`;
+                });
+            }
+
+            // Mostrar modal
+            const card = document.getElementById('detalle-flotante');
+            card.classList.remove('hidden');
+            setTimeout(() => card.classList.remove('translate-y-10', 'opacity-0'), 10);
+        }
+
+        function cerrarDetalle() {
+            viajeSeleccionado = null;
+            renderizarLista();
+            if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; }
+            const card = document.getElementById('detalle-flotante');
+            card.classList.add('translate-y-10', 'opacity-0');
+            setTimeout(() => card.classList.add('hidden'), 300);
+        }
+
+        // ==========================================
+        // ACCIONES DEL DESPACHADOR
+        // ==========================================
+        window.seleccionarVehiculo = (tipo) => {
+            if(viajeSeleccionado && viajeSeleccionado.estado !== 'pendiente') return;
+            
+            const estaRestringido = revisarRestricciones(viajeSeleccionado.coordenadas);
+            if(estaRestringido && tipo !== 'estaquitas') {
+                alert("⚠️ ZONA RESTRINGIDA: Para evitar multas en el Centro/Vías rápidas, se recomienda usar Nissan Estaquitas. Se requiere permiso especial para unidades pesadas.");
+            }
+
+            document.querySelectorAll('.btn-vehiculo').forEach(b => {
+                b.classList.remove('border-blue-500', 'bg-blue-50');
+                b.classList.add('border-slate-200', 'bg-white');
+            });
+            const btn = document.querySelector(`.btn-vehiculo[data-vehiculo="${tipo}"]`);
+            if(btn) {
+                btn.classList.add('border-blue-500', 'bg-blue-50');
+                btn.classList.remove('border-slate-200', 'bg-white');
+            }
+            document.getElementById('vehiculo-seleccionado').value = tipo;
+        };
+
+        window.iniciarRuta = () => {
+            const vehiculo = document.getElementById('vehiculo-seleccionado').value;
+            if(!vehiculo) { alert("Debes asignar una unidad de transporte primero."); return; }
+            actualizarEstadoLote('camino', vehiculo);
+        };
+
+        window.marcarEntregado = () => {
+            if(confirm("¿Confirmar que la entrega fue completada y firmada?")) {
+                actualizarEstadoLote('entregado', viajeSeleccionado.vehiculo_asignado);
+            }
+        };
+
+        function actualizarEstadoLote(nuevoEstado, vehiculo) {
+            if(!viajeSeleccionado) return;
+            
+            // Como puede ser 1 pedido o un grupo de 5 pedidos, actualizamos todos en Firebase
+            const batch = db.batch();
+            viajeSeleccionado.pedidos_incluidos.forEach(ped => {
+                const ref = db.collection('rutas_logistica').doc(ped.id);
+                batch.update(ref, { 
+                    estado: nuevoEstado, 
+                    vehiculo_asignado: vehiculo,
+                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+
+            batch.commit().then(() => {
+                cerrarDetalle();
+                // La UI se recarga sola por el onSnapshot
+            }).catch(e => alert("Error al actualizar: " + e.message));
+        }
+
+        // ==========================================
+        // SIMULADOR (Para poblar desde cero y probar)
+        // ==========================================
+        window.generarDatosPrueba = async () => {
+            if(!confirm("Esto inyectará pedidos de prueba a Firestore para probar la logística. ¿Continuar?")) return;
+            
+            const batch = db.batch();
+            const coll = db.collection('rutas_logistica');
+
+            // 1. Cliente Directo MTY (Fuera del centro - OK para Torton)
+            batch.set(coll.doc("FAC-9001"), {
+                cliente_codigo: "CLI-001", cliente_nombre: "Químicos Monterrey SA",
+                tipo_destino: "bodega_cliente", direccion: "Av. Ruiz Cortines 1234, Parque Industrial",
+                coordenadas: { lat: 25.7100, lng: -100.2500 }, estado: "pendiente", vehiculo_asignado: null,
+                articulos: [{nombre: "Tambor 200L Azul", cantidad: 50}]
+            });
+
+            // 2. Cliente Directo en el CENTRO (Multa si va pesado)
+            batch.set(coll.doc("FAC-9002"), {
+                cliente_codigo: "CLI-002", cliente_nombre: "Laboratorios Alfa",
+                tipo_destino: "bodega_cliente", direccion: "Modesto Arreola 500, Centro, Monterrey",
+                coordenadas: { lat: 25.6750, lng: -100.3120 }, estado: "pendiente", vehiculo_asignado: null,
+                articulos: [{nombre: "Caja Envases PET 500ml", cantidad: 10}]
+            });
+
+            // 3, 4 y 5. Pedidos Foráneos que van a LA MISMA PAQUETERÍA (Deben agruparse)
+            const coordsCastores = { lat: 25.7400, lng: -100.2800 }; // Bodega Castores Escobedo
+            
+            batch.set(coll.doc("FAC-9003"), {
+                cliente_codigo: "FOR-100", cliente_nombre: "Distribuidora Saltillo",
+                tipo_destino: "paqueteria", nombre_paqueteria: "Transportes Castores", direccion: "Bodega Castores Escobedo NL",
+                coordenadas: coordsCastores, estado: "pendiente", vehiculo_asignado: null,
+                articulos: [{nombre: "Porrones 20L", cantidad: 100}]
+            });
+            batch.set(coll.doc("FAC-9004"), {
+                cliente_codigo: "FOR-200", cliente_nombre: "Limpieza Reynosa",
+                tipo_destino: "paqueteria", nombre_paqueteria: "Transportes Castores", direccion: "Bodega Castores Escobedo NL",
+                coordenadas: coordsCastores, estado: "pendiente", vehiculo_asignado: null,
+                articulos: [{nombre: "Cubeta 19L Blanca", cantidad: 45}]
+            });
+            batch.set(coll.doc("FAC-9005"), {
+                cliente_codigo: "FOR-300", cliente_nombre: "Agro Torreón",
+                tipo_destino: "paqueteria", nombre_paqueteria: "Transportes Castores", direccion: "Bodega Castores Escobedo NL",
+                coordenadas: coordsCastores, estado: "camino", vehiculo_asignado: "torton", // Este grupo ya salió
+                articulos: [{nombre: "Tapa R-38", cantidad: 5000}]
+            });
+
+            await batch.commit();
+            alert("¡Datos generados! Revisa el panel izquierdo.");
+        };
+
+        window.onload = () => {
+            initMap();
+            cargarPedidosRuta();
+        };
+    </script>
+</body>
+</html>
