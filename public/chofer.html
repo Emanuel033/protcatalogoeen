@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal de Entregas - EEN</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        
+        .tab-btn.active { color: #2563eb; border-bottom: 3px solid #2563eb; font-weight: 800; }
+        .slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden text-slate-800">
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            projectId: "productoseen",
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA DE INGRESO (LOGIN SIMULADO)       -->
+    <!-- ========================================== -->
+    <div id="pantalla-login" class="flex-1 flex flex-col justify-center items-center p-6 bg-slate-900 z-50 absolute inset-0">
+        <div class="w-full max-w-sm bg-white p-8 rounded-3xl shadow-2xl text-center slide-up">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fas fa-truck-fast"></i>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 mb-1">Rutas EEN</h1>
+            <p class="text-sm text-slate-500 font-semibold mb-6">Portal de Operadores</p>
+            
+            <div class="text-left mb-6">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Selecciona tu perfil</label>
+                <select id="select-chofer" class="w-full bg-slate-50 border border-slate-200 text-slate-800 font-bold p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Cargando operadores...</option>
+                </select>
+            </div>
+            
+            <button onclick="iniciarSesion()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition active:scale-95">
+                Ingresar a mi ruta
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA PRINCIPAL DE VIAJES               -->
+    <!-- ========================================== -->
+    <div id="pantalla-app" class="hidden flex-1 flex flex-col h-full relative">
+        
+        <!-- App Bar -->
+        <header class="bg-blue-600 pt-8 pb-4 px-5 text-white shadow-md z-10 shrink-0 rounded-b-3xl">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <p class="text-[10px] font-bold tracking-widest uppercase opacity-80 text-blue-100">Operador en Turno</p>
+                    <h2 id="nombre-chofer-app" class="text-xl font-black leading-tight">Juan Pérez</h2>
+                </div>
+                <button onclick="cerrarSesion()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex bg-blue-700/50 rounded-xl p-1">
+                <button onclick="cambiarTab('camino')" id="tab-camino" class="flex-1 py-2 text-sm font-bold bg-white text-blue-600 rounded-lg shadow-sm transition">Por Entregar</button>
+                <button onclick="cambiarTab('entregado')" id="tab-entregado" class="flex-1 py-2 text-sm font-bold text-white hover:bg-white/10 rounded-lg transition">Completados</button>
+            </div>
+        </header>
+
+        <!-- Lista de Viajes -->
+        <main class="flex-1 overflow-y-auto p-4 space-y-4" id="lista-viajes">
+            <div class="text-center py-20">
+                <i class="fas fa-spinner fa-spin text-3xl text-blue-400 mb-3"></i>
+                <p class="text-slate-500 font-bold text-sm">Sincronizando ruta...</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let miChoferId = null;
+        let miChoferNombre = null;
+        let tabActual = 'camino';
+        let viajesAgrupados = [];
+        let unsubscribe = null;
+
+        // 1. Cargar Choferes en el Login
+        window.onload = () => {
+            db.collection('choferes').onSnapshot(snap => {
+                const select = document.getElementById('select-chofer');
+                select.innerHTML = '<option value="">-- Soy el operador --</option>';
+                snap.forEach(doc => {
+                    select.innerHTML += `<option value="${doc.id}">${doc.data().nombre}</option>`;
+                });
+            });
+
+            // Auto-login si ya había sesión
+            if (localStorage.getItem('choferId_een')) {
+                miChoferId = localStorage.getItem('choferId_een');
+                miChoferNombre = localStorage.getItem('choferNombre_een');
+                mostrarApp();
+            }
+        };
+
+        window.iniciarSesion = () => {
+            const select = document.getElementById('select-chofer');
+            if(!select.value) return alert("Selecciona tu nombre de la lista.");
+            miChoferId = select.value;
+            miChoferNombre = select.options[select.selectedIndex].text;
+            
+            localStorage.setItem('choferId_een', miChoferId);
+            localStorage.setItem('choferNombre_een', miChoferNombre);
+            mostrarApp();
+        };
+
+        window.cerrarSesion = () => {
+            if(unsubscribe) unsubscribe();
+            localStorage.removeItem('choferId_een');
+            localStorage.removeItem('choferNombre_een');
+            document.getElementById('pantalla-login').classList.remove('hidden');
+            document.getElementById('pantalla-app').classList.add('hidden');
+        };
+
+        function mostrarApp() {
+            document.getElementById('pantalla-login').classList.add('hidden');
+            document.getElementById('pantalla-app').classList.remove('hidden');
+            document.getElementById('pantalla-app').classList.add('flex');
+            document.getElementById('nombre-chofer-app').innerText = miChoferNombre;
+            cargarMisRutas();
+        }
+
+        window.cambiarTab = (tab) => {
+            tabActual = tab;
+            document.getElementById('tab-camino').className = tab === 'camino' ? "flex-1 py-2 text-sm font-bold bg-white text-blue-600 rounded-lg shadow-sm transition" : "flex-1 py-2 text-sm font-bold text-white hover:bg-white/10 rounded-lg transition";
+            document.getElementById('tab-entregado').className = tab === 'entregado' ? "flex-1 py-2 text-sm font-bold bg-white text-blue-600 rounded-lg shadow-sm transition" : "flex-1 py-2 text-sm font-bold text-white hover:bg-white/10 rounded-lg transition";
+            renderizarViajes();
+        };
+
+        // 2. Escuchar solo las rutas asignadas a este chofer
+        function cargarMisRutas() {
+            if(unsubscribe) unsubscribe();
+            
+            // Traemos las que están en camino o entregadas (omitimos pendientes porque el despachador las tiene)
+            unsubscribe = db.collection('rutas_logistica')
+                .where('chofer_asignado', '==', miChoferId)
+                .onSnapshot(snapshot => {
+                    const pedidosRaw = [];
+                    snapshot.forEach(doc => pedidosRaw.push({ id: doc.id, ...doc.data() }));
+                    agruparViajes(pedidosRaw);
+                });
+        }
+
+        function agruparViajes(pedidosRaw) {
+            viajesAgrupados = [];
+            const paqueteriasMap = {};
+
+            // Reutilizamos la lógica de agrupación por paquetería para que el chofer no vea 10 tarjetas si va a Castores
+            pedidosRaw.forEach(p => {
+                if(p.estado === 'pendiente') return; // El chofer no ve lo que no ha sido despachado
+
+                if (p.tipo_destino === 'paqueteria') {
+                    const key = `${p.nombre_paqueteria}_${p.estado}`;
+                    if (!paqueteriasMap[key]) {
+                        paqueteriasMap[key] = {
+                            es_grupo: true,
+                            id: `GRUPO-${p.nombre_paqueteria.replace(/\s/g,'').toUpperCase()}`,
+                            cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`,
+                            tipo_destino: 'paqueteria',
+                            direccion: p.direccion,
+                            horario: p.horario,
+                            excepcion: p.excepcion,
+                            estado: p.estado,
+                            pedidos_incluidos: []
+                        };
+                    }
+                    paqueteriasMap[key].pedidos_incluidos.push(p);
+                } else {
+                    viajesAgrupados.push({
+                        es_grupo: false,
+                        id: p.id,
+                        cliente_codigo: p.cliente_codigo,
+                        cliente_nombre: p.cliente_nombre,
+                        tipo_destino: 'bodega_cliente',
+                        direccion: p.direccion,
+                        horario: p.horario,
+                        excepcion: p.excepcion,
+                        estado: p.estado,
+                        pedidos_incluidos: [p]
+                    });
+                }
+            });
+
+            Object.values(paqueteriasMap).forEach(g => viajesAgrupados.push(g));
+            renderizarViajes();
+        }
+
+        function renderizarViajes() {
+            const container = document.getElementById('lista-viajes');
+            container.innerHTML = '';
+
+            const filtrados = viajesAgrupados.filter(v => v.estado === tabActual);
+
+            if(filtrados.length === 0) {
+                const icono = tabActual === 'camino' ? 'fa-mug-hot' : 'fa-box-open';
+                const msg = tabActual === 'camino' ? 'No tienes viajes pendientes. ¡Toma un descanso!' : 'Aún no hay entregas completadas.';
+                container.innerHTML = `
+                    <div class="text-center py-20 text-slate-400">
+                        <i class="fas ${icono} text-5xl mb-4 text-slate-300"></i>
+                        <p class="font-bold text-sm">${msg}</p>
+                    </div>`;
+                return;
+            }
+
+            filtrados.forEach((viaje, idx) => {
+                const isConsolidado = viaje.tipo_destino === 'paqueteria';
+                const iconDestino = isConsolidado ? '<i class="fas fa-boxes text-purple-500"></i> Paquetería' : '<i class="fas fa-building text-blue-500"></i> Bodega Cliente';
+                const urlMaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(viaje.direccion)}`;
+
+                // Renderizar Facturas
+                let facturasHTML = viaje.pedidos_incluidos.map(p => 
+                    `<li class="flex items-center gap-2"><i class="fas fa-file-invoice text-slate-300"></i> Factura <strong class="text-blue-600">${p.id}</strong></li>`
+                ).join('');
+
+                // Renderizar Horario si existe
+                let horarioHTML = '';
+                if(viaje.horario || viaje.excepcion) {
+                    let alertClass = viaje.excepcion ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100';
+                    horarioHTML = `
+                        <div class="mt-3 p-3 rounded-lg border ${alertClass} text-[11px] font-medium text-slate-700">
+                            ${viaje.horario ? `<p><i class="fas fa-clock text-blue-400 w-4"></i> Horario: <b>${viaje.horario}</b></p>` : ''}
+                            ${viaje.excepcion ? `<p class="text-amber-700 font-bold mt-1"><i class="fas fa-exclamation-circle w-4"></i> Nota: ${viaje.excepcion}</p>` : ''}
+                        </div>
+                    `;
+                }
+
+                // Botones de Acción
+                let botonesHTML = '';
+                if (tabActual === 'camino') {
+                    botonesHTML = `
+                        <div class="flex gap-2 mt-4 pt-4 border-t border-slate-100">
+                            <a href="${urlMaps}" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition"><i class="fas fa-location-arrow text-blue-500"></i> GPS</a>
+                            <button onclick="marcarComoEntregado('${viaje.id}')" class="flex-[1.5] bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 rounded-xl shadow-md shadow-green-200 flex items-center justify-center gap-2 transition active:scale-95"><i class="fas fa-check-double"></i> Entregado</button>
+                        </div>
+                    `;
+                } else {
+                    botonesHTML = `
+                        <div class="mt-4 pt-3 border-t border-slate-100 text-center">
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg"><i class="fas fa-check-circle"></i> Completado exitosamente</span>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 slide-up" style="animation-delay: ${idx * 50}ms">
+                        <div class="text-[10px] font-black uppercase tracking-widest mb-2">${iconDestino}</div>
+                        <h3 class="text-lg font-black text-slate-900 leading-tight mb-1">${viaje.cliente_nombre}</h3>
+                        <p class="text-xs text-slate-500 flex items-start gap-1"><i class="fas fa-map-marker-alt text-red-400 mt-0.5"></i> <span>${viaje.direccion}</span></p>
+                        
+                        ${horarioHTML}
+
+                        <div class="mt-4">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Documentos a entregar</p>
+                            <ul class="text-xs font-semibold text-slate-600 space-y-1.5 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                ${facturasHTML}
+                            </ul>
+                        </div>
+                        
+                        ${botonesHTML}
+                    </div>
+                `;
+            });
+        }
+
+        window.marcarComoEntregado = (idGrupo) => {
+            if(!confirm("¿El cliente firmó y recibió correctamente toda la carga?")) return;
+            
+            const viaje = viajesAgrupados.find(v => v.id === idGrupo);
+            if(!viaje) return;
+
+            const batch = db.batch();
+            viaje.pedidos_incluidos.forEach(ped => {
+                const ref = db.collection('rutas_logistica').doc(ped.id);
+                batch.update(ref, { 
+                    estado: 'entregado',
+                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+
+            batch.commit()
+                .then(() => alert("¡Excelente trabajo! Entrega registrada."))
+                .catch(e => alert("Error al actualizar: " + e.message));
+        };
+
+    </script>
+</body>
+</html>
