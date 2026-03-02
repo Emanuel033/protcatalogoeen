@@ -128,6 +128,12 @@
                         <p class="text-[10px] font-bold text-slate-400 uppercase">Dirección de Entrega</p>
                         <p id="det-direccion" class="text-sm text-slate-700 font-medium leading-snug">Cargando dirección...</p>
                         <p id="det-restriccion-alerta" class="text-xs font-bold text-red-600 mt-1 hidden"><i class="fas fa-exclamation-triangle"></i> Zona Restringida para Carga Pesada</p>
+                        
+                        <!-- HORARIO Y AVISOS -->
+                        <div id="det-horario-container" class="mt-2 text-[10px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 hidden">
+                            <p class="font-bold"><i class="fas fa-clock text-blue-500 mr-1"></i> Horario: <span id="det-horario" class="font-normal"></span></p>
+                            <p id="det-excepcion-p" class="font-bold text-amber-600 mt-1 hidden"><i class="fas fa-exclamation-circle mr-1"></i> <span id="det-excepcion"></span></p>
+                        </div>
                     </div>
                 </div>
                 
@@ -219,6 +225,17 @@
                         <option value="">-- Seleccionar Bodega Guardada --</option>
                     </select>
                     <textarea id="form-direccion" rows="2" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Calle, Número, Colonia, Municipio..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Horario Recepción</label>
+                        <input type="text" id="form-horario" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-xs" placeholder="Ej. L-V 9 a 5pm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Día festivo / Excepción</label>
+                        <input type="text" id="form-excepcion" class="w-full border border-amber-300 bg-amber-50 p-2.5 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-semibold text-amber-800" placeholder="Ej. Hoy salen 2pm">
+                    </div>
                 </div>
 
                 <div class="pt-4 border-t border-slate-100">
@@ -364,6 +381,8 @@
                             cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`,
                             tipo_destino: 'paqueteria',
                             direccion: p.direccion,
+                            horario: p.horario,
+                            excepcion: p.excepcion,
                             coordenadas: p.coordenadas,
                             estado: p.estado,
                             vehiculo_asignado: p.vehiculo_asignado,
@@ -381,6 +400,8 @@
                         cliente_nombre: p.cliente_nombre,
                         tipo_destino: 'bodega_cliente',
                         direccion: p.direccion,
+                        horario: p.horario,
+                        excepcion: p.excepcion,
                         coordenadas: p.coordenadas,
                         estado: p.estado,
                         vehiculo_asignado: p.vehiculo_asignado,
@@ -537,6 +558,22 @@
             document.getElementById('det-tipo-destino').innerText = viajeSeleccionado.tipo_destino === 'paqueteria' ? '📍 Consolidado a Paquetería' : '🏢 Entrega a Bodega Directa';
             document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
             
+            // Mostrar Horarios y Excepciones
+            const contHorario = document.getElementById('det-horario-container');
+            if (viajeSeleccionado.horario || viajeSeleccionado.excepcion) {
+                contHorario.classList.remove('hidden');
+                document.getElementById('det-horario').innerText = viajeSeleccionado.horario || 'No especificado';
+                const pExcep = document.getElementById('det-excepcion-p');
+                if (viajeSeleccionado.excepcion) {
+                    pExcep.classList.remove('hidden');
+                    document.getElementById('det-excepcion').innerText = viajeSeleccionado.excepcion;
+                } else {
+                    pExcep.classList.add('hidden');
+                }
+            } else {
+                contHorario.classList.add('hidden');
+            }
+
             const estaRestringido = viajeSeleccionado.coordenadas ? isPointInPolygon([viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng], zonasRestringidas[0].coords) : false;
             document.getElementById('det-restriccion-alerta').classList.toggle('hidden', !estaRestringido);
             
@@ -665,9 +702,11 @@
                 // Llenar direcciones
                 if(cliente.direcciones && cliente.direcciones.length > 0) {
                     selectDir.innerHTML = '<option value="">-- Seleccionar Bodega Guardada --</option>';
-                    cliente.direcciones.forEach(d => {
-                        selectDir.innerHTML += `<option value="${d}">${d}</option>`;
+                    cliente.direcciones.forEach((d, index) => {
+                        const dirText = typeof d === 'string' ? d : d.direccion;
+                        selectDir.innerHTML += `<option value="${index}">${dirText}</option>`;
                     });
+                    window.clienteActualEnForm = cliente;
                     selectDir.classList.remove('hidden');
                 } else {
                     selectDir.classList.add('hidden');
@@ -678,8 +717,19 @@
         };
 
         window.seleccionarDireccionGuardada = () => {
-            const val = document.getElementById('form-direcciones-guardadas').value;
-            if(val) document.getElementById('form-direccion').value = val;
+            const index = document.getElementById('form-direcciones-guardadas').value;
+            if(index !== "" && window.clienteActualEnForm) {
+                const dirObj = window.clienteActualEnForm.direcciones[index];
+                if(typeof dirObj === 'string') {
+                    document.getElementById('form-direccion').value = dirObj;
+                    document.getElementById('form-horario').value = "";
+                    document.getElementById('form-excepcion').value = "";
+                } else {
+                    document.getElementById('form-direccion').value = dirObj.direccion || "";
+                    document.getElementById('form-horario').value = dirObj.horario || "";
+                    document.getElementById('form-excepcion').value = dirObj.excepcion || "";
+                }
+            }
         };
 
         // ==========================================
@@ -695,6 +745,8 @@
             document.getElementById('form-tipo').value = 'bodega_cliente';
             document.getElementById('form-paqueteria').value = '';
             document.getElementById('form-direccion').value = '';
+            document.getElementById('form-horario').value = '';
+            document.getElementById('form-excepcion').value = '';
             document.getElementById('form-direcciones-guardadas').classList.add('hidden');
             togglePaqueteria();
 
@@ -722,6 +774,8 @@
             const tipo = document.getElementById('form-tipo').value;
             const paqueteria = document.getElementById('form-paqueteria').value.trim();
             const direccion = document.getElementById('form-direccion').value.trim();
+            const horario = document.getElementById('form-horario').value.trim();
+            const excepcion = document.getElementById('form-excepcion').value.trim();
 
             if(!factura) return alert("Falta el Folio de Factura.");
             if(!clienteCodigo) return alert("Falta el Código del Cliente.");
@@ -735,9 +789,24 @@
             try {
                 // 1. Guardar/Actualizar la Base de Datos del Cliente (Bitácora de clientes)
                 const refCliente = db.collection('clientes_logistica').doc(clienteCodigo);
+                const docCliente = await refCliente.get();
+                
+                let dirsGuardadas = [];
+                if (docCliente.exists) {
+                    dirsGuardadas = docCliente.data().direcciones || [];
+                    // Remover versiones previas de la misma direccion para actualizar horarios y no duplicar
+                    dirsGuardadas = dirsGuardadas.filter(d => {
+                        const dTxt = typeof d === 'string' ? d : d.direccion;
+                        return dTxt !== direccion;
+                    });
+                }
+                
+                // Agregamos la direccion en formato de Objeto
+                dirsGuardadas.push({ direccion, horario, excepcion });
+                
                 await refCliente.set({
                     nombre: clienteNombre,
-                    direcciones: firebase.firestore.FieldValue.arrayUnion(direccion) // Añade sin duplicar
+                    direcciones: dirsGuardadas
                 }, { merge: true });
 
                 // 2. Crear la orden de ruta
@@ -746,6 +815,8 @@
                     cliente_nombre: clienteNombre,
                     tipo_destino: tipo,
                     direccion: direccion,
+                    horario: horario,
+                    excepcion: excepcion,
                     estado: "pendiente",
                     vehiculo_asignado: null,
                     chofer_asignado: null,
