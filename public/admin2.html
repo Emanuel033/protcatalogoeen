@@ -685,7 +685,7 @@
         function getTotalPendingToImport() {
             const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
             return facturacionCatalog.filter(fact => {
-                const code = fact.codigo || fact.Codigo || fact.id;
+                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id;
                 return !masterCodes.includes(code);
             }).length;
         }
@@ -914,7 +914,7 @@
                 if(!matchSearch) return;
 
                 if(!groups[code]) {
-                    const fact = facturacionCatalog.find(f => (f.codigo || f.Codigo || f.id) === code);
+                    const fact = facturacionCatalog.find(f => (f.codigo_sistema_oficial || f.codigo || f.Codigo || f.id) === code);
                     const nameRaw = fact ? (fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto) : 'Desconocido / No importado';
                     groups[code] = { codigo: code, descripcion_oficial: nameRaw, stock_total: 0, variantes: [] };
                 }
@@ -1012,7 +1012,7 @@
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
             const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
             return facturacionCatalog.filter(fact => {
-                const code = fact.codigo || fact.Codigo || fact.id;
+                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id;
                 const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || '';
                 const matchSearch = term === '' || nameRaw.toLowerCase().includes(term) || code.toLowerCase().includes(term);
                 return matchSearch && !masterCodes.includes(code);
@@ -1027,7 +1027,7 @@
                 tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-16 text-center text-slate-400 font-bold"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-emerald-400"></i></div> Todo importado y al día o no coincide con tu búsqueda.</td></tr>`; return;
             }
             pendingToImport.forEach(fact => {
-                const code = fact.codigo || fact.Codigo || fact.id; const name = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción';
+                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id; const name = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción';
                 const tr = document.createElement('tr'); tr.className = "hover:bg-blue-50/30 transition-colors";
                 tr.innerHTML = `<td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-50">${code}</td><td class="px-6 py-4 font-bold text-slate-800 text-sm border-b border-slate-50">${name}</td><td class="px-6 py-4 text-right border-b border-slate-50"><button onclick="importProduct('${fact.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto">Importar <i class="fas fa-arrow-right"></i></button></td>`;
                 tbody.appendChild(tr);
@@ -1419,7 +1419,7 @@
             document.getElementById('editName').value = nameRaw;
             document.getElementById('editCategory').value = fact.categoria || fact.Categoria || fact.linea || '';
             document.getElementById('editTipo').value = 'PIEZA_BASE'; 
-            document.getElementById('editCodigo').value = fact.codigo || fact.Codigo || fact.id; 
+            document.getElementById('editCodigo').value = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id; 
             document.getElementById('recetaContainer').innerHTML = '';
             
             document.getElementById('editHeredaEmpaques').value = '';
