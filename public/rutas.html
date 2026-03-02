@@ -543,32 +543,53 @@
 
             if(viajeSeleccionado.coordenadas) {
                 const coordDestino = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
-                const coordPlanta = L.latLng(25.6980, -100.3150); // Planta Obrerista
+                const coordPlanta = L.latLng(25.6946, -100.3142); // Hesa Monterrey (Calzada Guadalupe Victoria 105)
                 map.setView(coordDestino, 13, { animate: true });
                 if(rutasTrazadas) map.removeControl(rutasTrazadas);
                 
-                // LÓGICA DE RUTAS MULTI-PARADA
+                // LÓGICA DE RUTAS Y SECUENCIA
+                const contSecuencia = document.getElementById('det-ruta-secuencia');
+                const listaSecuencia = document.getElementById('lista-secuencia');
+                listaSecuencia.innerHTML = '';
+
                 if (viajeSeleccionado.estado === 'camino' || viajeSeleccionado.estado === 'entregado') {
                     // Si ya tiene chofer, agrupa todos sus destinos para dibujar el circuito
                     const viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
                     
-                    let wps = [coordPlanta]; // 1. Inicia en Sucursal
-                    viajesMismoCamion.forEach(v => wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng))); // 2. Agrega todas las entregas
-                    wps.push(coordPlanta); // 3. Retorna a Sucursal
+                    let wps = [coordPlanta]; 
+                    listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pb-1 border-b border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">Hesa Monterrey</b> <span class="text-indigo-400 text-[10px]">(Carga)</span></span></li>`;
+                    
+                    viajesMismoCamion.forEach((v, idx) => {
+                        wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
+                        listaSecuencia.innerHTML += `<li class="flex items-center gap-2 py-0.5"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow">${idx + 1}</div> <span class="truncate"><b>${v.cliente_nombre}</b></span></li>`;
+                    });
+                    
+                    wps.push(coordPlanta); 
+                    listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pt-1 border-t border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-flag-checkered"></i></div> <span><b class="text-indigo-900">Hesa Monterrey</b> <span class="text-indigo-400 text-[10px]">(Retorno)</span></span></li>`;
+                    
+                    contSecuencia.classList.remove('hidden');
 
                     rutasTrazadas = L.Routing.control({
                         waypoints: wps,
-                        lineOptions: { styles: [{color: '#8b5cf6', weight: 5, opacity: 0.8}] }, // Color morado para circuito
-                        createMarker: function() { return null; },
+                        lineOptions: { styles: [{color: '#8b5cf6', weight: 5, opacity: 0.8}] }, 
+                        createMarker: function(i, waypoint, n) {
+                            let label = i === 0 ? '<i class="fas fa-store"></i>' : (i === n - 1 ? '<i class="fas fa-flag-checkered"></i>' : i);
+                            let color = (i === 0 || i === n - 1) ? 'bg-slate-900' : 'bg-blue-600';
+                            return L.marker(waypoint.latLng, { icon: L.divIcon({ className: 'custom-route-marker', html: `<div class="w-6 h-6 ${color} rounded-full flex items-center justify-center text-white text-xs font-bold shadow border-2 border-white">${label}</div>`, iconSize: [24,24], iconAnchor: [12,12] }) });
+                        },
                         fitSelectedRoutes: true, show: false, language: 'es'
                     }).addTo(map);
 
                 } else {
-                    // Si es planeación (pendiente), traza solo del punto A al B
+                    contSecuencia.classList.add('hidden');
                     rutasTrazadas = L.Routing.control({
                         waypoints: [coordPlanta, coordDestino],
-                        lineOptions: { styles: [{color: '#3b82f6', weight: 4, opacity: 0.7}] }, // Color azul normal
-                        createMarker: function() { return null; },
+                        lineOptions: { styles: [{color: '#3b82f6', weight: 4, opacity: 0.7}] }, 
+                        createMarker: function(i, waypoint, n) {
+                            let label = i === 0 ? '<i class="fas fa-store"></i>' : '<i class="fas fa-map-marker-alt"></i>';
+                            let color = i === 0 ? 'bg-slate-900' : 'bg-blue-600';
+                            return L.marker(waypoint.latLng, { icon: L.divIcon({ className: 'custom-route-marker', html: `<div class="w-6 h-6 ${color} rounded-full flex items-center justify-center text-white text-xs font-bold shadow border-2 border-white">${label}</div>`, iconSize: [24,24], iconAnchor: [12,12] }) });
+                        },
                         fitSelectedRoutes: true, show: false, language: 'es'
                     }).addTo(map);
                 }
@@ -661,8 +682,8 @@
 
             const card = document.getElementById('detalle-flotante');
             card.classList.remove('hidden');
-            // Animación inferior (Bottom-Sheet style)
-            setTimeout(() => card.classList.remove('translate-y-full', 'md:translate-y-10', 'opacity-0'), 10);
+            // Animación inferior (Bottom-Sheet style) adaptada a Lg
+            setTimeout(() => card.classList.remove('translate-y-full', 'lg:translate-y-10', 'opacity-0'), 10);
         }
 
         function cerrarDetalle() {
@@ -670,9 +691,37 @@
             renderizarLista();
             if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; }
             const card = document.getElementById('detalle-flotante');
-            card.classList.add('translate-y-full', 'md:translate-y-10', 'opacity-0');
+            card.classList.add('translate-y-full', 'lg:translate-y-10', 'opacity-0');
             setTimeout(() => card.classList.add('hidden'), 300);
         }
+
+        // ==========================================
+        // BORRAR VIAJE
+        // ==========================================
+        window.eliminarViajeActual = async () => {
+            if(!viajeSeleccionado) return;
+            if(!confirm(`¿Estás seguro de eliminar permanentemente la orden de ${viajeSeleccionado.cliente_nombre}?`)) return;
+
+            const btn = document.getElementById('btn-eliminar-viaje');
+            if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                if (viajeSeleccionado.es_grupo) {
+                    const batch = db.batch();
+                    viajeSeleccionado.pedidos_incluidos.forEach(p => {
+                        batch.delete(db.collection('rutas_logistica').doc(p.id));
+                    });
+                    await batch.commit();
+                } else {
+                    await db.collection('rutas_logistica').doc(viajeSeleccionado.id).delete();
+                }
+                showToast("Entrega borrada con éxito.", "success");
+                cerrarDetalle();
+            } catch (e) {
+                showToast("Error al eliminar: " + e.message, "error");
+                if(btn) btn.innerHTML = '<i class="fas fa-trash-alt"></i> Borrar';
+            }
+        };
 
         window.seleccionarVehiculo = (idVehiculo, tipoVehiculo) => {
             if(viajeSeleccionado && viajeSeleccionado.estado !== 'pendiente') return;
@@ -795,7 +844,7 @@
             modal.classList.remove('hidden');
             setTimeout(() => { 
                 modal.classList.remove('opacity-0'); 
-                content.classList.remove('translate-y-full', 'md:translate-y-0', 'md:scale-95'); 
+                content.classList.remove('translate-y-full', 'lg:translate-y-0', 'lg:scale-95'); 
             }, 10);
         };
 
@@ -803,7 +852,7 @@
             const modal = document.getElementById('modal-formulario');
             const content = document.getElementById('modal-formulario-content');
             modal.classList.add('opacity-0'); 
-            content.classList.add('translate-y-full', 'md:translate-y-0', 'md:scale-95');
+            content.classList.add('translate-y-full', 'lg:translate-y-0', 'lg:scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
