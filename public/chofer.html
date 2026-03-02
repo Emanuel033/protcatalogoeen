@@ -225,7 +225,9 @@
             filtrados.forEach((viaje, idx) => {
                 const isConsolidado = viaje.tipo_destino === 'paqueteria';
                 const iconDestino = isConsolidado ? '<i class="fas fa-boxes text-purple-500"></i> Paquetería' : '<i class="fas fa-building text-blue-500"></i> Bodega Cliente';
-                const urlMaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(viaje.direccion)}`;
+                
+                // MEJORA: Cambio de /search/ a /dir/ para usar la ubicación actual del chofer como punto de partida.
+                const urlMaps = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(viaje.direccion)}`;
 
                 // Renderizar Facturas
                 let facturasHTML = viaje.pedidos_incluidos.map(p => 
@@ -249,7 +251,7 @@
                 if (tabActual === 'camino') {
                     botonesHTML = `
                         <div class="flex gap-2 mt-4 pt-4 border-t border-slate-100">
-                            <a href="${urlMaps}" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition"><i class="fas fa-location-arrow text-blue-500"></i> GPS</a>
+                            <a href="${urlMaps}" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition"><i class="fas fa-location-arrow text-blue-500"></i> Iniciar Ruta GPS</a>
                             <button onclick="marcarComoEntregado('${viaje.id}')" class="flex-[1.5] bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 rounded-xl shadow-md shadow-green-200 flex items-center justify-center gap-2 transition active:scale-95"><i class="fas fa-check-double"></i> Entregado</button>
                         </div>
                     `;
