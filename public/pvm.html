@@ -36,7 +36,7 @@
         
         @media print {
             body { display: block !important; height: auto !important; overflow: visible !important; background: white !important; }
-            aside, main, #toast, .no-print, .modal-overlay, #imageModal, #checkoutModal { display: none !important; }
+            aside, main, #toast, .no-print, .modal-overlay, #imageModal, #checkoutModal, #loginModal { display: none !important; }
             
             #print-ticket { 
                 display: block !important; 
@@ -84,6 +84,28 @@
         const db = firebase.firestore();
     </script>
 
+    <!-- ========================================== -->
+    <!-- MODAL DE LOGIN CAJERO OBLIGATORIO          -->
+    <!-- ========================================== -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/95 z-[9999] flex flex-col items-center justify-center p-6 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
+            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-4xl mb-6 mx-auto shadow-inner">
+                <i class="fas fa-user-tag"></i>
+            </div>
+            <h1 class="text-2xl font-black text-center text-slate-800 mb-1">Caja Mostrador</h1>
+            <p class="text-center text-slate-500 text-sm font-medium mb-8">Selecciona tu usuario para iniciar turno</p>
+            
+            <select id="select-usuario-pos" class="w-full border-2 border-slate-200 bg-slate-50 p-4 rounded-xl focus:ring-0 focus:border-blue-500 outline-none text-base font-bold text-slate-700 mb-6 cursor-pointer">
+                <option value="">Cargando usuarios...</option>
+            </select>
+            
+            <button onclick="iniciarTurnoPOS()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-200 transition flex justify-center items-center gap-2 text-lg active:scale-95">
+                Abrir Caja <i class="fas fa-sign-in-alt"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- SIDEBAR DE NAVEGACIÓN -->
     <aside class="w-20 md:w-24 bg-slate-900 flex flex-col items-center py-6 shrink-0 z-20 h-full overflow-y-auto hide-scroll">
         <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-xl mb-8 shadow-lg shadow-blue-500/30 shrink-0">
@@ -121,9 +143,18 @@
             <!-- PANEL IZQUIERDO: CATÁLOGO -->
             <div class="flex-1 flex flex-col h-full border-r border-slate-200 bg-white min-w-0">
                 <div class="p-4 md:p-5 border-b border-slate-100 bg-white z-10 shrink-0 shadow-sm">
-                    <div class="flex justify-between items-end mb-3">
-                        <h2 class="text-lg md:text-xl font-black text-slate-800">Venta Mostrador</h2>
-                        <span id="inventoryStatusBadge" class="hidden text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md border border-indigo-200"><i class="fas fa-eye"></i> Stock</span>
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <h2 class="text-lg md:text-xl font-black text-slate-800">Venta Mostrador</h2>
+                                <span id="inventoryStatusBadge" class="hidden text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md border border-indigo-200"><i class="fas fa-eye"></i> Stock</span>
+                            </div>
+                            <!-- INDICADOR DEL CAJERO ACTIVO -->
+                            <div class="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                                <i class="fas fa-user-circle text-blue-500 text-xs"></i> Cajero: <span id="cajero-activo-txt" class="text-blue-600 font-black uppercase tracking-wider">---</span>
+                                <button onclick="cerrarTurnoPOS()" class="ml-2 text-red-400 hover:text-red-600 transition" title="Cerrar turno y salir"><i class="fas fa-sign-out-alt"></i></button>
+                            </div>
+                        </div>
                     </div>
                     <div class="relative">
                         <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
@@ -333,13 +364,55 @@
     </div>
 
     <script>
-        // GLOBALES
+        // GLOBALES Y CAJERO ACTUAL
+        let cajeroActual = localStorage.getItem('een_pos_nombre') || null;
+
         let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; 
         window.reporteFacturasEfectivo = []; window.reporteFacturasTodas = []; window.reporteMostrador = [];        
         let showInventoryConfig = false;
         let currentRenderLimit = 100; // Iniciamos mostrando 100 para no trabar el navegador
 
         const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
+
+        // ==========================================
+        // SISTEMA DE LOGIN DE CAJERO
+        // ==========================================
+        function verificarLogin() {
+            if (!cajeroActual) {
+                document.getElementById('loginModal').classList.remove('hidden');
+                setTimeout(() => document.getElementById('loginModal').classList.remove('opacity-0'), 10);
+            } else {
+                document.getElementById('loginModal').classList.add('opacity-0');
+                setTimeout(() => document.getElementById('loginModal').classList.add('hidden'), 300);
+                document.getElementById('cajero-activo-txt').innerText = cajeroActual;
+            }
+        }
+
+        function cargarUsuariosPOS() {
+            db.collection('usuarios_pos').onSnapshot(snap => {
+                const select = document.getElementById('select-usuario-pos');
+                select.innerHTML = '<option value="">-- Selecciona tu nombre --</option>';
+                snap.forEach(doc => {
+                    select.innerHTML += `<option value="${doc.data().nombre}">${doc.data().nombre}</option>`;
+                });
+            });
+        }
+
+        window.iniciarTurnoPOS = () => {
+            const select = document.getElementById('select-usuario-pos');
+            if(!select.value) return showToast("Debes seleccionar tu nombre", "error");
+            cajeroActual = select.value;
+            localStorage.setItem('een_pos_nombre', cajeroActual);
+            verificarLogin();
+        };
+
+        window.cerrarTurnoPOS = () => {
+            if(cart.length > 0 && !confirm("Tienes ventas en curso. ¿Cerrar turno y perderlas?")) return;
+            localStorage.removeItem('een_pos_nombre');
+            cajeroActual = null;
+            clearCart();
+            verificarLogin();
+        };
 
         // ==========================================
         // ATAJOS DE TECLADO
@@ -757,7 +830,7 @@
                     efectivo_recibido: recibido > 0 ? recibido : total, 
                     cambio_entregado: cambio,
                     articulos: articulosLimpios,
-                    vendedor: "Mostrador General", 
+                    vendedor: cajeroActual || "Mostrador General", // <-- AHORA GUARDA EL CAJERO SELECCIONADO
                     estado: "COMPLETADA"
                 };
 
@@ -769,7 +842,8 @@
                     total: saleData.total,
                     efectivo_recibido: saleData.efectivo_recibido,
                     cambio_entregado: saleData.cambio_entregado,
-                    articulos: saleData.articulos
+                    articulos: saleData.articulos,
+                    vendedor: saleData.vendedor // Pasamos el vendedor para imprimir
                 };
 
                 closeCheckoutModal(); 
@@ -838,6 +912,7 @@
                             <p style="margin:2px 0; font-size: 11px; font-weight: bold;">VENTA MOSTRADOR</p>
                             <p style="margin:2px 0; font-size: 10px; font-weight: bold;">Folio: ${venta.folio}</p>
                             <p style="margin:2px 0; font-size: 10px;">${fechaStr} - ${horaStr}</p>
+                            <p style="margin:2px 0; font-size: 9px; font-weight: bold;">Cajero: ${venta.vendedor || 'General'}</p>
                         </div>
                     </div>
                     
@@ -922,6 +997,7 @@
             const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando...</td></tr>';
             const date15DaysAgo = new Date(); date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
             try {
+                // AQUI SE VE LA MAGIA DEL FILTRO INMORTAL, NUNCA BORRA, SOLO LEE LOS ÚLTIMOS 15 DÍAS
                 const snap = await db.collection('ventas_mostrador').where('fecha', '>=', date15DaysAgo).orderBy('fecha', 'desc').get();
                 historySales = []; snap.forEach(doc => historySales.push({id: doc.id, ...doc.data()}));
                 if (historySales.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400 font-bold">No hay ventas registradas.</td></tr>'; return; }
@@ -930,14 +1006,15 @@
                     const fechaStr = v.fecha ? v.fecha.toDate().toLocaleString('es-MX', {day: '2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente';
                     const itemsDesc = (v.articulos||[]).map(a => `${a.cantidad}x ${a.codigo}`).join(', '); const isCanceled = v.estado === 'CANCELADA';
                     const motivoText = v.motivo_cancelacion ? `Motivo: ${v.motivo_cancelacion}` : ''; const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
+                    const cajeroName = v.vendedor || 'Mostrador General'; // SE MUESTRA EL CAJERO AQUÍ
                     const tr = document.createElement('tr'); tr.className = rowClass;
-                    tr.innerHTML = `<td class="px-4 md:px-6 py-3 md:py-4"><div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-[11px] md:text-xs">${v.folio}</div><div class="text-[9px] md:text-[10px] text-slate-400 font-medium">${fechaStr}</div>${isCanceled ? `<span class="bg-red-100 text-red-600 text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">CANCELADA</span><div class="text-[8px] md:text-[9px] text-red-500 mt-0.5 italic max-w-[150px] truncate" title="${motivoText}">${motivoText}</div>` : ''}</td>
+                    tr.innerHTML = `<td class="px-4 md:px-6 py-3 md:py-4"><div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-[11px] md:text-xs">${v.folio}</div><div class="text-[9px] md:text-[10px] text-slate-400 font-medium">${fechaStr}</div><div class="text-[9px] font-bold text-blue-600 mt-1"><i class="fas fa-user mr-1"></i>${cajeroName}</div>${isCanceled ? `<span class="bg-red-100 text-red-600 text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">CANCELADA</span><div class="text-[8px] md:text-[9px] text-red-500 mt-0.5 italic max-w-[150px] truncate" title="${motivoText}">${motivoText}</div>` : ''}</td>
                         <td class="px-4 md:px-6 py-3 md:py-4 text-[11px] md:text-xs text-slate-600 truncate max-w-[150px] md:max-w-[200px] hidden sm:table-cell" title="${itemsDesc}">${(v.articulos||[]).length} art. (${itemsDesc})</td>
                         <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-sm md:text-base ${isCanceled ? 'text-slate-400 line-through' : 'text-slate-800'}">${formatMoney(v.total)}</td>
                         <td class="px-4 md:px-6 py-3 md:py-4 text-center"><div class="flex items-center justify-center gap-1 md:gap-2"><button onclick="reprintTicket('${v.id}')" class="text-blue-500 hover:bg-blue-100 p-1.5 md:p-2 rounded-lg transition" title="Reimprimir"><i class="fas fa-print"></i></button>${!isCanceled ? `<button onclick="cancelTicket('${v.id}', '${v.folio}')" class="text-red-500 hover:bg-red-100 p-1.5 md:p-2 rounded-lg transition" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}</div></td>`;
                     tbody.appendChild(tr);
                 });
-            } catch (error) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold">Error al cargar historial.</td></tr>'; }
+            } catch (error) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold">Error al cargar historial. Verifica el índice compuesto en Firebase.</td></tr>'; }
         }
 
         window.reprintTicket = (id) => { const venta = historySales.find(v => String(v.id) === String(id)); if (venta) { showToast("Imprimiendo...", "info"); printTicketHTML(venta); } }
@@ -1045,7 +1122,12 @@
             const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(wsData); ws['!cols'] = [ {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, {wch: 28}, {wch: 10}, {wch: 14} ]; XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja"); XLSX.writeFile(wb, `Corte_${fileDate}.xlsx`); showToast("Bitácora exportada.");
         }
 
-        window.onload = () => { loadData(); initCorteUI(); };
+        window.onload = () => { 
+            verificarLogin(); 
+            cargarUsuariosPOS(); 
+            loadData(); 
+            initCorteUI(); 
+        };
 
     </script>
 </body>
