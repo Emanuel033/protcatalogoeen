@@ -341,8 +341,7 @@
         let viajesAgrupados = [], filtroActual = 'todos', viajeSeleccionado = null; 
         let clientesDB = [], flotaDB = [], choferesDB = [];
 
-        // Coordenadas Actualizadas de Sucursal EEN en base a tu link de Maps
-        // (Ajustadas a la zona aproximada para que el enrutamiento de Leaflet salga de ahí)
+        // ¡AQUÍ ESTÁN TUS COORDENADAS EXACTAS DE LA SUCURSAL EEN!
         const coordPlantaEEN = L.latLng(25.689804, -100.312066); 
 
         const zonasRestringidas = [
@@ -368,8 +367,8 @@
         };
 
         function initMap() {
-            // Centrado de inicio ajustado para cubrir bien el área metropolitana
-            map = L.map('map', { zoomControl: false }).setView([25.7000, -100.2500], 12);
+            // Centramos el mapa en Monterrey inicialmente
+            map = L.map('map', { zoomControl: false }).setView([25.689804, -100.312066], 13);
             L.control.zoom({ position: 'topright' }).addTo(map);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
@@ -386,6 +385,11 @@
                 L.circleMarker([p.lat, p.lng], { radius: 6, color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 1, weight: 2 })
                  .addTo(map).bindPopup(`<b class="text-amber-600"><i class="fas fa-exclamation-triangle"></i> PRECAUCIÓN VIAL:</b><br>${p.nombre}`);
             });
+            
+            // Ponemos un marcador fijo de la bodega EEN
+            L.marker([25.689804, -100.312066], { 
+                icon: L.divIcon({ className: 'custom-icon', html: `<div class="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white z-50"><i class="fas fa-store text-lg"></i></div>`, iconSize: [40, 40], iconAnchor: [20, 40] }) 
+            }).addTo(map).bindPopup("<b>Matriz EEN</b><br>Punto de salida oficial.");
         }
 
         function agruparYConsolidar(pedidosRaw) {
@@ -517,7 +521,7 @@
             marcadores = {};
 
             const filtrados = filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual);
-            const bounds = [];
+            const bounds = [[25.689804, -100.312066]]; // Siempre incluimos la bodega EEN en la vista
 
             filtrados.forEach(v => {
                 if(!v.coordenadas) return;
@@ -561,7 +565,6 @@
                 const listaSecuencia = document.getElementById('lista-secuencia');
                 listaSecuencia.innerHTML = '';
                 
-                // Poner iconos de carga antes de que llegue la respuesta del mapa
                 document.getElementById('resumen-distancia').innerHTML = '<i class="fas fa-spinner fa-spin text-xs text-slate-300"></i>';
                 document.getElementById('resumen-tiempo').innerHTML = '<i class="fas fa-spinner fa-spin text-xs text-slate-300"></i>';
 
@@ -590,7 +593,7 @@
                         fitSelectedRoutes: true, show: false, language: 'es'
                     }).addTo(map);
                 } else {
-                    contSecuencia.classList.remove('hidden'); // Lo mostramos para enseñar el tiempo
+                    contSecuencia.classList.remove('hidden'); 
                     listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pb-1 border-b border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">Sucursal EEN</b> <span class="text-indigo-400 text-[10px]">(Punto de Salida)</span></span></li>`;
                     listaSecuencia.innerHTML += `<li class="flex items-center gap-2 py-1"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-map-marker-alt"></i></div> <span class="truncate"><b>${viajeSeleccionado.cliente_nombre}</b></span></li>`;
 
@@ -606,11 +609,9 @@
                     }).addTo(map);
                 }
 
-                // EVENTO CUANDO EL MAPA TERMINA DE CALCULAR LA RUTA
                 rutasTrazadas.on('routesfound', function(e) {
                     const route = e.routes[0];
                     
-                    // Cálculo de Distancia y Tiempo
                     const distKm = (route.summary.totalDistance / 1000).toFixed(1);
                     const timeMin = Math.round(route.summary.totalTime / 60);
                     
@@ -621,7 +622,6 @@
                     document.getElementById('resumen-distancia').innerText = `${distKm} km`;
                     document.getElementById('resumen-tiempo').innerText = tiempoTexto;
 
-                    // Revisión de Centro de MTY (Multas)
                     let pasaCentro = false;
                     for(let i = 0; i < route.coordinates.length; i += 15) {
                         if(isPointInPolygon([route.coordinates[i].lat, route.coordinates[i].lng], zonasRestringidas[0].coords)){
@@ -842,6 +842,23 @@
             if(val !== 'paqueteria') document.getElementById('form-paqueteria').value = '';
         };
 
+        // Función para buscar las coordenadas reales de una dirección escrita
+        async function obtenerCoordenadasReales(direccionText) {
+            try {
+                // Le agregamos ", Monterrey, Nuevo Leon" al texto para ayudar al buscador gratuito
+                const query = encodeURIComponent(direccionText + ", Monterrey, Nuevo Leon");
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+                }
+            } catch (e) { console.log("No se pudo traducir la dirección", e); }
+            
+            // Si el satélite gratuito no la encuentra, pone un punto de respaldo en el centro.
+            return { lat: 25.6866, lng: -100.3161 }; 
+        }
+
         window.guardarEnvioManual = async () => {
             const factura = document.getElementById('form-factura').value.trim().toUpperCase(); 
             const clienteCodigo = document.getElementById('form-cliente-codigo').value.trim().toUpperCase(); 
@@ -860,7 +877,12 @@
             if(!direccion) return showToast("Falta la Dirección", "error"); 
             if(tipo === 'paqueteria' && !paqueteria) return showToast("Falta paquetería", "error");
 
-            const btn = document.getElementById('btn-guardar-manual'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
+            const btn = document.getElementById('btn-guardar-manual'); 
+            btn.innerHTML = '<i class="fas fa-satellite-dish fa-spin"></i> Localizando en mapa...'; 
+            btn.disabled = true;
+
+            // ¡MAGIA! Convertir la dirección escrita en coordenadas reales
+            let coordenadasReales = await obtenerCoordenadasReales(direccion);
 
             try {
                 const refCliente = db.collection('clientes_logistica').doc(clienteCodigo); const docCliente = await refCliente.get();
@@ -884,16 +906,20 @@
                     estado: "pendiente", 
                     vehiculo_asignado: null, 
                     chofer_asignado: null, 
-                    fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() 
+                    fecha_creacion: firebase.firestore.FieldValue.serverTimestamp(),
+                    coordenadas: coordenadasReales // Guardamos las coordenadas obtenidas
                 };
                 
                 if(tipo === 'paqueteria') nuevoDoc.nombre_paqueteria = paqueteria;
                 
-                nuevoDoc.coordenadas = { lat: 25.6866 + (Math.random() - 0.5) * 0.05, lng: -100.3161 + (Math.random() - 0.5) * 0.05 };
-
                 await db.collection('rutas_logistica').doc(factura).set(nuevoDoc);
-                showToast("¡Envío registrado con éxito!"); cerrarFormulario();
-            } catch(e) { showToast("Error al guardar: " + e.message, "error"); } finally { btn.innerHTML = '<i class="fas fa-save"></i> Registrar en Bandeja'; btn.disabled = false; }
+                showToast("¡Envío registrado y localizado con éxito!"); cerrarFormulario();
+            } catch(e) { 
+                showToast("Error al guardar: " + e.message, "error"); 
+            } finally { 
+                btn.innerHTML = '<i class="fas fa-save"></i> Registrar en Bandeja'; 
+                btn.disabled = false; 
+            }
         };
 
         window.abrirConfiguracion = () => { const m = document.getElementById('modal-config'); const c = document.getElementById('modal-config-content'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10); };
