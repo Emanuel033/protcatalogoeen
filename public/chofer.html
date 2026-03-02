@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portal de Entregas - EEN</title>
+    <title>App Choferes - EEN</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -11,15 +11,15 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
-        
-        .tab-btn.active { color: #2563eb; border-bottom: 3px solid #2563eb; font-weight: 800; }
-        .slide-up { animation: slideUp 0.3s ease-out forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        .toast-enter { animation: slideInUp 0.3s forwards; }
+        .toast-leave { animation: fadeOut 0.3s forwards; }
+        @keyframes slideInUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden text-slate-800">
+<body class="h-screen flex flex-col overflow-hidden">
 
     <script>
         const firebaseConfig = {
@@ -31,279 +31,341 @@
         const db = firebase.firestore();
     </script>
 
-    <!-- ========================================== -->
-    <!-- PANTALLA DE INGRESO (LOGIN SIMULADO)       -->
-    <!-- ========================================== -->
-    <div id="pantalla-login" class="flex-1 flex flex-col justify-center items-center p-6 bg-slate-900 z-50 absolute inset-0">
-        <div class="w-full max-w-sm bg-white p-8 rounded-3xl shadow-2xl text-center slide-up">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+    <!-- PANTALLA LOGIN -->
+    <div id="pantalla-login" class="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900 relative">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#475569 1px, transparent 1px); background-size: 20px 20px;"></div>
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm z-10 relative">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl mb-6 mx-auto shadow-lg shadow-blue-500/30">
                 <i class="fas fa-truck-fast"></i>
             </div>
-            <h1 class="text-2xl font-black text-slate-900 mb-1">Rutas EEN</h1>
-            <p class="text-sm text-slate-500 font-semibold mb-6">Portal de Operadores</p>
+            <h1 class="text-2xl font-black text-center text-slate-800 mb-1">Portal Operadores</h1>
+            <p class="text-center text-slate-500 text-sm font-medium mb-8">Logística EEN</p>
             
-            <div class="text-left mb-6">
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Selecciona tu perfil</label>
-                <select id="select-chofer" class="w-full bg-slate-50 border border-slate-200 text-slate-800 font-bold p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Cargando operadores...</option>
-                </select>
-            </div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Selecciona tu perfil:</label>
+            <select id="login-chofer" class="w-full border-2 border-slate-200 bg-slate-50 p-4 rounded-xl focus:ring-0 focus:border-blue-500 outline-none text-base font-bold text-slate-700 mb-6 cursor-pointer">
+                <option value="">Cargando operadores...</option>
+            </select>
             
-            <button onclick="iniciarSesion()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition active:scale-95">
-                Ingresar a mi ruta
+            <button onclick="iniciarSesion()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2 text-lg active:scale-95">
+                Ingresar a mi Ruta <i class="fas fa-arrow-right"></i>
             </button>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- PANTALLA PRINCIPAL DE VIAJES               -->
-    <!-- ========================================== -->
-    <div id="pantalla-app" class="hidden flex-1 flex flex-col h-full relative">
-        
-        <!-- App Bar -->
-        <header class="bg-blue-600 pt-8 pb-4 px-5 text-white shadow-md z-10 shrink-0 rounded-b-3xl">
+    <!-- PANTALLA RUTA PRINCIPAL -->
+    <div id="pantalla-ruta" class="hidden flex-1 flex flex-col overflow-hidden relative">
+        <header class="bg-slate-900 text-white p-5 pb-6 pt-10 rounded-b-3xl shadow-lg shrink-0 relative z-20">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <p class="text-[10px] font-bold tracking-widest uppercase opacity-80 text-blue-100">Operador en Turno</p>
-                    <h2 id="nombre-chofer-app" class="text-xl font-black leading-tight">Juan Pérez</h2>
+                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">En Ruta</p>
+                    <h2 id="nombre-chofer-header" class="text-xl font-black leading-tight">Operador</h2>
                 </div>
-                <button onclick="cerrarSesion()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
+                <button onclick="cerrarSesion()" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-sm transition"><i class="fas fa-sign-out-alt"></i></button>
             </div>
-
-            <!-- Tabs -->
-            <div class="flex bg-blue-700/50 rounded-xl p-1">
-                <button onclick="cambiarTab('camino')" id="tab-camino" class="flex-1 py-2 text-sm font-bold bg-white text-blue-600 rounded-lg shadow-sm transition">Por Entregar</button>
-                <button onclick="cambiarTab('entregado')" id="tab-entregado" class="flex-1 py-2 text-sm font-bold text-white hover:bg-white/10 rounded-lg transition">Completados</button>
+            
+            <div class="flex gap-2">
+                <div class="flex-1 bg-white/10 rounded-xl p-3 text-center border border-white/5">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Pendientes</p>
+                    <p id="contador-pendientes" class="text-2xl font-black text-amber-400">0</p>
+                </div>
+                <div class="flex-1 bg-white/10 rounded-xl p-3 text-center border border-white/5">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Entregados</p>
+                    <p id="contador-entregados" class="text-2xl font-black text-emerald-400">0</p>
+                </div>
             </div>
         </header>
 
-        <!-- Lista de Viajes -->
-        <main class="flex-1 overflow-y-auto p-4 space-y-4" id="lista-viajes">
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-24" id="lista-viajes">
             <div class="text-center py-20">
-                <i class="fas fa-spinner fa-spin text-3xl text-blue-400 mb-3"></i>
-                <p class="text-slate-500 font-bold text-sm">Sincronizando ruta...</p>
+                <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+                <p class="text-slate-500 font-semibold">Cargando tu ruta...</p>
             </div>
-        </main>
+        </div>
     </div>
 
+    <!-- MODAL REPORTE DE PROBLEMA (EXCLUSIVO DEL CHOFER) -->
+    <div id="modal-falla" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-end justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-t-3xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full transition-transform duration-300" id="modal-falla-content">
+            <div class="bg-red-600 p-5 flex justify-between items-center text-white">
+                <h3 class="font-black text-lg"><i class="fas fa-exclamation-triangle mr-2"></i> Reportar Problema</h3>
+                <button onclick="cerrarModalFalla()" class="text-red-200 hover:text-white text-xl"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-6 space-y-5">
+                <input type="hidden" id="falla-viaje-id">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">¿Por qué no se pudo entregar? <span class="text-red-500">*</span></label>
+                    <select id="motivo-falla" class="w-full border-2 border-slate-200 bg-slate-50 p-4 rounded-xl focus:ring-0 focus:border-red-500 outline-none text-sm font-bold text-slate-700">
+                        <option value="">-- Selecciona una razón --</option>
+                        <option value="Local cerrado / Nadie recibe">Local cerrado / Nadie recibe</option>
+                        <option value="Cliente no tiene el pago">Cliente no tiene el pago / saldo</option>
+                        <option value="Dirección incorrecta o no existe">Dirección incorrecta o no existe</option>
+                        <option value="Mercancía rechazada">Mercancía rechazada por el cliente</option>
+                        <option value="Se pasó el horario de recibo">Se pasó el horario de recibo</option>
+                        <option value="Otro motivo">Otro motivo...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Notas adicionales (Opcional)</label>
+                    <textarea id="notas-falla" rows="3" class="w-full border-2 border-slate-200 bg-slate-50 p-3 rounded-xl focus:ring-0 focus:border-red-500 outline-none text-sm font-medium" placeholder="Ej. El guardia dijo que regresáramos mañana..."></textarea>
+                </div>
+                
+                <button onclick="confirmarFalla()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2 text-base active:scale-95">
+                    <i class="fas fa-paper-plane"></i> Enviar Reporte a Base
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMACIÓN ENTREGA -->
+    <div id="modal-entrega" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300" id="modal-entrega-content">
+            <div class="p-6 text-center">
+                <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-4xl text-emerald-500 mx-auto mb-4"><i class="fas fa-check-double"></i></div>
+                <h3 class="text-2xl font-black text-slate-800 mb-2">¡Entrega Exitosa!</h3>
+                <p class="text-sm text-slate-500 font-medium mb-6">¿Confirmas que la mercancía fue entregada correctamente?</p>
+                <input type="hidden" id="entrega-viaje-id">
+                
+                <div class="flex gap-3">
+                    <button onclick="cerrarModalEntrega()" class="flex-1 py-3 text-sm font-bold text-slate-500 bg-slate-100 rounded-xl hover:bg-slate-200 transition">Cancelar</button>
+                    <button onclick="confirmarEntrega()" class="flex-1 py-3 text-sm font-black text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition shadow-lg shadow-emerald-200">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 flex flex-col gap-2 w-[90%] md:w-max z-[9999]"></div>
+
     <script>
-        let miChoferId = null;
-        let miChoferNombre = null;
-        let tabActual = 'camino';
-        let viajesAgrupados = [];
-        let unsubscribe = null;
+        let choferActualId = localStorage.getItem('een_chofer_id') || null;
+        let viajesEnRuta = [];
 
-        // 1. Cargar Choferes en el Login
-        window.onload = () => {
-            db.collection('choferes').onSnapshot(snap => {
-                const select = document.getElementById('select-chofer');
-                select.innerHTML = '<option value="">-- Soy el operador --</option>';
-                snap.forEach(doc => {
-                    select.innerHTML += `<option value="${doc.id}">${doc.data().nombre}</option>`;
-                });
-            });
-
-            // Auto-login si ya había sesión
-            if (localStorage.getItem('choferId_een')) {
-                miChoferId = localStorage.getItem('choferId_een');
-                miChoferNombre = localStorage.getItem('choferNombre_een');
-                mostrarApp();
-            }
+        window.showToast = (msg, type='success') => {
+            const toast = document.createElement('div');
+            const bg = type === 'error' ? 'bg-red-600' : (type === 'warning' ? 'bg-amber-500' : 'bg-slate-800');
+            toast.className = `toast-enter text-white px-5 py-3 rounded-xl shadow-2xl ${bg} text-sm font-bold text-center border border-white/10`;
+            toast.innerHTML = msg;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 300); }, 4000);
         };
 
+        // Cargar Lista de Choferes
+        db.collection('choferes').onSnapshot(snap => {
+            const select = document.getElementById('login-chofer');
+            select.innerHTML = '<option value="">-- Toca aquí para buscar tu nombre --</option>';
+            snap.forEach(doc => { select.innerHTML += `<option value="${doc.id}">${doc.data().nombre}</option>`; });
+        });
+
         window.iniciarSesion = () => {
-            const select = document.getElementById('select-chofer');
-            if(!select.value) return alert("Selecciona tu nombre de la lista.");
-            miChoferId = select.value;
-            miChoferNombre = select.options[select.selectedIndex].text;
-            
-            localStorage.setItem('choferId_een', miChoferId);
-            localStorage.setItem('choferNombre_een', miChoferNombre);
-            mostrarApp();
+            const select = document.getElementById('login-chofer');
+            if(!select.value) return showToast("Por favor selecciona tu nombre", "error");
+            choferActualId = select.value;
+            localStorage.setItem('een_chofer_id', choferActualId);
+            const nombreChofer = select.options[select.selectedIndex].text;
+            localStorage.setItem('een_chofer_nombre', nombreChofer);
+            mostrarPantallaRuta();
         };
 
         window.cerrarSesion = () => {
-            if(unsubscribe) unsubscribe();
-            localStorage.removeItem('choferId_een');
-            localStorage.removeItem('choferNombre_een');
+            localStorage.removeItem('een_chofer_id'); localStorage.removeItem('een_chofer_nombre');
+            choferActualId = null;
             document.getElementById('pantalla-login').classList.remove('hidden');
-            document.getElementById('pantalla-app').classList.add('hidden');
+            document.getElementById('pantalla-ruta').classList.add('hidden');
         };
 
-        function mostrarApp() {
+        function mostrarPantallaRuta() {
             document.getElementById('pantalla-login').classList.add('hidden');
-            document.getElementById('pantalla-app').classList.remove('hidden');
-            document.getElementById('pantalla-app').classList.add('flex');
-            document.getElementById('nombre-chofer-app').innerText = miChoferNombre;
-            cargarMisRutas();
+            document.getElementById('pantalla-ruta').classList.remove('hidden');
+            document.getElementById('nombre-chofer-header').innerText = localStorage.getItem('een_chofer_nombre') || 'Operador';
+            escucharViajes();
         }
 
-        window.cambiarTab = (tab) => {
-            tabActual = tab;
-            document.getElementById('tab-camino').className = tab === 'camino' ? "flex-1 py-2 text-sm font-bold bg-white text-blue-600 rounded-lg shadow-sm transition" : "flex-1 py-2 text-sm font-bold text-white hover:bg-white/10 rounded-lg transition";
-            document.getElementById('tab-entregado').className = tab === 'entregado' ? "flex-1 py-2 text-sm font-bold bg-white text-blue-600 rounded-lg shadow-sm transition" : "flex-1 py-2 text-sm font-bold text-white hover:bg-white/10 rounded-lg transition";
-            renderizarViajes();
-        };
-
-        // 2. Escuchar solo las rutas asignadas a este chofer
-        function cargarMisRutas() {
-            if(unsubscribe) unsubscribe();
-            
-            // Traemos las que están en camino o entregadas (omitimos pendientes porque el despachador las tiene)
-            unsubscribe = db.collection('rutas_logistica')
-                .where('chofer_asignado', '==', miChoferId)
-                .onSnapshot(snapshot => {
-                    const pedidosRaw = [];
-                    snapshot.forEach(doc => pedidosRaw.push({ id: doc.id, ...doc.data() }));
-                    agruparViajes(pedidosRaw);
-                });
-        }
-
-        function agruparViajes(pedidosRaw) {
-            viajesAgrupados = [];
-            const paqueteriasMap = {};
-
-            // Reutilizamos la lógica de agrupación por paquetería para que el chofer no vea 10 tarjetas si va a Castores
+        function agruparViajesParaChofer(pedidosRaw) {
+            let agrupados = [];
+            const paqMap = {};
             pedidosRaw.forEach(p => {
-                if(p.estado === 'pendiente') return; // El chofer no ve lo que no ha sido despachado
-
                 if (p.tipo_destino === 'paqueteria') {
                     const key = `${p.nombre_paqueteria}_${p.estado}`;
-                    if (!paqueteriasMap[key]) {
-                        paqueteriasMap[key] = {
-                            es_grupo: true,
-                            id: `GRUPO-${p.nombre_paqueteria.replace(/\s/g,'').toUpperCase()}`,
-                            cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`,
-                            tipo_destino: 'paqueteria',
-                            direccion: p.direccion,
-                            horario: p.horario,
-                            excepcion: p.excepcion,
-                            estado: p.estado,
-                            pedidos_incluidos: []
-                        };
-                    }
-                    paqueteriasMap[key].pedidos_incluidos.push(p);
+                    if (!paqMap[key]) paqMap[key] = { es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, pedidos: [] };
+                    paqMap[key].pedidos.push(p);
                 } else {
-                    viajesAgrupados.push({
-                        es_grupo: false,
-                        id: p.id,
-                        cliente_codigo: p.cliente_codigo,
-                        cliente_nombre: p.cliente_nombre,
-                        tipo_destino: 'bodega_cliente',
-                        direccion: p.direccion,
-                        horario: p.horario,
-                        excepcion: p.excepcion,
-                        estado: p.estado,
-                        pedidos_incluidos: [p]
-                    });
+                    agrupados.push({ es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, pedidos: [p] });
                 }
             });
+            Object.values(paqMap).forEach(g => agrupados.push(g));
+            return agrupados;
+        }
 
-            Object.values(paqueteriasMap).forEach(g => viajesAgrupados.push(g));
-            renderizarViajes();
+        function escucharViajes() {
+            if(!choferActualId) return;
+            // Solo descargamos los viajes que están 'camino' o 'entregado' para este chofer
+            db.collection('rutas_logistica')
+              .where('chofer_asignado', '==', choferActualId)
+              .where('estado', 'in', ['camino', 'entregado'])
+              .onSnapshot(snap => {
+                  let raw = []; snap.forEach(doc => raw.push({id: doc.id, ...doc.data()}));
+                  viajesEnRuta = agruparViajesParaChofer(raw);
+                  renderizarViajes();
+              });
         }
 
         function renderizarViajes() {
-            const container = document.getElementById('lista-viajes');
-            container.innerHTML = '';
+            const contenedor = document.getElementById('lista-viajes');
+            let html = '';
+            let pendientes = 0; let entregados = 0;
 
-            const filtrados = viajesAgrupados.filter(v => v.estado === tabActual);
+            const enCamino = viajesEnRuta.filter(v => v.estado === 'camino');
+            const completados = viajesEnRuta.filter(v => v.estado === 'entregado');
+            pendientes = enCamino.length; entregados = completados.length;
 
-            if(filtrados.length === 0) {
-                const icono = tabActual === 'camino' ? 'fa-mug-hot' : 'fa-box-open';
-                const msg = tabActual === 'camino' ? 'No tienes viajes pendientes. ¡Toma un descanso!' : 'Aún no hay entregas completadas.';
-                container.innerHTML = `
-                    <div class="text-center py-20 text-slate-400">
-                        <i class="fas ${icono} text-5xl mb-4 text-slate-300"></i>
-                        <p class="font-bold text-sm">${msg}</p>
-                    </div>`;
+            document.getElementById('contador-pendientes').innerText = pendientes;
+            document.getElementById('contador-entregados').innerText = entregados;
+
+            if(pendientes === 0 && entregados === 0) {
+                contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center mt-10"><div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-3xl text-slate-300 mx-auto mb-4"><i class="fas fa-mug-hot"></i></div><h3 class="text-lg font-black text-slate-700">Ruta Limpia</h3><p class="text-sm text-slate-500 mt-1">No tienes entregas asignadas por el momento.</p></div>`;
                 return;
             }
 
-            filtrados.forEach((viaje, idx) => {
-                const isConsolidado = viaje.tipo_destino === 'paqueteria';
-                const iconDestino = isConsolidado ? '<i class="fas fa-boxes text-purple-500"></i> Paquetería' : '<i class="fas fa-building text-blue-500"></i> Bodega Cliente';
+            enCamino.forEach((v, index) => {
+                let badge = v.es_grupo ? `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i class="fas fa-boxes"></i> Paquetería</span>` : `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i class="fas fa-building"></i> Bodega</span>`;
+                let facturas = v.pedidos.map(p => p.id).join(', ');
                 
-                // MEJORA: Cambio de /search/ a /dir/ para usar la ubicación actual del chofer como punto de partida.
-                const urlMaps = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(viaje.direccion)}`;
-
-                // Renderizar Facturas
-                let facturasHTML = viaje.pedidos_incluidos.map(p => 
-                    `<li class="flex items-center gap-2"><i class="fas fa-file-invoice text-slate-300"></i> Factura <strong class="text-blue-600">${p.id}</strong></li>`
-                ).join('');
-
-                // Renderizar Horario si existe
-                let horarioHTML = '';
-                if(viaje.horario || viaje.excepcion) {
-                    let alertClass = viaje.excepcion ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100';
-                    horarioHTML = `
-                        <div class="mt-3 p-3 rounded-lg border ${alertClass} text-[11px] font-medium text-slate-700">
-                            ${viaje.horario ? `<p><i class="fas fa-clock text-blue-400 w-4"></i> Horario: <b>${viaje.horario}</b></p>` : ''}
-                            ${viaje.excepcion ? `<p class="text-amber-700 font-bold mt-1"><i class="fas fa-exclamation-circle w-4"></i> Nota: ${viaje.excepcion}</p>` : ''}
-                        </div>
-                    `;
+                // Generar Link de Maps Dinámico si no hay link manual
+                let btnMapsHtml = '';
+                if(v.link_maps) {
+                    btnMapsHtml = `<a href="${v.link_maps}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
+                } else if(v.coordenadas && v.coordenadas.lat) {
+                    // Si Base ajustó el pin, usamos la coordenada satelital para el chofer
+                    btnMapsHtml = `<a href="https://www.google.com/maps/dir/?api=1&destination=${v.coordenadas.lat},${v.coordenadas.lng}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
                 }
 
-                // Botones de Acción
-                let botonesHTML = '';
-                if (tabActual === 'camino') {
-                    botonesHTML = `
-                        <div class="flex gap-2 mt-4 pt-4 border-t border-slate-100">
-                            <a href="${urlMaps}" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition"><i class="fas fa-location-arrow text-blue-500"></i> Iniciar Ruta GPS</a>
-                            <button onclick="marcarComoEntregado('${viaje.id}')" class="flex-[1.5] bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 rounded-xl shadow-md shadow-green-200 flex items-center justify-center gap-2 transition active:scale-95"><i class="fas fa-check-double"></i> Entregado</button>
+                html += `
+                <div class="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden mb-4">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center font-black text-sm shadow">${index + 1}</div>
+                            <div>${badge}<h3 class="font-black text-slate-800 text-base leading-tight mt-1">${v.cliente_nombre}</h3></div>
                         </div>
-                    `;
-                } else {
-                    botonesHTML = `
-                        <div class="mt-4 pt-3 border-t border-slate-100 text-center">
-                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg"><i class="fas fa-check-circle"></i> Completado exitosamente</span>
-                        </div>
-                    `;
-                }
-
-                container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 slide-up" style="animation-delay: ${idx * 50}ms">
-                        <div class="text-[10px] font-black uppercase tracking-widest mb-2">${iconDestino}</div>
-                        <h3 class="text-lg font-black text-slate-900 leading-tight mb-1">${viaje.cliente_nombre}</h3>
-                        <p class="text-xs text-slate-500 flex items-start gap-1"><i class="fas fa-map-marker-alt text-red-400 mt-0.5"></i> <span>${viaje.direccion}</span></p>
-                        
-                        ${horarioHTML}
-
-                        <div class="mt-4">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Documentos a entregar</p>
-                            <ul class="text-xs font-semibold text-slate-600 space-y-1.5 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                                ${facturasHTML}
-                            </ul>
-                        </div>
-                        
-                        ${botonesHTML}
                     </div>
-                `;
+                    <div class="p-4">
+                        <p class="text-xs text-slate-500 mb-3"><i class="fas fa-map-marker-alt text-red-500 w-4 text-center"></i> <span class="font-medium">${v.direccion}</span></p>
+                        
+                        ${v.horario || v.excepcion ? `<div class="bg-amber-50 border border-amber-100 p-2.5 rounded-lg mb-3 text-[11px] text-amber-800 font-medium">` + (v.horario ? `<p><i class="fas fa-clock w-4"></i> ${v.horario}</p>` : '') + (v.excepcion ? `<p class="mt-1 font-bold"><i class="fas fa-exclamation-triangle w-4"></i> ${v.excepcion}</p>` : '') + `</div>` : ''}
+                        
+                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-4">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Facturas a Entregar:</p>
+                            <p class="text-xs font-black text-slate-700">${facturas}</p>
+                        </div>
+
+                        <!-- BOTONES DE ACCIÓN DEL CHOFER -->
+                        <div class="flex gap-2">
+                            ${btnMapsHtml}
+                            <button onclick="abrirModalFalla('${v.id}')" class="w-12 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold flex items-center justify-center active:scale-95 transition text-lg shadow-sm" title="Reportar Problema"><i class="fas fa-exclamation-triangle"></i></button>
+                            <button onclick="abrirModalEntrega('${v.id}')" class="flex-[1.5] bg-emerald-500 text-white py-3 rounded-xl font-black flex items-center justify-center gap-2 active:scale-95 transition text-sm shadow-md shadow-emerald-200"><i class="fas fa-check-double"></i> Entregado</button>
+                        </div>
+                    </div>
+                </div>`;
             });
+
+            if (completados.length > 0) {
+                html += `<div class="flex items-center gap-3 my-6"><div class="h-px bg-slate-300 flex-1"></div><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ya Entregados</span><div class="h-px bg-slate-300 flex-1"></div></div>`;
+                completados.forEach(v => {
+                    html += `<div class="bg-emerald-50 rounded-xl border border-emerald-100 p-3 mb-2 flex justify-between items-center opacity-70"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-emerald-200 text-emerald-700 rounded-full flex items-center justify-center text-sm"><i class="fas fa-check"></i></div><div><h3 class="font-bold text-slate-700 text-sm">${v.cliente_nombre}</h3><p class="text-[10px] text-slate-500 truncate w-48">${v.direccion}</p></div></div></div>`;
+                });
+            }
+
+            contenedor.innerHTML = html;
         }
 
-        window.marcarComoEntregado = (idGrupo) => {
-            if(!confirm("¿El cliente firmó y recibió correctamente toda la carga?")) return;
+        // --- LÓGICA DE REPORTE DE PROBLEMA ---
+        window.abrirModalFalla = (idGrupo) => {
+            document.getElementById('falla-viaje-id').value = idGrupo;
+            document.getElementById('motivo-falla').value = '';
+            document.getElementById('notas-falla').value = '';
             
-            const viaje = viajesAgrupados.find(v => v.id === idGrupo);
-            if(!viaje) return;
-
-            const batch = db.batch();
-            viaje.pedidos_incluidos.forEach(ped => {
-                const ref = db.collection('rutas_logistica').doc(ped.id);
-                batch.update(ref, { 
-                    estado: 'entregado',
-                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            });
-
-            batch.commit()
-                .then(() => alert("¡Excelente trabajo! Entrega registrada."))
-                .catch(e => alert("Error al actualizar: " + e.message));
+            const modal = document.getElementById('modal-falla');
+            const content = document.getElementById('modal-falla-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full'); }, 10);
+        };
+        
+        window.cerrarModalFalla = () => {
+            const modal = document.getElementById('modal-falla');
+            const content = document.getElementById('modal-falla-content');
+            modal.classList.add('opacity-0'); content.classList.add('translate-y-full');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
         };
 
+        window.confirmarFalla = async () => {
+            const idGrupo = document.getElementById('falla-viaje-id').value;
+            const motivo = document.getElementById('motivo-falla').value;
+            const notas = document.getElementById('notas-falla').value.trim();
+
+            if (!motivo) return showToast("Selecciona una razón", "error");
+
+            const grupo = viajesEnRuta.find(v => v.id === idGrupo);
+            if(!grupo) return;
+
+            const razonFinal = notas ? `${motivo} - ${notas}` : motivo;
+
+            try {
+                const batch = db.batch();
+                grupo.pedidos.forEach(p => {
+                    // Actualizamos a estado 'fallido' y guardamos el motivo
+                    batch.update(db.collection('rutas_logistica').doc(p.id), { 
+                        estado: 'fallido', 
+                        motivo_falla: razonFinal,
+                        fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() 
+                    });
+                });
+                await batch.commit();
+                showToast("Reporte enviado a la Base", "warning");
+                cerrarModalFalla();
+            } catch(e) {
+                showToast("Error de conexión", "error");
+            }
+        };
+
+        // --- LÓGICA DE ENTREGA EXITOSA ---
+        window.abrirModalEntrega = (idGrupo) => {
+            document.getElementById('entrega-viaje-id').value = idGrupo;
+            const modal = document.getElementById('modal-entrega');
+            const content = document.getElementById('modal-entrega-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+        };
+
+        window.cerrarModalEntrega = () => {
+            const modal = document.getElementById('modal-entrega');
+            const content = document.getElementById('modal-entrega-content');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        };
+
+        window.confirmarEntrega = async () => {
+            const idGrupo = document.getElementById('entrega-viaje-id').value;
+            const grupo = viajesEnRuta.find(v => v.id === idGrupo);
+            if(!grupo) return;
+
+            try {
+                const batch = db.batch();
+                grupo.pedidos.forEach(p => {
+                    batch.update(db.collection('rutas_logistica').doc(p.id), { 
+                        estado: 'entregado', 
+                        fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() 
+                    });
+                });
+                await batch.commit();
+                showToast("¡Excelente! Entrega registrada.");
+                cerrarModalEntrega();
+            } catch(e) {
+                showToast("Error de conexión", "error");
+            }
+        };
+
+        window.onload = () => { if(choferActualId) mostrarPantallaRuta(); };
     </script>
 </body>
 </html>
