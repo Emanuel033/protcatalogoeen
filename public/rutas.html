@@ -39,7 +39,6 @@
         .leaflet-routing-container { display: none !important; } 
         .paqueteria-group { border-left: 4px solid #8b5cf6; background: #f5f3ff; }
         
-        /* Toast CSS */
         #toast-container { z-index: 9999; pointer-events: none; }
         .toast-enter { animation: slideInUp 0.3s forwards; }
         .toast-leave { animation: fadeOut 0.3s forwards; }
@@ -83,7 +82,7 @@
             <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition-colors">Todos</button>
             <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">Por Asignar</button>
             <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">En Ruta</button>
-            <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">Bitácora / Completados</button>
+            <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors">Completados</button>
         </div>
 
         <div class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3 bg-slate-100/50" id="lista-pedidos">
@@ -138,7 +137,7 @@
                                 <i class="fas fa-phone"></i> Llamar
                             </a>
                             <a id="det-btn-maps" href="#" target="_blank" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition hidden border border-blue-200">
-                                <i class="fas fa-map-marked-alt"></i> GPS
+                                <i class="fas fa-map-marked-alt"></i> Abrir GPS
                             </a>
                         </div>
 
@@ -157,11 +156,27 @@
                     <ul id="det-articulos" class="text-xs text-slate-700 font-medium space-y-2"></ul>
                 </div>
 
-                <!-- SECUENCIA DE RUTA (PLAN DE CARGA) -->
+                <!-- SECUENCIA DE RUTA Y TIEMPOS ESTIMADOS -->
                 <div id="det-ruta-secuencia" class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-5 shadow-sm hidden">
-                    <p class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider mb-3 border-b border-indigo-100/50 pb-2"><i class="fas fa-route mr-1"></i> Secuencia de Ruta (Plan de Carga)</p>
-                    <ul id="lista-secuencia" class="text-xs text-indigo-900 font-medium space-y-2 pl-1"></ul>
-                    <p class="text-[10px] text-indigo-600 mt-3 font-bold leading-tight bg-white/50 p-2 rounded-lg"><i class="fas fa-info-circle text-indigo-500"></i> Tip Logística: Carga al fondo del camión lo <b>último</b> que vas a entregar.</p>
+                    <div class="flex justify-between items-center mb-3 border-b border-indigo-100/50 pb-2">
+                        <p class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider"><i class="fas fa-route mr-1"></i> Secuencia y Tiempos</p>
+                    </div>
+                    
+                    <ul id="lista-secuencia" class="text-xs text-indigo-900 font-medium space-y-2 pl-1 mb-4"></ul>
+                    
+                    <!-- Resumen Calculado por el Mapa -->
+                    <div id="det-ruta-resumen" class="bg-white p-2.5 rounded-lg border border-indigo-100 flex justify-between items-center shadow-sm">
+                        <div class="text-center flex-1 border-r border-indigo-50">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">Distancia Total</p>
+                            <p class="text-sm font-black text-indigo-700 mt-0.5" id="resumen-distancia"><i class="fas fa-spinner fa-spin text-xs text-slate-300"></i></p>
+                        </div>
+                        <div class="text-center flex-1">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">Tiempo Estimado</p>
+                            <p class="text-sm font-black text-emerald-600 mt-0.5" id="resumen-tiempo"><i class="fas fa-spinner fa-spin text-xs text-slate-300"></i></p>
+                        </div>
+                    </div>
+
+                    <p class="text-[10px] text-indigo-600 mt-3 font-bold leading-tight bg-white/50 p-2 rounded-lg"><i class="fas fa-info-circle text-indigo-500"></i> Tip: Carga al fondo del camión lo <b>último</b> que vas a entregar.</p>
                 </div>
 
                 <!-- CONTROLES PARA DESPACHADOR -->
@@ -187,7 +202,6 @@
                 </div>
             </div>
 
-            <!-- FOOTER FIJO PARA BOTONES -->
             <div class="bg-white p-5 border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10">
                 <div class="flex gap-2">
                     <button id="btn-iniciar" onclick="iniciarRuta()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-sm font-black transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 uppercase tracking-wide"><i class="fas fa-play-circle text-lg"></i> Iniciar Ruta</button>
@@ -197,9 +211,7 @@
         </div>
     </main>
 
-    <!-- ========================================== -->
     <!-- MODAL FORMULARIO DE INGRESO MANUAL -->
-    <!-- ========================================== -->
     <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-end justify-center lg:items-center p-0 lg:p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-t-3xl lg:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full lg:translate-y-0 lg:scale-95 transition-transform duration-300 flex flex-col max-h-[90vh] absolute bottom-0 lg:relative lg:bottom-auto" id="modal-formulario-content">
             
@@ -239,7 +251,6 @@
                     <input type="text" id="form-paqueteria" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" placeholder="Ej. Transportes Castores...">
                 </div>
 
-                <!-- SECCIÓN DIRECCIÓN Y CONTACTO -->
                 <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
                     <label class="block text-xs font-bold text-blue-800 uppercase tracking-wider mb-2 border-b border-blue-200 pb-1">
                         <i class="fas fa-map-marker-alt"></i> Datos de Entrega
@@ -283,9 +294,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- MODAL CONFIGURACIÓN (FLOTA Y CHOFERES) -->
-    <!-- ========================================== -->
+    <!-- MODAL CONFIGURACIÓN -->
     <div id="modal-config" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[3000] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modal-config-content">
             <div class="bg-slate-900 p-4 flex justify-between items-center text-white">
@@ -299,7 +308,6 @@
             </div>
 
             <div class="p-5 h-[400px] overflow-y-auto custom-scroll bg-slate-50">
-                <!-- TAB FLOTA -->
                 <div id="tab-flota" class="space-y-4">
                     <div class="flex gap-2">
                         <input type="text" id="nueva-flota-nombre" placeholder="Ej. Camión 1 (3.5 Tons)" class="flex-1 border p-2 rounded-lg text-sm">
@@ -312,7 +320,6 @@
                     <div id="lista-flota-config" class="space-y-2"></div>
                 </div>
 
-                <!-- TAB CHOFERES -->
                 <div id="tab-choferes" class="space-y-4 hidden">
                     <div class="flex gap-2">
                         <input type="text" id="nuevo-chofer-nombre" placeholder="Nombre completo del chofer" class="flex-1 border p-2 rounded-lg text-sm">
@@ -324,7 +331,6 @@
         </div>
     </div>
 
-    <!-- Contenedor Toasts -->
     <div id="toast-container" class="fixed bottom-20 md:bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col gap-2 w-[90%] md:w-max"></div>
 
     <script>
@@ -334,6 +340,10 @@
         let map, marcadores = {}, rutasTrazadas = null;
         let viajesAgrupados = [], filtroActual = 'todos', viajeSeleccionado = null; 
         let clientesDB = [], flotaDB = [], choferesDB = [];
+
+        // Coordenadas Actualizadas de Sucursal EEN en base a tu link de Maps
+        // (Ajustadas a la zona aproximada para que el enrutamiento de Leaflet salga de ahí)
+        const coordPlantaEEN = L.latLng(25.6885, -100.1873); 
 
         const zonasRestringidas = [
             { nombre: "Centro MTY", color: "#ef4444", coords: [[25.6811, -100.3259], [25.6811, -100.3019], [25.6631, -100.3019], [25.6631, -100.3259]] }
@@ -358,7 +368,8 @@
         };
 
         function initMap() {
-            map = L.map('map', { zoomControl: false }).setView([25.6866, -100.3161], 12);
+            // Centrado de inicio ajustado para cubrir bien el área metropolitana
+            map = L.map('map', { zoomControl: false }).setView([25.7000, -100.2500], 12);
             L.control.zoom({ position: 'topright' }).addTo(map);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
@@ -394,7 +405,7 @@
                             direccion: p.direccion,
                             horario: p.horario,
                             excepcion: p.excepcion,
-                            telefono: p.telefono || '', // Toma el del primero si existe
+                            telefono: p.telefono || '', 
                             link_maps: p.link_maps || '', 
                             coordenadas: p.coordenadas,
                             estado: p.estado,
@@ -542,26 +553,30 @@
 
             if(viajeSeleccionado.coordenadas) {
                 const coordDestino = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
-                const coordPlanta = L.latLng(25.6946, -100.3142); 
+                
                 map.setView(coordDestino, 13, { animate: true });
                 if(rutasTrazadas) map.removeControl(rutasTrazadas);
                 
                 const contSecuencia = document.getElementById('det-ruta-secuencia');
                 const listaSecuencia = document.getElementById('lista-secuencia');
                 listaSecuencia.innerHTML = '';
+                
+                // Poner iconos de carga antes de que llegue la respuesta del mapa
+                document.getElementById('resumen-distancia').innerHTML = '<i class="fas fa-spinner fa-spin text-xs text-slate-300"></i>';
+                document.getElementById('resumen-tiempo').innerHTML = '<i class="fas fa-spinner fa-spin text-xs text-slate-300"></i>';
 
                 if (viajeSeleccionado.estado === 'camino' || viajeSeleccionado.estado === 'entregado') {
                     const viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
-                    let wps = [coordPlanta]; 
-                    listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pb-1 border-b border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">Hesa Monterrey</b> <span class="text-indigo-400 text-[10px]">(Carga)</span></span></li>`;
+                    let wps = [coordPlantaEEN]; 
+                    listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pb-1 border-b border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">Sucursal EEN</b> <span class="text-indigo-400 text-[10px]">(Carga)</span></span></li>`;
                     
                     viajesMismoCamion.forEach((v, idx) => {
                         wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
                         listaSecuencia.innerHTML += `<li class="flex items-center gap-2 py-0.5"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow">${idx + 1}</div> <span class="truncate"><b>${v.cliente_nombre}</b></span></li>`;
                     });
                     
-                    wps.push(coordPlanta); 
-                    listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pt-1 border-t border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-flag-checkered"></i></div> <span><b class="text-indigo-900">Hesa Monterrey</b> <span class="text-indigo-400 text-[10px]">(Retorno)</span></span></li>`;
+                    wps.push(coordPlantaEEN); 
+                    listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pt-1 border-t border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-flag-checkered"></i></div> <span><b class="text-indigo-900">Sucursal EEN</b> <span class="text-indigo-400 text-[10px]">(Retorno)</span></span></li>`;
                     contSecuencia.classList.remove('hidden');
 
                     rutasTrazadas = L.Routing.control({
@@ -575,9 +590,12 @@
                         fitSelectedRoutes: true, show: false, language: 'es'
                     }).addTo(map);
                 } else {
-                    contSecuencia.classList.add('hidden');
+                    contSecuencia.classList.remove('hidden'); // Lo mostramos para enseñar el tiempo
+                    listaSecuencia.innerHTML += `<li class="flex items-center gap-2 pb-1 border-b border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">Sucursal EEN</b> <span class="text-indigo-400 text-[10px]">(Punto de Salida)</span></span></li>`;
+                    listaSecuencia.innerHTML += `<li class="flex items-center gap-2 py-1"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow"><i class="fas fa-map-marker-alt"></i></div> <span class="truncate"><b>${viajeSeleccionado.cliente_nombre}</b></span></li>`;
+
                     rutasTrazadas = L.Routing.control({
-                        waypoints: [coordPlanta, coordDestino],
+                        waypoints: [coordPlantaEEN, coordDestino],
                         lineOptions: { styles: [{color: '#3b82f6', weight: 4, opacity: 0.7}] }, 
                         createMarker: function(i, waypoint, n) {
                             let label = i === 0 ? '<i class="fas fa-store"></i>' : '<i class="fas fa-map-marker-alt"></i>';
@@ -588,8 +606,22 @@
                     }).addTo(map);
                 }
 
+                // EVENTO CUANDO EL MAPA TERMINA DE CALCULAR LA RUTA
                 rutasTrazadas.on('routesfound', function(e) {
                     const route = e.routes[0];
+                    
+                    // Cálculo de Distancia y Tiempo
+                    const distKm = (route.summary.totalDistance / 1000).toFixed(1);
+                    const timeMin = Math.round(route.summary.totalTime / 60);
+                    
+                    let horas = Math.floor(timeMin / 60);
+                    let minRestantes = timeMin % 60;
+                    let tiempoTexto = horas > 0 ? `${horas}h ${minRestantes}m` : `${timeMin} min`;
+
+                    document.getElementById('resumen-distancia').innerText = `${distKm} km`;
+                    document.getElementById('resumen-tiempo').innerText = tiempoTexto;
+
+                    // Revisión de Centro de MTY (Multas)
                     let pasaCentro = false;
                     for(let i = 0; i < route.coordinates.length; i += 15) {
                         if(isPointInPolygon([route.coordinates[i].lat, route.coordinates[i].lng], zonasRestringidas[0].coords)){
@@ -612,34 +644,25 @@
             document.getElementById('det-tipo-destino').innerText = viajeSeleccionado.tipo_destino === 'paqueteria' ? '📍 Consolidado a Paquetería' : '🏢 Entrega a Bodega Directa';
             document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
             
-            // Lógica de Botones de Contacto (Maps y Teléfono)
             const contContacto = document.getElementById('det-contacto-container');
             const btnLlamar = document.getElementById('det-btn-llamar');
             const btnMaps = document.getElementById('det-btn-maps');
             let muestraContacto = false;
 
             if (viajeSeleccionado.telefono) {
-                btnLlamar.href = `tel:${viajeSeleccionado.telefono.replace(/\s+/g, '')}`; // Quita espacios para el href
+                btnLlamar.href = `tel:${viajeSeleccionado.telefono.replace(/\s+/g, '')}`; 
                 btnLlamar.innerHTML = `<i class="fas fa-phone"></i> Llamar al ${viajeSeleccionado.telefono}`;
                 btnLlamar.classList.remove('hidden');
                 muestraContacto = true;
-            } else {
-                btnLlamar.classList.add('hidden');
-            }
+            } else { btnLlamar.classList.add('hidden'); }
 
             if (viajeSeleccionado.link_maps) {
                 btnMaps.href = viajeSeleccionado.link_maps;
                 btnMaps.classList.remove('hidden');
                 muestraContacto = true;
-            } else {
-                btnMaps.classList.add('hidden');
-            }
+            } else { btnMaps.classList.add('hidden'); }
 
-            if (muestraContacto) {
-                contContacto.classList.remove('hidden');
-            } else {
-                contContacto.classList.add('hidden');
-            }
+            if (muestraContacto) { contContacto.classList.remove('hidden'); } else { contContacto.classList.add('hidden'); }
 
 
             const contHorario = document.getElementById('det-horario-container');
@@ -753,9 +776,6 @@
             batch.commit().then(() => { cerrarDetalle(); }).catch(e => alert("Error: " + e.message));
         }
 
-        // ==========================================
-        // CLIENTES Y FORMULARIO
-        // ==========================================
         window.buscarCliente = () => {
             const val = document.getElementById('form-cliente-codigo').value.trim().toUpperCase();
             const cliente = clientesDB.find(c => c.codigo === val);
@@ -788,7 +808,7 @@
                     document.getElementById('form-horario').value = dirObj.horario || ""; 
                     document.getElementById('form-excepcion').value = dirObj.excepcion || "";
                     document.getElementById('form-telefono').value = dirObj.telefono || "";
-                    document.getElementById('form-link-maps').value = dirObj.linkMaps || ""; // Cargo link si existe
+                    document.getElementById('form-link-maps').value = dirObj.linkMaps || "";
                 }
             }
         };
@@ -849,7 +869,6 @@
                     dirsGuardadas = docCliente.data().direcciones || [];
                     dirsGuardadas = dirsGuardadas.filter(d => { const dTxt = typeof d === 'string' ? d : d.direccion; return dTxt !== direccion; });
                 }
-                // Guardamos la nueva dirección con el link y teléfono al historial del cliente
                 dirsGuardadas.push({ direccion, horario, excepcion, telefono, linkMaps });
                 await refCliente.set({ nombre: clienteNombre, direcciones: dirsGuardadas }, { merge: true });
 
@@ -870,7 +889,6 @@
                 
                 if(tipo === 'paqueteria') nuevoDoc.nombre_paqueteria = paqueteria;
                 
-                // Simulación de coordenadas para demostración (esto asume que se rellenará real por back end eventualmente)
                 nuevoDoc.coordenadas = { lat: 25.6866 + (Math.random() - 0.5) * 0.05, lng: -100.3161 + (Math.random() - 0.5) * 0.05 };
 
                 await db.collection('rutas_logistica').doc(factura).set(nuevoDoc);
@@ -878,9 +896,6 @@
             } catch(e) { showToast("Error al guardar: " + e.message, "error"); } finally { btn.innerHTML = '<i class="fas fa-save"></i> Registrar en Bandeja'; btn.disabled = false; }
         };
 
-        // ==========================================
-        // CONFIGURACIÓN (FLOTA Y CHOFERES)
-        // ==========================================
         window.abrirConfiguracion = () => { const m = document.getElementById('modal-config'); const c = document.getElementById('modal-config-content'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10); };
         window.cerrarConfiguracion = () => { const m = document.getElementById('modal-config'); const c = document.getElementById('modal-config-content'); m.classList.add('opacity-0'); c.classList.add('scale-95'); setTimeout(() => m.classList.add('hidden'), 300); };
         window.switchTabConfig = (tab) => {
