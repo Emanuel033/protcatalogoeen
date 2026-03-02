@@ -372,12 +372,13 @@
 
             pedidosRaw.forEach(p => {
                 if (p.tipo_destino === 'paqueteria') {
-                    const key = `${p.nombre_paqueteria}_${p.estado}`;
+                    const nombrePaq = p.nombre_paqueteria || 'Paquetería Genérica';
+                    const key = `${nombrePaq}_${p.estado}`;
                     if (!paqueteriasMap[key]) {
                         paqueteriasMap[key] = {
                             es_grupo: true,
-                            id: `GRUPO-${p.nombre_paqueteria.replace(/\s/g,'').toUpperCase()}`,
-                            cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`,
+                            id: `GRUPO-${nombrePaq.replace(/\s/g,'').toUpperCase()}`,
+                            cliente_nombre: `Consolidado: ${nombrePaq}`,
                             tipo_destino: 'paqueteria',
                             direccion: p.direccion,
                             horario: p.horario,
@@ -419,7 +420,9 @@
                 return (order[a.estado] || 4) - (order[b.estado] || 4);
             });
 
-            document.getElementById('total-rutas').innerText = `${viajesAgrupados.length} Viajes Necesarios`;
+            const totalRutasEl = document.getElementById('total-rutas');
+            if(totalRutasEl) totalRutasEl.innerText = `${viajesAgrupados.length} Viajes Necesarios`;
+            
             renderizarLista();
             actualizarMapa();
         }
@@ -465,7 +468,7 @@
                     const choferName = choferesDB.find(c => c.id === viaje.chofer_asignado)?.nombre || 'Chofer';
                     
                     let fechaStr = '';
-                    if(viaje.fecha_actualizacion) {
+                    if(viaje.fecha_actualizacion && typeof viaje.fecha_actualizacion.toDate === 'function') {
                         const d = viaje.fecha_actualizacion.toDate();
                         fechaStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     }
