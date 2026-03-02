@@ -1015,6 +1015,49 @@
             alert("¡Datos generados! Revisa el panel izquierdo.");
         };
 
+        // ==========================================
+        // MOTOR DE DESCARGA (FALTABA ESTA FUNCIÓN)
+        // ==========================================
+        function cargarDatosMaestros() {
+            // 1. Cargar Catálogo de Clientes (Autocompletado)
+            db.collection('clientes_logistica').onSnapshot(snap => {
+                clientesDB = [];
+                snap.forEach(doc => clientesDB.push({ codigo: doc.id, ...doc.data() }));
+                const dl = document.getElementById('clientes-list');
+                if(dl) {
+                    dl.innerHTML = '';
+                    clientesDB.forEach(c => dl.innerHTML += `<option value="${c.codigo}">${c.nombre}</option>`);
+                }
+            });
+
+            // 2. Cargar Flota (Vehículos)
+            db.collection('flota').onSnapshot(snap => {
+                flotaDB = [];
+                snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() }));
+                renderizarFlotaUI();
+                renderizarOpcionesDespacho();
+            });
+
+            // 3. Cargar Personal (Choferes)
+            db.collection('choferes').onSnapshot(snap => {
+                choferesDB = [];
+                snap.forEach(doc => choferesDB.push({ id: doc.id, ...doc.data() }));
+                renderizarChoferesUI();
+                renderizarOpcionesDespacho();
+            });
+
+            // 4. Escuchar las Rutas en tiempo real
+            db.collection('rutas_logistica').onSnapshot(snap => {
+                const pedidosRaw = [];
+                snap.forEach(doc => pedidosRaw.push({ id: doc.id, ...doc.data() }));
+                agruparYConsolidar(pedidosRaw);
+            }, error => {
+                console.error("Error al cargar rutas:", error);
+                const container = document.getElementById('lista-pedidos');
+                if(container) container.innerHTML = `<div class="text-center py-10 text-red-500 font-bold"><i class="fas fa-exclamation-triangle text-3xl mb-3"></i><br>Error de conexión.</div>`;
+            });
+        }
+
         window.onload = () => {
             initMap();
             cargarDatosMaestros();
