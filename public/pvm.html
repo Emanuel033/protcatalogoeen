@@ -69,19 +69,18 @@
         <input type="password" name="fake_password_trap" tabindex="-1">
     </div>
 
-    <!-- CREDENCIALES FIREBASE -->
+    <!-- CONFIGURACIÓN FIREBASE CENTRALIZADA Y SOPORTE OFFLINE -->
+    <script src="assets/js/firebase-config.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
-            authDomain: "productoseen.firebaseapp.com",
-            databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
-            projectId: "productoseen",
-            storageBucket: "productoseen.firebasestorage.app",
-            messagingSenderId: "1052892398028",
-            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        // Asegurar la instancia de la base de datos
         const db = firebase.firestore();
+        
+        // Habilitar persistencia offline de Firebase (Mejora: Si se va el internet, la app sigue funcionando)
+        try {
+            db.enablePersistence({synchronizeTabs: true}).catch(function(err) {
+                console.warn("Aviso: No se pudo habilitar caché offline completa.", err.code);
+            });
+        } catch (e) {}
     </script>
 
     <!-- ========================================== -->
@@ -96,9 +95,14 @@
             <h1 class="text-2xl font-black text-center text-slate-800 mb-1">Caja Mostrador</h1>
             <p class="text-center text-slate-500 text-sm font-medium mb-8">Selecciona tu usuario para iniciar turno</p>
             
-            <select id="select-usuario-pos" class="w-full border-2 border-slate-200 bg-slate-50 p-4 rounded-xl focus:ring-0 focus:border-blue-500 outline-none text-base font-bold text-slate-700 mb-6 cursor-pointer">
+            <select id="select-usuario-pos" onchange="togglePinField()" class="w-full border-2 border-slate-200 bg-slate-50 p-4 rounded-xl focus:ring-0 focus:border-blue-500 outline-none text-base font-bold text-slate-700 mb-6 cursor-pointer transition-all">
                 <option value="">Cargando usuarios...</option>
             </select>
+            
+            <div id="pin-container" class="w-full hidden mb-6 fade-in">
+                <label class="block text-center text-xs font-bold text-slate-500 mb-2 uppercase">Ingresa tu PIN</label>
+                <input type="password" inputmode="numeric" id="input-pin-pos" maxlength="4" placeholder="••••" autocomplete="off" class="w-full border-2 border-slate-200 bg-slate-50 py-3 rounded-xl text-center text-3xl tracking-[0.5em] font-black text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+            </div>
             
             <button onclick="iniciarTurnoPOS()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-200 transition flex justify-center items-center gap-2 text-lg active:scale-95">
                 Abrir Caja <i class="fas fa-sign-in-alt"></i>
@@ -385,6 +389,7 @@
     <script>
         // GLOBALES Y CAJERO ACTUAL
         let cajeroActual = localStorage.getItem('een_pos_nombre') || null;
+        let usuariosCargados = {}; // Variable para validar el PIN en memoria
 
         let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; 
         window.reporteFacturasEfectivo = []; window.reporteFacturasTodas = []; window.reporteMostrador = [];        
@@ -411,17 +416,48 @@
             db.collection('usuarios_pos').onSnapshot(snap => {
                 const select = document.getElementById('select-usuario-pos');
                 select.innerHTML = '<option value="">-- Selecciona tu nombre --</option>';
+                usuariosCargados = {};
                 snap.forEach(doc => {
-                    select.innerHTML += `<option value="${doc.data().nombre}">${doc.data().nombre}</option>`;
+                    const data = doc.data();
+                    usuariosCargados[data.nombre] = data.pin || null; // Guarda temporalmente el PIN ligado al nombre
+                    select.innerHTML += `<option value="${data.nombre}">${data.nombre}</option>`;
                 });
             });
         }
 
+        window.togglePinField = () => {
+            const select = document.getElementById('select-usuario-pos');
+            const pinContainer = document.getElementById('pin-container');
+            const pinInput = document.getElementById('input-pin-pos');
+            
+            if (select.value && usuariosCargados[select.value]) {
+                pinContainer.classList.remove('hidden');
+                setTimeout(() => pinInput.focus(), 100);
+            } else {
+                pinContainer.classList.add('hidden');
+                pinInput.value = '';
+            }
+        };
+
         window.iniciarTurnoPOS = () => {
             const select = document.getElementById('select-usuario-pos');
+            const pinInput = document.getElementById('input-pin-pos');
+            
             if(!select.value) return showToast("Debes seleccionar tu nombre", "error");
+            
+            // VALIDACIÓN DEL PIN DE SEGURIDAD
+            const expectedPin = usuariosCargados[select.value];
+            if (expectedPin) {
+                if (pinInput.value !== String(expectedPin)) {
+                    pinInput.value = ''; // Limpiar el input si falló
+                    pinInput.focus();
+                    return showToast("PIN incorrecto", "error");
+                }
+            }
+            
             cajeroActual = select.value;
             localStorage.setItem('een_pos_nombre', cajeroActual);
+            pinInput.value = ''; // Limpiar para que no se quede guardado visualmente
             verificarLogin();
         };
 
@@ -861,6 +897,12 @@
             const btnFinal = document.getElementById('btnConfirmarVentaFinal'); 
             if (btnFinal.disabled) return; 
 
+            // MEJORA: Validación de red antes de procesar para evitar cuelgues
+            if (!navigator.onLine) {
+                showToast("Estás sin conexión a internet. Espera a que regrese la red para cobrar.", "error");
+                return;
+            }
+
             const inputRecibido = document.getElementById('inputEfectivoRecibido').value;
             let recibido = parseFloat(inputRecibido);
             if (isNaN(recibido)) recibido = 0;
@@ -876,62 +918,59 @@
             btnFinal.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...'; 
             btnFinal.disabled = true;
 
+            const articulosLimpios = cart.map(i => {
+                let p = Number(i.precio); if(isNaN(p)) p = 0;
+                let q = Number(i.qty); if(isNaN(q)) q = 1;
+                return { 
+                    codigo: String(i.codigo || 'S/C'), 
+                    nombre: String(i.nombre || 'Art.'), 
+                    precio_unitario: p, 
+                    cantidad: q, 
+                    subtotal: p * q
+                };
+            });
+
+            let cambio = recibido > 0 ? (recibido - total) : 0;
+            if (isNaN(cambio)) cambio = 0;
+
             let folio = "MOST-TEMP";
 
             try {
-                try {
-                    const counterRef = db.collection('configuracion').doc('consecutivos');
-                    const nextSeq = await db.runTransaction(async (transaction) => {
-                        const doc = await transaction.get(counterRef); 
-                        let newSeq = 1;
-                        if (doc.exists && doc.data().venta_mostrador) { 
-                            newSeq = doc.data().venta_mostrador + 1; 
-                        }
-                        transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true }); 
-                        return newSeq;
-                    });
-                    folio = "MOST-" + String(nextSeq).padStart(5, '0');
-                } catch (folioErr) {
-                    console.warn("Fallo el sistema de folios, usando folio de emergencia basado en la hora.", folioErr);
-                    folio = "MOST-" + Math.floor(Date.now() / 1000).toString().slice(-5);
-                }
+                const counterRef = db.collection('configuracion').doc('consecutivos');
+                const newSaleRef = db.collection('ventas_mostrador').doc(); // Crear referencia de documento de forma segura
 
-                const articulosLimpios = cart.map(i => {
-                    let p = Number(i.precio); if(isNaN(p)) p = 0;
-                    let q = Number(i.qty); if(isNaN(q)) q = 1;
-                    return { 
-                        codigo: String(i.codigo || 'S/C'), 
-                        nombre: String(i.nombre || 'Art.'), 
-                        precio_unitario: p, 
-                        cantidad: q, 
-                        subtotal: p * q
+                // MEJORA: TRANSACCIÓN ATÓMICA. Evita saltos en el folio contable.
+                await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(counterRef); 
+                    let newSeq = 1;
+                    if (doc.exists && doc.data().venta_mostrador) { 
+                        newSeq = doc.data().venta_mostrador + 1; 
+                    }
+                    folio = "MOST-" + String(newSeq).padStart(5, '0');
+
+                    const saleData = {
+                        folio: folio, 
+                        fecha: firebase.firestore.FieldValue.serverTimestamp(), 
+                        total: total,
+                        efectivo_recibido: recibido > 0 ? recibido : total, 
+                        cambio_entregado: cambio,
+                        articulos: articulosLimpios,
+                        vendedor: cajeroActual || "Mostrador General", 
+                        estado: "COMPLETADA"
                     };
+
+                    transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true }); 
+                    transaction.set(newSaleRef, saleData); // Guarda la venta ligada en el mismo paso
                 });
-
-                let cambio = recibido > 0 ? (recibido - total) : 0;
-                if (isNaN(cambio)) cambio = 0;
-
-                const saleData = {
-                    folio: folio, 
-                    fecha: firebase.firestore.FieldValue.serverTimestamp(), 
-                    total: total,
-                    efectivo_recibido: recibido > 0 ? recibido : total, 
-                    cambio_entregado: cambio,
-                    articulos: articulosLimpios,
-                    vendedor: cajeroActual || "Mostrador General", 
-                    estado: "COMPLETADA"
-                };
-
-                await db.collection('ventas_mostrador').add(saleData);
                 
                 const printData = {
-                    folio: saleData.folio,
+                    folio: folio,
                     fecha: new Date(), 
-                    total: saleData.total,
-                    efectivo_recibido: saleData.efectivo_recibido,
-                    cambio_entregado: saleData.cambio_entregado,
-                    articulos: saleData.articulos,
-                    vendedor: saleData.vendedor 
+                    total: total,
+                    efectivo_recibido: recibido > 0 ? recibido : total,
+                    cambio_entregado: cambio,
+                    articulos: articulosLimpios,
+                    vendedor: cajeroActual || "Mostrador General" 
                 };
 
                 closeCheckoutModal(); 
