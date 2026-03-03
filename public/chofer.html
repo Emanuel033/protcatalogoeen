@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA Meta Tags para que se vea como app nativa -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>App Choferes - EEN</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,16 +25,11 @@
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
 
+    <!-- Configuración Firebase Centralizada -->
+    <script src="assets/js/firebase-config.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
-            authDomain: "productoseen.firebaseapp.com",
-            projectId: "productoseen",
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        
         // --- MEJORA 2: SOPORTE OFFLINE (SIN INTERNET) ---
+        // 'db' ya viene inicializado desde firebase-config.js
         try {
             db.enablePersistence({synchronizeTabs: true}).catch(function(err) {
                 console.warn("Aviso: Modo offline limitado.", err);
@@ -299,24 +298,7 @@
 
                         <div class="flex gap-2">
                             ${btnMapsHtml}
-                            <button onclick="abrirModalFalla('${v.id}')" class="w-12 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold flex items-center justify-center active:scale-95 transition text-lg shadow-sm" title="Reportar Problema"><i class="fas fa-exclamation-triangle"></i></button>
-                            <button onclick="abrirModalEntrega('${v.id}')" class="flex-[1.5] bg-emerald-500 text-white py-3 rounded-xl font-black flex items-center justify-center gap-2 active:scale-95 transition text-sm shadow-md shadow-emerald-200"><i class="fas fa-check-double"></i> Entregado</button>
-                        </div>
-                    </div>
-                </div>`;
-            });
-
-            if (completados.length > 0) {
-                html += `<div class="flex items-center gap-3 my-6"><div class="h-px bg-slate-300 flex-1"></div><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ya Entregados</span><div class="h-px bg-slate-300 flex-1"></div></div>`;
-                completados.forEach(v => {
-                    html += `<div class="bg-emerald-50 rounded-xl border border-emerald-100 p-3 mb-2 flex justify-between items-center opacity-70"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-emerald-200 text-emerald-700 rounded-full flex items-center justify-center text-sm"><i class="fas fa-check"></i></div><div><h3 class="font-bold text-slate-700 text-sm">${v.cliente_nombre}</h3><p class="text-[10px] text-slate-500 truncate w-48">${v.direccion}</p></div></div></div>`;
-                });
-            }
-
-            contenedor.innerHTML = html;
-        }
-
-        // --- COMPRESIÓN DE FOTO (Lienzo Virtual para Proteger Memoria) ---
+        // --- COMPRESIÓN DE FOTO Y VISTA PREVIA ---
         window.procesarFoto = (input, textId, iconId) => {
             const file = input.files[0];
             if(!file) return;
@@ -339,10 +321,23 @@
                     ctx.drawImage(img, 0, 0, width, height);
                     
                     fotoBase64Temporal = canvas.toDataURL('image/jpeg', 0.6); // 60% calidad JPEG
-                    document.getElementById(textId).innerText = "¡Foto capturada lista!";
+                    
+                    // Actualizar UI con Vista Previa de la miniatura
+                    document.getElementById(textId).innerText = "¡Foto capturada lista! (Toca para cambiar)";
                     document.getElementById(textId).classList.replace('text-slate-500', 'text-emerald-600');
-                    document.getElementById(iconId).classList.replace('fa-camera', 'fa-image');
-                    document.getElementById(iconId).classList.replace('text-slate-400', 'text-emerald-500');
+                    
+                    const iconEl = document.getElementById(iconId);
+                    iconEl.classList.add('hidden'); // Ocultar el icono de cámara
+                    
+                    let previewImg = document.getElementById(iconId + '-preview');
+                    if (!previewImg) {
+                        previewImg = document.createElement('img');
+                        previewImg.id = iconId + '-preview';
+                        previewImg.className = "w-20 h-20 object-cover rounded-xl mx-auto mb-2 border-2 border-emerald-400 shadow-md";
+                        iconEl.parentNode.insertBefore(previewImg, iconEl);
+                    }
+                    previewImg.src = fotoBase64Temporal;
+                    previewImg.classList.remove('hidden');
                 };
             };
         };
@@ -356,7 +351,11 @@
             });
             ['foto-falla-icon', 'foto-entrega-icon'].forEach(id => {
                 const el = document.getElementById(id);
-                if(el) { el.className = "fas fa-camera text-2xl text-slate-400 mb-2"; }
+                if(el) { el.classList.remove('hidden'); el.className = "fas fa-camera text-2xl text-slate-400 mb-2"; }
+            });
+            ['foto-falla-icon-preview', 'foto-entrega-icon-preview'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) { el.classList.add('hidden'); el.src = ''; }
             });
         }
 
