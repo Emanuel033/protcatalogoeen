@@ -83,7 +83,7 @@
         </div>
     </div>
 
-    <!-- MODAL REPORTE DE PROBLEMA (EXCLUSIVO DEL CHOFER) -->
+    <!-- MODAL REPORTE DE PROBLEMA -->
     <div id="modal-falla" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-end justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-t-3xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full transition-transform duration-300" id="modal-falla-content">
             <div class="bg-red-600 p-5 flex justify-between items-center text-white">
@@ -188,10 +188,24 @@
             pedidosRaw.forEach(p => {
                 if (p.tipo_destino === 'paqueteria') {
                     const key = `${p.nombre_paqueteria}_${p.estado}`;
-                    if (!paqMap[key]) paqMap[key] = { es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, pedidos: [] };
+                    if (!paqMap[key]) {
+                        paqMap[key] = { 
+                            es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, 
+                            direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, 
+                            telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, 
+                            urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos: [] 
+                        };
+                    }
+                    if(p.urgente) paqMap[key].urgente = true;
+                    paqMap[key].orden_ruta = Math.min(paqMap[key].orden_ruta, p.orden_ruta || 9999999999999);
                     paqMap[key].pedidos.push(p);
                 } else {
-                    agrupados.push({ es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, pedidos: [p] });
+                    agrupados.push({ 
+                        es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, direccion: p.direccion, 
+                        link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, 
+                        horario: p.horario, excepcion: p.excepcion, estado: p.estado, 
+                        urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos: [p] 
+                    });
                 }
             });
             Object.values(paqMap).forEach(g => agrupados.push(g));
@@ -200,7 +214,6 @@
 
         function escucharViajes() {
             if(!choferActualId) return;
-            // Solo descargamos los viajes que están 'camino' o 'entregado' para este chofer
             db.collection('rutas_logistica')
               .where('chofer_asignado', '==', choferActualId)
               .where('estado', 'in', ['camino', 'entregado'])
@@ -214,16 +227,17 @@
         function renderizarViajes() {
             const contenedor = document.getElementById('lista-viajes');
             let html = '';
-            let pendientes = 0; let entregados = 0;
-
+            
+            // Separar y Ordenar por el Orden Maestro configurado por Despacho (orden_ruta)
             const enCamino = viajesEnRuta.filter(v => v.estado === 'camino');
+            enCamino.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
+            
             const completados = viajesEnRuta.filter(v => v.estado === 'entregado');
-            pendientes = enCamino.length; entregados = completados.length;
+            
+            document.getElementById('contador-pendientes').innerText = enCamino.length;
+            document.getElementById('contador-entregados').innerText = completados.length;
 
-            document.getElementById('contador-pendientes').innerText = pendientes;
-            document.getElementById('contador-entregados').innerText = entregados;
-
-            if(pendientes === 0 && entregados === 0) {
+            if(enCamino.length === 0 && completados.length === 0) {
                 contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center mt-10"><div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-3xl text-slate-300 mx-auto mb-4"><i class="fas fa-mug-hot"></i></div><h3 class="text-lg font-black text-slate-700">Ruta Limpia</h3><p class="text-sm text-slate-500 mt-1">No tienes entregas asignadas por el momento.</p></div>`;
                 return;
             }
@@ -232,21 +246,24 @@
                 let badge = v.es_grupo ? `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i class="fas fa-boxes"></i> Paquetería</span>` : `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i class="fas fa-building"></i> Bodega</span>`;
                 let facturas = v.pedidos.map(p => p.id).join(', ');
                 
-                // Generar Link de Maps Dinámico si no hay link manual
                 let btnMapsHtml = '';
                 if(v.link_maps) {
                     btnMapsHtml = `<a href="${v.link_maps}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
                 } else if(v.coordenadas && v.coordenadas.lat) {
-                    // Si Base ajustó el pin, usamos la coordenada satelital para el chofer
                     btnMapsHtml = `<a href="https://www.google.com/maps/dir/?api=1&destination=${v.coordenadas.lat},${v.coordenadas.lng}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
                 }
 
+                const badgeUrgente = v.urgente ? `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2 border border-red-300 shadow-sm"><i class="fas fa-siren-on"></i> Urgente</span>` : '';
+                const colorBurbuja = v.urgente ? 'bg-red-600' : 'bg-slate-800';
+                const colorBordeCaja = v.urgente ? 'border-red-400 shadow-red-500/10 shadow-lg' : 'border-slate-200';
+
                 html += `
-                <div class="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden mb-4">
+                <div class="bg-white rounded-2xl shadow-sm border-2 ${colorBordeCaja} overflow-hidden mb-4 relative">
+                    ${v.urgente ? `<div class="absolute top-0 left-0 w-full h-1.5 bg-red-500"></div>` : ''}
                     <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center font-black text-sm shadow">${index + 1}</div>
-                            <div>${badge}<h3 class="font-black text-slate-800 text-base leading-tight mt-1">${v.cliente_nombre}</h3></div>
+                            <div class="w-8 h-8 ${colorBurbuja} text-white rounded-full flex items-center justify-center font-black text-sm shadow">${index + 1}</div>
+                            <div>${badge}<h3 class="font-black text-slate-800 text-base leading-tight mt-1 flex flex-wrap items-center gap-y-1">${v.cliente_nombre}${badgeUrgente}</h3></div>
                         </div>
                     </div>
                     <div class="p-4">
@@ -259,7 +276,6 @@
                             <p class="text-xs font-black text-slate-700">${facturas}</p>
                         </div>
 
-                        <!-- BOTONES DE ACCIÓN DEL CHOFER -->
                         <div class="flex gap-2">
                             ${btnMapsHtml}
                             <button onclick="abrirModalFalla('${v.id}')" class="w-12 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold flex items-center justify-center active:scale-95 transition text-lg shadow-sm" title="Reportar Problema"><i class="fas fa-exclamation-triangle"></i></button>
@@ -313,7 +329,6 @@
             try {
                 const batch = db.batch();
                 grupo.pedidos.forEach(p => {
-                    // Actualizamos a estado 'fallido' y guardamos el motivo
                     batch.update(db.collection('rutas_logistica').doc(p.id), { 
                         estado: 'fallido', 
                         motivo_falla: razonFinal,
