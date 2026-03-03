@@ -106,6 +106,8 @@
                 <div class="flex justify-between items-start mb-2 pr-10">
                     <div class="flex gap-2 items-center">
                         <span id="det-folio" class="text-xs font-mono font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded">FOLIO</span>
+                        <!-- NUEVO BOTON EDITAR -->
+                        <button onclick="abrirEdicion()" class="text-blue-400 hover:text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded text-[10px] font-bold transition flex items-center gap-1"><i class="fas fa-edit"></i> Editar</button>
                         <button onclick="abrirModalConfirmacion('eliminar')" class="text-red-400 hover:text-red-500 bg-red-500/10 px-2 py-0.5 rounded text-[10px] font-bold transition flex items-center gap-1"><i class="fas fa-trash-alt"></i> Borrar</button>
                     </div>
                     <span id="det-status" class="text-[10px] font-black uppercase px-2 py-1 rounded">ESTADO</span>
@@ -187,7 +189,7 @@
     <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-end justify-center lg:items-center p-0 lg:p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-t-3xl lg:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full lg:translate-y-0 lg:scale-95 transition-transform duration-300 flex flex-col max-h-[90vh] absolute bottom-0 lg:relative lg:bottom-auto" id="modal-formulario-content">
             <div class="bg-slate-900 p-4 flex justify-between items-center text-white shrink-0">
-                <h3 class="font-bold text-lg"><i class="fas fa-clipboard-list text-blue-400 mr-2"></i> Nuevo Envío</h3>
+                <h3 id="modal-formulario-titulo" class="font-bold text-lg"><i class="fas fa-clipboard-list text-blue-400 mr-2"></i> Nuevo Envío</h3>
                 <button onclick="cerrarFormulario()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
             </div>
             <div class="p-5 overflow-y-auto custom-scroll flex-1 space-y-4">
@@ -331,12 +333,12 @@
         let map, marcadores = {}, rutasTrazadas = null;
         let miniMap = null, miniMarker = null; 
         
-        // --- MEJORA 1: MEMORIA DE DATOS OPTIMIZADA ---
         let rutasActivasDB = {}; 
         let rutasRecientesDB = {}; 
         let viajesAgrupados = [], filtroActual = 'todos', viajeSeleccionado = null; 
         let flotaDB = [], choferesDB = [], clientesDB = []; 
         let modalActionFn = null;
+        let viajeEnEdicion = null; // NUEVO: Controlador de estado de edición
 
         const coordPlantaEEN = L.latLng(25.689804, -100.312066); 
 
@@ -689,6 +691,13 @@
 
         // ====== FORMULARIO ======
         window.abrirFormulario = () => {
+            viajeEnEdicion = null;
+            document.getElementById('modal-formulario-titulo').innerHTML = '<i class="fas fa-clipboard-list text-blue-400 mr-2"></i> Nuevo Envío';
+            document.getElementById('btn-guardar-manual').innerHTML = '<i class="fas fa-save"></i> Registrar en Bandeja';
+            
+            const fInput = document.getElementById('form-factura'); fInput.disabled = false; fInput.classList.remove('opacity-60');
+            const cInput = document.getElementById('form-cliente-codigo'); cInput.disabled = false; cInput.classList.remove('opacity-60');
+
             const modal = document.getElementById('modal-formulario'); const content = document.getElementById('modal-formulario-content');
             ['form-factura','form-cliente-codigo','form-cliente','form-paqueteria','form-direccion','form-horario','form-excepcion','form-telefono','form-link-maps','form-lat','form-lng'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('form-tipo').value = 'bodega_cliente'; document.getElementById('form-urgente').checked = false; 
@@ -698,6 +707,52 @@
             setTimeout(() => { 
                 modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full', 'lg:translate-y-0', 'lg:scale-95'); 
                 initMiniMap(); miniMarker.setLatLng([25.689804, -100.312066]); miniMap.setView([25.689804, -100.312066], 11);
+            }, 10);
+        };
+
+        window.abrirEdicion = () => {
+            if(!viajeSeleccionado) return;
+            viajeEnEdicion = viajeSeleccionado;
+            
+            document.getElementById('modal-formulario-titulo').innerHTML = '<i class="fas fa-edit text-amber-400 mr-2"></i> Editar Envío';
+            document.getElementById('btn-guardar-manual').innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+            
+            const fInput = document.getElementById('form-factura');
+            fInput.value = viajeSeleccionado.pedidos_incluidos.map(p => p.id).join(', ');
+            fInput.disabled = true; fInput.classList.add('opacity-60'); // Bloqueamos el ID para evitar corrupción de datos
+            
+            const cInput = document.getElementById('form-cliente-codigo');
+            cInput.value = viajeSeleccionado.pedidos_incluidos[0].cliente_codigo || '';
+            cInput.disabled = true; cInput.classList.add('opacity-60'); // Bloqueamos el código de cliente
+            
+            document.getElementById('form-cliente').value = viajeSeleccionado.cliente_nombre || '';
+            document.getElementById('form-tipo').value = viajeSeleccionado.tipo_destino || 'bodega_cliente';
+            document.getElementById('form-paqueteria').value = viajeSeleccionado.tipo_destino === 'paqueteria' ? (viajeSeleccionado.nombre_paqueteria || '') : '';
+            document.getElementById('form-urgente').checked = viajeSeleccionado.urgente || false;
+            document.getElementById('form-direccion').value = viajeSeleccionado.direccion || '';
+            document.getElementById('form-telefono').value = viajeSeleccionado.pedidos_incluidos[0].telefono || '';
+            document.getElementById('form-link-maps').value = viajeSeleccionado.pedidos_incluidos[0].link_maps || '';
+            document.getElementById('form-horario').value = viajeSeleccionado.pedidos_incluidos[0].horario || '';
+            document.getElementById('form-excepcion').value = viajeSeleccionado.pedidos_incluidos[0].excepcion || '';
+            
+            const lat = viajeSeleccionado.coordenadas ? viajeSeleccionado.coordenadas.lat : '';
+            const lng = viajeSeleccionado.coordenadas ? viajeSeleccionado.coordenadas.lng : '';
+            document.getElementById('form-lat').value = lat;
+            document.getElementById('form-lng').value = lng;
+            
+            document.getElementById('form-direcciones-guardadas').classList.add('hidden');
+            togglePaqueteria();
+            
+            const modal = document.getElementById('modal-formulario'); const content = document.getElementById('modal-formulario-content');
+            modal.classList.remove('hidden'); 
+            setTimeout(() => { 
+                modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full', 'lg:translate-y-0', 'lg:scale-95'); 
+                initMiniMap(); 
+                if(lat && lng) {
+                    miniMarker.setLatLng([lat, lng]); miniMap.setView([lat, lng], 16);
+                } else {
+                    miniMarker.setLatLng([25.689804, -100.312066]); miniMap.setView([25.689804, -100.312066], 11);
+                }
             }, 10);
         };
         
@@ -753,17 +808,45 @@
             if (isNaN(lat) || isNaN(lng)) coords = await obtenerCoordenadasReales(d.dir);
 
             try {
+                // Actualizar libreta de direcciones del cliente (sirve tanto para nuevo como para edición)
                 const refCliente = db.collection('clientes_logistica').doc(d.cli); const docCli = await refCliente.get();
-                let dirs = docCli.exists ? docCli.data().direcciones || [] : []; dirs = dirs.filter(x => (typeof x === 'string' ? x : x.direccion) !== d.dir);
-                dirs.push({ direccion: d.dir, horario: d.hor, excepcion: d.exc, telefono: d.tel, linkMaps: d.link, lat: coords.lat, lng: coords.lng });
-                await refCliente.set({ nombre: d.nom, direcciones: dirs }, { merge: true });
+                if (docCli.exists) {
+                    let dirs = docCli.data().direcciones || []; dirs = dirs.filter(x => (typeof x === 'string' ? x : x.direccion) !== d.dir);
+                    dirs.push({ direccion: d.dir, horario: d.hor, excepcion: d.exc, telefono: d.tel, linkMaps: d.link, lat: coords.lat, lng: coords.lng });
+                    await refCliente.set({ nombre: d.nom, direcciones: dirs }, { merge: true });
+                }
 
-                const obj = { cliente_codigo: d.cli, cliente_nombre: d.nom, tipo_destino: d.tip, direccion: d.dir, horario: d.hor, excepcion: d.exc, telefono: d.tel, link_maps: d.link, estado: "pendiente", vehiculo_asignado: null, chofer_asignado: null, urgente: esUrgente, orden_ruta: esUrgente ? 0 : Date.now(), fecha_creacion: firebase.firestore.FieldValue.serverTimestamp(), fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(), coordenadas: coords, motivo_falla: null, foto_evidencia: null };
-                if(d.tip === 'paqueteria') obj.nombre_paqueteria = d.paq;
+                if (viajeEnEdicion) {
+                    // MODO EDICIÓN: Actualizar todos los pedidos dentro de este viaje
+                    const batch = db.batch();
+                    viajeEnEdicion.pedidos_incluidos.forEach(p => {
+                        const ref = db.collection('rutas_logistica').doc(p.id);
+                        const updateData = {
+                            cliente_nombre: d.nom, tipo_destino: d.tip, direccion: d.dir, horario: d.hor, excepcion: d.exc, 
+                            telefono: d.tel, link_maps: d.link, urgente: esUrgente, coordenadas: coords,
+                            fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        if(d.tip === 'paqueteria') updateData.nombre_paqueteria = d.paq;
+                        else updateData.nombre_paqueteria = firebase.firestore.FieldValue.delete(); // Limpiar si cambió de tipo
+                        
+                        batch.update(ref, updateData);
+                    });
+                    await batch.commit();
+                    showToast("Cambios guardados con éxito");
+                } else {
+                    // MODO NUEVO: Crear registro
+                    const obj = { cliente_codigo: d.cli, cliente_nombre: d.nom, tipo_destino: d.tip, direccion: d.dir, horario: d.hor, excepcion: d.exc, telefono: d.tel, link_maps: d.link, estado: "pendiente", vehiculo_asignado: null, chofer_asignado: null, urgente: esUrgente, orden_ruta: esUrgente ? 0 : Date.now(), fecha_creacion: firebase.firestore.FieldValue.serverTimestamp(), fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(), coordenadas: coords, motivo_falla: null, foto_evidencia: null };
+                    if(d.tip === 'paqueteria') obj.nombre_paqueteria = d.paq;
+                    await db.collection('rutas_logistica').doc(d.fac).set(obj);
+                    showToast("Envío registrado con éxito");
+                }
                 
-                await db.collection('rutas_logistica').doc(d.fac).set(obj);
-                showToast("Envío registrado con éxito"); cerrarFormulario();
-            } catch(e) { showToast("Error: " + e.message, "error"); } finally { btn.innerHTML = '<i class="fas fa-save"></i> Registrar en Bandeja'; btn.disabled = false; }
+                cerrarFormulario();
+            } catch(e) { showToast("Error: " + e.message, "error"); } 
+            finally { 
+                btn.innerHTML = viajeEnEdicion ? '<i class="fas fa-save"></i> Guardar Cambios' : '<i class="fas fa-save"></i> Registrar en Bandeja'; 
+                btn.disabled = false; 
+            }
         };
 
         window.abrirConfiguracion = () => { const m = document.getElementById('modal-config'); const c = document.getElementById('modal-config-content'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); c.classList.remove('scale-95'); }, 10); };
