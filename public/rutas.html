@@ -47,8 +47,16 @@
 </head>
 <body class="h-screen flex flex-col lg:flex-row overflow-hidden">
 
-    <!-- Configuración Firebase Centralizada -->
-    <script src="assets/js/firebase-config.js"></script>
+    <!-- Configuración Firebase -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            projectId: "productoseen",
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
 
     <!-- SIDEBAR DE PEDIDOS -->
     <aside class="w-full lg:w-[420px] h-1/2 lg:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg relative">
