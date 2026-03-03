@@ -718,7 +718,7 @@
 
                     // Configurar la Interfaz de Usuario
                     document.getElementById('userRoleName').innerText = userData.nombre || user.email;
-                    document.getElementById('userRoleBadge').innerText = userData.rol === 'admin' ? 'ADMINISTRADOR' : 'CAJERO / ALMACÉN';
+                    document.getElementById('userRoleBadge').innerText = userData.rol === 'admin' ? 'ADMINISTRADOR' : 'ALMACÉN';
                     
                     applyRoleRestrictions(userData.rol);
                     initializeData(); // Solo descargar datos si el login es exitoso
@@ -789,7 +789,7 @@
                 'btn-new-product', 'btn-mass-qr'
             ];
             
-            if (rol === 'cajero') {
+            if (rol === 'almacen') {
                 // OCULTAR TODOS LOS ACCESOS ADMINISTRATIVOS
                 adminElements.forEach(id => {
                     const el = document.getElementById(id);
