@@ -113,7 +113,7 @@
                     </div>
                     <span id="det-status" class="text-[10px] font-black uppercase px-2 py-1 rounded">ESTADO</span>
                 </div>
-                <h3 id="det-cliente" class="text-xl font-black text-white leading-tight mt-2">Cliente</h3>
+                <h3 id="det-cliente" class="text-xl font-black text-white leading-tight mt-2 flex items-center gap-2">Cliente <span id="det-urgente-badge"></span></h3>
                 <p class="text-[11px] text-blue-400 font-bold mt-1 uppercase tracking-wider" id="det-tipo-destino">DESTINO</p>
                 
                 <!-- ALERTA DE FALLA -->
@@ -138,12 +138,13 @@
                     <ul id="det-articulos" class="text-xs text-slate-700 font-medium space-y-2"></ul>
                 </div>
 
-                <!-- SECUENCIA DE RUTA -->
+                <!-- SECUENCIA DE RUTA (CON ORDEN MANUAL) -->
                 <div id="det-ruta-secuencia" class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-5 shadow-sm hidden">
                     <div class="flex justify-between items-center mb-3 border-b border-indigo-100/50 pb-2">
                         <p class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider"><i class="fas fa-route mr-1"></i> Secuencia de Ruta</p>
+                        <p class="text-[8px] text-indigo-500 font-bold uppercase"><i class="fas fa-hand-pointer"></i> Usa las flechas para ordenar</p>
                     </div>
-                    <ul id="lista-secuencia" class="text-xs text-indigo-900 font-medium space-y-2 pl-1 mb-4"></ul>
+                    <ul id="lista-secuencia" class="text-xs text-indigo-900 font-medium space-y-1 mb-4"></ul>
                     
                     <div class="bg-white p-2.5 rounded-lg border border-indigo-100 flex justify-between items-center shadow-sm">
                         <div class="text-center flex-1 border-r border-indigo-50">
@@ -183,7 +184,7 @@
     </main>
 
     <!-- ============================================== -->
-    <!-- MODAL FORMULARIO NUEVO ENVÍO (RESTAURADO)      -->
+    <!-- MODAL FORMULARIO NUEVO ENVÍO                   -->
     <!-- ============================================== -->
     <div id="modal-formulario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] hidden flex items-end justify-center lg:items-center p-0 lg:p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-t-3xl lg:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full lg:translate-y-0 lg:scale-95 transition-transform duration-300 flex flex-col max-h-[90vh] absolute bottom-0 lg:relative lg:bottom-auto" id="modal-formulario-content">
@@ -218,6 +219,16 @@
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre Paquetería <span class="text-red-500">*</span></label>
                     <input type="text" id="form-paqueteria" class="w-full border border-slate-300 bg-slate-50 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" placeholder="Ej. Transportes Castores...">
                 </div>
+
+                <!-- SECCIÓN DE PRIORIDAD/URGENCIA -->
+                <div class="bg-red-50 p-3 rounded-xl border border-red-200 mt-2 flex items-center justify-between cursor-pointer" onclick="document.getElementById('form-urgente').click()">
+                    <div>
+                        <label class="text-xs font-black text-red-700 uppercase tracking-wider cursor-pointer select-none block mb-0.5"><i class="fas fa-siren-on"></i> Envío de Alta Prioridad</label>
+                        <p class="text-[10px] text-red-500/80 font-bold leading-tight">Forzará este viaje al inicio de la ruta del chofer.</p>
+                    </div>
+                    <input type="checkbox" id="form-urgente" class="w-5 h-5 rounded border-red-300 text-red-600 focus:ring-red-500 cursor-pointer shadow-sm">
+                </div>
+
                 <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
                     <label class="block text-xs font-bold text-blue-800 uppercase tracking-wider mb-2 border-b border-blue-200 pb-1"><i class="fas fa-map-marker-alt"></i> Datos de Entrega</label>
                     
@@ -257,10 +268,9 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- MODAL CONFIGURACIÓN DE FLOTA Y CHOFERES        -->
-    <!-- ============================================== -->
+    <!-- MODAL CONFIGURACIÓN -->
     <div id="modal-config" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[3000] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <!-- ... existing config modal content unchanged ... -->
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modal-config-content">
             <div class="bg-slate-900 p-4 flex justify-between items-center text-white">
                 <h3 class="font-bold text-lg"><i class="fas fa-cogs text-blue-400 mr-2"></i> Configuración de Logística</h3>
@@ -271,8 +281,6 @@
                 <button onclick="switchTabConfig('choferes')" id="tab-btn-choferes" class="flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700">Operadores / Choferes</button>
             </div>
             <div class="p-5 h-[400px] overflow-y-auto custom-scroll bg-slate-50">
-                
-                <!-- TAB FLOTA -->
                 <div id="tab-flota" class="space-y-4">
                     <div class="flex gap-2">
                         <input type="text" id="nueva-flota-nombre" placeholder="Nombre de la Unidad (Ej. Estaquitas 01)" class="flex-1 border p-2 rounded-lg text-sm outline-none focus:border-blue-500">
@@ -284,8 +292,6 @@
                     </div>
                     <div id="lista-flota-config" class="space-y-2"></div>
                 </div>
-                
-                <!-- TAB CHOFERES -->
                 <div id="tab-choferes" class="space-y-4 hidden">
                     <div class="flex gap-2">
                         <input type="text" id="nuevo-chofer-nombre" placeholder="Nombre completo del Chofer" class="flex-1 border p-2 rounded-lg text-sm outline-none focus:border-blue-500">
@@ -293,7 +299,6 @@
                     </div>
                     <div id="lista-choferes-config" class="space-y-2"></div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -327,7 +332,7 @@
 
         window.showToast = (msg, type='success') => {
             const t = document.createElement('div');
-            t.className = `toast-enter text-white px-5 py-3 rounded-xl shadow-2xl ${type === 'error' ? 'bg-red-600' : 'bg-slate-800'} text-xs font-bold text-center border border-white/10 pointer-events-auto`;
+            t.className = `toast-enter text-white px-5 py-3 rounded-xl shadow-2xl ${type === 'error' ? 'bg-red-600' : (type==='info' ? 'bg-blue-600' : 'bg-slate-800')} text-xs font-bold text-center border border-white/10 pointer-events-auto`;
             t.innerHTML = msg; document.getElementById('toast-container').appendChild(t);
             setTimeout(() => { t.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => t.remove(), 300); }, 4000);
         };
@@ -353,13 +358,31 @@
             pedidosRaw.forEach(p => {
                 if (p.tipo_destino === 'paqueteria') {
                     const key = `${p.nombre_paqueteria}_${p.estado}`;
-                    if (!paqueteriasMap[key]) paqueteriasMap[key] = { es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, tipo_destino: 'paqueteria', direccion: p.direccion, coordenadas: p.coordenadas, estado: p.estado, vehiculo_asignado: p.vehiculo_asignado, chofer_asignado: p.chofer_asignado, motivo_falla: p.motivo_falla, pedidos_incluidos: [] };
+                    if (!paqueteriasMap[key]) {
+                        paqueteriasMap[key] = { es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, tipo_destino: 'paqueteria', direccion: p.direccion, coordenadas: p.coordenadas, estado: p.estado, vehiculo_asignado: p.vehiculo_asignado, chofer_asignado: p.chofer_asignado, motivo_falla: p.motivo_falla, urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos_incluidos: [] };
+                    }
+                    if (p.urgente) paqueteriasMap[key].urgente = true;
+                    paqueteriasMap[key].orden_ruta = Math.min(paqueteriasMap[key].orden_ruta, p.orden_ruta || 9999999999999);
                     paqueteriasMap[key].pedidos_incluidos.push(p);
-                } else { viajesAgrupados.push({ es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, tipo_destino: 'bodega_cliente', direccion: p.direccion, coordenadas: p.coordenadas, estado: p.estado, vehiculo_asignado: p.vehiculo_asignado, chofer_asignado: p.chofer_asignado, motivo_falla: p.motivo_falla, pedidos_incluidos: [p] }); }
+                } else { 
+                    viajesAgrupados.push({ es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, tipo_destino: 'bodega_cliente', direccion: p.direccion, coordenadas: p.coordenadas, estado: p.estado, vehiculo_asignado: p.vehiculo_asignado, chofer_asignado: p.chofer_asignado, motivo_falla: p.motivo_falla, urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos_incluidos: [p] }); 
+                }
             });
             Object.values(paqueteriasMap).forEach(g => viajesAgrupados.push(g));
             viajesAgrupados.sort((a,b) => { const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 }; return (ord[a.estado] || 5) - (ord[b.estado] || 5); });
+            
             renderizarLista(); actualizarMapa();
+            
+            // Mantener ventana de detalle actualizada si estaba abierta
+            if (viajeSeleccionado) {
+                const actualizado = viajesAgrupados.find(v => v.id === viajeSeleccionado.id);
+                if (actualizado) {
+                    viajeSeleccionado = actualizado;
+                    seleccionarViaje(viajeSeleccionado.id, true); // true = no animar mapa para no marear
+                } else {
+                    cerrarDetalle();
+                }
+            }
         }
 
         window.setFilter = (filtro) => {
@@ -372,6 +395,13 @@
         function renderizarLista() {
             const container = document.getElementById('lista-pedidos'); container.innerHTML = '';
             const filtrados = filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual);
+            
+            // Sub-ordenar para mostrar prioritarios primero en el sidebar
+            filtrados.sort((a, b) => {
+                if(a.estado === b.estado) return (a.orden_ruta || 99999999999) - (b.orden_ruta || 99999999999);
+                return 0;
+            });
+
             if(filtrados.length === 0) return container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold"><i class="fas fa-check-circle text-4xl mb-3 text-slate-300"></i><br>Bandeja limpia.</div>`; 
 
             filtrados.forEach(v => {
@@ -386,7 +416,9 @@
                 if (v.estado === 'fallido') bHtml = `<div class="mt-2 pt-2 border-t border-red-100 text-[10px] font-bold text-red-600 truncate"><i class="fas fa-info-circle"></i> ${v.motivo_falla || 'Problema reportado'}</div>`;
                 else if (v.vehiculo_asignado && v.estado !== 'pendiente') bHtml = `<div class="mt-2 pt-2 border-t border-slate-100 flex gap-2 text-[9px] font-bold text-slate-500"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded"><i class="fas fa-truck text-blue-400"></i> ${flotaDB.find(f => f.id === v.vehiculo_asignado)?.nombre || 'Vehículo'}</span></div>`;
 
-                container.innerHTML += `<div onclick="seleccionarViaje('${v.id}')" class="pedido-card ${isActive} ${v.es_grupo?'paqueteria-group':'bg-white'} p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer"><div class="flex justify-between items-start mb-2"><span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${stClass} flex items-center gap-1"><i class="fas ${icClass}"></i> ${stText}</span></div><h4 class="font-black text-slate-800 text-sm truncate mb-1">${v.cliente_nombre}</h4><p class="text-[10px] text-slate-500 truncate mb-1"><i class="fas fa-map-marker-alt text-red-400 w-4"></i> ${v.direccion}</p>${bHtml}</div>`;
+                const badgeUrgente = v.urgente ? `<span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-[8px] font-black uppercase ml-2 border border-red-600 shadow-sm"><i class="fas fa-siren-on"></i> Urgente</span>` : '';
+
+                container.innerHTML += `<div onclick="seleccionarViaje('${v.id}')" class="pedido-card ${isActive} ${v.es_grupo?'paqueteria-group':'bg-white'} ${v.urgente?'border-l-4 border-l-red-500':''} p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer"><div class="flex justify-between items-start mb-2"><span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${stClass} flex items-center gap-1"><i class="fas ${icClass}"></i> ${stText}</span></div><h4 class="font-black text-slate-800 text-sm truncate mb-1">${v.cliente_nombre}${badgeUrgente}</h4><p class="text-[10px] text-slate-500 truncate mb-1"><i class="fas fa-map-marker-alt text-red-400 w-4"></i> ${v.direccion}</p>${bHtml}</div>`;
             });
         }
 
@@ -425,14 +457,13 @@
             if(bounds.length > 0 && !viajeSeleccionado) map.fitBounds(bounds, { padding: [50, 50] });
         }
 
-        window.seleccionarViaje = (id) => {
+        window.seleccionarViaje = (id, skipAnimation = false) => {
             viajeSeleccionado = viajesAgrupados.find(x => x.id === id); if(!viajeSeleccionado) return;
             renderizarLista(); 
 
-            // Trazado de Rutas con Routing Machine
             if(viajeSeleccionado.coordenadas) {
                 const cDest = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
-                map.setView(cDest, 14, { animate: true });
+                if(!skipAnimation) map.setView(cDest, 14, { animate: true });
                 if(rutasTrazadas) map.removeControl(rutasTrazadas);
                 
                 const cSec = document.getElementById('det-ruta-secuencia');
@@ -442,33 +473,48 @@
                 if (viajeSeleccionado.estado === 'camino' || viajeSeleccionado.estado === 'entregado') {
                     // Viaje grupal (Todos los puntos del mismo camión)
                     const viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+                    
+                    // Ordenar matemáticamente por orden de ruta (urgentes ya traen orden bajo)
+                    viajesMismoCamion.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
+
                     let wps = [coordPlantaEEN]; 
-                    lSec.innerHTML += `<li class="flex items-center gap-2 pb-1"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] shadow"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">EEN</b> (Carga)</span></li>`;
+                    lSec.innerHTML += `<li class="flex items-center gap-2 pb-1"><div class="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] shadow border-2 border-white ml-8"><i class="fas fa-store"></i></div> <span class="text-xs"><b class="text-indigo-900">EEN</b> (Carga Base)</span></li>`;
                     
                     viajesMismoCamion.forEach((v, idx) => {
                         wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
-                        lSec.innerHTML += `<li class="flex items-center gap-2 py-0.5"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] shadow">${idx + 1}</div> <span class="truncate"><b>${v.cliente_nombre}</b></span></li>`;
+                        
+                        // Botones de Reorden Manual
+                        const btnUp = idx > 0 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, -1); event.stopPropagation();" class="text-slate-400 hover:text-blue-500 bg-slate-50 hover:bg-blue-50 border border-slate-200 rounded p-1 transition"><i class="fas fa-chevron-up text-[10px]"></i></button>` : `<div class="w-[26px] h-[26px]"></div>`;
+                        const btnDown = idx < viajesMismoCamion.length - 1 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, 1); event.stopPropagation();" class="text-slate-400 hover:text-blue-500 bg-slate-50 hover:bg-blue-50 border border-slate-200 rounded p-1 transition mt-0.5"><i class="fas fa-chevron-down text-[10px]"></i></button>` : `<div class="w-[26px] h-[26px]"></div>`;
+                        const badgeUrgente = v.urgente ? `<span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-[8px] font-black uppercase ml-1 shadow-sm">Urgente</span>` : '';
+                        const colorBola = v.urgente ? 'bg-red-600' : 'bg-blue-600';
+
+                        lSec.innerHTML += `<li class="flex items-center gap-2 py-1.5 group border-b border-indigo-100/50 last:border-0 relative">
+                            <div class="flex flex-col opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity absolute left-0 z-10 bg-white/80 rounded">${btnUp}${btnDown}</div>
+                            <div class="w-6 h-6 ${colorBola} text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow border-2 border-white ml-8 shrink-0">${idx + 1}</div>
+                            <span class="truncate text-xs flex-1"><b class="${v.urgente?'text-red-700':'text-slate-800'}">${v.cliente_nombre}</b>${badgeUrgente}</span>
+                        </li>`;
                     });
                     wps.push(coordPlantaEEN); 
-                    lSec.innerHTML += `<li class="flex items-center gap-2 pt-1 border-t border-indigo-100/50"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] shadow"><i class="fas fa-flag-checkered"></i></div> <span><b class="text-indigo-900">EEN</b> (Retorno)</span></li>`;
+                    lSec.innerHTML += `<li class="flex items-center gap-2 pt-1 border-t border-indigo-200 mt-1"><div class="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] shadow border-2 border-white ml-8"><i class="fas fa-flag-checkered"></i></div> <span class="text-xs"><b class="text-indigo-900">EEN</b> (Retorno)</span></li>`;
                     cSec.classList.remove('hidden');
 
                     rutasTrazadas = L.Routing.control({
                         waypoints: wps,
                         lineOptions: { styles: [{color: '#3b82f6', weight: 5, opacity: 0.8}] }, 
                         createMarker: function() { return null; },
-                        fitSelectedRoutes: true, show: false, language: 'es'
+                        fitSelectedRoutes: !skipAnimation, show: false, language: 'es'
                     }).addTo(map);
 
                 } else {
                     // Viaje individual
                     cSec.classList.remove('hidden'); 
-                    lSec.innerHTML = `<li class="flex items-center gap-2 pb-1"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] shadow"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">EEN</b> (Salida)</span></li><li class="flex items-center gap-2 py-1"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] shadow"><i class="fas fa-map-marker-alt"></i></div> <span class="truncate"><b>${viajeSeleccionado.cliente_nombre}</b></span></li>`;
+                    lSec.innerHTML = `<li class="flex items-center gap-2 pb-1"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] shadow ml-8"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">EEN</b> (Salida)</span></li><li class="flex items-center gap-2 py-1"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] shadow ml-8"><i class="fas fa-map-marker-alt"></i></div> <span class="truncate"><b>${viajeSeleccionado.cliente_nombre}</b></span></li>`;
                     
                     rutasTrazadas = L.Routing.control({
                         waypoints: [coordPlantaEEN, cDest],
                         lineOptions: { styles: [{color: '#cbd5e1', weight: 4, opacity: 0.7, dashArray: '5, 10'}] }, 
-                        createMarker: function() { return null; }, fitSelectedRoutes: true, show: false
+                        createMarker: function() { return null; }, fitSelectedRoutes: !skipAnimation, show: false
                     }).addTo(map);
                 }
 
@@ -478,7 +524,7 @@
                 });
             }
 
-            document.getElementById('det-folio').innerText = viajeSeleccionado.id; document.getElementById('det-cliente').innerText = viajeSeleccionado.cliente_nombre; document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
+            document.getElementById('det-folio').innerText = viajeSeleccionado.id; document.getElementById('det-cliente').innerHTML = `${viajeSeleccionado.cliente_nombre}`; document.getElementById('det-urgente-badge').innerHTML = viajeSeleccionado.urgente ? `<span class="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-black uppercase align-middle ml-1"><i class="fas fa-siren-on"></i> Urgente</span>` : ``; document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
             
             const badge = document.getElementById('det-status'); const selectorCont = document.getElementById('selector-vehiculo-container'); const btnIniciar = document.getElementById('btn-iniciar'); const btnReactivar = document.getElementById('btn-reactivar'); const alertaFalla = document.getElementById('det-alerta-falla');
             selectorCont.classList.add('hidden'); btnIniciar.classList.add('hidden'); btnReactivar.classList.add('hidden'); alertaFalla.classList.add('hidden');
@@ -496,14 +542,47 @@
         window.cerrarDetalle = () => { viajeSeleccionado = null; renderizarLista(); if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; } const card = document.getElementById('detalle-flotante'); card.classList.add('translate-y-full', 'lg:translate-x-full'); setTimeout(() => card.classList.add('hidden'), 300); }
         window.copiarDireccion = () => { if(viajeSeleccionado) { navigator.clipboard.writeText(viajeSeleccionado.direccion).then(() => showToast("Dirección copiada")).catch(() => document.execCommand('copy')); } };
 
+        // ====== REORDENAMIENTO MANUAL DE LA RUTA ======
+        window.moverParada = async (vehiculoId, index, direccion) => {
+            const viajesCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === vehiculoId && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+            viajesCamion.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
+
+            const targetIdx = index + direccion;
+            if(targetIdx < 0 || targetIdx >= viajesCamion.length) return;
+
+            // Asignar un orden limpio múltiplo de 10 a todo el arreglo actual
+            viajesCamion.forEach((v, i) => v.orden_ruta_temp = (i + 1) * 10);
+
+            // Hacer el swap de valores de orden
+            const temp = viajesCamion[index].orden_ruta_temp;
+            viajesCamion[index].orden_ruta_temp = viajesCamion[targetIdx].orden_ruta_temp;
+            viajesCamion[targetIdx].orden_ruta_temp = temp;
+
+            showToast("Recalculando nueva ruta...", "info");
+
+            const batch = db.batch();
+            viajesCamion.forEach(v => {
+                v.pedidos_incluidos.forEach(p => {
+                    batch.update(db.collection('rutas_logistica').doc(p.id), { orden_ruta: v.orden_ruta_temp });
+                });
+            });
+
+            try {
+                await batch.commit();
+                // Firestore onSnapshot se encargará de re-dibujar la UI instantáneamente.
+            } catch(e) {
+                showToast("Error al reordenar", "error");
+            }
+        };
+
         // ====== LÓGICA DEL FORMULARIO DE NUEVO ENVÍO ======
         window.abrirFormulario = () => {
             const modal = document.getElementById('modal-formulario'); const content = document.getElementById('modal-formulario-content');
-            // Reset campos
             document.getElementById('form-factura').value = ''; document.getElementById('form-cliente-codigo').value = ''; document.getElementById('form-cliente').value = '';
             document.getElementById('form-tipo').value = 'bodega_cliente'; document.getElementById('form-paqueteria').value = '';
             document.getElementById('form-direccion').value = ''; document.getElementById('form-horario').value = ''; document.getElementById('form-excepcion').value = '';
             document.getElementById('form-telefono').value = ''; document.getElementById('form-link-maps').value = '';
+            document.getElementById('form-urgente').checked = false; // Reset urgente
             document.getElementById('form-direcciones-guardadas').classList.add('hidden');
             togglePaqueteria();
             
@@ -574,6 +653,7 @@
         }
 
         window.guardarEnvioManual = async () => {
+            const esUrgente = document.getElementById('form-urgente').checked;
             const d = {
                 fac: document.getElementById('form-factura').value.trim().toUpperCase(),
                 cli: document.getElementById('form-cliente-codigo').value.trim().toUpperCase(),
@@ -594,7 +674,6 @@
             let coords = await obtenerCoordenadasReales(d.dir);
 
             try {
-                // Guardar/Actualizar BD Clientes
                 const refCliente = db.collection('clientes_logistica').doc(d.cli);
                 const docCli = await refCliente.get();
                 let dirs = docCli.exists ? docCli.data().direcciones || [] : [];
@@ -602,11 +681,11 @@
                 dirs.push({ direccion: d.dir, horario: d.hor, excepcion: d.exc, telefono: d.tel, linkMaps: d.link });
                 await refCliente.set({ nombre: d.nom, direcciones: dirs }, { merge: true });
 
-                // Crear Viaje
                 const obj = {
                     cliente_codigo: d.cli, cliente_nombre: d.nom, tipo_destino: d.tip, direccion: d.dir,
                     horario: d.hor, excepcion: d.exc, telefono: d.tel, link_maps: d.link,
                     estado: "pendiente", vehiculo_asignado: null, chofer_asignado: null,
+                    urgente: esUrgente, orden_ruta: esUrgente ? 0 : Date.now(), // Los urgentes van al top con orden_ruta: 0
                     fecha_creacion: firebase.firestore.FieldValue.serverTimestamp(),
                     coordenadas: coords, motivo_falla: null
                 };
@@ -676,35 +755,22 @@
         window.iniciarRuta = () => { const v = document.getElementById('vehiculo-seleccionado').value; const c = document.getElementById('selector-chofer').value; if(!v || !c) return showToast("Falta unidad o chofer", "error"); ejecutarAccionBatch('camino', v, c); };
         window.seleccionarVehiculo = (id) => { document.querySelectorAll('.btn-vehiculo').forEach(b => { b.classList.remove('border-blue-500', 'bg-blue-50'); b.classList.add('border-slate-200', 'bg-white'); }); document.querySelector(`.btn-vehiculo[data-vehiculo="${id}"]`)?.classList.add('border-blue-500', 'bg-blue-50'); document.getElementById('vehiculo-seleccionado').value = id; };
 
-        // ====== CARGA DE DATOS MAESTROS (FIREBASE) ======
+        // ====== CARGA DE DATOS MAESTROS ======
         function cargarDatosMaestros() {
-            // Clientes (Para Autocompletado del Formulario)
             db.collection('clientes_logistica').onSnapshot(snap => {
-                clientesDB = [];
-                const dl = document.getElementById('clientes-list');
-                if(dl) dl.innerHTML = '';
-                snap.forEach(doc => {
-                    const data = { codigo: doc.id, ...doc.data() };
-                    clientesDB.push(data);
-                    if(dl) dl.innerHTML += `<option value="${data.codigo}">${data.nombre}</option>`;
-                });
+                clientesDB = []; const dl = document.getElementById('clientes-list'); if(dl) dl.innerHTML = '';
+                snap.forEach(doc => { const data = { codigo: doc.id, ...doc.data() }; clientesDB.push(data); if(dl) dl.innerHTML += `<option value="${data.codigo}">${data.nombre}</option>`; });
             });
-
-            // Flota
             db.collection('flota').onSnapshot(snap => { 
                 flotaDB = []; snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() })); 
                 renderizarFlotaUI();
                 document.getElementById('grid-vehiculos').innerHTML = flotaDB.map(v => `<button onclick="seleccionarVehiculo('${v.id}')" class="btn-vehiculo p-3 border-2 rounded-xl text-xs font-bold bg-white transition hover:border-blue-300" data-vehiculo="${v.id}">${v.nombre}</button>`).join(''); 
             });
-            
-            // Choferes
             db.collection('choferes').onSnapshot(snap => { 
                 choferesDB = []; snap.forEach(doc => choferesDB.push({ id: doc.id, ...doc.data() })); 
                 renderizarChoferesUI();
                 document.getElementById('selector-chofer').innerHTML = '<option value="">-- Seleccionar Operador --</option>' + choferesDB.map(c => `<option value="${c.id}">${c.nombre}</option>`).join(''); 
             });
-            
-            // Rutas Principales
             db.collection('rutas_logistica').onSnapshot(snap => { 
                 const arr = []; snap.forEach(doc => arr.push({ id: doc.id, ...doc.data() })); 
                 agruparYConsolidar(arr); 
