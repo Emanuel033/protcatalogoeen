@@ -14,6 +14,11 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+    <!-- PWA Manifest & App Config -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f4f4f5">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -83,26 +88,9 @@
 <body class="h-screen flex flex-col overflow-hidden relative pb-[70px] md:pb-0">
 
     <!-- ========================================== -->
-    <!-- CREDENCIALES FIREBASE -->
+    <!-- CREDENCIALES FIREBASE CENTRALIZADAS -->
     <!-- ========================================== -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
-            authDomain: "productoseen.firebaseapp.com",
-            databaseURL: "https://productoseen-default-rtdb.firebaseio.com",
-            projectId: "productoseen",
-            storageBucket: "productoseen.firebasestorage.app",
-            messagingSenderId: "1052892398028",
-            appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        
-        const db = firebase.firestore();
-        const rtdb = firebase.database();
-        const productsRef = db.collection('productos_master');
-        const facturacionRef = db.collection('catalogo_facturacion');
-        const bitacoraRef = db.collection('bitacora_inventario'); 
-    </script>
+    <script src="firebase-config.js"></script>
 
     <!-- VISOR DE IMÁGENES -->
     <div id="imageLightbox" class="fixed inset-0 bg-slate-900/95 z-[100] hidden flex flex-col items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="closeImageLightbox()">
@@ -130,6 +118,7 @@
                 <button onclick="switchTab('master')" id="dtTab-master" class="px-5 py-2 rounded-lg font-bold text-sm transition-all text-blue-700 bg-white shadow-sm">Catálogo</button>
                 <button onclick="switchTab('scanner')" id="dtTab-scanner" class="px-5 py-2 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 transition-all">Escáner</button>
                 <button onclick="switchTab('import')" id="dtTab-import" class="px-5 py-2 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 transition-all relative">Importar <span id="dtImportBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full shadow hidden">0</span></button>
+                <button onclick="switchTab('cashiers')" id="dtTab-cashiers" class="px-5 py-2 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 transition-all">Cajeros</button>
             </div>
             <button onclick="openMassActions()" class="hidden md:flex bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm transition shadow-sm items-center gap-2"><i class="fas fa-qrcode"></i> QRs</button>
             <button onclick="openEditModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-slate-900/20 flex items-center gap-2"><i class="fas fa-plus"></i> <span class="hidden sm:inline">Nuevo</span></button>
@@ -140,7 +129,7 @@
     <div class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 shrink-0 z-0" id="globalSearchContainer">
         <div class="relative w-full sm:max-w-md">
             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="globalSearch" oninput="handleGlobalSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-11 pr-4 py-3 rounded-2xl input-modern text-sm font-semibold shadow-sm">
+            <input type="text" id="globalSearch" oninput="debouncedSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-11 pr-4 py-3 rounded-2xl input-modern text-sm font-semibold shadow-sm">
         </div>
         <div class="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scroll">
             
@@ -315,19 +304,65 @@
                         <p class="text-sm text-slate-600 mt-1 font-medium max-w-xl">Detectamos estos códigos en tu sistema de facturación que aún no están creados visualmente.</p>
                     </div>
                 </div>
-                <button onclick="exportImportToExcel()" class="z-10 bg-white hover:bg-emerald-50 text-emerald-600 px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 shadow-sm border border-emerald-100 whitespace-nowrap"><i class="fas fa-file-excel text-lg"></i> <span class="hidden sm:inline">Exportar Pendientes</span></button>
+                <div class="flex flex-col sm:flex-row gap-3 z-10 w-full sm:w-auto">
+                    <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event)">
+                    <button onclick="document.getElementById('csvSyncInput').click()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"><i class="fas fa-upload text-lg"></i> <span class="hidden sm:inline">Sincronizar CSV</span></button>
+                    <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-white hover:bg-emerald-50 text-emerald-600 px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm border border-emerald-100 whitespace-nowrap"><i class="fas fa-file-excel text-lg"></i> <span class="hidden sm:inline">Exportar Pendientes</span></button>
+                </div>
             </div>
             <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                 <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll p-1">
-                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[600px]">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[500px]">
                         <thead class="bg-slate-50/80 backdrop-blur sticky top-0 z-10 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
                             <tr>
-                                <th class="px-6 py-4 w-1/4 border-b border-slate-200">Cód. Facturación</th>
-                                <th class="px-6 py-4 border-b border-slate-200">Descripción Oficial (Excel)</th>
-                                <th class="px-6 py-4 text-right w-32 border-b border-slate-200">Acción</th>
+                                <th class="px-6 py-4 border-b border-slate-200">Cód. Facturación</th>
+                                <th class="px-6 py-4 border-b border-slate-200">Descripción Oficial</th>
+                                <th class="px-6 py-4 text-right border-b border-slate-200">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="importTableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: CAJEROS -->
+        <div id="view-cashiers" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
+            <!-- Formulario Nuevo Cajero -->
+            <div class="mb-6 shrink-0 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fas fa-user-plus"></i></div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 text-lg leading-tight">Nuevo Cajero</h2>
+                        <p class="text-[11px] text-slate-500 font-semibold">Registra accesos para punto de venta</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre del Cajero</label>
+                        <input type="text" id="newCashierName" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-slate-900 text-sm" placeholder="Ej. Juan Pérez">
+                    </div>
+                    <div class="w-full sm:w-48">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">PIN (4+ dígitos)</label>
+                        <input type="password" id="newCashierPin" class="w-full input-modern px-4 py-3 rounded-xl font-mono text-center text-slate-900 text-sm font-black tracking-widest" placeholder="****">
+                    </div>
+                    <button onclick="addCashier()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 h-[46px]">Registrar</button>
+                </div>
+            </div>
+
+            <!-- Tabla de Cajeros -->
+            <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll p-1">
+                    <table class="w-full text-left text-sm whitespace-nowrap min-w-[500px]">
+                        <thead class="bg-slate-50/80 backdrop-blur sticky top-0 z-10 text-slate-500 text-[11px] uppercase tracking-wider font-bold">
+                            <tr>
+                                <th class="px-6 py-4 border-b border-slate-200">Nombre</th>
+                                <th class="px-6 py-4 border-b border-slate-200">PIN de Acceso</th>
+                                <th class="px-6 py-4 text-center border-b border-slate-200">Estado</th>
+                                <th class="px-6 py-4 text-right border-b border-slate-200">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cashiersTableBody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
@@ -340,6 +375,7 @@
             <button onclick="switchTab('master')" id="mbTab-master" class="flex flex-col items-center justify-center w-full h-full text-blue-600 transition-colors"><i class="fas fa-layer-group text-xl mb-1 transition-transform -translate-y-1 scale-110"></i><span class="text-[10px] font-bold tracking-wide">Catálogo</span></button>
             <button onclick="switchTab('scanner')" id="mbTab-scanner" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors"><i class="fas fa-qrcode text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Escáner</span></button>
             <button onclick="switchTab('import')" id="mbTab-import" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors relative"><i class="fas fa-cloud-download-alt text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Importar</span><span id="mbImportBadge" class="absolute top-2 right-6 bg-red-500 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow hidden">0</span></button>
+            <button onclick="switchTab('cashiers')" id="mbTab-cashiers" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors"><i class="fas fa-user-tie text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Cajeros</span></button>
         </div>
     </nav>
 
@@ -356,7 +392,7 @@
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fas fa-layer-group text-lg"></i></div><div><h2 class="font-black text-slate-900 leading-tight">Edición en Lote</h2><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider"><span id="massEditCount">0</span> elementos</p></div></div>
-                <button onclick="closeModal('massEditModal')" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+                <button onclick="closeModal('massEditModal')" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-50 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6 space-y-5">
                 <p class="text-[11px] font-medium text-slate-500 bg-blue-50/50 p-3 rounded-xl border border-blue-100">Deja en blanco lo que NO quieras cambiar.</p>
@@ -547,11 +583,41 @@
         </div>
     </div>
 
+    <!-- Custom Dialog Modal -->
+    <div id="customDialogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100 p-6">
+            <h3 id="customDialogMsg" class="font-black text-slate-800 text-sm mb-4 whitespace-pre-line text-center"></h3>
+            <input type="text" id="customDialogInput" class="w-full input-modern px-4 py-3 rounded-xl font-bold text-sm text-slate-800 mb-5 hidden text-center" autocomplete="off">
+            <div class="flex gap-3 justify-center">
+                <button id="customDialogCancel" class="px-6 py-3 text-slate-600 font-bold text-sm hover:bg-slate-100 rounded-xl transition w-full">Cancelar</button>
+                <button id="customDialogConfirm" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 text-sm transition-all w-full">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay de Sincronización -->
+    <div id="syncOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[300] hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <i class="fas fa-sync fa-spin text-6xl text-blue-500 mb-6 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"></i>
+        <h2 class="text-white font-black text-2xl mb-2 tracking-tight">Sincronizando...</h2>
+        <p id="syncStatusText" class="text-blue-200 font-bold text-sm text-center max-w-sm bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700">Analizando archivo</p>
+    </div>
+
     <div id="toast" class="fixed top-6 md:top-auto md:bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] hidden z-[100] font-bold text-sm flex items-center gap-3 w-[90%] md:w-max transition-all border border-slate-700">
         <div id="toastIconContainer" class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0"><i id="toastIcon" class="fas fa-check text-green-400"></i></div><span id="toastMsg" class="flex-1"></span>
     </div>
 
     <script>
+        // ==========================================
+        // REGISTRO DE SERVICE WORKER (PWA)
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker PWA activado.'))
+                    .catch(err => console.log('Error PWA:', err));
+            });
+        }
+
         // ==========================================
         // CONFIGURACIÓN API (IMGBB) 
         // ==========================================
@@ -561,15 +627,15 @@
         let allItems = []; 
         let facturacionCatalog = []; 
         let baseItems = [];
+        let cashiersList = [];
         let currentTab = 'master';
         let currentMasterView = 'desglose'; 
         let subcollectionListener = null;
         let html5QrcodeScanner = null;
         let currentScanVariants = []; 
         
-        let heredarOptionsList = []; // Para el buscador del dropdown
+        let heredarOptionsList = []; 
 
-        // Cerrar Dropdown de "Heredar" si se hace clic fuera
         document.addEventListener('click', function(event) {
             const drop = document.getElementById('heredarDropdownList');
             const input = document.getElementById('heredarSearchInput');
@@ -577,6 +643,59 @@
                 drop.classList.add('hidden');
             }
         });
+
+        function customConfirm(msg) {
+            return new Promise(resolve => {
+                const modal = document.getElementById('customDialogModal');
+                const msgEl = document.getElementById('customDialogMsg');
+                const inputEl = document.getElementById('customDialogInput');
+                const btnCancel = document.getElementById('customDialogCancel');
+                const btnConfirm = document.getElementById('customDialogConfirm');
+
+                msgEl.innerText = msg;
+                inputEl.classList.add('hidden');
+                btnCancel.classList.remove('hidden');
+                
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+                const cleanup = () => {
+                    modal.classList.add('opacity-0');
+                    setTimeout(() => modal.classList.add('hidden'), 300);
+                    btnCancel.onclick = null; btnConfirm.onclick = null;
+                };
+
+                btnCancel.onclick = () => { cleanup(); resolve(false); };
+                btnConfirm.onclick = () => { cleanup(); resolve(true); };
+            });
+        }
+
+        function customPrompt(msg, defaultVal = '') {
+            return new Promise(resolve => {
+                const modal = document.getElementById('customDialogModal');
+                const msgEl = document.getElementById('customDialogMsg');
+                const inputEl = document.getElementById('customDialogInput');
+                const btnCancel = document.getElementById('customDialogCancel');
+                const btnConfirm = document.getElementById('customDialogConfirm');
+
+                msgEl.innerText = msg;
+                inputEl.value = defaultVal;
+                inputEl.classList.remove('hidden');
+                btnCancel.classList.remove('hidden');
+
+                modal.classList.remove('hidden');
+                setTimeout(() => { modal.classList.remove('opacity-0'); inputEl.focus(); }, 10);
+
+                const cleanup = () => {
+                    modal.classList.add('opacity-0');
+                    setTimeout(() => modal.classList.add('hidden'), 300);
+                    btnCancel.onclick = null; btnConfirm.onclick = null;
+                };
+
+                btnCancel.onclick = () => { cleanup(); resolve(null); };
+                btnConfirm.onclick = () => { cleanup(); resolve(inputEl.value); };
+            });
+        }
 
         function openImageLightbox(src) {
             if(!src || src.includes('placeholder')) return;
@@ -632,14 +751,13 @@
                 const response = await fetch(`${IMGBB_URL_ENDPOINT}?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
                 const data = await response.json();
                 if(data.success) {
-                    urlInput.value = data.data.url; preview.src = data.data.url;    
+                    urlInput.value = data.data.url; preview.src = data.data.url;   
                     showToast("Imagen subida con éxito");
                 } else showToast("Error al procesar en ImgBB", "error");
             } catch (error) { showToast("Error de conexión al subir la imagen", "error");
             } finally { status.classList.add('hidden'); btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); event.target.value = ''; }
         }
 
-        // ====== LÓGICA DE RECURSIÓN PARA STOCKS ======
         function getCalculatedStock(itemId, visited = new Set()) {
             if (visited.has(itemId)) return 0;
             visited.add(itemId);
@@ -660,12 +778,11 @@
             return maxKits === Infinity ? 0 : maxKits;
         }
 
-        // ====== VALIDACIÓN EXACTA DE FALTANTES ======
         function isProductPending(p) {
             const tipo = p.tipo_item || 'PIEZA_BASE';
             
             if (tipo === 'PIEZA_BASE') {
-                return !p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '';
+                return !p.codigo_sistema_oficial || String(p.codigo_sistema_oficial).trim() === '';
             }
             
             if (tipo === 'KIT_FLEXIBLE') {
@@ -674,18 +791,18 @@
             }
 
             if (tipo === 'KIT_OFICIAL') {
-                if (!p.codigo_sistema_oficial || p.codigo_sistema_oficial.trim() === '') return true;
+                if (!p.codigo_sistema_oficial || String(p.codigo_sistema_oficial).trim() === '') return true;
                 if (!p.hereda_empaques_de) return true;
             }
 
             return false;
         }
 
-        // ====== BADGE GLOBAL DE IMPORTACIONES PENDIENTES ======
         function getTotalPendingToImport() {
-            const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
+            // Protección contra errores en filter
+            const masterCodes = allItems.map(p => String(p.codigo_sistema_oficial || '')).filter(Boolean);
             return facturacionCatalog.filter(fact => {
-                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id;
+                const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || '');
                 return !masterCodes.includes(code);
             }).length;
         }
@@ -701,7 +818,6 @@
             });
         }
 
-        // ====== LISTENERS FIREBASE ======
         productsRef.onSnapshot((snapshot) => {
             allItems = []; baseItems = []; let pendingCount = 0;
             snapshot.forEach((doc) => {
@@ -711,16 +827,18 @@
             });
             
             allItems.forEach(p => { if(isProductPending(p)) pendingCount++; });
+            
+            // BLINDAJE DE FECHAS: Protege si fecha_creacion viene en string o nulo
             allItems.sort((a, b) => {
-                const dateA = a.fecha_creacion ? a.fecha_creacion.toDate() : new Date(0);
-                const dateB = b.fecha_creacion ? b.fecha_creacion.toDate() : new Date(0);
+                const dateA = (a.fecha_creacion && typeof a.fecha_creacion.toDate === 'function') ? a.fecha_creacion.toDate() : new Date(a.fecha_creacion || 0);
+                const dateB = (b.fecha_creacion && typeof b.fecha_creacion.toDate === 'function') ? b.fecha_creacion.toDate() : new Date(b.fecha_creacion || 0);
                 return dateB - dateA;
             });
 
             document.getElementById('count-total').innerText = allItems.length;
             document.getElementById('count-pending').innerText = pendingCount;
             
-            updateGlobalImportBadge(); // Actualiza badge independientemente de la pestaña
+            updateGlobalImportBadge();
 
             if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
             if(currentTab === 'import') renderImportTable(); 
@@ -730,10 +848,16 @@
             facturacionCatalog = [];
             snapshot.forEach(doc => { facturacionCatalog.push({ id: doc.id, ...doc.data() }); });
             
-            updateGlobalImportBadge(); // Actualiza badge independientemente de la pestaña
+            updateGlobalImportBadge();
 
             if(currentTab === 'master') renderGroupedTable();
             if(currentTab === 'import') renderImportTable();
+        });
+
+        cashiersRef.onSnapshot((snapshot) => {
+            cashiersList = [];
+            snapshot.forEach(doc => { cashiersList.push({ id: doc.id, ...doc.data() }); });
+            if(currentTab === 'cashiers') renderCashiers();
         });
 
         bitacoraRef.orderBy('fecha', 'desc').limit(20).onSnapshot(snap => {
@@ -743,7 +867,7 @@
             container.innerHTML = '';
             snap.forEach(doc => {
                 const data = doc.data();
-                const fecha = data.fecha ? data.fecha.toDate() : new Date();
+                const fecha = (data.fecha && typeof data.fecha.toDate === 'function') ? data.fecha.toDate() : new Date();
                 const strHora = fecha.toLocaleString('es-MX', {hour:'2-digit', minute:'2-digit'});
                 const strDia = fecha.toLocaleString('es-MX', {day: '2-digit', month: 'short'});
                 const isPos = data.cambio > 0;
@@ -766,27 +890,41 @@
         });
 
         function switchTab(tab) {
-            currentTab = tab; clearBulkSelection();
-            const tabs = ['master', 'import', 'scanner'];
+            currentTab = tab; 
+            clearBulkSelection();
+            const tabs = ['master', 'import', 'scanner', 'cashiers'];
+            
             tabs.forEach(t => {
                 const dtBtn = document.getElementById(`dtTab-${t}`);
                 if (dtBtn) dtBtn.className = t === tab ? "px-5 py-2 rounded-lg font-bold text-sm transition-all text-blue-700 bg-white shadow-sm" : "px-5 py-2 rounded-lg font-bold text-sm text-slate-500 hover:text-slate-800 transition-all " + (t==='import'?'relative':'');
+                
                 const mbBtn = document.getElementById(`mbTab-${t}`);
                 if (mbBtn) {
                     mbBtn.className = t === tab ? "flex flex-col items-center justify-center w-full h-full text-blue-600 transition-colors" : "flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors " + (t==='import'?'relative':'');
                     if(t===tab) mbBtn.querySelector('i').classList.add('-translate-y-1', 'scale-110'); else mbBtn.querySelector('i').classList.remove('-translate-y-1', 'scale-110');
                 }
+                
                 const view = document.getElementById(`view-${t}`);
-                if(view) t === tab ? view.classList.remove('hidden') : view.classList.add('hidden');
+                if(view) {
+                    if (t === tab) {
+                        view.classList.remove('hidden');
+                    } else {
+                        view.classList.add('hidden');
+                    }
+                }
             });
 
-            if(tab === 'scanner') { document.getElementById('globalSearchContainer').classList.add('hidden'); } 
-            else {
+            if(tab === 'scanner' || tab === 'cashiers') { 
+                document.getElementById('globalSearchContainer').classList.add('hidden'); 
+            } else {
                 document.getElementById('globalSearchContainer').classList.remove('hidden');
-                stopScanner(); 
+                stopScanner();
                 document.getElementById('globalSearch').value = '';
                 if(tab === 'master') { filterTable(); renderGroupedTable(); }
                 if(tab === 'import') renderImportTable();
+            }
+            if(tab === 'cashiers') {
+                renderCashiers();
             }
         }
 
@@ -810,6 +948,15 @@
             clearBulkSelection();
         }
 
+        // --- DEBOUNCE PARA EL BUSCADOR (Evita bloqueos si escribes rápido) ---
+        let searchTimeout;
+        function debouncedSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                handleGlobalSearch();
+            }, 300); // Se ejecuta 300ms después de que dejas de presionar teclas
+        }
+
         function handleGlobalSearch() {
             clearBulkSelection();
             if(currentTab === 'master') {
@@ -829,16 +976,16 @@
             if(!tbody) return; tbody.innerHTML = '';
 
             const filtered = allItems.filter(p => {
-                const matchSearch = term === '' || 
-                                    (p.nombre_flexible || '').toLowerCase().includes(term) || 
-                                    (p.codigo_sistema_oficial || '').toLowerCase().includes(term) || 
-                                    (p.categoria || '').toLowerCase().includes(term);
+                // BLINDAJE CON String(...)
+                const flexName = String(p.nombre_flexible || '').toLowerCase();
+                const sysCode = String(p.codigo_sistema_oficial || '').toLowerCase();
+                const cat = String(p.categoria || '').toLowerCase();
+                
+                const matchSearch = term === '' || flexName.includes(term) || sysCode.includes(term) || cat.includes(term);
                 if (!matchSearch) return false;
                 
-                // Filtro Faltantes
                 if (showOnlyPending && !isProductPending(p)) return false;
                 
-                // Filtro Tipo
                 const pType = p.tipo_item || 'PIEZA_BASE';
                 if (filterType !== 'ALL' && pType !== filterType) return false;
 
@@ -867,7 +1014,6 @@
                 const eyeIcon = isActivo ? 'fa-eye text-blue-500' : 'fa-eye-slash text-slate-400';
                 const eyeBg = isActivo ? 'bg-blue-50 hover:bg-blue-100 border border-blue-100' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200';
                 
-                // Usar cálculo en tiempo real
                 const realStock = getCalculatedStock(p.id);
 
                 const tr = document.createElement('tr');
@@ -891,6 +1037,8 @@
                             <button onclick="openPackagePrintSelector('${p.id}')" class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="QR Paquetes / Cajas"><i class="fas fa-box-open text-xs"></i></button>
                             <div class="w-px h-5 bg-slate-200 mx-0.5"></div>
                             <button onclick="openEditModal('${p.id}')" class="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center justify-center" title="Editar / Configurar"><i class="fas fa-pen text-xs"></i></button>
+                            <!-- BOTÓN DE ELIMINAR AÑADIDO -->
+                            <button onclick="deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all shadow-sm flex items-center justify-center border border-red-100" title="Eliminar Producto"><i class="fas fa-trash-alt text-xs"></i></button>
                         </div>
                     </td>
                 `;
@@ -904,18 +1052,17 @@
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
 
             allItems.forEach(item => {
-                const code = item.codigo_sistema_oficial;
+                const code = String(item.codigo_sistema_oficial || '');
                 if(!code || code.trim() === '') return; 
                 
-                const matchSearch = term === '' || 
-                                    (item.nombre_flexible || '').toLowerCase().includes(term) || 
-                                    code.toLowerCase().includes(term);
+                const flexName = String(item.nombre_flexible || '').toLowerCase();
+                const matchSearch = term === '' || flexName.includes(term) || code.toLowerCase().includes(term);
 
                 if(!matchSearch) return;
 
                 if(!groups[code]) {
-                    const fact = facturacionCatalog.find(f => (f.codigo_sistema_oficial || f.codigo || f.Codigo || f.id) === code);
-                    const nameRaw = fact ? (fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto) : 'Desconocido / No importado';
+                    const fact = facturacionCatalog.find(f => String(f.codigo_sistema_oficial || f.codigo || f.Codigo || f.id || '') === code);
+                    const nameRaw = fact ? String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || '') : 'Desconocido / No importado';
                     groups[code] = { codigo: code, descripcion_oficial: nameRaw, stock_total: 0, variantes: [] };
                 }
                 groups[code].stock_total += getCalculatedStock(item.id);
@@ -966,6 +1113,24 @@
             showToast('Excel de faltantes web descargado');
         }
 
+        // --- FUNCIÓN DE EXPORTACIÓN A EXCEL EN IMPORTAR ---
+        window.exportImportToExcel = () => {
+            const pendingToImport = getPendingToImport();
+            if(pendingToImport.length === 0) return showToast("No hay datos para exportar", "error");
+            
+            const dataToExport = pendingToImport.map(fact => ({ 
+                "Cód. Facturación": String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || ''), 
+                "Descripción Oficial": String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción')
+            }));
+            
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport); 
+            worksheet['!cols'] = [{wch: 25}, {wch: 60}];
+            const workbook = XLSX.utils.book_new(); 
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Pendientes_Importar");
+            XLSX.writeFile(workbook, `Pendientes_Importar_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast('Excel descargado correctamente');
+        };
+
         // --- ACCIONES RÁPIDAS ---
         window.toggleActivo = async (id, currentState) => {
             try { await productsRef.doc(id).update({ activo: !currentState }); showToast(!currentState ? 'El producto ahora es VISIBLE' : 'El producto ha sido OCULTADO', 'info'); } catch(e) { showToast('Error al cambiar visibilidad', 'error'); }
@@ -993,6 +1158,33 @@
             toggleFormFields();
         };
 
+        // NUEVA FUNCIÓN PARA ELIMINAR EL PRODUCTO
+        window.deleteProduct = async (id) => {
+            if (!(await customConfirm('¿Estás seguro de eliminar este producto permanentemente?\nEsta acción no se puede deshacer y borrará también sus cajas configuradas.'))) return;
+            
+            try {
+                const batch = db.batch();
+                
+                // Borrar también las subcolecciones (paquetes)
+                const pkgs = await productsRef.doc(id).collection('paquetes').get();
+                pkgs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Borrar el producto maestro
+                batch.delete(productsRef.doc(id));
+                
+                // Ejecutar ambos borrados al mismo tiempo
+                await batch.commit();
+
+                showToast('Producto eliminado correctamente', 'info');
+                clearBulkSelection(); 
+            } catch (error) {
+                console.error("Error al eliminar producto:", error);
+                showToast('Error de conexión al eliminar', 'error');
+            }
+        };
+
         function toggleSelectAll() {
             const checked = document.getElementById('selectAll').checked;
             document.querySelectorAll('.row-cb').forEach(cb => cb.checked = checked);
@@ -1010,10 +1202,13 @@
 
         function getPendingToImport() {
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
-            const masterCodes = allItems.map(p => p.codigo_sistema_oficial).filter(Boolean);
+            const masterCodes = allItems.map(p => String(p.codigo_sistema_oficial || '')).filter(Boolean);
+            
             return facturacionCatalog.filter(fact => {
-                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id;
-                const nameRaw = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || '';
+                // BLINDAJE CON String(...)
+                const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || '');
+                const nameRaw = String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || '');
+                
                 const matchSearch = term === '' || nameRaw.toLowerCase().includes(term) || code.toLowerCase().includes(term);
                 return matchSearch && !masterCodes.includes(code);
             });
@@ -1027,7 +1222,9 @@
                 tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-16 text-center text-slate-400 font-bold"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-emerald-400"></i></div> Todo importado y al día o no coincide con tu búsqueda.</td></tr>`; return;
             }
             pendingToImport.forEach(fact => {
-                const code = fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id; const name = fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción';
+                const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || ''); 
+                const name = String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción');
+                
                 const tr = document.createElement('tr'); tr.className = "hover:bg-blue-50/30 transition-colors";
                 tr.innerHTML = `<td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-50">${code}</td><td class="px-6 py-4 font-bold text-slate-800 text-sm border-b border-slate-50">${name}</td><td class="px-6 py-4 text-right border-b border-slate-50"><button onclick="importProduct('${fact.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto">Importar <i class="fas fa-arrow-right"></i></button></td>`;
                 tbody.appendChild(tr);
@@ -1059,7 +1256,6 @@
         }
 
         async function showScanResult(p, context) {
-            // BLOQUEO ESTRICTO DE KITS EN EL ESCÁNER
             if (p.tipo_item && p.tipo_item !== 'PIEZA_BASE') {
                 showToast("No se pueden escanear Kits para inventario físico.", "error");
                 document.getElementById('scanIdle').classList.remove('hidden');
@@ -1067,7 +1263,6 @@
                 document.getElementById('btnStartScan').classList.remove('hidden'); 
                 document.getElementById('btnStopScan').classList.add('hidden');
                 
-                // Mostrar UI de error en la tarjeta
                 const idleIconCont = document.getElementById('scanIdleIconContainer');
                 const idleIcon = document.getElementById('scanIdleIcon');
                 const idleText = document.getElementById('scanIdleText');
@@ -1086,7 +1281,6 @@
                 return;
             }
 
-            // Flujo Normal (Piezas Base)
             document.getElementById('btnStartScan').classList.remove('hidden'); document.getElementById('btnStopScan').classList.add('hidden');
             const resCard = document.getElementById('scanResult'); resCard.classList.remove('hidden');
             document.getElementById('resultCard').scrollIntoView({behavior: 'smooth', block: 'start'});
@@ -1189,9 +1383,8 @@
 
         // --- LÓGICA DEL DROPDOWN BUSCADOR DE "HEREDAR EMPAQUES" ---
         function updateHeredarOptions(excludeId) {
-            // Guardamos las opciones base en la variable global
             heredarOptionsList = allItems.filter(b => b.id !== excludeId && (!b.tipo_item || b.tipo_item === 'PIEZA_BASE'));
-            renderHeredarDropdown(''); // Renderizamos todo limpio
+            renderHeredarDropdown(''); 
         }
 
         function renderHeredarDropdown(filterText) {
@@ -1199,16 +1392,14 @@
             list.innerHTML = '';
             const lowerFilter = filterText.toLowerCase().trim();
 
-            // Opción para No Heredar (limpiar)
             const noneLi = document.createElement('li');
             noneLi.className = "px-4 py-3 hover:bg-red-50 cursor-pointer text-sm text-red-500 font-bold transition-colors";
             noneLi.innerHTML = "<i class='fas fa-times-circle mr-1'></i> Ninguno / No heredar";
             noneLi.onclick = () => selectHeredarOption('', '');
             list.appendChild(noneLi);
 
-            // Filtrado
             heredarOptionsList.forEach(opt => {
-                if (opt.nombre_flexible.toLowerCase().includes(lowerFilter)) {
+                if (String(opt.nombre_flexible || '').toLowerCase().includes(lowerFilter)) {
                     const li = document.createElement('li');
                     li.className = "px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm font-bold text-slate-800 transition-colors";
                     li.innerText = opt.nombre_flexible;
@@ -1217,7 +1408,7 @@
                 }
             });
 
-            if(list.children.length === 1) { // Solo está el botón de "Ninguno"
+            if(list.children.length === 1) { 
                 const emptyLi = document.createElement('li');
                 emptyLi.className = "px-4 py-3 text-sm text-slate-400 font-medium italic";
                 emptyLi.innerText = "No se encontraron resultados...";
@@ -1276,7 +1467,7 @@
             document.getElementById('importOldId').value = ''; document.getElementById('newPkgQty').value = ''; document.getElementById('newPkgSku').value = '';
             const modal = document.getElementById('editModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
             
-            updateHeredarOptions(id); // Precarga opciones del buscador de empaques
+            updateHeredarOptions(id);
 
             if (id) {
                 const p = allItems.find(x => x.id === id); if(!p) return;
@@ -1291,7 +1482,6 @@
                 
                 document.getElementById('editHeredaEmpaques').value = p.hereda_empaques_de || '';
                 
-                // Setear nombre en el buscador visual si hay herencia guardada
                 if(p.hereda_empaques_de) {
                     const parentItem = allItems.find(x => x.id === p.hereda_empaques_de);
                     document.getElementById('heredarSearchInput').value = parentItem ? parentItem.nombre_flexible : '';
@@ -1474,10 +1664,91 @@
             } catch (error) { showToast('Error al añadir', 'error'); }
         }
 
-        async function deletePackage(productId, pkgId) {
-            if(!confirm('¿Eliminar esta presentación?')) return;
+        window.deletePackage = async (productId, pkgId) => {
+            if(!(await customConfirm('¿Eliminar esta presentación?'))) return;
             try { await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete(); showToast('Eliminado', 'info'); } catch (error) { showToast('Error al eliminar', 'error'); }
+        };
+
+        // --- CAJEROS (USUARIOS POS) BLINDADO ---
+        function renderCashiers() {
+            const tbody = document.getElementById('cashiersTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            // BLINDAJE CON String(...)
+            const sorted = [...cashiersList].sort((a,b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
+
+            if(sorted.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold"><div class="text-3xl mb-2">👤</div>No hay cajeros registrados aún.</td></tr>';
+                return;
+            }
+
+            sorted.forEach(c => {
+                const isActivo = c.activo !== false;
+                const statusBadge = isActivo 
+                    ? '<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-md text-[10px] font-black tracking-wide"><i class="fas fa-check-circle mr-1"></i> ACTIVO</span>' 
+                    : '<span class="bg-red-100 text-red-700 px-3 py-1 rounded-md text-[10px] font-black tracking-wide"><i class="fas fa-ban mr-1"></i> INACTIVO</span>';
+                
+                const toggleIcon = isActivo ? 'fa-toggle-on text-emerald-500' : 'fa-toggle-off text-slate-400';
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 border-b border-slate-100 font-bold text-slate-800 text-sm">${String(c.nombre || 'Sin Nombre')}</td>
+                        <td class="px-6 py-4 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 font-mono font-black px-3 py-1.5 rounded-lg text-xs tracking-widest">${String(c.pin || '----')}</span></td>
+                        <td class="px-6 py-4 border-b border-slate-100 text-center">${statusBadge}</td>
+                        <td class="px-6 py-4 border-b border-slate-100 text-right">
+                            <div class="flex justify-end items-center gap-2">
+                                <button onclick="toggleCashierStatus('${c.id}', ${isActivo})" class="w-9 h-9 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 shadow-sm flex items-center justify-center transition active:scale-95" title="${isActivo ? 'Dar de baja' : 'Dar de alta'}"><i class="fas ${toggleIcon} text-lg"></i></button>
+                                <button onclick="deleteCashier('${c.id}')" class="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 border border-red-100 shadow-sm flex items-center justify-center transition active:scale-95" title="Eliminar"><i class="fas fa-trash-alt text-sm"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
         }
+
+        window.addCashier = async () => {
+            const nameInput = document.getElementById('newCashierName');
+            const pinInput = document.getElementById('newCashierPin');
+            const name = nameInput.value.trim();
+            const pin = pinInput.value.trim();
+            
+            if(!name) return showToast('El nombre es obligatorio', 'error');
+            if(!pin || pin.length < 4) return showToast('El PIN debe tener al menos 4 dígitos', 'error');
+
+            try {
+                await cashiersRef.add({
+                    nombre: name,
+                    pin: pin,
+                    activo: true,
+                    fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Cajero registrado con éxito');
+                nameInput.value = '';
+                pinInput.value = '';
+            } catch(e) {
+                showToast('Error al registrar cajero', 'error');
+            }
+        };
+
+        window.toggleCashierStatus = async (id, currentStatus) => {
+            try {
+                await cashiersRef.doc(id).update({ activo: !currentStatus });
+                showToast(currentStatus ? 'Cajero desactivado' : 'Cajero activado', 'info');
+            } catch(e) {
+                showToast('Error al actualizar estado', 'error');
+            }
+        };
+
+        window.deleteCashier = async (id) => {
+            if(!(await customConfirm('¿Estás seguro de eliminar permanentemente a este cajero?'))) return;
+            try {
+                await cashiersRef.doc(id).delete();
+                showToast('Cajero eliminado correctamente', 'info');
+            } catch(e) {
+                showToast('Error al eliminar', 'error');
+            }
+        };
 
         // --- FUNCIONES DE IMPRESIÓN ---
         function openMassActions() {
@@ -1509,7 +1780,11 @@
             const showOnlyPending = document.getElementById('filterPending').checked;
             const filterType = document.getElementById('filterType').value;
             return allItems.filter(p => {
-                const matchSearch = term === '' || (p.nombre_flexible || '').toLowerCase().includes(term) || (p.codigo_sistema_oficial || '').toLowerCase().includes(term) || (p.categoria || '').toLowerCase().includes(term);
+                const flexName = String(p.nombre_flexible || '').toLowerCase();
+                const sysCode = String(p.codigo_sistema_oficial || '').toLowerCase();
+                const cat = String(p.categoria || '').toLowerCase();
+
+                const matchSearch = term === '' || flexName.includes(term) || sysCode.includes(term) || cat.includes(term);
                 if (!matchSearch) return false;
                 if (showOnlyPending && !isProductPending(p)) return false;
                 const pType = p.tipo_item || 'PIEZA_BASE';
@@ -1519,7 +1794,6 @@
         }
 
         window.printAllPackagesQRs = async () => {
-            // SOLO PIEZAS BASE para Inventario Físico
             const filtered = getFilteredProductsForPrint().filter(p => !p.tipo_item || p.tipo_item === 'PIEZA_BASE');
             if(filtered.length === 0) return showToast("No hay PIEZAS BASE filtradas para imprimir.", "error"); 
             closeModal('massActionsModal'); showToast("Calculando paquetes...", "info");
@@ -1540,14 +1814,14 @@
                 await Promise.all(promises);
                 if(dataArray.length === 0) return showToast("No se encontraron empaques en los productos filtrados.", "error");
                 
-                const qty = prompt(`Se encontraron ${dataArray.length} cajas base.\n¿Cuántas etiquetas POR CAJA imprimir?`, "1"); 
+                const qty = await customPrompt(`Se encontraron ${dataArray.length} cajas base.\n¿Cuántas etiquetas POR CAJA imprimir?`, "1"); 
                 if (!qty || qty <= 0) return; 
                 
                 const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '')); pw.document.close(); 
             } catch (e) { showToast("Error al obtener los paquetes.", "error"); }
         };
 
-        window.printAllQRs = (printType) => { 
+        window.printAllQRs = async (printType) => { 
             let filtered = getFilteredProductsForPrint();
             if(printType === 'inventario') {
                 filtered = filtered.filter(p => !p.tipo_item || p.tipo_item === 'PIEZA_BASE');
@@ -1558,14 +1832,14 @@
             let baseUrl = ""; if (printType === 'vitrina') { baseUrl = document.getElementById('vitrinaUrlInput').value; if (!baseUrl) return showToast("URL requerida", "error"); } 
             
             closeModal('massActionsModal'); 
-            const qty = prompt(`Imprimiendo ${filtered.length} productos.\n¿Cuántas etiquetas POR PRODUCTO deseas?`, "1"); 
+            const qty = await customPrompt(`Imprimiendo ${filtered.length} productos.\n¿Cuántas etiquetas POR PRODUCTO deseas?`, "1"); 
             if (!qty || qty <= 0) return; 
             
             const dataArray = filtered.map(p => ({ id: p.id, title: p.nombre_flexible, sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'}` }));
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); pw.document.close(); 
         };
 
-        window.printSingleQR = (id, printType = 'inventario') => { 
+        window.printSingleQR = async (id, printType = 'inventario') => { 
             const p = allItems.find(x => x.id === id); if (!p) return; 
             
             if (printType === 'inventario' && p.tipo_item && p.tipo_item !== 'PIEZA_BASE') {
@@ -1578,7 +1852,7 @@
                 if(!baseUrl) return showToast("URL requerida en Acciones Masivas", "error");
             }
             const tipoNombre = printType === 'vitrina' ? 'VITRINA (Carrito web)' : 'PIEZAS SUELTAS (Inventario)';
-            const qty = prompt(`Etiquetas para ${tipoNombre} de:\n${p.nombre_flexible}\n\n¿Cuántas imprimir?`, "1"); 
+            const qty = await customPrompt(`Etiquetas para ${tipoNombre} de:\n${p.nombre_flexible}\n\n¿Cuántas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
             
             const dataArray = [{ id: p.id, title: p.nombre_flexible, sub: printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)` }];
@@ -1619,17 +1893,128 @@
             closeModal('printPackageModal');
         };
 
-        window.printPackageQR = (productId, sku, piezas, providedQty = null) => {
+        window.printPackageQR = async (productId, sku, piezas, providedQty = null) => {
             const p = allItems.find(x => x.id === productId); if (!p) return; 
             
             let qty = providedQty;
-            if(!qty) qty = prompt(`Etiquetas para CAJA/BOLSA:\nSKU: ${sku} (${piezas} pz)\n\n¿Cuántas imprimir?`, "1"); 
+            if(!qty) qty = await customPrompt(`Etiquetas para CAJA/BOLSA:\nSKU: ${sku} (${piezas} pz)\n\n¿Cuántas imprimir?`, "1"); 
             if (!qty || qty <= 0) return; 
             
             const qrVal = `PKG|${productId}|${sku}|${piezas}`;
             const dataArray = [{ id: qrVal, title: `${p.nombre_flexible}`, sub: `SKU: ${sku} (${piezas} PZ)` }];
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '')); pw.document.close();
         };
+
+        // --- NUEVA LÓGICA: SINCRONIZAR CSV/EXCEL DESDE LA WEB ---
+        async function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const overlay = document.getElementById('syncOverlay');
+            const statusText = document.getElementById('syncStatusText');
+            
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            statusText.innerText = "Leyendo archivo...";
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = e.target.result;
+                    // XLSX puede leer tanto CSV como hojas de cálculo
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+
+                    const productosCSV = [];
+                    const idsOficialesCSV = new Set();
+
+                    statusText.innerText = "Procesando filas del archivo...";
+
+                    jsonRows.forEach(row => {
+                        // Soporte para variaciones en el nombre de las columnas (minúsculas/mayúsculas)
+                        const codigo = row.codigo_sistema || row.codigo || row.Codigo || row.CODIGO;
+                        if (codigo) {
+                            let precioNumerico = parseFloat(row.precio || row.Precio || 0);
+                            if (isNaN(precioNumerico)) precioNumerico = 0;
+
+                            // 1. LIMPIEZA PARA EL ID DE FIRESTORE (Cambia diagonales por guiones)
+                            const idSeguroFirebase = String(codigo).replace(/\//g, '-').replace(/\\/g, '-');
+                            idsOficialesCSV.add(idSeguroFirebase);
+
+                            productosCSV.push({
+                                id: idSeguroFirebase,
+                                datos: {
+                                    codigo_sistema_oficial: String(codigo),
+                                    descripcion_oficial: row.descripcion_oficial || row.descripcion || row.Descripcion || row.nombre || '',
+                                    precio: precioNumerico,
+                                    tipo_articulo_sistema: row.tipo_articulo_sistema || row.tipo || 'PIEZA_BASE'
+                                }
+                            });
+                        }
+                    });
+
+                    statusText.innerText = `Comparando ${productosCSV.length} productos con la base de datos...`;
+
+                    const coleccion = 'catalogo_facturacion';
+                    const snapshotActual = await db.collection(coleccion).get();
+                    const idsAEliminar = [];
+
+                    snapshotActual.forEach(doc => {
+                        if (!idsOficialesCSV.has(doc.id)) {
+                            idsAEliminar.push(doc.id);
+                        }
+                    });
+
+                    // Función para dividir arreglos en grupos
+                    const dividirEnLotes = (arreglo, tamano = 500) => {
+                        const lotes = [];
+                        for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano));
+                        return lotes;
+                    };
+
+                    // 2. Borrar descontinuados
+                    if (idsAEliminar.length > 0) {
+                        statusText.innerText = `Eliminando ${idsAEliminar.length} productos descontinuados...`;
+                        const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
+                        for (const lote of lotesBorrado) {
+                            const batch = db.batch();
+                            lote.forEach(id => {
+                                batch.delete(db.collection(coleccion).doc(id));
+                            });
+                            await batch.commit();
+                        }
+                    }
+
+                    // 3. Actualizar / Insertar nuevos
+                    statusText.innerText = `Subiendo ${productosCSV.length} productos actualizados...`;
+                    const lotesSubida = dividirEnLotes(productosCSV, 500);
+                    for (let i = 0; i < lotesSubida.length; i++) {
+                        statusText.innerText = `Procesando lote ${i + 1} de ${lotesSubida.length}...`;
+                        const batch = db.batch();
+                        lotesSubida[i].forEach(producto => {
+                            const docRef = db.collection(coleccion).doc(producto.id);
+                            batch.set(docRef, producto.datos, { merge: true });
+                        });
+                        await batch.commit();
+                    }
+
+                    showToast('¡Sincronización finalizada exitosamente!', 'success');
+
+                } catch (error) {
+                    console.error("Error en sincronización:", error);
+                    showToast("Ocurrió un error en la sincronización.", "error");
+                } finally {
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                    event.target.value = ''; // Limpiar el input para permitir volver a subir el mismo archivo
+                }
+            };
+            
+            // Usar readAsArrayBuffer para compatibilidad total de XLSX y CSV
+            reader.readAsArrayBuffer(file);
+        }
     </script>
 </body>
 </html>
