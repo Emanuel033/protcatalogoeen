@@ -29,6 +29,13 @@
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        
+        // --- MEJORA 2: SOPORTE OFFLINE (SIN INTERNET) ---
+        try {
+            db.enablePersistence({synchronizeTabs: true}).catch(function(err) {
+                console.warn("Aviso: Modo offline limitado.", err);
+            });
+        } catch(e) {}
     </script>
 
     <!-- PANTALLA LOGIN -->
@@ -83,7 +90,7 @@
         </div>
     </div>
 
-    <!-- MODAL REPORTE DE PROBLEMA -->
+    <!-- MODAL REPORTE DE PROBLEMA (CON FOTO) -->
     <div id="modal-falla" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-end justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-t-3xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full transition-transform duration-300" id="modal-falla-content">
             <div class="bg-red-600 p-5 flex justify-between items-center text-white">
@@ -91,7 +98,7 @@
                 <button onclick="cerrarModalFalla()" class="text-red-200 hover:text-white text-xl"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="p-6 space-y-5">
+            <div class="p-6 space-y-5 overflow-y-auto max-h-[80vh]">
                 <input type="hidden" id="falla-viaje-id">
                 
                 <div>
@@ -108,29 +115,45 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Notas adicionales (Opcional)</label>
-                    <textarea id="notas-falla" rows="3" class="w-full border-2 border-slate-200 bg-slate-50 p-3 rounded-xl focus:ring-0 focus:border-red-500 outline-none text-sm font-medium" placeholder="Ej. El guardia dijo que regresáramos mañana..."></textarea>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Tomar Foto (Opcional)</label>
+                    <div class="relative w-full border-2 border-dashed border-slate-300 bg-slate-50 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-100 transition" onclick="document.getElementById('foto-falla-input').click()">
+                        <i id="foto-falla-icon" class="fas fa-camera text-2xl text-slate-400 mb-2"></i>
+                        <p class="text-xs font-bold text-slate-500" id="foto-falla-text">Toca para abrir cámara</p>
+                        <input type="file" id="foto-falla-input" accept="image/*" capture="environment" class="hidden" onchange="procesarFoto(this, 'foto-falla-text', 'foto-falla-icon')">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Notas adicionales</label>
+                    <textarea id="notas-falla" rows="2" class="w-full border-2 border-slate-200 bg-slate-50 p-3 rounded-xl focus:ring-0 focus:border-red-500 outline-none text-sm font-medium" placeholder="Ej. El guardia dijo que regresáramos..."></textarea>
                 </div>
                 
-                <button onclick="confirmarFalla()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2 text-base active:scale-95">
+                <button id="btn-enviar-falla" onclick="confirmarFalla()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2 text-base active:scale-95">
                     <i class="fas fa-paper-plane"></i> Enviar Reporte a Base
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL CONFIRMACIÓN ENTREGA -->
+    <!-- MODAL CONFIRMACIÓN ENTREGA (CON FOTO) -->
     <div id="modal-entrega" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300" id="modal-entrega-content">
             <div class="p-6 text-center">
                 <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-4xl text-emerald-500 mx-auto mb-4"><i class="fas fa-check-double"></i></div>
                 <h3 class="text-2xl font-black text-slate-800 mb-2">¡Entrega Exitosa!</h3>
-                <p class="text-sm text-slate-500 font-medium mb-6">¿Confirmas que la mercancía fue entregada correctamente?</p>
+                <p class="text-sm text-slate-500 font-medium mb-6">Captura la firma o el lugar de entrega (Opcional).</p>
+                
                 <input type="hidden" id="entrega-viaje-id">
+
+                <div class="relative w-full border-2 border-dashed border-slate-300 bg-slate-50 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-100 transition mb-6" onclick="document.getElementById('foto-entrega-input').click()">
+                    <i id="foto-entrega-icon" class="fas fa-camera text-2xl text-slate-400 mb-2"></i>
+                    <p class="text-xs font-bold text-slate-500" id="foto-entrega-text">Tomar Foto de Evidencia</p>
+                    <input type="file" id="foto-entrega-input" accept="image/*" capture="environment" class="hidden" onchange="procesarFoto(this, 'foto-entrega-text', 'foto-entrega-icon')">
+                </div>
                 
                 <div class="flex gap-3">
                     <button onclick="cerrarModalEntrega()" class="flex-1 py-3 text-sm font-bold text-slate-500 bg-slate-100 rounded-xl hover:bg-slate-200 transition">Cancelar</button>
-                    <button onclick="confirmarEntrega()" class="flex-1 py-3 text-sm font-black text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition shadow-lg shadow-emerald-200">Confirmar</button>
+                    <button id="btn-enviar-entrega" onclick="confirmarEntrega()" class="flex-[1.5] py-3 text-sm font-black text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition shadow-lg shadow-emerald-200">Guardar</button>
                 </div>
             </div>
         </div>
@@ -141,6 +164,7 @@
     <script>
         let choferActualId = localStorage.getItem('een_chofer_id') || null;
         let viajesEnRuta = [];
+        let fotoBase64Temporal = null; // Guarda la foto comprimida
 
         window.showToast = (msg, type='success') => {
             const toast = document.createElement('div');
@@ -151,7 +175,6 @@
             setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 300); }, 4000);
         };
 
-        // Cargar Lista de Choferes
         db.collection('choferes').onSnapshot(snap => {
             const select = document.getElementById('login-chofer');
             select.innerHTML = '<option value="">-- Toca aquí para buscar tu nombre --</option>';
@@ -183,29 +206,18 @@
         }
 
         function agruparViajesParaChofer(pedidosRaw) {
-            let agrupados = [];
-            const paqMap = {};
+            let agrupados = []; const paqMap = {};
             pedidosRaw.forEach(p => {
                 if (p.tipo_destino === 'paqueteria') {
                     const key = `${p.nombre_paqueteria}_${p.estado}`;
                     if (!paqMap[key]) {
-                        paqMap[key] = { 
-                            es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, 
-                            direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, 
-                            telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, 
-                            urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos: [] 
-                        };
+                        paqMap[key] = { es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos: [] };
                     }
                     if(p.urgente) paqMap[key].urgente = true;
                     paqMap[key].orden_ruta = Math.min(paqMap[key].orden_ruta, p.orden_ruta || 9999999999999);
                     paqMap[key].pedidos.push(p);
                 } else {
-                    agrupados.push({ 
-                        es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, direccion: p.direccion, 
-                        link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, 
-                        horario: p.horario, excepcion: p.excepcion, estado: p.estado, 
-                        urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos: [p] 
-                    });
+                    agrupados.push({ es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos: [p] });
                 }
             });
             Object.values(paqMap).forEach(g => agrupados.push(g));
@@ -228,10 +240,8 @@
             const contenedor = document.getElementById('lista-viajes');
             let html = '';
             
-            // Separar y Ordenar por el Orden Maestro configurado por Despacho (orden_ruta)
             const enCamino = viajesEnRuta.filter(v => v.estado === 'camino');
             enCamino.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
-            
             const completados = viajesEnRuta.filter(v => v.estado === 'entregado');
             
             document.getElementById('contador-pendientes').innerText = enCamino.length;
@@ -247,10 +257,18 @@
                 let facturas = v.pedidos.map(p => p.id).join(', ');
                 
                 let btnMapsHtml = '';
-                if(v.link_maps) {
-                    btnMapsHtml = `<a href="${v.link_maps}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
-                } else if(v.coordenadas && v.coordenadas.lat) {
-                    btnMapsHtml = `<a href="https://www.google.com/maps/dir/?api=1&destination=${v.coordenadas.lat},${v.coordenadas.lng}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
+                if(v.link_maps) btnMapsHtml = `<a href="${v.link_maps}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
+                else if(v.coordenadas && v.coordenadas.lat) btnMapsHtml = `<a href="https://www.google.com/maps/dir/?api=1&destination=${v.coordenadas.lat},${v.coordenadas.lng}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
+
+                // --- MEJORA 4: BOTONES DE CONTACTO DIRECTO ---
+                let btnContactoHtml = '';
+                if (v.telefono) {
+                    const telLimpio = v.telefono.replace(/\D/g,'');
+                    btnContactoHtml = `
+                    <div class="flex gap-2 mt-3">
+                        <a href="tel:${telLimpio}" class="flex-1 bg-slate-100 text-slate-600 border border-slate-200 py-2 rounded-lg font-bold flex items-center justify-center gap-2 active:scale-95 transition text-xs shadow-sm"><i class="fas fa-phone"></i> Llamar</a>
+                        <a href="https://wa.me/52${telLimpio}" target="_blank" class="flex-1 bg-emerald-50 text-emerald-600 border border-emerald-200 py-2 rounded-lg font-bold flex items-center justify-center gap-2 active:scale-95 transition text-xs shadow-sm"><i class="fab fa-whatsapp"></i> Chat</a>
+                    </div>`;
                 }
 
                 const badgeUrgente = v.urgente ? `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2 border border-red-300 shadow-sm"><i class="fas fa-siren-on"></i> Urgente</span>` : '';
@@ -267,9 +285,12 @@
                         </div>
                     </div>
                     <div class="p-4">
-                        <p class="text-xs text-slate-500 mb-3"><i class="fas fa-map-marker-alt text-red-500 w-4 text-center"></i> <span class="font-medium">${v.direccion}</span></p>
+                        <p class="text-xs text-slate-500 mb-2"><i class="fas fa-map-marker-alt text-red-500 w-4 text-center"></i> <span class="font-medium">${v.direccion}</span></p>
+                        ${btnContactoHtml}
                         
-                        ${v.horario || v.excepcion ? `<div class="bg-amber-50 border border-amber-100 p-2.5 rounded-lg mb-3 text-[11px] text-amber-800 font-medium">` + (v.horario ? `<p><i class="fas fa-clock w-4"></i> ${v.horario}</p>` : '') + (v.excepcion ? `<p class="mt-1 font-bold"><i class="fas fa-exclamation-triangle w-4"></i> ${v.excepcion}</p>` : '') + `</div>` : ''}
+                        <div class="mt-3 ${v.horario || v.excepcion ? 'mb-3' : 'mb-4'}">
+                            ${v.horario || v.excepcion ? `<div class="bg-amber-50 border border-amber-100 p-2.5 rounded-lg text-[11px] text-amber-800 font-medium">` + (v.horario ? `<p><i class="fas fa-clock w-4"></i> ${v.horario}</p>` : '') + (v.excepcion ? `<p class="mt-1 font-bold"><i class="fas fa-exclamation-triangle w-4"></i> ${v.excepcion}</p>` : '') + `</div>` : ''}
+                        </div>
                         
                         <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-4">
                             <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Facturas a Entregar:</p>
@@ -295,89 +316,119 @@
             contenedor.innerHTML = html;
         }
 
-        // --- LÓGICA DE REPORTE DE PROBLEMA ---
+        // --- COMPRESIÓN DE FOTO (Lienzo Virtual para Proteger Memoria) ---
+        window.procesarFoto = (input, textId, iconId) => {
+            const file = input.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; const MAX_HEIGHT = 800; // Calidad aceptable, poco peso
+                    let width = img.width; let height = img.height;
+
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    fotoBase64Temporal = canvas.toDataURL('image/jpeg', 0.6); // 60% calidad JPEG
+                    document.getElementById(textId).innerText = "¡Foto capturada lista!";
+                    document.getElementById(textId).classList.replace('text-slate-500', 'text-emerald-600');
+                    document.getElementById(iconId).classList.replace('fa-camera', 'fa-image');
+                    document.getElementById(iconId).classList.replace('text-slate-400', 'text-emerald-500');
+                };
+            };
+        };
+
+        function resetearCamposFoto() {
+            fotoBase64Temporal = null;
+            ['foto-falla-input', 'foto-entrega-input'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
+            ['foto-falla-text', 'foto-entrega-text'].forEach(id => { 
+                const el = document.getElementById(id); 
+                if(el) { el.innerText = id.includes('falla') ? "Toca para abrir cámara" : "Tomar Foto de Evidencia"; el.className = "text-xs font-bold text-slate-500"; }
+            });
+            ['foto-falla-icon', 'foto-entrega-icon'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) { el.className = "fas fa-camera text-2xl text-slate-400 mb-2"; }
+            });
+        }
+
+        // --- REPORTE DE PROBLEMA ---
         window.abrirModalFalla = (idGrupo) => {
             document.getElementById('falla-viaje-id').value = idGrupo;
-            document.getElementById('motivo-falla').value = '';
-            document.getElementById('notas-falla').value = '';
+            document.getElementById('motivo-falla').value = ''; document.getElementById('notas-falla').value = '';
+            resetearCamposFoto();
             
-            const modal = document.getElementById('modal-falla');
-            const content = document.getElementById('modal-falla-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full'); }, 10);
+            const modal = document.getElementById('modal-falla'); const content = document.getElementById('modal-falla-content');
+            modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full'); }, 10);
         };
         
         window.cerrarModalFalla = () => {
-            const modal = document.getElementById('modal-falla');
-            const content = document.getElementById('modal-falla-content');
-            modal.classList.add('opacity-0'); content.classList.add('translate-y-full');
-            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            const modal = document.getElementById('modal-falla'); const content = document.getElementById('modal-falla-content');
+            modal.classList.add('opacity-0'); content.classList.add('translate-y-full'); setTimeout(() => { modal.classList.add('hidden'); }, 300);
         };
 
         window.confirmarFalla = async () => {
             const idGrupo = document.getElementById('falla-viaje-id').value;
             const motivo = document.getElementById('motivo-falla').value;
             const notas = document.getElementById('notas-falla').value.trim();
-
             if (!motivo) return showToast("Selecciona una razón", "error");
 
-            const grupo = viajesEnRuta.find(v => v.id === idGrupo);
-            if(!grupo) return;
-
+            const grupo = viajesEnRuta.find(v => v.id === idGrupo); if(!grupo) return;
             const razonFinal = notas ? `${motivo} - ${notas}` : motivo;
+            
+            document.getElementById('btn-enviar-falla').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
             try {
                 const batch = db.batch();
                 grupo.pedidos.forEach(p => {
-                    batch.update(db.collection('rutas_logistica').doc(p.id), { 
-                        estado: 'fallido', 
-                        motivo_falla: razonFinal,
-                        fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() 
-                    });
+                    const updateData = { estado: 'fallido', motivo_falla: razonFinal, fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() };
+                    if (fotoBase64Temporal) updateData.foto_evidencia = fotoBase64Temporal; // Adjunta foto si existe
+                    batch.update(db.collection('rutas_logistica').doc(p.id), updateData);
                 });
                 await batch.commit();
-                showToast("Reporte enviado a la Base", "warning");
-                cerrarModalFalla();
-            } catch(e) {
-                showToast("Error de conexión", "error");
-            }
+                showToast("Reporte enviado a la Base", "warning"); cerrarModalFalla();
+            } catch(e) { showToast("Error de conexión. Se enviará al tener red.", "info"); cerrarModalFalla(); }
+            finally { document.getElementById('btn-enviar-falla').innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Reporte a Base'; }
         };
 
-        // --- LÓGICA DE ENTREGA EXITOSA ---
+        // --- ENTREGA EXITOSA ---
         window.abrirModalEntrega = (idGrupo) => {
             document.getElementById('entrega-viaje-id').value = idGrupo;
-            const modal = document.getElementById('modal-entrega');
-            const content = document.getElementById('modal-entrega-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+            resetearCamposFoto();
+            const modal = document.getElementById('modal-entrega'); const content = document.getElementById('modal-entrega-content');
+            modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
         };
 
         window.cerrarModalEntrega = () => {
-            const modal = document.getElementById('modal-entrega');
-            const content = document.getElementById('modal-entrega-content');
-            modal.classList.add('opacity-0'); content.classList.add('scale-95');
-            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            const modal = document.getElementById('modal-entrega'); const content = document.getElementById('modal-entrega-content');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); }, 300);
         };
 
         window.confirmarEntrega = async () => {
             const idGrupo = document.getElementById('entrega-viaje-id').value;
-            const grupo = viajesEnRuta.find(v => v.id === idGrupo);
-            if(!grupo) return;
+            const grupo = viajesEnRuta.find(v => v.id === idGrupo); if(!grupo) return;
+            
+            document.getElementById('btn-enviar-entrega').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             try {
                 const batch = db.batch();
                 grupo.pedidos.forEach(p => {
-                    batch.update(db.collection('rutas_logistica').doc(p.id), { 
-                        estado: 'entregado', 
-                        fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() 
-                    });
+                    const updateData = { estado: 'entregado', fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() };
+                    if (fotoBase64Temporal) updateData.foto_evidencia = fotoBase64Temporal; // Adjunta foto si existe
+                    batch.update(db.collection('rutas_logistica').doc(p.id), updateData);
                 });
                 await batch.commit();
-                showToast("¡Excelente! Entrega registrada.");
-                cerrarModalEntrega();
-            } catch(e) {
-                showToast("Error de conexión", "error");
-            }
+                showToast("¡Excelente! Entrega registrada."); cerrarModalEntrega();
+            } catch(e) { showToast("Error de red. Se subirá automáticamente después.", "info"); cerrarModalEntrega(); }
+            finally { document.getElementById('btn-enviar-entrega').innerHTML = 'Guardar'; }
         };
 
         window.onload = () => { if(choferActualId) mostrarPantallaRuta(); };
