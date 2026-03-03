@@ -25,11 +25,17 @@
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
 
-    <!-- Configuración Firebase Centralizada -->
-    <script src="assets/js/firebase-config.js"></script>
+    <!-- Configuración Firebase -->
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
+            authDomain: "productoseen.firebaseapp.com",
+            projectId: "productoseen",
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
         // --- MEJORA 2: SOPORTE OFFLINE (SIN INTERNET) ---
-        // 'db' ya viene inicializado desde firebase-config.js
         try {
             db.enablePersistence({synchronizeTabs: true}).catch(function(err) {
                 console.warn("Aviso: Modo offline limitado.", err);
