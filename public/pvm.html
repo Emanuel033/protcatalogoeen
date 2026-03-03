@@ -368,6 +368,20 @@
         </div>
     </div>
 
+    <!-- MODAL 4: CONFIRMACIÓN GENÉRICA -->
+    <div id="confirmModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[120] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="confirmBox">
+            <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle text-amber-500"></i> <span id="confirmTitle">Confirmar</span>
+            </h3>
+            <p class="text-sm text-slate-500 mb-6 font-medium" id="confirmText">¿Estás seguro?</p>
+            <div class="flex gap-3">
+                <button id="btnConfirmCancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors text-sm">Cancelar</button>
+                <button id="btnConfirmAccept" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-red-500/30 text-sm">Sí, continuar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // GLOBALES Y CAJERO ACTUAL
         let cajeroActual = localStorage.getItem('een_pos_nombre') || null;
@@ -412,11 +426,19 @@
         };
 
         window.cerrarTurnoPOS = () => {
-            if(cart.length > 0 && !confirm("Tienes ventas en curso. ¿Cerrar turno y perderlas?")) return;
-            localStorage.removeItem('een_pos_nombre');
-            cajeroActual = null;
-            clearCart();
-            verificarLogin();
+            const executeCierre = () => {
+                localStorage.removeItem('een_pos_nombre');
+                cajeroActual = null;
+                cart = [];
+                renderCart();
+                verificarLogin();
+            };
+
+            if (cart.length > 0) {
+                showConfirm("Cerrar Turno", "Tienes ventas en curso. ¿Estás seguro de cerrar turno y perderlas?", executeCierre);
+            } else {
+                executeCierre();
+            }
         };
 
         // ==========================================
@@ -502,6 +524,23 @@
             };
             modal.classList.remove('hidden'); setTimeout(() => { box.classList.remove('scale-95'); input.focus(); }, 10);
         }
+
+        window.showConfirm = (title, message, onAccept) => {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmText').innerText = message;
+            const modal = document.getElementById('confirmModal');
+            const box = document.getElementById('confirmBox');
+
+            document.getElementById('btnConfirmCancel').onclick = () => {
+                box.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200);
+            };
+            document.getElementById('btnConfirmAccept').onclick = () => {
+                box.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200);
+                onAccept();
+            };
+
+            modal.classList.remove('hidden'); setTimeout(() => box.classList.remove('scale-95'), 10);
+        };
 
         function switchTab(tabId) {
             ['pos', 'historial', 'corte'].forEach(t => {
@@ -743,7 +782,12 @@
         }
 
         function clearCart() {
-            if(cart.length === 0) return; if(confirm("¿Limpiar todo el ticket?")) { cart = []; renderCart(); document.getElementById('searchInput').focus(); }
+            if(cart.length === 0) return; 
+            showConfirm("Limpiar Ticket", "¿Estás seguro de que deseas eliminar todos los productos del ticket actual?", () => {
+                cart = []; 
+                renderCart(); 
+                document.getElementById('searchInput').focus();
+            });
         }
 
         function renderCart() {
