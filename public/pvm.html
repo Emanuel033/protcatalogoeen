@@ -230,9 +230,14 @@
                     <div>
                         <h2 class="text-xl md:text-2xl font-black text-slate-800">Corte de Caja</h2>
                     </div>
-                    <button onclick="exportCorteToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 text-sm">
-                        <i class="fas fa-file-excel"></i> Exportar Bitácora
-                    </button>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportProductsReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold shadow-md shadow-emerald-500/30 transition flex items-center gap-2 text-sm">
+                            <i class="fas fa-boxes"></i> Reporte Artículos
+                        </button>
+                        <button onclick="exportCorteToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-2 text-sm">
+                            <i class="fas fa-file-excel"></i> Exportar Bitácora
+                        </button>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div class="lg:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
@@ -694,6 +699,7 @@
                 card.className = "bg-white border border-slate-200 p-2.5 md:p-3 rounded-2xl shadow-sm hover:border-blue-300 hover:shadow-md transition cursor-pointer flex gap-2 md:gap-3 fade-in relative overflow-hidden";
                 card.onclick = () => addToCart(p);
                 
+                // NOTA DE ACTUALIZACIÓN: Se reemplazó line-clamp-2 por break-words whitespace-normal
                 card.innerHTML = `
                     ${imageBlock}
                     <div class="flex-1 flex flex-col justify-center min-w-0">
@@ -704,7 +710,7 @@
                             </div>
                             <span class="text-xs md:text-sm font-black text-emerald-600 shrink-0">${formatMoney(p.precio)}</span>
                         </div>
-                        <h4 class="font-bold text-slate-800 text-[11px] md:text-[12px] leading-tight flex-1 line-clamp-2" title="${p.nombre}">${p.nombre}</h4>
+                        <h4 class="font-bold text-slate-800 text-[11px] md:text-[12px] leading-tight flex-1 pb-1 break-words whitespace-normal" title="${p.nombre}">${p.nombre}</h4>
                         ${tipsHTML}
                     </div>
                 `;
@@ -752,18 +758,56 @@
 
             cart.forEach((item, index) => {
                 const subtotal = item.precio * item.qty; total += subtotal;
+                
+                // NOTA DE ACTUALIZACIÓN: Se agregó un campo input visible, bordeado, que actualiza al vuelo
                 container.innerHTML += `
                     <div class="bg-slate-50 border border-slate-100 p-2 md:p-3 rounded-xl flex flex-col relative animate-[fadeIn_0.2s_ease-out]">
-                        <div class="flex justify-between items-start mb-2"><div class="pr-6"><h5 class="text-[11px] md:text-xs font-bold text-slate-800 leading-tight">${item.nombre}</h5><span class="text-[8px] md:text-[9px] font-mono text-slate-400">${item.codigo}</span></div><button onclick="updateCartQty(${index}, -${item.qty})" class="absolute top-1.5 md:top-2 right-1.5 md:right-2 text-slate-300 hover:text-red-500"><i class="fas fa-times text-sm"></i></button></div>
-                        <div class="flex justify-between items-end mt-auto"><div class="flex items-center bg-white border border-slate-200 rounded-lg"><button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-red-500 font-bold text-sm">-</button>
-                        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" value="${item.qty}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); manualCartQty(${index}, this.value)" class="w-8 md:w-10 text-center font-black text-xs md:text-sm text-slate-800 border-none outline-none focus:ring-0 p-0 bg-transparent">
-                        <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm">+</button></div><div class="text-right"><div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div><div class="text-xs md:text-sm font-black text-slate-800">${formatMoney(subtotal)}</div></div></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="pr-6"><h5 class="text-[11px] md:text-xs font-bold text-slate-800 leading-tight break-words whitespace-normal">${item.nombre}</h5><span class="text-[8px] md:text-[9px] font-mono text-slate-400">${item.codigo}</span></div>
+                            <button onclick="updateCartQty(${index}, -${item.qty})" class="absolute top-1.5 md:top-2 right-1.5 md:right-2 text-slate-300 hover:text-red-500"><i class="fas fa-times text-sm"></i></button>
+                        </div>
+                        <div class="flex justify-between items-end mt-auto">
+                            <div class="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                                <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-red-500 font-bold text-sm transition-colors">-</button>
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" value="${item.qty}" 
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, ''); manualCartQtyVisual(${index}, this.value, this)" 
+                                       onblur="manualCartQtyBlur(${index}, this.value)" 
+                                       class="w-10 md:w-12 text-center font-black text-xs md:text-sm text-slate-800 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none p-1 mx-1 transition-all">
+                                <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm transition-colors">+</button>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div>
+                                <div class="item-subtotal text-xs md:text-sm font-black text-slate-800">${formatMoney(subtotal)}</div>
+                            </div>
+                        </div>
                     </div>`;
             });
             totalEl.innerText = formatMoney(total);
         }
 
-        window.manualCartQty = (index, val) => { let num = parseInt(val) || 1; if(num < 1) num = 1; cart[index].qty = num; renderCart(); }
+        // FUNCIONES NUEVAS PARA MANEJAR LA EDICIÓN DE CANTIDAD EN TIEMPO REAL SIN PERDER EL FOCO
+        window.manualCartQtyVisual = (index, val, el) => {
+            let num = parseInt(val);
+            if (isNaN(num) || num < 0) return; // Permite vaciar el input un momento sin arrojar errores
+            cart[index].qty = num;
+            
+            // Actualizar visualmente el subtotal de ese renglón
+            const subtotal = cart[index].precio * num;
+            const itemRow = el.closest('div.bg-slate-50');
+            itemRow.querySelector('.item-subtotal').innerText = formatMoney(subtotal);
+
+            // Recalcular Total General
+            let total = 0;
+            cart.forEach(x => total += (x.precio * (x.qty || 1)));
+            document.getElementById('cartTotal').innerText = formatMoney(total);
+        };
+
+        window.manualCartQtyBlur = (index, val) => {
+            let num = parseInt(val);
+            if(isNaN(num) || num < 1) num = 1; // Si lo dejó vacío, regresarlo a 1
+            cart[index].qty = num;
+            renderCart(); // Se vuelve a armar el carrito solo cuando el usuario saca el puntero/dedo
+        };
 
         // ==========================================
         // PROCESAMIENTO E IMPRESIÓN DIRECTA
@@ -830,7 +874,7 @@
                     efectivo_recibido: recibido > 0 ? recibido : total, 
                     cambio_entregado: cambio,
                     articulos: articulosLimpios,
-                    vendedor: cajeroActual || "Mostrador General", // <-- AHORA GUARDA EL CAJERO SELECCIONADO
+                    vendedor: cajeroActual || "Mostrador General", 
                     estado: "COMPLETADA"
                 };
 
@@ -843,7 +887,7 @@
                     efectivo_recibido: saleData.efectivo_recibido,
                     cambio_entregado: saleData.cambio_entregado,
                     articulos: saleData.articulos,
-                    vendedor: saleData.vendedor // Pasamos el vendedor para imprimir
+                    vendedor: saleData.vendedor 
                 };
 
                 closeCheckoutModal(); 
@@ -997,7 +1041,6 @@
             const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando...</td></tr>';
             const date15DaysAgo = new Date(); date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
             try {
-                // AQUI SE VE LA MAGIA DEL FILTRO INMORTAL, NUNCA BORRA, SOLO LEE LOS ÚLTIMOS 15 DÍAS
                 const snap = await db.collection('ventas_mostrador').where('fecha', '>=', date15DaysAgo).orderBy('fecha', 'desc').get();
                 historySales = []; snap.forEach(doc => historySales.push({id: doc.id, ...doc.data()}));
                 if (historySales.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400 font-bold">No hay ventas registradas.</td></tr>'; return; }
@@ -1006,7 +1049,7 @@
                     const fechaStr = v.fecha ? v.fecha.toDate().toLocaleString('es-MX', {day: '2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente';
                     const itemsDesc = (v.articulos||[]).map(a => `${a.cantidad}x ${a.codigo}`).join(', '); const isCanceled = v.estado === 'CANCELADA';
                     const motivoText = v.motivo_cancelacion ? `Motivo: ${v.motivo_cancelacion}` : ''; const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
-                    const cajeroName = v.vendedor || 'Mostrador General'; // SE MUESTRA EL CAJERO AQUÍ
+                    const cajeroName = v.vendedor || 'Mostrador General';
                     const tr = document.createElement('tr'); tr.className = rowClass;
                     tr.innerHTML = `<td class="px-4 md:px-6 py-3 md:py-4"><div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-[11px] md:text-xs">${v.folio}</div><div class="text-[9px] md:text-[10px] text-slate-400 font-medium">${fechaStr}</div><div class="text-[9px] font-bold text-blue-600 mt-1"><i class="fas fa-user mr-1"></i>${cajeroName}</div>${isCanceled ? `<span class="bg-red-100 text-red-600 text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">CANCELADA</span><div class="text-[8px] md:text-[9px] text-red-500 mt-0.5 italic max-w-[150px] truncate" title="${motivoText}">${motivoText}</div>` : ''}</td>
                         <td class="px-4 md:px-6 py-3 md:py-4 text-[11px] md:text-xs text-slate-600 truncate max-w-[150px] md:max-w-[200px] hidden sm:table-cell" title="${itemsDesc}">${(v.articulos||[]).length} art. (${itemsDesc})</td>
@@ -1107,18 +1150,138 @@
             else { resDiv.className = "text-3xl md:text-4xl font-black text-red-400"; txtDiv.innerText = "Faltante en caja ⚠️"; txtDiv.className = "text-xs md:text-sm font-bold mt-2 text-red-300"; }
         }
 
+        // NUEVO: GENERADOR DE REPORTE DE ARTÍCULOS VENDIDOS
+        window.exportProductsReport = async () => {
+            showToast("Calculando reporte de artículos...", "info");
+            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+            
+            try {
+                // Buscamos solo lo de hoy
+                const snap = await db.collection('ventas_mostrador')
+                    .where('fecha', '>=', todayStart)
+                    .get();
+
+                let productos = {};
+                let totalAcumulado = 0;
+
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (data.estado !== 'CANCELADA' && data.articulos) {
+                        data.articulos.forEach(art => {
+                            const cod = art.codigo || 'S/C';
+                            if (!productos[cod]) {
+                                productos[cod] = {
+                                    codigo: cod,
+                                    nombre: art.nombre || 'Articulo',
+                                    cantidad: 0,
+                                    subtotal: 0
+                                };
+                            }
+                            productos[cod].cantidad += Number(art.cantidad) || 0;
+                            productos[cod].subtotal += Number(art.subtotal) || 0;
+                            totalAcumulado += Number(art.subtotal) || 0;
+                        });
+                    }
+                });
+
+                const arrProductos = Object.values(productos).sort((a,b) => b.subtotal - a.subtotal); // Ordenar por mas vendidos
+                
+                if (arrProductos.length === 0) {
+                    showToast("No hay artículos vendidos hoy.", "error");
+                    return;
+                }
+
+                const wsData = [];
+                wsData.push(['REPORTE DE ARTÍCULOS VENDIDOS - MOSTRADOR']);
+                wsData.push(['Fecha de Generación:', new Date().toLocaleString('es-MX')]);
+                wsData.push([]);
+                wsData.push(['Código', 'Descripción', 'Cantidad Vendida', 'Total Venta']);
+
+                arrProductos.forEach(p => {
+                    wsData.push([p.codigo, p.nombre, p.cantidad, p.subtotal]);
+                });
+
+                wsData.push([]);
+                wsData.push(['', '', 'GRAN TOTAL:', totalAcumulado]);
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                ws['!cols'] = [{wch: 15}, {wch: 55}, {wch: 18}, {wch: 18}];
+                
+                XLSX.utils.book_append_sheet(wb, ws, "Artículos Vendidos");
+                const fileDate = new Date().toISOString().slice(0,10);
+                XLSX.writeFile(wb, `Reporte_Articulos_${fileDate}.xlsx`);
+                
+                showToast("¡Reporte de artículos exportado con éxito!", "success");
+            } catch(e) {
+                console.error(e);
+                showToast("Error al generar el reporte", "error");
+            }
+        };
+
+        // ACTUALIZADO: AHORA INYECTA FÓRMULAS REALES DE EXCEL EN LUGAR DE TEXTO ESTÁTICO
         window.exportCorteToExcel = () => {
             const dateStr = new Date().toLocaleString('es-MX'); const fileDate = new Date().toISOString().slice(0,10); const wsData = [];
             const writeCell = (r, c, val) => { while (wsData.length <= r) wsData.push([]); wsData[r][c] = val; };
             writeCell(0, 0, 'CORTE DE CAJA'); writeCell(1, 0, 'Fecha y Hora:'); writeCell(1, 1, dateStr);
             writeCell(3, 0, '--- TODAS LAS FACTURAS ---'); writeCell(3, 4, '--- FACTURAS EFECTIVO ---'); writeCell(3, 8, '--- MOSTRADOR (APP) ---'); writeCell(3, 12, '--- FÍSICO Y CÁLCULOS ---');
-            writeCell(4, 0, 'Folio'); writeCell(4, 1, 'Método'); writeCell(4, 2, 'Total'); writeCell(4, 4, 'Folio'); writeCell(4, 5, 'Texto Original'); writeCell(4, 6, 'Monto Efectivo'); writeCell(4, 8, 'Folio Ticket'); writeCell(4, 9, 'Hora'); writeCell(4, 10, 'Total'); writeCell(4, 12, 'Denom'); writeCell(4, 13, 'Cant'); writeCell(4, 14, 'Importe');
+            writeCell(4, 0, 'Folio'); writeCell(4, 1, 'Método'); writeCell(4, 2, 'Total'); writeCell(4, 4, 'Folio'); writeCell(4, 5, 'Texto Original'); writeCell(4, 6, 'Monto Efectivo'); writeCell(4, 8, 'Folio Ticket'); writeCell(4, 9, 'Hora'); writeCell(4, 10, 'Total'); writeCell(4, 12, 'Denominación'); writeCell(4, 13, 'Cantidad'); writeCell(4, 14, 'Importe');
+            
             let rowGen = 5, rowEf = 5, rowMos = 5, rowDen = 5; let sumGen = 0;
             if (window.reporteFacturasTodas && window.reporteFacturasTodas.length > 0) { window.reporteFacturasTodas.forEach(f => { writeCell(rowGen, 0, f.folio); writeCell(rowGen, 1, f.metodo); writeCell(rowGen, 2, f.total); sumGen += f.total; rowGen++; }); } else { writeCell(rowGen++, 0, 'Sin datos'); } writeCell(rowGen, 1, 'GRAN TOTAL:'); writeCell(rowGen, 2, sumGen);
             let sumEf = 0; if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) { window.reporteFacturasEfectivo.forEach(f => { writeCell(rowEf, 4, f.folio); writeCell(rowEf, 5, f.metodo_original); writeCell(rowEf, 6, f.monto_efectivo); sumEf += f.monto_efectivo; rowEf++; }); } else { writeCell(rowEf++, 4, 'Sin datos'); } writeCell(rowEf, 5, 'TOTAL EFECTIVO:'); writeCell(rowEf, 6, sumEf);
             let sumMos = 0; if (window.reporteMostrador && window.reporteMostrador.length > 0) { window.reporteMostrador.forEach(m => { writeCell(rowMos, 8, m.folio); writeCell(rowMos, 9, m.fecha); writeCell(rowMos, 10, m.total); sumMos += m.total; rowMos++; }); } else { writeCell(rowMos++, 8, 'Sin datos'); } writeCell(rowMos, 9, 'TOTAL MOSTRADOR:'); writeCell(rowMos, 10, sumMos);
-            let sumFisico = 0; denominations.forEach(val => { const qty = denomCounts[val] || 0; const rowTotal = val * qty; sumFisico += rowTotal; writeCell(rowDen, 12, `$ ${val}`); writeCell(rowDen, 13, qty); writeCell(rowDen, 14, rowTotal); rowDen++; }); writeCell(rowDen, 12, 'TOTAL FÍSICO:'); writeCell(rowDen, 14, sumFisico); rowDen += 2; 
-            writeCell(rowDen++, 12, '--- CÁLCULOS DEL SISTEMA ---'); const facturado = parseFloat(document.getElementById('inputFacturado').value) || 0; const teorico = facturado + totalMostradorDelDia; const diff = sumFisico - teorico; writeCell(rowDen, 12, 'Facturas Efectivo'); writeCell(rowDen++, 14, facturado); writeCell(rowDen, 12, 'Ventas App'); writeCell(rowDen++, 14, totalMostradorDelDia); writeCell(rowDen, 12, 'TOTAL TEÓRICO'); writeCell(rowDen++, 14, teorico); rowDen++; writeCell(rowDen++, 12, '--- RESULTADO ---'); writeCell(rowDen, 12, 'DIFERENCIA:'); writeCell(rowDen++, 14, diff); let estadoMsg = "Cuadrada"; if(diff > 0.1) estadoMsg = "Sobrante"; else if(diff < -0.1) estadoMsg = "Faltante"; writeCell(rowDen, 12, 'Estado Caja:'); writeCell(rowDen++, 14, estadoMsg);
+            
+            // FÓRMULAS EXCEL EN LA SECCIÓN DEL FÍSICO
+            let sumFisico = 0; 
+            const inicioFisico = rowDen + 1; // Para la fórmula SUM
+            denominations.forEach(val => { 
+                const qty = denomCounts[val] || 0; 
+                const rowTotal = val * qty; 
+                sumFisico += rowTotal; 
+                writeCell(rowDen, 12, val); // Valor numérico puro
+                writeCell(rowDen, 13, qty); 
+                // Formula: Columna M (12) * Columna N (13)
+                writeCell(rowDen, 14, { t: 'n', v: rowTotal, f: `M${rowDen+1}*N${rowDen+1}` }); 
+                rowDen++; 
+            }); 
+            const finFisico = rowDen;
+            writeCell(rowDen, 12, 'TOTAL FÍSICO:'); 
+            writeCell(rowDen, 14, { t: 'n', v: sumFisico, f: `SUM(O${inicioFisico}:O${finFisico})` }); 
+            const indexTotalFisico = rowDen + 1; // Registro de celda final de fisico
+            rowDen += 2; 
+            
+            writeCell(rowDen++, 12, '--- CÁLCULOS DEL SISTEMA ---'); 
+            const facturado = parseFloat(document.getElementById('inputFacturado').value) || 0; 
+            const teorico = facturado + totalMostradorDelDia; 
+            const diff = sumFisico - teorico; 
+            
+            writeCell(rowDen, 12, 'Facturas Efectivo'); 
+            writeCell(rowDen, 14, facturado);
+            const indexFacturado = rowDen + 1;
+            rowDen++;
+            
+            writeCell(rowDen, 12, 'Ventas App'); 
+            writeCell(rowDen, 14, totalMostradorDelDia);
+            const indexApp = rowDen + 1;
+            rowDen++;
+            
+            writeCell(rowDen, 12, 'TOTAL TEÓRICO'); 
+            // Formula: Efectivo (O..) + App (O..)
+            writeCell(rowDen, 14, { t: 'n', v: teorico, f: `O${indexFacturado}+O${indexApp}` }); 
+            const indexTotalTeorico = rowDen + 1;
+            rowDen++;
+            
+            rowDen++; 
+            writeCell(rowDen++, 12, '--- RESULTADO ---'); 
+            writeCell(rowDen, 12, 'DIFERENCIA:'); 
+            // Formula: Fisico - Teorico
+            writeCell(rowDen, 14, { t: 'n', v: diff, f: `O${indexTotalFisico}-O${indexTotalTeorico}` }); 
+            rowDen++;
+            
+            let estadoMsg = "Cuadrada"; if(diff > 0.1) estadoMsg = "Sobrante"; else if(diff < -0.1) estadoMsg = "Faltante"; 
+            writeCell(rowDen, 12, 'Estado Caja (Estático):'); writeCell(rowDen++, 14, estadoMsg);
+            
             const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(wsData); ws['!cols'] = [ {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, {wch: 28}, {wch: 10}, {wch: 14} ]; XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja"); XLSX.writeFile(wb, `Corte_${fileDate}.xlsx`); showToast("Bitácora exportada.");
         }
 
