@@ -694,8 +694,8 @@
         // ==========================================
         // AUTENTICACIÓN Y ROLES DE USUARIO
         // ==========================================
-        const auth = firebase.auth();
-        const usuariosPermisosRef = db.collection('usuarios_permisos');
+        //const auth = firebase.auth();
+        //const usuariosPermisosRef = db.collection('usuarios_permisos');
 
         auth.onAuthStateChanged(async (user) => {
             const overlay = document.getElementById('loginOverlay');
