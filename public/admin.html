@@ -1030,6 +1030,8 @@
                             <button onclick="openPackagePrintSelector('${p.id}')" class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="QR Paquetes / Cajas"><i class="fas fa-box-open text-xs"></i></button>
                             <div class="w-px h-5 bg-slate-200 mx-0.5"></div>
                             <button onclick="openEditModal('${p.id}')" class="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center justify-center" title="Editar / Configurar"><i class="fas fa-pen text-xs"></i></button>
+                            <!-- BOTÓN DE ELIMINAR AÑADIDO -->
+                            <button onclick="deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all shadow-sm flex items-center justify-center border border-red-100" title="Eliminar Producto"><i class="fas fa-trash-alt text-xs"></i></button>
                         </div>
                     </td>
                 `;
@@ -1147,6 +1149,33 @@
             document.getElementById('subcollectionList').innerHTML = '<tr><td colspan="3" class="text-center py-6 text-slate-400 text-xs font-bold">Guarda el producto primero para añadir empaques/cajas.</td></tr>';
             if(subcollectionListener) { subcollectionListener(); subcollectionListener = null; }
             toggleFormFields();
+        };
+
+        // NUEVA FUNCIÓN PARA ELIMINAR EL PRODUCTO
+        window.deleteProduct = async (id) => {
+            if (!(await customConfirm('¿Estás seguro de eliminar este producto permanentemente?\nEsta acción no se puede deshacer y borrará también sus cajas configuradas.'))) return;
+            
+            try {
+                const batch = db.batch();
+                
+                // Borrar también las subcolecciones (paquetes)
+                const pkgs = await productsRef.doc(id).collection('paquetes').get();
+                pkgs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Borrar el producto maestro
+                batch.delete(productsRef.doc(id));
+                
+                // Ejecutar ambos borrados al mismo tiempo
+                await batch.commit();
+
+                showToast('Producto eliminado correctamente', 'info');
+                clearBulkSelection(); 
+            } catch (error) {
+                console.error("Error al eliminar producto:", error);
+                showToast('Error de conexión al eliminar', 'error');
+            }
         };
 
         function toggleSelectAll() {
