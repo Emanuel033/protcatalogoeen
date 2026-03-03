@@ -783,6 +783,7 @@
         }
 
         function applyRoleRestrictions(rol) {
+            // IDs de los elementos que son EXCLUSIVOS para administradores
             const adminElements = [
                 'dtTab-master', 'dtTab-import', 'dtTab-cashiers',
                 'mbTab-master', 'mbTab-import', 'mbTab-cashiers',
@@ -790,25 +791,32 @@
             ];
             
             if (rol === 'almacen') {
-                // OCULTAR TODOS LOS ACCESOS ADMINISTRATIVOS
+                // ROL ALMACÉN: DESTRUIR O BLOQUEAR ACCESOS
                 adminElements.forEach(id => {
                     const el = document.getElementById(id);
-                    if (el) el.classList.add('hidden');
+                    if (el) {
+                        // Forzamos a que desaparezca ignorando a Tailwind
+                        el.style.setProperty('display', 'none', 'important');
+                        // Opcional: También lo puedes eliminar del código por seguridad
+                        // el.remove(); 
+                    }
                 });
-                // Forzarlo a ver solo el escáner
+                
+                // Forzarlo a ver solo el escáner y ocultar las demás secciones (paneles)
+                document.getElementById('view-master').classList.add('hidden');
+                document.getElementById('view-import').classList.add('hidden');
+                document.getElementById('view-cashiers').classList.add('hidden');
+                
                 switchTab('scanner'); 
             } else {
-                // ADMINISTRADOR: MOSTRAR TODO
+                // ROL ADMINISTRADOR: ASEGURAR QUE TODO SEA VISIBLE
                 adminElements.forEach(id => {
                     const el = document.getElementById(id);
-                    if (el) el.classList.remove('hidden'); // Depende de cómo quieras mostrarlo (md:flex)
+                    if (el) {
+                        el.style.display = ''; // Limpia cualquier bloqueo previo
+                        el.classList.remove('hidden');
+                    }
                 });
-                
-                // Asegurar las clases correctas para desktop (md:flex)
-                document.getElementById('btn-new-product').classList.add('md:flex');
-                document.getElementById('btn-mass-qr').classList.add('md:flex');
-                
-                switchTab('master');
             }
         }
 
