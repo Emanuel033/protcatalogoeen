@@ -160,10 +160,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="searchInput" oninput="resetRenderLimitAndFilter()" placeholder="Buscar por código o nombre (F2)..." autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false"
-                            class="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-inner transition-all">
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="searchInput" oninput="resetRenderLimitAndFilter()" placeholder="Buscar por código o nombre (F2)..." autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false"
+                                class="w-full pl-12 pr-4 py-3 bg-slate-100 border-none rounded-2xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-sm shadow-inner transition-all">
+                        </div>
+                        <button onclick="loadData(true)" class="bg-blue-100 hover:bg-blue-200 text-blue-600 px-4 rounded-2xl transition flex items-center justify-center shadow-inner" title="Forzar actualización del catálogo">
+                            <i class="fas fa-cloud-download-alt"></i>
+                        </button>
                     </div>
                 </div>
                 
@@ -277,10 +282,17 @@
                             </button>
                         </div>
 
+                        <!-- SECCIÓN ACTUALIZADA: FILTRO DE CAJA COMPARTIDA/INDIVIDUAL -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                             <div>
                                 <h4 class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Mostrador (Hoy)</h4>
-                                <button onclick="loadTodaySales()" class="text-[9px] md:text-[10px] text-blue-500 hover:underline font-bold">Calcular de DB</button>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <select id="filtroCorteCajero" onchange="loadTodaySales()" class="text-[10px] bg-slate-50 border border-slate-200 text-slate-700 rounded-md px-2 py-1 outline-none focus:border-blue-500 font-bold cursor-pointer">
+                                        <option value="todos">Caja Compartida (Todos)</option>
+                                        <option value="individual">Mi Caja (Solo mis ventas)</option>
+                                    </select>
+                                    <button onclick="loadTodaySales()" class="text-[10px] text-blue-500 hover:text-blue-700 font-bold transition-colors" title="Recalcular"><i class="fas fa-sync-alt"></i></button>
+                                </div>
                             </div>
                             <span class="text-lg md:text-xl font-black text-slate-800" id="totalMostradorHoy">$0.00</span>
                         </div>
@@ -594,8 +606,11 @@
         // ==========================================
         // CARGA DE DATOS: FACTURACIÓN ES EL REY
         // ==========================================
-        async function loadData() {
+        async function loadData(forceRefresh = false) {
             const loadingUI = document.getElementById('loadingProducts');
+            loadingUI.classList.remove('hidden');
+            document.getElementById('productsGrid').classList.add('hidden');
+
             try {
                 // 0. Revisar configuración
                 try {
@@ -603,6 +618,23 @@
                     if (configDoc.exists) { showInventoryConfig = configDoc.data().mostrar_inventario === true; }
                 } catch(e) {}
                 if(showInventoryConfig) { document.getElementById('inventoryStatusBadge').classList.remove('hidden'); }
+
+                // --- SISTEMA DE CACHÉ PARA AHORRAR CUOTA DE FIREBASE ---
+                if (!forceRefresh) {
+                    const cachedData = localStorage.getItem('een_catalog_cache');
+                    const cacheTime = localStorage.getItem('een_catalog_cache_time');
+                    // Si existe caché y tiene menos de 12 horas de antigüedad (43200000 ms)
+                    if (cachedData && cacheTime && (Date.now() - parseInt(cacheTime) < 43200000)) {
+                        catalogProducts = JSON.parse(cachedData);
+                        loadingUI.classList.add('hidden');
+                        document.getElementById('productsGrid').classList.remove('hidden');
+                        resetRenderLimitAndFilter();
+                        setTimeout(()=> document.getElementById('searchInput').focus(), 500);
+                        return; // TERMINA LA FUNCIÓN AQUÍ. ¡CERO LECTURAS A FIREBASE!
+                    }
+                }
+
+                if (forceRefresh) showToast("Descargando catálogo actualizado...", "info");
 
                 let tempCatalog = {};
 
@@ -700,10 +732,17 @@
                 
                 catalogProducts.sort((a,b) => String(a.nombre).localeCompare(String(b.nombre)));
 
+                // --- GUARDAR EN CACHÉ PARA LA PRÓXIMA VEZ ---
+                try {
+                    localStorage.setItem('een_catalog_cache', JSON.stringify(catalogProducts));
+                    localStorage.setItem('een_catalog_cache_time', Date.now().toString());
+                } catch (e) { console.warn("No se pudo guardar caché (memoria llena)", e); }
+
                 loadingUI.classList.add('hidden');
                 document.getElementById('productsGrid').classList.remove('hidden');
                 
                 resetRenderLimitAndFilter();
+                if (forceRefresh) showToast("Catálogo sincronizado exitosamente");
                 setTimeout(()=> document.getElementById('searchInput').focus(), 500); 
 
             } catch (error) {
@@ -1163,10 +1202,29 @@
 
         async function loadTodaySales() {
             const todayStart = new Date(); todayStart.setHours(0,0,0,0); document.getElementById('totalMostradorHoy').innerText = "...";
+            const filtroModalidad = document.getElementById('filtroCorteCajero').value;
+            
             try {
                 const snap = await db.collection('ventas_mostrador').where('fecha', '>=', todayStart).get();
                 totalMostradorDelDia = 0; window.reporteMostrador = [];
-                snap.forEach(doc => { const data = doc.data(); if (data.estado !== 'CANCELADA') { totalMostradorDelDia += data.total; window.reporteMostrador.push({ folio: data.folio, fecha: data.fecha ? data.fecha.toDate().toLocaleTimeString('es-MX') : 'S/H', total: data.total }); } });
+                snap.forEach(doc => { 
+                    const data = doc.data(); 
+                    if (data.estado !== 'CANCELADA') { 
+                        
+                        // Lógica del nuevo filtro: Si es "individual", ignora las ventas que no sean del cajero actual
+                        if (filtroModalidad === 'individual' && data.vendedor !== cajeroActual) {
+                            return; // Salta esta venta
+                        }
+
+                        totalMostradorDelDia += data.total; 
+                        window.reporteMostrador.push({ 
+                            folio: data.folio, 
+                            fecha: data.fecha ? data.fecha.toDate().toLocaleTimeString('es-MX') : 'S/H', 
+                            total: data.total,
+                            vendedor: data.vendedor || 'General'
+                        }); 
+                    } 
+                });
                 document.getElementById('totalMostradorHoy').innerText = formatMoney(totalMostradorDelDia); calculateCorte();
             } catch(e) { showToast("Error", "error"); }
         }
