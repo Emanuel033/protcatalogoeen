@@ -47,15 +47,8 @@
 </head>
 <body class="h-screen flex flex-col lg:flex-row overflow-hidden">
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
-            authDomain: "productoseen.firebaseapp.com",
-            projectId: "productoseen",
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-    </script>
+    <!-- Configuración Firebase Centralizada -->
+    <script src="assets/js/firebase-config.js"></script>
 
     <!-- SIDEBAR DE PEDIDOS -->
     <aside class="w-full lg:w-[420px] h-1/2 lg:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-lg relative">
@@ -72,6 +65,14 @@
             <button onclick="abrirFormulario()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-1">
                 <i class="fas fa-plus"></i> Nuevo Envío
             </button>
+        </div>
+
+        <!-- NUEVO: BUSCADOR RÁPIDO PARA DESPACHADOR -->
+        <div class="px-3 pt-3 pb-1 bg-slate-50 shrink-0">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="buscar-ruta-input" oninput="renderizarLista()" placeholder="Buscar por cliente, folio o dirección..." class="w-full bg-white border border-slate-200 pl-8 pr-3 py-2 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
+            </div>
         </div>
 
         <div class="flex p-3 gap-2 bg-slate-50 border-b border-slate-200 overflow-x-auto hide-scroll shadow-inner shrink-0">
@@ -420,14 +421,21 @@
 
         function renderizarLista() {
             const container = document.getElementById('lista-pedidos'); container.innerHTML = '';
-            const filtrados = filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual);
+            
+            // Lógica de búsqueda combinada con el filtro de estado
+            const termino = document.getElementById('buscar-ruta-input')?.value.toLowerCase() || '';
+            const filtrados = (filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual))
+                .filter(v => v.cliente_nombre.toLowerCase().includes(termino) || v.id.toLowerCase().includes(termino) || (v.direccion && v.direccion.toLowerCase().includes(termino)));
             
             filtrados.sort((a, b) => {
                 if(a.estado === b.estado) return (a.orden_ruta || 99999999999) - (b.orden_ruta || 99999999999);
                 return 0;
             });
 
-            if(filtrados.length === 0) return container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold"><i class="fas fa-check-circle text-4xl mb-3 text-slate-300"></i><br>Bandeja limpia.</div>`; 
+            if(filtrados.length === 0) {
+                if(termino) return container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold"><i class="fas fa-search text-4xl mb-3 text-slate-300"></i><br>No hay resultados para "${termino}".</div>`;
+                return container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold"><i class="fas fa-check-circle text-4xl mb-3 text-slate-300"></i><br>Bandeja limpia.</div>`; 
+            }
 
             filtrados.forEach(v => {
                 const isActive = viajeSeleccionado && v.id === viajeSeleccionado.id ? 'active' : '';
