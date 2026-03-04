@@ -1121,6 +1121,33 @@
             };
 
             try {
+                // GUARDADO 0: GESTIÓN INTELIGENTE DEL CLIENTE (Crear o Actualizar en catálogo)
+                let finalClientId = currentClientId;
+                
+                // Si el usuario escribió el código manualmente sin usar el autocompletado
+                if (!finalClientId && codigo) {
+                    const found = clientesDB.find(c => c.codigo.toUpperCase() === codigo.toUpperCase());
+                    if (found) finalClientId = found.id;
+                }
+
+                // Si de plano no existe, lo creamos como un nuevo cliente en el catálogo
+                if (!finalClientId && codigo && nombre) {
+                    const newClientRef = db.collection('clientes_logistica').doc();
+                    finalClientId = newClientRef.id;
+                    await newClientRef.set({ 
+                        codigo: codigo, 
+                        nombre: nombre, 
+                        telefono: tel || '', 
+                        bodegas: [] 
+                    });
+                } else if (finalClientId) {
+                    // Si ya existe, actualizamos sus datos básicos por si el usuario corrigió el teléfono
+                    await db.collection('clientes_logistica').doc(finalClientId).set({ 
+                        nombre: nombre, 
+                        telefono: tel || '' 
+                    }, { merge: true });
+                }
+
                 // GUARDADO 1: La ruta en sí
                 if(idDoc) {
                     await db.collection('rutas_logistica').doc(idDoc).update(data);
@@ -1135,9 +1162,9 @@
 
                 // GUARDADO 2: Si el usuario seleccionó crear "NUEVO" destino, lo guardamos en los catálogos correspondientes.
                 if (selectorVal === "NUEVO") {
-                    if (tipo === 'bodega_cliente' && currentClientId) {
+                    if (tipo === 'bodega_cliente' && finalClientId) {
                         const nuevaBodega = { alias: alias, direccion: dir, telefono: destTel, horario: horario, link_maps: maps, coordenadas: {lat, lng} };
-                        await db.collection('clientes_logistica').doc(currentClientId).update({
+                        await db.collection('clientes_logistica').doc(finalClientId).update({
                             bodegas: firebase.firestore.FieldValue.arrayUnion(nuevaBodega)
                         });
                         showToast("Bodega guardada en perfil del cliente", "info");
