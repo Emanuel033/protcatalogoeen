@@ -272,8 +272,13 @@
                                     <label class="block text-[10px] font-bold text-slate-600 mb-1">Alias / Nombre del Destino</label>
                                     <input type="text" id="form-destino-alias" class="w-full border border-slate-300 rounded-xl p-2 focus:border-blue-500 outline-none text-xs font-bold text-slate-800 bg-slate-50" placeholder="Ej. Sucursal Matriz, Castores MTY...">
                                 </div>
-                                <div class="col-span-2">
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Dirección Físca Exacta</label>
+                                <div class="col-span-2 relative">
+                                    <div class="flex justify-between items-end mb-1">
+                                        <label class="block text-[10px] font-bold text-slate-600">Dirección Física Exacta</label>
+                                        <button type="button" onclick="buscarDireccionMapa()" class="text-[9px] bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 px-2 py-0.5 rounded transition-colors flex items-center gap-1 font-bold shadow-sm">
+                                            <i class="fas fa-search-location"></i> Ubicar Pin
+                                        </button>
+                                    </div>
                                     <textarea id="form-direccion" rows="2" class="w-full border border-slate-300 rounded-xl p-2 focus:border-blue-500 outline-none text-xs font-semibold text-slate-800 bg-slate-50 resize-none" placeholder="Calle, Número, Colonia..."></textarea>
                                 </div>
                                 <div>
@@ -290,7 +295,7 @@
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Link de Google Maps (Recomendado)</label>
                                 <div class="relative">
                                     <i class="fas fa-map-pin absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
-                                    <input type="url" id="form-link-maps" class="w-full border border-slate-300 rounded-xl pl-8 p-2 focus:border-blue-500 outline-none text-xs font-semibold text-blue-600 bg-slate-50" placeholder="https://maps.app.goo.gl/...">
+                                    <input type="url" id="form-link-maps" oninput="intentarExtraerCoordenadas(this.value)" class="w-full border border-slate-300 rounded-xl pl-8 p-2 focus:border-blue-500 outline-none text-xs font-semibold text-blue-600 bg-slate-50" placeholder="https://maps.app.goo.gl/...">
                                 </div>
                             </div>
                         </div>
@@ -1032,6 +1037,49 @@
             }
             setTimeout(() => { formMap.invalidateSize(); }, 300);
         }
+
+        window.buscarDireccionMapa = async () => {
+            const dir = document.getElementById('form-direccion').value.trim();
+            if(!dir) return showToast("Escribe una dirección primero", "error");
+            
+            showToast("Buscando en el mapa...", "info");
+            try {
+                // Buscamos priorizando México
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dir + ', Mexico')}&limit=1`);
+                const data = await res.json();
+                
+                if(data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lng = parseFloat(data[0].lon);
+                    document.getElementById('form-lat').value = lat.toFixed(6);
+                    document.getElementById('form-lng').value = lng.toFixed(6);
+                    updateMapFromInputs();
+                    showToast("Pin reubicado aprox.");
+                } else {
+                    showToast("No encontrada. Arrastra el pin.", "error");
+                }
+            } catch(e) {
+                showToast("Error de conexión", "error");
+            }
+        };
+
+        window.intentarExtraerCoordenadas = (url) => {
+            if(!url) return;
+            const regexAt = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+            const regexBang = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/;
+            
+            let match = url.match(regexAt);
+            if(!match) match = url.match(regexBang);
+
+            if(match && match.length >= 3) {
+                const lat = parseFloat(match[1]);
+                const lng = parseFloat(match[2]);
+                document.getElementById('form-lat').value = lat.toFixed(6);
+                document.getElementById('form-lng').value = lng.toFixed(6);
+                updateMapFromInputs();
+                showToast("Coordenadas extraídas del link");
+            }
+        };
 
         window.updateMapFromInputs = () => {
             const lat = parseFloat(document.getElementById('form-lat').value);
