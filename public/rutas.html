@@ -9,11 +9,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
-    <!-- Leaflet & Routing Machine -->
+    <!-- Leaflet (SIN Routing Machine para evitar que rompa la interfaz) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
-    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -21,21 +19,16 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; overflow: hidden; }
         
-        /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
         #map { z-index: 10; }
-        .leaflet-routing-container { display: none !important; } /* Ocultar panel de texto feo del router */
         
-        /* Animaciones y Efectos Premium */
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .pedido-card { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); border-left: 4px solid transparent; }
         .pedido-card:hover { transform: translateX(4px) translateY(-2px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08); }
         .pedido-card.active { border-left-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1); }
         
-        /* Badges de Estado */
         .status-badge { padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px; }
         .status-pendiente { background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
         .status-camino { background-color: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
@@ -44,16 +37,12 @@
 
         @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
         
-        /* Drawer Animations */
         #detalle-drawer { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        
-        /* Vehículos radio buttons */
         .btn-vehiculo-dinamico.selected { border-color: #3b82f6; background-color: #eff6ff; color: #1d4ed8; box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.15); transform: translateY(-1px); }
     </style>
 </head>
 <body class="h-screen flex flex-col lg:flex-row overflow-hidden text-slate-800">
 
-    <!-- Configuración Firebase -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
@@ -92,7 +81,7 @@
             <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-md shadow-blue-500/20 transition-all">Todos</button>
             <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all">Por Asignar</button>
             <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all">En Ruta</button>
-            <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all">Completados</button>
+            <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all hidden lg:block">Completados</button>
             <button onclick="setFilter('fallido')" id="filter-fallido" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-red-600 hover:bg-red-50 transition-all"><i class="fas fa-exclamation-triangle"></i> Fallas</button>
         </div>
 
@@ -108,15 +97,11 @@
     <main class="flex-1 h-[55%] lg:h-full relative flex flex-col overflow-hidden bg-slate-200">
         <div id="map" class="w-full h-full z-[10]"></div>
 
-        <!-- DRAWER LATERAL PREMIUM (Desliza desde la derecha en PC, desde abajo en Móvil) -->
+        <!-- DRAWER LATERAL PREMIUM -->
         <div id="detalle-drawer" class="absolute lg:top-0 bottom-0 right-0 h-[85vh] lg:h-full w-full lg:w-[480px] bg-slate-50 shadow-2xl lg:shadow-[-20px_0_40px_rgba(0,0,0,0.1)] z-[1000] transform translate-y-full lg:translate-y-0 lg:translate-x-full flex flex-col rounded-t-3xl lg:rounded-none overflow-hidden">
-            
-            <!-- Indicador de arrastre (Solo móvil) -->
             <div class="w-full flex justify-center pt-3 pb-1 lg:hidden bg-slate-900" onclick="cerrarDetalle()">
                 <div class="w-12 h-1.5 bg-white/30 rounded-full"></div>
             </div>
-
-            <!-- Cabecera del Drawer -->
             <div class="bg-slate-900 p-5 lg:p-6 shrink-0 relative">
                 <button onclick="cerrarDetalle()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition bg-white/10 w-8 h-8 rounded-full flex items-center justify-center hidden lg:flex"><i class="fas fa-times"></i></button>
                 <div class="flex justify-between items-start mb-3 pr-10">
@@ -130,12 +115,7 @@
                 <h3 id="det-cliente" class="text-xl lg:text-2xl font-black text-white leading-tight mt-2 flex flex-wrap items-center gap-2">Cliente</h3>
                 <p class="text-xs text-slate-400 font-medium mt-1.5" id="det-tipo-destino"><i class="fas fa-map-marker-alt"></i> DESTINO</p>
             </div>
-            
-            <!-- Cuerpo Dinámico (Aquí se inyecta el HTML seguro) -->
-            <div id="drawer-dynamic-content" class="p-5 lg:p-6 overflow-y-auto custom-scroll flex-1 space-y-6">
-                <!-- Se llena vía JS -->
-            </div>
-
+            <div id="drawer-dynamic-content" class="p-5 lg:p-6 overflow-y-auto custom-scroll flex-1 space-y-6"></div>
         </div>
     </main>
 
@@ -145,7 +125,7 @@
     <script>
         document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        let map, marcadores = {}, rutasTrazadas = null; // Volvemos a usar LRM
+        let map, marcadores = {}, capaRuta = null; // Usaremos capaRuta para dibujar polilineas seguras
         
         let rutasActivasDB = {}; let rutasRecientesDB = {}; 
         let viajesAgrupados = [], filtroActual = 'todos', viajeSeleccionado = null; 
@@ -174,6 +154,56 @@
             L.control.zoom({ position: 'topleft' }).addTo(map);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
             L.marker([25.689804, -100.312066], { icon: L.divIcon({ className: 'custom-icon', html: `<div class="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-2xl border-4 border-white z-50"><i class="fas fa-industry text-xl"></i></div>`, iconSize: [48, 48], iconAnchor: [24, 48] }) }).addTo(map).bindPopup("<b class='font-bold text-sm'>Matriz EEN</b>");
+        }
+
+        // =========================================================================
+        // MOTOR DE RUTAS DIRECTO VÍA API OSRM (Sustituye a Leaflet Routing Machine)
+        // =========================================================================
+        async function trazarRutaCalles(waypointsArray, skipAnimation) {
+            if(capaRuta) map.removeLayer(capaRuta);
+            
+            // Si solo hay 1 punto extra (ida y vuelta a matriz)
+            const coordsStr = waypointsArray.map(wp => `${wp.lng},${wp.lat}`).join(';');
+            const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if(data.code !== 'Ok') throw new Error("No se pudo rutear");
+
+                const route = data.routes[0];
+                const coordsArr = route.geometry.coordinates.map(c => [c[1], c[0]]); // Leaflet usa [Lat, Lng]
+
+                // Dibujamos la polilínea sobre las calles (sin basura en la interfaz)
+                capaRuta = L.polyline(coordsArr, { color: '#3b82f6', weight: 6, opacity: 0.8 }).addTo(map);
+                
+                if(!skipAnimation) map.fitBounds(capaRuta.getBounds(), { padding: [50, 50] });
+
+                const distKm = (route.distance / 1000).toFixed(1);
+                const timeMins = Math.round(route.duration / 60);
+
+                const elDist = document.getElementById('calc-dist');
+                const elTime = document.getElementById('calc-time');
+                if(elDist) elDist.innerText = `${distKm} km`;
+                if(elTime) elTime.innerText = timeMins > 60 ? `${Math.floor(timeMins/60)}h ${timeMins%60}m` : `${timeMins} min`;
+
+            } catch(e) {
+                console.warn("Fallo en API de ruteo. Dibujando línea recta como rescate.", e);
+                capaRuta = L.polyline(waypointsArray, { color: '#94a3b8', weight: 4, opacity: 0.7, dashArray: '10, 10' }).addTo(map);
+                if(!skipAnimation) map.fitBounds(capaRuta.getBounds(), { padding: [50, 50] });
+                
+                // Calculo matemático de emergencia
+                let distMetros = 0;
+                for(let i=0; i<waypointsArray.length-1; i++) distMetros += waypointsArray[i].distanceTo(waypointsArray[i+1]);
+                const kmUrbanos = ((distMetros / 1000) * 1.35).toFixed(1);
+                const minsEstimados = Math.round((kmUrbanos / 30) * 60) + (waypointsArray.length * 10);
+                
+                const elDist = document.getElementById('calc-dist');
+                const elTime = document.getElementById('calc-time');
+                if(elDist) elDist.innerText = `~${kmUrbanos} km`;
+                if(elTime) elTime.innerText = `~${minsEstimados} min`;
+            }
         }
 
         function compilarDatosRutas() {
@@ -266,7 +296,7 @@
 
         function actualizarMapa() {
             Object.values(marcadores).forEach(m => map.removeLayer(m));
-            if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; }
+            if(capaRuta) { map.removeLayer(capaRuta); capaRuta = null; }
             marcadores = {}; const bounds = [[25.689804, -100.312066]]; 
 
             (filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual)).forEach(v => {
@@ -280,14 +310,10 @@
             if(bounds.length > 0 && !viajeSeleccionado) map.fitBounds(bounds, { padding: [50, 50] });
         }
 
-        // =========================================================================================
-        // MOTOR DE DIBUJADO DE TARJETA ESTABLE CON ROUTING MACHINE
-        // =========================================================================================
         window.seleccionarViaje = (id, skipAnimation = false) => {
             viajeSeleccionado = viajesAgrupados.find(x => x.id === id); if(!viajeSeleccionado) return;
             renderizarLista(); 
 
-            // 1. Llenar los campos fijos de la cabecera
             const badge = document.getElementById('det-status'); 
             document.getElementById('det-folio').innerText = viajeSeleccionado.id; 
             document.getElementById('det-cliente').innerHTML = `${viajeSeleccionado.cliente_nombre} ` + (viajeSeleccionado.urgente ? `<span class="bg-red-500 text-white px-2 py-0.5 rounded-md text-[10px] font-black uppercase align-middle ml-2 shadow-sm"><i class="fas fa-fire-alt"></i> Urgente</span>` : ``); 
@@ -299,10 +325,8 @@
             else if(estadoActual === 'fallido') { badge.className = 'status-badge status-fallido'; badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Problema'; }
             else { badge.className = 'status-badge status-entregado'; badge.innerHTML = '<i class="fas fa-check-double"></i> Entregado'; }
 
-            // 2. Construir el HTML dinámico para el interior de la tarjeta
             let htmlDinamico = '';
 
-            // 2.1 Módulo de Fallos / Evidencia
             if(estadoActual === 'fallido') {
                 htmlDinamico += `
                     <div class="bg-red-50 border border-red-200 p-5 rounded-2xl shadow-sm">
@@ -320,7 +344,6 @@
                     </div>`;
             }
 
-            // 2.2 Tarjeta de Ubicación y Facturas
             const listFacturas = viajeSeleccionado.pedidos_incluidos.map(p => `<li class="text-xs font-bold text-slate-700 py-2 border-b border-slate-100 last:border-0 flex items-center gap-2"><i class="fas fa-file-invoice text-blue-500"></i> ${p.id}</li>`).join('');
             htmlDinamico += `
                 <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative group">
@@ -338,9 +361,8 @@
                     </div>
                 </div>`;
 
-            // 2.3 Circuito y Rutas con Leaflet Routing Machine
+            // PREPARAR PUNTOS Y SECUENCIA
             const cDest = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
-            if(rutasTrazadas) map.removeControl(rutasTrazadas);
             let wps = [];
             let htmlSecuenciaItems = '';
             
@@ -378,32 +400,8 @@
                     </li>`;
             }
 
-            // Trazar Ruta con Leaflet Routing Machine (Para que siga las calles)
-            try {
-                rutasTrazadas = L.Routing.control({
-                    waypoints: wps,
-                    lineOptions: { styles: [{color: '#3b82f6', weight: 6, opacity: 0.9}] },
-                    createMarker: function() { return null; }, // No crear marcadores extra
-                    show: false, // Ocultar el panel feo
-                    fitSelectedRoutes: !skipAnimation,
-                    router: L.Routing.osrmv1({ language: 'es', profile: 'driving' })
-                }).addTo(map);
-
-                // Escuchar el cálculo para actualizar UI
-                rutasTrazadas.on('routesfound', function(e) {
-                    const r = e.routes[0]; 
-                    const dk = (r.summary.totalDistance / 1000).toFixed(1); 
-                    const tm = Math.round(r.summary.totalTime / 60);
-                    const elDist = document.getElementById('calc-dist');
-                    const elTime = document.getElementById('calc-time');
-                    if(elDist) elDist.innerText = `${dk} km`;
-                    if(elTime) elTime.innerText = tm > 60 ? `${Math.floor(tm/60)}h ${tm%60}m` : `${tm} min`;
-                });
-                
-                rutasTrazadas.on('routingerror', function(e) {
-                    console.warn("Fallo el servidor OSRM. Se muestran valores aproximados.");
-                });
-            } catch(e) { console.warn("Error LRM", e); }
+            // LLAMAMOS AL NUEVO SISTEMA DE DIBUJADO LIMPIO
+            trazarRutaCalles(wps, skipAnimation);
 
             htmlDinamico += `
                 <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-5 shadow-sm">
@@ -424,10 +422,8 @@
                     </div>
                 </div>`;
 
-            // 2.4 Panel de Asignación (SOLO SI ES PENDIENTE) - ¡Garantizado para aparecer!
             if(estadoActual === 'pendiente') {
                 const htmlVehiculos = flotaDB.map(v => `<button onclick="seleccionarVehiculoDinamico('${v.id}')" id="btn-veh-${v.id}" class="btn-vehiculo-dinamico p-3 border-2 border-slate-200 rounded-xl text-xs font-bold bg-white transition-all w-full text-left truncate text-slate-600 hover:border-blue-300 flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><i class="fas fa-truck"></i></div> <span class="truncate">${v.nombre}</span></button>`).join('');
-                
                 const htmlChoferes = `<option value="">-- Seleccionar Operador --</option>` + choferesDB.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
                 
                 htmlDinamico += `
@@ -445,7 +441,6 @@
                     </div>`;
             }
 
-            // 3. Inyectar todo y mostrar el cajón
             document.getElementById('drawer-dynamic-content').innerHTML = htmlDinamico;
             const drawer = document.getElementById('detalle-drawer');
             if(window.innerWidth < 1024) { drawer.classList.remove('translate-y-full'); } else { drawer.classList.remove('translate-x-full'); }
@@ -455,10 +450,11 @@
         window.cerrarDetalle = () => { 
             viajeSeleccionado = null; 
             renderizarLista(); 
-            if(rutasTrazadas) { map.removeControl(rutasTrazadas); rutasTrazadas = null; } 
+            if(capaRuta) { map.removeLayer(capaRuta); capaRuta = null; } 
             const drawer = document.getElementById('detalle-drawer'); 
             drawer.classList.add('translate-y-full', 'lg:translate-y-0', 'lg:translate-x-full'); 
         }
+
         window.copiarDireccion = () => { if(viajeSeleccionado) { navigator.clipboard.writeText(viajeSeleccionado.direccion).then(() => showToast("Dirección copiada")).catch(() => document.execCommand('copy')); } };
 
         window.seleccionarVehiculoDinamico = (id) => {
