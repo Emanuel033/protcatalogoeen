@@ -75,7 +75,6 @@
             </button>
         </div>
 
-        <!-- BUSCADOR RÁPIDO PARA DESPACHADOR -->
         <div class="px-3 pt-3 pb-1 bg-slate-50 shrink-0">
             <div class="relative">
                 <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -122,7 +121,6 @@
                 <h3 id="det-cliente" class="text-xl font-black text-white leading-tight mt-2 flex items-center gap-2">Cliente <span id="det-urgente-badge"></span></h3>
                 <p class="text-[11px] text-blue-400 font-bold mt-1 uppercase tracking-wider" id="det-tipo-destino">DESTINO</p>
                 
-                <!-- ALERTA DE FALLA O EVIDENCIA -->
                 <div id="det-evidencia-container" class="mt-3 bg-slate-800/50 border border-slate-700 p-3 rounded-lg hidden">
                     <p class="text-[10px] font-bold text-slate-300 uppercase mb-2 flex justify-between">
                         <span id="det-evidencia-titulo"><i class="fas fa-camera"></i> Evidencia del Chofer</span>
@@ -147,6 +145,7 @@
                     <ul id="det-articulos" class="text-xs text-slate-700 font-medium space-y-2"></ul>
                 </div>
 
+                <!-- CONTENEDOR SECUENCIA (Forzado a mostrarse) -->
                 <div id="det-ruta-secuencia" class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-5 shadow-sm hidden">
                     <div class="flex justify-between items-center mb-3 border-b border-indigo-100/50 pb-2">
                         <p class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider"><i class="fas fa-route mr-1"></i> Secuencia</p>
@@ -168,8 +167,9 @@
                     </div>
                 </div>
 
-                <div id="controles-despacho" class="mt-2">
-                    <div id="selector-vehiculo-container" class="bg-blue-50/50 border border-blue-100 rounded-xl p-4 space-y-5">
+                <!-- CONTENEDOR ASIGNAR CHOFER (Forzado a mostrarse en pendientes) -->
+                <div id="controles-despacho" class="mt-2 hidden">
+                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4 space-y-5">
                         <h4 class="text-[11px] font-black text-blue-800 uppercase tracking-wider border-b border-blue-100 pb-2 flex justify-between items-center"><span><i class="fas fa-clipboard-check mr-1"></i> Panel de Asignación</span></h4>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 uppercase mb-2">Unidad <span class="text-red-500">*</span></label>
@@ -184,9 +184,8 @@
                 </div>
             </div>
             
-            <!-- FIXED PANEL FOR BUTTONS AT THE BOTTOM -->
             <div class="bg-white p-5 border-t border-slate-200 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-10 relative">
-                <button id="btn-iniciar" onclick="iniciarRuta()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-sm font-black transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 uppercase"><i class="fas fa-play-circle text-lg"></i> Iniciar Ruta</button>
+                <button id="btn-iniciar" onclick="iniciarRuta()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-sm font-black transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 uppercase hidden"><i class="fas fa-play-circle text-lg"></i> Iniciar Ruta</button>
                 <button id="btn-reactivar" onclick="abrirModalConfirmacion('reactivar')" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl text-sm font-black transition shadow-lg shadow-amber-200 flex items-center justify-center gap-2 uppercase hidden"><i class="fas fa-redo text-lg"></i> Reasignar Viaje a Pendientes</button>
             </div>
         </div>
@@ -319,6 +318,7 @@
             </div>
         </div>
     </div>
+    
     <div id="modal-confirmacion" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[4000] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300">
             <div class="p-6 text-center">
@@ -332,6 +332,7 @@
             </div>
         </div>
     </div>
+    
     <div id="toast-container" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 flex flex-col gap-2 w-[90%] md:w-max z-[9999]"></div>
 
     <script>
@@ -382,13 +383,22 @@
         function agruparYConsolidar(pedidosRaw) {
             viajesAgrupados = []; const paqueteriasMap = {};
             pedidosRaw.forEach(p => {
+                // BLINDAJE 1: Forzamos el estado a minúsculas, así "Pendiente" y "pendiente" son iguales.
+                const estadoLimpio = String(p.estado || 'pendiente').toLowerCase().trim();
+                
+                // BLINDAJE 2: Si por algún error un documento viejo no tiene latitud/longitud, le ponemos la de Monterrey.
+                let coordsLimpia = p.coordenadas;
+                if (!coordsLimpia || typeof coordsLimpia.lat === 'undefined' || isNaN(coordsLimpia.lat)) {
+                    coordsLimpia = { lat: 25.6866, lng: -100.3161 }; // Fallback seguro
+                }
+
                 if (p.tipo_destino === 'paqueteria') {
-                    const key = `${p.nombre_paqueteria}_${p.estado}`;
+                    const key = `${p.nombre_paqueteria}_${estadoLimpio}`;
                     if (!paqueteriasMap[key]) {
                         paqueteriasMap[key] = { 
                             es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, 
-                            tipo_destino: 'paqueteria', direccion: p.direccion, coordenadas: p.coordenadas, 
-                            estado: p.estado, vehiculo_asignado: p.vehiculo_asignado, chofer_asignado: p.chofer_asignado, 
+                            tipo_destino: 'paqueteria', direccion: p.direccion, coordenadas: coordsLimpia, 
+                            estado: estadoLimpio, vehiculo_asignado: p.vehiculo_asignado, chofer_asignado: p.chofer_asignado, 
                             motivo_falla: p.motivo_falla, urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, 
                             foto_evidencia: p.foto_evidencia || null, pedidos_incluidos: [] 
                         };
@@ -400,7 +410,7 @@
                 } else { 
                     viajesAgrupados.push({ 
                         es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, tipo_destino: 'bodega_cliente', 
-                        direccion: p.direccion, coordenadas: p.coordenadas, estado: p.estado, 
+                        direccion: p.direccion, coordenadas: coordsLimpia, estado: estadoLimpio, 
                         vehiculo_asignado: p.vehiculo_asignado, chofer_asignado: p.chofer_asignado, 
                         motivo_falla: p.motivo_falla, urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, 
                         foto_evidencia: p.foto_evidencia || null, pedidos_incluidos: [p] 
@@ -501,47 +511,53 @@
             viajeSeleccionado = viajesAgrupados.find(x => x.id === id); if(!viajeSeleccionado) return;
             renderizarLista(); 
 
-            // 1. Limpieza segura y preventiva de toda la interfaz
+            // 1. Limpieza y preparación segura de la interfaz
             const cSec = document.getElementById('det-ruta-secuencia');
             const lSec = document.getElementById('lista-secuencia');
             const badge = document.getElementById('det-status'); 
-            const selectorCont = document.getElementById('selector-vehiculo-container'); 
+            const contDespacho = document.getElementById('controles-despacho'); // Usamos el contenedor padre para ocultar todo seguro
             const btnIniciar = document.getElementById('btn-iniciar'); 
             const btnReactivar = document.getElementById('btn-reactivar');
             const contEvidencia = document.getElementById('det-evidencia-container');
             const txtFalla = document.getElementById('det-texto-falla');
             const imgEvidencia = document.getElementById('det-imagen-evidencia');
 
-            // Reset general de clases y contenidos
+            // Reset garantizado
             cSec.classList.add('hidden');
             lSec.innerHTML = '';
             document.getElementById('resumen-distancia').innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
             document.getElementById('resumen-tiempo').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            selectorCont.classList.add('hidden'); 
+            contDespacho.classList.add('hidden'); 
             btnIniciar.classList.add('hidden'); 
             btnReactivar.classList.add('hidden');
             contEvidencia.classList.add('hidden'); 
             txtFalla.classList.add('hidden'); 
             imgEvidencia.classList.add('hidden');
 
-            // 2. Poblar los datos seguros y mostrar botones de acuerdo al estado
+            // Poblar Datos Básicos (Que no dependen del mapa)
             document.getElementById('det-folio').innerText = viajeSeleccionado.id; 
             document.getElementById('det-cliente').innerHTML = `${viajeSeleccionado.cliente_nombre}`; 
             document.getElementById('det-urgente-badge').innerHTML = viajeSeleccionado.urgente ? `<span class="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-black uppercase align-middle ml-1"><i class="fas fa-siren-on"></i> Urgente</span>` : ``; 
             document.getElementById('det-direccion').innerText = viajeSeleccionado.direccion;
-            document.getElementById('det-articulos').innerHTML = viajeSeleccionado.pedidos_incluidos.map(p => `<li class="text-[11px] font-bold text-slate-700 mt-2 border-b border-slate-100 pb-2"><i class="fas fa-file-invoice text-blue-500 mr-1"></i> Factura: <span class="font-black text-blue-600">${p.id}</span></li>`).join('');
+            
+            // Render de los artículos, protegiendo si pedidos_incluidos fallara
+            const pedidos = viajeSeleccionado.pedidos_incluidos || [];
+            document.getElementById('det-articulos').innerHTML = pedidos.map(p => `<li class="text-[11px] font-bold text-slate-700 mt-2 border-b border-slate-100 pb-2"><i class="fas fa-file-invoice text-blue-500 mr-1"></i> Factura: <span class="font-black text-blue-600">${p.id}</span></li>`).join('');
 
-            if(viajeSeleccionado.estado === 'pendiente') { 
+            // BLINDAJE 3: Forzamos mostrar paneles CLAVE antes de cualquier lógica del mapa.
+            const estadoActual = viajeSeleccionado.estado;
+
+            if(estadoActual === 'pendiente') { 
                 badge.className = 'text-[10px] font-black uppercase px-2 py-1 rounded status-pendiente'; 
                 badge.innerText = 'Por Asignar'; 
-                selectorCont.classList.remove('hidden'); 
+                contDespacho.classList.remove('hidden'); // AQUÍ ES DONDE SE MUESTRA EL SELECTOR DE VEHÍCULO
                 btnIniciar.classList.remove('hidden'); 
             }
-            else if(viajeSeleccionado.estado === 'camino') { 
+            else if(estadoActual === 'camino') { 
                 badge.className = 'text-[10px] font-black uppercase px-2 py-1 rounded status-camino'; 
                 badge.innerText = 'En Ruta'; 
             }
-            else if(viajeSeleccionado.estado === 'fallido') { 
+            else if(estadoActual === 'fallido') { 
                 badge.className = 'text-[10px] font-black uppercase px-2 py-1 rounded status-fallido'; 
                 badge.innerText = 'Problema'; 
                 btnReactivar.classList.remove('hidden'); 
@@ -567,76 +583,74 @@
                 }
             }
 
-            // 3. Renderizado del mapa y rutas (Protegido por try/catch para evitar pantallas rotas)
-            if(viajeSeleccionado.coordenadas) {
-                const cDest = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
-                if(!skipAnimation) map.setView(cDest, 14, { animate: true });
-                if(rutasTrazadas) map.removeControl(rutasTrazadas);
+            // MAPA Y RUTAS (Aislados del resto de la interfaz)
+            const cDest = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
+            if(!skipAnimation) map.setView(cDest, 14, { animate: true });
+            if(rutasTrazadas) map.removeControl(rutasTrazadas);
+            
+            let wps = [];
+
+            if (estadoActual === 'camino' || estadoActual === 'entregado') {
+                const viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+                viajesMismoCamion.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
+
+                wps = [coordPlantaEEN]; 
+                lSec.innerHTML += `<li class="flex items-center gap-2 pb-1"><div class="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] shadow border-2 border-white ml-8"><i class="fas fa-store"></i></div> <span class="text-xs"><b class="text-indigo-900">EEN</b> (Carga Base)</span></li>`;
                 
-                let wps = [];
+                document.getElementById('btn-optimizar-ruta').onclick = () => optimizarRuta(viajeSeleccionado.vehiculo_asignado);
 
-                if (viajeSeleccionado.estado === 'camino' || viajeSeleccionado.estado === 'entregado') {
-                    const viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
-                    viajesMismoCamion.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
+                viajesMismoCamion.forEach((v, idx) => {
+                    wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
+                    const btnUp = idx > 0 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, -1); event.stopPropagation();" class="text-slate-400 hover:text-blue-500 bg-slate-50 hover:bg-blue-50 border border-slate-200 rounded p-1 transition"><i class="fas fa-chevron-up text-[10px]"></i></button>` : `<div class="w-[26px] h-[26px]"></div>`;
+                    const btnDown = idx < viajesMismoCamion.length - 1 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, 1); event.stopPropagation();" class="text-slate-400 hover:text-blue-500 bg-slate-50 hover:bg-blue-50 border border-slate-200 rounded p-1 transition mt-0.5"><i class="fas fa-chevron-down text-[10px]"></i></button>` : `<div class="w-[26px] h-[26px]"></div>`;
+                    const badgeUrgente = v.urgente ? `<span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-[8px] font-black uppercase ml-1 shadow-sm">Urgente</span>` : '';
+                    const colorBola = v.urgente ? 'bg-red-600' : 'bg-blue-600';
 
-                    wps = [coordPlantaEEN]; 
-                    lSec.innerHTML += `<li class="flex items-center gap-2 pb-1"><div class="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] shadow border-2 border-white ml-8"><i class="fas fa-store"></i></div> <span class="text-xs"><b class="text-indigo-900">EEN</b> (Carga Base)</span></li>`;
-                    
-                    document.getElementById('btn-optimizar-ruta').onclick = () => optimizarRuta(viajeSeleccionado.vehiculo_asignado);
+                    lSec.innerHTML += `<li class="flex items-center gap-2 py-1.5 group border-b border-indigo-100/50 last:border-0 relative">
+                        <div class="flex flex-col opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity absolute left-0 z-10 bg-white/80 rounded">${btnUp}${btnDown}</div>
+                        <div class="w-6 h-6 ${colorBola} text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow border-2 border-white ml-8 shrink-0">${idx + 1}</div>
+                        <span class="truncate text-xs flex-1"><b class="${v.urgente?'text-red-700':'text-slate-800'}">${v.cliente_nombre}</b>${badgeUrgente}</span>
+                    </li>`;
+                });
+                wps.push(coordPlantaEEN); 
+                lSec.innerHTML += `<li class="flex items-center gap-2 pt-1 border-t border-indigo-200 mt-1"><div class="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] shadow border-2 border-white ml-8"><i class="fas fa-flag-checkered"></i></div> <span class="text-xs"><b class="text-indigo-900">EEN</b> (Retorno)</span></li>`;
+                cSec.classList.remove('hidden');
 
-                    viajesMismoCamion.forEach((v, idx) => {
-                        wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
-                        const btnUp = idx > 0 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, -1); event.stopPropagation();" class="text-slate-400 hover:text-blue-500 bg-slate-50 hover:bg-blue-50 border border-slate-200 rounded p-1 transition"><i class="fas fa-chevron-up text-[10px]"></i></button>` : `<div class="w-[26px] h-[26px]"></div>`;
-                        const btnDown = idx < viajesMismoCamion.length - 1 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, 1); event.stopPropagation();" class="text-slate-400 hover:text-blue-500 bg-slate-50 hover:bg-blue-50 border border-slate-200 rounded p-1 transition mt-0.5"><i class="fas fa-chevron-down text-[10px]"></i></button>` : `<div class="w-[26px] h-[26px]"></div>`;
-                        const badgeUrgente = v.urgente ? `<span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-[8px] font-black uppercase ml-1 shadow-sm">Urgente</span>` : '';
-                        const colorBola = v.urgente ? 'bg-red-600' : 'bg-blue-600';
-
-                        lSec.innerHTML += `<li class="flex items-center gap-2 py-1.5 group border-b border-indigo-100/50 last:border-0 relative">
-                            <div class="flex flex-col opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity absolute left-0 z-10 bg-white/80 rounded">${btnUp}${btnDown}</div>
-                            <div class="w-6 h-6 ${colorBola} text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow border-2 border-white ml-8 shrink-0">${idx + 1}</div>
-                            <span class="truncate text-xs flex-1"><b class="${v.urgente?'text-red-700':'text-slate-800'}">${v.cliente_nombre}</b>${badgeUrgente}</span>
-                        </li>`;
-                    });
-                    wps.push(coordPlantaEEN); 
-                    lSec.innerHTML += `<li class="flex items-center gap-2 pt-1 border-t border-indigo-200 mt-1"><div class="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] shadow border-2 border-white ml-8"><i class="fas fa-flag-checkered"></i></div> <span class="text-xs"><b class="text-indigo-900">EEN</b> (Retorno)</span></li>`;
-                    cSec.classList.remove('hidden');
-
-                } else {
-                    wps = [coordPlantaEEN, cDest];
-                    cSec.classList.remove('hidden'); 
-                    lSec.innerHTML = `<li class="flex items-center gap-2 pb-1"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] shadow ml-8"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">EEN</b> (Salida)</span></li><li class="flex items-center gap-2 py-1"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] shadow ml-8"><i class="fas fa-map-marker-alt"></i></div> <span class="truncate"><b>${viajeSeleccionado.cliente_nombre}</b></span></li>`;
-                    document.getElementById('btn-optimizar-ruta').onclick = () => showToast("Sólo se optimizan rutas con múltiples destinos", "info");
-                }
-
-                // Try/Catch preventivo por si el servidor de rutas públicas (Leaflet/OSRM) falla o está inalcanzable
-                try {
-                    if (typeof L.Routing !== 'undefined') {
-                        rutasTrazadas = L.Routing.control({
-                            waypoints: wps,
-                            lineOptions: { styles: [{color: '#3b82f6', weight: 5, opacity: 0.8}] }, 
-                            createMarker: function() { return null; },
-                            fitSelectedRoutes: !skipAnimation, show: false, language: 'es'
-                        }).addTo(map);
-
-                        rutasTrazadas.on('routesfound', function(e) {
-                            const r = e.routes[0]; const dk = (r.summary.totalDistance / 1000).toFixed(1); const tm = Math.round(r.summary.totalTime / 60);
-                            document.getElementById('resumen-distancia').innerText = `${dk} km`; document.getElementById('resumen-tiempo').innerText = tm > 60 ? `${Math.floor(tm/60)}h ${tm%60}m` : `${tm} min`;
-                        });
-                        
-                        rutasTrazadas.on('routingerror', function(e) {
-                            console.warn("Aviso: El servidor de enrutamiento no pudo trazar esta ruta en específico.");
-                            document.getElementById('resumen-distancia').innerText = `N/A`; document.getElementById('resumen-tiempo').innerText = `N/A`;
-                        });
-                    } else {
-                        document.getElementById('resumen-distancia').innerText = `N/A`; document.getElementById('resumen-tiempo').innerText = `N/A`;
-                    }
-                } catch(err) {
-                    console.warn("Fallo en la trazabilidad del mapa, pero el panel seguirá funcionando.", err);
-                    document.getElementById('resumen-distancia').innerText = `N/A`; document.getElementById('resumen-tiempo').innerText = `N/A`;
-                }
+            } else {
+                wps = [coordPlantaEEN, cDest];
+                cSec.classList.remove('hidden'); // Para los pendientes forzamos a que siempre se vea el trayecto 
+                lSec.innerHTML = `<li class="flex items-center gap-2 pb-1"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[9px] shadow ml-8"><i class="fas fa-store"></i></div> <span><b class="text-indigo-900">EEN</b> (Salida)</span></li><li class="flex items-center gap-2 py-1"><div class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[9px] shadow ml-8"><i class="fas fa-map-marker-alt"></i></div> <span class="truncate"><b>${viajeSeleccionado.cliente_nombre}</b></span></li>`;
+                document.getElementById('btn-optimizar-ruta').onclick = () => showToast("Sólo se optimizan rutas con múltiples destinos", "info");
             }
 
-            // 4. Se muestra el panel hasta el final (siempre se ejecutará gracias al manejo de errores previo)
+            // Trazado de ruta rodeado por bloque Try-Catch para asegurar que nunca colapse la app
+            try {
+                if (typeof L.Routing !== 'undefined') {
+                    rutasTrazadas = L.Routing.control({
+                        waypoints: wps,
+                        lineOptions: { styles: [{color: '#3b82f6', weight: 5, opacity: 0.8}] }, 
+                        createMarker: function() { return null; },
+                        fitSelectedRoutes: !skipAnimation, show: false, language: 'es'
+                    }).addTo(map);
+
+                    rutasTrazadas.on('routesfound', function(e) {
+                        const r = e.routes[0]; const dk = (r.summary.totalDistance / 1000).toFixed(1); const tm = Math.round(r.summary.totalTime / 60);
+                        document.getElementById('resumen-distancia').innerText = `${dk} km`; document.getElementById('resumen-tiempo').innerText = tm > 60 ? `${Math.floor(tm/60)}h ${tm%60}m` : `${tm} min`;
+                    });
+                    
+                    rutasTrazadas.on('routingerror', function(e) {
+                        console.warn("Aviso: El servidor de mapa remoto falló al calcular los km exactos.", e);
+                        document.getElementById('resumen-distancia').innerText = `N/A`; document.getElementById('resumen-tiempo').innerText = `N/A`;
+                    });
+                } else {
+                    document.getElementById('resumen-distancia').innerText = `N/A`; document.getElementById('resumen-tiempo').innerText = `N/A`;
+                }
+            } catch(err) {
+                console.warn("L.Routing se topó con un error inesperado, mostrando NA en la interfaz.", err);
+                document.getElementById('resumen-distancia').innerText = `N/A`; document.getElementById('resumen-tiempo').innerText = `N/A`;
+            }
+
+            // Forzar a que todo el panel principal se muestre al final de la ejecución
             const card = document.getElementById('detalle-flotante'); 
             card.classList.remove('hidden'); 
             void card.offsetWidth; 
@@ -709,7 +723,6 @@
             try { await batch.commit(); } catch(e) { showToast("Error al reordenar", "error"); }
         };
 
-        // ====== MINI MAPA ======
         function initMiniMap() {
             if (miniMap) { setTimeout(() => miniMap.invalidateSize(), 200); return; }
             miniMap = L.map('mini-map', { zoomControl: false }).setView([25.689804, -100.312066], 11);
@@ -736,7 +749,6 @@
             finally { btn.innerHTML = '<i class="fas fa-search-location"></i> Buscar'; }
         };
 
-        // ====== FORMULARIO ======
         window.abrirFormulario = () => {
             viajeEnEdicion = null;
             document.getElementById('modal-formulario-titulo').innerHTML = '<i class="fas fa-clipboard-list text-blue-400 mr-2"></i> Nuevo Envío';
@@ -855,7 +867,6 @@
             if (isNaN(lat) || isNaN(lng)) coords = await obtenerCoordenadasReales(d.dir);
 
             try {
-                // Actualizar O CREAR libreta de direcciones del cliente (Resuelve Punto 2)
                 const refCliente = db.collection('clientes_logistica').doc(d.cli); 
                 const docCli = await refCliente.get();
                 if (docCli.exists) {
@@ -863,7 +874,6 @@
                     dirs.push({ direccion: d.dir, horario: d.hor, excepcion: d.exc, telefono: d.tel, linkMaps: d.link, lat: coords.lat, lng: coords.lng });
                     await refCliente.set({ nombre: d.nom, direcciones: dirs, codigo: d.cli }, { merge: true });
                 } else {
-                    // Si el cliente no existía, lo crea de cero con sus datos
                     await refCliente.set({ 
                         nombre: d.nom, 
                         codigo: d.cli, 
