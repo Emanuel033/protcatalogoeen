@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#1e293b">
-    <title>Logística EEN - Operador</title>
+    <title>EEN - Operador</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -51,9 +51,15 @@
                     <p id="txt-operador" class="text-[10px] text-blue-300 font-bold uppercase tracking-wider">Sin identificar</p>
                 </div>
             </div>
-            <button onclick="cerrarSesion()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
+            <div class="flex gap-2">
+                <!-- NUEVO: BOTÓN DE DOCS LEGALES -->
+                <button onclick="abrirDocsLegales()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors shadow-sm" title="Descargar IMSS / SUA">
+                    <i class="fas fa-folder-open"></i>
+                </button>
+                <button onclick="cerrarSesion()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:text-red-400 flex items-center justify-center transition-colors">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
         </div>
         
         <!-- TABS MÓVILES -->
@@ -68,9 +74,59 @@
     </header>
 
     <!-- CONTENIDO PRINCIPAL (LISTA DE ENTREGAS) -->
-    <main class="flex-1 overflow-y-auto px-4 py-4 hide-scroll bg-slate-100" id="contenedor-viajes">
+    <!-- MEJORA: pb-32 agregado para garantizar que se pueda hacer scroll hasta la última tarjeta sin estorbar -->
+    <main class="flex-1 overflow-y-auto px-4 pt-4 pb-32 hide-scroll bg-slate-100" id="contenedor-viajes">
         <div class="text-center py-20 text-slate-400"><i class="fas fa-spinner fa-spin text-3xl mb-2"></i><br>Cargando ruta...</div>
     </main>
+
+    <!-- ========================================== -->
+    <!-- MODAL DOCS LEGALES (IMSS / SUA)            -->
+    <!-- ========================================== -->
+    <div id="modal-docs-legales" class="fixed inset-0 bg-slate-900/95 z-[90] hidden flex-col items-center justify-center p-4 backdrop-blur-md transition-opacity opacity-0">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl flex flex-col overflow-hidden" id="modal-docs-content">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white shrink-0">
+                <h3 class="font-black flex items-center gap-2"><i class="fas fa-file-pdf text-red-400"></i> Documentos Oficiales</h3>
+                <button onclick="cerrarDocsLegales()" class="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-5 flex-1 space-y-3 bg-slate-50">
+                <p class="text-xs font-bold text-slate-500 text-center mb-4">Descarga tus comprobantes vigentes para acceso a plantas industriales.</p>
+                
+                <a id="btn-descarga-imss" href="#" class="hidden w-full bg-white border border-slate-200 hover:border-blue-300 p-4 rounded-xl shadow-sm items-center gap-3 transition">
+                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-lg shrink-0"><i class="fas fa-hospital-user"></i></div>
+                    <div class="flex-1 text-left"><div class="font-black text-slate-700 text-sm">Alta IMSS</div><div class="text-[10px] text-slate-400 font-bold">Vigente. Clic para descargar.</div></div>
+                </a>
+                
+                <a id="btn-descarga-sua" href="#" class="hidden w-full bg-white border border-slate-200 hover:border-blue-300 p-4 rounded-xl shadow-sm items-center gap-3 transition">
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-lg shrink-0"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="flex-1 text-left"><div class="font-black text-slate-700 text-sm">Comprobante SUA</div><div class="text-[10px] text-slate-400 font-bold">Vigente. Clic para descargar.</div></div>
+                </a>
+
+                <a id="btn-descarga-otros" href="#" class="hidden w-full bg-white border border-slate-200 hover:border-blue-300 p-4 rounded-xl shadow-sm items-center gap-3 transition">
+                    <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-lg shrink-0"><i class="fas fa-shield-alt"></i></div>
+                    <div class="flex-1 text-left"><div class="font-black text-slate-700 text-sm">Documento Adicional</div><div class="text-[10px] text-slate-400 font-bold">Clic para descargar.</div></div>
+                </a>
+
+                <div id="docs-vacio" class="text-center py-6 hidden">
+                    <i class="fas fa-folder-open text-slate-300 text-4xl mb-2"></i>
+                    <p class="text-sm font-bold text-slate-400">Aún no hay documentos subidos para este mes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL VISOR DE CÓDIGO QR (ACCESO)          -->
+    <!-- ========================================== -->
+    <div id="modal-visor-qr" class="fixed inset-0 bg-slate-900/95 z-[95] hidden flex-col items-center justify-center p-4 backdrop-blur-md transition-opacity opacity-0">
+        <button onclick="cerrarVisorQR()" class="absolute top-6 right-6 text-white text-3xl hover:text-red-400 transition"><i class="fas fa-times"></i></button>
+        <div class="bg-white p-4 rounded-3xl shadow-2xl flex flex-col items-center text-center">
+            <h3 class="font-black text-slate-800 text-lg mb-1"><i class="fas fa-qrcode text-indigo-500"></i> Código de Acceso</h3>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-4">Muestra esto en caseta</p>
+            <div class="bg-slate-100 p-2 rounded-2xl mb-4"><img id="qr-img-src" src="" class="w-64 h-64 object-contain mix-blend-multiply"></div>
+            <p id="qr-empresa-nombre" class="text-sm font-black text-indigo-900 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-100 w-full truncate"></p>
+        </div>
+    </div>
 
     <!-- ========================================== -->
     <!-- MODAL DE LOGIN (SELECCIONAR CHOFER)        -->
@@ -362,9 +418,12 @@
                 if(docs.factura) docsHTML += '<span class="bg-indigo-100 text-indigo-700 border border-indigo-200 text-[10px] px-2 py-1 rounded-md font-bold shadow-sm">Factura</span> ';
                 if(docs.certificados) docsHTML += '<span class="bg-indigo-100 text-indigo-700 border border-indigo-200 text-[10px] px-2 py-1 rounded-md font-bold shadow-sm">Certificados</span> ';
                 if(docs.orden_compra) docsHTML += '<span class="bg-indigo-100 text-indigo-700 border border-indigo-200 text-[10px] px-2 py-1 rounded-md font-bold shadow-sm">OC</span> ';
-                if(docs.qr_acceso) docsHTML += '<span class="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-1 rounded-md font-bold shadow-sm"><i class="fas fa-qrcode"></i> QR Acceso</span> ';
+                if(docs.qr_acceso) docsHTML += '<span class="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-1 rounded-md font-bold shadow-sm"><i class="fas fa-qrcode"></i> Piden QR</span> ';
                 
                 const ciegoAlert = docs.envio_ciego ? `<div class="mt-3 bg-slate-800 text-white p-3 rounded-xl text-xs font-black flex items-center gap-3 shadow-md animate-pulse"><i class="fas fa-user-secret text-2xl text-red-400"></i> <div>ATENCIÓN: ENVÍO CIEGO<br><span class="text-[10px] font-medium text-slate-300">No entregar papeles con logos EEN.</span></div></div>` : '';
+
+                // NUEVO: BOTÓN VISUALIZADOR DE QR
+                const btnVerQR = v.qr_imagen ? `<button onclick="abrirVisorQR('${v.qr_imagen}', '${v.cliente_nombre.replace(/'/g, "\\'")}')" class="w-full mt-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 py-3 rounded-xl flex items-center justify-center gap-2 font-black text-sm transition"><i class="fas fa-qrcode text-lg"></i> Ver QR de Acceso en Pantalla</button>` : '';
 
                 // --- ACCIONES FINALES ---
                 let botonesFinales = '';
@@ -408,12 +467,71 @@
                             <div class="flex flex-wrap gap-1 leading-none">${docsHTML}</div>
                             ${ciegoAlert}
                         </div>` : ''}
+                        
+                        ${btnVerQR}
 
                         ${botonesFinales}
                     </div>
                 `;
             });
         }
+
+        // ==========================================
+        // FLUJO DE DOCS LEGALES Y VISOR QR
+        // ==========================================
+        window.abrirDocsLegales = async () => {
+            const m = document.getElementById('modal-docs-legales');
+            const c = document.getElementById('modal-docs-content');
+            m.classList.remove('hidden'); m.classList.add('flex');
+            
+            try {
+                const docSnap = await db.collection('configuracion').doc('docs_legales').get();
+                const btnImss = document.getElementById('btn-descarga-imss');
+                const btnSua = document.getElementById('btn-descarga-sua');
+                const btnOtros = document.getElementById('btn-descarga-otros');
+                const msgVacio = document.getElementById('docs-vacio');
+                
+                btnImss.classList.add('hidden'); btnImss.classList.remove('flex');
+                btnSua.classList.add('hidden'); btnSua.classList.remove('flex');
+                btnOtros.classList.add('hidden'); btnOtros.classList.remove('flex');
+                msgVacio.classList.add('hidden');
+
+                if(docSnap.exists) {
+                    const data = docSnap.data();
+                    let encontroAlgo = false;
+                    
+                    if(data.imss_pdf) { btnImss.href = data.imss_pdf; btnImss.download = "Alta_IMSS.pdf"; btnImss.classList.remove('hidden'); btnImss.classList.add('flex'); encontroAlgo = true; }
+                    if(data.sua_pdf) { btnSua.href = data.sua_pdf; btnSua.download = "Comprobante_SUA.pdf"; btnSua.classList.remove('hidden'); btnSua.classList.add('flex'); encontroAlgo = true; }
+                    if(data.otros_pdf) { btnOtros.href = data.otros_pdf; btnOtros.download = "Doc_Extra.pdf"; btnOtros.classList.remove('hidden'); btnOtros.classList.add('flex'); encontroAlgo = true; }
+                    
+                    if(!encontroAlgo) msgVacio.classList.remove('hidden');
+                } else {
+                    msgVacio.classList.remove('hidden');
+                }
+            } catch(e) {
+                showToast("Error al cargar docs", "error");
+            }
+
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        
+        window.cerrarDocsLegales = () => {
+            const m = document.getElementById('modal-docs-legales');
+            m.classList.add('opacity-0'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+        };
+
+        window.abrirVisorQR = (base64, clienteNombre) => {
+            document.getElementById('qr-img-src').src = base64;
+            document.getElementById('qr-empresa-nombre').innerText = clienteNombre;
+            const m = document.getElementById('modal-visor-qr');
+            m.classList.remove('hidden'); m.classList.add('flex');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        
+        window.cerrarVisorQR = () => {
+            const m = document.getElementById('modal-visor-qr');
+            m.classList.add('opacity-0'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+        };
 
         // ==========================================
         // FLUJO DE ENTREGA EXITOSA (2 FOTOS)
