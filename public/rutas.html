@@ -366,9 +366,19 @@
 
                 <!-- TAB FLOTA -->
                 <div id="cfg-panel-flota" class="cfg-panel hidden space-y-4">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-2">
-                        <input type="text" id="cfg-nuevo-vehiculo" placeholder="Identificador / Placas (Ej. Camión 1)" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold">
-                        <button onclick="agregarVehiculo()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition shadow-sm"><i class="fas fa-plus"></i> Agregar</button>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-3 items-end">
+                        <div class="flex-1 w-full">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Identificador / Placas</label>
+                            <input type="text" id="cfg-nuevo-vehiculo" placeholder="Ej. Camión 1 (NLR 05)" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold">
+                        </div>
+                        <div class="w-full sm:w-auto">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Capacidad</label>
+                            <select id="cfg-vehiculo-tipo" class="w-full sm:w-48 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold bg-slate-50 cursor-pointer">
+                                <option value="ligero">🚗 Ligero (Estaquita/Van)</option>
+                                <option value="pesado">🚛 Pesado (Camión/Torton)</option>
+                            </select>
+                        </div>
+                        <button onclick="agregarVehiculo()" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition shadow-sm h-[38px] flex items-center justify-center gap-2"><i class="fas fa-plus"></i> Agregar</button>
                     </div>
                     <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                         <table class="w-full text-left text-sm">
@@ -869,7 +879,12 @@
             }
 
             if(estadoActual === 'pendiente') {
-                const htmlVehiculos = flotaDB.map(v => `<button onclick="seleccionarVehiculoDinamico('${v.id}')" id="btn-veh-${v.id}" class="btn-vehiculo-dinamico p-1.5 border border-slate-200 rounded-lg text-[9px] font-bold bg-white transition-all text-left truncate text-slate-600 flex flex-col items-center gap-0.5"><div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"><i class="fas fa-truck text-[10px]"></i></div><span class="w-full text-center truncate">${v.nombre}</span></button>`).join('');
+                const htmlVehiculos = flotaDB.map(v => {
+                    const isPesado = v.pesado || false;
+                    const iconColor = isPesado ? 'text-purple-600' : 'text-slate-400';
+                    const iconType = isPesado ? 'fa-truck-moving' : 'fa-truck';
+                    return `<button onclick="seleccionarVehiculoDinamico('${v.id}')" id="btn-veh-${v.id}" class="btn-vehiculo-dinamico p-1.5 border border-slate-200 rounded-lg text-[9px] font-bold bg-white transition-all text-left truncate text-slate-600 flex flex-col items-center gap-0.5"><div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center ${iconColor}"><i class="fas ${iconType} text-[10px]"></i></div><span class="w-full text-center truncate">${v.nombre}</span></button>`;
+                }).join('');
                 const htmlChoferes = `<option value="">-- Operador --</option>` + choferesDB.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
                 htmlDinamico += `
                 <div class="bg-blue-600 rounded-xl p-3 shadow-md text-white mt-2">
@@ -1582,7 +1597,13 @@
         function renderConfigFlota() {
             const tbody = document.getElementById('cfg-tabla-flota'); tbody.innerHTML = '';
             flotaDB.forEach(f => {
-                tbody.innerHTML += `<tr><td class="px-4 py-2 font-bold text-slate-700"><i class="fas fa-truck text-slate-400 mr-2"></i> ${f.nombre}</td><td class="px-4 py-2 text-right"><button onclick="eliminarVehiculo('${f.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`;
+                const isPesado = f.pesado || false;
+                const badge = isPesado 
+                    ? `<span class="bg-purple-100 text-purple-700 text-[9px] px-2 py-0.5 rounded font-black ml-2 uppercase">Pesado</span>` 
+                    : `<span class="bg-slate-100 text-slate-600 text-[9px] px-2 py-0.5 rounded font-black ml-2 uppercase">Ligero</span>`;
+                const icon = isPesado ? 'fa-truck-moving text-purple-500' : 'fa-truck text-slate-400';
+                
+                tbody.innerHTML += `<tr><td class="px-4 py-2 font-bold text-slate-700 flex items-center"><i class="fas ${icon} w-6 text-center"></i> ${f.nombre} ${badge}</td><td class="px-4 py-2 text-right"><button onclick="eliminarVehiculo('${f.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`;
             });
         }
 
@@ -1599,8 +1620,18 @@
 
         window.agregarVehiculo = async () => {
             const input = document.getElementById('cfg-nuevo-vehiculo'); const nombre = input.value.trim();
+            const tipo = document.getElementById('cfg-vehiculo-tipo').value;
             if(!nombre) return showToast("Escribe un identificador", "error");
-            try { await db.collection('flota').add({ nombre: nombre }); input.value = ''; showToast("Vehículo agregado"); renderConfigFlota(); } catch(e) { showToast("Error", "error"); }
+            try { 
+                await db.collection('flota').add({ 
+                    nombre: nombre, 
+                    pesado: tipo === 'pesado',
+                    fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
+                }); 
+                input.value = ''; 
+                document.getElementById('cfg-vehiculo-tipo').value = 'ligero';
+                showToast("Vehículo agregado"); 
+            } catch(e) { showToast("Error", "error"); }
         };
         window.eliminarVehiculo = async (id) => {
             if(confirm("¿Eliminar vehículo permanentemente?")) {
@@ -1845,7 +1876,18 @@
         // INICIO Y CARGA DE DATOS
         // ==========================================
         function cargarDatosMaestros() {
-            db.collection('flota').onSnapshot(snap => { flotaDB = []; snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() })); });
+            db.collection('flota').onSnapshot(snap => { 
+                flotaDB = []; 
+                snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() })); 
+                // Ordenar por fecha de creación (los más viejos primero)
+                flotaDB.sort((a,b) => {
+                    const tA = a.fecha_creacion ? a.fecha_creacion.toMillis() : 0;
+                    const tB = b.fecha_creacion ? b.fecha_creacion.toMillis() : 0;
+                    return tA - tB;
+                });
+                const panelFlota = document.getElementById('cfg-panel-flota');
+                if(panelFlota && !panelFlota.classList.contains('hidden')) renderConfigFlota();
+            });
             db.collection('choferes').onSnapshot(snap => { choferesDB = []; snap.forEach(doc => choferesDB.push({ id: doc.id, ...doc.data() })); });
 
             // NUEVO: Catálogo global de Fleteras
