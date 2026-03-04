@@ -9,6 +9,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
+    <!-- NUEVO: Librería para exportar Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -403,6 +406,51 @@
                     <p class="text-[9px] text-slate-400 text-center mt-2">* Por favor, intenta subir archivos en formato PDF o Imágenes ligeras para no saturar la conexión de los choferes.</p>
                 </div>
                 
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BITÁCORA (HISTORIAL DE RUTAS Y EXCEL) -->
+    <div id="modal-bitacora" class="fixed inset-0 bg-slate-900/90 z-[120] hidden flex-col items-center justify-center p-2 sm:p-6 backdrop-blur-md transition-opacity opacity-0">
+        <div class="bg-white rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden transform scale-95 transition-transform flex flex-col h-[85vh]" id="modal-bitacora-content">
+            <div class="bg-indigo-900 p-5 text-white flex justify-between items-center shrink-0">
+                <h3 class="text-lg font-black flex items-center gap-2"><i class="fas fa-book text-indigo-300"></i> Bitácora de Logística (Últimos 30 días)</h3>
+                <button onclick="cerrarBitacora()" class="text-indigo-200 hover:text-white transition w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row gap-3 justify-between items-center shrink-0">
+                <div class="flex items-center gap-2 w-full sm:w-auto relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="bitacora-search" oninput="filtrarBitacora()" placeholder="Buscar folio, cliente, chofer..." class="border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-sm outline-none focus:border-indigo-500 font-bold w-full sm:w-64 bg-white">
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center px-2 border-r border-slate-100">
+                        <i class="fas fa-calendar-alt text-slate-400 mr-2 text-xs"></i>
+                        <input type="date" id="bitacora-fecha-inicio" class="text-xs font-bold text-slate-600 outline-none bg-transparent cursor-pointer">
+                        <span class="text-slate-300 mx-2">-</span>
+                        <input type="date" id="bitacora-fecha-fin" class="text-xs font-bold text-slate-600 outline-none bg-transparent cursor-pointer">
+                    </div>
+                    <button onclick="exportarBitacoraExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-sm shadow-emerald-500/30 transition flex items-center gap-2 active:scale-95">
+                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scroll bg-white">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[10px] uppercase sticky top-0 z-10 shadow-sm">
+                        <tr>
+                            <th class="px-4 py-3">Fechas (Cap / Sal)</th>
+                            <th class="px-4 py-3">Folios</th>
+                            <th class="px-4 py-3">Cliente / Destino</th>
+                            <th class="px-4 py-3">Modalidad</th>
+                            <th class="px-4 py-3">Operador</th>
+                            <th class="px-4 py-3 text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bitacora-tbody" class="divide-y divide-slate-100"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -1643,14 +1691,29 @@
 
         window.cargarBitacora = async () => {
             const tbody = document.getElementById('bitacora-tbody');
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-slate-400 font-bold"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando historial...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-slate-400 font-bold"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando historial del último mes...</td></tr>';
+            
+            // Establecer fechas por defecto en los inputs (Últimos 30 días)
+            const hoy = new Date();
+            const haceUnMes = new Date();
+            haceUnMes.setDate(hoy.getDate() - 30);
+            
+            document.getElementById('bitacora-fecha-fin').valueAsDate = hoy;
+            document.getElementById('bitacora-fecha-inicio').valueAsDate = haceUnMes;
+
             try {
-                const snap = await db.collection('rutas_logistica').orderBy('fecha_actualizacion', 'desc').limit(100).get();
+                // SOLO TRAE DATOS DEL ÚLTIMO MES PARA NO SATURAR FIREBASE
+                const snap = await db.collection('rutas_logistica')
+                    .where('fecha_actualizacion', '>=', haceUnMes)
+                    .orderBy('fecha_actualizacion', 'desc')
+                    .get();
+                    
                 bitacoraData = [];
                 snap.forEach(doc => { bitacoraData.push({ id: doc.id, ...doc.data() }); });
                 filtrarBitacora();
             } catch(e) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-red-500 font-bold">Error al cargar historial.</td></tr>';
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-red-500 font-bold">Error al cargar historial. Verifica el índice compuesto en Firebase.</td></tr>';
             }
         };
 
@@ -1707,6 +1770,75 @@
                     </tr>
                 `;
             });
+        };
+
+        window.exportarBitacoraExcel = () => {
+            const fInicioStr = document.getElementById('bitacora-fecha-inicio').value;
+            const fFinStr = document.getElementById('bitacora-fecha-fin').value;
+            
+            if(!fInicioStr || !fFinStr) return showToast("Selecciona un rango de fechas", "error");
+            
+            // Ajustar la fecha final para abarcar todo el día hasta las 23:59:59
+            const dInicio = new Date(fInicioStr + 'T00:00:00');
+            const dFin = new Date(fFinStr + 'T23:59:59');
+
+            const datosExportar = bitacoraData.filter(v => {
+                const fecha = v.fecha_actualizacion ? v.fecha_actualizacion.toDate() : new Date(0);
+                return fecha >= dInicio && fecha <= dFin;
+            });
+
+            if (datosExportar.length === 0) return showToast("No hay registros en el rango de fechas seleccionado", "error");
+
+            showToast("Generando Excel...", "info");
+
+            const wsData = [
+                ['BITÁCORA DE LOGÍSTICA EEN'],
+                [`Periodo Exportado: ${fInicioStr} al ${fFinStr}`],
+                [`Generado el: ${new Date().toLocaleString('es-MX')}`],
+                [],
+                ['Estado', 'Fecha Captura', 'Fecha Salida', 'Folio Pedido', 'Folio Factura', 'Código Cliente', 'Razón Social / Nombre', 'Destino / Sucursal', 'Dirección Exacta', 'Modalidad de Envío', 'Operador (Chofer)', 'Vehículo', 'Problema Reportado (Motivo Falla)']
+            ];
+
+            datosExportar.forEach(v => {
+                const fCreacion = v.fecha_creacion ? v.fecha_creacion.toDate().toLocaleString('es-MX') : 'S/R';
+                const fSalida = v.fecha_salida ? v.fecha_salida.toDate().toLocaleString('es-MX') : 'S/R';
+                const chofer = v.chofer_asignado ? (choferesDB.find(c => c.id === v.chofer_asignado)?.nombre || 'S/N') : 'Sin asignar';
+                const vehiculo = v.vehiculo_asignado ? (flotaDB.find(f => f.id === v.vehiculo_asignado)?.nombre || 'S/N') : 'N/A';
+                
+                let tipoTxt = 'Local';
+                if(v.tipo_envio === 'fletera_domicilio') tipoTxt = 'Fletera (Domicilio)';
+                if(v.tipo_envio === 'fletera_ocurre') tipoTxt = 'Fletera (Ocurre)';
+
+                wsData.push([
+                    (v.estado || '').toUpperCase(),
+                    fCreacion,
+                    fSalida,
+                    v.folio_pedido || '',
+                    v.folio_factura || '',
+                    v.cliente_codigo || '',
+                    v.cliente_nombre || '',
+                    v.destino_alias || '',
+                    v.direccion || '',
+                    tipoTxt,
+                    chofer,
+                    vehiculo,
+                    v.motivo_falla || ''
+                ]);
+            });
+
+            try {
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                
+                // Darle ancho a las columnas para que se vea legible
+                ws['!cols'] = [ {wch: 12}, {wch: 18}, {wch: 18}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 50}, {wch: 20}, {wch: 25}, {wch: 18}, {wch: 35} ];
+                
+                XLSX.utils.book_append_sheet(wb, ws, "Bitácora de Logística");
+                XLSX.writeFile(wb, `Bitacora_Logistica_${fInicioStr}_al_${fFinStr}.xlsx`);
+                showToast("Excel descargado con éxito");
+            } catch(e) {
+                showToast("Error al exportar. Comprueba que el navegador permita descargas.", "error");
+            }
         };
 
         // ==========================================
