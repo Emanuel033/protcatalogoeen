@@ -3,440 +3,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- PWA Meta Tags para que se vea como app nativa -->
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>App Choferes - EEN</title>
+    <title>App Chofer - EEN</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
-        .toast-enter { animation: slideInUp 0.3s forwards; }
-        .toast-leave { animation: fadeOut 0.3s forwards; }
-        @keyframes slideInUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Ocultar barra de scroll en móviles */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden text-slate-800">
 
-    <!-- Configuración Firebase -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
             authDomain: "productoseen.firebaseapp.com",
             projectId: "productoseen",
+            storageBucket: "productoseen.appspot.com",
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        
-        // --- MEJORA 2: SOPORTE OFFLINE (SIN INTERNET) ---
-        try {
-            db.enablePersistence({synchronizeTabs: true}).catch(function(err) {
-                console.warn("Aviso: Modo offline limitado.", err);
-            });
-        } catch(e) {}
+        const storage = firebase.storage();
     </script>
 
-    <!-- PANTALLA LOGIN -->
-    <div id="pantalla-login" class="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900 relative">
-        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#475569 1px, transparent 1px); background-size: 20px 20px;"></div>
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm z-10 relative">
-            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl mb-6 mx-auto shadow-lg shadow-blue-500/30">
-                <i class="fas fa-truck-fast"></i>
+    <!-- PANTALLA DE LOGIN -->
+    <div id="view-login" class="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900 relative overflow-hidden z-50">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl"></div>
+        
+        <div class="w-full max-w-sm bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 shadow-2xl relative z-10 fade-in">
+            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-4xl text-white mx-auto mb-6 shadow-lg shadow-blue-500/50">
+                <i class="fas fa-truck-moving"></i>
             </div>
-            <h1 class="text-2xl font-black text-center text-slate-800 mb-1">Portal Operadores</h1>
-            <p class="text-center text-slate-500 text-sm font-medium mb-8">Logística EEN</p>
+            <h1 class="text-2xl font-black text-white text-center mb-2">Portal Operadores</h1>
+            <p class="text-blue-200 text-center text-sm font-medium mb-8">Selecciona tu nombre para ver tu ruta</p>
             
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Selecciona tu perfil:</label>
-            <select id="login-chofer" class="w-full border-2 border-slate-200 bg-slate-50 p-4 rounded-xl focus:ring-0 focus:border-blue-500 outline-none text-base font-bold text-slate-700 mb-6 cursor-pointer">
+            <select id="select-chofer" class="w-full bg-white/90 border-0 p-4 rounded-xl text-slate-800 font-bold outline-none focus:ring-4 focus:ring-blue-500/50 transition mb-6 cursor-pointer">
                 <option value="">Cargando operadores...</option>
             </select>
             
-            <button onclick="iniciarSesion()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2 text-lg active:scale-95">
-                Ingresar a mi Ruta <i class="fas fa-arrow-right"></i>
+            <button onclick="iniciarTurno()" class="w-full bg-blue-500 hover:bg-blue-400 text-white font-black py-4 rounded-xl shadow-lg transition active:scale-95 text-lg">
+                Ingresar <i class="fas fa-arrow-right ml-2"></i>
             </button>
         </div>
     </div>
 
-    <!-- PANTALLA RUTA PRINCIPAL -->
-    <div id="pantalla-ruta" class="hidden flex-1 flex flex-col overflow-hidden relative">
-        <header class="bg-slate-900 text-white p-5 pb-6 pt-10 rounded-b-3xl shadow-lg shrink-0 relative z-20">
-            <div class="flex justify-between items-center mb-4">
+    <!-- PANTALLA PRINCIPAL (DASHBOARD) -->
+    <div id="view-dashboard" class="flex-1 flex flex-col hidden bg-slate-50 relative z-40">
+        <!-- HEADER -->
+        <header class="bg-slate-900 pt-12 pb-6 px-6 rounded-b-[2.5rem] shadow-xl shrink-0 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
+            <div class="flex justify-between items-center relative z-10">
                 <div>
-                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">En Ruta</p>
-                    <h2 id="nombre-chofer-header" class="text-xl font-black leading-tight">Operador</h2>
+                    <p class="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-1">Operador Activo</p>
+                    <h2 class="text-2xl font-black text-white" id="nombre-chofer-display">Cargando...</h2>
                 </div>
-                <button onclick="cerrarSesion()" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-sm transition"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
-            
-            <div class="flex gap-2">
-                <div class="flex-1 bg-white/10 rounded-xl p-3 text-center border border-white/5">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Pendientes</p>
-                    <p id="contador-pendientes" class="text-2xl font-black text-amber-400">0</p>
-                </div>
-                <div class="flex-1 bg-white/10 rounded-xl p-3 text-center border border-white/5">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Entregados</p>
-                    <p id="contador-entregados" class="text-2xl font-black text-emerald-400">0</p>
-                </div>
+                <button onclick="cerrarSesion()" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-24" id="lista-viajes">
-            <div class="text-center py-20">
-                <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
-                <p class="text-slate-500 font-semibold">Cargando tu ruta...</p>
+        <!-- LISTA DE RUTAS -->
+        <div class="flex-1 overflow-y-auto p-5 -mt-4 relative z-20 pb-20">
+            <div class="flex justify-between items-end mb-4 px-2">
+                <h3 class="font-black text-slate-800 text-lg">Mi Ruta de Hoy</h3>
+                <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2.5 py-1 rounded-md" id="contador-rutas">0 paradas</span>
+            </div>
+
+            <div id="lista-rutas" class="space-y-4">
+                <!-- Se llena con JS -->
+                <div class="text-center py-12 text-slate-400">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
+                    <p class="font-bold">Buscando entregas...</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL REPORTE DE PROBLEMA (CON FOTO) -->
-    <div id="modal-falla" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-end justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-t-3xl shadow-2xl w-full max-w-md overflow-hidden transform translate-y-full transition-transform duration-300" id="modal-falla-content">
-            <div class="bg-red-600 p-5 flex justify-between items-center text-white">
-                <h3 class="font-black text-lg"><i class="fas fa-exclamation-triangle mr-2"></i> Reportar Problema</h3>
-                <button onclick="cerrarModalFalla()" class="text-red-200 hover:text-white text-xl"><i class="fas fa-times"></i></button>
+    <!-- MODAL DE ACCIÓN (ENTREGAR / FALLA) -->
+    <div id="modal-accion" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex-col justify-end backdrop-blur-sm transition-opacity opacity-0">
+        <div class="bg-white w-full rounded-t-3xl p-6 transform transition-transform translate-y-full" id="modal-accion-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-slate-800" id="modal-titulo">Acción</h3>
+                <button onclick="cerrarModal()" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="p-6 space-y-5 overflow-y-auto max-h-[80vh]">
-                <input type="hidden" id="falla-viaje-id">
-                
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">¿Por qué no se pudo entregar? <span class="text-red-500">*</span></label>
-                    <select id="motivo-falla" class="w-full border-2 border-slate-200 bg-slate-50 p-4 rounded-xl focus:ring-0 focus:border-red-500 outline-none text-sm font-bold text-slate-700">
-                        <option value="">-- Selecciona una razón --</option>
-                        <option value="Local cerrado / Nadie recibe">Local cerrado / Nadie recibe</option>
-                        <option value="Cliente no tiene el pago">Cliente no tiene el pago / saldo</option>
-                        <option value="Dirección incorrecta o no existe">Dirección incorrecta o no existe</option>
-                        <option value="Mercancía rechazada">Mercancía rechazada por el cliente</option>
-                        <option value="Se pasó el horario de recibo">Se pasó el horario de recibo</option>
-                        <option value="Otro motivo">Otro motivo...</option>
-                    </select>
-                </div>
+            <input type="hidden" id="modal-viaje-id">
+            <input type="hidden" id="modal-tipo-accion">
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Tomar Foto (Opcional)</label>
-                    <div class="relative w-full border-2 border-dashed border-slate-300 bg-slate-50 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-100 transition" onclick="document.getElementById('foto-falla-input').click()">
-                        <i id="foto-falla-icon" class="fas fa-camera text-2xl text-slate-400 mb-2"></i>
-                        <p class="text-xs font-bold text-slate-500" id="foto-falla-text">Toca para abrir cámara</p>
-                        <input type="file" id="foto-falla-input" accept="image/*" capture="environment" class="hidden" onchange="procesarFoto(this, 'foto-falla-text', 'foto-falla-icon')">
-                    </div>
+            <!-- FOTO INPUT (Ambos casos) -->
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2"><i class="fas fa-camera"></i> Tomar Foto de Evidencia <span class="text-red-500">*</span></label>
+                <input type="file" id="input-foto" accept="image/*" capture="environment" class="hidden" onchange="previewFoto(event)">
+                <div id="foto-preview-container" onclick="document.getElementById('input-foto').click()" class="w-full h-40 bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-slate-400 cursor-pointer overflow-hidden relative">
+                    <i class="fas fa-cloud-upload-alt text-3xl mb-2"></i>
+                    <span class="text-sm font-bold">Toca para abrir cámara</span>
+                    <img id="foto-preview" class="absolute inset-0 w-full h-full object-cover hidden">
                 </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Notas adicionales</label>
-                    <textarea id="notas-falla" rows="2" class="w-full border-2 border-slate-200 bg-slate-50 p-3 rounded-xl focus:ring-0 focus:border-red-500 outline-none text-sm font-medium" placeholder="Ej. El guardia dijo que regresáramos..."></textarea>
-                </div>
-                
-                <button id="btn-enviar-falla" onclick="confirmarFalla()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2 text-base active:scale-95">
-                    <i class="fas fa-paper-plane"></i> Enviar Reporte a Base
-                </button>
             </div>
+
+            <!-- MOTIVO FALLA (Solo para fallas) -->
+            <div id="div-motivo" class="mb-6 hidden">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Motivo del problema <span class="text-red-500">*</span></label>
+                <textarea id="input-motivo" rows="2" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-red-500 outline-none text-sm font-semibold" placeholder="Ej. Domicilio cerrado, no tienen dinero..."></textarea>
+            </div>
+
+            <button id="btn-guardar-accion" onclick="procesarAccion()" class="w-full bg-emerald-500 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition text-lg flex justify-center items-center gap-2">
+                Confirmar
+            </button>
         </div>
     </div>
 
-    <!-- MODAL CONFIRMACIÓN ENTREGA (CON FOTO) -->
-    <div id="modal-entrega" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300" id="modal-entrega-content">
-            <div class="p-6 text-center">
-                <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-4xl text-emerald-500 mx-auto mb-4"><i class="fas fa-check-double"></i></div>
-                <h3 class="text-2xl font-black text-slate-800 mb-2">¡Entrega Exitosa!</h3>
-                <p class="text-sm text-slate-500 font-medium mb-6">Captura la firma o el lugar de entrega (Opcional).</p>
-                
-                <input type="hidden" id="entrega-viaje-id">
-
-                <div class="relative w-full border-2 border-dashed border-slate-300 bg-slate-50 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-100 transition mb-6" onclick="document.getElementById('foto-entrega-input').click()">
-                    <i id="foto-entrega-icon" class="fas fa-camera text-2xl text-slate-400 mb-2"></i>
-                    <p class="text-xs font-bold text-slate-500" id="foto-entrega-text">Tomar Foto de Evidencia</p>
-                    <input type="file" id="foto-entrega-input" accept="image/*" capture="environment" class="hidden" onchange="procesarFoto(this, 'foto-entrega-text', 'foto-entrega-icon')">
-                </div>
-                
-                <div class="flex gap-3">
-                    <button onclick="cerrarModalEntrega()" class="flex-1 py-3 text-sm font-bold text-slate-500 bg-slate-100 rounded-xl hover:bg-slate-200 transition">Cancelar</button>
-                    <button id="btn-enviar-entrega" onclick="confirmarEntrega()" class="flex-[1.5] py-3 text-sm font-black text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition shadow-lg shadow-emerald-200">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 flex flex-col gap-2 w-[90%] md:w-max z-[9999]"></div>
+    <!-- TOAST -->
+    <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 flex flex-col gap-2 w-[90%] z-[9999]"></div>
 
     <script>
-        let choferActualId = localStorage.getItem('een_chofer_id') || null;
-        let viajesEnRuta = [];
-        let fotoBase64Temporal = null; // Guarda la foto comprimida
+        let miId = localStorage.getItem('een_chofer_id');
+        let miNombre = localStorage.getItem('een_chofer_nombre');
+        let misViajes = [];
+        let fotoDataUrl = null;
 
         window.showToast = (msg, type='success') => {
-            const toast = document.createElement('div');
-            const bg = type === 'error' ? 'bg-red-600' : (type === 'warning' ? 'bg-amber-500' : 'bg-slate-800');
-            toast.className = `toast-enter text-white px-5 py-3 rounded-xl shadow-2xl ${bg} text-sm font-bold text-center border border-white/10`;
-            toast.innerHTML = msg;
-            document.getElementById('toast-container').appendChild(toast);
-            setTimeout(() => { toast.classList.replace('toast-enter', 'toast-leave'); setTimeout(() => toast.remove(), 300); }, 4000);
+            const t = document.createElement('div');
+            t.className = `toast-enter text-white px-5 py-3 rounded-xl shadow-2xl ${type === 'error' ? 'bg-red-600' : 'bg-slate-800'} text-xs font-bold text-center border border-white/10`;
+            t.innerHTML = msg; document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => { t.remove(); }, 3000);
         };
 
-        db.collection('choferes').onSnapshot(snap => {
-            const select = document.getElementById('login-chofer');
-            select.innerHTML = '<option value="">-- Toca aquí para buscar tu nombre --</option>';
-            snap.forEach(doc => { select.innerHTML += `<option value="${doc.id}">${doc.data().nombre}</option>`; });
-        });
+        // 1. CARGAR LISTA DE CHOFERES
+        function cargarChoferes() {
+            db.collection('choferes').onSnapshot(snap => {
+                const select = document.getElementById('select-chofer');
+                select.innerHTML = '<option value="">-- Selecciona tu nombre --</option>';
+                snap.forEach(doc => {
+                    select.innerHTML += `<option value="${doc.id}">${doc.data().nombre}</option>`;
+                });
+            });
+        }
 
-        window.iniciarSesion = () => {
-            const select = document.getElementById('login-chofer');
-            if(!select.value) return showToast("Por favor selecciona tu nombre", "error");
-            choferActualId = select.value;
-            localStorage.setItem('een_chofer_id', choferActualId);
-            const nombreChofer = select.options[select.selectedIndex].text;
-            localStorage.setItem('een_chofer_nombre', nombreChofer);
-            mostrarPantallaRuta();
+        // 2. NAVEGACIÓN Y LOGIN
+        function verificarSesion() {
+            if (miId) {
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                document.getElementById('nombre-chofer-display').innerText = miNombre;
+                escucharMisRutas();
+            } else {
+                document.getElementById('view-dashboard').classList.add('hidden');
+                document.getElementById('view-login').classList.remove('hidden');
+                cargarChoferes();
+            }
+        }
+
+        window.iniciarTurno = () => {
+            const sel = document.getElementById('select-chofer');
+            if(!sel.value) return showToast("Selecciona tu nombre", "error");
+            miId = sel.value;
+            miNombre = sel.options[sel.selectedIndex].text;
+            localStorage.setItem('een_chofer_id', miId);
+            localStorage.setItem('een_chofer_nombre', miNombre);
+            verificarSesion();
         };
 
         window.cerrarSesion = () => {
-            localStorage.removeItem('een_chofer_id'); localStorage.removeItem('een_chofer_nombre');
-            choferActualId = null;
-            document.getElementById('pantalla-login').classList.remove('hidden');
-            document.getElementById('pantalla-ruta').classList.add('hidden');
+            localStorage.removeItem('een_chofer_id');
+            localStorage.removeItem('een_chofer_nombre');
+            miId = null; miNombre = null;
+            verificarSesion();
         };
 
-        function mostrarPantallaRuta() {
-            document.getElementById('pantalla-login').classList.add('hidden');
-            document.getElementById('pantalla-ruta').classList.remove('hidden');
-            document.getElementById('nombre-chofer-header').innerText = localStorage.getItem('een_chofer_nombre') || 'Operador';
-            escucharViajes();
-        }
-
-        function agruparViajesParaChofer(pedidosRaw) {
-            let agrupados = []; const paqMap = {};
-            pedidosRaw.forEach(p => {
-                if (p.tipo_destino === 'paqueteria') {
-                    const key = `${p.nombre_paqueteria}_${p.estado}`;
-                    if (!paqMap[key]) {
-                        paqMap[key] = { es_grupo: true, id: `GRP-${p.id}`, cliente_nombre: `Consolidado: ${p.nombre_paqueteria}`, direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos: [] };
-                    }
-                    if(p.urgente) paqMap[key].urgente = true;
-                    paqMap[key].orden_ruta = Math.min(paqMap[key].orden_ruta, p.orden_ruta || 9999999999999);
-                    paqMap[key].pedidos.push(p);
-                } else {
-                    agrupados.push({ es_grupo: false, id: p.id, cliente_nombre: p.cliente_nombre, direccion: p.direccion, link_maps: p.link_maps || '', coordenadas: p.coordenadas, telefono: p.telefono, horario: p.horario, excepcion: p.excepcion, estado: p.estado, urgente: p.urgente || false, orden_ruta: p.orden_ruta || 9999999999999, pedidos: [p] });
-                }
-            });
-            Object.values(paqMap).forEach(g => agrupados.push(g));
-            return agrupados;
-        }
-
-        function escucharViajes() {
-            if(!choferActualId) return;
+        // 3. CARGAR RUTAS ASIGNADAS A ESTE CHOFER
+        function escucharMisRutas() {
             db.collection('rutas_logistica')
-              .where('chofer_asignado', '==', choferActualId)
-              .where('estado', 'in', ['camino', 'entregado'])
+              .where('chofer_asignado', '==', miId)
+              .where('estado', '==', 'camino')
               .onSnapshot(snap => {
-                  let raw = []; snap.forEach(doc => raw.push({id: doc.id, ...doc.data()}));
-                  viajesEnRuta = agruparViajesParaChofer(raw);
-                  renderizarViajes();
+                  misViajes = [];
+                  snap.forEach(doc => { misViajes.push({ id: doc.id, ...doc.data() }); });
+                  // Ordenar por orden_ruta asignado por el algoritmo/drag&drop
+                  misViajes.sort((a,b) => (a.orden_ruta || 99999) - (b.orden_ruta || 99999));
+                  renderizarRutas();
               });
         }
 
-        function renderizarViajes() {
-            const contenedor = document.getElementById('lista-viajes');
-            let html = '';
+        function renderizarRutas() {
+            const cont = document.getElementById('lista-rutas');
+            document.getElementById('contador-rutas').innerText = `${misViajes.length} entregas pendientes`;
             
-            const enCamino = viajesEnRuta.filter(v => v.estado === 'camino');
-            enCamino.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
-            const completados = viajesEnRuta.filter(v => v.estado === 'entregado');
-            
-            document.getElementById('contador-pendientes').innerText = enCamino.length;
-            document.getElementById('contador-entregados').innerText = completados.length;
-
-            if(enCamino.length === 0 && completados.length === 0) {
-                contenedor.innerHTML = `<div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center mt-10"><div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-3xl text-slate-300 mx-auto mb-4"><i class="fas fa-mug-hot"></i></div><h3 class="text-lg font-black text-slate-700">Ruta Limpia</h3><p class="text-sm text-slate-500 mt-1">No tienes entregas asignadas por el momento.</p></div>`;
+            if(misViajes.length === 0) {
+                cont.innerHTML = `
+                    <div class="bg-white p-8 rounded-3xl shadow-sm text-center border border-slate-100 mt-10">
+                        <div class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"><i class="fas fa-check"></i></div>
+                        <h4 class="font-black text-slate-800 text-lg">¡Ruta Completada!</h4>
+                        <p class="text-slate-500 text-sm font-medium mt-1">No tienes más entregas pendientes.</p>
+                    </div>`;
                 return;
             }
 
-            enCamino.forEach((v, index) => {
-                let badge = v.es_grupo ? `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i class="fas fa-boxes"></i> Paquetería</span>` : `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i class="fas fa-building"></i> Bodega</span>`;
-                let facturas = v.pedidos.map(p => p.id).join(', ');
-                
-                let btnMapsHtml = '';
-                if(v.link_maps) btnMapsHtml = `<a href="${v.link_maps}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
-                else if(v.coordenadas && v.coordenadas.lat) btnMapsHtml = `<a href="https://www.google.com/maps/dir/?api=1&destination=${v.coordenadas.lat},${v.coordenadas.lng}" target="_blank" class="flex-1 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition text-sm"><i class="fas fa-location-arrow"></i> GPS</a>`;
-
-                // --- MEJORA 4: BOTONES DE CONTACTO DIRECTO ---
-                let btnContactoHtml = '';
-                if (v.telefono) {
-                    const telLimpio = v.telefono.replace(/\D/g,'');
-                    btnContactoHtml = `
-                    <div class="flex gap-2 mt-3">
-                        <a href="tel:${telLimpio}" class="flex-1 bg-slate-100 text-slate-600 border border-slate-200 py-2 rounded-lg font-bold flex items-center justify-center gap-2 active:scale-95 transition text-xs shadow-sm"><i class="fas fa-phone"></i> Llamar</a>
-                        <a href="https://wa.me/52${telLimpio}" target="_blank" class="flex-1 bg-emerald-50 text-emerald-600 border border-emerald-200 py-2 rounded-lg font-bold flex items-center justify-center gap-2 active:scale-95 transition text-xs shadow-sm"><i class="fab fa-whatsapp"></i> Chat</a>
-                    </div>`;
-                }
-
-                const badgeUrgente = v.urgente ? `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[9px] font-black uppercase ml-2 border border-red-300 shadow-sm"><i class="fas fa-siren-on"></i> Urgente</span>` : '';
-                const colorBurbuja = v.urgente ? 'bg-red-600' : 'bg-slate-800';
-                const colorBordeCaja = v.urgente ? 'border-red-400 shadow-red-500/10 shadow-lg' : 'border-slate-200';
-
-                html += `
-                <div class="bg-white rounded-2xl shadow-sm border-2 ${colorBordeCaja} overflow-hidden mb-4 relative">
-                    ${v.urgente ? `<div class="absolute top-0 left-0 w-full h-1.5 bg-red-500"></div>` : ''}
-                    <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 ${colorBurbuja} text-white rounded-full flex items-center justify-center font-black text-sm shadow">${index + 1}</div>
-                            <div>${badge}<h3 class="font-black text-slate-800 text-base leading-tight mt-1 flex flex-wrap items-center gap-y-1">${v.cliente_nombre}${badgeUrgente}</h3></div>
+            cont.innerHTML = misViajes.map((v, index) => `
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 relative overflow-hidden fade-in" style="animation-delay: ${index * 0.1}s">
+                    ${v.urgente ? '<div class="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl"><i class="fas fa-fire-alt"></i> URGENTE</div>' : ''}
+                    <div class="flex items-center gap-3 mb-3 pr-16">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black shrink-0">${index + 1}</div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">${v.id}</p>
+                            <h4 class="font-black text-slate-800 leading-tight">${v.cliente_nombre}</h4>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <p class="text-xs text-slate-500 mb-2"><i class="fas fa-map-marker-alt text-red-500 w-4 text-center"></i> <span class="font-medium">${v.direccion}</span></p>
-                        ${btnContactoHtml}
-                        
-                        <div class="mt-3 ${v.horario || v.excepcion ? 'mb-3' : 'mb-4'}">
-                            ${v.horario || v.excepcion ? `<div class="bg-amber-50 border border-amber-100 p-2.5 rounded-lg text-[11px] text-amber-800 font-medium">` + (v.horario ? `<p><i class="fas fa-clock w-4"></i> ${v.horario}</p>` : '') + (v.excepcion ? `<p class="mt-1 font-bold"><i class="fas fa-exclamation-triangle w-4"></i> ${v.excepcion}</p>` : '') + `</div>` : ''}
-                        </div>
-                        
-                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-4">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Facturas a Entregar:</p>
-                            <p class="text-xs font-black text-slate-700">${facturas}</p>
-                        </div>
-
-                        <div class="flex gap-2">
-                            ${btnMapsHtml}
-        // --- COMPRESIÓN DE FOTO Y VISTA PREVIA ---
-        window.procesarFoto = (input, textId, iconId) => {
-            const file = input.files[0];
-            if(!file) return;
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = event => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800; const MAX_HEIGHT = 800; // Calidad aceptable, poco peso
-                    let width = img.width; let height = img.height;
-
-                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
-                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    fotoBase64Temporal = canvas.toDataURL('image/jpeg', 0.6); // 60% calidad JPEG
-                    
-                    // Actualizar UI con Vista Previa de la miniatura
-                    document.getElementById(textId).innerText = "¡Foto capturada lista! (Toca para cambiar)";
-                    document.getElementById(textId).classList.replace('text-slate-500', 'text-emerald-600');
-                    
-                    const iconEl = document.getElementById(iconId);
-                    iconEl.classList.add('hidden'); // Ocultar el icono de cámara
-                    
-                    let previewImg = document.getElementById(iconId + '-preview');
-                    if (!previewImg) {
-                        previewImg = document.createElement('img');
-                        previewImg.id = iconId + '-preview';
-                        previewImg.className = "w-20 h-20 object-cover rounded-xl mx-auto mb-2 border-2 border-emerald-400 shadow-md";
-                        iconEl.parentNode.insertBefore(previewImg, iconEl);
-                    }
-                    previewImg.src = fotoBase64Temporal;
-                    previewImg.classList.remove('hidden');
-                };
-            };
-        };
-
-        function resetearCamposFoto() {
-            fotoBase64Temporal = null;
-            ['foto-falla-input', 'foto-entrega-input'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
-            ['foto-falla-text', 'foto-entrega-text'].forEach(id => { 
-                const el = document.getElementById(id); 
-                if(el) { el.innerText = id.includes('falla') ? "Toca para abrir cámara" : "Tomar Foto de Evidencia"; el.className = "text-xs font-bold text-slate-500"; }
-            });
-            ['foto-falla-icon', 'foto-entrega-icon'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) { el.classList.remove('hidden'); el.className = "fas fa-camera text-2xl text-slate-400 mb-2"; }
-            });
-            ['foto-falla-icon-preview', 'foto-entrega-icon-preview'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) { el.classList.add('hidden'); el.src = ''; }
-            });
+                    <div class="bg-slate-50 p-3 rounded-xl mb-4 border border-slate-100">
+                        <p class="text-xs text-slate-600 font-semibold leading-relaxed"><i class="fas fa-map-marker-alt text-red-400 w-4"></i> ${v.direccion}</p>
+                        ${v.excepcion ? `<p class="text-xs text-amber-600 font-bold mt-2"><i class="fas fa-exclamation-triangle"></i> Aviso: ${v.excepcion}</p>` : ''}
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="abrirModal('${v.id}', 'entregado')" class="flex-[2] bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-black text-sm transition shadow-md shadow-emerald-500/20"><i class="fas fa-camera"></i> Entregado</button>
+                        <button onclick="abrirModal('${v.id}', 'fallido')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-3.5 rounded-xl font-black text-sm transition border border-red-200"><i class="fas fa-times"></i> Falla</button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // --- REPORTE DE PROBLEMA ---
-        window.abrirModalFalla = (idGrupo) => {
-            document.getElementById('falla-viaje-id').value = idGrupo;
-            document.getElementById('motivo-falla').value = ''; document.getElementById('notas-falla').value = '';
-            resetearCamposFoto();
+        // 4. LÓGICA DE FOTOS Y CONFIRMACIÓN
+        window.abrirModal = (viajeId, tipo) => {
+            const modal = document.getElementById('modal-accion');
+            const content = document.getElementById('modal-accion-content');
             
-            const modal = document.getElementById('modal-falla'); const content = document.getElementById('modal-falla-content');
-            modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full'); }, 10);
-        };
-        
-        window.cerrarModalFalla = () => {
-            const modal = document.getElementById('modal-falla'); const content = document.getElementById('modal-falla-content');
-            modal.classList.add('opacity-0'); content.classList.add('translate-y-full'); setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            document.getElementById('modal-viaje-id').value = viajeId;
+            document.getElementById('modal-tipo-accion').value = tipo;
+            fotoDataUrl = null;
+            document.getElementById('foto-preview').classList.add('hidden');
+            document.getElementById('input-foto').value = '';
+            document.getElementById('input-motivo').value = '';
+
+            const btnGuardar = document.getElementById('btn-guardar-accion');
+            if(tipo === 'entregado') {
+                document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-check-circle text-emerald-500"></i> Reportar Entrega';
+                document.getElementById('div-motivo').classList.add('hidden');
+                btnGuardar.className = "w-full bg-emerald-500 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition text-lg flex justify-center items-center gap-2";
+                btnGuardar.innerHTML = "Confirmar Entrega";
+            } else {
+                document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Reportar Problema';
+                document.getElementById('div-motivo').classList.remove('hidden');
+                btnGuardar.className = "w-full bg-red-500 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition text-lg flex justify-center items-center gap-2";
+                btnGuardar.innerHTML = "Guardar Reporte";
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full'); }, 10);
         };
 
-        window.confirmarFalla = async () => {
-            const idGrupo = document.getElementById('falla-viaje-id').value;
-            const motivo = document.getElementById('motivo-falla').value;
-            const notas = document.getElementById('notas-falla').value.trim();
-            if (!motivo) return showToast("Selecciona una razón", "error");
+        window.cerrarModal = () => {
+            const modal = document.getElementById('modal-accion');
+            const content = document.getElementById('modal-accion-content');
+            content.classList.add('translate-y-full'); modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        };
 
-            const grupo = viajesEnRuta.find(v => v.id === idGrupo); if(!grupo) return;
-            const razonFinal = notas ? `${motivo} - ${notas}` : motivo;
-            
-            document.getElementById('btn-enviar-falla').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        window.previewFoto = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                fotoDataUrl = e.target.result;
+                const img = document.getElementById('foto-preview');
+                img.src = fotoDataUrl;
+                img.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.procesarAccion = async () => {
+            const id = document.getElementById('modal-viaje-id').value;
+            const tipo = document.getElementById('modal-tipo-accion').value;
+            const motivo = document.getElementById('input-motivo').value.trim();
+            const btn = document.getElementById('btn-guardar-accion');
+
+            if(!fotoDataUrl) return showToast("La foto de evidencia es obligatoria", "error");
+            if(tipo === 'fallido' && !motivo) return showToast("Escribe el motivo del problema", "error");
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+            btn.disabled = true;
 
             try {
-                const batch = db.batch();
-                grupo.pedidos.forEach(p => {
-                    const updateData = { estado: 'fallido', motivo_falla: razonFinal, fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() };
-                    if (fotoBase64Temporal) updateData.foto_evidencia = fotoBase64Temporal; // Adjunta foto si existe
-                    batch.update(db.collection('rutas_logistica').doc(p.id), updateData);
-                });
-                await batch.commit();
-                showToast("Reporte enviado a la Base", "warning"); cerrarModalFalla();
-            } catch(e) { showToast("Error de conexión. Se enviará al tener red.", "info"); cerrarModalFalla(); }
-            finally { document.getElementById('btn-enviar-falla').innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Reporte a Base'; }
+                // Generar nombre seguro para Storage
+                const fileName = `evidencias/${id}_${Date.now()}.jpg`;
+                const ref = storage.ref().child(fileName);
+                await ref.putString(fotoDataUrl, 'data_url');
+                const photoUrl = await ref.getDownloadURL();
+
+                const updateData = {
+                    estado: tipo,
+                    foto_evidencia: photoUrl,
+                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (tipo === 'fallido') updateData.motivo_falla = motivo;
+
+                // Actualizar todos los pedidos bajo este ID (si es consolidado paquetería) o simple
+                const viaje = misViajes.find(v => v.id === id);
+                if (viaje && viaje.es_grupo) {
+                    const batch = db.batch();
+                    viaje.pedidos_incluidos.forEach(p => {
+                        batch.update(db.collection('rutas_logistica').doc(p.id), updateData);
+                    });
+                    await batch.commit();
+                } else {
+                    await db.collection('rutas_logistica').doc(id).update(updateData);
+                }
+
+                showToast("¡Registrado con éxito!");
+                cerrarModal();
+            } catch(e) {
+                console.error(e);
+                showToast("Error de conexión al subir evidencia", "error");
+            } finally {
+                btn.disabled = false;
+            }
         };
 
-        // --- ENTREGA EXITOSA ---
-        window.abrirModalEntrega = (idGrupo) => {
-            document.getElementById('entrega-viaje-id').value = idGrupo;
-            resetearCamposFoto();
-            const modal = document.getElementById('modal-entrega'); const content = document.getElementById('modal-entrega-content');
-            modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
-        };
-
-        window.cerrarModalEntrega = () => {
-            const modal = document.getElementById('modal-entrega'); const content = document.getElementById('modal-entrega-content');
-            modal.classList.add('opacity-0'); content.classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); }, 300);
-        };
-
-        window.confirmarEntrega = async () => {
-            const idGrupo = document.getElementById('entrega-viaje-id').value;
-            const grupo = viajesEnRuta.find(v => v.id === idGrupo); if(!grupo) return;
-            
-            document.getElementById('btn-enviar-entrega').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-            try {
-                const batch = db.batch();
-                grupo.pedidos.forEach(p => {
-                    const updateData = { estado: 'entregado', fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() };
-                    if (fotoBase64Temporal) updateData.foto_evidencia = fotoBase64Temporal; // Adjunta foto si existe
-                    batch.update(db.collection('rutas_logistica').doc(p.id), updateData);
-                });
-                await batch.commit();
-                showToast("¡Excelente! Entrega registrada."); cerrarModalEntrega();
-            } catch(e) { showToast("Error de red. Se subirá automáticamente después.", "info"); cerrarModalEntrega(); }
-            finally { document.getElementById('btn-enviar-entrega').innerHTML = 'Guardar'; }
-        };
-
-        window.onload = () => { if(choferActualId) mostrarPantallaRuta(); };
+        window.onload = verificarSesion;
     </script>
 </body>
 </html>
