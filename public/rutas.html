@@ -42,6 +42,13 @@
         #detalle-drawer.drawer-open { transform: translate(0, 0) !important; }
 
         .btn-vehiculo-dinamico.selected { border-color: #3b82f6; background-color: #eff6ff; color: #1d4ed8; box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.15); transform: translateY(-1px); }
+        
+        /* Transición suave para ocultar sidebar */
+        #main-sidebar { transition: margin 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        .sidebar-hidden { margin-left: -100% !important; }
+        @media (min-width: 1024px) {
+            .sidebar-hidden { margin-left: -420px !important; }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col lg:flex-row overflow-hidden text-slate-800">
@@ -56,8 +63,8 @@
         const db = firebase.firestore();
     </script>
 
-    <!-- SIDEBAR DE PEDIDOS -->
-    <aside class="w-full lg:w-[420px] h-[45%] lg:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-xl relative">
+    <!-- SIDEBAR DE PEDIDOS (Ahora ocultable) -->
+    <aside id="main-sidebar" class="w-full lg:w-[420px] h-[45%] lg:h-full bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-xl relative">
         <div class="p-5 border-b border-slate-100 bg-slate-900 flex justify-between items-center text-white shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center font-black text-xl shadow-lg cursor-pointer hover:scale-105 transition-transform" onclick="abrirConfiguracion()" title="Configuración">
@@ -98,6 +105,12 @@
 
     <!-- ÁREA DEL MAPA -->
     <main class="flex-1 h-[55%] lg:h-full relative flex flex-col overflow-hidden bg-slate-200">
+        
+        <!-- BOTÓN PARA OCULTAR/MOSTRAR SIDEBAR Y LIBERAR ESPACIO -->
+        <button onclick="toggleSidebar()" class="absolute top-4 right-4 z-[400] bg-white text-slate-700 hover:text-blue-600 hover:bg-blue-50 p-3 rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.15)] border border-slate-200 transition-colors flex items-center justify-center group" title="Pantalla Completa">
+            <i class="fas fa-expand-arrows-alt group-hover:scale-110 transition-transform"></i>
+        </button>
+
         <div id="map" class="w-full h-full z-[10]"></div>
 
         <!-- DRAWER LATERAL PREMIUM (Optimizado para Celular y Desktop) -->
@@ -135,6 +148,7 @@
         let viajesAgrupados = [], filtroActual = 'todos', viajeSeleccionado = null; 
         let flotaDB = [], choferesDB = [], clientesDB = []; 
         let vehiculoSeleccionadoTemp = null;
+        let sidebarVisible = true;
 
         const coordPlantaEEN = L.latLng(25.689804, -100.312066); 
 
@@ -160,17 +174,28 @@
             L.marker([25.689804, -100.312066], { icon: L.divIcon({ className: 'custom-icon', html: `<div class="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-2xl border-4 border-white z-50"><i class="fas fa-industry text-xl"></i></div>`, iconSize: [48, 48], iconAnchor: [24, 48] }) }).addTo(map).bindPopup("<b class='font-bold text-sm'>Matriz EEN</b>");
         }
 
+        window.toggleSidebar = () => {
+            sidebarVisible = !sidebarVisible;
+            const sidebar = document.getElementById('main-sidebar');
+            if(sidebarVisible) {
+                sidebar.classList.remove('sidebar-hidden');
+            } else {
+                sidebar.classList.add('sidebar-hidden');
+            }
+            // Recalcular el tamaño del mapa despues de la transicion de CSS
+            setTimeout(() => { map.invalidateSize(); }, 350);
+        };
+
         // =========================================================================
         // MOTOR DE RUTAS DIRECTO VÍA API OSRM (Sustituye a Leaflet Routing Machine)
         // =========================================================================
         async function trazarRutaCalles(waypointsArray, skipAnimation) {
             if(capaRuta) map.removeLayer(capaRuta);
             
-            // Calculamos el padding dinamico: Si hay Drawer abierto, no queremos que la ruta se esconda detrás de él.
+            // Calculamos el padding dinamico para que el drawer no tape la línea de la ruta
             const paddingRight = window.innerWidth >= 1024 ? 440 : 50; 
             const paddingBottom = window.innerWidth < 1024 ? (window.innerHeight * 0.65) + 20 : 50;
 
-            // Si solo hay 1 punto extra (ida y vuelta a matriz)
             const coordsStr = waypointsArray.map(wp => `${wp.lng},${wp.lat}`).join(';');
             const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
 
@@ -318,12 +343,77 @@
                 mk.on('click', () => seleccionarViaje(v.id));
                 marcadores[v.id] = mk; bounds.push([v.coordenadas.lat, v.coordenadas.lng]);
             });
-            // Si el drawer esta cerrado (no hay viaje seleccionado), ajustar normal. 
-            // Si hay viaje seleccionado, dejar que seleccionarViaje aplique el padding.
             if(bounds.length > 0 && !viajeSeleccionado) {
                 map.fitBounds(bounds, { padding: [50, 50] });
             }
         }
+
+        // =========================================================================
+        // LÓGICA DE REACOMODO MANUAL DE RUTAS (Flechitas y Optimización Mágica)
+        // =========================================================================
+        window.optimizarRuta = async (vehiculoId) => {
+            const viajesCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === vehiculoId && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+            if(viajesCamion.length < 2) return showToast("No hay suficientes paradas para optimizar", "warning");
+
+            showToast("Optimizando ruta inteligentemente...", "info");
+
+            let urgentes = viajesCamion.filter(x => x.urgente);
+            let normales = viajesCamion.filter(x => !x.urgente);
+            
+            let currentPt = coordPlantaEEN;
+            let ordered = [];
+            
+            const calcularVecinoMasCercano = (listaNoVisitada) => {
+                while(listaNoVisitada.length > 0) {
+                    let nearestIdx = 0; let minDist = Infinity;
+                    for(let i=0; i<listaNoVisitada.length; i++) {
+                        let pt = L.latLng(listaNoVisitada[i].coordenadas.lat, listaNoVisitada[i].coordenadas.lng);
+                        let dist = currentPt.distanceTo(pt);
+                        if(dist < minDist) { minDist = dist; nearestIdx = i; }
+                    }
+                    currentPt = L.latLng(listaNoVisitada[nearestIdx].coordenadas.lat, listaNoVisitada[nearestIdx].coordenadas.lng);
+                    ordered.push(listaNoVisitada[nearestIdx]);
+                    listaNoVisitada.splice(nearestIdx, 1);
+                }
+            };
+
+            calcularVecinoMasCercano(urgentes);
+            calcularVecinoMasCercano(normales);
+
+            const batch = db.batch();
+            ordered.forEach((v, idx) => {
+                const nuevoOrden = (idx + 1) * 10;
+                v.pedidos_incluidos.forEach(p => {
+                    batch.update(db.collection('rutas_logistica').doc(p.id), { orden_ruta: nuevoOrden });
+                });
+            });
+
+            try {
+                await batch.commit();
+                showToast("¡Ruta perfecta generada!");
+            } catch(e) { showToast("Error al optimizar", "error"); }
+        };
+
+        window.moverParada = async (vehiculoId, index, direccion) => {
+            const viajesCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === vehiculoId && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+            viajesCamion.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
+
+            const targetIdx = index + direccion;
+            if(targetIdx < 0 || targetIdx >= viajesCamion.length) return;
+
+            viajesCamion.forEach((v, i) => v.orden_ruta_temp = (i + 1) * 10);
+            const temp = viajesCamion[index].orden_ruta_temp;
+            viajesCamion[index].orden_ruta_temp = viajesCamion[targetIdx].orden_ruta_temp;
+            viajesCamion[targetIdx].orden_ruta_temp = temp;
+
+            showToast("Actualizando ruta...", "info");
+            const batch = db.batch();
+            viajesCamion.forEach(v => {
+                v.pedidos_incluidos.forEach(p => { batch.update(db.collection('rutas_logistica').doc(p.id), { orden_ruta: v.orden_ruta_temp }); });
+            });
+            try { await batch.commit(); } catch(e) { showToast("Error al reordenar", "error"); }
+        };
+
 
         window.seleccionarViaje = (id, skipAnimation = false) => {
             viajeSeleccionado = viajesAgrupados.find(x => x.id === id); if(!viajeSeleccionado) return;
@@ -390,14 +480,21 @@
                 
                 viajesMismoCamion.forEach((v, idx) => {
                     wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
+                    
+                    // BOTONES DE REACOMODO MANUAL (NUEVO)
+                    const btnUp = idx > 0 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, -1); event.stopPropagation();" class="absolute right-10 top-1/2 -translate-y-1/2 w-7 h-7 bg-white border border-slate-200 rounded-md shadow-sm text-slate-400 hover:text-blue-600 transition flex items-center justify-center z-20"><i class="fas fa-chevron-up text-[10px]"></i></button>` : '';
+                    const btnDown = idx < viajesMismoCamion.length - 1 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, 1); event.stopPropagation();" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white border border-slate-200 rounded-md shadow-sm text-slate-400 hover:text-blue-600 transition flex items-center justify-center z-20"><i class="fas fa-chevron-down text-[10px]"></i></button>` : '';
+
                     const bgColor = v.urgente ? 'bg-red-500' : 'bg-blue-600';
                     const textColor = v.urgente ? 'text-red-600' : 'text-slate-800';
                     const urgBadge = v.urgente ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase ml-2 border border-red-200">Urgente</span>` : '';
                     
                     htmlSecuenciaItems += `
-                        <li class="flex items-center gap-3 py-3 relative border-l-2 border-slate-200 ml-6 pl-4 before:absolute before:w-3 before:h-3 before:bg-slate-200 before:rounded-full before:-left-[7px] before:top-1/2 before:-translate-y-1/2">
+                        <li class="flex items-center gap-3 py-3 relative border-l-2 border-slate-200 ml-6 pl-4 pr-20 before:absolute before:w-3 before:h-3 before:bg-slate-200 before:rounded-full before:-left-[7px] before:top-1/2 before:-translate-y-1/2 group hover:bg-slate-100/50 rounded-r-xl transition-colors">
                             <div class="w-6 h-6 ${bgColor} text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm shrink-0">${idx + 1}</div>
                             <span class="truncate text-sm flex-1 font-bold ${textColor}">${v.cliente_nombre}${urgBadge}</span>
+                            <!-- Se muestran los botones de subir/bajar -->
+                            ${btnUp}${btnDown}
                         </li>`;
                 });
                 wps.push(coordPlantaEEN);
@@ -418,10 +515,15 @@
             // LLAMAMOS AL NUEVO SISTEMA DE DIBUJADO LIMPIO
             trazarRutaCalles(wps, skipAnimation);
 
+            const btnOptimizarHTML = (estadoActual === 'camino' || estadoActual === 'entregado') 
+                ? `<button onclick="optimizarRuta('${viajeSeleccionado.vehiculo_asignado}')" class="text-[10px] bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-bold shadow-md shadow-indigo-500/30 hover:bg-indigo-700 transition active:scale-95 flex items-center gap-1.5"><i class="fas fa-magic"></i> Optimizar</button>` 
+                : '';
+
             htmlDinamico += `
                 <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-5 shadow-sm">
                     <div class="flex justify-between items-center mb-4 border-b border-indigo-100/80 pb-3">
                         <p class="text-[11px] font-black text-indigo-800 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-route text-indigo-500 text-lg"></i> Secuencia de Ruta</p>
+                        ${btnOptimizarHTML}
                     </div>
                     <ul class="mb-5 relative">${htmlSecuenciaItems}</ul>
                     
