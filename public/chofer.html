@@ -83,7 +83,6 @@
             </div>
 
             <div id="lista-rutas" class="space-y-4">
-                <!-- Se llena con JS -->
                 <div class="text-center py-12 text-slate-400">
                     <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
                     <p class="font-bold">Buscando entregas...</p>
@@ -103,7 +102,7 @@
             <input type="hidden" id="modal-viaje-id">
             <input type="hidden" id="modal-tipo-accion">
 
-            <!-- FOTO INPUT (Ambos casos) -->
+            <!-- FOTO INPUT CON COMPRESIÓN -->
             <div class="mb-6">
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-2"><i class="fas fa-camera"></i> Tomar Foto de Evidencia <span class="text-red-500">*</span></label>
                 <input type="file" id="input-foto" accept="image/*" capture="environment" class="hidden" onchange="previewFoto(event)">
@@ -112,6 +111,7 @@
                     <span class="text-sm font-bold">Toca para abrir cámara</span>
                     <img id="foto-preview" class="absolute inset-0 w-full h-full object-cover hidden">
                 </div>
+                <p class="text-[9px] font-bold text-slate-400 text-center mt-2"><i class="fas fa-compress-arrows-alt"></i> La foto se comprime automáticamente para ahorrar datos.</p>
             </div>
 
             <!-- MOTIVO FALLA (Solo para fallas) -->
@@ -142,18 +142,14 @@
             setTimeout(() => { t.remove(); }, 3000);
         };
 
-        // 1. CARGAR LISTA DE CHOFERES
         function cargarChoferes() {
             db.collection('choferes').onSnapshot(snap => {
                 const select = document.getElementById('select-chofer');
                 select.innerHTML = '<option value="">-- Selecciona tu nombre --</option>';
-                snap.forEach(doc => {
-                    select.innerHTML += `<option value="${doc.id}">${doc.data().nombre}</option>`;
-                });
+                snap.forEach(doc => { select.innerHTML += `<option value="${doc.id}">${doc.data().nombre}</option>`; });
             });
         }
 
-        // 2. NAVEGACIÓN Y LOGIN
         function verificarSesion() {
             if (miId) {
                 document.getElementById('view-login').classList.add('hidden');
@@ -170,29 +166,20 @@
         window.iniciarTurno = () => {
             const sel = document.getElementById('select-chofer');
             if(!sel.value) return showToast("Selecciona tu nombre", "error");
-            miId = sel.value;
-            miNombre = sel.options[sel.selectedIndex].text;
-            localStorage.setItem('een_chofer_id', miId);
-            localStorage.setItem('een_chofer_nombre', miNombre);
+            miId = sel.value; miNombre = sel.options[sel.selectedIndex].text;
+            localStorage.setItem('een_chofer_id', miId); localStorage.setItem('een_chofer_nombre', miNombre);
             verificarSesion();
         };
 
         window.cerrarSesion = () => {
-            localStorage.removeItem('een_chofer_id');
-            localStorage.removeItem('een_chofer_nombre');
-            miId = null; miNombre = null;
-            verificarSesion();
+            localStorage.removeItem('een_chofer_id'); localStorage.removeItem('een_chofer_nombre');
+            miId = null; miNombre = null; verificarSesion();
         };
 
-        // 3. CARGAR RUTAS ASIGNADAS A ESTE CHOFER
         function escucharMisRutas() {
-            db.collection('rutas_logistica')
-              .where('chofer_asignado', '==', miId)
-              .where('estado', '==', 'camino')
+            db.collection('rutas_logistica').where('chofer_asignado', '==', miId).where('estado', '==', 'camino')
               .onSnapshot(snap => {
-                  misViajes = [];
-                  snap.forEach(doc => { misViajes.push({ id: doc.id, ...doc.data() }); });
-                  // Ordenar por orden_ruta asignado por el algoritmo/drag&drop
+                  misViajes = []; snap.forEach(doc => { misViajes.push({ id: doc.id, ...doc.data() }); });
                   misViajes.sort((a,b) => (a.orden_ruta || 99999) - (b.orden_ruta || 99999));
                   renderizarRutas();
               });
@@ -212,7 +199,14 @@
                 return;
             }
 
-            cont.innerHTML = misViajes.map((v, index) => `
+            cont.innerHTML = misViajes.map((v, index) => {
+                // Preparamos el link de Google Maps. Si no hay link, armamos uno con latitud/longitud
+                let linkNavegar = v.link_maps || '';
+                if(!linkNavegar && v.coordenadas && v.coordenadas.lat) {
+                    linkNavegar = `https://www.google.com/maps/search/?api=1&query=${v.coordenadas.lat},${v.coordenadas.lng}`;
+                }
+
+                return `
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 relative overflow-hidden fade-in" style="animation-delay: ${index * 0.1}s">
                     ${v.urgente ? '<div class="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl"><i class="fas fa-fire-alt"></i> URGENTE</div>' : ''}
                     <div class="flex items-center gap-3 mb-3 pr-16">
@@ -222,19 +216,28 @@
                             <h4 class="font-black text-slate-800 leading-tight">${v.cliente_nombre}</h4>
                         </div>
                     </div>
+                    
                     <div class="bg-slate-50 p-3 rounded-xl mb-4 border border-slate-100">
-                        <p class="text-xs text-slate-600 font-semibold leading-relaxed"><i class="fas fa-map-marker-alt text-red-400 w-4"></i> ${v.direccion}</p>
-                        ${v.excepcion ? `<p class="text-xs text-amber-600 font-bold mt-2"><i class="fas fa-exclamation-triangle"></i> Aviso: ${v.excepcion}</p>` : ''}
+                        <p class="text-xs text-slate-600 font-semibold leading-relaxed mb-2"><i class="fas fa-map-marker-alt text-red-400 w-4"></i> ${v.direccion}</p>
+                        
+                        <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-200/60">
+                            <div class="text-[10px] text-slate-600 font-bold flex items-center gap-1.5"><i class="fas fa-clock text-blue-400"></i> ${v.horario || 'Sin horario esp.'}</div>
+                            ${v.telefono ? `<a href="tel:${v.telefono}" class="text-[10px] text-blue-600 font-bold flex items-center justify-end gap-1.5"><i class="fas fa-phone-alt"></i> Llamar</a>` : '<span class="text-[10px] text-slate-400 text-right font-medium">Sin teléfono</span>'}
+                        </div>
+                        
+                        ${linkNavegar ? `<a href="${linkNavegar}" target="_blank" class="mt-3 block w-full bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2.5 rounded-lg text-xs font-black transition-colors"><i class="fas fa-location-arrow mr-1"></i> Iniciar Navegación GPS</a>` : ''}
+                        
+                        ${v.excepcion ? `<p class="text-xs text-amber-600 font-bold mt-3 bg-amber-50 p-2 rounded-lg border border-amber-100"><i class="fas fa-exclamation-triangle"></i> Aviso: ${v.excepcion}</p>` : ''}
                     </div>
+
                     <div class="flex gap-2">
                         <button onclick="abrirModal('${v.id}', 'entregado')" class="flex-[2] bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-black text-sm transition shadow-md shadow-emerald-500/20"><i class="fas fa-camera"></i> Entregado</button>
                         <button onclick="abrirModal('${v.id}', 'fallido')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-3.5 rounded-xl font-black text-sm transition border border-red-200"><i class="fas fa-times"></i> Falla</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
-        // 4. LÓGICA DE FOTOS Y CONFIRMACIÓN
         window.abrirModal = (viajeId, tipo) => {
             const modal = document.getElementById('modal-accion');
             const content = document.getElementById('modal-accion-content');
@@ -259,27 +262,53 @@
                 btnGuardar.innerHTML = "Guardar Reporte";
             }
 
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
             setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('translate-y-full'); }, 10);
         };
 
         window.cerrarModal = () => {
-            const modal = document.getElementById('modal-accion');
-            const content = document.getElementById('modal-accion-content');
+            const modal = document.getElementById('modal-accion'); const content = document.getElementById('modal-accion-content');
             content.classList.add('translate-y-full'); modal.classList.add('opacity-0');
             setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
         };
 
+        // ==============================================================
+        // SISTEMA DE COMPRESIÓN DE IMÁGENES EN EL NAVEGADOR
+        // ==============================================================
         window.previewFoto = (e) => {
             const file = e.target.files[0];
             if(!file) return;
+
             const reader = new FileReader();
-            reader.onload = (e) => {
-                fotoDataUrl = e.target.result;
-                const img = document.getElementById('foto-preview');
-                img.src = fotoDataUrl;
-                img.classList.remove('hidden');
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    // Reducimos a un máximo de 1024px de ancho o alto para que no pesen.
+                    const MAX_WIDTH = 1024;
+                    const MAX_HEIGHT = 1024;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Calidad al 70% (0.7) en formato JPEG = Imágenes ligeras (100kb a 200kb max)
+                    fotoDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+                    
+                    const preview = document.getElementById('foto-preview');
+                    preview.src = fotoDataUrl;
+                    preview.classList.remove('hidden');
+                };
+                img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         };
@@ -297,7 +326,7 @@
             btn.disabled = true;
 
             try {
-                // Generar nombre seguro para Storage
+                // Guarda la imagen super rápida gracias a la compresión
                 const fileName = `evidencias/${id}_${Date.now()}.jpg`;
                 const ref = storage.ref().child(fileName);
                 await ref.putString(fotoDataUrl, 'data_url');
@@ -311,13 +340,10 @@
 
                 if (tipo === 'fallido') updateData.motivo_falla = motivo;
 
-                // Actualizar todos los pedidos bajo este ID (si es consolidado paquetería) o simple
                 const viaje = misViajes.find(v => v.id === id);
                 if (viaje && viaje.es_grupo) {
                     const batch = db.batch();
-                    viaje.pedidos_incluidos.forEach(p => {
-                        batch.update(db.collection('rutas_logistica').doc(p.id), updateData);
-                    });
+                    viaje.pedidos_incluidos.forEach(p => { batch.update(db.collection('rutas_logistica').doc(p.id), updateData); });
                     await batch.commit();
                 } else {
                     await db.collection('rutas_logistica').doc(id).update(updateData);
@@ -326,11 +352,8 @@
                 showToast("¡Registrado con éxito!");
                 cerrarModal();
             } catch(e) {
-                console.error(e);
-                showToast("Error de conexión al subir evidencia", "error");
-            } finally {
-                btn.disabled = false;
-            }
+                console.error(e); showToast("Error de conexión al subir evidencia", "error");
+            } finally { btn.disabled = false; }
         };
 
         window.onload = verificarSesion;
