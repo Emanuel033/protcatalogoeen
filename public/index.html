@@ -2,7 +2,7 @@
 <html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <!-- === SEO PRINCIPAL === -->
     <title>Catálogo - Envases La Económica del Norte | Servirle es un placer</title>
@@ -34,16 +34,16 @@
         #scroll-top-btn.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
     </style>
 
-    <!-- Librerías -->
+    <!-- Librerías de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-    <!-- JS Propio (Con parámetro para limpiar el caché roto) -->
+    <!-- JS Propio (Conectado a tu RTDB) -->
     <script src="assets/js/firebase-config.js" defer></script>
-    <script src="assets/js/app.js?v=rollback" defer></script>
+    <script src="assets/js/app.js?v=2" defer></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
 
