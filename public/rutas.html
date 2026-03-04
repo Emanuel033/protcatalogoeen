@@ -98,6 +98,8 @@
                     <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
                     <input type="text" id="buscar-ruta-input" oninput="renderizarLista()" placeholder="Buscar cliente, folio..." class="w-full bg-slate-50 border border-slate-200 pl-9 pr-3 py-2.5 rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 placeholder-slate-400">
                 </div>
+                <!-- BOTÓN CONFIG / CATÁLOGOS -->
+                <button onclick="abrirConfiguracion()" class="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 w-10 h-10 shrink-0 rounded-xl text-sm transition shadow-sm flex items-center justify-center" title="Configuración / Catálogos"><i class="fas fa-cog"></i></button>
                 <!-- BOTÓN BITÁCORA -->
                 <button onclick="abrirBitacora()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 w-10 h-10 shrink-0 rounded-xl text-sm transition shadow-sm flex items-center justify-center" title="Bitácora / Historial"><i class="fas fa-book"></i></button>
                 <!-- BOTÓN NUEVO -->
@@ -216,14 +218,19 @@
                                     <input type="checkbox" id="doc-oc" class="hidden">
                                     <div class="border border-slate-200 bg-slate-50 text-slate-600 rounded-xl p-2 text-center text-[10px] font-bold transition-all flex items-center justify-center gap-1"><i class="fas fa-file-signature"></i> O. Compra</div>
                                 </label>
-                                <label class="doc-checkbox cursor-pointer">
-                                    <input type="checkbox" id="doc-qr" class="hidden">
-                                    <div class="border border-slate-200 bg-slate-50 text-slate-600 rounded-xl p-2 text-center text-[10px] font-bold transition-all flex items-center justify-center gap-1"><i class="fas fa-qrcode"></i> QR Acceso</div>
-                                </label>
-                                <label class="doc-checkbox-ciego cursor-pointer sm:col-span-2">
+                                <label class="doc-checkbox-ciego cursor-pointer sm:col-span-3">
                                     <input type="checkbox" id="doc-ciego" class="hidden">
                                     <div class="border border-slate-200 bg-slate-50 text-slate-600 rounded-xl p-2 text-center text-[10px] font-bold transition-all flex items-center justify-center gap-1"><i class="fas fa-user-secret"></i> Envío Ciego (Sin Logos)</div>
                                 </label>
+                            </div>
+                            <!-- NUEVO: SUBIDA DE QR DE ACCESO (OPCIONAL) -->
+                            <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2"><i class="fas fa-qrcode mr-1"></i> Imagen QR de Acceso (Opcional)</label>
+                                <input type="file" id="form-qr-file" accept="image/*" class="w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer">
+                                <input type="hidden" id="form-qr-base64">
+                                <div id="form-qr-preview-container" class="mt-2 hidden flex items-center gap-2">
+                                    <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200"><i class="fas fa-check-circle"></i> QR ya guardado. Sube otro para reemplazar.</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -309,63 +316,104 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- MODAL BITÁCORA / HISTORIAL GIGANTE                        -->
-    <!-- ========================================================= -->
-    <div id="modal-bitacora" class="fixed inset-0 bg-slate-900/90 z-[100] hidden flex-col items-center justify-center p-2 sm:p-6 backdrop-blur-md transition-opacity opacity-0">
-        <div class="bg-white rounded-3xl w-full max-w-7xl shadow-2xl overflow-hidden transform scale-95 transition-transform flex flex-col h-[95vh]" id="modal-bitacora-content">
-            
-            <div class="bg-slate-900 p-5 text-white flex justify-between items-center shrink-0">
-                <div>
-                    <h3 class="text-xl font-black flex items-center gap-2"><i class="fas fa-book text-indigo-400"></i> Bitácora Logística</h3>
-                    <p class="text-xs text-slate-400 font-medium mt-1">Historial de salidas, folios y trazabilidad.</p>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="cargarBitacora()" class="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2"><i class="fas fa-sync-alt"></i> Recargar</button>
-                    <button onclick="cerrarBitacora()" class="text-slate-400 hover:text-white transition w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
-                </div>
-            </div>
-            
-            <div class="p-4 bg-slate-50 border-b border-slate-200 shrink-0 flex justify-between items-center">
-                <div class="relative w-full max-w-sm">
-                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input type="text" id="bitacora-search" oninput="filtrarBitacora()" placeholder="Buscar en historial (Folios, Cliente, Chofer)..." class="w-full border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-sm font-bold text-slate-700 outline-none focus:border-indigo-500">
-                </div>
-                <div class="text-xs font-bold text-slate-500">Últimos 100 registros</div>
-            </div>
-
-            <div class="flex-1 overflow-auto custom-scroll bg-white">
-                <table class="w-full text-left border-collapse min-w-[900px]">
-                    <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm border-b border-slate-200">
-                        <tr>
-                            <th class="px-4 py-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">Tiempos</th>
-                            <th class="px-4 py-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">Folios (Sistema)</th>
-                            <th class="px-4 py-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">Cliente y Destino</th>
-                            <th class="px-4 py-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">Tipo Envío</th>
-                            <th class="px-4 py-3 text-[10px] font-black uppercase text-slate-500 tracking-wider">Responsable</th>
-                            <th class="px-4 py-3 text-[10px] font-black uppercase text-slate-500 tracking-wider text-center">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bitacora-tbody" class="divide-y divide-slate-100 text-sm">
-                        <!-- Llenado por JS -->
-                    </tbody>
-                </table>
+    <!-- MODALES NUEVOS AÑADIDOS AL FINAL DEL BODY, JUSTO ANTES DE LOS SCRIPTS -->
+    
+    <!-- MODAL CONFIRMAR SALIDA -->
+    <div id="modal-salida" class="fixed inset-0 bg-slate-900/80 z-[110] hidden items-center justify-center p-4 backdrop-blur-sm transition-opacity opacity-0">
+        <div class="bg-white rounded-3xl p-5 max-w-[300px] w-full shadow-2xl transform scale-95 transition-transform text-center" id="modal-salida-content">
+            <div class="w-12 h-12 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-3"><i class="fas fa-truck-fast"></i></div>
+            <h3 class="text-lg font-black text-slate-800 mb-1">¿Confirmar Salida?</h3>
+            <p class="text-xs text-slate-500 mb-5">El chofer iniciará la ruta ahora. Se registrará la hora actual.</p>
+            <div class="flex gap-2">
+                <button onclick="cerrarModalSalida()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-lg text-sm transition hover:bg-slate-200">Cancelar</button>
+                <button onclick="confirmarSalidaBatch()" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-lg text-sm shadow-md transition hover:bg-blue-700">Sí, Enviar</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL CONFIGURACIÓN (CHOFERES, FLOTA, DOCS) -->
+    <div id="modal-configuracion" class="fixed inset-0 bg-slate-900/90 z-[120] hidden flex-col items-center justify-center p-2 sm:p-6 backdrop-blur-md transition-opacity opacity-0">
+        <div class="bg-white rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden transform scale-95 transition-transform flex flex-col h-[85vh]" id="modal-configuracion-content">
+            <div class="bg-slate-900 p-5 text-white flex justify-between items-center shrink-0">
+                <h3 class="text-lg font-black flex items-center gap-2"><i class="fas fa-cogs text-slate-300"></i> Administración General</h3>
+                <button onclick="cerrarConfiguracion()" class="text-slate-400 hover:text-white transition w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="flex border-b border-slate-200 bg-slate-50 shrink-0">
+                <button onclick="setConfigTab('choferes')" id="tab-cfg-choferes" class="cfg-tab flex-1 py-3 text-xs font-black uppercase tracking-wider text-blue-600 border-b-2 border-blue-600 transition">👨‍✈️ Choferes</button>
+                <button onclick="setConfigTab('flota')" id="tab-cfg-flota" class="cfg-tab flex-1 py-3 text-xs font-black uppercase tracking-wider text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition">🚚 Flota</button>
+                <button onclick="setConfigTab('docs')" id="tab-cfg-docs" class="cfg-tab flex-1 py-3 text-xs font-black uppercase tracking-wider text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition relative">📄 Docs Legales <span id="docs-alert" class="hidden absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span></button>
+            </div>
 
-    <!-- MODAL CONFIRMACIÓN ELIMINAR -->
-    <div id="modal-confirm" class="fixed inset-0 bg-slate-900/80 z-[110] hidden items-center justify-center p-4 backdrop-blur-sm transition-opacity opacity-0">
-        <div class="bg-white rounded-3xl p-5 max-w-[300px] w-full shadow-2xl transform scale-95 transition-transform text-center" id="modal-confirm-content">
-            <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-3"><i class="fas fa-exclamation-triangle"></i></div>
-            <h3 class="text-lg font-black text-slate-800 mb-1">¿Eliminar Ruta?</h3>
-            <p class="text-xs text-slate-500 mb-5">Esta acción no se puede deshacer.</p>
-            <div class="flex gap-2">
-                <button onclick="cerrarModalConfirmacion()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-lg text-sm">Cancelar</button>
-                <button onclick="eliminarPedidoDefinitivo()" class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg text-sm shadow-md">Eliminar</button>
+            <div class="p-4 flex-1 overflow-y-auto custom-scroll bg-slate-50/50">
+                
+                <!-- TAB CHOFERES -->
+                <div id="cfg-panel-choferes" class="cfg-panel block space-y-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-2">
+                        <input type="text" id="cfg-nuevo-chofer" placeholder="Nombre completo del Chofer" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold">
+                        <button onclick="agregarChofer()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition shadow-sm"><i class="fas fa-plus"></i> Agregar</button>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-xs uppercase"><tr><th class="px-4 py-2">Operador</th><th class="px-4 py-2 text-right">Acción</th></tr></thead>
+                            <tbody id="cfg-tabla-choferes" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB FLOTA -->
+                <div id="cfg-panel-flota" class="cfg-panel hidden space-y-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-2">
+                        <input type="text" id="cfg-nuevo-vehiculo" placeholder="Identificador / Placas (Ej. Camión 1)" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold">
+                        <button onclick="agregarVehiculo()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition shadow-sm"><i class="fas fa-plus"></i> Agregar</button>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-xs uppercase"><tr><th class="px-4 py-2">Vehículo</th><th class="px-4 py-2 text-right">Acción</th></tr></thead>
+                            <tbody id="cfg-tabla-flota" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB DOCS LEGALES -->
+                <div id="cfg-panel-docs" class="cfg-panel hidden">
+                    <div id="docs-warning-box" class="mb-4 hidden bg-red-50 border-l-4 border-red-500 p-3 rounded-r-xl shadow-sm">
+                        <p class="text-xs font-bold text-red-700"><i class="fas fa-exclamation-circle"></i> ATENCIÓN: Ya pasó el día 17 del mes y parece que no has actualizado los documentos (IMSS/SUA). Sube las versiones recientes para los choferes.</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <label class="block text-xs font-black text-slate-600 uppercase mb-2">Comprobante IMSS (PDF / Imagen)</label>
+                            <input type="file" id="cfg-doc-imss" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                            <div id="lbl-imss-status" class="text-[10px] text-slate-400 mt-1 font-medium">Estado: Desconocido</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <label class="block text-xs font-black text-slate-600 uppercase mb-2">Comprobante SUA (PDF / Imagen)</label>
+                            <input type="file" id="cfg-doc-sua" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                            <div id="lbl-sua-status" class="text-[10px] text-slate-400 mt-1 font-medium">Estado: Desconocido</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <label class="block text-xs font-black text-slate-600 uppercase mb-2">Documento Extra (Ej. Seguro)</label>
+                            <input type="file" id="cfg-doc-otros" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                            <div id="lbl-otros-status" class="text-[10px] text-slate-400 mt-1 font-medium">Estado: Desconocido</div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="guardarDocsLegales()" id="btn-guardar-docs" class="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl shadow-lg shadow-emerald-500/30 transition active:scale-95 text-sm"><i class="fas fa-cloud-upload-alt mr-1"></i> Subir y Actualizar Documentos</button>
+                    <p class="text-[9px] text-slate-400 text-center mt-2">* Por favor, intenta subir archivos en formato PDF o Imágenes ligeras para no saturar la conexión de los choferes.</p>
+                </div>
+                
             </div>
         </div>
+    </div>
+
+    <!-- VISOR DE EVIDENCIAS (FOTOS Y QR) MEJORADO -->
+    <div id="visor-imagenes" class="fixed inset-0 bg-slate-900/95 z-[200] hidden flex-col items-center justify-center p-4 backdrop-blur-sm">
+        <button onclick="cerrarVisorImagen()" class="absolute top-4 right-4 text-white text-3xl hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+        <img id="visor-img-src" src="" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl mb-6">
+        <a id="visor-btn-descargar" href="#" download="Evidencia_EEN.jpg" class="bg-blue-600 hover:bg-blue-500 text-white font-black py-3 px-8 rounded-xl shadow-lg shadow-blue-500/30 transition active:scale-95 text-sm flex items-center gap-2">
+            <i class="fas fa-download"></i> Descargar Imagen
+        </a>
     </div>
 
     <!-- TOAST NOTIFICATIONS -->
@@ -606,7 +654,11 @@
                 const mk = L.marker([v.coordenadas.lat, v.coordenadas.lng], { icon: ico, draggable: false }).addTo(map);
                 mk.bindTooltip(`<div class="font-bold text-xs truncate max-w-[150px]">${v.cliente_nombre}</div><div class="text-[9px] opacity-80 truncate">${v.destino_alias || 'Destino'}</div>`, { permanent: false, direction: 'top', className: 'map-tooltip', offset: [0, -15] });
                 
-                mk.on('click', () => seleccionarViaje(v.id));
+                // MEJORA: Al hacer clic en el pin, enfoca la tarjeta y hace zoom in hacia esa ruta
+                mk.on('click', () => {
+                    seleccionarViaje(v.id);
+                    map.flyTo([v.coordenadas.lat, v.coordenadas.lng], 16, {duration: 0.5});
+                });
                 marcadores[v.id] = mk; bounds.push([v.coordenadas.lat, v.coordenadas.lng]);
             });
             
@@ -744,11 +796,12 @@
 
             if(estadoActual === 'fallido' || (estadoActual === 'entregado' && tieneFotos)) {
                 let fotosHtml = '';
+                // MEJORA: Ahora usa el visor de imágenes nativo con opción de descarga
                 if(viajeSeleccionado.foto_evidencia) {
-                    fotosHtml += `<div><p class="text-[9px] font-bold text-slate-500 mb-1">Doc / Guía:</p><img src="${viajeSeleccionado.foto_evidencia}" class="w-full h-24 object-cover rounded shadow-sm border ${estadoActual==='fallido'?'border-red-200':'border-emerald-200'} cursor-pointer hover:opacity-80 transition" onclick="window.open(this.src, '_blank')"></div>`;
+                    fotosHtml += `<div><p class="text-[9px] font-bold text-slate-500 mb-1">Doc / Guía:</p><img src="${viajeSeleccionado.foto_evidencia}" class="w-full h-24 object-cover rounded shadow-sm border ${estadoActual==='fallido'?'border-red-200':'border-emerald-200'} cursor-zoom-in hover:opacity-80 transition" onclick="abrirVisorImagen(this.src)"></div>`;
                 }
                 if(viajeSeleccionado.foto_evidencia_material) {
-                    fotosHtml += `<div><p class="text-[9px] font-bold text-slate-500 mb-1">Material:</p><img src="${viajeSeleccionado.foto_evidencia_material}" class="w-full h-24 object-cover rounded shadow-sm border ${estadoActual==='fallido'?'border-red-200':'border-emerald-200'} cursor-pointer hover:opacity-80 transition" onclick="window.open(this.src, '_blank')"></div>`;
+                    fotosHtml += `<div><p class="text-[9px] font-bold text-slate-500 mb-1">Material:</p><img src="${viajeSeleccionado.foto_evidencia_material}" class="w-full h-24 object-cover rounded shadow-sm border ${estadoActual==='fallido'?'border-red-200':'border-emerald-200'} cursor-zoom-in hover:opacity-80 transition" onclick="abrirVisorImagen(this.src)"></div>`;
                 }
 
                 htmlDinamico += `
@@ -1024,7 +1077,13 @@
             document.getElementById('doc-factura').checked = true; 
             document.getElementById('doc-certificados').checked = false;
             document.getElementById('doc-oc').checked = false;
-            document.getElementById('doc-qr').checked = false;
+            document.getElementById('doc-qr').checked = false; // El checkbox visual
+            
+            // Limpiar QR
+            document.getElementById('form-qr-file').value = '';
+            document.getElementById('form-qr-base64').value = '';
+            document.getElementById('form-qr-preview-container').classList.add('hidden');
+
             document.getElementById('doc-ciego').checked = false;
 
             adjustFormByShippingType();
@@ -1067,6 +1126,16 @@
             document.getElementById('doc-qr').checked = docs.qr_acceso || false;
             document.getElementById('doc-ciego').checked = docs.envio_ciego || false;
             
+            // Cargar QR existente visualmente si lo tiene
+            document.getElementById('form-qr-file').value = '';
+            if(viajeSeleccionado.qr_imagen) {
+                document.getElementById('form-qr-base64').value = viajeSeleccionado.qr_imagen;
+                document.getElementById('form-qr-preview-container').classList.remove('hidden');
+            } else {
+                document.getElementById('form-qr-base64').value = '';
+                document.getElementById('form-qr-preview-container').classList.add('hidden');
+            }
+
             adjustFormByShippingType();
             
             // Set fields values
@@ -1139,6 +1208,8 @@
 
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
+            const qrBase64 = document.getElementById('form-qr-base64').value;
+
             const data = {
                 folio_pedido: ped || null,
                 folio_factura: fac || null,
@@ -1155,6 +1226,7 @@
                 coordenadas: { lat: lat, lng: lng },
                 
                 documentacion: docs,
+                qr_imagen: qrBase64 || null, // Agregado al payload
                 urgente: urgente,
                 fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
             };
@@ -1327,17 +1399,35 @@
             btn.querySelector('div').classList.add('bg-blue-500', 'text-white');
         };
 
+        // MEJORA: Flujo con confirmación de salida
         window.iniciarRutaDinamica = () => {
             const v = window.vehiculoSeleccionadoTemp;
             const c = document.getElementById('selector-chofer-dinamico').value;
             if(!v) return showToast("Falta seleccionar el vehículo", "error");
             if(!c) return showToast("Falta seleccionar el operador", "error");
             
-            showToast("Asignando ruta al chofer...", "info");
-            ejecutarAccionBatch('camino', v, c);
+            // Abre modal pidiendo confirmación de salida real
+            const modal = document.getElementById('modal-salida');
+            const content = document.getElementById('modal-salida-content');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
         };
 
-        async function ejecutarAccionBatch(accion, vehiculo = null, chofer = null) {
+        window.cerrarModalSalida = () => {
+            const modal = document.getElementById('modal-salida'); const content = document.getElementById('modal-salida-content');
+            content.classList.add('scale-95'); modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        };
+
+        window.confirmarSalidaBatch = () => {
+            cerrarModalSalida();
+            showToast("Asignando ruta y marcando salida...", "info");
+            const v = window.vehiculoSeleccionadoTemp;
+            const c = document.getElementById('selector-chofer-dinamico').value;
+            ejecutarAccionBatch('camino', v, c, true); // Envia true para forzar la fecha actual
+        };
+
+        async function ejecutarAccionBatch(accion, vehiculo = null, chofer = null, forzarSalidaAhora = false) {
             if(!viajeSeleccionado) return;
             try {
                 let data = { estado: accion, fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() };
@@ -1346,7 +1436,10 @@
                 }
                 else if(accion === 'camino') { 
                     data.vehiculo_asignado = vehiculo; data.chofer_asignado = chofer;
-                    if(!viajeSeleccionado.fecha_salida) data.fecha_salida = firebase.firestore.FieldValue.serverTimestamp();
+                    // Si se fuerza la salida o no existía, plasma la hora actual del servidor
+                    if(forzarSalidaAhora || !viajeSeleccionado.fecha_salida) {
+                        data.fecha_salida = firebase.firestore.FieldValue.serverTimestamp();
+                    }
                 }
                 await db.collection('rutas_logistica').doc(viajeSeleccionado.id).update(data);
                 showToast("Acción exitosa"); cerrarDetalle();
@@ -1354,6 +1447,180 @@
         }
 
         window.copiarDireccion = () => { if(viajeSeleccionado) { navigator.clipboard.writeText(viajeSeleccionado.direccion).then(() => showToast("Dirección copiada")).catch(() => document.execCommand('copy')); } };
+
+        // ==========================================
+        // LÓGICA DEL VISOR DE IMÁGENES
+        // ==========================================
+        window.abrirVisorImagen = (src) => {
+            document.getElementById('visor-img-src').src = src;
+            document.getElementById('visor-btn-descargar').href = src; // Prepara la descarga nativa
+            document.getElementById('visor-imagenes').classList.remove('hidden');
+            document.getElementById('visor-imagenes').classList.add('flex');
+        };
+        window.cerrarVisorImagen = () => {
+            document.getElementById('visor-imagenes').classList.add('hidden');
+            document.getElementById('visor-imagenes').classList.remove('flex');
+            document.getElementById('visor-img-src').src = '';
+        };
+
+        // Escucha cambios en el input del QR para procesarlo a base64
+        document.getElementById('form-qr-file')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('form-qr-base64').value = event.target.result;
+                document.getElementById('form-qr-preview-container').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ==========================================
+        // LÓGICA DE CONFIGURACIÓN (CHOFERES, FLOTA, DOCS)
+        // ==========================================
+        let docsLegalesCache = null;
+
+        window.abrirConfiguracion = async () => {
+            const modal = document.getElementById('modal-configuracion');
+            const content = document.getElementById('modal-configuracion-content');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setConfigTab('choferes');
+            
+            // Cargar estado de Docs Legales
+            try {
+                const docSnap = await db.collection('configuracion').doc('docs_legales').get();
+                if(docSnap.exists) {
+                    docsLegalesCache = docSnap.data();
+                    const fechaTxt = docsLegalesCache.fecha_actualizacion ? docsLegalesCache.fecha_actualizacion.toDate().toLocaleDateString('es-MX') : 'Desconocida';
+                    document.getElementById('lbl-imss-status').innerHTML = docsLegalesCache.imss_pdf ? `<span class="text-emerald-500"><i class="fas fa-check"></i> Subido (${fechaTxt})</span>` : 'Falta archivo';
+                    document.getElementById('lbl-sua-status').innerHTML = docsLegalesCache.sua_pdf ? `<span class="text-emerald-500"><i class="fas fa-check"></i> Subido (${fechaTxt})</span>` : 'Falta archivo';
+                    document.getElementById('lbl-otros-status').innerHTML = docsLegalesCache.otros_pdf ? `<span class="text-emerald-500"><i class="fas fa-check"></i> Subido (${fechaTxt})</span>` : 'Opcional';
+
+                    // Lógica de expiración (Día > 17 del mes actual)
+                    validarCaducidadDocs(docsLegalesCache.fecha_actualizacion);
+                }
+            } catch(e) {}
+
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+        };
+
+        window.cerrarConfiguracion = () => {
+            const modal = document.getElementById('modal-configuracion'); const content = document.getElementById('modal-configuracion-content');
+            content.classList.add('scale-95'); modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        };
+
+        window.setConfigTab = (tab) => {
+            ['choferes', 'flota', 'docs'].forEach(t => {
+                document.getElementById('tab-cfg-'+t).classList.replace('text-blue-600', 'text-slate-500');
+                document.getElementById('tab-cfg-'+t).classList.replace('border-blue-600', 'border-transparent');
+                document.getElementById('cfg-panel-'+t).classList.add('hidden');
+            });
+            document.getElementById('tab-cfg-'+tab).classList.replace('text-slate-500', 'text-blue-600');
+            document.getElementById('tab-cfg-'+tab).classList.replace('border-transparent', 'border-blue-600');
+            document.getElementById('cfg-panel-'+tab).classList.remove('hidden');
+
+            if(tab === 'choferes') renderConfigChoferes();
+            if(tab === 'flota') renderConfigFlota();
+        };
+
+        function renderConfigChoferes() {
+            const tbody = document.getElementById('cfg-tabla-choferes'); tbody.innerHTML = '';
+            choferesDB.forEach(c => {
+                tbody.innerHTML += `<tr><td class="px-4 py-2 font-bold text-slate-700"><i class="fas fa-user-circle text-blue-400 mr-2"></i> ${c.nombre}</td><td class="px-4 py-2 text-right"><button onclick="eliminarChofer('${c.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+        }
+
+        function renderConfigFlota() {
+            const tbody = document.getElementById('cfg-tabla-flota'); tbody.innerHTML = '';
+            flotaDB.forEach(f => {
+                tbody.innerHTML += `<tr><td class="px-4 py-2 font-bold text-slate-700"><i class="fas fa-truck text-slate-400 mr-2"></i> ${f.nombre}</td><td class="px-4 py-2 text-right"><button onclick="eliminarVehiculo('${f.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+        }
+
+        window.agregarChofer = async () => {
+            const input = document.getElementById('cfg-nuevo-chofer'); const nombre = input.value.trim();
+            if(!nombre) return showToast("Escribe un nombre", "error");
+            try { await db.collection('choferes').add({ nombre: nombre }); input.value = ''; showToast("Chofer agregado"); renderConfigChoferes(); } catch(e) { showToast("Error", "error"); }
+        };
+        window.eliminarChofer = async (id) => {
+            if(confirm("¿Eliminar operador permanentemente?")) {
+                try { await db.collection('choferes').doc(id).delete(); showToast("Eliminado"); renderConfigChoferes(); } catch(e) { showToast("Error", "error"); }
+            }
+        };
+
+        window.agregarVehiculo = async () => {
+            const input = document.getElementById('cfg-nuevo-vehiculo'); const nombre = input.value.trim();
+            if(!nombre) return showToast("Escribe un identificador", "error");
+            try { await db.collection('flota').add({ nombre: nombre }); input.value = ''; showToast("Vehículo agregado"); renderConfigFlota(); } catch(e) { showToast("Error", "error"); }
+        };
+        window.eliminarVehiculo = async (id) => {
+            if(confirm("¿Eliminar vehículo permanentemente?")) {
+                try { await db.collection('flota').doc(id).delete(); showToast("Eliminado"); renderConfigFlota(); } catch(e) { showToast("Error", "error"); }
+            }
+        };
+
+        function validarCaducidadDocs(timestampFirestore) {
+            const hoy = new Date();
+            const esMasDelDia17 = hoy.getDate() > 17;
+            let estaCaducado = false;
+
+            if (esMasDelDia17) {
+                if (!timestampFirestore) { estaCaducado = true; } 
+                else {
+                    const fechaDocs = timestampFirestore.toDate();
+                    // Si el documento es del mes pasado (o antes) y ya es >17 del actual, caducó.
+                    if(fechaDocs.getFullYear() < hoy.getFullYear() || fechaDocs.getMonth() < hoy.getMonth()) {
+                        estaCaducado = true;
+                    }
+                }
+            }
+
+            if(estaCaducado) {
+                document.getElementById('docs-alert').classList.remove('hidden');
+                document.getElementById('docs-warning-box').classList.remove('hidden');
+            } else {
+                document.getElementById('docs-alert').classList.add('hidden');
+                document.getElementById('docs-warning-box').classList.add('hidden');
+            }
+        }
+
+        window.guardarDocsLegales = async () => {
+            const btn = document.getElementById('btn-guardar-docs');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...'; btn.disabled = true;
+
+            const fileImss = document.getElementById('cfg-doc-imss').files[0];
+            const fileSua = document.getElementById('cfg-doc-sua').files[0];
+            const fileOtros = document.getElementById('cfg-doc-otros').files[0];
+
+            let payload = { fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() };
+
+            const toBase64 = (file) => new Promise((resolve) => {
+                const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.readAsDataURL(file);
+            });
+
+            try {
+                if(fileImss) payload.imss_pdf = await toBase64(fileImss);
+                if(fileSua) payload.sua_pdf = await toBase64(fileSua);
+                if(fileOtros) payload.otros_pdf = await toBase64(fileOtros);
+
+                await db.collection('configuracion').doc('docs_legales').set(payload, {merge: true});
+                
+                showToast("Documentos actualizados correctamente");
+                document.getElementById('docs-alert').classList.add('hidden');
+                document.getElementById('docs-warning-box').classList.add('hidden');
+                
+                // Resetea inputs
+                document.getElementById('cfg-doc-imss').value = '';
+                document.getElementById('cfg-doc-sua').value = '';
+                document.getElementById('cfg-doc-otros').value = '';
+
+            } catch(e) {
+                showToast("Error al subir. Usa archivos más pequeños (Max 800kb)", "error");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> Subir y Actualizar Documentos'; btn.disabled = false;
+            }
+        };
 
         // ==========================================
         // LÓGICA DE BITÁCORA
