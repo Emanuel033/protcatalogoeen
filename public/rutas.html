@@ -108,9 +108,10 @@
             <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-slate-800 text-white shadow-sm transition-all">Todos</button>
             <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">Por Asignar</button>
             <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">En Ruta</button>
+            <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all"><i class="fas fa-check-double"></i> Entregados</button>
             <button onclick="setFilter('fallido')" id="filter-fallido" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-all"><i class="fas fa-exclamation-triangle"></i> Fallas</button>
         </div>
-        <div class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2 bg-slate-50/80" id="lista-pedidos">
+        <div class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2 bg-slate-50/80 pb-32" id="lista-pedidos">
             <div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-3xl text-blue-500 mb-3"></i><p class="text-slate-500 text-xs font-bold">Sincronizando...</p></div>
         </div>
     </aside>
@@ -136,7 +137,7 @@
                 <span id="det-status" class="status-badge shrink-0">ESTADO</span>
             </div>
         </div>
-        <div id="drawer-dynamic-content" class="p-3 overflow-y-auto custom-scroll flex-1 space-y-3 bg-slate-50/50 pb-8"></div>
+        <div id="drawer-dynamic-content" class="p-3 overflow-y-auto custom-scroll flex-1 space-y-3 bg-slate-50/50 pb-32"></div>
     </div>
 
 
@@ -518,6 +519,7 @@
                     urgente: p.urgente || false,
                     orden_ruta: p.orden_ruta || 9999999999999,
                     foto_evidencia: p.foto_evidencia || null,
+                    foto_evidencia_material: p.foto_evidencia_material || null,
                     fecha_creacion: p.fecha_creacion || null,
                     fecha_salida: p.fecha_salida || null
                 };
@@ -738,7 +740,17 @@
                     </div>
                 </details>`;
 
-            if(estadoActual === 'fallido' || (estadoActual === 'entregado' && viajeSeleccionado.foto_evidencia)) {
+            const tieneFotos = viajeSeleccionado.foto_evidencia || viajeSeleccionado.foto_evidencia_material;
+
+            if(estadoActual === 'fallido' || (estadoActual === 'entregado' && tieneFotos)) {
+                let fotosHtml = '';
+                if(viajeSeleccionado.foto_evidencia) {
+                    fotosHtml += `<div><p class="text-[9px] font-bold text-slate-500 mb-1">Doc / Guía:</p><img src="${viajeSeleccionado.foto_evidencia}" class="w-full h-24 object-cover rounded shadow-sm border ${estadoActual==='fallido'?'border-red-200':'border-emerald-200'} cursor-pointer hover:opacity-80 transition" onclick="window.open(this.src, '_blank')"></div>`;
+                }
+                if(viajeSeleccionado.foto_evidencia_material) {
+                    fotosHtml += `<div><p class="text-[9px] font-bold text-slate-500 mb-1">Material:</p><img src="${viajeSeleccionado.foto_evidencia_material}" class="w-full h-24 object-cover rounded shadow-sm border ${estadoActual==='fallido'?'border-red-200':'border-emerald-200'} cursor-pointer hover:opacity-80 transition" onclick="window.open(this.src, '_blank')"></div>`;
+                }
+
                 htmlDinamico += `
                 <details class="${estadoActual==='fallido'?'bg-red-50 border-red-200':'bg-emerald-50 border-emerald-200'} border rounded-xl shadow-sm group" open>
                     <summary class="font-black text-[11px] ${estadoActual==='fallido'?'text-red-900':'text-emerald-900'} p-3 cursor-pointer flex justify-between items-center select-none">
@@ -747,7 +759,9 @@
                     </summary>
                     <div class="px-3 pb-3 pt-0">
                         ${estadoActual === 'fallido' ? `<p class="text-[10px] font-bold text-red-800 bg-white p-2 rounded border border-red-100 mb-2">${viajeSeleccionado.motivo_falla || 'Sin detalle'}</p>` : ''}
-                        ${viajeSeleccionado.foto_evidencia ? `<img src="${viajeSeleccionado.foto_evidencia}" class="w-full h-24 object-cover rounded shadow-sm border ${estadoActual==='fallido'?'border-red-200':'border-emerald-200'} mb-2">` : ''}
+                        <div class="${(viajeSeleccionado.foto_evidencia && viajeSeleccionado.foto_evidencia_material) ? 'grid grid-cols-2 gap-2' : ''} mb-2">
+                            ${fotosHtml}
+                        </div>
                         ${estadoActual === 'fallido' ? `<button onclick="abrirModalConfirmacion('reactivar')" class="w-full bg-amber-500 text-white py-1.5 rounded font-bold text-[10px] shadow-sm flex items-center justify-center gap-1"><i class="fas fa-redo"></i> Reasignar a Pendientes</button>` : ''}
                     </div>
                 </details>`;
