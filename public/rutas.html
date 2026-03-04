@@ -37,7 +37,10 @@
 
         @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
         
+        /* Drawer Animations - Bulletproof Open/Close */
         #detalle-drawer { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        #detalle-drawer.drawer-open { transform: translate(0, 0) !important; }
+
         .btn-vehiculo-dinamico.selected { border-color: #3b82f6; background-color: #eff6ff; color: #1d4ed8; box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.15); transform: translateY(-1px); }
     </style>
 </head>
@@ -97,12 +100,12 @@
     <main class="flex-1 h-[55%] lg:h-full relative flex flex-col overflow-hidden bg-slate-200">
         <div id="map" class="w-full h-full z-[10]"></div>
 
-        <!-- DRAWER LATERAL PREMIUM -->
-        <div id="detalle-drawer" class="absolute lg:top-0 bottom-0 right-0 h-[85vh] lg:h-full w-full lg:w-[480px] bg-slate-50 shadow-2xl lg:shadow-[-20px_0_40px_rgba(0,0,0,0.1)] z-[1000] transform translate-y-full lg:translate-y-0 lg:translate-x-full flex flex-col rounded-t-3xl lg:rounded-none overflow-hidden">
-            <div class="w-full flex justify-center pt-3 pb-1 lg:hidden bg-slate-900" onclick="cerrarDetalle()">
+        <!-- DRAWER LATERAL PREMIUM (Optimizado para Celular y Desktop) -->
+        <div id="detalle-drawer" class="fixed lg:absolute z-[1000] bottom-0 lg:top-0 right-0 w-full lg:w-[420px] h-[65vh] lg:h-full bg-slate-50 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] lg:shadow-[-20px_0_40px_rgba(0,0,0,0.1)] flex flex-col rounded-t-3xl lg:rounded-none overflow-hidden transform translate-y-full lg:translate-y-0 lg:translate-x-full">
+            <div class="w-full flex justify-center pt-3 pb-1 lg:hidden bg-slate-900 cursor-pointer" onclick="cerrarDetalle()">
                 <div class="w-12 h-1.5 bg-white/30 rounded-full"></div>
             </div>
-            <div class="bg-slate-900 p-5 lg:p-6 shrink-0 relative">
+            <div class="bg-slate-900 p-5 lg:p-6 shrink-0 relative shadow-md z-10">
                 <button onclick="cerrarDetalle()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition bg-white/10 w-8 h-8 rounded-full flex items-center justify-center hidden lg:flex"><i class="fas fa-times"></i></button>
                 <div class="flex justify-between items-start mb-3 pr-10">
                     <div class="flex gap-2 items-center">
@@ -115,7 +118,8 @@
                 <h3 id="det-cliente" class="text-xl lg:text-2xl font-black text-white leading-tight mt-2 flex flex-wrap items-center gap-2">Cliente</h3>
                 <p class="text-xs text-slate-400 font-medium mt-1.5" id="det-tipo-destino"><i class="fas fa-map-marker-alt"></i> DESTINO</p>
             </div>
-            <div id="drawer-dynamic-content" class="p-5 lg:p-6 overflow-y-auto custom-scroll flex-1 space-y-6"></div>
+            <!-- pb-20 añadido para asegurar que el bloque inferior (Asignar chofer) sea completamente visible en moviles -->
+            <div id="drawer-dynamic-content" class="p-5 lg:p-6 overflow-y-auto custom-scroll flex-1 space-y-6 pb-20 bg-slate-50"></div>
         </div>
     </main>
 
@@ -162,6 +166,10 @@
         async function trazarRutaCalles(waypointsArray, skipAnimation) {
             if(capaRuta) map.removeLayer(capaRuta);
             
+            // Calculamos el padding dinamico: Si hay Drawer abierto, no queremos que la ruta se esconda detrás de él.
+            const paddingRight = window.innerWidth >= 1024 ? 440 : 50; 
+            const paddingBottom = window.innerWidth < 1024 ? (window.innerHeight * 0.65) + 20 : 50;
+
             // Si solo hay 1 punto extra (ida y vuelta a matriz)
             const coordsStr = waypointsArray.map(wp => `${wp.lng},${wp.lat}`).join(';');
             const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
@@ -173,12 +181,13 @@
                 if(data.code !== 'Ok') throw new Error("No se pudo rutear");
 
                 const route = data.routes[0];
-                const coordsArr = route.geometry.coordinates.map(c => [c[1], c[0]]); // Leaflet usa [Lat, Lng]
+                const coordsArr = route.geometry.coordinates.map(c => [c[1], c[0]]);
 
-                // Dibujamos la polilínea sobre las calles (sin basura en la interfaz)
                 capaRuta = L.polyline(coordsArr, { color: '#3b82f6', weight: 6, opacity: 0.8 }).addTo(map);
                 
-                if(!skipAnimation) map.fitBounds(capaRuta.getBounds(), { padding: [50, 50] });
+                if(!skipAnimation) {
+                    map.fitBounds(capaRuta.getBounds(), { paddingTopLeft: [50, 50], paddingBottomRight: [paddingRight, paddingBottom] });
+                }
 
                 const distKm = (route.distance / 1000).toFixed(1);
                 const timeMins = Math.round(route.duration / 60);
@@ -191,9 +200,11 @@
             } catch(e) {
                 console.warn("Fallo en API de ruteo. Dibujando línea recta como rescate.", e);
                 capaRuta = L.polyline(waypointsArray, { color: '#94a3b8', weight: 4, opacity: 0.7, dashArray: '10, 10' }).addTo(map);
-                if(!skipAnimation) map.fitBounds(capaRuta.getBounds(), { padding: [50, 50] });
                 
-                // Calculo matemático de emergencia
+                if(!skipAnimation) {
+                    map.fitBounds(capaRuta.getBounds(), { paddingTopLeft: [50, 50], paddingBottomRight: [paddingRight, paddingBottom] });
+                }
+                
                 let distMetros = 0;
                 for(let i=0; i<waypointsArray.length-1; i++) distMetros += waypointsArray[i].distanceTo(waypointsArray[i+1]);
                 const kmUrbanos = ((distMetros / 1000) * 1.35).toFixed(1);
@@ -307,7 +318,11 @@
                 mk.on('click', () => seleccionarViaje(v.id));
                 marcadores[v.id] = mk; bounds.push([v.coordenadas.lat, v.coordenadas.lng]);
             });
-            if(bounds.length > 0 && !viajeSeleccionado) map.fitBounds(bounds, { padding: [50, 50] });
+            // Si el drawer esta cerrado (no hay viaje seleccionado), ajustar normal. 
+            // Si hay viaje seleccionado, dejar que seleccionarViaje aplique el padding.
+            if(bounds.length > 0 && !viajeSeleccionado) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
         }
 
         window.seleccionarViaje = (id, skipAnimation = false) => {
@@ -443,7 +458,8 @@
 
             document.getElementById('drawer-dynamic-content').innerHTML = htmlDinamico;
             const drawer = document.getElementById('detalle-drawer');
-            if(window.innerWidth < 1024) { drawer.classList.remove('translate-y-full'); } else { drawer.classList.remove('translate-x-full'); }
+            // Clase de CSS para forzar la animacion sin importar el dispositivo
+            drawer.classList.add('drawer-open');
             window.vehiculoSeleccionadoTemp = null; 
         }
 
@@ -452,7 +468,9 @@
             renderizarLista(); 
             if(capaRuta) { map.removeLayer(capaRuta); capaRuta = null; } 
             const drawer = document.getElementById('detalle-drawer'); 
-            drawer.classList.add('translate-y-full', 'lg:translate-y-0', 'lg:translate-x-full'); 
+            // Eliminar clase que forzaba el abierto
+            drawer.classList.remove('drawer-open'); 
+            actualizarMapa(); // Para que el mapa vuelva a su tamaño original sin el padding del panel
         }
 
         window.copiarDireccion = () => { if(viajeSeleccionado) { navigator.clipboard.writeText(viajeSeleccionado.direccion).then(() => showToast("Dirección copiada")).catch(() => document.execCommand('copy')); } };
