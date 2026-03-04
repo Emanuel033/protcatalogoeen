@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <!-- ELIMINAMOS EL STORAGE PORQUE GUARDAREMOS DIRECTO EN BASE DE DATOS -->
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -30,11 +30,9 @@
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
             authDomain: "productoseen.firebaseapp.com",
             projectId: "productoseen",
-            storageBucket: "productoseen.appspot.com",
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage();
     </script>
 
     <!-- PANTALLA DE LOGIN -->
@@ -111,7 +109,7 @@
                     <span class="text-sm font-bold">Toca para abrir cámara</span>
                     <img id="foto-preview" class="absolute inset-0 w-full h-full object-cover hidden">
                 </div>
-                <p class="text-[9px] font-bold text-slate-400 text-center mt-2"><i class="fas fa-compress-arrows-alt"></i> La foto se comprime automáticamente para ahorrar datos.</p>
+                <p class="text-[9px] font-bold text-emerald-500 text-center mt-2 bg-emerald-50 py-1 rounded-md border border-emerald-100"><i class="fas fa-bolt"></i> Sistema de Guardado Rápido Activado</p>
             </div>
 
             <!-- MOTIVO FALLA (Solo para fallas) -->
@@ -200,7 +198,6 @@
             }
 
             cont.innerHTML = misViajes.map((v, index) => {
-                // Preparamos el link de Google Maps. Si no hay link, armamos uno con latitud/longitud
                 let linkNavegar = v.link_maps || '';
                 if(!linkNavegar && v.coordenadas && v.coordenadas.lat) {
                     linkNavegar = `https://www.google.com/maps/search/?api=1&query=${v.coordenadas.lat},${v.coordenadas.lng}`;
@@ -284,9 +281,9 @@
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    // Reducimos a un máximo de 1024px de ancho o alto para que no pesen.
-                    const MAX_WIDTH = 1024;
-                    const MAX_HEIGHT = 1024;
+                    // Reducimos a un máximo de 800px para que pese casi nada en Base64
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
                     let width = img.width;
                     let height = img.height;
 
@@ -301,8 +298,8 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Calidad al 70% (0.7) en formato JPEG = Imágenes ligeras (100kb a 200kb max)
-                    fotoDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+                    // Calidad al 60% en formato JPEG para guardado directo en Firestore
+                    fotoDataUrl = canvas.toDataURL('image/jpeg', 0.6); 
                     
                     const preview = document.getElementById('foto-preview');
                     preview.src = fotoDataUrl;
@@ -322,19 +319,14 @@
             if(!fotoDataUrl) return showToast("La foto de evidencia es obligatoria", "error");
             if(tipo === 'fallido' && !motivo) return showToast("Escribe el motivo del problema", "error");
 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
             btn.disabled = true;
 
             try {
-                // Guarda la imagen super rápida gracias a la compresión
-                const fileName = `evidencias/${id}_${Date.now()}.jpg`;
-                const ref = storage.ref().child(fileName);
-                await ref.putString(fotoDataUrl, 'data_url');
-                const photoUrl = await ref.getDownloadURL();
-
+                // YA NO USAMOS STORAGE! Guardamos la foto (DataURL) directamente en la base de datos de Firestore
                 const updateData = {
                     estado: tipo,
-                    foto_evidencia: photoUrl,
+                    foto_evidencia: fotoDataUrl, // <-- Guardado directo
                     fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
@@ -352,7 +344,7 @@
                 showToast("¡Registrado con éxito!");
                 cerrarModal();
             } catch(e) {
-                console.error(e); showToast("Error de conexión al subir evidencia", "error");
+                console.error(e); showToast("Error de conexión al guardar", "error");
             } finally { btn.disabled = false; }
         };
 
