@@ -1,0 +1,10 @@
+{
+  "name": "EEN Operador",
+  "short_name": "Ruta EEN",
+  "start_url": "./chofer.html",
+  "display": "standalone",
+  "theme_color": "#1e293b",
+  "icons": [
+    { "src": "assets/img/chofer-icon.png", "sizes": "192x192", "type": "image/png" }
+  ]
+}
