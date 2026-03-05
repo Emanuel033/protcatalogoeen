@@ -775,13 +775,15 @@
         // ==========================================
         // REGISTRO DE SERVICE WORKER (PWA)
         // ==========================================
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker PWA activado.'))
-                    .catch(err => console.log('Error PWA:', err));
-            });
-        }
+       
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW registrado', reg.scope))
+                .catch(err => console.log('SW error', err));
+        });
+    }
+
 
         const IMGBB_API_KEY = "43034dab40f80fe91cd054d4949e5d5c"; 
         const IMGBB_URL_ENDPOINT = "https://api.imgbb.com/1/upload";
