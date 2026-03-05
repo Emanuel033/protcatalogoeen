@@ -229,7 +229,7 @@
                             <!-- NUEVO: SUBIDA DE QR DE ACCESO (OPCIONAL) -->
                             <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
                                 <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2"><i class="fas fa-qrcode mr-1"></i> Imagen QR de Acceso (Opcional)</label>
-                                <input type="file" id="form-qr-file" accept="image/*" class="w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer">
+                                <input type="file" id="form-qr-file" accept="image/*" class="w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer">
                                 <input type="hidden" id="form-qr-base64">
                                 <div id="form-qr-preview-container" class="mt-2 hidden flex items-center gap-2">
                                     <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200"><i class="fas fa-check-circle"></i> QR ya guardado. Sube otro para reemplazar.</span>
@@ -438,17 +438,17 @@
                     <div class="space-y-3">
                         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                             <label class="block text-xs font-black text-slate-600 uppercase mb-2">Comprobante IMSS (PDF / Imagen)</label>
-                            <input type="file" id="cfg-doc-imss" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                            <input type="file" id="cfg-doc-imss" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
                             <div id="lbl-imss-status" class="text-[10px] text-slate-400 mt-1 font-medium">Estado: Desconocido</div>
                         </div>
                         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                             <label class="block text-xs font-black text-slate-600 uppercase mb-2">Comprobante SUA (PDF / Imagen)</label>
-                            <input type="file" id="cfg-doc-sua" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                            <input type="file" id="cfg-doc-sua" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
                             <div id="lbl-sua-status" class="text-[10px] text-slate-400 mt-1 font-medium">Estado: Desconocido</div>
                         </div>
                         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                             <label class="block text-xs font-black text-slate-600 uppercase mb-2">Documento Extra (Ej. Seguro)</label>
-                            <input type="file" id="cfg-doc-otros" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                            <input type="file" id="cfg-doc-otros" class="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] font-bold file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
                             <div id="lbl-otros-status" class="text-[10px] text-slate-400 mt-1 font-medium">Estado: Desconocido</div>
                         </div>
                     </div>
@@ -587,6 +587,9 @@
         };
 
         function enfocarPin(cDest, arrayPuntosRuta = null) {
+            // CORRECCIÓN CLAVE 1: Frenar cualquier animación de cámara que estuviera corriendo.
+            if(map) map.stop(); 
+
             let pLeft = 20, pRight = 20, pTop = 20, pBottom = 20;
             if (window.innerWidth >= 1024) {
                 if(isSidebarOpen) pLeft = 400;
@@ -687,6 +690,7 @@
             
             if (viajeSeleccionado) {
                 const actualizado = viajesAgrupados.find(v => v.id === viajeSeleccionado.id);
+                // Aquí pasamos skipAnimation = true porque es una recarga de fondo (Firestore onSnapshot)
                 if (actualizado) { viajeSeleccionado = actualizado; seleccionarViaje(viajeSeleccionado.id, true); } else { cerrarDetalle(); }
             }
         }
@@ -769,10 +773,9 @@
                 const mk = L.marker([v.coordenadas.lat, v.coordenadas.lng], { icon: ico, draggable: false }).addTo(map);
                 mk.bindTooltip(`<div class="font-bold text-xs truncate max-w-[150px]">${v.cliente_nombre}</div><div class="text-[9px] opacity-80 truncate">${v.destino_alias || 'Destino'}</div>`, { permanent: false, direction: 'top', className: 'map-tooltip', offset: [0, -15] });
                 
-                // MEJORA: Al hacer clic en el pin, enfoca la tarjeta y hace zoom in hacia esa ruta
+                // CORRECCIÓN CLAVE 2: Se removió el map.flyTo que chocaba y ocasionaba el cuadro beige.
                 mk.on('click', () => {
                     seleccionarViaje(v.id);
-                    map.flyTo([v.coordenadas.lat, v.coordenadas.lng], 16, {duration: 0.5});
                 });
                 marcadores[v.id] = mk; bounds.push([v.coordenadas.lat, v.coordenadas.lng]);
             });
@@ -893,7 +896,12 @@
                 htmlSecuenciaItems = `<li class="flex items-center gap-2 pb-2 relative border-l-2 border-dashed border-slate-300 ml-2.5 pl-3"><div class="absolute -left-[11px] top-0 w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm"><i class="fas fa-industry"></i></div> <span class="text-[10px] font-bold text-slate-800">Planta EEN</span></li><li class="flex items-center gap-2 relative ml-2.5 pl-3"><div class="absolute -left-[11px] top-0 w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm"><i class="fas fa-map-marker-alt"></i></div> <span class="truncate text-[10px] font-black text-blue-900">${viajeSeleccionado.cliente_nombre}</span></li>`;
             }
 
-            enfocarPin(cDest, (estadoActual === 'camino' || estadoActual === 'entregado') ? wps : null);
+            // CORRECCIÓN CLAVE 3: Esta es la pieza faltante. El encuadre sólo ocurre 
+            // si la actualización no proviene de un proceso de fondo ("skipAnimation").
+            if (!skipAnimation) {
+                enfocarPin(cDest, (estadoActual === 'camino' || estadoActual === 'entregado') ? wps : null);
+            }
+            
             trazarRutaCalles(wps, true);
 
             const btnOptimizarHTML = (estadoActual === 'camino' || estadoActual === 'entregado') ? `<button onclick="optimizarRuta('${viajeSeleccionado.vehiculo_asignado}')" class="text-[9px] bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-bold hover:bg-indigo-200 transition"><i class="fas fa-magic"></i> Optimizar</button>` : '';
