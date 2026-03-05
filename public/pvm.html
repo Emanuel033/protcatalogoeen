@@ -1052,9 +1052,10 @@
             const subtotal = total / 1.16; 
             const iva = total - subtotal;
             
+            // MODIFICACIÓN APLICADA: SE CAMBIÓ EL ORDEN PARA QUE ALMACÉN SEA LA COPIA 1
             const copies = [
-                { title: 'COPIA 1 - FIRMA (SUCURSAL)', signType: 'client' }, 
-                { title: 'COPIA 2 - ALMACÉN', signType: 'warehouse' }, 
+                { title: 'COPIA 1 - ALMACÉN', signType: 'warehouse' }, 
+                { title: 'COPIA 2 - FIRMA (SUCURSAL)', signType: 'client' }, 
                 { title: 'COPIA 3 - CLIENTE', signType: 'none' }
             ];
             
