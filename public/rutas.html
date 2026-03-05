@@ -329,12 +329,12 @@
     <!-- NUEVO: MODAL CONFIRMACIÓN DE SALIDA A RUTA (Para registrar hora exacta) -->
     <div id="modal-salida" class="fixed inset-0 bg-slate-900/80 z-[110] hidden items-center justify-center p-4 backdrop-blur-sm transition-opacity opacity-0">
         <div class="bg-white rounded-3xl p-6 max-w-[320px] w-full shadow-2xl transform scale-95 transition-transform text-center" id="modal-salida-content">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner"><i class="fas fa-truck-fast"></i></div>
-            <h3 class="text-xl font-black text-slate-800 mb-2">¿Iniciar Ruta?</h3>
-            <p class="text-sm text-slate-500 mb-6">Se registrará la <b>hora exacta de salida</b> en la bitácora de este operador.</p>
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner"><i class="fas fa-truck-fast"></i></div>
+            <h3 class="text-xl font-black text-slate-800 mb-2">¿Dar Salida al Camión?</h3>
+            <p class="text-sm text-slate-500 mb-6">Se registrará la <b>hora exacta de salida</b> para TODOS los pedidos asignados a esta unidad.</p>
             <div class="flex gap-3">
                 <button onclick="cerrarModalSalida()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-sm transition hover:bg-slate-200">Cancelar</button>
-                <button onclick="confirmarSalidaBatch()" class="flex-1 bg-emerald-500 text-white font-black py-3 rounded-xl text-sm shadow-md transition hover:bg-emerald-600 active:scale-95">Confirmar</button>
+                <button onclick="confirmarSalidaCamion()" class="flex-1 bg-emerald-500 text-white font-black py-3 rounded-xl text-sm shadow-md transition hover:bg-emerald-600 active:scale-95">Confirmar</button>
             </div>
         </div>
     </div>
@@ -715,7 +715,13 @@
                 let stClass, stText, icClass;
                 if(v.estado === 'fallido') { stClass = 'status-fallido'; stText = 'Problema'; icClass = 'fa-exclamation-triangle'; }
                 else if(v.estado === 'pendiente') { stClass = 'status-pendiente'; stText = 'Por Asignar'; icClass = 'fa-clock'; }
-                else if(v.estado === 'camino') { stClass = 'status-camino'; stText = 'En Ruta'; icClass = 'fa-truck-fast'; }
+                else if(v.estado === 'camino') { 
+                    if(!v.fecha_salida) {
+                        stClass = 'bg-indigo-100 text-indigo-700'; stText = 'Asignado'; icClass = 'fa-boxes';
+                    } else {
+                        stClass = 'status-camino'; stText = 'En Ruta'; icClass = 'fa-truck-fast'; 
+                    }
+                }
                 else { stClass = 'status-entregado'; stText = 'Entregado'; icClass = 'fa-check-double'; }
 
                 let bHtml = '';
@@ -792,7 +798,13 @@
 
             const estadoActual = viajeSeleccionado.estado;
             if(estadoActual === 'pendiente') { elBadge.className = 'status-badge status-pendiente'; elBadge.innerHTML = '<i class="fas fa-clock"></i> Por Asignar'; }
-            else if(estadoActual === 'camino') { elBadge.className = 'status-badge status-camino'; elBadge.innerHTML = '<i class="fas fa-truck-fast"></i> En Ruta'; }
+            else if(estadoActual === 'camino') { 
+                if(!viajeSeleccionado.fecha_salida) {
+                    elBadge.className = 'status-badge bg-indigo-100 text-indigo-700'; elBadge.innerHTML = '<i class="fas fa-boxes"></i> Asignado (En Rampa)';
+                } else {
+                    elBadge.className = 'status-badge status-camino'; elBadge.innerHTML = '<i class="fas fa-truck-fast"></i> En Ruta'; 
+                }
+            }
             else if(estadoActual === 'fallido') { elBadge.className = 'status-badge status-fallido'; elBadge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Problema'; }
             else { elBadge.className = 'status-badge status-entregado'; elBadge.innerHTML = '<i class="fas fa-check-double"></i> Entregado'; }
 
@@ -926,6 +938,17 @@
                 </details>`;
             }
 
+            if(estadoActual === 'camino' && !viajeSeleccionado.fecha_salida) {
+                htmlDinamico += `
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 shadow-sm mt-3">
+                    <p class="text-[10px] font-black text-emerald-800 uppercase mb-2"><i class="fas fa-stopwatch"></i> Confirmar Salida</p>
+                    <p class="text-[10px] text-emerald-600 mb-3 font-medium leading-tight">La unidad ya tiene pedidos pre-asignados. Presiona aquí cuando arranque para registrar la hora exacta de salida de TODOS los pedidos de este camión.</p>
+                    <button onclick="abrirModalSalida('${viajeSeleccionado.vehiculo_asignado}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl text-xs transition active:scale-95 shadow-md flex items-center justify-center gap-2">
+                        <i class="fas fa-truck-fast"></i> Iniciar Ruta Ahora
+                    </button>
+                </div>`;
+            }
+
             if(estadoActual === 'pendiente') {
                 const htmlVehiculos = flotaDB.map(v => {
                     const isPesado = v.pesado || false;
@@ -945,10 +968,10 @@
                 const htmlChoferes = `<option value="" class="text-slate-500 font-bold bg-white">-- Selecciona al Operador --</option>` + choferesDB.map(c => `<option value="${c.id}" class="text-slate-800 font-bold bg-white">${c.nombre}</option>`).join('');
                 
                 htmlDinamico += `
-                <div class="bg-blue-600 rounded-xl p-3 shadow-md text-white mt-2 border border-blue-500">
-                    <h4 class="text-[10px] font-black uppercase tracking-wider mb-2"><i class="fas fa-clipboard-check"></i> Asignar Logística</h4>
+                <div class="bg-slate-800 rounded-xl p-3 shadow-md text-white mt-2 border border-slate-700">
+                    <h4 class="text-[10px] font-black uppercase tracking-wider mb-2 text-slate-300"><i class="fas fa-clipboard-check"></i> Asignar Unidad</h4>
                     
-                    <div class="grid grid-cols-3 gap-1.5 mb-3">${htmlVehiculos || '<p class="text-[9px] text-blue-200 col-span-3">Sin vehículos disponibles</p>'}</div>
+                    <div class="grid grid-cols-3 gap-1.5 mb-3">${htmlVehiculos || '<p class="text-[9px] text-slate-400 col-span-3">Sin vehículos disponibles</p>'}</div>
                     
                     <div class="relative mb-3">
                         <i class="fas fa-user-circle absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
@@ -957,8 +980,8 @@
                         </select>
                     </div>
 
-                    <button onclick="iniciarRutaDinamica()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-3 rounded-lg text-xs font-black transition-transform active:scale-95 shadow-md flex items-center justify-center gap-2 border border-emerald-400">
-                        <i class="fas fa-paper-plane"></i> Iniciar Ruta Ahora
+                    <button onclick="asignarSinSalida()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg text-xs font-black transition-transform active:scale-95 shadow-md flex items-center justify-center gap-2 border border-blue-500">
+                        <i class="fas fa-link"></i> Pre-Asignar (En Rampa)
                     </button>
                 </div>`;
             }
@@ -1605,14 +1628,19 @@
             btn.querySelector('div').classList.add('bg-blue-500', 'text-white');
         };
 
-        // MEJORA: Flujo con confirmación de salida
-        window.iniciarRutaDinamica = () => {
+        // MEJORA: Flujo de doble paso (Asignar -> Dar Salida)
+        window.asignarSinSalida = () => {
             const v = window.vehiculoSeleccionadoTemp;
             const c = document.getElementById('selector-chofer-dinamico').value;
             if(!v) return showToast("Falta seleccionar el vehículo", "error");
             if(!c) return showToast("Falta seleccionar el operador", "error");
             
-            // Abre modal pidiendo confirmación de salida real
+            // Llama al actualizador indicando que NO fuerce la fecha de salida aún
+            ejecutarAccionBatch('camino', v, c, false); 
+        };
+
+        window.abrirModalSalida = (vehiculoId) => {
+            window.vehiculoParaSalida = vehiculoId;
             const modal = document.getElementById('modal-salida');
             const content = document.getElementById('modal-salida-content');
             modal.classList.remove('hidden'); modal.classList.add('flex');
@@ -1625,12 +1653,37 @@
             setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
         };
 
-        window.confirmarSalidaBatch = () => {
+        window.confirmarSalidaCamion = async () => {
             cerrarModalSalida();
-            showToast("Asignando ruta y marcando salida...", "info");
-            const v = window.vehiculoSeleccionadoTemp;
-            const c = document.getElementById('selector-chofer-dinamico').value;
-            ejecutarAccionBatch('camino', v, c, true); // Envia true para forzar la fecha actual
+            if(!window.vehiculoParaSalida) return;
+            
+            showToast("Registrando salida del camión...", "info");
+            
+            // Extraer todos los pedidos asignados a ESTE camión específico
+            const viajesCamion = viajesAgrupados.filter(v => 
+                v.vehiculo_asignado === window.vehiculoParaSalida && 
+                v.estado === 'camino' && 
+                !v.fecha_salida
+            );
+
+            if(viajesCamion.length === 0) return showToast("No hay pedidos pendientes de salida", "error");
+
+            const batch = db.batch();
+            const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+            // A todos les estampamos exactamente la misma hora milimétrica del servidor
+            viajesCamion.forEach(v => {
+                const docRef = db.collection('rutas_logistica').doc(v.id);
+                batch.update(docRef, { fecha_salida: timestamp });
+            });
+
+            try {
+                await batch.commit();
+                showToast(`Salida registrada a ${viajesCamion.length} pedidos`);
+                cerrarDetalle();
+            } catch(e) {
+                showToast("Error al registrar salida", "error");
+            }
         };
 
         async function ejecutarAccionBatch(accion, vehiculo = null, chofer = null, forzarSalidaAhora = false) {
@@ -1642,13 +1695,13 @@
                     data.chofer_asignado = null; 
                     data.motivo_falla = null; 
                     data.foto_evidencia = null; 
-                    data.foto_evidencia_material = null; // Limpiamos la segunda foto también
+                    data.foto_evidencia_material = null; 
                     data.fecha_salida = null;
                 }
                 else if(accion === 'camino') { 
                     data.vehiculo_asignado = vehiculo; data.chofer_asignado = chofer;
-                    // Si se fuerza la salida o no existía, plasma la hora actual del servidor
-                    if(forzarSalidaAhora || !viajeSeleccionado.fecha_salida) {
+                    // Ya no se inyecta la hora automáticamente al asignar
+                    if(forzarSalidaAhora) {
                         data.fecha_salida = firebase.firestore.FieldValue.serverTimestamp();
                     }
                 }
