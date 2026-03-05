@@ -146,49 +146,60 @@
         <img id="lightboxImg" src="" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
     </div>
 
-    <!-- SIDEBAR - EXCLUSIVA PARA PC/TABLET (Dashboard Style) -->
-    <aside class="hidden md:flex w-[250px] lg:w-[280px] bg-white border-r border-slate-200 flex-col z-30 shrink-0 shadow-sm relative">
-        <div class="h-20 flex items-center px-6 border-b border-slate-100">
-            <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center mr-3 shadow-md shadow-blue-500/20">
+    <!-- SIDEBAR COLAPSABLE - EXCLUSIVA PARA PC/TABLET (Dashboard Style) -->
+    <aside id="mainSidebar" class="hidden md:flex w-[250px] lg:w-[280px] bg-white border-r border-slate-200 flex-col z-30 shrink-0 shadow-sm relative transition-all duration-300">
+        <!-- Toggle Button flotante -->
+        <button onclick="toggleSidebar()" class="absolute -right-3.5 top-6 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 rounded-full w-7 h-7 flex items-center justify-center shadow-md z-50 transition-transform" id="sidebarToggleBtn">
+            <i class="fas fa-chevron-left text-xs"></i>
+        </button>
+
+        <div class="h-20 flex items-center px-6 border-b border-slate-100 sidebar-btn">
+            <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center mr-3 shadow-md shadow-blue-500/20 shrink-0 sidebar-icon-container">
                 <i class="fas fa-layer-group text-white text-[15px]"></i>
             </div>
-            <div>
-                <span class="text-xl font-black tracking-tight text-slate-900 leading-none">Panel EEN</span>
-                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Gestión Maestra</p>
+            <div class="sidebar-text overflow-hidden">
+                <span class="text-xl font-black tracking-tight text-slate-900 leading-none block truncate">Panel EEN</span>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">Gestión Maestra</p>
             </div>
         </div>
 
         <nav class="flex-1 py-6 flex flex-col overflow-y-auto custom-scroll space-y-1">
-            <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Secciones</p>
+            <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Secciones</p>
             
-            <button onclick="switchTab('master')" id="dtTab-master" class="w-full flex items-center gap-3 px-6 py-3.5 bg-blue-50/80 text-blue-700 font-bold border-r-4 border-blue-600 transition-colors">
-                <i class="fas fa-box w-5 text-center text-lg"></i> <span class="text-sm">Catálogo Maestro</span>
+            <button onclick="switchTab('master')" id="dtTab-master" class="w-full flex items-center px-6 py-3.5 bg-blue-50/80 text-blue-700 font-bold border-r-4 border-blue-600 transition-colors sidebar-btn group">
+                <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-box text-lg text-center w-5"></i></div>
+                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Catálogo Maestro</span>
             </button>
-            <button onclick="switchTab('scanner')" id="dtTab-scanner" class="w-full flex items-center gap-3 px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors">
-                <i class="fas fa-qrcode w-5 text-center text-lg"></i> <span class="text-sm">Escáner Físico</span>
+            <button onclick="switchTab('scanner')" id="dtTab-scanner" class="w-full flex items-center px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors sidebar-btn group">
+                <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-qrcode text-lg text-center w-5"></i></div>
+                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Escáner Físico</span>
             </button>
             
-            <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mt-6 mb-2">Administración</p>
+            <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mt-6 mb-2 sidebar-text">Administración</p>
             
-            <button onclick="switchTab('import')" id="dtTab-import" class="w-full flex items-center justify-between px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors relative">
-                <div class="flex items-center gap-3"><i class="fas fa-cloud-download-alt w-5 text-center text-lg"></i> <span class="text-sm">Importaciones</span></div>
-                <span id="dtImportBadge" class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow hidden">0</span>
+            <button onclick="switchTab('import')" id="dtTab-import" class="w-full flex items-center justify-between px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors relative sidebar-btn group">
+                <div class="flex items-center">
+                    <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-cloud-download-alt text-lg text-center w-5"></i></div>
+                    <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Importaciones</span>
+                </div>
+                <span id="dtImportBadge" class="sidebar-text bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow hidden">0</span>
             </button>
-            <button onclick="switchTab('cashiers')" id="dtTab-cashiers" class="w-full flex items-center gap-3 px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors">
-                <i class="fas fa-user-tie w-5 text-center text-lg"></i> <span class="text-sm">Accesos POS</span>
+            <button onclick="switchTab('cashiers')" id="dtTab-cashiers" class="w-full flex items-center px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors sidebar-btn group">
+                <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-user-tie text-lg text-center w-5"></i></div>
+                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Accesos POS</span>
             </button>
         </nav>
 
-        <div class="p-4 border-t border-slate-100 bg-slate-50">
-            <div class="flex items-center gap-3 p-2 bg-white rounded-2xl border border-slate-200 shadow-sm">
-                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center font-bold">
+        <div class="p-4 border-t border-slate-100 bg-slate-50 sidebar-footer">
+            <div class="flex items-center p-2 bg-white rounded-2xl border border-slate-200 shadow-sm sidebar-btn">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center font-bold shrink-0 mr-3 sidebar-icon-container">
                     <i class="fas fa-user"></i>
                 </div>
-                <div class="flex-1 min-w-0">
+                <div class="flex-1 min-w-0 sidebar-text">
                     <p id="userRoleName" class="text-xs font-black text-slate-800 truncate leading-none">Cargando...</p>
                     <p id="userRoleBadge" class="text-[9px] text-blue-500 font-bold uppercase tracking-wider mt-1 border border-blue-100 bg-blue-50 inline-block px-1.5 py-0.5 rounded">PERFIL</p>
                 </div>
-                <button onclick="handleLogout()" class="w-9 h-9 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition flex items-center justify-center" title="Cerrar Sesión">
+                <button onclick="handleLogout()" class="w-9 h-9 shrink-0 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition flex items-center justify-center sidebar-text ml-2" title="Cerrar Sesión">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
@@ -288,17 +299,18 @@
                         <button id="btnExportExcel" onclick="exportToExcel()" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm border border-emerald-200"><i class="fas fa-file-excel text-sm"></i> <span class="hidden sm:inline">Exportar Stock</span></button>
                     </div>
 
-                    <!-- Tabla Desglose -->
-                    <div id="tableContainerDesglose" class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
-                        <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px]">
-                            <thead class="bg-slate-50/90 backdrop-blur sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold">
+                    <!-- Tabla Desglose (COMPACTA Y ACCIONES STICKY) -->
+                    <div id="tableContainerDesglose" class="overflow-y-auto overflow-x-auto flex-1 custom-scroll relative">
+                        <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px] border-collapse">
+                            <thead class="bg-slate-50/90 backdrop-blur sticky top-0 z-30 text-slate-500 text-[10px] uppercase tracking-wider font-bold">
                                 <tr>
-                                    <th class="px-4 py-3 w-12 text-center border-b border-slate-200 bg-slate-50"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="cb-modern focus:ring-blue-500"></th>
-                                    <th class="px-6 py-3 border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('nombre_flexible')">Producto / Variante <i id="sortIcon-nombre_flexible" class="fas fa-sort sort-icon ml-1"></i></th>
-                                    <th class="px-6 py-3 border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('categoria')">Categoría <i id="sortIcon-categoria" class="fas fa-sort sort-icon ml-1"></i></th>
-                                    <th class="px-6 py-3 text-center border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('stock')">Stock Real <i id="sortIcon-stock" class="fas fa-sort sort-icon ml-1"></i></th>
-                                    <th class="px-6 py-3 border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('codigo_sistema_oficial')">Cód. Sistema Oficial <i id="sortIcon-codigo_sistema_oficial" class="fas fa-sort sort-icon ml-1"></i></th>
-                                    <th class="px-6 py-3 text-right border-b border-slate-200 bg-slate-50">Acciones</th>
+                                    <th class="px-3 py-3 w-10 text-center border-b border-slate-200 bg-slate-50"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()" class="cb-modern focus:ring-blue-500"></th>
+                                    <th class="px-3 py-3 border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('nombre_flexible')">Producto / Variante <i id="sortIcon-nombre_flexible" class="fas fa-sort sort-icon ml-1"></i></th>
+                                    <th class="px-3 py-3 border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('categoria')">Categoría <i id="sortIcon-categoria" class="fas fa-sort sort-icon ml-1"></i></th>
+                                    <th class="px-3 py-3 text-center border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('stock')">Stock Real <i id="sortIcon-stock" class="fas fa-sort sort-icon ml-1"></i></th>
+                                    <th class="px-3 py-3 border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('codigo_sistema_oficial')">Cód. Sistema Oficial <i id="sortIcon-codigo_sistema_oficial" class="fas fa-sort sort-icon ml-1"></i></th>
+                                    <!-- COLUMNA ACCIONES STICKY (Derecha) -->
+                                    <th class="px-3 py-3 text-right border-b border-slate-200 bg-slate-50 sticky right-0 z-[30] shadow-[-8px_0_15px_-5px_rgba(0,0,0,0.05)]">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
@@ -537,6 +549,9 @@
         </div>
     </div>
 
+    <!-- DATALIST PARA BÚSQUEDA ORDENADA DE CÓDIGOS OFICIALES -->
+    <datalist id="codigosFacturacionList"></datalist>
+
     <!-- Modal Premium Edición Individual -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-2 sm:p-4 opacity-0 transition-opacity duration-300 pb-20 md:pb-4">
         <div class="bg-[#f8fafc] sm:bg-slate-50/95 rounded-[2rem] shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[90vh] sm:max-h-[95vh] slide-up border border-slate-100 relative">
@@ -596,7 +611,8 @@
                         </div>
                         <div id="fieldCodigo" class="relative">
                             <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Cód. Facturación <span class="text-red-500" id="codRequiredStar">*</span></label>
-                            <input type="text" id="editCodigo" class="w-full input-modern px-4 py-3 rounded-xl font-mono uppercase text-slate-900 font-black text-sm" placeholder="Opcional para Kits Web" oninput="markError('editCodigo', false)">
+                            <!-- Este es el campo conectado a datalist para búsqueda rápida -->
+                            <input type="text" id="editCodigo" list="codigosFacturacionList" class="w-full input-modern px-4 py-3 rounded-xl font-mono uppercase text-slate-900 font-black text-sm" placeholder="Busca o escribe el código..." oninput="markError('editCodigo', false)">
                             <p id="editCodigoError" class="text-red-500 text-[10px] font-bold mt-1 hidden">Obligatorio para Piezas Base.</p>
                         </div>
                     </div>
@@ -728,6 +744,34 @@
     </div>
 
     <script>
+        // ==========================================
+        // LOGICA DE INTERFAZ DEL SIDEBAR
+        // ==========================================
+        let isSidebarCollapsed = false;
+        function toggleSidebar() {
+            isSidebarCollapsed = !isSidebarCollapsed;
+            const sidebar = document.getElementById('mainSidebar');
+            const btnIcon = document.querySelector('#sidebarToggleBtn i');
+            
+            if (isSidebarCollapsed) {
+                sidebar.classList.remove('w-[250px]', 'lg:w-[280px]');
+                sidebar.classList.add('w-[80px]');
+                document.querySelectorAll('.sidebar-text').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.sidebar-icon-container').forEach(el => { el.classList.remove('mr-3'); el.classList.add('mx-auto'); });
+                document.querySelectorAll('.sidebar-btn').forEach(el => { el.classList.remove('px-6'); el.classList.add('px-0', 'justify-center'); });
+                btnIcon.classList.remove('fa-chevron-left');
+                btnIcon.classList.add('fa-chevron-right');
+            } else {
+                sidebar.classList.remove('w-[80px]');
+                sidebar.classList.add('w-[250px]', 'lg:w-[280px]');
+                document.querySelectorAll('.sidebar-text').forEach(el => el.classList.remove('hidden'));
+                document.querySelectorAll('.sidebar-icon-container').forEach(el => { el.classList.add('mr-3'); el.classList.remove('mx-auto'); });
+                document.querySelectorAll('.sidebar-btn').forEach(el => { el.classList.add('px-6'); el.classList.remove('px-0', 'justify-center'); });
+                btnIcon.classList.remove('fa-chevron-right');
+                btnIcon.classList.add('fa-chevron-left');
+            }
+        }
+
         // ==========================================
         // REGISTRO DE SERVICE WORKER (PWA)
         // ==========================================
@@ -890,6 +934,23 @@
                 facturacionCatalog = [];
                 snapshot.forEach(doc => { facturacionCatalog.push({ id: doc.id, ...doc.data() }); });
                 updateGlobalImportBadge();
+
+                // LLENAR EL DATALIST ORDENADO ALFABÉTICAMENTE
+                const datalist = document.getElementById('codigosFacturacionList');
+                if (datalist) {
+                    datalist.innerHTML = '';
+                    const sortedFact = [...facturacionCatalog].sort((a,b) => {
+                        const nameA = String(a.descripcion_oficial || a.nombre || a.codigo || '').toLowerCase();
+                        const nameB = String(b.descripcion_oficial || b.nombre || b.codigo || '').toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    });
+                    sortedFact.forEach(f => {
+                        const code = f.codigo_sistema_oficial || f.codigo || f.Codigo || f.id;
+                        const desc = f.descripcion_oficial || f.nombre || f.Descripcion || 'Sin descripción';
+                        datalist.innerHTML += `<option value="${code}">${desc}</option>`;
+                    });
+                }
+
                 if(currentTab === 'master') renderGroupedTable();
                 if(currentTab === 'import') renderImportTable();
             });
@@ -1128,9 +1189,13 @@
                 const dtBtn = document.getElementById(`dtTab-${t}`);
                 if (dtBtn) {
                     if (t === tab) {
-                        dtBtn.className = "w-full flex items-center gap-3 px-6 py-3.5 bg-blue-50/80 text-blue-700 font-bold border-r-4 border-blue-600 transition-colors " + (t==='import'?'relative':'');
+                        dtBtn.className = "w-full flex items-center px-6 py-3.5 bg-blue-50/80 text-blue-700 font-bold border-r-4 border-blue-600 transition-colors sidebar-btn group " + (t==='import'?'relative':'');
                     } else {
-                        dtBtn.className = "w-full flex items-center gap-3 px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors " + (t==='import'?'relative':'');
+                        dtBtn.className = "w-full flex items-center px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors sidebar-btn group " + (t==='import'?'relative':'');
+                    }
+                    if(isSidebarCollapsed) {
+                        dtBtn.classList.remove('px-6', 'justify-start');
+                        dtBtn.classList.add('px-0', 'justify-center');
                     }
                 }
                 
@@ -1288,18 +1353,22 @@
                 const eyeBg = isActivo ? 'bg-blue-50 hover:bg-blue-100 border border-blue-100' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200';
                 const realStock = getCalculatedStock(p.id);
 
+                const activeRowBg = !isActivo ? 'opacity-75 bg-slate-50/50' : 'hover:bg-slate-50/50';
+                const activeStickyBg = !isActivo ? 'bg-slate-50/90' : 'bg-white group-hover:bg-slate-50';
+
                 const tr = document.createElement('tr');
-                tr.className = `transition-colors group ${!isActivo ? 'opacity-75 bg-slate-50' : 'hover:bg-slate-50/80'}`;
+                tr.className = `transition-colors group ${activeRowBg}`;
                 tr.innerHTML = `
-                    <td class="px-4 py-4 text-center border-b border-slate-100"><input type="checkbox" class="row-cb cb-modern focus:ring-blue-500" value="${p.id}" onchange="updateBulkSelection()"></td>
-                    <td class="px-6 py-4 flex items-center gap-4 border-b border-slate-100">
-                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform ${!isActivo ? 'grayscale' : ''}" onclick="openImageLightbox(this.src)">
-                        <div class="min-w-0 pr-4"><p class="font-black text-slate-800 text-sm truncate group-hover:text-blue-600 transition-colors cursor-pointer ${!isActivo ? 'line-through decoration-slate-300' : ''}" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>${statusBadge}</div>
+                    <td class="px-3 py-3 text-center border-b border-slate-100"><input type="checkbox" class="row-cb cb-modern focus:ring-blue-500" value="${p.id}" onchange="updateBulkSelection()"></td>
+                    <td class="px-3 py-3 flex items-center gap-4 border-b border-slate-100 min-w-[280px]">
+                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-10 h-10 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform ${!isActivo ? 'grayscale' : ''}" onclick="openImageLightbox(this.src)">
+                        <div class="min-w-0 pr-2"><p class="font-black text-slate-800 text-sm truncate group-hover:text-blue-600 transition-colors cursor-pointer ${!isActivo ? 'line-through decoration-slate-300' : ''}" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>${statusBadge}</div>
                     </td>
-                    <td class="px-6 py-4 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">${p.categoria || 'N/A'}</span></td>
-                    <td class="px-6 py-4 text-center border-b border-slate-100"><span class="inline-block bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl font-black ${realStock > 5 ? 'text-blue-600' : 'text-red-500'}" title="Calculado en base a receta o sistema">${realStock}</span></td>
-                    <td class="px-6 py-4 border-b border-slate-100"><div class="font-mono text-[11px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-md inline-block border border-slate-100">${codTxt}</div></td>
-                    <td class="px-6 py-4 text-right border-b border-slate-100">
+                    <td class="px-3 py-3 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider">${p.categoria || 'N/A'}</span></td>
+                    <td class="px-3 py-3 text-center border-b border-slate-100"><span class="inline-block bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl font-black ${realStock > 5 ? 'text-blue-600' : 'text-red-500'}" title="Calculado en base a receta o sistema">${realStock}</span></td>
+                    <td class="px-3 py-3 border-b border-slate-100"><div class="font-mono text-[11px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-md inline-block border border-slate-100">${codTxt}</div></td>
+                    <!-- CELDA STICKY -->
+                    <td class="px-3 py-3 text-right border-b border-slate-100 sticky right-0 ${activeStickyBg} transition-colors shadow-[-8px_0_15px_-5px_rgba(0,0,0,0.05)] z-10 w-[240px]">
                         <div class="flex justify-end items-center gap-1.5 flex-wrap w-max ml-auto opacity-80 group-hover:opacity-100 transition-opacity">
                             <button onclick="toggleActivo('${p.id}', ${isActivo})" class="w-8 h-8 rounded-lg ${eyeBg} transition-all shadow-sm flex items-center justify-center" title="${isActivo ? 'Ocultar de web' : 'Mostrar en web'}"><i class="fas ${eyeIcon} text-xs"></i></button>
                             <button onclick="cloneProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="Clonar Producto"><i class="fas fa-copy text-xs"></i></button>
@@ -1688,9 +1757,10 @@
             }
         }
 
-        // --- LÓGICA DEL DROPDOWN BUSCADOR ---
+        // --- LÓGICA DEL DROPDOWN BUSCADOR (Ordenado Alfabéticamente) ---
         function updateHeredarOptions(excludeId) {
             heredarOptionsList = allItems.filter(b => b.id !== excludeId && (!b.tipo_item || b.tipo_item === 'PIEZA_BASE'));
+            heredarOptionsList.sort((a,b) => String(a.nombre_flexible||'').localeCompare(String(b.nombre_flexible||'')));
             renderHeredarDropdown(''); 
         }
 
@@ -1773,7 +1843,8 @@
 
         function getAllProductOptions(excludeId = null) {
             let opts = `<option value="">Selecciona pieza / kit base...</option>`;
-            allItems.forEach(b => {
+            const sorted = [...allItems].sort((a,b) => String(a.nombre_flexible||'').localeCompare(String(b.nombre_flexible||'')));
+            sorted.forEach(b => {
                 if(b.id !== excludeId) opts += `<option value="${b.id}">${b.nombre_flexible} (${b.tipo_item === 'KIT_FLEXIBLE' ? 'K.WEB' : 'BASE'})</option>`;
             });
             return opts;
