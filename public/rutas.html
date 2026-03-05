@@ -534,6 +534,7 @@
         let vehiculoSeleccionadoTemp = null;
         let isSidebarOpen = true; 
         let formMap = null; let formMarker = null;
+        let routeFetchCounter = 0; // NUEVO: Evita empalme de rutas asíncronas
 
         // Variables de estado del formulario
         let currentClientId = null;
@@ -603,18 +604,23 @@
         }
 
         async function trazarRutaCalles(waypointsArray, skipBoundsAnimation) {
-            if(capaRuta) map.removeLayer(capaRuta);
+            const currentFetchId = ++routeFetchCounter;
+            if(capaRuta) { map.removeLayer(capaRuta); capaRuta = null; }
+            
             const coordsStr = waypointsArray.map(wp => `${wp.lng},${wp.lat}`).join(';');
             const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
+                
+                if (currentFetchId !== routeFetchCounter) return; // Evita empalme de rutas viejas
                 if(data.code !== 'Ok') throw new Error("No se pudo rutear");
 
                 const route = data.routes[0];
                 const coordsArr = route.geometry.coordinates.map(c => [c[1], c[0]]);
 
+                if(capaRuta) map.removeLayer(capaRuta);
                 capaRuta = L.polyline(coordsArr, { color: '#3b82f6', weight: 5, opacity: 0.8 }).addTo(map);
                 if(!skipBoundsAnimation) enfocarPin(waypointsArray[waypointsArray.length-1], waypointsArray);
 
@@ -626,6 +632,9 @@
                 if(elTime) elTime.innerText = timeMins > 60 ? `${Math.floor(timeMins/60)}h ${timeMins%60}m` : `${timeMins} min`;
 
             } catch(e) {
+                if (currentFetchId !== routeFetchCounter) return; // Evita empalme de rutas viejas
+                if(capaRuta) map.removeLayer(capaRuta);
+                
                 capaRuta = L.polyline(waypointsArray, { color: '#94a3b8', weight: 4, opacity: 0.7, dashArray: '10, 10' }).addTo(map);
                 if(!skipBoundsAnimation) enfocarPin(waypointsArray[waypointsArray.length-1], waypointsArray);
             }
@@ -747,6 +756,7 @@
         function actualizarMapa() {
             Object.values(marcadores).forEach(m => map.removeLayer(m));
             if(capaRuta) { map.removeLayer(capaRuta); capaRuta = null; }
+            routeFetchCounter++; // Cancelamos cualquier pintado asíncrono en curso
             marcadores = {}; const bounds = [[25.689804, -100.312066]]; 
 
             (filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual)).forEach(v => {
@@ -993,6 +1003,7 @@
 
         window.cerrarDetalle = () => { 
             viajeSeleccionado = null; renderizarLista(); 
+            routeFetchCounter++; // Cancelamos peticiones en curso
             if(capaRuta) { map.removeLayer(capaRuta); capaRuta = null; } 
             
             const drawer = document.getElementById('detalle-drawer');
