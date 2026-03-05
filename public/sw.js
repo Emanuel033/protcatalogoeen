@@ -1,22 +1,27 @@
-// sw.js - Service Worker Básico para permitir instalación PWA
-const CACHE_NAME = 'een-admin-cache-v1';
+const CACHE_NAME = 'een-sistema-v2'; // Cambia la versión para forzar la actualización
+const urlsToCache = [
+  './',
+  // Archivos del Admin
+  './admin.html',
+  './manifest-admin.json',
+  // Archivos del Chofer
+  './chofer.html',
+  './manifest-chofer.json',
+  // Bibliotecas compartidas (Tailwind, FontAwesome, etc.)
+  'https://cdn.tailwindcss.com',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+];
 
-// Al instalar, no guardamos en caché archivos pesados de momento, 
-// solo lo necesario para que el navegador apruebe la instalación PWA.
-self.addEventListener('install', (event) => {
-    self.skipWaiting();
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+  );
 });
 
-self.addEventListener('activate', (event) => {
-    event.waitUntil(clients.claim());
-});
-
-// Interceptar peticiones de red (por ahora, simplemente las deja pasar, 
-// pero es requisito para que Chrome muestre el botón de "Instalar App")
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        fetch(event.request).catch(() => {
-            return caches.match(event.request);
-        })
-    );
+// Estrategia: Network First (Intenta buscar en internet, si falla, saca de caché)
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });
