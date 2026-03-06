@@ -1,5 +1,5 @@
 {
-  "name": "Panel Maestro EEN",
+  "name": "Configurador Maestro - Premium EEN",
   "short_name": "EEN Admin",
   "description": "Panel de control maestro e inventario para EEN",
   "start_url": "./admin.html",
@@ -8,12 +8,12 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192/3b82f6/ffffff?text=EEN",
+      "src": "assets/img/logoeen.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://via.placeholder.com/512/3b82f6/ffffff?text=EEN",
+      "src": "assets/img/logoeen.png",
       "sizes": "512x512",
       "type": "image/png"
     }
