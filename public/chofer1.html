@@ -493,6 +493,62 @@
 
             cont.innerHTML = renderHtml;
         }
+         // ==========================================
+        // FLUJO DE DOCS LEGALES Y VISOR QR
+        // ==========================================
+        window.abrirDocsLegales = async () => {
+            const m = document.getElementById('modal-docs-legales');
+            const c = document.getElementById('modal-docs-content');
+            m.classList.remove('hidden'); m.classList.add('flex');
+            
+            try {
+                const docSnap = await db.collection('configuracion').doc('docs_legales').get();
+                const btnImss = document.getElementById('btn-descarga-imss');
+                const btnSua = document.getElementById('btn-descarga-sua');
+                const btnOtros = document.getElementById('btn-descarga-otros');
+                const msgVacio = document.getElementById('docs-vacio');
+                
+                btnImss.classList.add('hidden'); btnImss.classList.remove('flex');
+                btnSua.classList.add('hidden'); btnSua.classList.remove('flex');
+                btnOtros.classList.add('hidden'); btnOtros.classList.remove('flex');
+                msgVacio.classList.add('hidden');
+
+                if(docSnap.exists) {
+                    const data = docSnap.data();
+                    let encontroAlgo = false;
+                    
+                    if(data.imss_pdf) { btnImss.href = data.imss_pdf; btnImss.download = "Alta_IMSS.pdf"; btnImss.classList.remove('hidden'); btnImss.classList.add('flex'); encontroAlgo = true; }
+                    if(data.sua_pdf) { btnSua.href = data.sua_pdf; btnSua.download = "Comprobante_SUA.pdf"; btnSua.classList.remove('hidden'); btnSua.classList.add('flex'); encontroAlgo = true; }
+                    if(data.otros_pdf) { btnOtros.href = data.otros_pdf; btnOtros.download = "Doc_Extra.pdf"; btnOtros.classList.remove('hidden'); btnOtros.classList.add('flex'); encontroAlgo = true; }
+                    
+                    if(!encontroAlgo) msgVacio.classList.remove('hidden');
+                } else {
+                    msgVacio.classList.remove('hidden');
+                }
+            } catch(e) {
+                showToast("Error al cargar docs", "error");
+            }
+
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        //documentos legales y visor qr
+        window.cerrarDocsLegales = () => {
+            const m = document.getElementById('modal-docs-legales');
+            m.classList.add('opacity-0'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+        };
+
+        window.abrirVisorQR = (base64, clienteNombre) => {
+            document.getElementById('qr-img-src').src = base64;
+            document.getElementById('qr-empresa-nombre').innerText = clienteNombre;
+            const m = document.getElementById('modal-visor-qr');
+            m.classList.remove('hidden'); m.classList.add('flex');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        
+        window.cerrarVisorQR = () => {
+            const m = document.getElementById('modal-visor-qr');
+            m.classList.add('opacity-0'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+        };
 
         // ==========================================
         // MANEJO DE LA ENTREGA EXACTA
