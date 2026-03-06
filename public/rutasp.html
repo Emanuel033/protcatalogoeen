@@ -305,7 +305,7 @@
         <div class="bg-white rounded-3xl p-6 max-w-[320px] w-full shadow-2xl transform scale-95 transition-transform text-center" id="modal-salida-content">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner"><i class="fas fa-truck-fast"></i></div>
             <h3 class="text-xl font-black text-slate-800 mb-2">¿Dar Salida al Camión?</h3>
-            <p class="text-sm text-slate-500 mb-6">Se registrará la <b>hora exacta de salida</b> para TODOS los pedidos asignados a esta unidad.</p>
+            <p class="text-sm text-slate-500 mb-6">Se registrará la <b>hora exacta de salida</b> y se agruparán TODOS los pedidos asignados a esta unidad en un mismo <b>Lote de Viaje</b>.</p>
             <div class="flex gap-3">
                 <button onclick="cerrarModalSalida()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-sm transition hover:bg-slate-200">Cancelar</button>
                 <button onclick="confirmarSalidaCamion()" class="flex-1 bg-emerald-500 text-white font-black py-3 rounded-xl text-sm shadow-md transition hover:bg-emerald-600 active:scale-95">Confirmar</button>
@@ -460,7 +460,7 @@
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[10px] uppercase sticky top-0 z-10 shadow-sm">
                         <tr>
-                            <th class="px-4 py-3">Fechas (Cap / Sal)</th>
+                            <th class="px-4 py-3">Fechas y Lote</th>
                             <th class="px-4 py-3">Folios</th>
                             <th class="px-4 py-3">Cliente / Destino</th>
                             <th class="px-4 py-3">Modalidad</th>
@@ -645,6 +645,7 @@
                     foto_evidencia_material: p.foto_evidencia_material || null,
                     fecha_creacion: p.fecha_creacion || null,
                     fecha_salida: p.fecha_salida || null,
+                    lote_id: p.lote_id || null, 
                     qr_imagen: p.qr_imagen || null
                 };
             });
@@ -830,23 +831,44 @@
             const cDest = L.latLng(viajeSeleccionado.coordenadas.lat, viajeSeleccionado.coordenadas.lng);
             let wps = []; let htmlSecuenciaItems = '';
             
-            if (estadoActual === 'camino' || estadoActual === 'entregado') {
-                const viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+            // LÓGICA DE LOTES / VUELTAS: Solo mostramos juntos los que pertenecen a la misma vuelta
+            if (estadoActual === 'camino' || (estadoActual === 'entregado' && viajeSeleccionado.lote_id)) {
+                
+                let viajesMismoCamion = [];
+                if (estadoActual === 'camino') {
+                    // Ruta Activa: Agrupamos SOLO los pedidos "En Camino" para no mezclar con entregados del pasado
+                    viajesMismoCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === viajeSeleccionado.vehiculo_asignado && v.estado === 'camino' && v.coordenadas);
+                } else {
+                    // Ruta Histórica: Reconstruimos la vuelta usando el ID de Lote exacto
+                    viajesMismoCamion = viajesAgrupados.filter(v => v.lote_id === viajeSeleccionado.lote_id && v.coordenadas);
+                }
+
                 viajesMismoCamion.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
 
                 wps = [coordPlantaEEN];
-                htmlSecuenciaItems += `<li class="flex items-center gap-2 pb-2"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm z-10"><i class="fas fa-industry"></i></div> <span class="text-[10px] font-bold text-slate-800">Planta EEN</span></li>`;
+                const infoLoteTexto = viajeSeleccionado.lote_id ? `<span class="ml-2 bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded text-[8px] font-mono shadow-sm border border-indigo-200">LOTE: ${viajeSeleccionado.lote_id}</span>` : '';
+                
+                htmlSecuenciaItems += `<li class="flex items-center gap-2 pb-2"><div class="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm z-10"><i class="fas fa-industry"></i></div> <span class="text-[10px] font-bold text-slate-800 flex items-center">Planta EEN ${infoLoteTexto}</span></li>`;
                 
                 viajesMismoCamion.forEach((v, idx) => {
                     wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
-                    const btnUp = idx > 0 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, -1); event.stopPropagation();" class="w-5 h-5 bg-white border border-slate-200 rounded text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-chevron-up text-[8px]"></i></button>` : '';
-                    const btnDown = idx < viajesMismoCamion.length - 1 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, 1); event.stopPropagation();" class="w-5 h-5 bg-white border border-slate-200 rounded text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-chevron-down text-[8px]"></i></button>` : '';
-
-                    const bgColor = v.urgente ? 'bg-red-500' : 'bg-blue-600';
-                    const textColor = v.urgente ? 'text-red-600' : 'text-slate-800';
-                    const urgBadge = v.urgente ? `<span class="text-[7px] font-black uppercase ml-1 text-red-500">Urg.</span>` : '';
                     
-                    htmlSecuenciaItems += `<li class="flex items-center gap-1.5 py-1.5 relative border-l-2 border-slate-200 ml-2.5 pl-3 before:absolute before:w-1.5 before:h-1.5 before:bg-slate-200 before:rounded-full before:-left-[4px] before:top-1/2 before:-translate-y-1/2"><div class="w-4 h-4 ${bgColor} text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-sm shrink-0">${idx + 1}</div><span class="truncate text-[10px] flex-1 font-bold ${textColor}">${v.cliente_nombre}${urgBadge}</span><div class="flex flex-col gap-[1px]">${btnUp}${btnDown}</div></li>`;
+                    let btnUp = '', btnDown = '';
+                    if (estadoActual === 'camino') {
+                        btnUp = idx > 0 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, -1); event.stopPropagation();" class="w-5 h-5 bg-white border border-slate-200 rounded text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-chevron-up text-[8px]"></i></button>` : '';
+                        btnDown = idx < viajesMismoCamion.length - 1 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, 1); event.stopPropagation();" class="w-5 h-5 bg-white border border-slate-200 rounded text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-chevron-down text-[8px]"></i></button>` : '';
+                    }
+
+                    const isCurrentItem = v.id === viajeSeleccionado.id;
+                    let bgColor = v.urgente ? 'bg-red-500' : 'bg-blue-600';
+                    if (v.estado === 'entregado') bgColor = 'bg-emerald-500';
+                    if (v.estado === 'fallido') bgColor = 'bg-red-800';
+
+                    const textColor = isCurrentItem ? 'text-blue-800 font-black' : (v.urgente ? 'text-red-600 font-bold' : 'text-slate-700 font-bold');
+                    const urgBadge = v.urgente ? `<span class="text-[7px] font-black uppercase ml-1 text-red-500">Urg.</span>` : '';
+                    const statusIcon = v.estado === 'entregado' ? `<i class="fas fa-check-circle text-emerald-500 ml-1"></i>` : (v.estado === 'fallido' ? `<i class="fas fa-exclamation-triangle text-red-500 ml-1"></i>` : '');
+                    
+                    htmlSecuenciaItems += `<li class="flex items-center gap-1.5 py-1.5 relative border-l-2 border-slate-200 ml-2.5 pl-3 before:absolute before:w-1.5 before:h-1.5 before:bg-slate-200 before:rounded-full before:-left-[4px] before:top-1/2 before:-translate-y-1/2"><div class="w-4 h-4 ${bgColor} text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-sm shrink-0">${idx + 1}</div><span class="truncate text-[10px] flex-1 ${textColor}">${v.cliente_nombre}${urgBadge}${statusIcon}</span><div class="flex flex-col gap-[1px]">${btnUp}${btnDown}</div></li>`;
                 });
                 wps.push(coordPlantaEEN);
                 htmlSecuenciaItems += `<li class="flex items-center gap-2 pt-2"><div class="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm z-10"><i class="fas fa-flag-checkered"></i></div> <span class="text-[10px] font-bold text-slate-800">Retorno Base</span></li>`;
@@ -855,15 +877,15 @@
                 htmlSecuenciaItems = `<li class="flex items-center gap-2 pb-2 relative border-l-2 border-dashed border-slate-300 ml-2.5 pl-3"><div class="absolute -left-[11px] top-0 w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm"><i class="fas fa-industry"></i></div> <span class="text-[10px] font-bold text-slate-800">Planta EEN</span></li><li class="flex items-center gap-2 relative ml-2.5 pl-3"><div class="absolute -left-[11px] top-0 w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm"><i class="fas fa-map-marker-alt"></i></div> <span class="truncate text-[10px] font-black text-blue-900">${viajeSeleccionado.cliente_nombre}</span></li>`;
             }
 
-            if (!skipAnimation) { enfocarPin(cDest, (estadoActual === 'camino' || estadoActual === 'entregado') ? wps : null); }
+            if (!skipAnimation) { enfocarPin(cDest, (estadoActual === 'camino' || (estadoActual === 'entregado' && viajeSeleccionado.lote_id)) ? wps : null); }
             trazarRutaCalles(wps, true);
 
-            const btnOptimizarHTML = (estadoActual === 'camino' || estadoActual === 'entregado') ? `<button onclick="optimizarRuta('${viajeSeleccionado.vehiculo_asignado}')" class="text-[9px] bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-bold hover:bg-indigo-200 transition"><i class="fas fa-magic"></i> Optimizar</button>` : '';
+            const btnOptimizarHTML = (estadoActual === 'camino') ? `<button onclick="optimizarRuta('${viajeSeleccionado.vehiculo_asignado}')" class="text-[9px] bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-bold hover:bg-indigo-200 transition"><i class="fas fa-magic"></i> Optimizar</button>` : '';
 
             htmlDinamico += `
                 <details class="bg-indigo-50 border border-indigo-100 rounded-xl shadow-sm group" ${estadoActual!=='pendiente' ? 'open' : ''}>
                     <summary class="font-black text-[11px] text-indigo-900 p-3 cursor-pointer flex justify-between items-center select-none">
-                        <span class="flex items-center gap-1.5"><i class="fas fa-route text-indigo-500"></i> Trayecto</span>
+                        <span class="flex items-center gap-1.5"><i class="fas fa-route text-indigo-500"></i> ${viajeSeleccionado.lote_id ? 'Ruta de Viaje' : 'Trayecto Estimado'}</span>
                         <div class="flex items-center gap-2">${btnOptimizarHTML} <i class="fas fa-chevron-down text-indigo-300 group-open:rotate-180 transition-transform"></i></div>
                     </summary>
                     <div class="px-3 pb-3 pt-0">
@@ -914,7 +936,7 @@
                 htmlDinamico += `
                 <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 shadow-sm mt-3">
                     <p class="text-[10px] font-black text-emerald-800 uppercase mb-2"><i class="fas fa-stopwatch"></i> Confirmar Salida</p>
-                    <p class="text-[10px] text-emerald-600 mb-3 font-medium leading-tight">La unidad ya tiene pedidos pre-asignados. Presiona aquí cuando arranque para registrar la hora exacta de salida de TODOS los pedidos de este camión.</p>
+                    <p class="text-[10px] text-emerald-600 mb-3 font-medium leading-tight">La unidad ya tiene pedidos pre-asignados. Presiona aquí cuando arranque para registrar la hora exacta de salida y crear el <b>Lote de Viaje</b> para este camión.</p>
                     <button onclick="abrirModalSalida('${viajeSeleccionado.vehiculo_asignado}', '${viajeSeleccionado.chofer_asignado}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl text-xs transition active:scale-95 shadow-md flex items-center justify-center gap-2">
                         <i class="fas fa-truck-fast"></i> Iniciar Ruta Ahora
                     </button>
@@ -927,7 +949,6 @@
                     const iconColor = isPesado ? 'text-purple-600' : 'text-slate-400';
                     const iconType = isPesado ? 'fa-truck-moving' : 'fa-truck';
                     
-                    // --- NUEVO: Verificamos si la unidad está En Transcurso ---
                     const enRuta = viajesAgrupados.some(p => p.vehiculo_asignado === v.id && p.estado === 'camino' && p.fecha_salida);
                     const enRampa = viajesAgrupados.some(p => p.vehiculo_asignado === v.id && p.estado === 'camino' && !p.fecha_salida);
 
@@ -956,7 +977,6 @@
                             </button>`;
                 }).join('');
                 
-                // --- NUEVO: Verificamos si el chofer está En Transcurso ---
                 const htmlChoferes = `<option value="" class="text-slate-500 font-bold bg-white">-- Selecciona al Operador --</option>` + choferesDB.map(c => {
                     const enRuta = viajesAgrupados.some(p => p.chofer_asignado === c.id && p.estado === 'camino' && p.fecha_salida);
                     const disabledStr = enRuta ? 'disabled' : '';
@@ -1446,6 +1466,7 @@
                     data.estado = 'pendiente';
                     data.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
                     data.fecha_salida = null;
+                    data.lote_id = null; // Inicia sin lote de vuelta
                     await db.collection('rutas_logistica').add(data);
                     showToast("Orden registrada exitosamente");
                 }
@@ -1540,7 +1561,7 @@
         // OTRAS FUNCIONES (Reacomodo, Asignar)
         // ==========================================
         window.optimizarRuta = async (vehiculoId) => {
-            const viajesCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === vehiculoId && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+            const viajesCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === vehiculoId && v.estado === 'camino' && v.coordenadas);
             if(viajesCamion.length < 2) return showToast("No hay suficientes paradas", "error");
             showToast("Optimizando ruta inteligentemente...", "info");
 
@@ -1571,7 +1592,7 @@
         };
 
         window.moverParada = async (vehiculoId, index, direccion) => {
-            const viajesCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === vehiculoId && (v.estado === 'camino' || v.estado === 'entregado') && v.coordenadas);
+            const viajesCamion = viajesAgrupados.filter(v => v.vehiculo_asignado === vehiculoId && v.estado === 'camino' && v.coordenadas);
             viajesCamion.sort((a,b) => (a.orden_ruta || 9999999999999) - (b.orden_ruta || 9999999999999));
             const targetIdx = index + direccion; if(targetIdx < 0 || targetIdx >= viajesCamion.length) return;
 
@@ -1656,7 +1677,7 @@
             cerrarModalSalida();
             if(!window.vehiculoParaSalida || !window.choferParaSalida) return;
             
-            showToast("Registrando salida exacta...", "info");
+            showToast("Registrando salida y creando lote de viaje...", "info");
             
             const viajesCamion = viajesAgrupados.filter(v => 
                 v.vehiculo_asignado === window.vehiculoParaSalida && 
@@ -1669,15 +1690,18 @@
 
             const batch = db.batch();
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+            
+            // GENERADOR DE ID DE VUELTA/LOTE
+            const loteId = 'VUELTA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
             viajesCamion.forEach(v => {
                 const docRef = db.collection('rutas_logistica').doc(v.id);
-                batch.update(docRef, { fecha_salida: timestamp });
+                batch.update(docRef, { fecha_salida: timestamp, lote_id: loteId });
             });
 
             try {
                 await batch.commit();
-                showToast(`Salida registrada a ${viajesCamion.length} pedidos`);
+                showToast(`Vuelta registrada correctamente con ${viajesCamion.length} pedidos`);
                 cerrarDetalle();
             } catch(e) {
                 showToast("Error al registrar salida", "error");
@@ -1695,11 +1719,13 @@
                     data.foto_evidencia = null; 
                     data.foto_evidencia_material = null; 
                     data.fecha_salida = null;
+                    data.lote_id = null; // Liberamos el ID de Lote para que pueda entrar a otra vuelta
                 }
                 else if(accion === 'camino') { 
                     data.vehiculo_asignado = vehiculo; data.chofer_asignado = chofer;
                     if(forzarSalidaAhora) {
                         data.fecha_salida = firebase.firestore.FieldValue.serverTimestamp();
+                        data.lote_id = 'VUELTA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
                     }
                 }
                 await db.collection('rutas_logistica').doc(viajeSeleccionado.id).update(data);
@@ -2010,7 +2036,8 @@
                 (v.folio_pedido && v.folio_pedido.toLowerCase().includes(term)) ||
                 (v.folio_factura && v.folio_factura.toLowerCase().includes(term)) ||
                 (v.cliente_nombre && v.cliente_nombre.toLowerCase().includes(term)) ||
-                (v.chofer_asignado && choferesDB.find(c => c.id === v.chofer_asignado)?.nombre.toLowerCase().includes(term))
+                (v.chofer_asignado && choferesDB.find(c => c.id === v.chofer_asignado)?.nombre.toLowerCase().includes(term)) ||
+                (v.lote_id && v.lote_id.toLowerCase().includes(term))
             );
 
             if(filtrados.length === 0) {
@@ -2034,11 +2061,14 @@
                 if(v.tipo_envio === 'fletera_domicilio') tipoTxt = 'Fletera (Dom)';
                 if(v.tipo_envio === 'fletera_ocurre') tipoTxt = 'Fletera (Ocu)';
 
+                const loteBadge = v.lote_id ? `<div class="text-[9px] font-mono text-indigo-500 font-bold mt-0.5" title="ID de Lote/Vuelta"><i class="fas fa-layer-group"></i> ${v.lote_id}</div>` : '';
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition border-b border-slate-100">
                         <td class="px-4 py-3">
                             <div class="text-[10px] text-slate-500 font-bold mb-0.5">Cap: ${fCreacion}</div>
                             <div class="text-[10px] text-indigo-600 font-bold"><i class="fas fa-truck text-[9px]"></i> Sal: ${fSalida}</div>
+                            ${loteBadge}
                         </td>
                         <td class="px-4 py-3 font-mono text-xs font-bold text-slate-700">
                             <div>${v.folio_pedido ? 'PED: '+v.folio_pedido : ''}</div>
@@ -2079,7 +2109,7 @@
                 [`Periodo Exportado: ${fInicioStr} al ${fFinStr}`],
                 [`Generado el: ${new Date().toLocaleString('es-MX')}`],
                 [],
-                ['Estado', 'Fecha Captura', 'Fecha Salida', 'Folio Pedido', 'Folio Factura', 'Código Cliente', 'Razón Social / Nombre', 'Destino / Sucursal', 'Dirección Exacta', 'Modalidad de Envío', 'Operador (Chofer)', 'Vehículo', 'Problema Reportado (Motivo Falla)']
+                ['Estado', 'ID de Lote / Vuelta', 'Fecha Captura', 'Fecha Salida', 'Folio Pedido', 'Folio Factura', 'Código Cliente', 'Razón Social / Nombre', 'Destino / Sucursal', 'Dirección Exacta', 'Modalidad de Envío', 'Operador (Chofer)', 'Vehículo', 'Problema Reportado (Motivo Falla)']
             ];
 
             datosExportar.forEach(v => {
@@ -2094,6 +2124,7 @@
 
                 wsData.push([
                     (v.estado || '').toUpperCase(),
+                    v.lote_id || 'N/A',
                     fCreacion,
                     fSalida,
                     v.folio_pedido || '',
@@ -2113,7 +2144,7 @@
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet(wsData);
                 
-                ws['!cols'] = [ {wch: 12}, {wch: 18}, {wch: 18}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 50}, {wch: 20}, {wch: 25}, {wch: 18}, {wch: 35} ];
+                ws['!cols'] = [ {wch: 12}, {wch: 16}, {wch: 18}, {wch: 18}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 50}, {wch: 20}, {wch: 25}, {wch: 18}, {wch: 35} ];
                 
                 XLSX.utils.book_append_sheet(wb, ws, "Bitácora de Logística");
                 XLSX.writeFile(wb, `Bitacora_Logistica_${fInicioStr}_al_${fFinStr}.xlsx`);
