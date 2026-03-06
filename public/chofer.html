@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -144,6 +145,7 @@
                 <div class="space-y-4">
                     <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
                         <label class="block text-[11px] font-black text-blue-800 uppercase tracking-wider mb-2"><i class="fas fa-file-signature text-blue-500 mr-1"></i> 1. Documento Firmado</label>
+                        <!-- Se añadió "preview-doc" al callback -->
                         <input type="file" accept="image/*" capture="environment" id="cam-doc" class="hidden" onchange="previewImg(this, 'preview-doc')">
                         <div id="preview-doc" onclick="document.getElementById('cam-doc').click()" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent cursor-pointer bg-cover bg-center flex flex-col justify-end p-2">
                             <span id="label-doc" class="bg-slate-900/70 text-white text-[10px] font-bold py-1 px-2 rounded backdrop-blur-sm self-center transition"><i class="fas fa-camera mr-1"></i> Tomar Foto</span>
@@ -152,6 +154,7 @@
 
                     <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
                         <label class="block text-[11px] font-black text-amber-800 uppercase tracking-wider mb-2"><i class="fas fa-boxes text-amber-500 mr-1"></i> 2. Material Físico</label>
+                        <!-- Se añadió "preview-mat" al callback -->
                         <input type="file" accept="image/*" capture="environment" id="cam-mat" class="hidden" onchange="previewImg(this, 'preview-mat')">
                         <div id="preview-mat" onclick="document.getElementById('cam-mat').click()" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent cursor-pointer bg-cover bg-center flex flex-col justify-end p-2">
                             <span id="label-mat" class="bg-slate-900/70 text-white text-[10px] font-bold py-1 px-2 rounded backdrop-blur-sm self-center transition"><i class="fas fa-camera mr-1"></i> Tomar Foto</span>
@@ -201,6 +204,9 @@
         let tabActual = 'camino';
         let idViajeActivo = null;
 
+        // Cache para liberar la memoria de las vistas previas
+        const imageCache = {};
+
         window.showToast = (msg, type='success') => {
             const t = document.createElement('div');
             t.className = `toast-enter text-white px-5 py-3 rounded-2xl shadow-2xl ${type === 'error' ? 'bg-red-600' : 'bg-slate-800'} text-xs font-bold text-center flex items-center gap-2 justify-center border border-white/10`;
@@ -210,71 +216,92 @@
         };
 
         // ==========================================
-        // COMPRESIÓN DE IMAGEN CORREGIDA Y OPTIMIZADA
+        // COMPRESIÓN ULTRA OPTIMIZADA (SIN MEMORY LEAKS)
         // ==========================================
-        async function compressImage(fileElementId) {
+        async function compressImage(fileElementId, previewId) {
             return new Promise((resolve, reject) => {
                 const fileInput = document.getElementById(fileElementId);
-                // Si el input está vacío, regresamos null de inmediato
                 if (!fileInput || !fileInput.files || fileInput.files.length === 0) return resolve(null);
                 
                 const file = fileInput.files[0];
-                const reader = new FileReader();
                 
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        // LA MAGIA ESTÁ AQUÍ: Creamos el canvas en memoria por cada foto.
-                        // Esto evita que las 2 fotos peleen por el mismo espacio y colapsen la app.
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        const MAX_WIDTH = 800; // Resolución excelente para leer guías sin pesar nada
-                        let width = img.width; 
-                        let height = img.height;
-                        
-                        if (width > MAX_WIDTH) { 
-                            height = Math.round((height * MAX_WIDTH) / width); 
-                            width = MAX_WIDTH; 
-                        }
-                        
-                        canvas.width = width; 
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // Calidad 0.6 (60%) genera fotos de aprox 50kb-100kb ¡Ultra ligeras!
-                        resolve(canvas.toDataURL('image/jpeg', 0.6)); 
-                    };
-                    img.onerror = () => reject("Error al procesar la imagen");
-                    img.src = e.target.result;
+                // 1. Usar el ObjectURL ya generado en la vista previa (si existe) para no gastar RAM
+                let objectUrl = imageCache[previewId];
+                let isTempUrl = false;
+                
+                if (!objectUrl) {
+                    objectUrl = URL.createObjectURL(file);
+                    isTempUrl = true; // Si no existía, lo marcaremos para destruirlo al terminar
+                }
+                
+                const img = new Image();
+                img.onload = () => {
+                    // Limpieza inmediata si era temporal
+                    if (isTempUrl) URL.revokeObjectURL(objectUrl);
+                    
+                    const canvas = document.createElement('canvas');
+                    // alpha: false reduce significativamente el uso de memoria en el renderizado
+                    const ctx = canvas.getContext('2d', { alpha: false }); 
+                    
+                    const MAX_WIDTH = 800;
+                    let width = img.width; 
+                    let height = img.height;
+                    
+                    if (width > MAX_WIDTH) { 
+                        height = Math.round((height * MAX_WIDTH) / width); 
+                        width = MAX_WIDTH; 
+                    }
+                    
+                    canvas.width = width; 
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const base64 = canvas.toDataURL('image/jpeg', 0.6); 
+                    
+                    // 2. LIBERACIÓN AGRESIVA DE MEMORIA (Vital para evitar crasheos en móviles)
+                    canvas.width = 0;
+                    canvas.height = 0;
+                    img.src = ''; 
+                    img.onload = null;
+                    img.onerror = null;
+                    
+                    resolve(base64); 
                 };
-                reader.onerror = () => reject("Error al leer el archivo");
-                reader.readAsDataURL(file);
+                img.onerror = () => {
+                    if (isTempUrl) URL.revokeObjectURL(objectUrl);
+                    reject("Error al procesar la imagen");
+                };
+                img.src = objectUrl;
             });
         }
 
         // ==========================================
-        // UX VISUAL DE FOTOS (PREVIEW Y RESET)
+        // UX VISUAL DE FOTOS CON ObjectURL
         // ==========================================
         window.previewImg = (input, previewId) => {
             if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById(previewId);
-                    preview.style.backgroundImage = `url(${e.target.result})`;
-                    preview.classList.add('has-image');
-                    // Indicadores visuales de éxito
-                    preview.classList.remove('border-transparent', 'border-slate-200');
-                    preview.classList.add('border-emerald-500');
-                    
-                    const labelId = previewId.replace('preview-', 'label-');
-                    const label = document.getElementById(labelId);
-                    if(label) {
-                        label.className = "bg-emerald-500 text-white text-[11px] font-black py-1.5 px-3 rounded-lg shadow-lg self-center transition transform scale-105";
-                        label.innerHTML = '<i class="fas fa-check-circle mr-1"></i> ¡Foto Lista!';
-                    }
+                const file = input.files[0];
+                
+                // Si el usuario vuelve a tomar la foto, limpiamos la RAM de la anterior
+                if (imageCache[previewId]) {
+                    URL.revokeObjectURL(imageCache[previewId]);
                 }
-                reader.readAsDataURL(input.files[0]);
+                
+                // URL.createObjectURL no carga la imagen completa a RAM como lo hace FileReader
+                const objectUrl = URL.createObjectURL(file);
+                imageCache[previewId] = objectUrl;
+                
+                const preview = document.getElementById(previewId);
+                preview.style.backgroundImage = `url(${objectUrl})`;
+                preview.classList.add('has-image', 'border-emerald-500');
+                preview.classList.remove('border-transparent', 'border-slate-200');
+                
+                const labelId = previewId.replace('preview-', 'label-');
+                const label = document.getElementById(labelId);
+                if(label) {
+                    label.className = "bg-emerald-500 text-white text-[11px] font-black py-1.5 px-3 rounded-lg shadow-lg self-center transition transform scale-105";
+                    label.innerHTML = '<i class="fas fa-check-circle mr-1"></i> ¡Foto Lista!';
+                }
             }
         };
 
@@ -284,6 +311,12 @@
             preview.style.backgroundImage = '';
             preview.classList.remove('has-image', 'border-emerald-500');
             preview.classList.add('border-transparent');
+            
+            // Limpieza de memoria al resetear
+            if (imageCache[previewId]) {
+                URL.revokeObjectURL(imageCache[previewId]);
+                delete imageCache[previewId];
+            }
             
             const labelId = previewId.replace('preview-', 'label-');
             const label = document.getElementById(labelId);
@@ -372,13 +405,16 @@
 
         function renderizarViajes() {
             const cont = document.getElementById('contenedor-viajes');
-            cont.innerHTML = '';
             const filtrados = misViajes.filter(v => tabActual === 'camino' ? v.estado === 'camino' : (v.estado === 'entregado' || v.estado === 'fallido'));
             
             if(filtrados.length === 0) {
                 cont.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold"><div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center text-3xl mx-auto mb-3 text-slate-400"><i class="fas ${tabActual==='camino'?'fa-mug-hot':'fa-inbox'}"></i></div> Nada por aquí.</div>`;
                 return;
             }
+
+            // Uso de una variable temporal para concatenar todo el HTML antes de inyectarlo,
+            // esto evita repintar el DOM en cada vuelta del ciclo, ahorrando CPU.
+            let renderHtml = '';
 
             filtrados.forEach((v, idx) => {
                 const esUrgente = v.urgente === true;
@@ -421,7 +457,7 @@
                     botonesFinales = `<div class="mt-4 pt-3 border-t border-slate-100 text-center text-red-500 font-black text-sm"><i class="fas fa-times-circle text-xl mb-1 block"></i> Reportado con falla<p class="text-[10px] text-red-400 font-medium mt-1">"${v.motivo_falla}"</p></div>`;
                 }
 
-                cont.innerHTML += `
+                renderHtml += `
                     <div class="card-entrega bg-white rounded-3xl p-4 shadow-sm mb-4 border-l-4 ${borderColor}">
                         <div class="flex justify-between items-start mb-1">
                             <div class="flex items-center gap-1.5">
@@ -454,7 +490,65 @@
                     </div>
                 `;
             });
+
+            cont.innerHTML = renderHtml;
         }
+         // ==========================================
+        // FLUJO DE DOCS LEGALES Y VISOR QR
+        // ==========================================
+        window.abrirDocsLegales = async () => {
+            const m = document.getElementById('modal-docs-legales');
+            const c = document.getElementById('modal-docs-content');
+            m.classList.remove('hidden'); m.classList.add('flex');
+            
+            try {
+                const docSnap = await db.collection('configuracion').doc('docs_legales').get();
+                const btnImss = document.getElementById('btn-descarga-imss');
+                const btnSua = document.getElementById('btn-descarga-sua');
+                const btnOtros = document.getElementById('btn-descarga-otros');
+                const msgVacio = document.getElementById('docs-vacio');
+                
+                btnImss.classList.add('hidden'); btnImss.classList.remove('flex');
+                btnSua.classList.add('hidden'); btnSua.classList.remove('flex');
+                btnOtros.classList.add('hidden'); btnOtros.classList.remove('flex');
+                msgVacio.classList.add('hidden');
+
+                if(docSnap.exists) {
+                    const data = docSnap.data();
+                    let encontroAlgo = false;
+                    
+                    if(data.imss_pdf) { btnImss.href = data.imss_pdf; btnImss.download = "Alta_IMSS.pdf"; btnImss.classList.remove('hidden'); btnImss.classList.add('flex'); encontroAlgo = true; }
+                    if(data.sua_pdf) { btnSua.href = data.sua_pdf; btnSua.download = "Comprobante_SUA.pdf"; btnSua.classList.remove('hidden'); btnSua.classList.add('flex'); encontroAlgo = true; }
+                    if(data.otros_pdf) { btnOtros.href = data.otros_pdf; btnOtros.download = "Doc_Extra.pdf"; btnOtros.classList.remove('hidden'); btnOtros.classList.add('flex'); encontroAlgo = true; }
+                    
+                    if(!encontroAlgo) msgVacio.classList.remove('hidden');
+                } else {
+                    msgVacio.classList.remove('hidden');
+                }
+            } catch(e) {
+                showToast("Error al cargar docs", "error");
+            }
+
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        //documentos legales y visor qr
+        window.cerrarDocsLegales = () => {
+            const m = document.getElementById('modal-docs-legales');
+            m.classList.add('opacity-0'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+        };
+
+        window.abrirVisorQR = (base64, clienteNombre) => {
+            document.getElementById('qr-img-src').src = base64;
+            document.getElementById('qr-empresa-nombre').innerText = clienteNombre;
+            const m = document.getElementById('modal-visor-qr');
+            m.classList.remove('hidden'); m.classList.add('flex');
+            setTimeout(() => m.classList.remove('opacity-0'), 10);
+        };
+        
+        window.cerrarVisorQR = () => {
+            const m = document.getElementById('modal-visor-qr');
+            m.classList.add('opacity-0'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300);
+        };
 
         // ==========================================
         // MANEJO DE LA ENTREGA EXACTA
@@ -480,20 +574,18 @@
             const fileInputDoc = document.getElementById('cam-doc');
             const fileInputMat = document.getElementById('cam-mat');
             
-            // Verificación segura directamente en los inputs
             if(!fileInputDoc.files || fileInputDoc.files.length === 0 || !fileInputMat.files || fileInputMat.files.length === 0) {
                 return showToast("⚠️ Debes capturar AMBAS fotos (Documento y Material)", "error");
             }
 
-            // Cambiamos el texto del botón para calmar al operador
             btn.disabled = true; 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando evidencias (1/2)...';
 
             try {
-                // Compresión en serie (una tras otra) para NUNCA saturar la memoria del celular
-                const b64Doc = await compressImage('cam-doc');
+                // Pasamos el ID del preview para reutilizar la referencia en memoria y ahorrar doble carga de imagen
+                const b64Doc = await compressImage('cam-doc', 'preview-doc');
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo a la nube (2/2)...';
-                const b64Mat = await compressImage('cam-mat');
+                const b64Mat = await compressImage('cam-mat', 'preview-mat');
 
                 await db.collection('rutas_logistica').doc(idViajeActivo).update({
                     estado: 'entregado',
@@ -538,7 +630,8 @@
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
             try {
-                const b64Foto = await compressImage('cam-falla'); 
+                // Mismo proceso de optimización para fallas
+                const b64Foto = await compressImage('cam-falla', 'preview-falla'); 
                 let data = {
                     estado: 'fallido',
                     motivo_falla: motivo,
