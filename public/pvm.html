@@ -402,6 +402,10 @@
 
         const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
 
+        // NUEVAS FUNCIONES DE SEGURIDAD FINANCIERA
+        const toCentavos = (cantidad) => Math.round((parseFloat(cantidad) || 0) * 100);
+        const toPesos = (centavos) => centavos / 100;
+
         function verificarLogin() {
             if (!cajeroActual) {
                 document.getElementById('loginModal').classList.remove('hidden');
@@ -507,37 +511,53 @@
         let currentTotalToPay = 0;
         
         function openCheckoutModal() {
-            if (cart.length === 0) return;
-            const subtotal = cart.reduce((sum, item) => sum + ((item.precio||0) * (item.qty||1)), 0);
-            const iva = subtotal * 0.16;
-            currentTotalToPay = subtotal + iva; 
-            
-            document.getElementById('checkoutSubtotalDisplay').innerText = formatMoney(subtotal);
-            document.getElementById('checkoutIvaDisplay').innerText = formatMoney(iva);
-            document.getElementById('checkoutTotalDisplay').innerText = formatMoney(currentTotalToPay);
-            document.getElementById('inputEfectivoRecibido').value = '';
-            document.getElementById('checkoutCambioDisplay').innerText = "$0.00";
-            document.getElementById('checkoutCambioDisplay').className = "text-3xl md:text-4xl font-black text-slate-300";
-            
-            const modal = document.getElementById('checkoutModal'); const box = document.getElementById('checkoutBox');
-            modal.classList.remove('hidden');
-            setTimeout(() => { box.classList.remove('scale-95'); document.getElementById('inputEfectivoRecibido').focus(); }, 10);
-        }
+    if (cart.length === 0) return;
+    
+    let subtotalCentavos = 0;
+    cart.forEach(item => {
+        subtotalCentavos += toCentavos(item.precio) * (item.qty || 1);
+    });
+    
+    const ivaCentavos = Math.round(subtotalCentavos * 0.16);
+    const totalCentavos = subtotalCentavos + ivaCentavos;
+    
+    // Guardamos el total a pagar en pesos, ya con matemática exacta
+    currentTotalToPay = toPesos(totalCentavos); 
+    
+    document.getElementById('checkoutSubtotalDisplay').innerText = formatMoney(toPesos(subtotalCentavos));
+    document.getElementById('checkoutIvaDisplay').innerText = formatMoney(toPesos(ivaCentavos));
+    document.getElementById('checkoutTotalDisplay').innerText = formatMoney(currentTotalToPay);
+    document.getElementById('inputEfectivoRecibido').value = '';
+    document.getElementById('checkoutCambioDisplay').innerText = "$0.00";
+    document.getElementById('checkoutCambioDisplay').className = "text-3xl md:text-4xl font-black text-slate-300";
+    
+    const modal = document.getElementById('checkoutModal'); const box = document.getElementById('checkoutBox');
+    modal.classList.remove('hidden');
+    setTimeout(() => { box.classList.remove('scale-95'); document.getElementById('inputEfectivoRecibido').focus(); }, 10);
+}
+
+window.calculateChange = () => {
+    const recibidoPesos = parseFloat(document.getElementById('inputEfectivoRecibido').value) || 0;
+    const display = document.getElementById('checkoutCambioDisplay');
+    
+    if (recibidoPesos === 0) { display.innerText = "$0.00"; display.className = "text-3xl md:text-4xl font-black text-slate-300"; return; }
+    
+    // RESTA EXACTA EN CENTAVOS PARA EVITAR EL "0.000000001"
+    const recibidoCentavos = toCentavos(recibidoPesos);
+    const aPagarCentavos = toCentavos(currentTotalToPay);
+    const cambioCentavos = recibidoCentavos - aPagarCentavos;
+    
+    display.innerText = formatMoney(toPesos(cambioCentavos));
+    if (cambioCentavos < 0) { display.className = "text-3xl md:text-4xl font-black text-red-500"; } 
+    else { display.className = "text-3xl md:text-4xl font-black text-blue-600"; }
+}
 
         function closeCheckoutModal() {
             const modal = document.getElementById('checkoutModal'); const box = document.getElementById('checkoutBox');
             box.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200);
         }
 
-        window.calculateChange = () => {
-            const recibido = parseFloat(document.getElementById('inputEfectivoRecibido').value) || 0;
-            const display = document.getElementById('checkoutCambioDisplay');
-            if (recibido === 0) { display.innerText = "$0.00"; display.className = "text-3xl md:text-4xl font-black text-slate-300"; return; }
-            const cambio = recibido - currentTotalToPay;
-            display.innerText = formatMoney(cambio);
-            if (cambio < 0) { display.className = "text-3xl md:text-4xl font-black text-red-500"; } 
-            else { display.className = "text-3xl md:text-4xl font-black text-blue-600"; }
-        }
+        
 
         window.setQuickPay = (amount) => {
             const input = document.getElementById('inputEfectivoRecibido');
@@ -846,50 +866,58 @@
         }
 
         function renderCart() {
-            const container = document.getElementById('cartItems'); const btnPreparar = document.getElementById('btnPrepararCobro');
-            if (cart.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 md:py-20 text-slate-300 font-medium text-xs md:text-sm flex flex-col items-center"><i class="fas fa-shopping-basket text-3xl md:text-4xl mb-3 opacity-50"></i>Ticket vacío.</div>`;
-                document.getElementById('cartSubtotal').innerText = "$0.00";
-                document.getElementById('cartIva').innerText = "$0.00";
-                document.getElementById('cartTotal').innerText = "$0.00"; 
-                btnPreparar.disabled = true; btnPreparar.classList.add('opacity-50', 'cursor-not-allowed'); return;
-            }
+    const container = document.getElementById('cartItems'); const btnPreparar = document.getElementById('btnPrepararCobro');
+    if (cart.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 md:py-20 text-slate-300 font-medium text-xs md:text-sm flex flex-col items-center"><i class="fas fa-shopping-basket text-3xl md:text-4xl mb-3 opacity-50"></i>Ticket vacío.</div>`;
+        document.getElementById('cartSubtotal').innerText = "$0.00";
+        document.getElementById('cartIva').innerText = "$0.00";
+        document.getElementById('cartTotal').innerText = "$0.00"; 
+        btnPreparar.disabled = true; btnPreparar.classList.add('opacity-50', 'cursor-not-allowed'); return;
+    }
 
-            btnPreparar.disabled = false; btnPreparar.classList.remove('opacity-50', 'cursor-not-allowed');
-            container.innerHTML = ''; let subtotal = 0;
+    btnPreparar.disabled = false; btnPreparar.classList.remove('opacity-50', 'cursor-not-allowed');
+    container.innerHTML = ''; 
+    
+    // TRABAJAMOS TODO EN CENTAVOS
+    let subtotalCentavos = 0;
 
-            cart.forEach((item, index) => {
-                const itemSubtotal = item.precio * item.qty; subtotal += itemSubtotal;
-                
-                container.innerHTML += `
-                    <div class="bg-slate-50 border border-slate-100 p-2 md:p-3 rounded-xl flex flex-col relative animate-[fadeIn_0.2s_ease-out]">
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="pr-6"><h5 class="text-[11px] md:text-xs font-bold text-slate-800 leading-tight break-words whitespace-normal">${item.nombre}</h5><span class="text-[8px] md:text-[9px] font-mono text-slate-400">${item.codigo}</span></div>
-                            <button onclick="updateCartQty(${index}, -${item.qty})" class="absolute top-1.5 md:top-2 right-1.5 md:right-2 text-slate-300 hover:text-red-500"><i class="fas fa-times text-sm"></i></button>
-                        </div>
-                        <div class="flex justify-between items-end mt-auto">
-                            <div class="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
-                                <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-red-500 font-bold text-sm transition-colors">-</button>
-                                <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" value="${item.qty}" 
-                                       oninput="this.value = this.value.replace(/[^0-9]/g, ''); manualCartQtyVisual(${index}, this.value, this)" 
-                                       onblur="manualCartQtyBlur(${index}, this.value)" 
-                                       class="w-10 md:w-12 text-center font-black text-xs md:text-sm text-slate-800 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none p-1 mx-1 transition-all">
-                                <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm transition-colors">+</button>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div>
-                                <div class="item-subtotal text-xs md:text-sm font-black text-slate-800">${formatMoney(itemSubtotal)}</div>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-            
-            const iva = subtotal * 0.16;
-            const total = subtotal + iva;
-            document.getElementById('cartSubtotal').innerText = formatMoney(subtotal);
-            document.getElementById('cartIva').innerText = formatMoney(iva);
-            document.getElementById('cartTotal').innerText = formatMoney(total);
-        }
+    cart.forEach((item, index) => {
+        // Multiplicamos centavos por cantidad para evitar errores de punto flotante
+        const itemSubtotalCentavos = toCentavos(item.precio) * item.qty; 
+        subtotalCentavos += itemSubtotalCentavos;
+        
+        container.innerHTML += `
+            <div class="bg-slate-50 border border-slate-100 p-2 md:p-3 rounded-xl flex flex-col relative animate-[fadeIn_0.2s_ease-out]">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="pr-6"><h5 class="text-[11px] md:text-xs font-bold text-slate-800 leading-tight break-words whitespace-normal">${item.nombre}</h5><span class="text-[8px] md:text-[9px] font-mono text-slate-400">${item.codigo}</span></div>
+                    <button onclick="updateCartQty(${index}, -${item.qty})" class="absolute top-1.5 md:top-2 right-1.5 md:right-2 text-slate-300 hover:text-red-500"><i class="fas fa-times text-sm"></i></button>
+                </div>
+                <div class="flex justify-between items-end mt-auto">
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                        <button onclick="updateCartQty(${index}, -1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-red-500 font-bold text-sm transition-colors">-</button>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" value="${item.qty}" 
+                               oninput="this.value = this.value.replace(/[^0-9]/g, ''); manualCartQtyVisual(${index}, this.value, this)" 
+                               onblur="manualCartQtyBlur(${index}, this.value)" 
+                               class="w-10 md:w-12 text-center font-black text-xs md:text-sm text-slate-800 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none p-1 mx-1 transition-all">
+                        <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm transition-colors">+</button>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div>
+                        <div class="item-subtotal text-xs md:text-sm font-black text-slate-800">${formatMoney(toPesos(itemSubtotalCentavos))}</div>
+                    </div>
+                </div>
+            </div>`;
+    });
+    
+    // CÁLCULO DE IVA Y TOTAL EN CENTAVOS
+    const ivaCentavos = Math.round(subtotalCentavos * 0.16);
+    const totalCentavos = subtotalCentavos + ivaCentavos;
+    
+    // REGRESAMOS A PESOS SOLO PARA PINTAR EN LA PANTALLA
+    document.getElementById('cartSubtotal').innerText = formatMoney(toPesos(subtotalCentavos));
+    document.getElementById('cartIva').innerText = formatMoney(toPesos(ivaCentavos));
+    document.getElementById('cartTotal').innerText = formatMoney(toPesos(totalCentavos));
+}
 
         window.manualCartQtyVisual = (index, val, el) => {
             let num = parseInt(val);
