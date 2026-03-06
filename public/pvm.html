@@ -63,19 +63,14 @@
 </head>
 <body class="flex w-full">
 
-    <!-- TRAMPA PARA GESTORES DE CONTRASEÑAS -->
     <div style="display:none; width:0; height:0; overflow:hidden; position:absolute;">
         <input type="text" name="fake_username_trap" tabindex="-1">
         <input type="password" name="fake_password_trap" tabindex="-1">
     </div>
 
-    <!-- CONFIGURACIÓN FIREBASE CENTRALIZADA Y SOPORTE OFFLINE -->
     <script src="assets/js/firebase-config.js"></script>
     <script>
-        // Asegurar la instancia de la base de datos
         const db = firebase.firestore();
-        
-        // Habilitar persistencia offline de Firebase (Mejora: Si se va el internet, la app sigue funcionando)
         try {
             db.enablePersistence({synchronizeTabs: true}).catch(function(err) {
                 console.warn("Aviso: No se pudo habilitar caché offline completa.", err.code);
@@ -83,9 +78,6 @@
         } catch (e) {}
     </script>
 
-    <!-- ========================================== -->
-    <!-- MODAL DE LOGIN CAJERO OBLIGATORIO          -->
-    <!-- ========================================== -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/95 z-[9999] flex flex-col items-center justify-center p-6 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2 bg-blue-600"></div>
@@ -110,7 +102,6 @@
         </div>
     </div>
 
-    <!-- SIDEBAR DE NAVEGACIÓN -->
     <aside class="w-20 md:w-24 bg-slate-900 flex flex-col items-center py-6 shrink-0 z-20 h-full overflow-y-auto hide-scroll">
         <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-xl mb-8 shadow-lg shadow-blue-500/30 shrink-0">
             <i class="fas fa-store"></i>
@@ -138,13 +129,10 @@
         </div>
     </aside>
 
-    <!-- ÁREA PRINCIPAL -->
     <main class="flex-1 h-full relative overflow-hidden flex bg-slate-50 min-w-0">
         
-        <!-- PESTAÑA 1: PUNTO DE VENTA (POS) -->
         <div id="view-pos" class="w-full h-full flex flex-col md:flex-row min-w-0">
             
-            <!-- PANEL IZQUIERDO: CATÁLOGO -->
             <div class="flex-1 flex flex-col h-full border-r border-slate-200 bg-white min-w-0">
                 <div class="p-4 md:p-5 border-b border-slate-100 bg-white z-10 shrink-0 shadow-sm">
                     <div class="flex justify-between items-start mb-3">
@@ -153,7 +141,6 @@
                                 <h2 class="text-lg md:text-xl font-black text-slate-800">Venta Mostrador</h2>
                                 <span id="inventoryStatusBadge" class="hidden text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md border border-indigo-200"><i class="fas fa-eye"></i> Stock</span>
                             </div>
-                            <!-- INDICADOR DEL CAJERO ACTIVO -->
                             <div class="text-[10px] font-bold text-slate-500 flex items-center gap-1">
                                 <i class="fas fa-user-circle text-blue-500 text-xs"></i> Cajero: <span id="cajero-activo-txt" class="text-blue-600 font-black uppercase tracking-wider">---</span>
                                 <button onclick="cerrarTurnoPOS()" class="ml-2 text-red-400 hover:text-red-600 transition" title="Cerrar turno y salir"><i class="fas fa-sign-out-alt"></i></button>
@@ -180,7 +167,6 @@
                 </div>
             </div>
 
-            <!-- PANEL DERECHO: TICKET (CARRITO) -->
             <div class="w-full md:w-[300px] lg:w-[400px] bg-white flex flex-col h-full shrink-0 shadow-[-10px_0_20px_rgba(0,0,0,0.02)] relative z-20">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
                     <h3 class="font-black text-slate-800 flex items-center gap-2"><i class="fas fa-receipt text-blue-600"></i> Ticket</h3>
@@ -190,9 +176,17 @@
                 <div id="cartItems" class="flex-1 overflow-y-auto min-h-0 custom-scroll p-3 space-y-2 bg-white"></div>
                 
                 <div class="p-4 md:p-5 border-t border-slate-100 bg-slate-50 shrink-0 pb-safe">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="font-bold text-slate-500 text-sm">Total a cobrar:</span>
-                        <span class="text-2xl md:text-3xl font-black text-blue-600" id="cartTotal">$0.00</span>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-slate-400 text-xs">Subtotal:</span>
+                        <span class="text-sm font-bold text-slate-600" id="cartSubtotal">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-200">
+                        <span class="font-bold text-slate-400 text-xs">IVA (16%):</span>
+                        <span class="text-sm font-bold text-slate-600" id="cartIva">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-bold text-slate-600 text-sm">Total a cobrar:</span>
+                        <span class="text-3xl md:text-4xl font-black text-blue-600" id="cartTotal">$0.00</span>
                     </div>
                     <button onclick="openCheckoutModal()" id="btnPrepararCobro" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 md:py-4 rounded-xl font-black text-base md:text-lg shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
                         <i class="fas fa-cash-register"></i> Cobrar <span class="hidden md:inline-block text-[10px] bg-white/20 px-1.5 py-0.5 rounded ml-1 font-mono">F9</span>
@@ -201,7 +195,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA 2: HISTORIAL -->
         <div id="view-historial" class="w-full h-full hidden flex-col p-4 md:p-8 overflow-y-auto custom-scroll">
             <div class="max-w-5xl mx-auto w-full">
                 <div class="flex justify-between items-center mb-6">
@@ -232,7 +225,6 @@
             </div>
         </div>
 
-        <!-- PESTAÑA 3: CORTE DE CAJA -->
         <div id="view-corte" class="w-full h-full hidden flex-col p-4 md:p-8 overflow-y-auto custom-scroll">
             <div class="max-w-6xl mx-auto w-full pb-10">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
@@ -282,7 +274,6 @@
                             </button>
                         </div>
 
-                        <!-- SECCIÓN ACTUALIZADA: FILTRO DE CAJA COMPARTIDA/INDIVIDUAL -->
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                             <div>
                                 <h4 class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Mostrador (Hoy)</h4>
@@ -316,12 +307,10 @@
         </div>
     </main>
 
-    <!-- ÁREA DE IMPRESIÓN -->
     <div id="print-ticket" class="bg-white"></div>
 
     <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity z-[100] font-medium text-sm text-center"></div>
 
-    <!-- MODAL 1: VISOR DE IMÁGENES -->
     <div id="imageModal" class="fixed inset-0 bg-black/95 z-[120] hidden flex-col items-center justify-center p-4 backdrop-blur-sm transition-opacity" onclick="closeImageModal()">
         <button class="absolute top-4 right-6 md:top-6 md:right-8 text-white/50 hover:text-white text-3xl md:text-4xl transition-colors"><i class="fas fa-times"></i></button>
         <img id="enlargedImg" src="" class="max-w-full max-h-[65vh] md:max-h-[75vh] object-contain rounded-xl shadow-2xl" onclick="event.stopPropagation()">
@@ -331,12 +320,18 @@
         </div>
     </div>
 
-    <!-- MODAL 2: CALCULADORA DE CAMBIO Y PAGO RÁPIDO -->
     <div id="checkoutModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl overflow-hidden max-w-md w-full shadow-2xl transform scale-95 transition-transform duration-200 max-h-[90dvh] overflow-y-auto custom-scroll" id="checkoutBox">
             <div class="bg-slate-900 p-5 md:p-6 text-center relative shrink-0">
                 <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-                <h3 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Total a Pagar</h3>
+                
+                <div class="flex justify-between text-slate-400 text-sm font-bold mb-1 px-4 mt-2">
+                    <span>Subtotal:</span> <span id="checkoutSubtotalDisplay">$0.00</span>
+                </div>
+                <div class="flex justify-between text-slate-400 text-sm font-bold mb-4 px-4 pb-4 border-b border-slate-700">
+                    <span>IVA (16%):</span> <span id="checkoutIvaDisplay">$0.00</span>
+                </div>
+                <h3 class="text-xs md:text-sm font-bold text-slate-300 uppercase tracking-wider mb-1">Total a Pagar</h3>
                 <div class="text-4xl md:text-5xl font-black text-emerald-400" id="checkoutTotalDisplay">$0.00</div>
             </div>
             
@@ -371,7 +366,6 @@
         </div>
     </div>
 
-    <!-- MODAL 3: PROMPT GENÉRICO -->
     <div id="genericPromptModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="genericPromptBox">
             <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2 flex items-center gap-2"><i class="fas fa-pen-nib text-blue-600"></i> <span id="genericPromptTitle">Razón</span></h3>
@@ -384,7 +378,6 @@
         </div>
     </div>
 
-    <!-- MODAL 4: CONFIRMACIÓN GENÉRICA -->
     <div id="confirmModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[120] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="confirmBox">
             <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2 flex items-center gap-2">
@@ -399,20 +392,16 @@
     </div>
 
     <script>
-        // GLOBALES Y CAJERO ACTUAL
         let cajeroActual = localStorage.getItem('een_pos_nombre') || null;
-        let usuariosCargados = {}; // Variable para validar el PIN en memoria
+        let usuariosCargados = {}; 
 
         let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; 
         window.reporteFacturasEfectivo = []; window.reporteFacturasTodas = []; window.reporteMostrador = [];        
         let showInventoryConfig = false;
-        let currentRenderLimit = 100; // Iniciamos mostrando 100 para no trabar el navegador
+        let currentRenderLimit = 100; 
 
         const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
 
-        // ==========================================
-        // SISTEMA DE LOGIN DE CAJERO
-        // ==========================================
         function verificarLogin() {
             if (!cajeroActual) {
                 document.getElementById('loginModal').classList.remove('hidden');
@@ -431,7 +420,7 @@
                 usuariosCargados = {};
                 snap.forEach(doc => {
                     const data = doc.data();
-                    usuariosCargados[data.nombre] = data.pin || null; // Guarda temporalmente el PIN ligado al nombre
+                    usuariosCargados[data.nombre] = data.pin || null;
                     select.innerHTML += `<option value="${data.nombre}">${data.nombre}</option>`;
                 });
             });
@@ -457,11 +446,10 @@
             
             if(!select.value) return showToast("Debes seleccionar tu nombre", "error");
             
-            // VALIDACIÓN DEL PIN DE SEGURIDAD
             const expectedPin = usuariosCargados[select.value];
             if (expectedPin) {
                 if (pinInput.value !== String(expectedPin)) {
-                    pinInput.value = ''; // Limpiar el input si falló
+                    pinInput.value = ''; 
                     pinInput.focus();
                     return showToast("PIN incorrecto", "error");
                 }
@@ -469,7 +457,7 @@
             
             cajeroActual = select.value;
             localStorage.setItem('een_pos_nombre', cajeroActual);
-            pinInput.value = ''; // Limpiar para que no se quede guardado visualmente
+            pinInput.value = ''; 
             verificarLogin();
         };
 
@@ -489,9 +477,6 @@
             }
         };
 
-        // ==========================================
-        // ATAJOS DE TECLADO
-        // ==========================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F2') { e.preventDefault(); document.getElementById('searchInput').focus(); }
             if (e.key === 'F9') { e.preventDefault(); if(cart.length > 0 && document.getElementById('checkoutModal').classList.contains('hidden')) openCheckoutModal(); }
@@ -503,7 +488,6 @@
             }
         });
 
-        // UI & MODALES
         function showToast(msg, type = 'success') {
             const t = document.getElementById('toast'); t.innerText = msg;
             t.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl transition-opacity z-[100] font-bold text-sm text-center ${type === 'error' ? 'bg-red-600 text-white' : (type === 'info' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-white')}`;
@@ -522,9 +506,15 @@
 
         let currentTotalToPay = 0;
         
+        // CÁLCULO ACTUALIZADO CON IVA
         function openCheckoutModal() {
             if (cart.length === 0) return;
-            currentTotalToPay = cart.reduce((sum, item) => sum + ((item.precio||0) * (item.qty||1)), 0);
+            const subtotal = cart.reduce((sum, item) => sum + ((item.precio||0) * (item.qty||1)), 0);
+            const iva = subtotal * 0.16;
+            currentTotalToPay = subtotal + iva; 
+            
+            document.getElementById('checkoutSubtotalDisplay').innerText = formatMoney(subtotal);
+            document.getElementById('checkoutIvaDisplay').innerText = formatMoney(iva);
             document.getElementById('checkoutTotalDisplay').innerText = formatMoney(currentTotalToPay);
             document.getElementById('inputEfectivoRecibido').value = '';
             document.getElementById('checkoutCambioDisplay').innerText = "$0.00";
@@ -603,34 +593,29 @@
             if(tabId === 'corte') loadTodaySales();
         }
 
-        // ==========================================
-        // CARGA DE DATOS: FACTURACIÓN ES EL REY
-        // ==========================================
+        // CARGA DE DATOS CORREGIDA A 'catalogo_oficial'
         async function loadData(forceRefresh = false) {
             const loadingUI = document.getElementById('loadingProducts');
             loadingUI.classList.remove('hidden');
             document.getElementById('productsGrid').classList.add('hidden');
 
             try {
-                // 0. Revisar configuración
                 try {
                     const configDoc = await db.collection('configuracion').doc('pos_settings').get();
                     if (configDoc.exists) { showInventoryConfig = configDoc.data().mostrar_inventario === true; }
                 } catch(e) {}
                 if(showInventoryConfig) { document.getElementById('inventoryStatusBadge').classList.remove('hidden'); }
 
-                // --- SISTEMA DE CACHÉ PARA AHORRAR CUOTA DE FIREBASE ---
                 if (!forceRefresh) {
                     const cachedData = localStorage.getItem('een_catalog_cache');
                     const cacheTime = localStorage.getItem('een_catalog_cache_time');
-                    // Si existe caché y tiene menos de 12 horas de antigüedad (43200000 ms)
                     if (cachedData && cacheTime && (Date.now() - parseInt(cacheTime) < 43200000)) {
                         catalogProducts = JSON.parse(cachedData);
                         loadingUI.classList.add('hidden');
                         document.getElementById('productsGrid').classList.remove('hidden');
                         resetRenderLimitAndFilter();
                         setTimeout(()=> document.getElementById('searchInput').focus(), 500);
-                        return; // TERMINA LA FUNCIÓN AQUÍ. ¡CERO LECTURAS A FIREBASE!
+                        return; 
                     }
                 }
 
@@ -638,18 +623,16 @@
 
                 let tempCatalog = {};
 
-                // PASO 1: CARGAR TODO CATALOGO_FACTURACION (LA FUENTE DE LA VERDAD)
-                const factSnap = await db.collection('catalogo_facturacion').get();
-                if (factSnap.empty) throw new Error("No hay productos en catalogo_facturacion");
+                // PASO 1: CARGAR TODO CATALOGO_OFICIAL (Corrección aplicada)
+                const factSnap = await db.collection('catalogo_oficial').get();
+                if (factSnap.empty) throw new Error("No hay productos en catalogo_oficial");
 
                 factSnap.forEach(doc => {
                     const data = doc.data();
                     
-                    // SUPER RED: Se añaden las versiones con acento "Código", "CÓDIGO"
                     const codeRaw = data.codigo_oficial || data.Codigo_oficial || data.codigo || data.Codigo || data.CODIGO || data['Código'] || data['CÓDIGO'] || data.clave || data.Clave || data.CLAVE || data.sku || data.SKU || data.ItemCode || data.itemCode || doc.id;
                     const code = String(codeRaw).trim();
                     
-                    // SUPER RED: Se añaden las versiones con acento "Descripción", "DESCRIPCIÓN"
                     const nombreRaw = data.descripcion_oficial || data.Descripcion_oficial || data.nombre_oficial || data.nombre || data.Nombre || data.descripcion || data.Descripcion || data.DESCRIPCION || data['Descripción'] || data['DESCRIPCIÓN'] || data.concepto || data.Concepto || data.CONCEPTO || data.ItemName || data.itemName || 'Articulo S/N';
                     const nombre = String(nombreRaw).trim();
                     
@@ -723,7 +706,6 @@
                 }
                 await Promise.all(promesasPaquetes); 
 
-                // PASO 4: FORMATEAR Y MOSTRAR AL USUARIO
                 catalogProducts = Object.values(tempCatalog).map(p => {
                     p.empaques_tips.sort((a,b) => a - b); 
                     p.imagen = p.imagenes.length > 0 ? p.imagenes[0] : null; 
@@ -732,7 +714,6 @@
                 
                 catalogProducts.sort((a,b) => String(a.nombre).localeCompare(String(b.nombre)));
 
-                // --- GUARDAR EN CACHÉ PARA LA PRÓXIMA VEZ ---
                 try {
                     localStorage.setItem('een_catalog_cache', JSON.stringify(catalogProducts));
                     localStorage.setItem('een_catalog_cache_time', Date.now().toString());
@@ -750,11 +731,8 @@
             }
         }
 
-        // ==========================================
-        // FILTROS Y RENDERIZADO INFINITO
-        // ==========================================
         window.resetRenderLimitAndFilter = () => {
-            currentRenderLimit = 100; // Resetear el limite al escribir en el buscador
+            currentRenderLimit = 100; 
             filterCatalog();
         };
 
@@ -768,7 +746,6 @@
             const grid = document.getElementById('productsGrid'); 
             grid.innerHTML = '';
             
-            // Limpiamos espacios múltiples para hacer la búsqueda a prueba de errores
             const cleanTerm = term.replace(/\s+/g, ' ');
 
             filteredCatalog = catalogProducts.filter(p => 
@@ -813,7 +790,6 @@
                 card.className = "bg-white border border-slate-200 p-2.5 md:p-3 rounded-2xl shadow-sm hover:border-blue-300 hover:shadow-md transition cursor-pointer flex gap-2 md:gap-3 fade-in relative overflow-hidden";
                 card.onclick = () => addToCart(p);
                 
-                // NOTA DE ACTUALIZACIÓN: Se reemplazó line-clamp-2 por break-words whitespace-normal
                 card.innerHTML = `
                     ${imageBlock}
                     <div class="flex-1 flex flex-col justify-center min-w-0">
@@ -831,7 +807,6 @@
                 grid.appendChild(card);
             });
 
-            // BOTÓN DE CARGAR MÁS SI HAY MÁS PRODUCTOS
             if (filteredCatalog.length > currentRenderLimit) {
                 const hiddenCount = filteredCatalog.length - currentRenderLimit;
                 const loadMoreBtnContainer = document.createElement('div');
@@ -845,7 +820,6 @@
             }
         }
 
-        // LÓGICA DEL CARRITO
         function addToCart(product) {
             const existing = cart.find(x => x.id_facturacion === product.id_facturacion);
             if (existing) existing.qty += 1; else cart.push({ ...product, qty: 1 });
@@ -865,20 +839,23 @@
             });
         }
 
+        // RENDER CARRITO ACTUALIZADO CON CÁLCULO DE IVA
         function renderCart() {
-            const container = document.getElementById('cartItems'); const totalEl = document.getElementById('cartTotal'); const btnPreparar = document.getElementById('btnPrepararCobro');
+            const container = document.getElementById('cartItems'); const btnPreparar = document.getElementById('btnPrepararCobro');
             if (cart.length === 0) {
                 container.innerHTML = `<div class="text-center py-10 md:py-20 text-slate-300 font-medium text-xs md:text-sm flex flex-col items-center"><i class="fas fa-shopping-basket text-3xl md:text-4xl mb-3 opacity-50"></i>Ticket vacío.</div>`;
-                totalEl.innerText = "$0.00"; btnPreparar.disabled = true; btnPreparar.classList.add('opacity-50', 'cursor-not-allowed'); return;
+                document.getElementById('cartSubtotal').innerText = "$0.00";
+                document.getElementById('cartIva').innerText = "$0.00";
+                document.getElementById('cartTotal').innerText = "$0.00"; 
+                btnPreparar.disabled = true; btnPreparar.classList.add('opacity-50', 'cursor-not-allowed'); return;
             }
 
             btnPreparar.disabled = false; btnPreparar.classList.remove('opacity-50', 'cursor-not-allowed');
-            container.innerHTML = ''; let total = 0;
+            container.innerHTML = ''; let subtotal = 0;
 
             cart.forEach((item, index) => {
-                const subtotal = item.precio * item.qty; total += subtotal;
+                const itemSubtotal = item.precio * item.qty; subtotal += itemSubtotal;
                 
-                // NOTA DE ACTUALIZACIÓN: Se agregó un campo input visible, bordeado, que actualiza al vuelo
                 container.innerHTML += `
                     <div class="bg-slate-50 border border-slate-100 p-2 md:p-3 rounded-xl flex flex-col relative animate-[fadeIn_0.2s_ease-out]">
                         <div class="flex justify-between items-start mb-2">
@@ -896,47 +873,51 @@
                             </div>
                             <div class="text-right">
                                 <div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div>
-                                <div class="item-subtotal text-xs md:text-sm font-black text-slate-800">${formatMoney(subtotal)}</div>
+                                <div class="item-subtotal text-xs md:text-sm font-black text-slate-800">${formatMoney(itemSubtotal)}</div>
                             </div>
                         </div>
                     </div>`;
             });
-            totalEl.innerText = formatMoney(total);
+            
+            const iva = subtotal * 0.16;
+            const total = subtotal + iva;
+            document.getElementById('cartSubtotal').innerText = formatMoney(subtotal);
+            document.getElementById('cartIva').innerText = formatMoney(iva);
+            document.getElementById('cartTotal').innerText = formatMoney(total);
         }
 
-        // FUNCIONES NUEVAS PARA MANEJAR LA EDICIÓN DE CANTIDAD EN TIEMPO REAL SIN PERDER EL FOCO
+        // CÁLCULO VISUAL CON IVA
         window.manualCartQtyVisual = (index, val, el) => {
             let num = parseInt(val);
-            if (isNaN(num) || num < 0) return; // Permite vaciar el input un momento sin arrojar errores
+            if (isNaN(num) || num < 0) return; 
             cart[index].qty = num;
             
-            // Actualizar visualmente el subtotal de ese renglón
-            const subtotal = cart[index].precio * num;
+            const itemSubtotal = cart[index].precio * num;
             const itemRow = el.closest('div.bg-slate-50');
-            itemRow.querySelector('.item-subtotal').innerText = formatMoney(subtotal);
+            itemRow.querySelector('.item-subtotal').innerText = formatMoney(itemSubtotal);
 
-            // Recalcular Total General
-            let total = 0;
-            cart.forEach(x => total += (x.precio * (x.qty || 1)));
+            let subtotal = 0;
+            cart.forEach(x => subtotal += (x.precio * (x.qty || 1)));
+            const iva = subtotal * 0.16;
+            const total = subtotal + iva;
+            
+            document.getElementById('cartSubtotal').innerText = formatMoney(subtotal);
+            document.getElementById('cartIva').innerText = formatMoney(iva);
             document.getElementById('cartTotal').innerText = formatMoney(total);
         };
 
         window.manualCartQtyBlur = (index, val) => {
             let num = parseInt(val);
-            if(isNaN(num) || num < 1) num = 1; // Si lo dejó vacío, regresarlo a 1
+            if(isNaN(num) || num < 1) num = 1; 
             cart[index].qty = num;
-            renderCart(); // Se vuelve a armar el carrito solo cuando el usuario saca el puntero/dedo
+            renderCart(); 
         };
 
-        // ==========================================
-        // PROCESAMIENTO E IMPRESIÓN DIRECTA
-        // ==========================================
         async function processSale() {
             if (cart.length === 0) return;
             const btnFinal = document.getElementById('btnConfirmarVentaFinal'); 
             if (btnFinal.disabled) return; 
 
-            // MEJORA: Validación de red antes de procesar para evitar cuelgues
             if (!navigator.onLine) {
                 showToast("Estás sin conexión a internet. Espera a que regrese la red para cobrar.", "error");
                 return;
@@ -976,9 +957,8 @@
 
             try {
                 const counterRef = db.collection('configuracion').doc('consecutivos');
-                const newSaleRef = db.collection('ventas_mostrador').doc(); // Crear referencia de documento de forma segura
+                const newSaleRef = db.collection('ventas_mostrador').doc(); 
 
-                // MEJORA: TRANSACCIÓN ATÓMICA. Evita saltos en el folio contable.
                 await db.runTransaction(async (transaction) => {
                     const doc = await transaction.get(counterRef); 
                     let newSeq = 1;
@@ -999,7 +979,7 @@
                     };
 
                     transaction.set(counterRef, { venta_mostrador: newSeq }, { merge: true }); 
-                    transaction.set(newSaleRef, saleData); // Guarda la venta ligada en el mismo paso
+                    transaction.set(newSaleRef, saleData); 
                 });
                 
                 const printData = {
@@ -1033,6 +1013,7 @@
             }
         }
 
+        // TICKET MANTIENE LÓGICA DE IVA 
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             
@@ -1052,7 +1033,6 @@
             const subtotal = total / 1.16; 
             const iva = total - subtotal;
             
-            // MODIFICACIÓN APLICADA: SE CAMBIÓ EL ORDEN PARA QUE ALMACÉN SEA LA COPIA 1
             const copies = [
                 { title: 'COPIA 1 - ALMACÉN', signType: 'warehouse' }, 
                 { title: 'COPIA 2 - FIRMA (SUCURSAL)', signType: 'client' }, 
@@ -1211,12 +1191,7 @@
                 snap.forEach(doc => { 
                     const data = doc.data(); 
                     if (data.estado !== 'CANCELADA') { 
-                        
-                        // Lógica del nuevo filtro: Si es "individual", ignora las ventas que no sean del cajero actual
-                        if (filtroModalidad === 'individual' && data.vendedor !== cajeroActual) {
-                            return; // Salta esta venta
-                        }
-
+                        if (filtroModalidad === 'individual' && data.vendedor !== cajeroActual) return;
                         totalMostradorDelDia += data.total; 
                         window.reporteMostrador.push({ 
                             folio: data.folio, 
@@ -1292,13 +1267,11 @@
             else { resDiv.className = "text-3xl md:text-4xl font-black text-red-400"; txtDiv.innerText = "Faltante en caja ⚠️"; txtDiv.className = "text-xs md:text-sm font-bold mt-2 text-red-300"; }
         }
 
-        // NUEVO: GENERADOR DE REPORTE DE ARTÍCULOS VENDIDOS
         window.exportProductsReport = async () => {
             showToast("Calculando reporte de artículos...", "info");
             const todayStart = new Date(); todayStart.setHours(0,0,0,0);
             
             try {
-                // Buscamos solo lo de hoy
                 const snap = await db.collection('ventas_mostrador')
                     .where('fecha', '>=', todayStart)
                     .get();
@@ -1326,7 +1299,7 @@
                     }
                 });
 
-                const arrProductos = Object.values(productos).sort((a,b) => b.subtotal - a.subtotal); // Ordenar por mas vendidos
+                const arrProductos = Object.values(productos).sort((a,b) => b.subtotal - a.subtotal); 
                 
                 if (arrProductos.length === 0) {
                     showToast("No hay artículos vendidos hoy.", "error");
@@ -1361,7 +1334,6 @@
             }
         };
 
-        // ACTUALIZADO: AHORA INYECTA FÓRMULAS REALES DE EXCEL EN LUGAR DE TEXTO ESTÁTICO
         window.exportCorteToExcel = () => {
             const dateStr = new Date().toLocaleString('es-MX'); const fileDate = new Date().toISOString().slice(0,10); const wsData = [];
             const writeCell = (r, c, val) => { while (wsData.length <= r) wsData.push([]); wsData[r][c] = val; };
@@ -1374,23 +1346,21 @@
             let sumEf = 0; if (window.reporteFacturasEfectivo && window.reporteFacturasEfectivo.length > 0) { window.reporteFacturasEfectivo.forEach(f => { writeCell(rowEf, 4, f.folio); writeCell(rowEf, 5, f.metodo_original); writeCell(rowEf, 6, f.monto_efectivo); sumEf += f.monto_efectivo; rowEf++; }); } else { writeCell(rowEf++, 4, 'Sin datos'); } writeCell(rowEf, 5, 'TOTAL EFECTIVO:'); writeCell(rowEf, 6, sumEf);
             let sumMos = 0; if (window.reporteMostrador && window.reporteMostrador.length > 0) { window.reporteMostrador.forEach(m => { writeCell(rowMos, 8, m.folio); writeCell(rowMos, 9, m.fecha); writeCell(rowMos, 10, m.total); sumMos += m.total; rowMos++; }); } else { writeCell(rowMos++, 8, 'Sin datos'); } writeCell(rowMos, 9, 'TOTAL MOSTRADOR:'); writeCell(rowMos, 10, sumMos);
             
-            // FÓRMULAS EXCEL EN LA SECCIÓN DEL FÍSICO
             let sumFisico = 0; 
-            const inicioFisico = rowDen + 1; // Para la fórmula SUM
+            const inicioFisico = rowDen + 1; 
             denominations.forEach(val => { 
                 const qty = denomCounts[val] || 0; 
                 const rowTotal = val * qty; 
                 sumFisico += rowTotal; 
-                writeCell(rowDen, 12, val); // Valor numérico puro
+                writeCell(rowDen, 12, val); 
                 writeCell(rowDen, 13, qty); 
-                // Formula: Columna M (12) * Columna N (13)
                 writeCell(rowDen, 14, { t: 'n', v: rowTotal, f: `M${rowDen+1}*N${rowDen+1}` }); 
                 rowDen++; 
             }); 
             const finFisico = rowDen;
             writeCell(rowDen, 12, 'TOTAL FÍSICO:'); 
             writeCell(rowDen, 14, { t: 'n', v: sumFisico, f: `SUM(O${inicioFisico}:O${finFisico})` }); 
-            const indexTotalFisico = rowDen + 1; // Registro de celda final de fisico
+            const indexTotalFisico = rowDen + 1; 
             rowDen += 2; 
             
             writeCell(rowDen++, 12, '--- CÁLCULOS DEL SISTEMA ---'); 
@@ -1409,7 +1379,6 @@
             rowDen++;
             
             writeCell(rowDen, 12, 'TOTAL TEÓRICO'); 
-            // Formula: Efectivo (O..) + App (O..)
             writeCell(rowDen, 14, { t: 'n', v: teorico, f: `O${indexFacturado}+O${indexApp}` }); 
             const indexTotalTeorico = rowDen + 1;
             rowDen++;
@@ -1417,7 +1386,6 @@
             rowDen++; 
             writeCell(rowDen++, 12, '--- RESULTADO ---'); 
             writeCell(rowDen, 12, 'DIFERENCIA:'); 
-            // Formula: Fisico - Teorico
             writeCell(rowDen, 14, { t: 'n', v: diff, f: `O${indexTotalFisico}-O${indexTotalTeorico}` }); 
             rowDen++;
             
