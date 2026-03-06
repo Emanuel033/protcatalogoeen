@@ -628,7 +628,8 @@
                 factSnap.forEach(doc => {
                     const data = doc.data();
                     
-                    const codeRaw = data.codigo_oficial || data.Codigo_oficial || data.codigo || data.Codigo || data.CODIGO || data['Código'] || data['CÓDIGO'] || data.clave || data.Clave || data.CLAVE || data.sku || data.SKU || data.ItemCode || data.itemCode || doc.id;
+                    // CORRECCIÓN: Priorizar codigo_sistema_oficial para evadir el problema de las diagonales en Firebase
+                    const codeRaw = data.codigo_sistema_oficial || data.codigo_oficial || data.Codigo_oficial || data.codigo || data.Codigo || data.CODIGO || data['Código'] || data['CÓDIGO'] || data.clave || data.Clave || data.CLAVE || data.sku || data.SKU || data.ItemCode || data.itemCode || doc.id;
                     const code = String(codeRaw).trim();
                     
                     const nombreRaw = data.descripcion_oficial || data.Descripcion_oficial || data.nombre_oficial || data.nombre || data.Nombre || data.descripcion || data.Descripcion || data.DESCRIPCION || data['Descripción'] || data['DESCRIPCIÓN'] || data.concepto || data.Concepto || data.CONCEPTO || data.ItemName || data.itemName || 'Articulo S/N';
@@ -655,7 +656,9 @@
                     const masterSnap = await db.collection('productos_master').where('activo', '==', true).get();
                     masterSnap.forEach(doc => {
                         const data = doc.data();
-                        const masterCodeRaw = data.codigo_sistema_oficial || data.codigo || data.codigo_barras || data.sku || data.SKU || '';
+                        
+                        // CORRECCIÓN: Priorizar codigo_sistema_oficial también en el maestro
+                        const masterCodeRaw = data.codigo_sistema_oficial || data.codigo_oficial || data.codigo || data.codigo_barras || data.sku || data.SKU || '';
                         
                         // MINÚSCULAS PARA EVITAR PROBLEMAS DE CRUCE
                         const masterCode = String(masterCodeRaw).trim().toLowerCase();
