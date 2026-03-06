@@ -506,7 +506,6 @@
 
         let currentTotalToPay = 0;
         
-        // CÁLCULO ACTUALIZADO CON IVA
         function openCheckoutModal() {
             if (cart.length === 0) return;
             const subtotal = cart.reduce((sum, item) => sum + ((item.precio||0) * (item.qty||1)), 0);
@@ -593,7 +592,6 @@
             if(tabId === 'corte') loadTodaySales();
         }
 
-        // CARGA DE DATOS CORREGIDA A 'catalogo_oficial'
         async function loadData(forceRefresh = false) {
             const loadingUI = document.getElementById('loadingProducts');
             loadingUI.classList.remove('hidden');
@@ -623,9 +621,9 @@
 
                 let tempCatalog = {};
 
-                // PASO 1: CARGAR TODO CATALOGO_OFICIAL (Corrección aplicada)
-                const factSnap = await db.collection('catalogo_oficial').get();
-                if (factSnap.empty) throw new Error("No hay productos en catalogo_oficial");
+                // PASO 1: CARGAR TODO CATALOGO_FACTURACION
+                const factSnap = await db.collection('catalogo_facturacion').get();
+                if (factSnap.empty) throw new Error("No hay productos en catalogo_facturacion");
 
                 factSnap.forEach(doc => {
                     const data = doc.data();
@@ -658,11 +656,16 @@
                     masterSnap.forEach(doc => {
                         const data = doc.data();
                         const masterCodeRaw = data.codigo_sistema_oficial || data.codigo || data.codigo_barras || data.sku || data.SKU || '';
-                        const masterCode = String(masterCodeRaw).trim();
+                        
+                        // MINÚSCULAS PARA EVITAR PROBLEMAS DE CRUCE
+                        const masterCode = String(masterCodeRaw).trim().toLowerCase();
 
                         if (masterCode) {
                             for (const factId in tempCatalog) {
-                                if (tempCatalog[factId].codigo === masterCode) {
+                                // MINÚSCULAS PARA EVITAR PROBLEMAS DE CRUCE
+                                const codigoFacturacionLimpio = String(tempCatalog[factId].codigo).trim().toLowerCase();
+                                
+                                if (codigoFacturacionLimpio === masterCode) {
                                     
                                     tempCatalog[factId].ids_master_vinculados.push(doc.id);
 
@@ -839,7 +842,6 @@
             });
         }
 
-        // RENDER CARRITO ACTUALIZADO CON CÁLCULO DE IVA
         function renderCart() {
             const container = document.getElementById('cartItems'); const btnPreparar = document.getElementById('btnPrepararCobro');
             if (cart.length === 0) {
@@ -886,7 +888,6 @@
             document.getElementById('cartTotal').innerText = formatMoney(total);
         }
 
-        // CÁLCULO VISUAL CON IVA
         window.manualCartQtyVisual = (index, val, el) => {
             let num = parseInt(val);
             if (isNaN(num) || num < 0) return; 
@@ -1013,7 +1014,6 @@
             }
         }
 
-        // TICKET MANTIENE LÓGICA DE IVA 
         function printTicketHTML(venta) {
             const printArea = document.getElementById('print-ticket');
             
