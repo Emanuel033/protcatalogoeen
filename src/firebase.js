@@ -12,4 +12,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Exportamos la base de datos (Firestore) para usarla en el resto de la app
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+});
