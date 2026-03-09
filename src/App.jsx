@@ -7,7 +7,7 @@ import Footer from './components/Footer'
 import FloatingButtons from './components/FloatingButtons'
 import CartDrawer from './components/CartDrawer'
 import QRScanner from './components/QRScanner' // <--- IMPORTAMOS
-import BackupTool from './components/BackupTool' // <--- RESPALDO
+
 function App() {
   return (
     <div className="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen relative overflow-x-hidden">
@@ -15,7 +15,7 @@ function App() {
       <Navbar />
       <Hero />
       <CategoriesBar />
-      <BackupTool />
+      
 
       <main className="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
         <ProductGrid />
