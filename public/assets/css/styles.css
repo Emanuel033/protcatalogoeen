@@ -1,0 +1,114 @@
+/* ==========================================
+   ESTILOS GENERALES Y UTILIDADES
+   ========================================== */
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+.fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+.hero-pattern {
+    background-image: radial-gradient(circle at 20% 150%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 80% -50%, rgba(255,255,255,0.15) 0%, transparent 50%);
+}
+
+.badge-pulse { animation: pulse 2s infinite; }
+
+@keyframes pulse { 
+    0%, 100% { opacity: 1; } 
+    50% { opacity: .7; } 
+}
+
+/* ==========================================
+   ANIMACIONES EXCLUSIVAS (CARRITO)
+   ========================================== */
+@keyframes popBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25) rotate(-5deg); background-color: #22c55e; border-color: #22c55e; } /* Verde éxito */
+    100% { transform: scale(1); }
+}
+.animate-pop { 
+    animation: popBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+
+/* ==========================================
+   SISTEMA DE TOUR A PRUEBA DE BALAS
+   ========================================== */
+#tour-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.8) !important;
+    backdrop-filter: blur(2px);
+    z-index: 99990 !important;
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Resaltado súper-prioritario */
+.tour-highlight {
+    position: relative !important;
+    z-index: 99995 !important;
+    background-color: #ffffff !important;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.8), 0 0 25px rgba(0,0,0,0.5) !important;
+    pointer-events: auto !important;
+    transition: all 0.3s ease;
+}
+
+/* Prevenir que contenedores padres corten la caja del tour */
+.tour-fix-stacking {
+    z-index: 99992 !important;
+    overflow: visible !important;
+}
+
+/* Casos especiales para respetar colores de fondos oscuros */
+nav.tour-highlight, header.tour-highlight {
+    background-color: rgb(49, 46, 129) !important; /* bg-indigo-900 */
+}
+
+/* Cuadro de diálogo del Tour */
+#tour-tooltip {
+    position: fixed;
+    z-index: 99999 !important;
+    width: 320px;
+    max-width: 92vw;
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.05);
+    display: none;
+}
+
+/* ==========================================
+   ESTILOS PARA BOTONES SELECCIONADOS (CARRITO)
+   ========================================== */
+.option-btn.selected {
+    border-color: #6366f1 !important; /* Borde Índigo brillante */
+    background-color: #eef2ff !important; /* Fondo Índigo súper clarito */
+    color: #4338ca !important; /* Texto Índigo fuerte */
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.15) !important;
+    transform: translateY(-2px); /* Pequeño salto hacia arriba */
+}
+
+.pay-btn.selected {
+    background-color: #4f46e5 !important; /* Fondo Índigo sólido */
+    color: #ffffff !important; /* Texto blanco */
+    border-color: #4f46e5 !important;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3) !important;
+    transform: translateY(-2px);
+}
+
+/* Aclarar el texto pequeño dentro del botón de pago seleccionado */
+.pay-btn.selected span {
+    color: #e0e7ff !important;
+}

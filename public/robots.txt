@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html/, /login.html/
+# Sitemap location
+Sitemap: https://productoseen.web.app/sitemap.xml
