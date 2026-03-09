@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+// Importamos las nuevas herramientas de caché offline de Firestore
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
 // Usamos la configuración de tu proyecto "productoseen"
 const firebaseConfig = {
