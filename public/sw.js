@@ -8,7 +8,7 @@ const urlsToCache = [
   './chofer.html',
   './manifest-chofer.json',
   // Bibliotecas compartidas (Tailwind, FontAwesome, etc.)
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 
 self.addEventListener('install', event => {
