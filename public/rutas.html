@@ -13,6 +13,9 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Librería para Arrastrar y Soltar (Optimizada para Móviles) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -59,6 +62,11 @@
         /* Checkboxes tipo Pill (Documentación) */
         .doc-checkbox input:checked + div { background-color: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
         .doc-checkbox-ciego input:checked + div { background-color: #1e293b; color: white; border-color: #0f172a; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+
+        /* Estilos para arrastrar y soltar (Drag & Drop) en Móviles */
+        .drag-handle { touch-action: none; /* Previene scroll en celular al agarrar */ }
+        .sortable-ghost { opacity: 0.4; background-color: #e0e7ff; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
+        .sortable-drag { cursor: grabbing !important; }
     </style>
 </head>
 <body class="relative w-screen h-screen overflow-hidden text-slate-800">
@@ -687,7 +695,6 @@
         window.setFilter = (filtro) => {
             filtroActual = filtro;
             
-            // 1. Limpiar todos los botones a su estado inactivo por defecto
             document.querySelectorAll('.filter-btn').forEach(b => {
                 b.classList.remove('bg-slate-800', 'text-white', 'shadow-md', 'scale-105', 'bg-emerald-500', 'bg-red-500', 'shadow-emerald-500/30', 'shadow-red-500/30', 'shadow-slate-800/30');
                 
@@ -702,7 +709,6 @@
 
             const activeBtn = document.getElementById(`filter-${filtro}`);
             
-            // 2. Aplicar estilos destacados al botón activo
             if (activeBtn) {
                 if (filtro === 'entregado') {
                     activeBtn.className = 'filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-md shadow-emerald-500/30 transition-all cursor-pointer transform scale-105';
@@ -712,7 +718,6 @@
                     activeBtn.className = 'filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-800 text-white shadow-md shadow-slate-800/30 transition-all cursor-pointer transform scale-105';
                 }
 
-                // 3. AUTO-CENTRADO EN LA BARRA HORIZONTAL (UX Improvement)
                 const container = activeBtn.parentElement;
                 const scrollLeft = activeBtn.offsetLeft - (container.offsetWidth / 2) + (activeBtn.offsetWidth / 2);
                 container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
@@ -725,7 +730,6 @@
             const container = document.getElementById('lista-pedidos'); container.innerHTML = '';
             const termino = document.getElementById('buscar-ruta-input')?.value.toLowerCase() || '';
             
-            // Lógica Central de Filtrado por Estado/Pestañas
             let filtradosBase = viajesAgrupados;
             if (filtroActual !== 'todos') {
                 filtradosBase = viajesAgrupados.filter(p => {
@@ -736,10 +740,8 @@
                 });
             }
 
-            // Filtro por Texto y Búsqueda
             const filtrados = filtradosBase.filter(v => v.cliente_nombre.toLowerCase().includes(termino) || v.id.toLowerCase().includes(termino) || (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino)));
             
-            // Ordenamiento lógico y cronológico con fechas más recientes arriba
             filtrados.sort((a, b) => {
                 if (a.estado !== b.estado) {
                     const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 };
@@ -747,18 +749,15 @@
                 }
                 
                 if (a.estado === 'entregado') {
-                    // Ordenados por fecha de entrega o actualización (completado), de más reciente a más viejo
                     const msA = getMs(a.fecha_entrega) || getMs(a.fecha_actualizacion);
                     const msB = getMs(b.fecha_entrega) || getMs(b.fecha_actualizacion);
                     return msB - msA; 
                 }
                 
                 if (a.estado === 'camino' && a.fecha_salida && b.fecha_salida) {
-                    // Únicamente los que ya partieron (En Ruta) se mantienen con su orden geográfico de ruta
                     return (a.orden_ruta || 999999) - (b.orden_ruta || 999999);
                 }
                 
-                // Fallidos, Pendientes y En Rampa: Se ordenan cronológicamente del más reciente al más antiguo
                 return getMs(b.fecha_creacion) - getMs(a.fecha_creacion);
             });
 
@@ -788,7 +787,6 @@
                 } else if (v.estado === 'camino' && v.fecha_salida) {
                     dateBadge = `<span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Salida"><i class="fas fa-truck-fast text-blue-400"></i> Salida: ${formatDateShort(v.fecha_salida) || 'Sin salida'}</span>`;
                 } else if (v.estado === 'entregado') {
-                    // Usamos fecha_entrega si existe, de lo contrario fallback a fecha_actualizacion
                     const fFin = v.fecha_entrega || v.fecha_actualizacion;
                     dateBadge = `<span class="text-[8px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Finalización"><i class="fas fa-check-double text-emerald-400"></i> Fin: ${formatDateShort(fFin) || 'Sin fecha'}</span>`;
                 } else if (v.estado === 'fallido') {
@@ -969,10 +967,11 @@
                 viajesMismoCamion.forEach((v, idx) => {
                     wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
                     
-                    let btnUp = '', btnDown = '';
+                    let btnUp = '', btnDown = '', dragHandle = '';
                     if (estadoActual === 'camino') {
                         btnUp = idx > 0 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, -1); event.stopPropagation();" class="w-5 h-5 bg-white border border-slate-200 rounded text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-chevron-up text-[8px]"></i></button>` : '';
                         btnDown = idx < viajesMismoCamion.length - 1 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, 1); event.stopPropagation();" class="w-5 h-5 bg-white border border-slate-200 rounded text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-chevron-down text-[8px]"></i></button>` : '';
+                        dragHandle = `<div class="drag-handle w-4 h-full flex items-center justify-center text-slate-300 hover:text-indigo-500 cursor-grab active:cursor-grabbing"><i class="fas fa-grip-vertical"></i></div>`;
                     }
 
                     const isCurrentItem = v.id === viajeSeleccionado.id;
@@ -984,7 +983,12 @@
                     const urgBadge = v.urgente ? `<span class="text-[7px] font-black uppercase ml-1 text-red-500">Urg.</span>` : '';
                     const statusIcon = v.estado === 'entregado' ? `<i class="fas fa-check-circle text-emerald-500 ml-1"></i>` : (v.estado === 'fallido' ? `<i class="fas fa-exclamation-triangle text-red-500 ml-1"></i>` : '');
                     
-                    htmlSecuenciaItems += `<li class="flex items-center gap-1.5 py-1.5 relative border-l-2 border-slate-200 ml-2.5 pl-3 before:absolute before:w-1.5 before:h-1.5 before:bg-slate-200 before:rounded-full before:-left-[4px] before:top-1/2 before:-translate-y-1/2"><div class="w-4 h-4 ${bgColor} text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-sm shrink-0">${idx + 1}</div><span class="truncate text-[10px] flex-1 ${textColor}">${v.cliente_nombre}${urgBadge}${statusIcon}</span><div class="flex flex-col gap-[1px]">${btnUp}${btnDown}</div></li>`;
+                    htmlSecuenciaItems += `<li class="draggable-item flex items-center gap-1.5 py-1.5 relative border-l-2 border-slate-200 ml-2.5 pl-3 before:absolute before:w-1.5 before:h-1.5 before:bg-slate-200 before:rounded-full before:-left-[4px] before:top-1/2 before:-translate-y-1/2" data-id="${v.id}">
+                        ${dragHandle}
+                        <div class="w-4 h-4 ${bgColor} text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-sm shrink-0">${idx + 1}</div>
+                        <span class="truncate text-[10px] flex-1 ${textColor}">${v.cliente_nombre}${urgBadge}${statusIcon}</span>
+                        <div class="flex flex-col gap-[1px]">${btnUp}${btnDown}</div>
+                    </li>`;
                 });
                 wps.push(coordPlantaEEN);
                 htmlSecuenciaItems += `<li class="flex items-center gap-2 pt-2"><div class="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm z-10"><i class="fas fa-flag-checkered"></i></div> <span class="text-[10px] font-bold text-slate-800">Retorno Base</span></li>`;
@@ -1005,7 +1009,7 @@
                         <div class="flex items-center gap-2">${btnOptimizarHTML} <i class="fas fa-chevron-down text-indigo-300 group-open:rotate-180 transition-transform"></i></div>
                     </summary>
                     <div class="px-3 pb-3 pt-0">
-                        <ul class="mb-3 relative">${htmlSecuenciaItems}</ul>
+                        <ul id="sortable-route-list" class="mb-3 relative">${htmlSecuenciaItems}</ul>
                         <div class="bg-white p-1.5 rounded-lg border border-indigo-100 flex justify-between items-center">
                             <div class="text-center flex-1 border-r border-indigo-50"><p class="text-[8px] font-bold text-slate-400 uppercase">Distancia</p><p class="text-xs font-black text-indigo-700" id="calc-dist"><i class="fas fa-spinner fa-spin"></i></p></div>
                             <div class="text-center flex-1"><p class="text-[8px] font-bold text-slate-400 uppercase">Tiempo</p><p class="text-xs font-black text-emerald-600" id="calc-time"><i class="fas fa-spinner fa-spin"></i></p></div>
@@ -1122,6 +1126,34 @@
             document.getElementById('drawer-dynamic-content').innerHTML = htmlDinamico;
             document.getElementById('detalle-drawer').classList.remove('translate-x-[120%]', 'lg:translate-x-[120%]', 'translate-y-full', 'lg:translate-y-0');
             window.vehiculoSeleccionadoTemp = null; 
+
+            // INICIALIZACIÓN DE SORTABLE.JS DESPUÉS DE INYECTAR EL HTML
+            if (estadoActual === 'camino') {
+                const listEl = document.getElementById('sortable-route-list');
+                if (listEl && typeof Sortable !== 'undefined') {
+                    new Sortable(listEl, {
+                        animation: 150,
+                        handle: '.drag-handle',
+                        draggable: '.draggable-item',
+                        ghostClass: 'sortable-ghost',
+                        onEnd: async function (evt) {
+                            const items = Array.from(listEl.querySelectorAll('.draggable-item'));
+                            const newOrderIds = items.map(li => li.getAttribute('data-id'));
+                            
+                            showToast("Guardando nuevo orden...", "info");
+                            const batch = db.batch();
+                            newOrderIds.forEach((id, idx) => {
+                                batch.update(db.collection('rutas_logistica').doc(id), { orden_ruta: (idx + 1) * 10 });
+                            });
+                            try { 
+                                await batch.commit(); 
+                            } catch(e) { 
+                                showToast("Error al reordenar", "error"); 
+                            }
+                        }
+                    });
+                }
+            }
         }
 
         window.cerrarDetalle = () => { 
@@ -2146,16 +2178,14 @@
             }
         };
 
-        // Función que atiende los clics en los encabezados
         window.ordenarBitacora = (col) => {
             if (bitacoraSort.col === col) {
-                bitacoraSort.asc = !bitacoraSort.asc; // Invertir orden
+                bitacoraSort.asc = !bitacoraSort.asc; 
             } else {
                 bitacoraSort.col = col;
-                bitacoraSort.asc = true; // Nuevo orden por default ascente (salvo en fechas)
+                bitacoraSort.asc = true; 
             }
 
-            // Actualizar interfaz visual (Iconos de flechas)
             ['fecha', 'folios', 'cliente', 'modalidad', 'operador', 'estado'].forEach(c => {
                 const icon = document.getElementById('sort-icon-' + c);
                 if (icon) {
@@ -2183,12 +2213,10 @@
                 (v.lote_id && v.lote_id.toLowerCase().includes(term))
             );
 
-            // AUTO ORDENAMIENTO DE CABECERAS (Sort Array)
             filtrados.sort((a, b) => {
                 let valA, valB;
                 
                 if (bitacoraSort.col === 'fecha') {
-                    // Ordenamos principalmente por fecha_entrega si existe, de lo contrario actualización
                     valA = getMs(a.fecha_entrega) || getMs(a.fecha_actualizacion);
                     valB = getMs(b.fecha_entrega) || getMs(b.fecha_actualizacion);
                 } else if (bitacoraSort.col === 'folios') {
@@ -2284,7 +2312,6 @@
                 [`Periodo Exportado: ${fInicioStr} al ${fFinStr}`],
                 [`Generado el: ${new Date().toLocaleString('es-MX')}`],
                 [],
-                // Se agregó la columna "Fecha Entrega" al Excel para tener precisión forense
                 ['Estado', 'ID de Lote / Vuelta', 'Fecha Captura', 'Fecha Salida', 'Fecha Entrega', 'Folio Pedido', 'Folio Factura', 'Código Cliente', 'Razón Social / Nombre', 'Destino / Sucursal', 'Dirección Exacta', 'Modalidad de Envío', 'Operador (Chofer)', 'Vehículo', 'Problema Reportado (Motivo Falla)']
             ];
 
