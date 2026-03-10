@@ -7,6 +7,7 @@ import Footer from './components/Footer'
 import FloatingButtons from './components/FloatingButtons'
 import CartDrawer from './components/CartDrawer'
 import QRScanner from './components/QRScanner' // <--- IMPORTAMOS
+import BackupTool from './components/BackupTool' // <--- IMPORTAMOS
 
 function App() {
   return (
@@ -14,9 +15,9 @@ function App() {
       
       <Navbar />
       <Hero />
+      <BackupTool />
       <CategoriesBar />
-      
-
+       
       <main className="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
         <ProductGrid />
       </main>

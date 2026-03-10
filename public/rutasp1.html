@@ -104,8 +104,7 @@
         <div class="flex gap-2 overflow-x-auto hide-scroll px-4 py-3 shrink-0 bg-white/50 border-b border-slate-100">
             <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-slate-800 text-white shadow-sm transition-all">Todos</button>
             <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">Por Asignar</button>
-            <button onclick="setFilter('rampa')" id="filter-rampa" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"><i class="fas fa-boxes text-indigo-500 mr-1"></i> En Rampa</button>
-            <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"><i class="fas fa-truck-fast text-blue-500 mr-1"></i> En Ruta</button>
+            <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">En Ruta</button>
             <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all"><i class="fas fa-check-double"></i> Entregados</button>
             <button onclick="setFilter('fallido')" id="filter-fallido" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-all"><i class="fas fa-exclamation-triangle"></i> Fallas</button>
         </div>
@@ -665,37 +664,21 @@
             filtroActual = filtro;
             document.querySelectorAll('.filter-btn').forEach(b => {
                 b.classList.remove('bg-slate-800', 'text-white');
-                if(!b.classList.contains('bg-red-50') && !b.classList.contains('bg-emerald-50')) {
-                    b.classList.add('bg-white', 'text-slate-600');
-                }
+                if(!b.classList.contains('bg-red-50')) b.classList.add('bg-white', 'text-slate-600');
             });
             const btn = document.getElementById(`filter-${filtro}`);
-            
-            // Excluimos colores fijos especiales como fallido (rojo) y entregado (verde) para que no pierdan su color base
-            if(filtro !== 'fallido' && filtro !== 'entregado') {
+            if(filtro !== 'fallido') {
                 btn.classList.remove('bg-white', 'text-slate-600');
                 btn.classList.add('bg-slate-800', 'text-white');
             }
-            
             renderizarLista(); actualizarMapa(); cerrarDetalle();
         }
 
         function renderizarLista() {
             const container = document.getElementById('lista-pedidos'); container.innerHTML = '';
             const termino = document.getElementById('buscar-ruta-input')?.value.toLowerCase() || '';
-            
-            // Lógica Central de Filtrado por Estado/Pestañas
-            let filtradosBase = viajesAgrupados;
-            if (filtroActual !== 'todos') {
-                filtradosBase = viajesAgrupados.filter(p => {
-                    if (filtroActual === 'rampa') return p.estado === 'camino' && !p.fecha_salida;
-                    if (filtroActual === 'camino') return p.estado === 'camino' && p.fecha_salida;
-                    return p.estado === filtroActual;
-                });
-            }
-
-            // Filtro por Texto y Búsqueda
-            const filtrados = filtradosBase.filter(v => v.cliente_nombre.toLowerCase().includes(termino) || v.id.toLowerCase().includes(termino) || (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino)));
+            const filtrados = (filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual))
+                .filter(v => v.cliente_nombre.toLowerCase().includes(termino) || v.id.toLowerCase().includes(termino) || (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino)));
             
             filtrados.sort((a, b) => { if(a.estado === b.estado) return (a.orden_ruta || 99999999999) - (b.orden_ruta || 99999999999); return 0; });
 
@@ -712,7 +695,7 @@
                 else if(v.estado === 'pendiente') { stClass = 'status-pendiente'; stText = 'Por Asignar'; icClass = 'fa-clock'; }
                 else if(v.estado === 'camino') { 
                     if(!v.fecha_salida) {
-                        stClass = 'bg-indigo-100 text-indigo-700'; stText = 'En Rampa'; icClass = 'fa-boxes';
+                        stClass = 'bg-indigo-100 text-indigo-700'; stText = 'Asignado'; icClass = 'fa-boxes';
                     } else {
                         stClass = 'status-camino'; stText = 'En Ruta'; icClass = 'fa-truck-fast'; 
                     }
@@ -745,14 +728,7 @@
             routeFetchCounter++; 
             marcadores = {}; const bounds = [[25.689804, -100.312066]]; 
 
-            const viajesFiltrados = viajesAgrupados.filter(p => {
-                if (filtroActual === 'todos') return true;
-                if (filtroActual === 'asignado') return p.estado === 'camino' && !p.fecha_salida;
-                if (filtroActual === 'en_ruta') return p.estado === 'camino' && p.fecha_salida;
-                return p.estado === filtroActual;
-            });
-
-            viajesFiltrados.forEach(v => {
+            (filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual)).forEach(v => {
                 if(!v.coordenadas) return;
                 let ico = icons.bodega; 
                 if(v.estado === 'entregado') ico = icons.entregado; 
@@ -797,7 +773,7 @@
             if(estadoActual === 'pendiente') { elBadge.className = 'status-badge status-pendiente'; elBadge.innerHTML = '<i class="fas fa-clock"></i> Por Asignar'; }
             else if(estadoActual === 'camino') { 
                 if(!viajeSeleccionado.fecha_salida) {
-                    elBadge.className = 'status-badge bg-indigo-100 text-indigo-700'; elBadge.innerHTML = '<i class="fas fa-boxes"></i> En Rampa';
+                    elBadge.className = 'status-badge bg-indigo-100 text-indigo-700'; elBadge.innerHTML = '<i class="fas fa-boxes"></i> Asignado (En Rampa)';
                 } else {
                     elBadge.className = 'status-badge status-camino'; elBadge.innerHTML = '<i class="fas fa-truck-fast"></i> En Ruta'; 
                 }

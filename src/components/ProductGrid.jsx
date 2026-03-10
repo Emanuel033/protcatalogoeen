@@ -14,26 +14,23 @@ function ProductGrid() {
     );
   }
 
-  // Aseguramos que el texto esté limpio y en minúsculas
+  // BLINDAJE CONTRA ERRORES: Evitamos el 'undefined' asegurando que siempre haya un texto fallback ('')
   const termino = (searchTerm || '').toLowerCase().trim();
-  const catActiva = (categoriaActiva || 'Todos').toLowerCase();
+  const catActiva = (categoriaActiva || 'Todos').toLowerCase().trim();
   
-  // FILTRO BLINDADO
-  let productosFiltrados = productos.filter(p => {
-    const catProd = (p.category || '').toLowerCase();
-    const nomProd = (p.name || '').toLowerCase();
-    const codProd = (p.codigo_sistema || '').toLowerCase();
+  // FILTRAR
+  let productosFiltrados = (productos || []).filter(p => {
+    const categoriaProducto = (p.category || '').toLowerCase();
+    const nombreProducto = (p.name || '').toLowerCase();
+    const codigoProducto = (p.codigo_sistema || '').toLowerCase();
 
-    // 1. ¿Pasa el filtro de categoría?
-    const pasaCategoria = (catActiva === 'todos' || catProd === catActiva);
+    const coincideCategoria = catActiva === 'todos' || categoriaProducto === catActiva;
+    const coincideBusqueda = termino === '' || nombreProducto.includes(termino) || codigoProducto.includes(termino);
     
-    // 2. ¿Pasa el filtro de búsqueda? (Si está vacío, pasan todos)
-    const pasaBusqueda = termino === '' || nomProd.includes(termino) || codProd.includes(termino);
-    
-    return pasaCategoria && pasaBusqueda;
+    return coincideCategoria && coincideBusqueda;
   });
 
-  // ORDEN ALFABÉTICO (A-Z)
+  // ORDENAR ALFABÉTICAMENTE (A - Z)
   productosFiltrados = productosFiltrados.sort((a, b) => {
     const nameA = a.name || '';
     const nameB = b.name || '';

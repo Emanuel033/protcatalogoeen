@@ -1,18 +1,24 @@
-import { initializeApp } from "firebase/app";
-// Importamos las nuevas herramientas de caché offline de Firestore
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
-// Usamos la configuración de tu proyecto "productoseen"
 const firebaseConfig = {
   apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
   authDomain: "productoseen.firebaseapp.com",
   projectId: "productoseen",
 };
 
-// Inicializamos Firebase
-const app = initializeApp(firebaseConfig);
+// 1. BLINDAJE: Verificamos si Firebase ya se inicializó antes. Si no, lo creamos.
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Exportamos la base de datos (Firestore) para usarla en el resto de la app
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
-});
+// 2. BLINDAJE: Intentamos prender Firestore con la caché activada
+let db;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+  });
+} catch (error) {
+  // Si da el error de "ya fue inicializado" por recargar la página, simplemente usamos el que ya existe
+  db = getFirestore(app);
+}
+
+export { db };

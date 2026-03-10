@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -590,6 +589,7 @@
                 await db.collection('rutas_logistica').doc(idViajeActivo).update({
                     estado: 'entregado',
                     fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(),
+                    fecha_entrega: firebase.firestore.FieldValue.serverTimestamp(), // AQUÍ ESTÁ EL CAMBIO SOLICITADO
                     foto_evidencia: b64Doc, 
                     foto_evidencia_material: b64Mat 
                 });
