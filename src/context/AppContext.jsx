@@ -46,6 +46,9 @@ export const AppProvider = ({ children }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState('recoger');
   const [paymentMethod, setPaymentMethod] = useState('');
+  
+  // NUEVO ESTADO: Para saber qué imagen tiene zoom
+  const [imagenAmpliada, setImagenAmpliada] = useState(null);
 
   // Función centralizada para registrar eventos
   const registrarEvento = (nombreEvento, parametros = {}) => {
@@ -57,8 +60,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        // AHORA SÍ: Leemos el archivo estático directamente. ¡Cero lecturas a Firebase!
-        // Asegúrate de que "catalogo_completo.json" esté guardado en tu carpeta "public"
+        // Leemos el archivo estático directamente. ¡Cero lecturas a Firebase!
         const response = await fetch('/catalogo_completo.json');
         
         if (!response.ok) {
@@ -137,7 +139,8 @@ export const AppProvider = ({ children }) => {
       searchTerm, setSearchTerm,
       carrito, isCartOpen, toggleCart, clearCart, agregarAlCarrito, quitarDelCarrito, eliminarProducto, totalPiezas,
       deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp,
-      registrarEvento // Exponemos la función al resto de la app
+      registrarEvento,
+      imagenAmpliada, setImagenAmpliada // Pasamos los estados del Zoom
     }}>
       {children}
     </AppContext.Provider>
@@ -158,13 +161,22 @@ function Navbar() {
     setSearchTerm('');
   };
 
-  // Rastrear búsquedas cuando el usuario pausa de escribir (debounce manual básico)
+  // NUEVO CÓDIGO SECRETO: Escribir "secreto123" en el buscador activa el modo admin
+  useEffect(() => {
+    if (searchTerm.trim().toLowerCase() === 'secreto123') {
+      window.dispatchEvent(new Event('activar-admin'));
+      setSearchTerm(''); // Limpia la barra para que no se note
+      alert('¡Modo Administrador Desbloqueado!');
+    }
+  }, [searchTerm]);
+
+  // Rastrear búsquedas
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (searchTerm.trim().length > 2) {
+      if (searchTerm.trim().length > 2 && searchTerm !== 'secreto123') {
         registrarEvento('search', { search_term: searchTerm });
       }
-    }, 1500); // Espera 1.5s después de que dejan de escribir para registrar la búsqueda
+    }, 1500); 
     return () => clearTimeout(timeoutId);
   }, [searchTerm, registrarEvento]);
 
@@ -208,7 +220,6 @@ function Hero() {
 function CategoriesBar() {
   const { categorias, categoriaActiva, setCategoriaActiva, registrarEvento } = useApp();
   
-  // Rastrear qué categorías clickean
   const manejarClickCategoria = (cat) => {
     setCategoriaActiva(cat);
     registrarEvento('select_content', { content_type: 'category', item_id: cat });
@@ -226,17 +237,81 @@ function CategoriesBar() {
 }
 
 function ProductCard({ product }) {
-  const { agregarAlCarrito } = useApp();
+  const { agregarAlCarrito, setImagenAmpliada } = useApp();
+  
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col gap-2 hover:shadow-md transition">
-      <div className="h-32 w-full bg-slate-50 rounded-xl overflow-hidden p-2">
-        <img src={product.image} alt={product.name} className="h-full w-full object-contain mix-blend-multiply" onError={(e) => e.target.src='https://via.placeholder.com/150'} />
+      {/* Ccontenedor de imagen clickeable para abrir el zoom */}
+      <div 
+        onClick={() => setImagenAmpliada(product)}
+        className="h-32 w-full bg-slate-50 rounded-xl overflow-hidden p-2 relative group cursor-pointer"
+      >
+        <img 
+          src={product.image} 
+          alt={product.name} 
+          className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-110" 
+          onError={(e) => e.target.src='https://via.placeholder.com/150'} 
+        />
+        <div className="absolute inset-0 bg-indigo-900/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="bg-white/90 text-indigo-900 text-[10px] uppercase font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+            Ver Foto
+          </span>
+        </div>
       </div>
+      
       <h4 className="text-sm font-bold text-slate-800 line-clamp-2 mt-2">{product.name}</h4>
       <p className="text-[10px] uppercase font-bold text-slate-400">{product.category}</p>
+      
       <button onClick={() => agregarAlCarrito(product, 1)} className="mt-auto bg-indigo-50 text-indigo-600 font-bold py-2 rounded-xl hover:bg-indigo-100 transition text-sm">
         Agregar
       </button>
+    </div>
+  );
+}
+
+// NUEVO: Componente para mostrar la imagen con Zoom
+function ImageZoomModal() {
+  const { imagenAmpliada, setImagenAmpliada, agregarAlCarrito } = useApp();
+
+  if (!imagenAmpliada) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm transition-opacity" 
+      onClick={() => setImagenAmpliada(null)}
+    >
+      <div 
+        className="relative max-w-sm w-full bg-white rounded-2xl p-6 flex flex-col items-center shadow-2xl transform scale-100 transition-transform" 
+        onClick={e => e.stopPropagation()} // Evita que se cierre al clickear la tarjeta
+      >
+        <button 
+          onClick={() => setImagenAmpliada(null)} 
+          className="absolute top-4 right-4 bg-slate-100 text-slate-500 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center font-bold transition"
+        >
+          X
+        </button>
+        
+        <div className="w-full h-64 bg-slate-50 rounded-xl p-4 mb-4 flex items-center justify-center">
+           <img 
+             src={imagenAmpliada.image} 
+             alt={imagenAmpliada.name} 
+             className="max-h-full max-w-full object-contain mix-blend-multiply" 
+             onError={(e) => e.target.src='https://via.placeholder.com/300'} 
+           />
+        </div>
+        
+        <h3 className="text-lg font-black text-slate-800 text-center leading-tight">{imagenAmpliada.name}</h3>
+        <p className="text-xs font-bold text-indigo-500 uppercase mt-2 mb-6">{imagenAmpliada.category}</p>
+        
+        <button 
+          onClick={() => { agregarAlCarrito(imagenAmpliada, 1); setImagenAmpliada(null); }} 
+          className="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-500 transition shadow-md flex items-center justify-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+          Agregar al carrito
+        </button>
+      </div>
     </div>
   );
 }
@@ -418,7 +493,7 @@ function BackupTool({ onClose }) {
       document.body.appendChild(enlace);
       enlace.click();
       document.body.removeChild(enlace);
-      URL.revokeObjectURL(url); // Buena práctica liberar memoria
+      URL.revokeObjectURL(url); 
       
       alert(`¡Catálogo Completo exportado con éxito! Ahora muévelo a la carpeta 'public' de tu proyecto.`);
     } catch (error) {
@@ -459,27 +534,23 @@ function Footer() {
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL CON MODO ADMINISTRADOR (CORREGIDO)
+// COMPONENTE PRINCIPAL
 // ============================================================================
 function App() {
   const [esAdmin, setEsAdmin] = useState(false);
 
   useEffect(() => {
-    // Convertimos la validación en una función para reutilizarla
-    const revisarSiEsAdmin = () => {
-      const parametrosUrl = new URLSearchParams(window.location.search);
-      // Validamos y ASIGNAMOS un true o false estricto. 
-      // Si el parámetro ya no existe, apagará automáticamente el modo.
-      const modoActivo = parametrosUrl.get('modo') === 'secreto';
-      setEsAdmin(modoActivo);
-    };
+    // Revisión por si acaso aún usan el URL
+    const parametrosUrl = new URLSearchParams(window.location.search);
+    if (parametrosUrl.get('modo') === 'secreto') {
+      setEsAdmin(true);
+    }
 
-    // Ejecutar al cargar el componente
-    revisarSiEsAdmin();
-
-    // Escuchar los cambios en la navegación del navegador (botón atrás/adelante)
-    window.addEventListener('popstate', revisarSiEsAdmin);
-    return () => window.removeEventListener('popstate', revisarSiEsAdmin);
+    // Escuchar el evento desencadenado desde la barra de búsqueda
+    const activarModoAdmin = () => setEsAdmin(true);
+    window.addEventListener('activar-admin', activarModoAdmin);
+    
+    return () => window.removeEventListener('activar-admin', activarModoAdmin);
   }, []);
 
   return (
@@ -490,9 +561,7 @@ function App() {
         <CategoriesBar />
         
         <main className="flex-grow max-w-7xl mx-auto px-4 py-4 w-full">
-          {/* Se pasa una función para forzar el cierre manualmente si se queda pegado */}
           {esAdmin && <BackupTool onClose={() => setEsAdmin(false)} />} 
-          
           <ProductGrid />
         </main>
         
@@ -500,6 +569,7 @@ function App() {
         <CartDrawer />
         <FloatingButtons />
         <QRScanner /> 
+        <ImageZoomModal /> {/* Componente del Zoom renderizado al final */}
       </div>
     </AppProvider>
   );
