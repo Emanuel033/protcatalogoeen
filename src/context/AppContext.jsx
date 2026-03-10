@@ -57,7 +57,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const response = await fetch('/catalogo_completo.json');
+        const response = await fetch('/catalogo_completo1.json');
         
         if (!response.ok) {
           throw new Error("No se encontró catalogo_completo.json.");
