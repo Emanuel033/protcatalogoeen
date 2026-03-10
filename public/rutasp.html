@@ -13,6 +13,9 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Librería para Arrastrar y Soltar (Optimizada para Móviles) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -59,11 +62,31 @@
         /* Checkboxes tipo Pill (Documentación) */
         .doc-checkbox input:checked + div { background-color: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
         .doc-checkbox-ciego input:checked + div { background-color: #1e293b; color: white; border-color: #0f172a; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+
+        /* Estilos para arrastrar y soltar (Drag & Drop) en Móviles */
+        .drag-handle { touch-action: none; /* Previene scroll en celular al agarrar */ }
+        .sortable-ghost { opacity: 0.4; background-color: #e0e7ff; border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
+        .sortable-drag { cursor: grabbing !important; }
     </style>
 </head>
 <body class="relative w-screen h-screen overflow-hidden text-slate-800">
 
     <script>
+        // Utilidades para manejar fechas en las tarjetas y los ordenamientos
+        const getMs = (dateObj) => {
+            if(!dateObj) return 0;
+            if(typeof dateObj.toMillis === 'function') return dateObj.toMillis();
+            const d = new Date(dateObj);
+            return isNaN(d.getTime()) ? 0 : d.getTime();
+        };
+
+        function formatDateShort(ts) {
+            if(!ts) return '';
+            const d = (ts && typeof ts.toDate === 'function') ? ts.toDate() : new Date(ts);
+            if(isNaN(d.getTime())) return '';
+            return d.toLocaleString('es-MX', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}).replace(',', '');
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
             authDomain: "productoseen.firebaseapp.com",
@@ -101,13 +124,18 @@
                 <button onclick="abrirFormulario()" class="bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 shrink-0 rounded-xl text-sm transition shadow-md shadow-blue-500/30 flex items-center justify-center active:scale-95" title="Nuevo Pedido"><i class="fas fa-plus"></i></button>
             </div>
         </div>
-        <div class="flex gap-2 overflow-x-auto hide-scroll px-4 py-3 shrink-0 bg-white/50 border-b border-slate-100">
-            <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-slate-800 text-white shadow-sm transition-all">Todos</button>
-            <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">Por Asignar</button>
-            <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">En Ruta</button>
-            <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all"><i class="fas fa-check-double"></i> Entregados</button>
-            <button onclick="setFilter('fallido')" id="filter-fallido" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-all"><i class="fas fa-exclamation-triangle"></i> Fallas</button>
+        
+        <!-- Barra de Categorías Mejorada con Smooth Scroll y Auto-Centrado -->
+        <div class="flex gap-2 overflow-x-auto hide-scroll px-4 py-3 shrink-0 bg-white/50 border-b border-slate-100 scroll-smooth relative" id="filter-container">
+            <button onclick="setFilter('activos')" id="filter-activos" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-800 text-white shadow-md shadow-slate-800/30 transition-all cursor-pointer transform scale-105"><i class="fas fa-layer-group text-blue-400 mr-1"></i> En Curso</button>
+            <button onclick="setFilter('pendiente')" id="filter-pendiente" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">Por Asignar</button>
+            <button onclick="setFilter('rampa')" id="filter-rampa" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"><i class="fas fa-boxes text-indigo-500 mr-1"></i> En Rampa</button>
+            <button onclick="setFilter('camino')" id="filter-camino" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"><i class="fas fa-truck-fast text-blue-500 mr-1"></i> En Ruta</button>
+            <button onclick="setFilter('fallido')" id="filter-fallido" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-all cursor-pointer"><i class="fas fa-exclamation-triangle"></i> Fallas</button>
+            <button onclick="setFilter('entregado')" id="filter-entregado" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all cursor-pointer"><i class="fas fa-check-double"></i> Entregados</button>
+            <button onclick="setFilter('todos')" id="filter-todos" class="filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"><i class="fas fa-archive text-slate-400 mr-1"></i> Todos</button>
         </div>
+
         <div class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2 bg-slate-50/80 pb-32" id="lista-pedidos">
             <div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-3xl text-blue-500 mb-3"></i><p class="text-slate-500 text-xs font-bold">Sincronizando...</p></div>
         </div>
@@ -430,6 +458,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE BITÁCORA MODIFICADO CON CABECERAS ORDENABLES -->
     <div id="modal-bitacora" class="fixed inset-0 bg-slate-900/90 z-[120] hidden flex-col items-center justify-center p-2 sm:p-6 backdrop-blur-md transition-opacity opacity-0">
         <div class="bg-white rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden transform scale-95 transition-transform flex flex-col h-[85vh]" id="modal-bitacora-content">
             <div class="bg-indigo-900 p-5 text-white flex justify-between items-center shrink-0">
@@ -456,16 +485,17 @@
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto custom-scroll bg-white">
+            <div class="flex-1 overflow-y-auto custom-scroll bg-white relative">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[10px] uppercase sticky top-0 z-10 shadow-sm">
                         <tr>
-                            <th class="px-4 py-3">Fechas y Lote</th>
-                            <th class="px-4 py-3">Folios</th>
-                            <th class="px-4 py-3">Cliente / Destino</th>
-                            <th class="px-4 py-3">Modalidad</th>
-                            <th class="px-4 py-3">Operador</th>
-                            <th class="px-4 py-3 text-center">Estado</th>
+                            <!-- AGREGADA FUNCIONALIDAD DE ORDENAMIENTO -->
+                            <th class="px-4 py-3 cursor-pointer hover:bg-slate-200 transition select-none" onclick="ordenarBitacora('fecha')">Fechas y Lote <i id="sort-icon-fecha" class="fas fa-sort-down ml-1 text-indigo-500"></i></th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-slate-200 transition select-none" onclick="ordenarBitacora('folios')">Folios <i id="sort-icon-folios" class="fas fa-sort ml-1 text-slate-300"></i></th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-slate-200 transition select-none" onclick="ordenarBitacora('cliente')">Cliente / Destino <i id="sort-icon-cliente" class="fas fa-sort ml-1 text-slate-300"></i></th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-slate-200 transition select-none" onclick="ordenarBitacora('modalidad')">Modalidad <i id="sort-icon-modalidad" class="fas fa-sort ml-1 text-slate-300"></i></th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-slate-200 transition select-none" onclick="ordenarBitacora('operador')">Operador <i id="sort-icon-operador" class="fas fa-sort ml-1 text-slate-300"></i></th>
+                            <th class="px-4 py-3 cursor-pointer hover:bg-slate-200 transition select-none text-center" onclick="ordenarBitacora('estado')">Estado <i id="sort-icon-estado" class="fas fa-sort ml-1 text-slate-300"></i></th>
                         </tr>
                     </thead>
                     <tbody id="bitacora-tbody" class="divide-y divide-slate-100"></tbody>
@@ -494,7 +524,7 @@
 
         let map, marcadores = {}, capaRuta = null; 
         let rutasActivasDB = {}; let rutasRecientesDB = {}; 
-        let viajesAgrupados = [], filtroActual = 'todos', viajeSeleccionado = null; 
+        let viajesAgrupados = [], filtroActual = 'activos', viajeSeleccionado = null; 
         let flotaDB = [], choferesDB = [], clientesDB = [], fleterasDB = []; 
         let vehiculoSeleccionadoTemp = null;
         let isSidebarOpen = true; 
@@ -608,7 +638,7 @@
         }
 
         // ==========================================
-        // PROCESAMIENTO DE DATOS
+        // PROCESAMIENTO DE DATOS Y FILTROS
         // ==========================================
         function compilarDatosRutas() {
             const arrayUnico = []; const controlMap = {};
@@ -645,6 +675,8 @@
                     foto_evidencia_material: p.foto_evidencia_material || null,
                     fecha_creacion: p.fecha_creacion || null,
                     fecha_salida: p.fecha_salida || null,
+                    fecha_entrega: p.fecha_entrega || null,
+                    fecha_actualizacion: p.fecha_actualizacion || null,
                     lote_id: p.lote_id || null, 
                     qr_imagen: p.qr_imagen || null
                 };
@@ -662,25 +694,72 @@
 
         window.setFilter = (filtro) => {
             filtroActual = filtro;
+            
             document.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.remove('bg-slate-800', 'text-white');
-                if(!b.classList.contains('bg-red-50')) b.classList.add('bg-white', 'text-slate-600');
+                b.classList.remove('bg-slate-800', 'text-white', 'shadow-md', 'scale-105', 'bg-emerald-500', 'bg-red-500', 'shadow-emerald-500/30', 'shadow-red-500/30', 'shadow-slate-800/30');
+                
+                if (b.id === 'filter-entregado') {
+                    b.className = 'filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 transition-all cursor-pointer';
+                } else if (b.id === 'filter-fallido') {
+                    b.className = 'filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-all cursor-pointer';
+                } else {
+                    b.className = 'filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all cursor-pointer';
+                }
             });
-            const btn = document.getElementById(`filter-${filtro}`);
-            if(filtro !== 'fallido') {
-                btn.classList.remove('bg-white', 'text-slate-600');
-                btn.classList.add('bg-slate-800', 'text-white');
+
+            const activeBtn = document.getElementById(`filter-${filtro}`);
+            
+            if (activeBtn) {
+                if (filtro === 'entregado') {
+                    activeBtn.className = 'filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-md shadow-emerald-500/30 transition-all cursor-pointer transform scale-105';
+                } else if (filtro === 'fallido') {
+                    activeBtn.className = 'filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-red-500 text-white shadow-md shadow-red-500/30 transition-all cursor-pointer transform scale-105';
+                } else {
+                    activeBtn.className = 'filter-btn shrink-0 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-800 text-white shadow-md shadow-slate-800/30 transition-all cursor-pointer transform scale-105';
+                }
+
+                const container = activeBtn.parentElement;
+                const scrollLeft = activeBtn.offsetLeft - (container.offsetWidth / 2) + (activeBtn.offsetWidth / 2);
+                container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
             }
+            
             renderizarLista(); actualizarMapa(); cerrarDetalle();
         }
 
         function renderizarLista() {
             const container = document.getElementById('lista-pedidos'); container.innerHTML = '';
             const termino = document.getElementById('buscar-ruta-input')?.value.toLowerCase() || '';
-            const filtrados = (filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual))
-                .filter(v => v.cliente_nombre.toLowerCase().includes(termino) || v.id.toLowerCase().includes(termino) || (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino)));
             
-            filtrados.sort((a, b) => { if(a.estado === b.estado) return (a.orden_ruta || 99999999999) - (b.orden_ruta || 99999999999); return 0; });
+            let filtradosBase = viajesAgrupados;
+            if (filtroActual !== 'todos') {
+                filtradosBase = viajesAgrupados.filter(p => {
+                    if (filtroActual === 'activos') return p.estado === 'pendiente' || p.estado === 'camino';
+                    if (filtroActual === 'rampa') return p.estado === 'camino' && !p.fecha_salida;
+                    if (filtroActual === 'camino') return p.estado === 'camino' && p.fecha_salida;
+                    return p.estado === filtroActual;
+                });
+            }
+
+            const filtrados = filtradosBase.filter(v => v.cliente_nombre.toLowerCase().includes(termino) || v.id.toLowerCase().includes(termino) || (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino)));
+            
+            filtrados.sort((a, b) => {
+                if (a.estado !== b.estado) {
+                    const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 };
+                    return (ord[a.estado] || 5) - (ord[b.estado] || 5);
+                }
+                
+                if (a.estado === 'entregado') {
+                    const msA = getMs(a.fecha_entrega) || getMs(a.fecha_actualizacion);
+                    const msB = getMs(b.fecha_entrega) || getMs(b.fecha_actualizacion);
+                    return msB - msA; 
+                }
+                
+                if (a.estado === 'camino' && a.fecha_salida && b.fecha_salida) {
+                    return (a.orden_ruta || 999999) - (b.orden_ruta || 999999);
+                }
+                
+                return getMs(b.fecha_creacion) - getMs(a.fecha_creacion);
+            });
 
             if(filtrados.length === 0) {
                 container.innerHTML = `<div class="text-center py-6 text-slate-400 font-bold flex flex-col items-center"><i class="fas ${termino ? 'fa-search' : 'fa-check-circle text-emerald-400'} text-3xl mb-2"></i><span class="text-xs">${termino ? 'Sin resultados.' : 'Bandeja limpia.'}</span></div>`; 
@@ -695,12 +774,25 @@
                 else if(v.estado === 'pendiente') { stClass = 'status-pendiente'; stText = 'Por Asignar'; icClass = 'fa-clock'; }
                 else if(v.estado === 'camino') { 
                     if(!v.fecha_salida) {
-                        stClass = 'bg-indigo-100 text-indigo-700'; stText = 'Asignado'; icClass = 'fa-boxes';
+                        stClass = 'bg-indigo-100 text-indigo-700'; stText = 'En Rampa'; icClass = 'fa-boxes';
                     } else {
                         stClass = 'status-camino'; stText = 'En Ruta'; icClass = 'fa-truck-fast'; 
                     }
                 }
                 else { stClass = 'status-entregado'; stText = 'Entregado'; icClass = 'fa-check-double'; }
+
+                let dateBadge = '';
+                if (v.estado === 'pendiente' || (v.estado === 'camino' && !v.fecha_salida)) {
+                    dateBadge = `<span class="text-[8px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Fecha de Captura"><i class="fas fa-calendar-plus text-slate-400"></i> ${formatDateShort(v.fecha_creacion) || 'Sin fecha'}</span>`;
+                } else if (v.estado === 'camino' && v.fecha_salida) {
+                    dateBadge = `<span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Salida"><i class="fas fa-truck-fast text-blue-400"></i> Salida: ${formatDateShort(v.fecha_salida) || 'Sin salida'}</span>`;
+                } else if (v.estado === 'entregado') {
+                    const fFin = v.fecha_entrega || v.fecha_actualizacion;
+                    dateBadge = `<span class="text-[8px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Finalización"><i class="fas fa-check-double text-emerald-400"></i> Fin: ${formatDateShort(fFin) || 'Sin fecha'}</span>`;
+                } else if (v.estado === 'fallido') {
+                    const fFail = v.fecha_actualizacion || v.fecha_creacion;
+                    dateBadge = `<span class="text-[8px] text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Falla"><i class="fas fa-clock text-red-400"></i> ${formatDateShort(fFail) || 'Sin fecha'}</span>`;
+                }
 
                 let bHtml = '';
                 if (v.estado === 'fallido') bHtml = `<div class="mt-2 pt-2 border-t border-red-100 text-[9px] font-bold text-red-600 truncate bg-red-50 px-2 py-1 rounded-md"><i class="fas fa-info-circle"></i> ${v.motivo_falla || 'Problema reportado'}</div>`;
@@ -717,7 +809,21 @@
 
                 let aliasMostrar = v.destino_alias ? `(${v.destino_alias}) ` : '';
 
-                htmlAcumulado += `<div onclick="seleccionarViaje('${v.id}')" class="pedido-card ${isActive} rounded-2xl p-3 cursor-pointer relative overflow-hidden"><div class="flex justify-between items-start mb-1.5"><span class="status-badge ${stClass} text-[8px] px-2 py-0.5"><i class="fas ${icClass}"></i> ${stText}</span><div class="flex flex-col items-end"><span class="text-[8px] font-mono font-bold text-slate-400">${muestraFolio}</span>${v.cliente_codigo ? `<span class="text-[7px] font-mono font-bold text-slate-300">Cód: ${v.cliente_codigo}</span>` : ''}</div></div><h4 class="font-black text-slate-800 text-xs truncate mb-0.5">${badgeFletera}${v.cliente_nombre}${badgeUrgente}</h4><p class="text-[9px] text-slate-500 truncate mb-1 font-medium"><i class="fas fa-map-marker-alt text-red-400 w-3"></i> <b>${aliasMostrar}</b>${v.direccion}</p>${bHtml}</div>`;
+                htmlAcumulado += `<div onclick="seleccionarViaje('${v.id}')" class="pedido-card ${isActive} rounded-2xl p-3 cursor-pointer relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-1.5">
+                        <span class="status-badge ${stClass} text-[8px] px-2 py-0.5"><i class="fas ${icClass}"></i> ${stText}</span>
+                        <div class="flex flex-col items-end">
+                            <span class="text-[8px] font-mono font-bold text-slate-400">${muestraFolio}</span>
+                            ${v.cliente_codigo ? `<span class="text-[7px] font-mono font-bold text-slate-300">Cód: ${v.cliente_codigo}</span>` : ''}
+                        </div>
+                    </div>
+                    <h4 class="font-black text-slate-800 text-xs truncate mb-1">${badgeFletera}${v.cliente_nombre}${badgeUrgente}</h4>
+                    <div class="flex justify-between items-center mb-1 gap-2">
+                        <p class="text-[9px] text-slate-500 truncate font-medium flex-1"><i class="fas fa-map-marker-alt text-red-400 w-3"></i> <b>${aliasMostrar}</b>${v.direccion}</p>
+                        ${dateBadge}
+                    </div>
+                    ${bHtml}
+                </div>`;
             });
             container.innerHTML = htmlAcumulado;
         }
@@ -728,7 +834,21 @@
             routeFetchCounter++; 
             marcadores = {}; const bounds = [[25.689804, -100.312066]]; 
 
-            (filtroActual === 'todos' ? viajesAgrupados : viajesAgrupados.filter(p => p.estado === filtroActual)).forEach(v => {
+           const lotesActivos = new Set(
+                viajesAgrupados
+                    .filter(p => p.estado === 'camino' && p.lote_id)
+                    .map(p => p.lote_id)
+            );
+            
+            const viajesFiltrados = viajesAgrupados.filter(p => {
+                if (filtroActual === 'todos') return true;
+                if (filtroActual === 'activos') return p.estado === 'pendiente' || p.estado === 'camino' || (p.estado === 'entregado' && p.lote_id && lotesActivos.has(p.lote_id));
+                if (filtroActual === 'rampa') return p.estado === 'camino' && !p.fecha_salida;
+                if (filtroActual === 'camino') return p.estado === 'camino' && p.fecha_salida || (p.estado === 'entregado' && p.lote_id && lotesActivos.has(p.lote_id));
+                return p.estado === filtroActual;
+            });
+
+            viajesFiltrados.forEach(v => {
                 if(!v.coordenadas) return;
                 let ico = icons.bodega; 
                 if(v.estado === 'entregado') ico = icons.entregado; 
@@ -773,7 +893,7 @@
             if(estadoActual === 'pendiente') { elBadge.className = 'status-badge status-pendiente'; elBadge.innerHTML = '<i class="fas fa-clock"></i> Por Asignar'; }
             else if(estadoActual === 'camino') { 
                 if(!viajeSeleccionado.fecha_salida) {
-                    elBadge.className = 'status-badge bg-indigo-100 text-indigo-700'; elBadge.innerHTML = '<i class="fas fa-boxes"></i> Asignado (En Rampa)';
+                    elBadge.className = 'status-badge bg-indigo-100 text-indigo-700'; elBadge.innerHTML = '<i class="fas fa-boxes"></i> En Rampa';
                 } else {
                     elBadge.className = 'status-badge status-camino'; elBadge.innerHTML = '<i class="fas fa-truck-fast"></i> En Ruta'; 
                 }
@@ -853,10 +973,11 @@
                 viajesMismoCamion.forEach((v, idx) => {
                     wps.push(L.latLng(v.coordenadas.lat, v.coordenadas.lng));
                     
-                    let btnUp = '', btnDown = '';
+                    let btnUp = '', btnDown = '', dragHandle = '';
                     if (estadoActual === 'camino') {
                         btnUp = idx > 0 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, -1); event.stopPropagation();" class="w-5 h-5 bg-white border border-slate-200 rounded text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-chevron-up text-[8px]"></i></button>` : '';
                         btnDown = idx < viajesMismoCamion.length - 1 ? `<button onclick="moverParada('${v.vehiculo_asignado}', ${idx}, 1); event.stopPropagation();" class="w-5 h-5 bg-white border border-slate-200 rounded text-slate-400 hover:text-blue-600 flex items-center justify-center"><i class="fas fa-chevron-down text-[8px]"></i></button>` : '';
+                        dragHandle = `<div class="drag-handle w-4 h-full flex items-center justify-center text-slate-300 hover:text-indigo-500 cursor-grab active:cursor-grabbing"><i class="fas fa-grip-vertical"></i></div>`;
                     }
 
                     const isCurrentItem = v.id === viajeSeleccionado.id;
@@ -868,7 +989,12 @@
                     const urgBadge = v.urgente ? `<span class="text-[7px] font-black uppercase ml-1 text-red-500">Urg.</span>` : '';
                     const statusIcon = v.estado === 'entregado' ? `<i class="fas fa-check-circle text-emerald-500 ml-1"></i>` : (v.estado === 'fallido' ? `<i class="fas fa-exclamation-triangle text-red-500 ml-1"></i>` : '');
                     
-                    htmlSecuenciaItems += `<li class="flex items-center gap-1.5 py-1.5 relative border-l-2 border-slate-200 ml-2.5 pl-3 before:absolute before:w-1.5 before:h-1.5 before:bg-slate-200 before:rounded-full before:-left-[4px] before:top-1/2 before:-translate-y-1/2"><div class="w-4 h-4 ${bgColor} text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-sm shrink-0">${idx + 1}</div><span class="truncate text-[10px] flex-1 ${textColor}">${v.cliente_nombre}${urgBadge}${statusIcon}</span><div class="flex flex-col gap-[1px]">${btnUp}${btnDown}</div></li>`;
+                    htmlSecuenciaItems += `<li class="draggable-item flex items-center gap-1.5 py-1.5 relative border-l-2 border-slate-200 ml-2.5 pl-3 before:absolute before:w-1.5 before:h-1.5 before:bg-slate-200 before:rounded-full before:-left-[4px] before:top-1/2 before:-translate-y-1/2" data-id="${v.id}">
+                        ${dragHandle}
+                        <div class="w-4 h-4 ${bgColor} text-white rounded-full flex items-center justify-center text-[8px] font-bold shadow-sm shrink-0">${idx + 1}</div>
+                        <span class="truncate text-[10px] flex-1 ${textColor}">${v.cliente_nombre}${urgBadge}${statusIcon}</span>
+                        <div class="flex flex-col gap-[1px]">${btnUp}${btnDown}</div>
+                    </li>`;
                 });
                 wps.push(coordPlantaEEN);
                 htmlSecuenciaItems += `<li class="flex items-center gap-2 pt-2"><div class="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm z-10"><i class="fas fa-flag-checkered"></i></div> <span class="text-[10px] font-bold text-slate-800">Retorno Base</span></li>`;
@@ -889,7 +1015,7 @@
                         <div class="flex items-center gap-2">${btnOptimizarHTML} <i class="fas fa-chevron-down text-indigo-300 group-open:rotate-180 transition-transform"></i></div>
                     </summary>
                     <div class="px-3 pb-3 pt-0">
-                        <ul class="mb-3 relative">${htmlSecuenciaItems}</ul>
+                        <ul id="sortable-route-list" class="mb-3 relative">${htmlSecuenciaItems}</ul>
                         <div class="bg-white p-1.5 rounded-lg border border-indigo-100 flex justify-between items-center">
                             <div class="text-center flex-1 border-r border-indigo-50"><p class="text-[8px] font-bold text-slate-400 uppercase">Distancia</p><p class="text-xs font-black text-indigo-700" id="calc-dist"><i class="fas fa-spinner fa-spin"></i></p></div>
                             <div class="text-center flex-1"><p class="text-[8px] font-bold text-slate-400 uppercase">Tiempo</p><p class="text-xs font-black text-emerald-600" id="calc-time"><i class="fas fa-spinner fa-spin"></i></p></div>
@@ -1006,6 +1132,34 @@
             document.getElementById('drawer-dynamic-content').innerHTML = htmlDinamico;
             document.getElementById('detalle-drawer').classList.remove('translate-x-[120%]', 'lg:translate-x-[120%]', 'translate-y-full', 'lg:translate-y-0');
             window.vehiculoSeleccionadoTemp = null; 
+
+            // INICIALIZACIÓN DE SORTABLE.JS DESPUÉS DE INYECTAR EL HTML
+            if (estadoActual === 'camino') {
+                const listEl = document.getElementById('sortable-route-list');
+                if (listEl && typeof Sortable !== 'undefined') {
+                    new Sortable(listEl, {
+                        animation: 150,
+                        handle: '.drag-handle',
+                        draggable: '.draggable-item',
+                        ghostClass: 'sortable-ghost',
+                        onEnd: async function (evt) {
+                            const items = Array.from(listEl.querySelectorAll('.draggable-item'));
+                            const newOrderIds = items.map(li => li.getAttribute('data-id'));
+                            
+                            showToast("Guardando nuevo orden...", "info");
+                            const batch = db.batch();
+                            newOrderIds.forEach((id, idx) => {
+                                batch.update(db.collection('rutas_logistica').doc(id), { orden_ruta: (idx + 1) * 10 });
+                            });
+                            try { 
+                                await batch.commit(); 
+                            } catch(e) { 
+                                showToast("Error al reordenar", "error"); 
+                            }
+                        }
+                    });
+                }
+            }
         }
 
         window.cerrarDetalle = () => { 
@@ -1466,6 +1620,7 @@
                     data.estado = 'pendiente';
                     data.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
                     data.fecha_salida = null;
+                    data.fecha_entrega = null;
                     data.lote_id = null; // Inicia sin lote de vuelta
                     await db.collection('rutas_logistica').add(data);
                     showToast("Orden registrada exitosamente");
@@ -1719,6 +1874,7 @@
                     data.foto_evidencia = null; 
                     data.foto_evidencia_material = null; 
                     data.fecha_salida = null;
+                    data.fecha_entrega = null;
                     data.lote_id = null; // Liberamos el ID de Lote para que pueda entrar a otra vuelta
                 }
                 else if(accion === 'camino') { 
@@ -1983,9 +2139,10 @@
         };
 
         // ==========================================
-        // LÓGICA DE BITÁCORA
+        // LÓGICA DE BITÁCORA Y ORDENAMIENTO DE COLUMNAS
         // ==========================================
         let bitacoraData = [];
+        let bitacoraSort = { col: 'fecha', asc: false }; // Estado global del ordenamiento
 
         window.abrirBitacora = () => {
             const modal = document.getElementById('modal-bitacora');
@@ -2027,18 +2184,68 @@
             }
         };
 
+        window.ordenarBitacora = (col) => {
+            if (bitacoraSort.col === col) {
+                bitacoraSort.asc = !bitacoraSort.asc; 
+            } else {
+                bitacoraSort.col = col;
+                bitacoraSort.asc = true; 
+            }
+
+            ['fecha', 'folios', 'cliente', 'modalidad', 'operador', 'estado'].forEach(c => {
+                const icon = document.getElementById('sort-icon-' + c);
+                if (icon) {
+                    if (c === bitacoraSort.col) {
+                        icon.className = bitacoraSort.asc ? "fas fa-sort-up ml-1 text-indigo-500" : "fas fa-sort-down ml-1 text-indigo-500";
+                    } else {
+                        icon.className = "fas fa-sort ml-1 text-slate-300";
+                    }
+                }
+            });
+
+            filtrarBitacora();
+        };
+
         window.filtrarBitacora = () => {
             const term = document.getElementById('bitacora-search').value.toLowerCase();
             const tbody = document.getElementById('bitacora-tbody');
             tbody.innerHTML = '';
             
-            const filtrados = bitacoraData.filter(v => 
+            let filtrados = bitacoraData.filter(v => 
                 (v.folio_pedido && v.folio_pedido.toLowerCase().includes(term)) ||
                 (v.folio_factura && v.folio_factura.toLowerCase().includes(term)) ||
                 (v.cliente_nombre && v.cliente_nombre.toLowerCase().includes(term)) ||
                 (v.chofer_asignado && choferesDB.find(c => c.id === v.chofer_asignado)?.nombre.toLowerCase().includes(term)) ||
                 (v.lote_id && v.lote_id.toLowerCase().includes(term))
             );
+
+            filtrados.sort((a, b) => {
+                let valA, valB;
+                
+                if (bitacoraSort.col === 'fecha') {
+                    valA = getMs(a.fecha_entrega) || getMs(a.fecha_actualizacion);
+                    valB = getMs(b.fecha_entrega) || getMs(b.fecha_actualizacion);
+                } else if (bitacoraSort.col === 'folios') {
+                    valA = (a.folio_pedido || a.folio_factura || '').toString().toLowerCase();
+                    valB = (b.folio_pedido || b.folio_factura || '').toString().toLowerCase();
+                } else if (bitacoraSort.col === 'cliente') {
+                    valA = (a.cliente_nombre || '').toString().toLowerCase();
+                    valB = (b.cliente_nombre || '').toString().toLowerCase();
+                } else if (bitacoraSort.col === 'modalidad') {
+                    valA = (a.tipo_envio || '').toString().toLowerCase();
+                    valB = (b.tipo_envio || '').toString().toLowerCase();
+                } else if (bitacoraSort.col === 'operador') {
+                    valA = (choferesDB.find(c => c.id === a.chofer_asignado)?.nombre || '').toString().toLowerCase();
+                    valB = (choferesDB.find(c => c.id === b.chofer_asignado)?.nombre || '').toString().toLowerCase();
+                } else if (bitacoraSort.col === 'estado') {
+                    valA = (a.estado || '').toString().toLowerCase();
+                    valB = (b.estado || '').toString().toLowerCase();
+                }
+
+                if (valA < valB) return bitacoraSort.asc ? -1 : 1;
+                if (valA > valB) return bitacoraSort.asc ? 1 : -1;
+                return 0;
+            });
 
             if(filtrados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-slate-400 font-bold">Sin resultados.</td></tr>';
@@ -2048,6 +2255,7 @@
             filtrados.forEach(v => {
                 const fCreacion = v.fecha_creacion ? v.fecha_creacion.toDate().toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '--';
                 const fSalida = v.fecha_salida ? v.fecha_salida.toDate().toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Sin salida';
+                const fEntrega = v.fecha_entrega ? v.fecha_entrega.toDate().toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : (v.estado === 'entregado' ? 'S/F' : '--');
                 
                 const chofer = v.chofer_asignado ? (choferesDB.find(c => c.id === v.chofer_asignado)?.nombre || 'Chofer Desc.') : 'Sin asignar';
                 
@@ -2067,7 +2275,8 @@
                     <tr class="hover:bg-slate-50 transition border-b border-slate-100">
                         <td class="px-4 py-3">
                             <div class="text-[10px] text-slate-500 font-bold mb-0.5">Cap: ${fCreacion}</div>
-                            <div class="text-[10px] text-indigo-600 font-bold"><i class="fas fa-truck text-[9px]"></i> Sal: ${fSalida}</div>
+                            <div class="text-[10px] text-blue-600 font-bold mb-0.5"><i class="fas fa-truck text-[9px]"></i> Sal: ${fSalida}</div>
+                            <div class="text-[10px] text-emerald-600 font-bold"><i class="fas fa-check-double text-[9px]"></i> Fin: ${fEntrega}</div>
                             ${loteBadge}
                         </td>
                         <td class="px-4 py-3 font-mono text-xs font-bold text-slate-700">
@@ -2109,12 +2318,14 @@
                 [`Periodo Exportado: ${fInicioStr} al ${fFinStr}`],
                 [`Generado el: ${new Date().toLocaleString('es-MX')}`],
                 [],
-                ['Estado', 'ID de Lote / Vuelta', 'Fecha Captura', 'Fecha Salida', 'Folio Pedido', 'Folio Factura', 'Código Cliente', 'Razón Social / Nombre', 'Destino / Sucursal', 'Dirección Exacta', 'Modalidad de Envío', 'Operador (Chofer)', 'Vehículo', 'Problema Reportado (Motivo Falla)']
+                ['Estado', 'ID de Lote / Vuelta', 'Fecha Captura', 'Fecha Salida', 'Fecha Entrega', 'Folio Pedido', 'Folio Factura', 'Código Cliente', 'Razón Social / Nombre', 'Destino / Sucursal', 'Dirección Exacta', 'Modalidad de Envío', 'Operador (Chofer)', 'Vehículo', 'Problema Reportado (Motivo Falla)']
             ];
 
             datosExportar.forEach(v => {
                 const fCreacion = v.fecha_creacion ? v.fecha_creacion.toDate().toLocaleString('es-MX') : 'S/R';
                 const fSalida = v.fecha_salida ? v.fecha_salida.toDate().toLocaleString('es-MX') : 'S/R';
+                const fEntrega = v.fecha_entrega ? v.fecha_entrega.toDate().toLocaleString('es-MX') : (v.estado === 'entregado' ? 'S/R' : 'N/A');
+                
                 const chofer = v.chofer_asignado ? (choferesDB.find(c => c.id === v.chofer_asignado)?.nombre || 'S/N') : 'Sin asignar';
                 const vehiculo = v.vehiculo_asignado ? (flotaDB.find(f => f.id === v.vehiculo_asignado)?.nombre || 'S/N') : 'N/A';
                 
@@ -2127,6 +2338,7 @@
                     v.lote_id || 'N/A',
                     fCreacion,
                     fSalida,
+                    fEntrega, // Incluído en el Excel final
                     v.folio_pedido || '',
                     v.folio_factura || '',
                     v.cliente_codigo || '',
@@ -2144,7 +2356,7 @@
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet(wsData);
                 
-                ws['!cols'] = [ {wch: 12}, {wch: 16}, {wch: 18}, {wch: 18}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 50}, {wch: 20}, {wch: 25}, {wch: 18}, {wch: 35} ];
+                ws['!cols'] = [ {wch: 12}, {wch: 16}, {wch: 18}, {wch: 18}, {wch: 18}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 50}, {wch: 20}, {wch: 25}, {wch: 18}, {wch: 35} ];
                 
                 XLSX.utils.book_append_sheet(wb, ws, "Bitácora de Logística");
                 XLSX.writeFile(wb, `Bitacora_Logistica_${fInicioStr}_al_${fFinStr}.xlsx`);
