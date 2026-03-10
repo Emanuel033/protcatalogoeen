@@ -357,7 +357,7 @@ function QRScanner() {
   );
 }
 
-function BackupTool() {
+function BackupTool({ onClose }) {
   const [cargando, setCargando] = useState(false);
 
   const descargarCatalogoPerfecto = async () => {
@@ -408,11 +408,13 @@ function BackupTool() {
       const jsonTexto = JSON.stringify(allProducts, null, 2);
       const blob = new Blob([jsonTexto], { type: 'application/json' });
       const enlace = document.createElement('a');
-      enlace.href = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      enlace.href = url;
       enlace.download = `catalogo_completo.json`;
       document.body.appendChild(enlace);
       enlace.click();
       document.body.removeChild(enlace);
+      URL.revokeObjectURL(url); // Buena práctica liberar memoria
       
       alert(`¡Catálogo Completo exportado con éxito!`);
     } catch (error) {
@@ -423,8 +425,15 @@ function BackupTool() {
   };
 
   return (
-    <div className="p-6 bg-slate-900 text-white rounded-2xl shadow-xl my-8 text-center border border-emerald-500/30">
-      <h3 className="text-lg font-black mb-2">Generador de Catálogo Estático</h3>
+    <div className="p-6 bg-slate-900 text-white rounded-2xl shadow-xl my-8 text-center border border-emerald-500/30 relative">
+      <button 
+        onClick={onClose} 
+        className="absolute top-4 right-4 text-slate-400 hover:text-red-400 font-bold w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 transition-colors"
+        title="Cerrar Herramienta"
+      >
+        X
+      </button>
+      <h3 className="text-lg font-black mb-2 pr-6">Generador de Catálogo Estático</h3>
       <p className="text-xs text-slate-400 mb-6 max-w-xl mx-auto">Este botón recopila todos tus productos y sus paquetes desde la base de datos y arma el archivo JSON que usaremos para que tu app funcione sin gastar saldo en Firebase.</p>
       <button 
         onClick={descargarCatalogoPerfecto} 
@@ -446,17 +455,27 @@ function Footer() {
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL CON MODO ADMINISTRADOR (ESCONDIDO)
+// COMPONENTE PRINCIPAL CON MODO ADMINISTRADOR (CORREGIDO)
 // ============================================================================
 function App() {
   const [esAdmin, setEsAdmin] = useState(false);
 
   useEffect(() => {
-    // Si la URL termina en "?modo=secreto", mostramos el botón.
-    const parametrosUrl = new URLSearchParams(window.location.search);
-    if (parametrosUrl.get('modo') === 'secreto') {
-      setEsAdmin(true);
-    }
+    // 1. Convertimos la validación en una función para reutilizarla
+    const revisarSiEsAdmin = () => {
+      const parametrosUrl = new URLSearchParams(window.location.search);
+      // Validamos y ASIGNAMOS un true o false estricto. 
+      // Si el parámetro ya no existe, apagará automáticamente el modo.
+      const modoActivo = parametrosUrl.get('modo') === 'secreto';
+      setEsAdmin(modoActivo);
+    };
+
+    // 2. Ejecutar al cargar el componente
+    revisarSiEsAdmin();
+
+    // 3. Escuchar los cambios en la navegación del navegador (botón atrás/adelante)
+    window.addEventListener('popstate', revisarSiEsAdmin);
+    return () => window.removeEventListener('popstate', revisarSiEsAdmin);
   }, []);
 
   return (
@@ -467,8 +486,8 @@ function App() {
         <CategoriesBar />
         
         <main className="flex-grow max-w-7xl mx-auto px-4 py-4 w-full">
-          {/* Aquí está la magia: El botón SOLO se muestra si esAdmin es verdadero */}
-          {esAdmin && <BackupTool />} 
+          {/* Se pasa una función para forzar el cierre manualmente si se queda pegado */}
+          {esAdmin && <BackupTool onClose={() => setEsAdmin(false)} />} 
           
           <ProductGrid />
         </main>
