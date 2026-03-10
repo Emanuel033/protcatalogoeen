@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, query, where } from "firebase/firestore";
+// Importar Analytics
+import { getAnalytics, logEvent, isSupported } from "firebase/analytics";
 
 // ============================================================================
 // CONFIGURACIÓN DE FIREBASE (BLINDADA)
@@ -21,6 +23,14 @@ try {
   db = getFirestore(app);
 }
 
+// Inicializar Analytics de forma segura (verifica si el navegador lo soporta)
+let analytics;
+isSupported().then((supported) => {
+  if (supported) {
+    analytics = getAnalytics(app);
+  }
+});
+
 // ============================================================================
 // CONTEXTO GLOBAL (CEREBRO)
 // ============================================================================
@@ -37,73 +47,31 @@ export const AppProvider = ({ children }) => {
   const [deliveryMethod, setDeliveryMethod] = useState('recoger');
   const [paymentMethod, setPaymentMethod] = useState('');
 
+  // Función centralizada para registrar eventos
+  const registrarEvento = (nombreEvento, parametros = {}) => {
+    if (analytics) {
+      logEvent(analytics, nombreEvento, parametros);
+    }
+  };
+
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const cacheLocal = localStorage.getItem('catalogo_een_data');
-        const timestampCache = localStorage.getItem('catalogo_een_time');
-        const TIEMPO_EXPIRACION = 86400000;
-
-        if (cacheLocal && timestampCache && (Date.now() - timestampCache < TIEMPO_EXPIRACION)) {
-          const cachedData = JSON.parse(cacheLocal);
-          setProductos(cachedData);
-          extraerCategorias(cachedData);
-          setCargando(false);
-          return; 
+        // AHORA SÍ: Leemos el archivo estático directamente. ¡Cero lecturas a Firebase!
+        // Asegúrate de que "catalogo_completo.json" esté guardado en tu carpeta "public"
+        const response = await fetch('/catalogo_completo.json');
+        
+        if (!response.ok) {
+          throw new Error("No se encontró catalogo_completo.json. ¿Entraste al modo secreto para generarlo?");
         }
 
-        const q = query(collection(db, 'productos_master'), where('activo', '==', true));
-        const snapshot = await getDocs(q);
-
-        let rawProducts = [];
-        let basesToFetch = new Set();
-
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          rawProducts.push({ id: doc.id, ...data });
-          if (data.tipo_item === 'PIEZA_BASE') basesToFetch.add(doc.id);
-          else if (data.hereda_empaques_de) basesToFetch.add(data.hereda_empaques_de);
-        });
-
-        const paquetesMap = {};
-        const promesasPaquetes = Array.from(basesToFetch).map(async (baseId) => {
-          try {
-            const paqSnap = await getDocs(collection(db, 'productos_master', baseId, 'paquetes'));
-            paquetesMap[baseId] = [];
-            paqSnap.forEach(pDoc => paquetesMap[baseId].push({ id: pDoc.id, ...pDoc.data() }));
-            paquetesMap[baseId].sort((a, b) => a.piezas - b.piezas);
-          } catch (error) {}
-        });
-        
-        await Promise.all(promesasPaquetes);
-
-        const allProducts = rawProducts.map(data => {
-          const producto = {
-            id: data.id,
-            name: data.nombre_flexible || 'Sin nombre',
-            category: data.categoria || 'General',
-            image: data.imagen_url || 'https://via.placeholder.com/300?text=Sin+Imagen',
-            piezas: data.piezas_por_caja_original || 1,
-            stock: data.stock_total_piezas || 0,
-            tipo_item: data.tipo_item || 'PIEZA_BASE',
-            codigo_sistema: data.codigo_sistema_oficial || data.codigo_sistema || null,
-            receta: data.receta_desglose || data.receta || null,
-            paquetes: [] 
-          };
-
-          if (producto.tipo_item === 'PIEZA_BASE') producto.paquetes = paquetesMap[producto.id] || [];
-          else if (data.hereda_empaques_de) producto.paquetes = paquetesMap[data.hereda_empaques_de] || [];
-          return producto;
-        });
-
-        localStorage.setItem('catalogo_een_data', JSON.stringify(allProducts));
-        localStorage.setItem('catalogo_een_time', Date.now());
+        const allProducts = await response.json();
 
         setProductos(allProducts);
         extraerCategorias(allProducts);
         setCargando(false);
       } catch (error) {
-        console.error("Error al cargar productos:", error);
+        console.error("Error al cargar productos estáticos:", error);
         setCargando(false);
       }
     };
@@ -125,6 +93,13 @@ export const AppProvider = ({ children }) => {
       if (existe) return prev.map(item => item.id === producto.id ? { ...item, cantidad: item.cantidad + cantidadAAgregar } : item);
       return [...prev, { ...producto, cantidad: cantidadAAgregar }];
     });
+    
+    // Rastrear cuando agregan algo al carrito
+    registrarEvento('add_to_cart', {
+      item_name: producto.name,
+      item_category: producto.category,
+      quantity: cantidadAAgregar
+    });
   };
 
   const quitarDelCarrito = (productoId) => setCarrito(prev => prev.map(item => item.id === productoId ? { ...item, cantidad: item.cantidad - 1 } : item).filter(item => item.cantidad > 0));
@@ -133,6 +108,13 @@ export const AppProvider = ({ children }) => {
 
   const sendWhatsApp = (clientData) => {
     if(carrito.length === 0) return alert("Carrito vacío");
+
+    // Rastrear cuando un cliente inicia el pedido por WhatsApp
+    registrarEvento('begin_checkout', {
+      total_items: totalPiezas,
+      delivery_method: deliveryMethod
+    });
+
     const name = clientData.name || "Cliente Público";
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
     
@@ -154,7 +136,8 @@ export const AppProvider = ({ children }) => {
       productos, categorias, cargando, categoriaActiva, setCategoriaActiva,
       searchTerm, setSearchTerm,
       carrito, isCartOpen, toggleCart, clearCart, agregarAlCarrito, quitarDelCarrito, eliminarProducto, totalPiezas,
-      deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp
+      deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp,
+      registrarEvento // Exponemos la función al resto de la app
     }}>
       {children}
     </AppContext.Provider>
@@ -168,9 +151,22 @@ export const useApp = () => useContext(AppContext);
 // ============================================================================
 
 function Navbar() {
-  const { searchTerm, setSearchTerm } = useApp();
+  const { searchTerm, setSearchTerm, registrarEvento } = useApp();
   const handleQR = () => window.dispatchEvent(new Event('open-qr-scanner'));
-  const clearSearch = () => setSearchTerm('');
+  
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
+  // Rastrear búsquedas cuando el usuario pausa de escribir (debounce manual básico)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm.trim().length > 2) {
+        registrarEvento('search', { search_term: searchTerm });
+      }
+    }, 1500); // Espera 1.5s después de que dejan de escribir para registrar la búsqueda
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, registrarEvento]);
 
   return (
     <nav className="bg-indigo-900 text-white sticky top-0 z-40 shadow-xl">
@@ -210,11 +206,18 @@ function Hero() {
 }
 
 function CategoriesBar() {
-  const { categorias, categoriaActiva, setCategoriaActiva } = useApp();
+  const { categorias, categoriaActiva, setCategoriaActiva, registrarEvento } = useApp();
+  
+  // Rastrear qué categorías clickean
+  const manejarClickCategoria = (cat) => {
+    setCategoriaActiva(cat);
+    registrarEvento('select_content', { content_type: 'category', item_id: cat });
+  };
+
   return (
     <div className="bg-white shadow-sm sticky top-[68px] z-30 overflow-x-auto border-b border-slate-200 py-3 px-4 flex gap-2">
       {categorias.map(cat => (
-        <button key={cat} onClick={() => setCategoriaActiva(cat)} className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${categoriaActiva === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+        <button key={cat} onClick={() => manejarClickCategoria(cat)} className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${categoriaActiva === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
           {cat}
         </button>
       ))}
@@ -363,6 +366,7 @@ function BackupTool({ onClose }) {
   const descargarCatalogoPerfecto = async () => {
     setCargando(true);
     try {
+      // AQUÍ ES EL ÚNICO LUGAR DONDE SE LEE FIREBASE: En la herramienta secreta de Admin.
       const q = query(collection(db, 'productos_master'), where('activo', '==', true));
       const snapshot = await getDocs(q);
 
@@ -416,10 +420,10 @@ function BackupTool({ onClose }) {
       document.body.removeChild(enlace);
       URL.revokeObjectURL(url); // Buena práctica liberar memoria
       
-      alert(`¡Catálogo Completo exportado con éxito!`);
+      alert(`¡Catálogo Completo exportado con éxito! Ahora muévelo a la carpeta 'public' de tu proyecto.`);
     } catch (error) {
       console.error(error);
-      alert(`Error al generar el catálogo.`);
+      alert(`Error al generar el catálogo. Asegúrate de tener conexión a internet.`);
     }
     setCargando(false);
   };
@@ -461,7 +465,7 @@ function App() {
   const [esAdmin, setEsAdmin] = useState(false);
 
   useEffect(() => {
-    // 1. Convertimos la validación en una función para reutilizarla
+    // Convertimos la validación en una función para reutilizarla
     const revisarSiEsAdmin = () => {
       const parametrosUrl = new URLSearchParams(window.location.search);
       // Validamos y ASIGNAMOS un true o false estricto. 
@@ -470,10 +474,10 @@ function App() {
       setEsAdmin(modoActivo);
     };
 
-    // 2. Ejecutar al cargar el componente
+    // Ejecutar al cargar el componente
     revisarSiEsAdmin();
 
-    // 3. Escuchar los cambios en la navegación del navegador (botón atrás/adelante)
+    // Escuchar los cambios en la navegación del navegador (botón atrás/adelante)
     window.addEventListener('popstate', revisarSiEsAdmin);
     return () => window.removeEventListener('popstate', revisarSiEsAdmin);
   }, []);
