@@ -10,6 +10,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDkQ2HcaLHY7dPvg_IRmuiZNGtcfUhu05o",
   authDomain: "productoseen.firebaseapp.com",
   projectId: "productoseen",
+  appId: "1:1052892398028:web:055e67f2aa4bce0d9c9d69"
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
