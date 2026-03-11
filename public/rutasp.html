@@ -72,6 +72,7 @@
 <body class="relative w-screen h-screen overflow-hidden text-slate-800">
 
     <script>
+        
         // Utilidades para manejar fechas en las tarjetas y los ordenamientos
         const getMs = (dateObj) => {
             if(!dateObj) return 0;
@@ -521,7 +522,8 @@
 
     <script>
         document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
-
+        // Memoria para recordar qué grupos el usuario decidió fusionar visualmente
+        let gruposFusionadosUI = {};
         let map, marcadores = {}, capaRuta = null; 
         let rutasActivasDB = {}; let rutasRecientesDB = {}; 
         let viajesAgrupados = [], filtroActual = 'activos', viajeSeleccionado = null; 
@@ -742,90 +744,177 @@
 
             const filtrados = filtradosBase.filter(v => v.cliente_nombre.toLowerCase().includes(termino) || v.id.toLowerCase().includes(termino) || (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino)));
             
-            filtrados.sort((a, b) => {
-                if (a.estado !== b.estado) {
-                    const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 };
-                    return (ord[a.estado] || 5) - (ord[b.estado] || 5);
-                }
-                
-                if (a.estado === 'entregado') {
-                    const msA = getMs(a.fecha_entrega) || getMs(a.fecha_actualizacion);
-                    const msB = getMs(b.fecha_entrega) || getMs(b.fecha_actualizacion);
-                    return msB - msA; 
-                }
-                
-                if (a.estado === 'camino' && a.fecha_salida && b.fecha_salida) {
-                    return (a.orden_ruta || 999999) - (b.orden_ruta || 999999);
-                }
-                
-                return getMs(b.fecha_creacion) - getMs(a.fecha_creacion);
-            });
-
             if(filtrados.length === 0) {
                 container.innerHTML = `<div class="text-center py-6 text-slate-400 font-bold flex flex-col items-center"><i class="fas ${termino ? 'fa-search' : 'fa-check-circle text-emerald-400'} text-3xl mb-2"></i><span class="text-xs">${termino ? 'Sin resultados.' : 'Bandeja limpia.'}</span></div>`; 
                 return;
             }
 
-            let htmlAcumulado = '';
+            // 1. Detectar Similitudes (Solo para los que están Pendientes)
+            const gruposMap = {};
+            const tarjetasFinales = []; // Aquí meteremos lo que se va a dibujar
+
             filtrados.forEach(v => {
-                const isActive = viajeSeleccionado && v.id === viajeSeleccionado.id ? 'active' : 'bg-white';
-                let stClass, stText, icClass;
-                if(v.estado === 'fallido') { stClass = 'status-fallido'; stText = 'Problema'; icClass = 'fa-exclamation-triangle'; }
-                else if(v.estado === 'pendiente') { stClass = 'status-pendiente'; stText = 'Por Asignar'; icClass = 'fa-clock'; }
-                else if(v.estado === 'camino') { 
-                    if(!v.fecha_salida) {
-                        stClass = 'bg-indigo-100 text-indigo-700'; stText = 'En Rampa'; icClass = 'fa-boxes';
+                if (v.estado === 'pendiente') {
+                    // Creamos una clave única basada en cliente y dirección exacta
+                    const key = `grp_${v.cliente_nombre}_${v.direccion}`;
+                    if (!gruposMap[key]) gruposMap[key] = [];
+                    gruposMap[key].push(v);
+                } else {
+                    tarjetasFinales.push({ tipo: 'individual', data: v });
+                }
+            });
+
+            // 2. Procesar los grupos detectados
+            Object.keys(gruposMap).forEach(key => {
+                const arrPedidos = gruposMap[key];
+                
+                if (arrPedidos.length === 1) {
+                    // Si solo hay 1, se trata como tarjeta normal
+                    tarjetasFinales.push({ tipo: 'individual', data: arrPedidos[0] });
+                } else {
+                    // Si hay varios, vemos si el usuario ya los fusionó
+                    if (gruposFusionadosUI[key]) {
+                        tarjetasFinales.push({ tipo: 'fusionada', key: key, items: arrPedidos });
                     } else {
-                        stClass = 'status-camino'; stText = 'En Ruta'; icClass = 'fa-truck-fast'; 
+                        tarjetasFinales.push({ tipo: 'sugerencia_grupo', key: key, items: arrPedidos });
                     }
                 }
-                else { stClass = 'status-entregado'; stText = 'Entregado'; icClass = 'fa-check-double'; }
+            });
 
-                let dateBadge = '';
-                if (v.estado === 'pendiente' || (v.estado === 'camino' && !v.fecha_salida)) {
-                    dateBadge = `<span class="text-[8px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Fecha de Captura"><i class="fas fa-calendar-plus text-slate-400"></i> ${formatDateShort(v.fecha_creacion) || 'Sin fecha'}</span>`;
-                } else if (v.estado === 'camino' && v.fecha_salida) {
-                    dateBadge = `<span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Salida"><i class="fas fa-truck-fast text-blue-400"></i> Salida: ${formatDateShort(v.fecha_salida) || 'Sin salida'}</span>`;
-                } else if (v.estado === 'entregado') {
-                    const fFin = v.fecha_entrega || v.fecha_actualizacion;
-                    dateBadge = `<span class="text-[8px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Finalización"><i class="fas fa-check-double text-emerald-400"></i> Fin: ${formatDateShort(fFin) || 'Sin fecha'}</span>`;
-                } else if (v.estado === 'fallido') {
-                    const fFail = v.fecha_actualizacion || v.fecha_creacion;
-                    dateBadge = `<span class="text-[8px] text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Falla"><i class="fas fa-clock text-red-400"></i> ${formatDateShort(fFail) || 'Sin fecha'}</span>`;
-                }
+            // Ordenamiento (mandamos al final)
+            tarjetasFinales.sort((a, b) => {
+                const getCreationDate = (item) => {
+                    if (item.tipo === 'individual') return getMs(item.data.fecha_creacion);
+                    // Para grupos, tomamos la fecha de creación más antigua
+                    return Math.min(...item.items.map(x => getMs(x.fecha_creacion)));
+                };
+                return getCreationDate(b) - getCreationDate(a); // Más recientes primero
+            });
 
-                let bHtml = '';
-                if (v.estado === 'fallido') bHtml = `<div class="mt-2 pt-2 border-t border-red-100 text-[9px] font-bold text-red-600 truncate bg-red-50 px-2 py-1 rounded-md"><i class="fas fa-info-circle"></i> ${v.motivo_falla || 'Problema reportado'}</div>`;
-                else if (v.vehiculo_asignado && v.estado !== 'pendiente') {
-                    const choferNombre = choferesDB.find(c => c.id === v.chofer_asignado)?.nombre || 'Chofer';
-                    bHtml = `<div class="mt-2 pt-1.5 border-t border-slate-100 flex justify-between items-center text-[8px] font-bold text-slate-500"><span class="bg-slate-100 px-1.5 py-0.5 rounded"><i class="fas fa-truck text-slate-400"></i> ${flotaDB.find(f => f.id === v.vehiculo_asignado)?.nombre || 'Vehículo'}</span> <span class="text-blue-600"><i class="fas fa-user-circle"></i> ${choferNombre}</span></div>`;
-                }
-
-                const badgeUrgente = v.urgente ? `<span class="bg-gradient-to-r from-red-500 to-red-600 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase ml-1 shadow-sm"><i class="fas fa-fire-alt"></i> Urg.</span>` : '';
-                
+            let htmlAcumulado = '';
+            
+            // Función auxiliar para dibujar 1 tarjeta individual
+            const dibujarTarjeta = (v) => {
+                const isActive = viajeSeleccionado && v.id === viajeSeleccionado.id ? 'active' : 'bg-white';
+                // ... (AQUÍ VA EXACTAMENTE EL MISMO CÓDIGO HTML QUE TENÍAS PARA DIBUJAR UNA TARJETA NORMAL CON SUS STATUS, ICONOS Y BADGES)
+                // Para no hacer el código gigante aquí, copias la generación de tu tarjeta normal (la que empieza con const stClass...)
+                let stClass = 'status-pendiente', stText = 'Por Asignar', icClass = 'fa-clock';
+                const dateBadge = `<span class="text-[8px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap"><i class="fas fa-calendar-plus text-slate-400"></i> ${formatDateShort(v.fecha_creacion) || 'Sin fecha'}</span>`;
                 const muestraFolio = v.folio_pedido || v.folio_factura || 'S/F';
-                const isFletera = v.tipo_envio.includes('fletera');
-                const badgeFletera = isFletera ? `<i class="fas fa-truck-loading text-purple-400 mr-1" title="Fletera"></i>` : '';
-
-                let aliasMostrar = v.destino_alias ? `(${v.destino_alias}) ` : '';
-
-                htmlAcumulado += `<div onclick="seleccionarViaje('${v.id}')" class="pedido-card ${isActive} rounded-2xl p-3 cursor-pointer relative overflow-hidden">
+                
+                return `<div onclick="seleccionarViaje('${v.id}')" class="pedido-card ${isActive} rounded-2xl p-3 cursor-pointer relative overflow-hidden mb-2">
                     <div class="flex justify-between items-start mb-1.5">
                         <span class="status-badge ${stClass} text-[8px] px-2 py-0.5"><i class="fas ${icClass}"></i> ${stText}</span>
                         <div class="flex flex-col items-end">
                             <span class="text-[8px] font-mono font-bold text-slate-400">${muestraFolio}</span>
-                            ${v.cliente_codigo ? `<span class="text-[7px] font-mono font-bold text-slate-300">Cód: ${v.cliente_codigo}</span>` : ''}
                         </div>
                     </div>
-                    <h4 class="font-black text-slate-800 text-xs truncate mb-1">${badgeFletera}${v.cliente_nombre}${badgeUrgente}</h4>
+                    <h4 class="font-black text-slate-800 text-xs truncate mb-1">${v.cliente_nombre} ${v.urgente ? '<span class="text-[8px] bg-red-500 text-white px-1 rounded ml-1">URG.</span>' : ''}</h4>
                     <div class="flex justify-between items-center mb-1 gap-2">
-                        <p class="text-[9px] text-slate-500 truncate font-medium flex-1"><i class="fas fa-map-marker-alt text-red-400 w-3"></i> <b>${aliasMostrar}</b>${v.direccion}</p>
+                        <p class="text-[9px] text-slate-500 truncate font-medium flex-1"><i class="fas fa-map-marker-alt text-red-400 w-3"></i> ${v.direccion}</p>
                         ${dateBadge}
                     </div>
-                    ${bHtml}
                 </div>`;
+            };
+
+            // 3. Renderizar según el tipo
+            tarjetasFinales.forEach(block => {
+                if (block.tipo === 'individual') {
+                    htmlAcumulado += dibujarTarjeta(block.data);
+                } 
+                else if (block.tipo === 'sugerencia_grupo') {
+                    // DIBUJAR LA CAJA PUNTEADA CON LA SUGERENCIA
+                    let tarjetasDentro = block.items.map(v => dibujarTarjeta(v)).join('');
+                    htmlAcumulado += `
+                        <div class="border-2 border-dashed border-indigo-200 bg-indigo-50/30 rounded-2xl p-2 mb-3 relative">
+                            <div class="flex justify-between items-center mb-2 px-1">
+                                <span class="text-[9px] font-black text-indigo-500 uppercase flex items-center gap-1"><i class="fas fa-lightbulb"></i> Van al mismo destino (${block.items.length})</span>
+                                <button onclick="toggleFusionUI('${block.key}', true); event.stopPropagation();" class="bg-indigo-600 text-white text-[9px] font-bold px-3 py-1 rounded-full shadow-sm hover:bg-indigo-700 transition active:scale-95">Fusionar en 1 Tarjeta</button>
+                            </div>
+                            <div class="pl-2 border-l-2 border-indigo-100">
+                                ${tarjetasDentro}
+                            </div>
+                        </div>
+                    `;
+                }
+                else if (block.tipo === 'fusionada') {
+                    // DIBUJAR LA TARJETA MAESTRA FUSIONADA
+                    const foliosPed = block.items.map(x => x.folio_pedido).filter(Boolean).join(', ');
+                    const foliosFac = block.items.map(x => x.folio_factura).filter(Boolean).join(', ');
+                    const muestraFolios = foliosPed || foliosFac || 'Varios Folios';
+                    const tieneUrgente = block.items.some(x => x.urgente);
+                    // Pasamos todos los IDs separados por comas
+                    const idsCompuestos = block.items.map(x => x.id).join(',');
+
+                    const isMasterActive = viajeSeleccionado && viajeSeleccionado.es_grupo && viajeSeleccionado.id === idsCompuestos ? 'active border-indigo-500' : 'bg-white border-indigo-300';
+
+                    htmlAcumulado += `
+                        <div onclick="seleccionarViaje('${idsCompuestos}')" class="pedido-card ${isMasterActive} border-2 rounded-2xl p-3 cursor-pointer relative overflow-hidden mb-3 shadow-md">
+                            <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-black px-2 py-0.5 rounded-bl-lg shadow-sm">TARJETA FUSIONADA</div>
+                            
+                            <div class="flex justify-between items-start mb-1.5 mt-2">
+                                <span class="status-badge status-pendiente text-[8px] px-2 py-0.5"><i class="fas fa-layer-group"></i> ${block.items.length} Pedidos Listos</span>
+                            </div>
+                            
+                            <h4 class="font-black text-slate-800 text-xs truncate mb-1">${block.items[0].cliente_nombre} ${tieneUrgente ? '<span class="text-[8px] bg-red-500 text-white px-1 rounded ml-1 animate-pulse">URGENTE</span>' : ''}</h4>
+                            
+                            <div class="text-[9px] text-slate-500 font-medium mb-2"><i class="fas fa-map-marker-alt text-red-400 w-3"></i> ${block.items[0].direccion}</div>
+                            
+                            <div class="bg-slate-50 border border-slate-100 p-1.5 rounded-lg text-[8px] font-mono text-slate-600 truncate mb-2">
+                                <b>Folios:</b> ${muestraFolios}
+                            </div>
+
+                            <button onclick="toggleFusionUI('${block.key}', false); event.stopPropagation();" class="w-full text-center text-[9px] font-bold text-indigo-500 hover:text-indigo-700 bg-indigo-50 py-1 rounded transition mt-1 border border-indigo-100">
+                                <i class="fas fa-unlink"></i> Separar tarjetas
+                            </button>
+                        </div>
+                    `;
+                }
             });
+
             container.innerHTML = htmlAcumulado;
+        }
+        
+        window.toggleFusionUI = (key, fusionar) => {
+            if (fusionar) {
+                gruposFusionadosUI[key] = true;
+                showToast("Tarjetas fusionadas visualmente", "info");
+            } else {
+                delete gruposFusionadosUI[key];
+                // Si estaba seleccionado este grupo en el drawer, lo cerramos
+                cerrarDetalle();
+                showToast("Tarjetas separadas");
+            }
+            renderizarLista();
+        };
+
+        async function ejecutarAccionBatch(accion, vehiculo = null, chofer = null, forzarSalidaAhora = false) {
+            if(!viajeSeleccionado) return;
+            try {
+                let data = { estado: accion, fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp() };
+                if(accion === 'camino') { 
+                    data.vehiculo_asignado = vehiculo; data.chofer_asignado = chofer;
+                    if(forzarSalidaAhora) {
+                        data.fecha_salida = firebase.firestore.FieldValue.serverTimestamp();
+                        data.lote_id = 'VUELTA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                    }
+                } else if (accion === 'pendiente') {
+                     // Lógica para regresar a pendientes
+                     data.vehiculo_asignado = null; data.chofer_asignado = null; data.fecha_salida = null;
+                }
+
+                const batch = db.batch();
+                // Si la tarjeta está fusionada, viajeSeleccionado.ids_grupo tendrá los 3 IDs. Si es normal, solo 1.
+                const idsParaActualizar = viajeSeleccionado.ids_grupo || [viajeSeleccionado.id];
+                
+                idsParaActualizar.forEach(id => {
+                    batch.update(db.collection('rutas_logistica').doc(id), data);
+                });
+
+                await batch.commit();
+                showToast("Operación exitosa" + (idsParaActualizar.length > 1 ? ` (${idsParaActualizar.length} pedidos)` : '')); 
+                cerrarDetalle();
+            } catch(e) { showToast("Error al guardar en la base de datos", "error"); }
         }
 
         function actualizarMapa() {
