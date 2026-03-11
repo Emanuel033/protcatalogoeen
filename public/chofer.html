@@ -47,22 +47,83 @@ cursor:zoom-out;
  width:100%;
 }
 
-#qr-img-src{
- width:90vw;
- max-width:420px;
+#modal-visor-qr{
  height:auto;
+ border-radius:18px;
+ background:white;
+ padding:18px;
+ box-shadow:0 25px 50px rgba(0,0,0,.6);
+ transition:transform .2s ease;
+}
+
+#qr-img-src:active{
+ transform:scale(.97);
+}
+
+#qr-empresa-nombre{
+ margin-top:20px;
+ font-weight:800;
+ color:#e2e8f0;
+ text-align:center;
+ font-size:15px;
+ letter-spacing:.4px;
+ background:#020617;
+ padding:10px 16px;
+ border-radius:12px;
+}
+
+.qr-title{
+ font-size:19px;
+ font-weight:900;
+ color:white;
+ margin-bottom:6px;
+}
+
+.qr-subtitle{
+ font-size:11px;
+ color:#94a3b8;
+ text-transform:uppercase;
+ letter-spacing:1.2px;
+ margin-bottom:20px;
+}
+
+.qr-close{
+ position:absolute;
+ top:22px;
+ right:22px;
+ background:#020617;
+ width:44px;
+ height:44px;
+ border-radius:50%;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ color:white;
+ font-size:18px;
+ box-shadow:0 12px 26px rgba(0,0,0,.6);
+ border:1px solid rgba(255,255,255,.05);
+}
+
+.qr-close:active{
+ transform:scale(.9);
 }
 
 .qr-bright-btn{
  position:absolute;
- bottom:40px;
- right:30px;
- background:#facc15;
+ bottom:38px;
+ right:28px;
+ background:linear-gradient(135deg,#fde047,#facc15);
  color:black;
  font-weight:900;
- padding:14px 18px;
- border-radius:12px;
- box-shadow:0 10px 20px rgba(0,0,0,.4);
+ padding:14px 22px;
+ border-radius:16px;
+ box-shadow:0 20px 40px rgba(0,0,0,.7);
+ font-size:14px;
+ letter-spacing:.4px;
+}
+
+.qr-bright-btn:active{
+ transform:scale(.95);
 }
     </style>
 </head>
@@ -141,13 +202,21 @@ cursor:zoom-out;
         </div>
     </div>
 
-    <div id="modal-visor-qr" class="fixed inset-0 bg-black z-[95] hidden flex-col items-center justify-center p-4">
+    <div id="modal-visor-qr" class="fixed inset-0 z-[95] hidden flex-col items-center justify-center p-6">
 
-<button onclick="cerrarVisorQR()" class="absolute top-6 right-6 text-white text-3xl z-30">
+<button onclick="cerrarVisorQR()" class="qr-close">
 <i class="fas fa-times"></i>
 </button>
 
-<div id="qr-pro-container">
+<div id="qr-card">
+
+<div class="qr-title">
+<i class="fas fa-qrcode"></i> Código de Acceso
+</div>
+
+<div class="qr-subtitle">
+Mostrar en caseta para escaneo
+</div>
 
 <img
 id="qr-img-src"
@@ -156,7 +225,7 @@ onclick="toggleZoomQR(event)"
 class="cursor-zoom-in"
 >
 
-<p id="qr-empresa-nombre" class="mt-6 text-white font-bold text-center"></p>
+<p id="qr-empresa-nombre"></p>
 
 </div>
 
@@ -715,7 +784,9 @@ class="max-w-full max-h-full rounded-xl shadow-2xl"
                 btn.disabled = false; btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> Enviar Reporte';
             }
         };
-
+// ==========================================
+        // modal qr zoom
+        // ==========================================
         window.toggleZoomQR = (e) => {
 
  e.stopPropagation()
