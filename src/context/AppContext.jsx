@@ -113,13 +113,42 @@ export const AppProvider = ({ children }) => {
 
     window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`, '_blank');
   };
+  
+// --- NUEVA FUNCIÓN: Enviar por Correo ---
+  const sendEmail = (clientData) => {
+    if(carrito.length === 0) return alert("Carrito vacío");
+    registrarEvento('begin_checkout_email', { total_items: totalPiezas });
+
+    const name = clientData.name || "Cliente Público";
+    const address = clientData.address || "No especificada";
+    const delivery = deliveryMethod;
+    const payment = paymentMethod || "No especificado";
+
+    let msg = `Hola, mi nombre es ${name}.\n\nAdjunto los detalles de mi pedido:\n\n`;
+    
+    carrito.forEach((item, index) => {
+        msg += `${index + 1}. ${item.name} - Cantidad: ${item.cantidad}\n`;
+    });
+
+    msg += `\n--- DATOS DE ENTREGA Y PAGO ---\n`;
+    msg += `Método de entrega: ${delivery.toUpperCase()}\n`;
+    if (delivery === 'local') msg += `Dirección: ${address}\n`;
+    if (delivery === 'foraneo') msg += `Fletera: ${clientData.fletera || 'No especificada'} (${clientData.ocurre ? 'Ocurre' : 'Domicilio'})\n`;
+    msg += `Método de pago: ${payment.toUpperCase()}\n\n`;
+
+    const subject = encodeURIComponent(`Nuevo Pedido de ${name}`);
+    const body = encodeURIComponent(msg);
+    
+    // Cambia el correo "ventas@tuempresa.com" por el tuyo
+    window.location.href = `mailto:ventas@tuempresa.com?subject=${subject}&body=${body}`;
+  };
 
   return (
     <AppContext.Provider value={{ 
       productos, categorias, cargando, categoriaActiva, setCategoriaActiva,
       searchTerm, setSearchTerm,
       carrito, isCartOpen, toggleCart, clearCart, agregarAlCarrito, eliminarProducto, totalPiezas,
-      deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp,
+      deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp, sendEmail, // <-- Agrega sendEmail aquí
       registrarEvento, esAdmin, setEsAdmin
     }}>
       {children}
