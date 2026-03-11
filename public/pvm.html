@@ -391,6 +391,26 @@
         </div>
     </div>
 
+    <div id="priceOverrideModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[120] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="priceOverrideBox">
+            <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2 flex items-center gap-2">
+                <i class="fas fa-tag text-blue-600"></i> Ajustar Precio
+            </h3>
+            <p class="text-xs md:text-sm text-slate-500 mb-4 line-clamp-2" id="priceOverrideProductName">Producto</p>
+
+            <label class="block text-xs font-bold text-slate-600 mb-1">Nuevo Precio Unitario ($)</label>
+            <input type="text" inputmode="decimal" id="inputNewPrice" autocomplete="off" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none mb-4 text-xl font-black text-slate-800" oninput="this.value = this.value.replace(/[^0-9.]/g, '');">
+
+            <label class="block text-xs font-bold text-slate-600 mb-1">PIN de Autorización (Gerente)</label>
+            <input type="password" inputmode="numeric" id="inputAuthPin" maxlength="4" autocomplete="off" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none mb-6 text-center tracking-[0.5em] text-xl font-black" placeholder="••••">
+
+            <div class="flex gap-2 md:gap-3">
+                <button onclick="closePriceOverrideModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors text-sm">Cancelar</button>
+                <button id="btnConfirmPriceOverride" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg text-sm">Autorizar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="confirmModal" class="modal-overlay fixed inset-0 bg-slate-900/80 z-[120] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-200" id="confirmBox">
             <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2 flex items-center gap-2">
@@ -789,6 +809,8 @@ window.calculateChange = () => {
             }
         }
 
+        
+
         window.resetRenderLimitAndFilter = () => {
             currentRenderLimit = 100; 
             filterCatalog();
@@ -934,7 +956,13 @@ window.calculateChange = () => {
                         <button onclick="updateCartQty(${index}, 1)" class="w-6 h-6 md:w-7 md:h-7 text-slate-500 hover:text-blue-500 font-bold text-sm transition-colors">+</button>
                     </div>
                     <div class="text-right">
-                        <div class="text-[8px] md:text-[9px] text-slate-400 font-bold">${formatMoney(item.precio)} c/u</div>
+                        <div class="text-[8px] md:text-[9px] text-slate-400 font-bold flex items-center justify-end gap-1">
+    ${item.precio_modificado ? '<span class="text-red-500 font-black text-xs" title="Precio editado">*</span>' : ''}
+    ${formatMoney(item.precio)} c/u
+    <button onclick="openPriceOverrideModal(${index})" class="text-blue-500 hover:bg-blue-100 p-1 rounded-md transition ml-1" title="Ajustar precio">
+        <i class="fas fa-edit"></i>
+    </button>
+</div>
                         <div class="item-subtotal text-xs md:text-sm font-black text-slate-800">${formatMoney(toPesos(itemSubtotalCentavos))}</div>
                     </div>
                 </div>
@@ -1368,6 +1396,57 @@ window.calculateChange = () => {
             else if (diferencia > 0) { resDiv.className = "text-3xl md:text-4xl font-black text-blue-400"; txtDiv.innerText = "Sobrante en caja 📈"; txtDiv.className = "text-xs md:text-sm font-bold mt-2 text-blue-300"; } 
             else { resDiv.className = "text-3xl md:text-4xl font-black text-red-400"; txtDiv.innerText = "Faltante en caja ⚠️"; txtDiv.className = "text-xs md:text-sm font-bold mt-2 text-red-300"; }
         }
+
+        // --- LÓGICA DE AJUSTE DE PRECIOS CON CANDADO ---
+        let currentOverrideIndex = -1;
+        const PIN_GERENTE = "1234"; // <-- CAMBIA ESTE PIN POR EL QUE QUIERAS USAR COMO CANDADO
+
+        window.openPriceOverrideModal = (index) => {
+            currentOverrideIndex = index;
+            const item = cart[index];
+            document.getElementById('priceOverrideProductName').innerText = item.nombre;
+            document.getElementById('inputNewPrice').value = item.precio;
+            document.getElementById('inputAuthPin').value = '';
+
+            const modal = document.getElementById('priceOverrideModal');
+            const box = document.getElementById('priceOverrideBox');
+            modal.classList.remove('hidden');
+            
+            setTimeout(() => { 
+                box.classList.remove('scale-95'); 
+                document.getElementById('inputNewPrice').focus(); 
+                document.getElementById('inputNewPrice').select(); // Selecciona el texto para borrar rápido
+            }, 10);
+            
+            document.getElementById('btnConfirmPriceOverride').onclick = () => {
+                const newPrice = parseFloat(document.getElementById('inputNewPrice').value);
+                const pin = document.getElementById('inputAuthPin').value;
+
+                if (isNaN(newPrice) || newPrice < 0) return showToast("Ingresa un precio válido", "error");
+                
+                // Verificación del candado
+                if (pin !== PIN_GERENTE) {
+                    document.getElementById('inputAuthPin').value = '';
+                    document.getElementById('inputAuthPin').focus();
+                    return showToast("PIN de autorización incorrecto", "error");
+                }
+
+                // Aplicar el cambio
+                cart[currentOverrideIndex].precio = newPrice;
+                cart[currentOverrideIndex].precio_modificado = true; // Etiqueta para saber que se alteró
+                
+                renderCart();
+                closePriceOverrideModal();
+                showToast("Precio ajustado correctamente");
+            };
+        };
+
+        window.closePriceOverrideModal = () => {
+            const modal = document.getElementById('priceOverrideModal');
+            const box = document.getElementById('priceOverrideBox');
+            box.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        };
 
         window.exportProductsReport = async () => {
             showToast("Calculando reporte de artículos...", "info");
