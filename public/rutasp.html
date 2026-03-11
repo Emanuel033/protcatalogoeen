@@ -1431,169 +1431,160 @@
 
 
         function renderizarLista() {
-
-            const container = document.getElementById('lista-pedidos'); container.innerHTML = '';
-
+            const container = document.getElementById('lista-pedidos'); 
+            container.innerHTML = '';
             const termino = document.getElementById('buscar-ruta-input')?.value.toLowerCase() || '';
-
             
-
+            // 1. Aplicar Filtro Base
             let filtradosBase = viajesAgrupados;
-
             if (filtroActual !== 'todos') {
-
                 filtradosBase = viajesAgrupados.filter(p => {
-
                     if (filtroActual === 'activos') return p.estado === 'pendiente' || p.estado === 'camino';
-
                     if (filtroActual === 'rampa') return p.estado === 'camino' && !p.fecha_salida;
-
                     if (filtroActual === 'camino') return p.estado === 'camino' && p.fecha_salida;
-
                     return p.estado === filtroActual;
-
                 });
-
             }
 
-
-
-            const filtrados = filtradosBase.filter(v => v.cliente_nombre.toLowerCase().includes(termino) || v.id.toLowerCase().includes(termino) || (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino)));
-
+            // 2. Aplicar Búsqueda de Texto
+            const filtrados = filtradosBase.filter(v => 
+                v.cliente_nombre.toLowerCase().includes(termino) || 
+                v.id.toLowerCase().includes(termino) || 
+                (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || 
+                (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || 
+                (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino))
+            );
             
-
-            filtrados.sort((a, b) => {
-                if (a.estado !== b.estado) {
-                    const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 };
-                    return (ord[a.estado] || 5) - (ord[b.estado] || 5);
-                }
-                if (a.estado === 'entregado') return b._ms_entrega - a._ms_entrega;
-                if (a.estado === 'camino' && a.fecha_salida && b.fecha_salida) return (a.orden_ruta || 999999) - (b.orden_ruta || 999999);
-                
-                return b._ms_creacion - a._ms_creacion; // Mucho más rápido que getMs() aquí
-            });
-
-
-
             if(filtrados.length === 0) {
-
                 container.innerHTML = `<div class="text-center py-6 text-slate-400 font-bold flex flex-col items-center"><i class="fas ${termino ? 'fa-search' : 'fa-check-circle text-emerald-400'} text-3xl mb-2"></i><span class="text-xs">${termino ? 'Sin resultados.' : 'Bandeja limpia.'}</span></div>`; 
-
                 return;
-
             }
 
-
-
-            let htmlAcumulado = '';
+            // 3. AGRUPACIÓN VISUAL: Separar en Grupos (solo pendientes con misma dirección) y Solitarios
+            const gruposMap = {};
+            const bloquesRender = []; // Aquí meteremos { tipo: 'individual', data: v } o { tipo: 'grupo', items: [...] }
 
             filtrados.forEach(v => {
-
-                const isActive = viajeSeleccionado && v.id === viajeSeleccionado.id ? 'active' : 'bg-white';
-
-                let stClass, stText, icClass;
-
-                if(v.estado === 'fallido') { stClass = 'status-fallido'; stText = 'Problema'; icClass = 'fa-exclamation-triangle'; }
-
-                else if(v.estado === 'pendiente') { stClass = 'status-pendiente'; stText = 'Por Asignar'; icClass = 'fa-clock'; }
-
-                else if(v.estado === 'camino') { 
-
-                    if(!v.fecha_salida) {
-
-                        stClass = 'bg-indigo-100 text-indigo-700'; stText = 'En Rampa'; icClass = 'fa-boxes';
-
-                    } else {
-
-                        stClass = 'status-camino'; stText = 'En Ruta'; icClass = 'fa-truck-fast'; 
-
-                    }
-
+                if (v.estado === 'pendiente') {
+                    // Agrupamos usando la dirección exacta ignorando mayúsculas/minúsculas y espacios extra
+                    const key = v.direccion.trim().toLowerCase();
+                    if (!gruposMap[key]) gruposMap[key] = [];
+                    gruposMap[key].push(v);
+                } else {
+                    bloquesRender.push({ tipo: 'individual', data: v });
                 }
+            });
 
+            // Convertir el mapa de grupos en bloques de renderizado
+            Object.keys(gruposMap).forEach(key => {
+                const arr = gruposMap[key];
+                if (arr.length > 1) {
+                    bloquesRender.push({ tipo: 'grupo', items: arr }); // Si hay varios al mismo lugar
+                } else {
+                    bloquesRender.push({ tipo: 'individual', data: arr[0] }); // Si solo hay 1 a ese lugar
+                }
+            });
+
+            // 4. Ordenamiento de los Bloques
+            const getSortItem = (b) => {
+                // Si es grupo, tomamos el pedido más reciente de ese grupo para representarlo en el ordenamiento
+                if (b.tipo === 'individual') return b.data;
+                b.items.sort((x, y) => y._ms_creacion - x._ms_creacion);
+                return b.items[0]; 
+            };
+
+            bloquesRender.sort((a, b) => {
+                const itemA = getSortItem(a);
+                const itemB = getSortItem(b);
+                
+                if (itemA.estado !== itemB.estado) {
+                    const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 };
+                    return (ord[itemA.estado] || 5) - (ord[itemB.estado] || 5);
+                }
+                if (itemA.estado === 'entregado') return itemB._ms_entrega - itemA._ms_entrega;
+                if (itemA.estado === 'camino' && itemA.fecha_salida && itemB.fecha_salida) return (itemA.orden_ruta || 999999) - (itemB.orden_ruta || 999999);
+                return itemB._ms_creacion - itemA._ms_creacion; // Usa la variable pre-calculada de rendimiento
+            });
+
+            // 5. Helper para dibujar 1 tarjeta HTML (Reutilizable)
+            const generarTarjetaHTML = (v) => {
+                const isActive = viajeSeleccionado && v.id === viajeSeleccionado.id ? 'active' : 'bg-white';
+                let stClass, stText, icClass;
+                if(v.estado === 'fallido') { stClass = 'status-fallido'; stText = 'Problema'; icClass = 'fa-exclamation-triangle'; }
+                else if(v.estado === 'pendiente') { stClass = 'status-pendiente'; stText = 'Por Asignar'; icClass = 'fa-clock'; }
+                else if(v.estado === 'camino') { 
+                    if(!v.fecha_salida) { stClass = 'bg-indigo-100 text-indigo-700'; stText = 'En Rampa'; icClass = 'fa-boxes'; } 
+                    else { stClass = 'status-camino'; stText = 'En Ruta'; icClass = 'fa-truck-fast'; }
+                }
                 else { stClass = 'status-entregado'; stText = 'Entregado'; icClass = 'fa-check-double'; }
 
-
-
                 let dateBadge = '';
-            if (v.estado === 'pendiente' || (v.estado === 'camino' && !v.fecha_salida)) {
-                dateBadge = `<span class="text-[8px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap"><i class="fas fa-calendar-plus text-slate-400"></i> ${v._fecha_creacion_str || 'Sin fecha'}</span>`;
-            } else if (v.estado === 'camino' && v.fecha_salida) {
-                dateBadge = `<span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap"><i class="fas fa-truck-fast text-blue-400"></i> Salida: ${v._fecha_salida_str || 'Sin salida'}</span>`;
-            } else if (v.estado === 'entregado') {
-                dateBadge = `<span class="text-[8px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap"><i class="fas fa-check-double text-emerald-400"></i> Fin: ${v._fecha_fin_str || 'Sin fecha'}</span>`;
-            } else if (v.estado === 'fallido') {
-                dateBadge = `<span class="text-[8px] text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap"><i class="fas fa-clock text-red-400"></i> ${v._fecha_falla_str || 'Sin fecha'}</span>`;
-            }
-
-
-
-                let bHtml = '';
-
-                if (v.estado === 'fallido') bHtml = `<div class="mt-2 pt-2 border-t border-red-100 text-[9px] font-bold text-red-600 truncate bg-red-50 px-2 py-1 rounded-md"><i class="fas fa-info-circle"></i> ${v.motivo_falla || 'Problema reportado'}</div>`;
-
-                else if (v.vehiculo_asignado && v.estado !== 'pendiente') {
-
-                    const choferNombre = choferesDB.find(c => c.id === v.chofer_asignado)?.nombre || 'Chofer';
-
-                    bHtml = `<div class="mt-2 pt-1.5 border-t border-slate-100 flex justify-between items-center text-[8px] font-bold text-slate-500"><span class="bg-slate-100 px-1.5 py-0.5 rounded"><i class="fas fa-truck text-slate-400"></i> ${flotaDB.find(f => f.id === v.vehiculo_asignado)?.nombre || 'Vehículo'}</span> <span class="text-blue-600"><i class="fas fa-user-circle"></i> ${choferNombre}</span></div>`;
-
+                if (v.estado === 'pendiente' || (v.estado === 'camino' && !v.fecha_salida)) {
+                    dateBadge = `<span class="text-[8px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Fecha de Captura"><i class="fas fa-calendar-plus text-slate-400"></i> ${v._fecha_creacion_str || 'Sin fecha'}</span>`;
+                } else if (v.estado === 'camino' && v.fecha_salida) {
+                    dateBadge = `<span class="text-[8px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Salida"><i class="fas fa-truck-fast text-blue-400"></i> Salida: ${v._fecha_salida_str || 'Sin salida'}</span>`;
+                } else if (v.estado === 'entregado') {
+                    dateBadge = `<span class="text-[8px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Finalización"><i class="fas fa-check-double text-emerald-400"></i> Fin: ${v._fecha_fin_str || 'Sin fecha'}</span>`;
+                } else if (v.estado === 'fallido') {
+                    dateBadge = `<span class="text-[8px] text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap" title="Hora de Falla"><i class="fas fa-clock text-red-400"></i> ${v._fecha_falla_str || 'Sin fecha'}</span>`;
                 }
 
-
+                let bHtml = '';
+                if (v.estado === 'fallido') bHtml = `<div class="mt-2 pt-2 border-t border-red-100 text-[9px] font-bold text-red-600 truncate bg-red-50 px-2 py-1 rounded-md"><i class="fas fa-info-circle"></i> ${v.motivo_falla || 'Problema reportado'}</div>`;
+                else if (v.vehiculo_asignado && v.estado !== 'pendiente') {
+                    const choferNombre = choferesDB.find(c => c.id === v.chofer_asignado)?.nombre || 'Chofer';
+                    bHtml = `<div class="mt-2 pt-1.5 border-t border-slate-100 flex justify-between items-center text-[8px] font-bold text-slate-500"><span class="bg-slate-100 px-1.5 py-0.5 rounded"><i class="fas fa-truck text-slate-400"></i> ${flotaDB.find(f => f.id === v.vehiculo_asignado)?.nombre || 'Vehículo'}</span> <span class="text-blue-600"><i class="fas fa-user-circle"></i> ${choferNombre}</span></div>`;
+                }
 
                 const badgeUrgente = v.urgente ? `<span class="bg-gradient-to-r from-red-500 to-red-600 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase ml-1 shadow-sm"><i class="fas fa-fire-alt"></i> Urg.</span>` : '';
-
-                
-
                 const muestraFolio = v.folio_pedido || v.folio_factura || 'S/F';
-
                 const isFletera = v.tipo_envio.includes('fletera');
-
                 const badgeFletera = isFletera ? `<i class="fas fa-truck-loading text-purple-400 mr-1" title="Fletera"></i>` : '';
-
-
-
                 let aliasMostrar = v.destino_alias ? `(${v.destino_alias}) ` : '';
 
-
-
-                htmlAcumulado += `<div onclick="seleccionarViaje('${v.id}')" class="pedido-card ${isActive} rounded-2xl p-3 cursor-pointer relative overflow-hidden">
-
+                // Usamos margin-bottom 0 porque el margin lo dará el contenedor si están agrupados
+                return `<div onclick="seleccionarViaje('${v.id}')" class="pedido-card ${isActive} rounded-2xl p-3 cursor-pointer relative overflow-hidden mb-2 shadow-sm border border-slate-100">
                     <div class="flex justify-between items-start mb-1.5">
-
                         <span class="status-badge ${stClass} text-[8px] px-2 py-0.5"><i class="fas ${icClass}"></i> ${stText}</span>
-
                         <div class="flex flex-col items-end">
-
                             <span class="text-[8px] font-mono font-bold text-slate-400">${muestraFolio}</span>
-
                             ${v.cliente_codigo ? `<span class="text-[7px] font-mono font-bold text-slate-300">Cód: ${v.cliente_codigo}</span>` : ''}
-
                         </div>
-
                     </div>
-
                     <h4 class="font-black text-slate-800 text-xs truncate mb-1">${badgeFletera}${v.cliente_nombre}${badgeUrgente}</h4>
-
                     <div class="flex justify-between items-center mb-1 gap-2">
-
                         <p class="text-[9px] text-slate-500 truncate font-medium flex-1"><i class="fas fa-map-marker-alt text-red-400 w-3"></i> <b>${aliasMostrar}</b>${v.direccion}</p>
-
                         ${dateBadge}
-
                     </div>
-
                     ${bHtml}
-
                 </div>`;
+            };
 
+            // 6. Construir el DOM Final
+            let htmlAcumulado = '';
+            bloquesRender.forEach(bloque => {
+                if (bloque.tipo === 'individual') {
+                    htmlAcumulado += generarTarjetaHTML(bloque.data);
+                } else {
+                    // SI ES GRUPO, DIBUJAMOS LA CAJA CONTENEDORA
+                    let tarjetasDentroHtml = bloque.items.map(v => generarTarjetaHTML(v)).join('');
+                    htmlAcumulado += `
+                        <div class="border-2 border-dashed border-indigo-300 bg-indigo-50/40 rounded-2xl p-2 mb-3 relative">
+                            <div class="flex justify-between items-center mb-2 px-1">
+                                <span class="text-[10px] font-black text-indigo-600 uppercase flex items-center gap-1">
+                                    <i class="fas fa-map-marker-alt"></i> ${bloque.items.length} Pedidos al mismo destino
+                                </span>
+                            </div>
+                            <div class="pl-2 border-l-2 border-indigo-200 space-y-2">
+                                ${tarjetasDentroHtml}
+                            </div>
+                        </div>
+                    `;
+                }
             });
 
             container.innerHTML = htmlAcumulado;
-
         }
-
 
 
         function actualizarMapa() {
