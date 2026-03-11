@@ -1033,12 +1033,21 @@ window.calculateChange = () => {
             const articulosLimpios = cart.map(i => {
                 let p = Number(i.precio); if(isNaN(p)) p = 0;
                 let q = Number(i.qty); if(isNaN(q)) q = 1;
+                
+                // Detectar si fue modificado
+                let fueModificado = i.precio_modificado || false;
+                let pOriginal = Number(i.precio_original) || p;
+
                 return { 
                     codigo: String(i.codigo || 'S/C'), 
                     nombre: String(i.nombre || 'Art.'), 
                     precio_unitario: p, 
                     cantidad: q, 
-                    subtotal: p * q
+                    subtotal: p * q,
+                    // NUEVOS CAMPOS DE RASTREO PARA FIREBASE
+                    precio_modificado: fueModificado,
+                    precio_original: pOriginal,
+                    descuento_unitario: fueModificado ? (pOriginal - p) : 0
                 };
             });
 
@@ -1431,6 +1440,11 @@ window.calculateChange = () => {
                     return showToast("PIN de autorización incorrecto", "error");
                 }
 
+                // Guardar el precio original solo la primera vez que se edita
+                if (!cart[currentOverrideIndex].precio_original) {
+                    cart[currentOverrideIndex].precio_original = cart[currentOverrideIndex].precio;
+                }
+                
                 // Aplicar el cambio
                 cart[currentOverrideIndex].precio = newPrice;
                 cart[currentOverrideIndex].precio_modificado = true; // Etiqueta para saber que se alteró
