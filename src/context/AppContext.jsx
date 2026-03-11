@@ -139,8 +139,8 @@ export const AppProvider = ({ children }) => {
     const subject = encodeURIComponent(`Nuevo Pedido de ${name}`);
     const body = encodeURIComponent(msg);
     
-    // Cambia el correo "ventas@tuempresa.com" por el tuyo
-    window.location.href = `mailto:ventas@tuempresa.com?subject=${subject}&body=${body}`;
+    // Cambia el correo "ventas@laeconomicamty.com" 
+    window.location.href = `mailto:ventas@laeconomicamty.com?subject=${subject}&body=${body}`;
   };
 
   return (
