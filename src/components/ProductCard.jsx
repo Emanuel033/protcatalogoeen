@@ -39,7 +39,7 @@ function ProductCard({ product }) {
                 onClick={() => setZoomOpen(false)}
                 className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 transition-colors"
               >
-                <i className="fas fa-times">✕</i>
+                <i className="fas fa-times"></i>
               </button>
             </div>
 
