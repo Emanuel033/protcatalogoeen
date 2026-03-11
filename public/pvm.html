@@ -1310,9 +1310,15 @@ window.calculateChange = () => {
                     const cajeroName = v.vendedor || 'Mostrador General';
                     
                     // NUEVO: Preparar la etiqueta de descuento en rojo si aplica
+                    // NUEVO: Preparar la etiqueta de ajuste de precio
                     let htmlDescuento = "";
-                    if (tieneAjustes && !isCanceled && totalDescuentoTicket > 0) {
-                        htmlDescuento = `<div class="text-[9px] md:text-[10px] text-red-500 font-bold mt-0.5" title="Descuento autorizado en caja">Desc: -${formatMoney(totalDescuentoTicket)}</div>`;
+                    if (tieneAjustes && !isCanceled && totalDescuentoTicket !== 0) {
+                        // Si totalDescuentoTicket es positivo, fue una rebaja. Si es negativo, fue un aumento.
+                        let esRebaja = totalDescuentoTicket > 0;
+                        let colorTxt = esRebaja ? "text-red-500" : "text-emerald-600";
+                        let signo = esRebaja ? "-" : "+";
+                        
+                        htmlDescuento = `<div class="text-[9px] md:text-[10px] ${colorTxt} font-bold mt-0.5" title="Ajuste de precio en caja">Ajuste: ${signo}${formatMoney(Math.abs(totalDescuentoTicket))}</div>`;
                     }
 
                     const tr = document.createElement('tr'); tr.className = rowClass;
