@@ -39,6 +39,31 @@ transition:transform .25s ease;
 transform:scale(1.8);
 cursor:zoom-out;
 }
+        #qr-pro-container{
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ width:100%;
+}
+
+#qr-img-src{
+ width:90vw;
+ max-width:420px;
+ height:auto;
+}
+
+.qr-bright-btn{
+ position:absolute;
+ bottom:40px;
+ right:30px;
+ background:#facc15;
+ color:black;
+ font-weight:900;
+ padding:14px 18px;
+ border-radius:12px;
+ box-shadow:0 10px 20px rgba(0,0,0,.4);
+}
     </style>
 </head>
 <body class="flex flex-col h-screen w-full overflow-hidden text-slate-800">
@@ -116,39 +141,28 @@ cursor:zoom-out;
         </div>
     </div>
 
-    <div id="modal-visor-qr" class="fixed inset-0 bg-black z-[95] hidden flex-col items-center justify-center p-4 transition-opacity opacity-0">
+    <div id="modal-visor-qr" class="fixed inset-0 bg-black z-[95] hidden flex-col items-center justify-center p-4">
 
 <button onclick="cerrarVisorQR()" class="absolute top-6 right-6 text-white text-3xl z-30">
 <i class="fas fa-times"></i>
 </button>
 
-<div class="flex flex-col items-center text-center w-full max-w-md">
-
-<h3 class="font-black text-white text-xl mb-2">
-<i class="fas fa-qrcode text-indigo-400"></i>
-Código de Acceso
-</h3>
-
-<p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-4">
-Toca el QR para ampliar
-</p>
-
-<div class="bg-white p-3 rounded-2xl shadow-2xl">
+<div id="qr-pro-container">
 
 <img
 id="qr-img-src"
 src=""
-class="w-72 h-72 object-contain cursor-zoom-in"
 onclick="toggleZoomQR(event)"
+class="cursor-zoom-in"
 >
 
-</div>
-
-<p id="qr-empresa-nombre"
-class="mt-4 text-sm font-black text-white bg-slate-800 px-4 py-2 rounded-lg w-full truncate">
-</p>
+<p id="qr-empresa-nombre" class="mt-6 text-white font-bold text-center"></p>
 
 </div>
+
+<button onclick="activarBrilloMaximo()" class="qr-bright-btn">
+🔆 BRILLO
+</button>
 
 </div>
 <div
@@ -734,7 +748,37 @@ window.cerrarZoomQR = () => {
  },150)
 
 }
+function activarBrilloMaximo(){
 
+ try{
+  if(screen && screen.orientation){
+   screen.orientation.lock("portrait")
+  }
+ }catch(e){}
+
+ if(navigator.vibrate){
+  navigator.vibrate(60)
+ }
+
+ document.body.style.background="#000"
+
+}
+
+function abrirVisorQR(base64,nombre){
+
+ document.getElementById("qr-img-src").src = base64
+ document.getElementById("qr-empresa-nombre").innerText = nombre
+
+ const m = document.getElementById("modal-visor-qr")
+
+ m.classList.remove("hidden")
+ m.classList.add("flex")
+
+ if(navigator.vibrate){
+  navigator.vibrate(50)
+ }
+
+}
         window.onload = initApp;
 
     </script>
