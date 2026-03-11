@@ -997,10 +997,7 @@
             const elFolioFac = document.getElementById('det-factura');
 
             
-            const elBadge = document.getElementById('det-status'); 
             
-            const elFolioPed = document.getElementById('det-folio');
-            const elFolioFac = document.getElementById('det-factura');
             if(viajeSeleccionado.folio_pedido) { elFolioPed.innerText = 'PED: ' + viajeSeleccionado.folio_pedido; elFolioPed.classList.remove('hidden'); } else { elFolioPed.classList.add('hidden'); }
             if(viajeSeleccionado.folio_factura) { elFolioFac.innerText = 'FAC: ' + viajeSeleccionado.folio_factura; elFolioFac.classList.remove('hidden'); } else { elFolioFac.classList.add('hidden'); }
             if(!viajeSeleccionado.folio_pedido && !viajeSeleccionado.folio_factura) { elFolioPed.innerText = 'ID: ' + viajeSeleccionado.id.substring(0,6); elFolioPed.classList.remove('hidden'); }
