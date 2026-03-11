@@ -1289,13 +1289,39 @@ window.calculateChange = () => {
                 tbody.innerHTML = '';
                 historySales.forEach(v => {
                     const fechaStr = v.fecha ? v.fecha.toDate().toLocaleString('es-MX', {day: '2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Reciente';
-                    const itemsDesc = (v.articulos||[]).map(a => `${a.cantidad}x ${a.codigo}`).join(', '); const isCanceled = v.estado === 'CANCELADA';
-                    const motivoText = v.motivo_cancelacion ? `Motivo: ${v.motivo_cancelacion}` : ''; const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
+                    
+                    // NUEVO: Calcular si hubo descuentos en este ticket
+                    let totalDescuentoTicket = 0;
+                    let tieneAjustes = false;
+                    const itemsDescArr = (v.articulos||[]).map(a => {
+                        if (a.precio_modificado) {
+                            tieneAjustes = true;
+                            // Multiplicamos descuento unitario por la cantidad de piezas
+                            totalDescuentoTicket += (Number(a.descuento_unitario) || 0) * (Number(a.cantidad) || 1);
+                            return `${a.cantidad}x ${a.codigo} (*)`; // Etiqueta visual para el tooltip
+                        }
+                        return `${a.cantidad}x ${a.codigo}`;
+                    });
+                    const itemsDesc = itemsDescArr.join(', ');
+
+                    const isCanceled = v.estado === 'CANCELADA';
+                    const motivoText = v.motivo_cancelacion ? `Motivo: ${v.motivo_cancelacion}` : ''; 
+                    const rowClass = isCanceled ? "bg-red-50/40 opacity-75" : "hover:bg-blue-50/50 transition-colors";
                     const cajeroName = v.vendedor || 'Mostrador General';
+                    
+                    // NUEVO: Preparar la etiqueta de descuento en rojo si aplica
+                    let htmlDescuento = "";
+                    if (tieneAjustes && !isCanceled && totalDescuentoTicket > 0) {
+                        htmlDescuento = `<div class="text-[9px] md:text-[10px] text-red-500 font-bold mt-0.5" title="Descuento autorizado en caja">Desc: -${formatMoney(totalDescuentoTicket)}</div>`;
+                    }
+
                     const tr = document.createElement('tr'); tr.className = rowClass;
                     tr.innerHTML = `<td class="px-4 md:px-6 py-3 md:py-4"><div class="font-bold ${isCanceled ? 'text-red-800 line-through' : 'text-slate-800'} text-[11px] md:text-xs">${v.folio}</div><div class="text-[9px] md:text-[10px] text-slate-400 font-medium">${fechaStr}</div><div class="text-[9px] font-bold text-blue-600 mt-1"><i class="fas fa-user mr-1"></i>${cajeroName}</div>${isCanceled ? `<span class="bg-red-100 text-red-600 text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">CANCELADA</span><div class="text-[8px] md:text-[9px] text-red-500 mt-0.5 italic max-w-[150px] truncate" title="${motivoText}">${motivoText}</div>` : ''}</td>
                         <td class="px-4 md:px-6 py-3 md:py-4 text-[11px] md:text-xs text-slate-600 truncate max-w-[150px] md:max-w-[200px] hidden sm:table-cell" title="${itemsDesc}">${(v.articulos||[]).length} art. (${itemsDesc})</td>
-                        <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-sm md:text-base ${isCanceled ? 'text-slate-400 line-through' : 'text-slate-800'}">${formatMoney(v.total)}</td>
+                        <td class="px-4 md:px-6 py-3 md:py-4 text-right">
+                            <div class="font-black text-sm md:text-base ${isCanceled ? 'text-slate-400 line-through' : 'text-slate-800'}">${formatMoney(v.total)}</div>
+                            ${htmlDescuento}
+                        </td>
                         <td class="px-4 md:px-6 py-3 md:py-4 text-center"><div class="flex items-center justify-center gap-1 md:gap-2"><button onclick="reprintTicket('${v.id}')" class="text-blue-500 hover:bg-blue-100 p-1.5 md:p-2 rounded-lg transition" title="Reimprimir"><i class="fas fa-print"></i></button>${!isCanceled ? `<button onclick="cancelTicket('${v.id}', '${v.folio}')" class="text-red-500 hover:bg-red-100 p-1.5 md:p-2 rounded-lg transition" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}</div></td>`;
                     tbody.appendChild(tr);
                 });
