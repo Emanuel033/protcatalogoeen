@@ -135,11 +135,19 @@
         </div>
     </div>
 
-    <div id="qr-zoom-overlay" onclick="cerrarZoomQR()" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-4 backdrop-blur-xl transition-opacity opacity-0 duration-300 cursor-zoom-out">
-        <button onclick="cerrarZoomQR()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition backdrop-blur-md border border-white/20">
+    <div id="qr-zoom-overlay" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-0 backdrop-blur-xl transition-opacity opacity-0 duration-300 overflow-hidden touch-none">
+        
+        <button onclick="cerrarZoomQR()" class="absolute top-6 right-6 w-12 h-12 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition backdrop-blur-md border border-white/20 z-50 shadow-2xl">
             <i class="fas fa-times text-xl"></i>
         </button>
-        <img id="qr-zoom-img" src="" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-[0_0_50px_rgba(255,255,255,0.1)] transform scale-95 transition-transform duration-300">
+
+        <div id="zoom-container" class="w-full h-full flex items-center justify-center relative">
+            <img id="qr-zoom-img" src="" class="max-w-full max-h-[85vh] object-contain transform origin-center transition-transform duration-100 ease-out will-change-transform">
+        </div>
+
+        <div id="zoom-hint" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold tracking-wide pointer-events-none transition-opacity duration-500">
+            <i class="fas fa-hand-pointer mr-1"></i> Arrastra y usa 2 dedos para hacer zoom
+        </div>
     </div>
     <div id="modal-login" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col p-6 transition-opacity opacity-0 hidden">
         <div class="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
@@ -681,6 +689,8 @@
 // ==========================================
         // MODAL QR ZOOM Y BRILLO (OPTIMIZADO)
         // ==========================================
+
+        
         window.abrirVisorQR = (base64, nombre) => {
             document.getElementById("qr-img-src").src = base64;
             document.getElementById("qr-empresa-nombre").innerText = nombre;
@@ -709,39 +719,134 @@
             }, 300);
         };
 
+        // ==========================================
+        // LÓGICA DE PAN & ZOOM TÁCTIL PARA EL QR
+        // ==========================================
+        let currentScale = 1;
+        let currentX = 0;
+        let currentY = 0;
+        let initialPinchDistance = null;
+        let lastTouchX = null;
+        let lastTouchY = null;
+        let zoomImg = null;
+        let zoomContainer = null;
+
         window.toggleZoomQR = (e) => {
             if(e) e.stopPropagation();
             const src = document.getElementById("qr-img-src").src;
             const overlay = document.getElementById("qr-zoom-overlay");
-            const img = document.getElementById("qr-zoom-img");
+            
+            zoomImg = document.getElementById("qr-zoom-img");
+            zoomContainer = document.getElementById("zoom-container");
 
-            img.src = src;
+            zoomImg.src = src;
             overlay.classList.remove("hidden");
             overlay.classList.add("flex");
 
-            // Ejecutar animación de entrada
+            // Resetear valores de transformación
+            currentScale = 1;
+            currentX = 0;
+            currentY = 0;
+            actualizarTransformacion();
+
+            // Mostrar instrucción y ocultarla después
+            const hint = document.getElementById("zoom-hint");
+            hint.style.opacity = "1";
+            setTimeout(() => { hint.style.opacity = "0"; }, 3000);
+
             setTimeout(() => {
                 overlay.classList.remove("opacity-0");
-                img.classList.remove("scale-95");
-                img.classList.add("scale-100");
             }, 10);
+
+            // Inicializar eventos táctiles si no están creados
+            if (!zoomContainer.dataset.listenersAttached) {
+                zoomContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+                zoomContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+                zoomContainer.addEventListener('touchend', handleTouchEnd);
+                zoomContainer.dataset.listenersAttached = 'true';
+            }
         };
 
         window.cerrarZoomQR = () => {
             const overlay = document.getElementById("qr-zoom-overlay");
-            const img = document.getElementById("qr-zoom-img");
-
-            // Ejecutar animación de salida
             overlay.classList.add("opacity-0");
-            img.classList.remove("scale-100");
-            img.classList.add("scale-95");
 
             setTimeout(() => {
                 overlay.classList.add("hidden");
                 overlay.classList.remove("flex");
+                // Resetear por seguridad
+                currentScale = 1; currentX = 0; currentY = 0;
+                if(zoomImg) zoomImg.style.transform = `translate(0px, 0px) scale(1)`;
             }, 300);
         };
 
+        // --- Funciones del Touch ---
+        function actualizarTransformacion() {
+            if(zoomImg) {
+                // Limitamos para que no se aleje más del tamaño original, ni se acerque exageradamente
+                if (currentScale < 1) currentScale = 1;
+                if (currentScale > 8) currentScale = 8;
+                
+                // Si la escala es 1, devolvemos la imagen al centro exacto
+                if (currentScale === 1) {
+                    currentX = 0;
+                    currentY = 0;
+                }
+                
+                zoomImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
+            }
+        }
+
+        function getDistance(touches) {
+            return Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+        }
+
+        function handleTouchStart(e) {
+            if (e.touches.length === 2) {
+                // Inicio de pellizco (Pinch Zoom)
+                initialPinchDistance = getDistance(e.touches);
+            } else if (e.touches.length === 1) {
+                // Inicio de arrastre (Pan)
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+            }
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault(); // Evitar scroll del body
+            
+            if (e.touches.length === 2 && initialPinchDistance) {
+                // Calculando zoom
+                const currentDistance = getDistance(e.touches);
+                const diff = currentDistance - initialPinchDistance;
+                // Ajustar velocidad de zoom
+                currentScale += diff * 0.01; 
+                initialPinchDistance = currentDistance;
+                actualizarTransformacion();
+            } else if (e.touches.length === 1 && lastTouchX !== null && currentScale > 1) {
+                // Calculando movimiento (solo si hay zoom)
+                const deltaX = e.touches[0].clientX - lastTouchX;
+                const deltaY = e.touches[0].clientY - lastTouchY;
+                
+                currentX += deltaX;
+                currentY += deltaY;
+                
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+                
+                actualizarTransformacion();
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (e.touches.length < 2) {
+                initialPinchDistance = null;
+            }
+            if (e.touches.length === 0) {
+                lastTouchX = null;
+                lastTouchY = null;
+            }
+        }
         window.activarBrilloMaximo = () => {
             try { if(screen && screen.orientation) screen.orientation.lock("portrait"); } catch(e){}
             if(navigator.vibrate) navigator.vibrate(60);
