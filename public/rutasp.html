@@ -957,12 +957,46 @@
         // ==========================================
         // DETALLES Y PANELES COLAPSABLES
         // ==========================================
-        window.seleccionarViaje = (id, skipAnimation = false) => {
-            viajeSeleccionado = viajesAgrupados.find(x => x.id === id); if(!viajeSeleccionado) return;
+        window.seleccionarViaje = (idStr, skipAnimation = false) => {
+            // 1. Lógica para detectar si es 1 ID o varios fusionados
+            const ids = String(idStr).split(',');
+            
+            if (ids.length === 1) {
+                viajeSeleccionado = viajesAgrupados.find(x => x.id === ids[0]);
+                if(!viajeSeleccionado) return;
+                viajeSeleccionado.es_grupo = false;
+                viajeSeleccionado.ids_grupo = [ids[0]];
+            } else {
+                // Es una tarjeta FUSIONADA (creamos un viaje maestro "virtual")
+                const subViajes = ids.map(i => viajesAgrupados.find(x => x.id === i)).filter(Boolean);
+                if(subViajes.length === 0) return;
+                
+                viajeSeleccionado = {
+                    ...subViajes[0], // Copiamos el primero de base (misma dirección y cliente)
+                    id: idStr,
+                    es_grupo: true,
+                    ids_grupo: ids,
+                    // Juntamos los folios para que se vean todos en la cabecera del Drawer
+                    folio_pedido: subViajes.map(x => x.folio_pedido).filter(Boolean).join(', ') || null,
+                    folio_factura: subViajes.map(x => x.folio_factura).filter(Boolean).join(', ') || null,
+                    urgente: subViajes.some(x => x.urgente)
+                };
+            }
             
             if(window.innerWidth < 1024 && isSidebarOpen) toggleSidebar();
             renderizarLista(); 
 
+            // 2. SEGURIDAD: Ocultar los botones de "Editar" y "Eliminar" si es un grupo
+            const btnEditar = document.querySelector('button[onclick="abrirEdicion()"]');
+            const btnEliminar = document.querySelector('button[onclick="abrirModalConfirmacion(\'eliminar\')"]');
+            if (btnEditar) viajeSeleccionado.es_grupo ? btnEditar.classList.add('hidden') : btnEditar.classList.remove('hidden');
+            if (btnEliminar) viajeSeleccionado.es_grupo ? btnEliminar.classList.add('hidden') : btnEliminar.classList.remove('hidden');
+
+            const elBadge = document.getElementById('det-status'); 
+            const elFolioPed = document.getElementById('det-folio');
+            const elFolioFac = document.getElementById('det-factura');
+
+            
             const elBadge = document.getElementById('det-status'); 
             
             const elFolioPed = document.getElementById('det-folio');
