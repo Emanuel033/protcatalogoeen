@@ -411,7 +411,26 @@
         let catalogProducts = []; let filteredCatalog = []; let cart = []; let historySales = []; 
         window.reporteFacturasEfectivo = []; window.reporteFacturasTodas = []; window.reporteMostrador = [];        
         let showInventoryConfig = false;
-        let currentRenderLimit = 100; 
+        let currentRenderLimit = 100;
+
+        // --- NUEVO: Variables para impresión local ---
+        window.ticketLogoUrl = "https://i.ibb.co/dJr7BzL5/logoeen.png";
+        window.ticketQrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://productoseen.web.app";
+
+        async function precargarImagenesImpresion() {
+            try {
+                const resQr = await fetch(window.ticketQrUrl);
+                const blobQr = await resQr.blob();
+                window.ticketQrUrl = URL.createObjectURL(blobQr); // Guarda el QR en la memoria local
+            } catch(e) { console.warn("No se pudo precargar QR", e); }
+            
+            try {
+                const resLogo = await fetch(window.ticketLogoUrl);
+                const blobLogo = await resLogo.blob();
+                window.ticketLogoUrl = URL.createObjectURL(blobLogo); // Guarda el Logo en la memoria local
+            } catch(e) { console.warn("No se pudo precargar Logo", e); }
+        }
+        // ---------------------------------------------
 
         const formatMoney = (amount) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
 
@@ -1089,7 +1108,7 @@ window.calculateChange = () => {
                 <div class="ticket-copy">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; font-family: 'Courier New', Courier, monospace;">
                         <div style="width: 65%; display: flex; gap: 10px; align-items: flex-start;">
-                            <img src="https://i.ibb.co/dJr7BzL5/logoeen.png" style="height: 55px; width: auto; max-width: 90px; object-fit: contain; margin-top: 2px;">
+                            <img src="${window.ticketLogoUrl}" style="height: 55px; width: auto; max-width: 90px; object-fit: contain; margin-top: 2px;">
                             <div>
                                 <h2 style="margin:0; font-size: 13pt; font-weight: 900; line-height: 1.1;">ENVASES LA ECONÓMICA DEL NORTE</h2>
                                 <p style="margin:6px 0 0 0; font-size: 9pt; line-height: 1.3;">
@@ -1179,7 +1198,7 @@ window.calculateChange = () => {
                         <div style="margin-top: 8px;"><b>Correo:</b> ventas@laeconomicamty.com</div>
                         
                         <div style="margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 15px;">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://productoseen.web.app" style="width: 60px; height: 60px; border: 1px solid #ccc; padding: 3px;">
+                            <img src="${window.ticketQrUrl}" style="width: 60px; height: 60px; border: 1px solid #ccc; padding: 3px;">
                             <div style="text-align: left;">
                                 <div style="font-weight: 900; font-size: 12pt;">¡Escanea y compra en línea!</div>
                                 <div style="font-size: 11pt;">productoseen.web.app</div>
@@ -1482,7 +1501,8 @@ window.calculateChange = () => {
             verificarLogin(); 
             cargarUsuariosPOS(); 
             loadData(); 
-            initCorteUI(); 
+            initCorteUI();
+            precargarImagenesImpresion();
         };
 
     </script>
