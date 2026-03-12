@@ -12,10 +12,10 @@
     "paquetes": [
       {
         "id": "paquete_108",
-        "nombre_paquete": "Paquete de 108 piezas",
-        "sku": "-OK_NRCQBHHMPVQ3DHIR-108PZ",
+        "es_default": true,
         "piezas": 108,
-        "es_default": true
+        "nombre_paquete": "Paquete de 108 piezas",
+        "sku": "-OK_NRCQBHHMPVQ3DHIR-108PZ"
       }
     ]
   },
@@ -32,10 +32,10 @@
     "paquetes": [
       {
         "id": "paquete_108",
-        "nombre_paquete": "Paquete de 108 piezas",
-        "sku": "-OK_NRCQBHHMPVQ3DHIR-108PZ",
+        "es_default": true,
         "piezas": 108,
-        "es_default": true
+        "nombre_paquete": "Paquete de 108 piezas",
+        "sku": "-OK_NRCQBHHMPVQ3DHIR-108PZ"
       }
     ]
   },
@@ -54,8 +54,8 @@
         "id": "paquete_168",
         "piezas": 168,
         "es_default": true,
-        "nombre_paquete": "Paquete de 168 piezas",
-        "sku": "-OK_O9ULEKDN0OUD3ODT-168PZ"
+        "sku": "-OK_O9ULEKDN0OUD3ODT-168PZ",
+        "nombre_paquete": "Paquete de 168 piezas"
       }
     ]
   },
@@ -74,8 +74,8 @@
         "id": "paquete_168",
         "piezas": 168,
         "es_default": true,
-        "nombre_paquete": "Paquete de 168 piezas",
-        "sku": "-OK_O9ULEKDN0OUD3ODT-168PZ"
+        "sku": "-OK_O9ULEKDN0OUD3ODT-168PZ",
+        "nombre_paquete": "Paquete de 168 piezas"
       }
     ]
   },
@@ -92,10 +92,10 @@
     "paquetes": [
       {
         "id": "paquete_900",
-        "piezas": 900,
         "es_default": true,
-        "nombre_paquete": "Paquete de 900 piezas",
-        "sku": "-OK_OILDPPFC1A6OIRF5-900PZ"
+        "piezas": 900,
+        "sku": "-OK_OILDPPFC1A6OIRF5-900PZ",
+        "nombre_paquete": "Paquete de 900 piezas"
       }
     ]
   },
@@ -112,10 +112,10 @@
     "paquetes": [
       {
         "id": "paquete_153",
-        "sku": "-OK_P3TQLOBZBZEYAY1B-153PZ",
-        "nombre_paquete": "Paquete de 153 piezas",
+        "piezas": 153,
         "es_default": true,
-        "piezas": 153
+        "nombre_paquete": "Paquete de 153 piezas",
+        "sku": "-OK_P3TQLOBZBZEYAY1B-153PZ"
       }
     ]
   },
@@ -132,10 +132,10 @@
     "paquetes": [
       {
         "id": "paquete_250",
-        "piezas": 250,
-        "es_default": true,
         "nombre_paquete": "Paquete de 250 piezas",
-        "sku": "-OK_PHQK9UX1XZ3QVTHT-250PZ"
+        "sku": "-OK_PHQK9UX1XZ3QVTHT-250PZ",
+        "piezas": 250,
+        "es_default": true
       }
     ]
   },
@@ -152,10 +152,10 @@
     "paquetes": [
       {
         "id": "paquete_231",
-        "sku": "-OK_PSST-ZVUYJRO_SZL-231PZ",
-        "nombre_paquete": "Paquete de 231 piezas",
+        "piezas": 231,
         "es_default": true,
-        "piezas": 231
+        "sku": "-OK_PSST-ZVUYJRO_SZL-231PZ",
+        "nombre_paquete": "Paquete de 231 piezas"
       }
     ]
   },
@@ -212,8 +212,8 @@
     "paquetes": [
       {
         "id": "paquete_170",
-        "nombre_paquete": "Paquete de 170 piezas",
         "sku": "-OK_PXMAD2_OT0M9_SVD-170PZ",
+        "nombre_paquete": "Paquete de 170 piezas",
         "piezas": "170",
         "es_default": true
       }
@@ -252,10 +252,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OK_QXK40XLOWAG2S1CF-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "sku": "-OK_QXK40XLOWAG2S1CF-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -272,10 +272,10 @@
     "paquetes": [
       {
         "id": "paquete_1400",
-        "nombre_paquete": "Paquete de 1400 piezas",
-        "sku": "-OK_QYQCGPLRW7LNKOWA-1400PZ",
+        "es_default": true,
         "piezas": 1400,
-        "es_default": true
+        "sku": "-OK_QYQCGPLRW7LNKOWA-1400PZ",
+        "nombre_paquete": "Paquete de 1400 piezas"
       }
     ]
   },
@@ -292,10 +292,10 @@
     "paquetes": [
       {
         "id": "paquete_2150",
-        "nombre_paquete": "Paquete de 2150 piezas",
-        "sku": "-OK_R5A44XA0H7E7GHLD-2150PZ",
+        "es_default": true,
         "piezas": 2150,
-        "es_default": true
+        "nombre_paquete": "Paquete de 2150 piezas",
+        "sku": "-OK_R5A44XA0H7E7GHLD-2150PZ"
       }
     ]
   },
@@ -312,10 +312,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
-        "sku": "-OK_RJBXG5GKAZQLDQGL-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OK_RJBXG5GKAZQLDQGL-1PZ"
       }
     ]
   },
@@ -332,10 +332,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "-OKKIBIJE11L0KIZVQAM-1PZ",
-        "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -352,10 +352,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "-OKKIURG_UMFJSYESZW4-1PZ"
+        "piezas": "1",
+        "sku": "-OKKIURG_UMFJSYESZW4-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -432,10 +432,10 @@
     "paquetes": [
       {
         "id": "paquete_54",
-        "es_default": true,
         "piezas": 54,
-        "sku": "P316-54PZ",
-        "nombre_paquete": "Paquete de 54 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 54 piezas",
+        "sku": "P316-54PZ"
       }
     ]
   },
@@ -464,10 +464,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "P257-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "P257-50PZ"
       }
     ]
   },
@@ -496,13 +496,13 @@
     "paquetes": [
       {
         "id": "vviNh8fdWOWwOuwo8ROg",
-        "sku": "BPP-30-FT/CP-1000PZ",
-        "piezas": 1000,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772903117,
           "nanoseconds": 728000000
-        }
+        },
+        "piezas": 1000,
+        "sku": "BPP-30-FT/CP-1000PZ"
       }
     ]
   },
@@ -519,10 +519,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "-OKKKQF-N7JITV_PYQX5-1PZ",
-        "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -539,10 +539,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OKKL8A06TILULB9_TE3-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "es_default": true,
+        "piezas": 24
       }
     ]
   },
@@ -559,10 +559,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OKKLHDOIU2BMZKCP6MS-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "sku": "-OKKLHDOIU2BMZKCP6MS-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -579,10 +579,10 @@
     "paquetes": [
       {
         "id": "paquete_10",
-        "sku": "-OKKLDCN0J7HMM6IH2N3-10PZ",
-        "nombre_paquete": "Paquete de 10 piezas",
+        "piezas": "10",
         "es_default": true,
-        "piezas": "10"
+        "nombre_paquete": "Paquete de 10 piezas",
+        "sku": "-OKKLDCN0J7HMM6IH2N3-10PZ"
       }
     ]
   },
@@ -599,10 +599,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
-        "sku": "-OKKLIS7GYMRLTWAEQGQ-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OKKLIS7GYMRLTWAEQGQ-1PZ"
       }
     ]
   },
@@ -619,8 +619,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OKKM3TTKQFWWHAWUAO--1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OKKM3TTKQFWWHAWUAO--1PZ",
         "es_default": true,
         "piezas": "1"
       }
@@ -639,8 +639,8 @@
     "paquetes": [
       {
         "id": "paquete_180",
-        "piezas": 180,
         "es_default": true,
+        "piezas": 180,
         "nombre_paquete": "Paquete de 180 piezas",
         "sku": "-OKOE-7KDWIPAU1XUP2K-180PZ"
       }
@@ -659,10 +659,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "-OKOE3TLSI4AZKGPO6NG-1PZ"
+        "sku": "-OKOE3TLSI4AZKGPO6NG-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -681,8 +681,8 @@
         "id": "paquete_1",
         "sku": "-OKOECAEMA111L-9QHFZ-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -699,10 +699,10 @@
     "paquetes": [
       {
         "id": "paquete_48",
-        "sku": "-OKOEPEJUW8OEDHMOYI7-48PZ",
-        "nombre_paquete": "Paquete de 48 piezas",
+        "piezas": "48",
         "es_default": true,
-        "piezas": "48"
+        "sku": "-OKOEPEJUW8OEDHMOYI7-48PZ",
+        "nombre_paquete": "Paquete de 48 piezas"
       }
     ]
   },
@@ -719,10 +719,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
+        "sku": "-OKOEC7WCUM_D9OLM0BG-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "-OKOEC7WCUM_D9OLM0BG-1PZ"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -739,10 +739,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OKOEIVMHOVZQBZ7VER3-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OKOEIVMHOVZQBZ7VER3-1PZ"
       }
     ]
   },
@@ -759,10 +759,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OKOEMHIY8KM9EHNDHJU-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "sku": "-OKOEMHIY8KM9EHNDHJU-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -779,10 +779,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "piezas": 36,
-        "es_default": true,
         "nombre_paquete": "Paquete de 36 piezas",
-        "sku": "-OKOETTLRTNGDFVUTIFH-36PZ"
+        "sku": "-OKOETTLRTNGDFVUTIFH-36PZ",
+        "es_default": true,
+        "piezas": 36
       }
     ]
   },
@@ -801,8 +801,8 @@
         "id": "paquete_1",
         "es_default": true,
         "piezas": "1",
-        "sku": "-OKOF2AYICWXTYNRUXFU-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OKOF2AYICWXTYNRUXFU-1PZ"
       }
     ]
   },
@@ -819,8 +819,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
+        "es_default": true,
         "sku": "-OKOF9EYG-B7X3EOQBWY-1PZ",
         "nombre_paquete": "Paquete de 1 piezas"
       }
@@ -839,8 +839,8 @@
     "paquetes": [
       {
         "id": "paquete_162",
-        "es_default": true,
         "piezas": 162,
+        "es_default": true,
         "sku": "-OKOG5YAFIJOHPAU_PAI-162PZ",
         "nombre_paquete": "Paquete de 162 piezas"
       }
@@ -859,10 +859,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "-OKOFOLPEXPOFIONHNW4-100PZ",
         "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "sku": "-OKOFOLPEXPOFIONHNW4-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -881,8 +881,8 @@
         "id": "paquete_150",
         "nombre_paquete": "Paquete de 150 piezas",
         "sku": "-OKOFRJEXI9DPRE359OP-150PZ",
-        "piezas": 150,
-        "es_default": true
+        "es_default": true,
+        "piezas": 150
       }
     ]
   },
@@ -899,10 +899,10 @@
     "paquetes": [
       {
         "id": "paquete_400",
-        "piezas": 400,
-        "es_default": true,
         "nombre_paquete": "Paquete de 400 piezas",
-        "sku": "-OKOFUMIVG2VM3LKFVBX-400PZ"
+        "sku": "-OKOFUMIVG2VM3LKFVBX-400PZ",
+        "es_default": true,
+        "piezas": 400
       }
     ]
   },
@@ -919,8 +919,8 @@
     "paquetes": [
       {
         "id": "paquete_180",
-        "piezas": 180,
         "es_default": true,
+        "piezas": 180,
         "nombre_paquete": "Paquete de 180 piezas",
         "sku": "-OKOE-7KDWIPAU1XUP2K-180PZ"
       }
@@ -939,10 +939,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": "100",
         "es_default": true,
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "-OKOFKGSJQZ6YLBQO2YB-100PZ"
+        "piezas": "100",
+        "sku": "-OKOFKGSJQZ6YLBQO2YB-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -991,8 +991,8 @@
     "paquetes": [
       {
         "id": "paquete_162",
-        "es_default": true,
         "piezas": 162,
+        "es_default": true,
         "sku": "-OKOG5YAFIJOHPAU_PAI-162PZ",
         "nombre_paquete": "Paquete de 162 piezas"
       }
@@ -1033,8 +1033,8 @@
         "id": "paquete_50",
         "nombre_paquete": "Paquete de 50 piezas",
         "sku": "-OL88JJTR689MW1UZEZF-50PZ",
-        "piezas": 50,
-        "es_default": true
+        "es_default": true,
+        "piezas": 50
       }
     ]
   },
@@ -1051,10 +1051,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "-OL88VQTZEX0E-RWPK9Q-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
         "es_default": true,
-        "piezas": 50
+        "piezas": 50,
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "-OL88VQTZEX0E-RWPK9Q-50PZ"
       }
     ]
   },
@@ -1073,8 +1073,8 @@
         "id": "paquete_50",
         "piezas": 50,
         "es_default": true,
-        "nombre_paquete": "Paquete de 50 piezas",
-        "sku": "-OL892VTYGYJGBSM1GIO-50PZ"
+        "sku": "-OL892VTYGYJGBSM1GIO-50PZ",
+        "nombre_paquete": "Paquete de 50 piezas"
       }
     ]
   },
@@ -1091,8 +1091,8 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "es_default": true,
         "piezas": 50,
+        "es_default": true,
         "sku": "-OL89HG8_PKREX5WHGLZ-50PZ",
         "nombre_paquete": "Paquete de 50 piezas"
       }
@@ -1111,10 +1111,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "sku": "-OL89MLOHGBYOF5L955V-50PZ",
+        "es_default": true,
         "piezas": 50,
-        "es_default": true
+        "sku": "-OL89MLOHGBYOF5L955V-50PZ",
+        "nombre_paquete": "Paquete de 50 piezas"
       }
     ]
   },
@@ -1131,10 +1131,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "piezas": 50,
-        "es_default": true,
+        "sku": "-OL89YSWZJOR6CJF6SE3-50PZ",
         "nombre_paquete": "Paquete de 50 piezas",
-        "sku": "-OL89YSWZJOR6CJF6SE3-50PZ"
+        "piezas": 50,
+        "es_default": true
       }
     ]
   },
@@ -1151,10 +1151,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "piezas": 50,
-        "es_default": true,
         "nombre_paquete": "Paquete de 50 piezas",
-        "sku": "-OL89EK8TY3XISUUKHBT-50PZ"
+        "sku": "-OL89EK8TY3XISUUKHBT-50PZ",
+        "piezas": 50,
+        "es_default": true
       }
     ]
   },
@@ -1171,10 +1171,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "-OL89OAWPO1JBAY8QJE7-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "-OL89OAWPO1JBAY8QJE7-50PZ"
       }
     ]
   },
@@ -1193,8 +1193,8 @@
         "id": "paquete_24",
         "es_default": true,
         "piezas": 24,
-        "sku": "-OL8DIBSH8NJMBAJTTAA-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "sku": "-OL8DIBSH8NJMBAJTTAA-24PZ"
       }
     ]
   },
@@ -1214,10 +1214,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
         "sku": "P252-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1234,10 +1234,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
         "sku": "P252-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1251,16 +1251,16 @@
     "tipo_item": "KIT_FLEXIBLE",
     "codigo_sistema": null,
     "receta": {
-      "p252": 1,
-      "-Ol89MLOhGByoF5l955V": 1
+      "-Ol89MLOhGByoF5l955V": 1,
+      "p252": 1
     },
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
         "sku": "P252-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1280,10 +1280,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
         "sku": "P252-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1302,8 +1302,8 @@
         "id": "paquete_24",
         "sku": "-OL8DOL7WRKI41LRYCU1-24PZ",
         "nombre_paquete": "Paquete de 24 piezas",
-        "es_default": true,
-        "piezas": 24
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1323,10 +1323,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OL8DX0F6D92R-EZLTVP-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1340,16 +1340,16 @@
     "tipo_item": "KIT_FLEXIBLE",
     "codigo_sistema": null,
     "receta": {
-      "-Ol8DX0F6d92R-eZLtVP": 1,
-      "-Ol89YsWZjOr6cjF6Se3": 1
+      "-Ol89YsWZjOr6cjF6Se3": 1,
+      "-Ol8DX0F6d92R-eZLtVP": 1
     },
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OL8DX0F6D92R-EZLTVP-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1369,10 +1369,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OL8DX0F6D92R-EZLTVP-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1386,16 +1386,16 @@
     "tipo_item": "KIT_FLEXIBLE",
     "codigo_sistema": null,
     "receta": {
-      "-Ol88vQtZEx0e-rwpk9Q": 1,
-      "-Ol8DX0F6d92R-eZLtVP": 1
+      "-Ol8DX0F6d92R-eZLtVP": 1,
+      "-Ol88vQtZEx0e-rwpk9Q": 1
     },
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OL8DX0F6D92R-EZLTVP-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1409,16 +1409,16 @@
     "tipo_item": "KIT_FLEXIBLE",
     "codigo_sistema": null,
     "receta": {
-      "p252": 1,
-      "-Ol88vQtZEx0e-rwpk9Q": 1
+      "-Ol88vQtZEx0e-rwpk9Q": 1,
+      "p252": 1
     },
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
         "sku": "P252-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1432,16 +1432,16 @@
     "tipo_item": "KIT_FLEXIBLE",
     "codigo_sistema": null,
     "receta": {
-      "p252": 1,
-      "-Ol892vtYgyJgBSM1GiO": 1
+      "-Ol892vtYgyJgBSM1GiO": 1,
+      "p252": 1
     },
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
         "sku": "P252-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1460,8 +1460,8 @@
         "id": "paquete_24",
         "sku": "-OL8DOL7WRKI41LRYCU1-24PZ",
         "nombre_paquete": "Paquete de 24 piezas",
-        "es_default": true,
-        "piezas": 24
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1478,10 +1478,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OL8DX0F6D92R-EZLTVP-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1498,10 +1498,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OL8DX0F6D92R-EZLTVP-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1518,10 +1518,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OL8DX0F6D92R-EZLTVP-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1538,8 +1538,8 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
         "piezas": 24,
+        "es_default": true,
         "sku": "-OL8D8DK3MGAGFH4ZYHQ-24PZ",
         "nombre_paquete": "Paquete de 24 piezas"
       }
@@ -1560,8 +1560,8 @@
         "id": "paquete_24",
         "es_default": true,
         "piezas": 24,
-        "sku": "-OL8DIBSH8NJMBAJTTAA-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "sku": "-OL8DIBSH8NJMBAJTTAA-24PZ"
       }
     ]
   },
@@ -1580,8 +1580,8 @@
         "id": "paquete_24",
         "sku": "-OL8DOL7WRKI41LRYCU1-24PZ",
         "nombre_paquete": "Paquete de 24 piezas",
-        "es_default": true,
-        "piezas": 24
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1598,10 +1598,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
         "sku": "-OL8DX0F6D92R-EZLTVP-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -1638,10 +1638,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "-OLCZDMOQFDHDJAUERQV-1PZ",
+        "es_default": true,
         "piezas": 1,
-        "es_default": true
+        "sku": "-OLCZDMOQFDHDJAUERQV-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -1658,8 +1658,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "-OLCZOIN4UN0LFHEZJDQ-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas",
         "piezas": 1,
         "es_default": true
       }
@@ -1678,10 +1678,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": 1,
-        "es_default": true,
+        "sku": "-OLD-6LINNYWRI2YEVCH-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "-OLD-6LINNYWRI2YEVCH-1PZ"
+        "es_default": true,
+        "piezas": 1
       }
     ]
   },
@@ -1718,10 +1718,10 @@
     "paquetes": [
       {
         "id": "paquete_220",
-        "nombre_paquete": "Paquete de 220 piezas",
-        "sku": "-OLDSONBXSOWBALDM5BT-220PZ",
+        "es_default": true,
         "piezas": 220,
-        "es_default": true
+        "sku": "-OLDSONBXSOWBALDM5BT-220PZ",
+        "nombre_paquete": "Paquete de 220 piezas"
       }
     ]
   },
@@ -1738,10 +1738,10 @@
     "paquetes": [
       {
         "id": "paquete_220",
-        "nombre_paquete": "Paquete de 220 piezas",
-        "sku": "-OLDSONBXSOWBALDM5BT-220PZ",
+        "es_default": true,
         "piezas": 220,
-        "es_default": true
+        "sku": "-OLDSONBXSOWBALDM5BT-220PZ",
+        "nombre_paquete": "Paquete de 220 piezas"
       }
     ]
   },
@@ -1761,10 +1761,10 @@
     "paquetes": [
       {
         "id": "paquete_104",
-        "es_default": true,
-        "piezas": 104,
         "sku": "-OLNKDYYGIXZ59247X1U-104PZ",
-        "nombre_paquete": "Paquete de 104 piezas"
+        "nombre_paquete": "Paquete de 104 piezas",
+        "es_default": true,
+        "piezas": 104
       }
     ]
   },
@@ -1783,10 +1783,10 @@
     "paquetes": [
       {
         "id": "paquete_104",
-        "sku": "-OLNLUA9XUGLGLZK1JRQ-104PZ",
-        "nombre_paquete": "Paquete de 104 piezas",
+        "piezas": 104,
         "es_default": true,
-        "piezas": 104
+        "sku": "-OLNLUA9XUGLGLZK1JRQ-104PZ",
+        "nombre_paquete": "Paquete de 104 piezas"
       }
     ]
   },
@@ -1803,10 +1803,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "sku": "-OLNES6M4IAPCIYV7MFW-50PZ",
         "piezas": 50,
-        "es_default": true
+        "es_default": true,
+        "sku": "-OLNES6M4IAPCIYV7MFW-50PZ",
+        "nombre_paquete": "Paquete de 50 piezas"
       }
     ]
   },
@@ -1823,10 +1823,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "-OLNEGWG-EW98PHYQC-2-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "-OLNEGWG-EW98PHYQC-2-50PZ"
       }
     ]
   },
@@ -1845,8 +1845,8 @@
         "id": "paquete_100",
         "sku": "-OLNHIEMK_ZIDRKMGKRZ-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -1863,10 +1863,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "-OLNHUV5GLODKT8GTSDC-1PZ",
+        "es_default": true,
         "piezas": 1,
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OLNHUV5GLODKT8GTSDC-1PZ"
       }
     ]
   },
@@ -1883,10 +1883,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "-OLNI34Q6FWNTXGN1HBH-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "-OLNI34Q6FWNTXGN1HBH-50PZ"
       }
     ]
   },
@@ -1903,10 +1903,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "-OLNIDBQP_YLPV8L18LX-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
         "es_default": true,
-        "piezas": 50
+        "piezas": 50,
+        "sku": "-OLNIDBQP_YLPV8L18LX-50PZ",
+        "nombre_paquete": "Paquete de 50 piezas"
       }
     ]
   },
@@ -1943,10 +1943,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "-OLNINRLT1PAHIMF4C6H-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
         "es_default": true,
-        "piezas": 50
+        "piezas": 50,
+        "sku": "-OLNINRLT1PAHIMF4C6H-50PZ",
+        "nombre_paquete": "Paquete de 50 piezas"
       }
     ]
   },
@@ -1985,8 +1985,8 @@
         "id": "paquete_20",
         "nombre_paquete": "Paquete de 20 piezas",
         "sku": "-OLNJG0ALRKNKK5MTDDG-20PZ",
-        "piezas": 20,
-        "es_default": true
+        "es_default": true,
+        "piezas": 20
       }
     ]
   },
@@ -2005,8 +2005,8 @@
         "id": "paquete_20",
         "nombre_paquete": "Paquete de 20 piezas",
         "sku": "-OLNJG0ALRKNKK5MTDDG-20PZ",
-        "piezas": 20,
-        "es_default": true
+        "es_default": true,
+        "piezas": 20
       }
     ]
   },
@@ -2063,10 +2063,10 @@
     "paquetes": [
       {
         "id": "paquete_104",
-        "es_default": true,
-        "piezas": 104,
         "sku": "-OLNKDYYGIXZ59247X1U-104PZ",
-        "nombre_paquete": "Paquete de 104 piezas"
+        "nombre_paquete": "Paquete de 104 piezas",
+        "es_default": true,
+        "piezas": 104
       }
     ]
   },
@@ -2103,10 +2103,10 @@
     "paquetes": [
       {
         "id": "paquete_98",
-        "sku": "-OLNKSPMQHEIZ-B7Y5BD-98PZ",
         "nombre_paquete": "Paquete de 98 piezas",
-        "es_default": true,
-        "piezas": 98
+        "sku": "-OLNKSPMQHEIZ-B7Y5BD-98PZ",
+        "piezas": 98,
+        "es_default": true
       }
     ]
   },
@@ -2123,10 +2123,10 @@
     "paquetes": [
       {
         "id": "paquete_98",
-        "piezas": 98,
-        "es_default": true,
+        "sku": "-OLNL0O_TFCD7QDBDLIJ-98PZ",
         "nombre_paquete": "Paquete de 98 piezas",
-        "sku": "-OLNL0O_TFCD7QDBDLIJ-98PZ"
+        "es_default": true,
+        "piezas": 98
       }
     ]
   },
@@ -2145,8 +2145,8 @@
         "id": "paquete_98",
         "nombre_paquete": "Paquete de 98 piezas",
         "sku": "-OLNL59M62CG6LNTWYDS-98PZ",
-        "piezas": 98,
-        "es_default": true
+        "es_default": true,
+        "piezas": 98
       }
     ]
   },
@@ -2163,10 +2163,10 @@
     "paquetes": [
       {
         "id": "paquete_98",
-        "sku": "-OLNKSPMQHEIZ-B7Y5BD-98PZ",
         "nombre_paquete": "Paquete de 98 piezas",
-        "es_default": true,
-        "piezas": 98
+        "sku": "-OLNKSPMQHEIZ-B7Y5BD-98PZ",
+        "piezas": 98,
+        "es_default": true
       }
     ]
   },
@@ -2183,10 +2183,10 @@
     "paquetes": [
       {
         "id": "paquete_98",
-        "piezas": 98,
-        "es_default": true,
+        "sku": "-OLNL0O_TFCD7QDBDLIJ-98PZ",
         "nombre_paquete": "Paquete de 98 piezas",
-        "sku": "-OLNL0O_TFCD7QDBDLIJ-98PZ"
+        "es_default": true,
+        "piezas": 98
       }
     ]
   },
@@ -2203,10 +2203,10 @@
     "paquetes": [
       {
         "id": "paquete_104",
-        "sku": "-OLNLUA9XUGLGLZK1JRQ-104PZ",
-        "nombre_paquete": "Paquete de 104 piezas",
+        "piezas": 104,
         "es_default": true,
-        "piezas": 104
+        "sku": "-OLNLUA9XUGLGLZK1JRQ-104PZ",
+        "nombre_paquete": "Paquete de 104 piezas"
       }
     ]
   },
@@ -2225,8 +2225,8 @@
         "id": "paquete_98",
         "nombre_paquete": "Paquete de 98 piezas",
         "sku": "-OLNL59M62CG6LNTWYDS-98PZ",
-        "piezas": 98,
-        "es_default": true
+        "es_default": true,
+        "piezas": 98
       }
     ]
   },
@@ -2243,10 +2243,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "sku": "-OLNME83F3LXP2F9ZVR1-36PZ",
-        "nombre_paquete": "Paquete de 36 piezas",
+        "piezas": 36,
         "es_default": true,
-        "piezas": 36
+        "sku": "-OLNME83F3LXP2F9ZVR1-36PZ",
+        "nombre_paquete": "Paquete de 36 piezas"
       }
     ]
   },
@@ -2263,10 +2263,10 @@
     "paquetes": [
       {
         "id": "paquete_220",
-        "nombre_paquete": "Paquete de 220 piezas",
-        "sku": "-OLNMRVPMGHKECVLV3J1-220PZ",
+        "es_default": true,
         "piezas": 220,
-        "es_default": true
+        "nombre_paquete": "Paquete de 220 piezas",
+        "sku": "-OLNMRVPMGHKECVLV3J1-220PZ"
       }
     ]
   },
@@ -2283,10 +2283,10 @@
     "paquetes": [
       {
         "id": "paquete_220",
-        "nombre_paquete": "Paquete de 220 piezas",
-        "sku": "-OLNMRVPMGHKECVLV3J1-220PZ",
+        "es_default": true,
         "piezas": 220,
-        "es_default": true
+        "nombre_paquete": "Paquete de 220 piezas",
+        "sku": "-OLNMRVPMGHKECVLV3J1-220PZ"
       }
     ]
   },
@@ -2303,10 +2303,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OLNN0AWP3BFUVCBDDLQ-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": 1
+        "piezas": 1,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OLNN0AWP3BFUVCBDDLQ-1PZ"
       }
     ]
   },
@@ -2320,16 +2320,16 @@
     "tipo_item": "KIT_FLEXIBLE",
     "codigo_sistema": null,
     "receta": {
-      "-OlNn0Awp3BfuvcbDdlQ": 1,
-      "-OlNoIVg8vMpfa2_-9Nz": 1
+      "-OlNoIVg8vMpfa2_-9Nz": 1,
+      "-OlNn0Awp3BfuvcbDdlQ": 1
     },
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OLNN0AWP3BFUVCBDDLQ-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": 1
+        "piezas": 1,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OLNN0AWP3BFUVCBDDLQ-1PZ"
       }
     ]
   },
@@ -2366,10 +2366,10 @@
     "paquetes": [
       {
         "id": "paquete_220",
-        "nombre_paquete": "Paquete de 220 piezas",
-        "sku": "-OLNMRVPMGHKECVLV3J1-220PZ",
+        "es_default": true,
         "piezas": 220,
-        "es_default": true
+        "nombre_paquete": "Paquete de 220 piezas",
+        "sku": "-OLNMRVPMGHKECVLV3J1-220PZ"
       }
     ]
   },
@@ -2386,10 +2386,10 @@
     "paquetes": [
       {
         "id": "paquete_80",
-        "piezas": 80,
-        "es_default": true,
         "nombre_paquete": "Paquete de 80 piezas",
-        "sku": "-OLNNXY_-WETDPEOOHQJ-80PZ"
+        "sku": "-OLNNXY_-WETDPEOOHQJ-80PZ",
+        "es_default": true,
+        "piezas": 80
       }
     ]
   },
@@ -2406,10 +2406,10 @@
     "paquetes": [
       {
         "id": "paquete_80",
-        "piezas": 80,
-        "es_default": true,
         "nombre_paquete": "Paquete de 80 piezas",
-        "sku": "-OLNNXY_-WETDPEOOHQJ-80PZ"
+        "sku": "-OLNNXY_-WETDPEOOHQJ-80PZ",
+        "es_default": true,
+        "piezas": 80
       }
     ]
   },
@@ -2426,10 +2426,10 @@
     "paquetes": [
       {
         "id": "paquete_128",
-        "piezas": 128,
-        "es_default": true,
         "nombre_paquete": "Paquete de 128 piezas",
-        "sku": "-OLNNNMRWD_W-RA3A3CZ-128PZ"
+        "sku": "-OLNNNMRWD_W-RA3A3CZ-128PZ",
+        "piezas": 128,
+        "es_default": true
       }
     ]
   },
@@ -2446,10 +2446,10 @@
     "paquetes": [
       {
         "id": "paquete_128",
-        "piezas": 128,
-        "es_default": true,
         "nombre_paquete": "Paquete de 128 piezas",
-        "sku": "-OLNNNMRWD_W-RA3A3CZ-128PZ"
+        "sku": "-OLNNNMRWD_W-RA3A3CZ-128PZ",
+        "piezas": 128,
+        "es_default": true
       }
     ]
   },
@@ -2466,10 +2466,10 @@
     "paquetes": [
       {
         "id": "paquete_98",
-        "piezas": 98,
-        "es_default": true,
+        "sku": "-OLNO2XWI5YKBIRO3Q8V-98PZ",
         "nombre_paquete": "Paquete de 98 piezas",
-        "sku": "-OLNO2XWI5YKBIRO3Q8V-98PZ"
+        "piezas": 98,
+        "es_default": true
       }
     ]
   },
@@ -2486,10 +2486,10 @@
     "paquetes": [
       {
         "id": "paquete_98",
-        "piezas": 98,
-        "es_default": true,
+        "sku": "-OLNO2XWI5YKBIRO3Q8V-98PZ",
         "nombre_paquete": "Paquete de 98 piezas",
-        "sku": "-OLNO2XWI5YKBIRO3Q8V-98PZ"
+        "piezas": 98,
+        "es_default": true
       }
     ]
   },
@@ -2506,10 +2506,10 @@
     "paquetes": [
       {
         "id": "paquete_4000",
-        "nombre_paquete": "Paquete de 4000 piezas",
-        "sku": "-OLNOIVG8VMPFA2_-9NZ-4000PZ",
         "piezas": 4000,
-        "es_default": true
+        "es_default": true,
+        "sku": "-OLNOIVG8VMPFA2_-9NZ-4000PZ",
+        "nombre_paquete": "Paquete de 4000 piezas"
       }
     ]
   },
@@ -2546,10 +2546,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OLNO_CBTAKTCGBHU69A-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": 1
+        "piezas": 1,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OLNO_CBTAKTCGBHU69A-1PZ"
       }
     ]
   },
@@ -2566,8 +2566,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "-OLNOERH8Z7ZFEGUY8Q4-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OLNOERH8Z7ZFEGUY8Q4-1PZ",
         "es_default": true,
         "piezas": 1
       }
@@ -2586,10 +2586,10 @@
     "paquetes": [
       {
         "id": "paquete_126",
-        "nombre_paquete": "Paquete de 126 piezas",
-        "sku": "P195-126PZ",
+        "es_default": true,
         "piezas": 126,
-        "es_default": true
+        "nombre_paquete": "Paquete de 126 piezas",
+        "sku": "P195-126PZ"
       }
     ]
   },
@@ -2621,10 +2621,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "-OLNCGXZXJ9F65F2SYKS-1PZ",
+        "es_default": true,
         "piezas": 1,
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "-OLNCGXZXJ9F65F2SYKS-1PZ"
       }
     ]
   },
@@ -2679,8 +2679,8 @@
         "id": "paquete_1482",
         "es_default": true,
         "piezas": 1482,
-        "sku": "P60-1482PZ",
-        "nombre_paquete": "Paquete de 1482 piezas"
+        "nombre_paquete": "Paquete de 1482 piezas",
+        "sku": "P60-1482PZ"
       }
     ]
   },
@@ -2721,10 +2721,10 @@
     "paquetes": [
       {
         "id": "paquete_153",
-        "sku": "-OK_P3TQLOBZBZEYAY1B-153PZ",
-        "nombre_paquete": "Paquete de 153 piezas",
+        "piezas": 153,
         "es_default": true,
-        "piezas": 153
+        "nombre_paquete": "Paquete de 153 piezas",
+        "sku": "-OK_P3TQLOBZBZEYAY1B-153PZ"
       }
     ]
   },
@@ -2735,8 +2735,40 @@
     "image": "https://i.ibb.co/xqDfL1Wn/TARRO-DE-POLIETILENO-NATURAL-DE-250-G-CON-TAPA-R-70.jpg",
     "piezas": 1,
     "stock": 0,
-    "tipo_item": "PIEZA_BASE",
+    "tipo_item": "KIT_OFICIAL",
     "codigo_sistema": "TPL-250-R70-NAT-CT",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "paquete_150",
+        "sku": "P412-150PZ",
+        "nombre_paquete": "Paquete de 150 piezas",
+        "piezas": 150,
+        "es_default": true
+      }
+    ]
+  },
+  {
+    "id": "5TaFwE4Il0EaMY0BRpHk",
+    "name": "TARRO DE POLIETILENO NATURAL DE 20 G R-28 C/TAPA",
+    "category": "PAD",
+    "image": "https://i.ibb.co/V04GckQM/TARRO-DE-POLIETILENO-NATURAL-DE-20-G-CON-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "KIT_OFICIAL",
+    "codigo_sistema": "TPL-20-R28-NAT-CT",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "5f4voWprntU7djLqaoXl",
+    "name": "TAMBO DE LAMINA CERRADO DE 200 L CON FENOL",
+    "category": "LAMINA",
+    "image": "https://i.ibb.co/gMwNpw7d/TAMBO-DE-LAMINA-CERRADO-DE-200-L-SIN-FENOL.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TLC-CF-200/CP",
     "receta": null,
     "paquetes": []
   },
@@ -2753,10 +2785,45 @@
     "paquetes": [
       {
         "id": "paquete_145",
-        "nombre_paquete": "Paquete de 145 piezas",
-        "sku": "P86-145PZ",
+        "es_default": true,
         "piezas": 145,
-        "es_default": true
+        "sku": "P86-145PZ",
+        "nombre_paquete": "Paquete de 145 piezas"
+      }
+    ]
+  },
+  {
+    "id": "6Fv2rDEMeUgY5Tz9U9xR",
+    "name": "TAPON FLEX SPOUT FS-II BLANCO    ( 1202010419 )",
+    "category": "PAD",
+    "image": "https://i.ibb.co/cH9Cg87/TAPON-FLEX-BLANCO.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TF-STDB/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "9QThI7RkYnCvOE6hciyG",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA AZUL 12X20X6 #91",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/5hN8TRnL/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-AZUL-12-X20-X6-91-93.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP91-SUP-AZUL-150/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "yDMnVnd8dpa5jTZD5nwX",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347295,
+          "nanoseconds": 310000000
+        },
+        "piezas": 100,
+        "sku": "BP91-SUP-AZUL-150/CP-100PZ"
       }
     ]
   },
@@ -2797,6 +2864,64 @@
     "paquetes": []
   },
   {
+    "id": "CCiQpf4qWJotu9UzQ3mq",
+    "name": "TARRO DE POLIETILENO NATURAL DE 20 G R-28 S/TAPA",
+    "category": "PAD",
+    "image": "https://i.ibb.co/JWbQQnkv/TARRO-DE-POLIETILENO-NATURAL-DE-20-G-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TPL-20-R28-NAT/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "CGFVVMNV1iyDUDu6t8ne",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROJA 15X20X7 #89",
+    "category": "General",
+    "image": "https://i.ibb.co/bRmsRBjj/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-ROJA-12-X20-X6-88-90.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP89-SUP-ROJA-250/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "VcRJS0gwfg9K1Vh47CF0",
+        "sku": "BP89-SUP-ROJA-250/CP-100PZ",
+        "piezas": 100,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347197,
+          "nanoseconds": 671000000
+        }
+      }
+    ]
+  },
+  {
+    "id": "GV6QJFKWlpHRN2dYQI6g",
+    "name": "BOLSA STAND UP POUCH C/Z KRAFT CON TRANS. 12X20X6 #52",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/hx9gBfnL/BOLSA-STAND-UP-POUCH-CZ-KRAFT-CON-TRANS-12-X20-X6-52.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP52-SU-KRAFT-TRANS-150/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "jdfF4EmxrkkltXAP4aXD",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347165,
+          "nanoseconds": 504000000
+        },
+        "piezas": 100,
+        "sku": "BP52-SU-KRAFT-TRANS-150/CP-100PZ"
+      }
+    ]
+  },
+  {
     "id": "He6sc7ORtxUFEUETQmbu",
     "name": "ENVASE DE PLASTICO LECHERO 500 ML STAPA",
     "category": "PBD",
@@ -2809,13 +2934,48 @@
     "paquetes": [
       {
         "id": "ZV3E8s8whMgT9zWC9zIF",
+        "sku": "EPL-500/CP-200PZ",
+        "piezas": 200,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772909162,
           "nanoseconds": 490000000
-        },
-        "piezas": 200,
-        "sku": "EPL-500/CP-200PZ"
+        }
+      }
+    ]
+  },
+  {
+    "id": "IZfr3R5zPjHxPvU37E4a",
+    "name": "TAMBO DE LAMINA ABIERTO DE 200 L C/TAPA Y CINCHO",
+    "category": "lamina",
+    "image": "https://i.ibb.co/JjVynNK9/TAMBO-DE-LAMINA-ABIERTO-DE-200-L-CON-ARO-Y-CINCHO-SIN-FENOL.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TLA-200/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "JHukOxJTprZHXiJgCDvY",
+    "name": "BOLSA LIQUIDOS STAND UP POUCH C/POPOTE 1 L 16X25X8.5 #99",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/Jb0rDsK/BOLSA-LIQUIDOS-STAND-UP-POUCH-CPOPOTE-250-ML-12-X18-X3-2-97-99.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP99-SU-LIQP-1/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "AosVHCjWuPWHAXio1IPo",
+        "sku": "BP99-SU-LIQP-1/CP-100PZ",
+        "piezas": 100,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347806,
+          "nanoseconds": 71000000
+        }
       }
     ]
   },
@@ -2844,13 +3004,13 @@
     "paquetes": [
       {
         "id": "eRIEpo8EY06avP0ne4I1",
-        "sku": "EPL-1/CP-192PZ",
-        "piezas": 192,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772909174,
           "nanoseconds": 210000000
-        }
+        },
+        "piezas": 192,
+        "sku": "EPL-1/CP-192PZ"
       },
       {
         "id": "q6zQqG8RFOCgtyD5FHBd",
@@ -2865,6 +3025,88 @@
     ]
   },
   {
+    "id": "L9L9eTPQ37g7KOjeKL4x",
+    "name": "FRASCO PET ESPECIERO CUADRADO DE 500 S/TAPA R63",
+    "category": "PET",
+    "image": "https://i.ibb.co/Ymyqj4T/FRASCO-PET-ESPECIERO-CUADRADO-DE-500-g-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "FPEC-500-S/T/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "Pl0lBiheeZpdxYdtHX0v",
+    "name": "TAPA PARA GARRAFON DE AGUA CORTA",
+    "category": "OTROS",
+    "image": "https://i.ibb.co/tTbRffd8/TAPA-PARA-GARRAFON-DE-AGUA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TP-PGA/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "Q6UiAS6PfGKHLFslUMBm",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROSA 15X20X7 #95",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/tMTz0ZbY/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-ROSA-12-X20-X6-94-96.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP95-SUP-ROSA-250/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "r8TA63Tpt1p1MpyhaQPq",
+        "sku": "BP95-SUP-ROSA-250/CP-100PZ",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347608,
+          "nanoseconds": 493000000
+        },
+        "piezas": 100
+      }
+    ]
+  },
+  {
+    "id": "QjyiwefGQp2jVBAbiC38",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA AZUL 19X25X9 #93",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/5hN8TRnL/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-AZUL-12-X20-X6-91-93.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP93-SUP-AZUL-500/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "zeCiCuu856Pq5TptmzKL",
+        "sku": "BP93-SUP-AZUL-500/CP-100PZ",
+        "piezas": 100,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347572,
+          "nanoseconds": 702000000
+        }
+      }
+    ]
+  },
+  {
+    "id": "QpmI5bGQeau0DSGgLQRo",
+    "name": "LLAVE DE ACERO INOXIDABLE CAL 12, TIPO 430 P/ABRIR TAPA R-38",
+    "category": "OTROS",
+    "image": "https://i.ibb.co/RGGcG8DZ/LLAVE-DE-ACERO-INOXIDABLE-CAL-12-TIPO-430-PABRIR-TAPA-R-38.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "LLPTR38/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
     "id": "R1ZrRgTNtRENl7eTJug5",
     "name": "BOTELLA PET PIRAMIDE DE 30 ML CON TAPA Y SIN FUNDA",
     "category": "PET",
@@ -2877,13 +3119,48 @@
     "paquetes": [
       {
         "id": "vviNh8fdWOWwOuwo8ROg",
-        "sku": "BPP-30-FT/CP-1000PZ",
-        "piezas": 1000,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772903117,
           "nanoseconds": 728000000
-        }
+        },
+        "piezas": 1000,
+        "sku": "BPP-30-FT/CP-1000PZ"
+      }
+    ]
+  },
+  {
+    "id": "RK4PZ855z3P4NeX74IOQ",
+    "name": "CUBETA DE PLASTICO DE 2 L BCA CON TAPA",
+    "category": "CUBETA DE PLASTICO",
+    "image": "https://i.ibb.co/nstfwrfg/CUBETA-DE-PLASTICO-DE-2-L-CON-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "CPB-2/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "RUl3JOUW8R0sUrtMt5WX",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROSA 12X20X6 #94",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/tMTz0ZbY/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-ROSA-12-X20-X6-94-96.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP94-SUP-ROSA-150/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "gKoFlSg9bbS5JWOGJxNX",
+        "sku": "BP94-SUP-ROSA-150/CP-100PZ",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347593,
+          "nanoseconds": 749000000
+        },
+        "piezas": 100
       }
     ]
   },
@@ -2900,10 +3177,45 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "sku": "P275-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas",
         "es_default": true,
-        "piezas": 24
+        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
+        "sku": "P275-24PZ"
+      }
+    ]
+  },
+  {
+    "id": "SZoaRTde0wNr3lcmcxY7",
+    "name": "BOTELLA PET FARMACEUTICA DE 60 ML CRISTAL S/TAPA",
+    "category": "PET",
+    "image": "https://i.ibb.co/676ky1dX/BOTELLA-PET-FARMACEUTICA-DE-60-ML-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BPF-60-CR/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "TVYTgqKKZmQK35nZy55C",
+    "name": "BOLSA STAND UP POUCH C/Z KRAFT CON TRANS. 15X23X7 #53",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/1tv6ZYB5/BOLSA-STAND-UP-POUCH-CZ-KRAFT-CON-TRANS-15-X23-X7-53.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP53-SU-KRAFT-TRANS-250/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "cuIBLP1YjpgyspXg0ULt",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347178,
+          "nanoseconds": 930000000
+        },
+        "piezas": 100,
+        "sku": "BP53-SU-KRAFT-TRANS-250/CP-100PZ"
       }
     ]
   },
@@ -2920,10 +3232,10 @@
     "paquetes": [
       {
         "id": "paquete_900",
-        "piezas": 900,
         "es_default": true,
-        "nombre_paquete": "Paquete de 900 piezas",
-        "sku": "-OK_OILDPPFC1A6OIRF5-900PZ"
+        "piezas": 900,
+        "sku": "-OK_OILDPPFC1A6OIRF5-900PZ",
+        "nombre_paquete": "Paquete de 900 piezas"
       }
     ]
   },
@@ -2940,6 +3252,65 @@
     "paquetes": []
   },
   {
+    "id": "YS2jLagH9a3JpK8Yl8oe",
+    "name": "TAMBO DE LAMINA CERRADO DE 200 L SIN FENOL",
+    "category": "LAMINA",
+    "image": "https://i.ibb.co/VYH4sWbR/TAMBO-DE-LAMINA-CERRADO-DE-200-L-CON-FENOL.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TLC-SF-200/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "YWYhpqOkLIbcp6VCkXE6",
+    "name": "TARRO DE POLIETILENO NATURAL DE 40 G C/TAPA R-38",
+    "category": "PAD",
+    "image": "https://i.ibb.co/Fb13f2Pt/TARRO-DE-POLIETILENO-NATURAL-DE-40-G-CON-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "KIT_OFICIAL",
+    "codigo_sistema": "TPL-40-R38-NAT-CT",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "ZTTmDZ1LE1GFBnZMWRD6",
+    "name": "PORRON INDUSTRIAL NARANJA DE 20 L C/TAPON",
+    "category": "PAD",
+    "image": "https://i.ibb.co/h1RW2GVF/PORRON-INDUSTRIAL-NARANJA-DE-20-LITROS-CON-TAPON.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "PINA-20-S/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "Zq01tBdqv3rER22fBFao",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROSA 19X25X9 #96",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/tMTz0ZbY/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-ROSA-12-X20-X6-94-96.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP96-SUP-ROSA-500/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "HyLJQMmFujnQS3XU0ObH",
+        "piezas": 100,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347702,
+          "nanoseconds": 562000000
+        },
+        "sku": "BP96-SUP-ROSA-500/CP-100PZ"
+      }
+    ]
+  },
+  {
     "id": "byfbZP2W1NYnzr5wyFN4",
     "name": "TAPA PORTOLA PARA ENVASE LECHERO",
     "category": "OTROS",
@@ -2948,6 +3319,18 @@
     "stock": 0,
     "tipo_item": "PIEZA_BASE",
     "codigo_sistema": "TP-EL/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "cXH8Xm8Sai3T1yNQ9x1d",
+    "name": "CUBETA DE PLASTICO REC DE 4 L GDL S/TAPA",
+    "category": "CUBETA DE PLASTICO",
+    "image": "https://i.ibb.co/bgVTmjwr/CUBETA-DE-PLASTICO-REC-DE-4-LITROS-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "CPB-4-REC-GDL/CP",
     "receta": null,
     "paquetes": []
   },
@@ -2972,6 +3355,111 @@
     ]
   },
   {
+    "id": "cn7qEnml8Q0bKreibXrH",
+    "name": "BOLSA LIQUIDOS STAND UP POUCH C/POPOTE 250ML 12X18X3.2 #97",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/Jb0rDsK/BOLSA-LIQUIDOS-STAND-UP-POUCH-CPOPOTE-250-ML-12-X18-X3-2-97-99.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP97-SU-LIQP-250/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "9pdqZB7V5GMeh3fZCtei",
+        "sku": "BP97-SU-LIQP-250/CP-100PZ",
+        "piezas": 100,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347744,
+          "nanoseconds": 746000000
+        }
+      }
+    ]
+  },
+  {
+    "id": "dFTogxHH2hmsYbvVTVXA",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROJA 19X25X9 #90",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/bRmsRBjj/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-ROJA-12-X20-X6-88-90.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP90-SUP-ROJA-500/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "LVtGxyFxSBRaKRqnlUf5",
+        "sku": "BP90-SUP-ROJA-500/CP-100PZ",
+        "piezas": 100,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347205,
+          "nanoseconds": 398000000
+        }
+      }
+    ]
+  },
+  {
+    "id": "e3ThiNjkXcDaWtXe2sul",
+    "name": "BOTELLA PET FARMACEUTICA 120 ML CRISTAL C/TAPA R-24",
+    "category": "PET",
+    "image": "https://i.ibb.co/vxq2fpcV/BOTELLA-PET-FARMACEUTICA-DE-120-ML-CON-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "KIT_OFICIAL",
+    "codigo_sistema": "BPF-120-CR-CT",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "e4zfAGKa1qTNzXIpldU1",
+    "name": "BOTELLA PAD NAT ALCOHOLERA 60 ML R-22 S/TAPA",
+    "category": "PAD",
+    "image": "https://i.ibb.co/Mx7tJsRR/BOTELLA-PAR-NAT-ALCOHOLERA-DE-60-ML-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BPLA-60/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "eBkNTIBuroE1MZiWkNLa",
+    "name": "FRASCO PET ESPECIERO CUADRADO DE 500 C/TAPA ROJA R-63 S/LAIN",
+    "category": "PET",
+    "image": "https://i.ibb.co/WpnCjZwN/FRASCO-PET-ESPECIERO-DE-150-ML-CON-TAPA-FLAPPER-ROJA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "KIT_OFICIAL",
+    "codigo_sistema": "FPEC-500-CTR",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "eFeJBgn9yObirx5Bl9DW",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA AZUL 15X20X7 #92",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/5hN8TRnL/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-AZUL-12-X20-X6-91-93.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP92-SUP-AZUL-250/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "jKd7tuZCOQNzq5qiQaYv",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347559,
+          "nanoseconds": 797000000
+        },
+        "piezas": 100,
+        "sku": "BP92-SUP-AZUL-250/CP-100PZ"
+      }
+    ]
+  },
+  {
     "id": "eiwAiIUvrL69JZqDzThi",
     "name": "BOTE DE LAMINA PRESION SENCILLA DE 2 LT",
     "category": "lamina",
@@ -2984,13 +3472,48 @@
     "paquetes": [
       {
         "id": "2vd1sjqPUq5kJXCV9E9H",
+        "piezas": 40,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772903082,
           "nanoseconds": 885000000
         },
-        "piezas": 40,
         "sku": "BLPS-2/CP-40PZ"
+      }
+    ]
+  },
+  {
+    "id": "exj4VxPxcWpnJgUg90r4",
+    "name": "FRASCO PET ESPECIERO DE 150 ML  S/TAPA SIN LAINER",
+    "category": "PET",
+    "image": "https://i.ibb.co/9kD4TxJx/FRASCO-PET-ESPECIERO-DE-150-ML-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "FPE-150C/T/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "fYj52Nj6GzlOF758J4X5",
+    "name": "BOLSA  SPOUT TRANSPARENTE P/LIQUIDOS  2LT. 23X30+6 #100",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/C5VtfsHm/BOLSA-SPOUT-TRANSPARENTE-PLIQUIDOS-2-LT-23-X30-6-100.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP100-SU-LIQP-2/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "BWXwuPOdqbLsZsfk1SAR",
+        "sku": "BP100-SU-LIQP-2/CP-100PZ",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347871,
+          "nanoseconds": 429000000
+        },
+        "piezas": 100
       }
     ]
   },
@@ -3018,6 +3541,41 @@
     ]
   },
   {
+    "id": "gOQkF5IvtFZvIwoA4jbK",
+    "name": "BOLSA LIQUIDOS STAND UP POUCH C/POPOTE 500ML 13X22.5X6.5 #98",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/Jb0rDsK/BOLSA-LIQUIDOS-STAND-UP-POUCH-CPOPOTE-250-ML-12-X18-X3-2-97-99.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP98-SU-LIQP-500/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "lY4J6xncL6ouHJhVr9Di",
+        "sku": "BP98-SU-LIQP-500/CP-100PZ",
+        "piezas": 100,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347813,
+          "nanoseconds": 476000000
+        }
+      }
+    ]
+  },
+  {
+    "id": "gptZFO1eaRRqCHD2ubpf",
+    "name": "GARRAFON DE POLIETILENO NATURAL PARA AGUA DE 2 L S/TAPA",
+    "category": "PAD",
+    "image": "https://i.ibb.co/39PHMddh/GARRAFON-DE-POLIETILENO-NATURAL-P-AGUA-DE-2-L-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "GPA-2L/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
     "id": "h4H0n7NhKrl0ugtgDSLz",
     "name": "ENVASE DE PLASTICO LECHERO DE GALON S/TAPA",
     "category": "PBD",
@@ -3030,12 +3588,12 @@
     "paquetes": [
       {
         "id": "EC9nfT0n1oIftVm7OR2p",
+        "piezas": 48,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772909154,
           "nanoseconds": 362000000
         },
-        "piezas": 48,
         "sku": "EPL-GAL/CP-48PZ"
       }
     ]
@@ -3061,6 +3619,53 @@
     ]
   },
   {
+    "id": "jfFv8C3DgP0JuBGKxm6K",
+    "name": "BOLSA SPOUT TRANSPARENTE P/IQUIDOS 3 LT. 31X26+6.5 #101",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/W4YkGWx9/BOLSA-SPOUT-TRANSPARENTE-PIQUIDOS-3-LT-31-X26-6-5-101.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP101-SU-LIQP-3/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "7wRh65zNBlVrAkjtSs0D",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347910,
+          "nanoseconds": 7000000
+        },
+        "piezas": 100,
+        "sku": "BP101-SU-LIQP-3/CP-100PZ"
+      }
+    ]
+  },
+  {
+    "id": "kM4i21853GhUWqgRISfq",
+    "name": "PORRON INDUSTRIAL AZUL DE 20 L C/TAPON SAMPSOM",
+    "category": "PAD",
+    "image": "https://i.ibb.co/Tx9Mqbbh/PORRON-INDUSTRIAL-AZUL-DE-20-LITROS-CON-TAPON.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "PIA-20-S/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "kusMvINdgxwxqy9DnaTs",
+    "name": "BOTELLA PET FARMACEUTICA 120 ML CRISTAL S/TAPA",
+    "category": "PET",
+    "image": "https://i.ibb.co/xtfYywCt/BOTELLA-PET-FARMACEUTICA-DE-120-ML-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BPF-120-CR/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
     "id": "l0dcRiRyvyLBljaVGEAd",
     "name": "BOTELLA PAD BCO ALCOHOLERA DE 1 LT LISA C/TAPA R-28",
     "category": "PAD",
@@ -3073,12 +3678,24 @@
     "paquetes": [
       {
         "id": "paquete_170",
-        "nombre_paquete": "Paquete de 170 piezas",
         "sku": "-OK_PXMAD2_OT0M9_SVD-170PZ",
+        "nombre_paquete": "Paquete de 170 piezas",
         "piezas": "170",
         "es_default": true
       }
     ]
+  },
+  {
+    "id": "lMVADP0WZRK2JFIoH8OZ",
+    "name": "TARRO DE POLIETILENO NATURAL DE 40 G R-38 S/TAPA",
+    "category": "PAD",
+    "image": "https://i.ibb.co/JWbQQnkv/TARRO-DE-POLIETILENO-NATURAL-DE-20-G-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TPL-40-R38-NAT/CP",
+    "receta": null,
+    "paquetes": []
   },
   {
     "id": "lYbmujjw2Y7uhMReOrWy",
@@ -3089,6 +3706,65 @@
     "stock": 0,
     "tipo_item": "PIEZA_BASE",
     "codigo_sistema": "EPL-250/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "m6fQMK1oV6DkwHqFlCAd",
+    "name": "BOLSA SPOUT TRANSPARENTE P/LIQUIDOS  5 LLT. 31X35+6.5 #102",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/pjxDk1Nf/BOLSA-SPOUT-TRANSPARENTE-PLIQUIDOS-5-LLT-31-X35-6-5-102.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP102-SU-LIQP-5/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "RxPtQPdws6XYTwjW2pxc",
+        "sku": "BP102-SU-LIQP-5/CP-100PZ",
+        "piezas": 100,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347954,
+          "nanoseconds": 982000000
+        }
+      }
+    ]
+  },
+  {
+    "id": "mFfP8rNSG8MdssKIIHpq",
+    "name": "TAMBO DE LAMINA ABIERTO DE 200 L C/FENOL GAMUZA",
+    "category": "LAMINA",
+    "image": "https://i.ibb.co/23ZRK82D/TAMBO-DE-LAMINA-ABIERTO-DE-200-L-CON-ARO-Y-CINCHO-CON-FENOL.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TLA-CF-200-GAM/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "ni84XPWjPccSOuzv3hj9",
+    "name": "TAMBO DE LAMINA ABIERO DE 100 L S/FENOL",
+    "category": "LAMINA",
+    "image": "https://i.ibb.co/Q3r53dX5/TAMBO-DE-LAMINA-ABIERTO-DE-100-L-CON-ARO-Y-CINCHO-SIN-FENOL.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TLA-SF-100/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
+    "id": "oUL3nCluphv5Sx6Wirdw",
+    "name": "BOTELLA PAD NAT ALCOHOLERA 60 ML R-22 C/TAPA",
+    "category": "PAD",
+    "image": "https://i.ibb.co/S442NGB0/BOTELLA-PAD-NAT-ALCOHOLERA-DE-60-ML-CON-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BPLA-60-CT",
     "receta": null,
     "paquetes": []
   },
@@ -3105,10 +3781,10 @@
     "paquetes": [
       {
         "id": "paquete_250",
-        "piezas": 250,
-        "es_default": true,
         "nombre_paquete": "Paquete de 250 piezas",
-        "sku": "-OK_PHQK9UX1XZ3QVTHT-250PZ"
+        "sku": "-OK_PHQK9UX1XZ3QVTHT-250PZ",
+        "piezas": 250,
+        "es_default": true
       }
     ]
   },
@@ -3137,10 +3813,10 @@
     "paquetes": [
       {
         "id": "paquete_48",
-        "nombre_paquete": "Paquete de 48 piezas",
-        "sku": "P1-48PZ",
+        "es_default": true,
         "piezas": "48",
-        "es_default": true
+        "sku": "P1-48PZ",
+        "nombre_paquete": "Paquete de 48 piezas"
       }
     ]
   },
@@ -3177,10 +3853,10 @@
     "paquetes": [
       {
         "id": "paquete_91",
-        "es_default": true,
-        "piezas": 91,
         "sku": "P101-91PZ",
-        "nombre_paquete": "Paquete de 91 piezas"
+        "nombre_paquete": "Paquete de 91 piezas",
+        "es_default": true,
+        "piezas": 91
       }
     ]
   },
@@ -3197,10 +3873,10 @@
     "paquetes": [
       {
         "id": "paquete_91",
-        "es_default": true,
-        "piezas": 91,
         "sku": "P101-91PZ",
-        "nombre_paquete": "Paquete de 91 piezas"
+        "nombre_paquete": "Paquete de 91 piezas",
+        "es_default": true,
+        "piezas": 91
       }
     ]
   },
@@ -3297,10 +3973,10 @@
     "paquetes": [
       {
         "id": "paquete_352",
-        "piezas": 352,
-        "es_default": true,
         "nombre_paquete": "Paquete de 352 piezas",
-        "sku": "P121-352PZ"
+        "sku": "P121-352PZ",
+        "es_default": true,
+        "piezas": 352
       }
     ]
   },
@@ -3317,10 +3993,10 @@
     "paquetes": [
       {
         "id": "paquete_352",
-        "piezas": 352,
-        "es_default": true,
         "nombre_paquete": "Paquete de 352 piezas",
-        "sku": "P121-352PZ"
+        "sku": "P121-352PZ",
+        "es_default": true,
+        "piezas": 352
       }
     ]
   },
@@ -3337,10 +4013,10 @@
     "paquetes": [
       {
         "id": "paquete_355",
-        "nombre_paquete": "Paquete de 355 piezas",
-        "sku": "P122-355PZ",
         "piezas": 355,
-        "es_default": true
+        "es_default": true,
+        "sku": "P122-355PZ",
+        "nombre_paquete": "Paquete de 355 piezas"
       }
     ]
   },
@@ -3377,8 +4053,8 @@
     "paquetes": [
       {
         "id": "paquete_30",
-        "sku": "P127-30PZ",
         "nombre_paquete": "Paquete de 30 piezas",
+        "sku": "P127-30PZ",
         "es_default": true,
         "piezas": 30
       }
@@ -3397,10 +4073,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
         "es_default": true,
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P128-100PZ"
+        "piezas": 100,
+        "sku": "P128-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -3417,10 +4093,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "es_default": true,
-        "piezas": 50,
         "sku": "P130-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas"
+        "nombre_paquete": "Paquete de 50 piezas",
+        "es_default": true,
+        "piezas": 50
       }
     ]
   },
@@ -3437,8 +4113,8 @@
     "paquetes": [
       {
         "id": "paquete_160",
-        "piezas": 160,
         "es_default": true,
+        "piezas": 160,
         "nombre_paquete": "Paquete de 160 piezas",
         "sku": "P131-160PZ"
       }
@@ -3457,10 +4133,10 @@
     "paquetes": [
       {
         "id": "paquete_7",
-        "piezas": 7,
-        "es_default": true,
+        "sku": "P132-7PZ",
         "nombre_paquete": "Paquete de 7 piezas",
-        "sku": "P132-7PZ"
+        "es_default": true,
+        "piezas": 7
       }
     ]
   },
@@ -3479,8 +4155,8 @@
         "id": "paquete_1",
         "sku": "P133-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -3499,8 +4175,8 @@
         "id": "paquete_1",
         "sku": "P133-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -3517,10 +4193,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P135-1PZ"
+        "piezas": "1",
+        "sku": "P135-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -3539,8 +4215,8 @@
         "id": "paquete_1",
         "sku": "P133-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -3559,8 +4235,8 @@
         "id": "paquete_1",
         "sku": "P133-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -3579,8 +4255,8 @@
         "id": "paquete_1",
         "sku": "P133-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -3599,8 +4275,8 @@
         "id": "paquete_1",
         "sku": "P133-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -3617,10 +4293,10 @@
     "paquetes": [
       {
         "id": "paquete_60",
-        "es_default": true,
-        "piezas": 60,
         "sku": "P14-60PZ",
-        "nombre_paquete": "Paquete de 60 piezas"
+        "nombre_paquete": "Paquete de 60 piezas",
+        "piezas": 60,
+        "es_default": true
       }
     ]
   },
@@ -3639,8 +4315,8 @@
         "id": "paquete_1",
         "sku": "P133-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -3657,10 +4333,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P142-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "es_default": true,
-        "piezas": 100
+        "sku": "P142-100PZ",
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -3677,10 +4353,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P142-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "es_default": true,
-        "piezas": 100
+        "sku": "P142-100PZ",
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -3697,10 +4373,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
+        "sku": "P144-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P144-100PZ"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -3717,10 +4393,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
+        "sku": "P144-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P144-100PZ"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -3737,10 +4413,10 @@
     "paquetes": [
       {
         "id": "paquete_104",
-        "es_default": true,
-        "piezas": 104,
         "sku": "P146-104PZ",
-        "nombre_paquete": "Paquete de 104 piezas"
+        "nombre_paquete": "Paquete de 104 piezas",
+        "piezas": 104,
+        "es_default": true
       }
     ]
   },
@@ -3757,10 +4433,10 @@
     "paquetes": [
       {
         "id": "paquete_104",
-        "es_default": true,
-        "piezas": 104,
         "sku": "P146-104PZ",
-        "nombre_paquete": "Paquete de 104 piezas"
+        "nombre_paquete": "Paquete de 104 piezas",
+        "piezas": 104,
+        "es_default": true
       }
     ]
   },
@@ -3779,8 +4455,8 @@
         "id": "paquete_100",
         "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P148-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -3799,8 +4475,8 @@
         "id": "paquete_100",
         "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P148-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -3817,10 +4493,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P151-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -3837,10 +4513,10 @@
     "paquetes": [
       {
         "id": "paquete_72",
-        "sku": "P15-72PZ",
         "nombre_paquete": "Paquete de 72 piezas",
-        "es_default": true,
-        "piezas": 72
+        "sku": "P15-72PZ",
+        "piezas": 72,
+        "es_default": true
       }
     ]
   },
@@ -3857,10 +4533,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P151-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -3877,10 +4553,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P151-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -3897,10 +4573,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P153-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "sku": "P153-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -3917,10 +4593,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P153-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "sku": "P153-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -3937,10 +4613,10 @@
     "paquetes": [
       {
         "id": "paquete_32",
-        "piezas": 32,
-        "es_default": true,
+        "sku": "P155-32PZ",
         "nombre_paquete": "Paquete de 32 piezas",
-        "sku": "P155-32PZ"
+        "es_default": true,
+        "piezas": 32
       }
     ]
   },
@@ -3957,10 +4633,10 @@
     "paquetes": [
       {
         "id": "paquete_32",
-        "piezas": 32,
-        "es_default": true,
+        "sku": "P155-32PZ",
         "nombre_paquete": "Paquete de 32 piezas",
-        "sku": "P155-32PZ"
+        "es_default": true,
+        "piezas": 32
       }
     ]
   },
@@ -3977,10 +4653,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "P157-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "P157-50PZ"
       }
     ]
   },
@@ -3997,10 +4673,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "P157-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "P157-50PZ"
       }
     ]
   },
@@ -4017,8 +4693,8 @@
     "paquetes": [
       {
         "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
         "sku": "P159-40PZ",
+        "nombre_paquete": "Paquete de 40 piezas",
         "piezas": 40,
         "es_default": true
       }
@@ -4037,8 +4713,8 @@
     "paquetes": [
       {
         "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
         "sku": "P159-40PZ",
+        "nombre_paquete": "Paquete de 40 piezas",
         "piezas": 40,
         "es_default": true
       }
@@ -4077,10 +4753,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "piezas": 50,
-        "es_default": true,
+        "sku": "P161-50PZ",
         "nombre_paquete": "Paquete de 50 piezas",
-        "sku": "P161-50PZ"
+        "piezas": 50,
+        "es_default": true
       }
     ]
   },
@@ -4097,10 +4773,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "piezas": 50,
-        "es_default": true,
+        "sku": "P161-50PZ",
         "nombre_paquete": "Paquete de 50 piezas",
-        "sku": "P161-50PZ"
+        "piezas": 50,
+        "es_default": true
       }
     ]
   },
@@ -4117,10 +4793,10 @@
     "paquetes": [
       {
         "id": "paquete_196",
-        "piezas": 196,
         "es_default": true,
-        "nombre_paquete": "Paquete de 196 piezas",
-        "sku": "P163-196PZ"
+        "piezas": 196,
+        "sku": "P163-196PZ",
+        "nombre_paquete": "Paquete de 196 piezas"
       }
     ]
   },
@@ -4137,10 +4813,10 @@
     "paquetes": [
       {
         "id": "paquete_196",
-        "piezas": 196,
         "es_default": true,
-        "nombre_paquete": "Paquete de 196 piezas",
-        "sku": "P163-196PZ"
+        "piezas": 196,
+        "sku": "P163-196PZ",
+        "nombre_paquete": "Paquete de 196 piezas"
       }
     ]
   },
@@ -4157,10 +4833,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "piezas": 50,
-        "es_default": true,
+        "sku": "P164-50PZ",
         "nombre_paquete": "Paquete de 50 piezas",
-        "sku": "P164-50PZ"
+        "piezas": 50,
+        "es_default": true
       }
     ]
   },
@@ -4179,8 +4855,8 @@
         "id": "paquete_50",
         "nombre_paquete": "Paquete de 50 piezas",
         "sku": "P165-50PZ",
-        "piezas": 50,
-        "es_default": true
+        "es_default": true,
+        "piezas": 50
       }
     ]
   },
@@ -4237,10 +4913,10 @@
     "paquetes": [
       {
         "id": "paquete_88",
-        "piezas": 88,
-        "es_default": true,
         "nombre_paquete": "Paquete de 88 piezas",
-        "sku": "P17-88PZ"
+        "sku": "P17-88PZ",
+        "piezas": 88,
+        "es_default": true
       }
     ]
   },
@@ -4257,10 +4933,10 @@
     "paquetes": [
       {
         "id": "paquete_170",
-        "es_default": true,
         "piezas": 170,
-        "sku": "P171-170PZ",
-        "nombre_paquete": "Paquete de 170 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 170 piezas",
+        "sku": "P171-170PZ"
       }
     ]
   },
@@ -4277,10 +4953,10 @@
     "paquetes": [
       {
         "id": "paquete_170",
-        "es_default": true,
         "piezas": 170,
-        "sku": "P171-170PZ",
-        "nombre_paquete": "Paquete de 170 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 170 piezas",
+        "sku": "P171-170PZ"
       }
     ]
   },
@@ -4297,10 +4973,10 @@
     "paquetes": [
       {
         "id": "paquete_250",
-        "es_default": true,
-        "piezas": 250,
+        "nombre_paquete": "Paquete de 250 piezas",
         "sku": "P172-250PZ",
-        "nombre_paquete": "Paquete de 250 piezas"
+        "es_default": true,
+        "piezas": 250
       }
     ]
   },
@@ -4317,8 +4993,8 @@
     "paquetes": [
       {
         "id": "paquete_162",
-        "nombre_paquete": "Paquete de 162 piezas",
         "sku": "P173-162PZ",
+        "nombre_paquete": "Paquete de 162 piezas",
         "piezas": 162,
         "es_default": true
       }
@@ -4337,10 +5013,10 @@
     "paquetes": [
       {
         "id": "paquete_334",
-        "es_default": true,
-        "piezas": 334,
+        "nombre_paquete": "Paquete de 334 piezas",
         "sku": "P174-334PZ",
-        "nombre_paquete": "Paquete de 334 piezas"
+        "es_default": true,
+        "piezas": 334
       }
     ]
   },
@@ -4359,8 +5035,8 @@
         "id": "paquete_334",
         "es_default": true,
         "piezas": 334,
-        "sku": "P175-334PZ",
-        "nombre_paquete": "Paquete de 334 piezas"
+        "nombre_paquete": "Paquete de 334 piezas",
+        "sku": "P175-334PZ"
       }
     ]
   },
@@ -4377,10 +5053,10 @@
     "paquetes": [
       {
         "id": "paquete_170",
-        "es_default": true,
-        "piezas": 170,
         "sku": "P177-170PZ",
-        "nombre_paquete": "Paquete de 170 piezas"
+        "nombre_paquete": "Paquete de 170 piezas",
+        "es_default": true,
+        "piezas": 170
       }
     ]
   },
@@ -4397,10 +5073,10 @@
     "paquetes": [
       {
         "id": "paquete_170",
-        "es_default": true,
-        "piezas": 170,
         "sku": "P177-170PZ",
-        "nombre_paquete": "Paquete de 170 piezas"
+        "nombre_paquete": "Paquete de 170 piezas",
+        "es_default": true,
+        "piezas": 170
       }
     ]
   },
@@ -4417,10 +5093,10 @@
     "paquetes": [
       {
         "id": "paquete_120",
-        "sku": "P18-120PZ",
-        "nombre_paquete": "Paquete de 120 piezas",
+        "piezas": "120",
         "es_default": true,
-        "piezas": "120"
+        "nombre_paquete": "Paquete de 120 piezas",
+        "sku": "P18-120PZ"
       }
     ]
   },
@@ -4437,10 +5113,10 @@
     "paquetes": [
       {
         "id": "paquete_96",
-        "sku": "P181-96PZ",
-        "nombre_paquete": "Paquete de 96 piezas",
+        "piezas": 96,
         "es_default": true,
-        "piezas": 96
+        "sku": "P181-96PZ",
+        "nombre_paquete": "Paquete de 96 piezas"
       }
     ]
   },
@@ -4457,10 +5133,10 @@
     "paquetes": [
       {
         "id": "paquete_96",
-        "sku": "P181-96PZ",
-        "nombre_paquete": "Paquete de 96 piezas",
+        "piezas": 96,
         "es_default": true,
-        "piezas": 96
+        "sku": "P181-96PZ",
+        "nombre_paquete": "Paquete de 96 piezas"
       }
     ]
   },
@@ -4477,10 +5153,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P182-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "sku": "P182-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -4497,10 +5173,10 @@
     "paquetes": [
       {
         "id": "paquete_96",
-        "es_default": true,
-        "piezas": 96,
         "sku": "P191-96PZ",
-        "nombre_paquete": "Paquete de 96 piezas"
+        "nombre_paquete": "Paquete de 96 piezas",
+        "piezas": 96,
+        "es_default": true
       }
     ]
   },
@@ -4517,10 +5193,10 @@
     "paquetes": [
       {
         "id": "paquete_96",
-        "es_default": true,
-        "piezas": 96,
         "sku": "P191-96PZ",
-        "nombre_paquete": "Paquete de 96 piezas"
+        "nombre_paquete": "Paquete de 96 piezas",
+        "piezas": 96,
+        "es_default": true
       }
     ]
   },
@@ -4539,8 +5215,8 @@
         "id": "paquete_96",
         "es_default": true,
         "piezas": 96,
-        "sku": "P192-96PZ",
-        "nombre_paquete": "Paquete de 96 piezas"
+        "nombre_paquete": "Paquete de 96 piezas",
+        "sku": "P192-96PZ"
       }
     ]
   },
@@ -4577,10 +5253,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "sku": "P193-36PZ",
-        "nombre_paquete": "Paquete de 36 piezas",
         "es_default": true,
-        "piezas": 36
+        "piezas": 36,
+        "sku": "P193-36PZ",
+        "nombre_paquete": "Paquete de 36 piezas"
       }
     ]
   },
@@ -4617,10 +5293,10 @@
     "paquetes": [
       {
         "id": "paquete_96",
-        "es_default": true,
-        "piezas": 96,
         "sku": "P191-96PZ",
-        "nombre_paquete": "Paquete de 96 piezas"
+        "nombre_paquete": "Paquete de 96 piezas",
+        "piezas": 96,
+        "es_default": true
       }
     ]
   },
@@ -4639,8 +5315,8 @@
         "id": "paquete_96",
         "es_default": true,
         "piezas": 96,
-        "sku": "P192-96PZ",
-        "nombre_paquete": "Paquete de 96 piezas"
+        "nombre_paquete": "Paquete de 96 piezas",
+        "sku": "P192-96PZ"
       }
     ]
   },
@@ -4657,10 +5333,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "sku": "P193-36PZ",
-        "nombre_paquete": "Paquete de 36 piezas",
         "es_default": true,
-        "piezas": 36
+        "piezas": 36,
+        "sku": "P193-36PZ",
+        "nombre_paquete": "Paquete de 36 piezas"
       }
     ]
   },
@@ -4677,10 +5353,10 @@
     "paquetes": [
       {
         "id": "paquete_126",
-        "nombre_paquete": "Paquete de 126 piezas",
-        "sku": "P195-126PZ",
+        "es_default": true,
         "piezas": 126,
-        "es_default": true
+        "nombre_paquete": "Paquete de 126 piezas",
+        "sku": "P195-126PZ"
       }
     ]
   },
@@ -4717,10 +5393,10 @@
     "paquetes": [
       {
         "id": "paquete_2000",
-        "nombre_paquete": "Paquete de 2000 piezas",
         "sku": "P198-2000PZ",
-        "piezas": 2000,
-        "es_default": true
+        "nombre_paquete": "Paquete de 2000 piezas",
+        "es_default": true,
+        "piezas": 2000
       }
     ]
   },
@@ -4737,10 +5413,10 @@
     "paquetes": [
       {
         "id": "paquete_84",
-        "sku": "P20-84PZ",
-        "nombre_paquete": "Paquete de 84 piezas",
+        "piezas": "84",
         "es_default": true,
-        "piezas": "84"
+        "nombre_paquete": "Paquete de 84 piezas",
+        "sku": "P20-84PZ"
       }
     ]
   },
@@ -4757,10 +5433,10 @@
     "paquetes": [
       {
         "id": "paquete_84",
-        "sku": "P21-84PZ",
-        "nombre_paquete": "Paquete de 84 piezas",
+        "piezas": "84",
         "es_default": true,
-        "piezas": "84"
+        "sku": "P21-84PZ",
+        "nombre_paquete": "Paquete de 84 piezas"
       }
     ]
   },
@@ -4777,10 +5453,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P214-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -4797,10 +5473,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P214-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -4817,8 +5493,8 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
         "piezas": 24,
+        "es_default": true,
         "sku": "P215-24PZ",
         "nombre_paquete": "Paquete de 24 piezas"
       }
@@ -4837,10 +5513,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P216-100PZ",
+        "es_default": true,
         "piezas": 100,
-        "es_default": true
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P216-100PZ"
       }
     ]
   },
@@ -4857,10 +5533,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P217-100PZ"
+        "sku": "P217-100PZ",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -4897,10 +5573,10 @@
     "paquetes": [
       {
         "id": "paquete_48",
-        "sku": "P219-48PZ",
         "nombre_paquete": "Paquete de 48 piezas",
-        "es_default": true,
-        "piezas": 48
+        "sku": "P219-48PZ",
+        "piezas": 48,
+        "es_default": true
       }
     ]
   },
@@ -4917,10 +5593,10 @@
     "paquetes": [
       {
         "id": "paquete_120",
-        "piezas": "120",
-        "es_default": true,
         "nombre_paquete": "Paquete de 120 piezas",
-        "sku": "P22-120PZ"
+        "sku": "P22-120PZ",
+        "es_default": true,
+        "piezas": "120"
       }
     ]
   },
@@ -4937,10 +5613,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "es_default": true,
-        "piezas": 36,
         "sku": "P221-36PZ",
-        "nombre_paquete": "Paquete de 36 piezas"
+        "nombre_paquete": "Paquete de 36 piezas",
+        "piezas": 36,
+        "es_default": true
       }
     ]
   },
@@ -4957,10 +5633,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "es_default": true,
-        "piezas": 36,
         "sku": "P221-36PZ",
-        "nombre_paquete": "Paquete de 36 piezas"
+        "nombre_paquete": "Paquete de 36 piezas",
+        "piezas": 36,
+        "es_default": true
       }
     ]
   },
@@ -4979,8 +5655,8 @@
         "id": "paquete_1",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P222-1PZ"
+        "sku": "P222-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -4997,10 +5673,10 @@
     "paquetes": [
       {
         "id": "paquete_22",
-        "piezas": 22,
-        "es_default": true,
+        "sku": "P223-22PZ",
         "nombre_paquete": "Paquete de 22 piezas",
-        "sku": "P223-22PZ"
+        "es_default": true,
+        "piezas": 22
       }
     ]
   },
@@ -5017,10 +5693,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
         "sku": "P252-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -5037,10 +5713,10 @@
     "paquetes": [
       {
         "id": "paquete_22",
-        "piezas": 22,
-        "es_default": true,
+        "sku": "P251-22PZ",
         "nombre_paquete": "Paquete de 22 piezas",
-        "sku": "P251-22PZ"
+        "es_default": true,
+        "piezas": 22
       }
     ]
   },
@@ -5057,10 +5733,10 @@
     "paquetes": [
       {
         "id": "paquete_22",
-        "piezas": 22,
-        "es_default": true,
+        "sku": "P223-22PZ",
         "nombre_paquete": "Paquete de 22 piezas",
-        "sku": "P223-22PZ"
+        "es_default": true,
+        "piezas": 22
       }
     ]
   },
@@ -5077,10 +5753,10 @@
     "paquetes": [
       {
         "id": "paquete_22",
-        "piezas": 22,
-        "es_default": true,
+        "sku": "P223-22PZ",
         "nombre_paquete": "Paquete de 22 piezas",
-        "sku": "P223-22PZ"
+        "es_default": true,
+        "piezas": 22
       }
     ]
   },
@@ -5097,10 +5773,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "P257-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "P257-50PZ"
       }
     ]
   },
@@ -5117,10 +5793,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P246-1PZ",
-        "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -5137,10 +5813,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P246-1PZ",
-        "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -5157,10 +5833,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P249-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "sku": "P249-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -5177,10 +5853,10 @@
     "paquetes": [
       {
         "id": "paquete_22",
-        "piezas": 22,
-        "es_default": true,
+        "sku": "P251-22PZ",
         "nombre_paquete": "Paquete de 22 piezas",
-        "sku": "P251-22PZ"
+        "es_default": true,
+        "piezas": 22
       }
     ]
   },
@@ -5197,10 +5873,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "es_default": true,
-        "piezas": 24,
         "sku": "P252-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas"
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
@@ -5217,10 +5893,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "P257-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "nombre_paquete": "Paquete de 50 piezas",
+        "sku": "P257-50PZ"
       }
     ]
   },
@@ -5239,8 +5915,8 @@
         "id": "paquete_1",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P259-1PZ"
+        "sku": "P259-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -5259,8 +5935,8 @@
         "id": "paquete_1",
         "sku": "P272-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -5277,10 +5953,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "sku": "P275-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas",
         "es_default": true,
-        "piezas": 24
+        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
+        "sku": "P275-24PZ"
       }
     ]
   },
@@ -5297,10 +5973,10 @@
     "paquetes": [
       {
         "id": "paquete_24",
-        "sku": "P275-24PZ",
-        "nombre_paquete": "Paquete de 24 piezas",
         "es_default": true,
-        "piezas": 24
+        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
+        "sku": "P275-24PZ"
       }
     ]
   },
@@ -5317,10 +5993,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P276-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P276-1PZ"
       }
     ]
   },
@@ -5357,10 +6033,10 @@
     "paquetes": [
       {
         "id": "paquete_200",
-        "sku": "P282-200PZ",
-        "nombre_paquete": "Paquete de 200 piezas",
         "es_default": true,
-        "piezas": "200"
+        "piezas": "200",
+        "nombre_paquete": "Paquete de 200 piezas",
+        "sku": "P282-200PZ"
       }
     ]
   },
@@ -5379,8 +6055,8 @@
         "id": "paquete_650",
         "nombre_paquete": "Paquete de 650 piezas",
         "sku": "P283-650PZ",
-        "piezas": "650",
-        "es_default": true
+        "es_default": true,
+        "piezas": "650"
       }
     ]
   },
@@ -5417,10 +6093,10 @@
     "paquetes": [
       {
         "id": "paquete_200",
-        "nombre_paquete": "Paquete de 200 piezas",
-        "sku": "P286-200PZ",
+        "es_default": true,
         "piezas": "200",
-        "es_default": true
+        "sku": "P286-200PZ",
+        "nombre_paquete": "Paquete de 200 piezas"
       }
     ]
   },
@@ -5437,10 +6113,10 @@
     "paquetes": [
       {
         "id": "paquete_200",
-        "nombre_paquete": "Paquete de 200 piezas",
-        "sku": "P287-200PZ",
+        "es_default": true,
         "piezas": 200,
-        "es_default": true
+        "sku": "P287-200PZ",
+        "nombre_paquete": "Paquete de 200 piezas"
       }
     ]
   },
@@ -5457,8 +6133,8 @@
     "paquetes": [
       {
         "id": "paquete_40",
-        "es_default": true,
         "piezas": 40,
+        "es_default": true,
         "sku": "P288-40PZ",
         "nombre_paquete": "Paquete de 40 piezas"
       }
@@ -5497,10 +6173,10 @@
     "paquetes": [
       {
         "id": "paquete_168",
-        "es_default": true,
-        "piezas": 168,
+        "nombre_paquete": "Paquete de 168 piezas",
         "sku": "P290-168PZ",
-        "nombre_paquete": "Paquete de 168 piezas"
+        "piezas": 168,
+        "es_default": true
       }
     ]
   },
@@ -5517,8 +6193,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
+        "piezas": "1",
         "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P291-1PZ"
       }
@@ -5557,10 +6233,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P294-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -5577,10 +6253,10 @@
     "paquetes": [
       {
         "id": "paquete_425",
-        "nombre_paquete": "Paquete de 425 piezas",
-        "sku": "P296-425PZ",
         "piezas": 425,
-        "es_default": true
+        "es_default": true,
+        "sku": "P296-425PZ",
+        "nombre_paquete": "Paquete de 425 piezas"
       }
     ]
   },
@@ -5597,10 +6273,10 @@
     "paquetes": [
       {
         "id": "paquete_425",
-        "nombre_paquete": "Paquete de 425 piezas",
-        "sku": "P296-425PZ",
         "piezas": 425,
-        "es_default": true
+        "es_default": true,
+        "sku": "P296-425PZ",
+        "nombre_paquete": "Paquete de 425 piezas"
       }
     ]
   },
@@ -5617,10 +6293,10 @@
     "paquetes": [
       {
         "id": "paquete_48",
-        "sku": "P299-48PZ",
-        "nombre_paquete": "Paquete de 48 piezas",
+        "piezas": 48,
         "es_default": true,
-        "piezas": 48
+        "sku": "P299-48PZ",
+        "nombre_paquete": "Paquete de 48 piezas"
       }
     ]
   },
@@ -5637,10 +6313,10 @@
     "paquetes": [
       {
         "id": "paquete_48",
-        "sku": "P299-48PZ",
-        "nombre_paquete": "Paquete de 48 piezas",
+        "piezas": 48,
         "es_default": true,
-        "piezas": 48
+        "sku": "P299-48PZ",
+        "nombre_paquete": "Paquete de 48 piezas"
       }
     ]
   },
@@ -5657,10 +6333,10 @@
     "paquetes": [
       {
         "id": "paquete_48",
-        "sku": "P299-48PZ",
-        "nombre_paquete": "Paquete de 48 piezas",
+        "piezas": 48,
         "es_default": true,
-        "piezas": 48
+        "sku": "P299-48PZ",
+        "nombre_paquete": "Paquete de 48 piezas"
       }
     ]
   },
@@ -5697,8 +6373,8 @@
     "paquetes": [
       {
         "id": "paquete_40",
-        "piezas": 40,
         "es_default": true,
+        "piezas": 40,
         "nombre_paquete": "Paquete de 40 piezas",
         "sku": "P301-40PZ"
       }
@@ -5717,8 +6393,8 @@
     "paquetes": [
       {
         "id": "paquete_40",
-        "piezas": 40,
         "es_default": true,
+        "piezas": 40,
         "nombre_paquete": "Paquete de 40 piezas",
         "sku": "P301-40PZ"
       }
@@ -5797,10 +6473,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "nombre_paquete": "Paquete de 36 piezas",
         "sku": "P307-36PZ",
-        "piezas": 36,
-        "es_default": true
+        "nombre_paquete": "Paquete de 36 piezas",
+        "es_default": true,
+        "piezas": 36
       }
     ]
   },
@@ -5817,10 +6493,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "nombre_paquete": "Paquete de 36 piezas",
         "sku": "P307-36PZ",
-        "piezas": 36,
-        "es_default": true
+        "nombre_paquete": "Paquete de 36 piezas",
+        "es_default": true,
+        "piezas": 36
       }
     ]
   },
@@ -5839,8 +6515,8 @@
         "id": "paquete_36",
         "sku": "P309-36PZ",
         "nombre_paquete": "Paquete de 36 piezas",
-        "es_default": true,
-        "piezas": 36
+        "piezas": 36,
+        "es_default": true
       }
     ]
   },
@@ -5859,8 +6535,8 @@
         "id": "paquete_36",
         "sku": "P309-36PZ",
         "nombre_paquete": "Paquete de 36 piezas",
-        "es_default": true,
-        "piezas": 36
+        "piezas": 36,
+        "es_default": true
       }
     ]
   },
@@ -5877,10 +6553,10 @@
     "paquetes": [
       {
         "id": "paquete_54",
-        "es_default": true,
-        "piezas": 54,
         "sku": "P313-54PZ",
-        "nombre_paquete": "Paquete de 54 piezas"
+        "nombre_paquete": "Paquete de 54 piezas",
+        "piezas": 54,
+        "es_default": true
       }
     ]
   },
@@ -5897,10 +6573,10 @@
     "paquetes": [
       {
         "id": "paquete_54",
-        "es_default": true,
-        "piezas": 54,
         "sku": "P313-54PZ",
-        "nombre_paquete": "Paquete de 54 piezas"
+        "nombre_paquete": "Paquete de 54 piezas",
+        "piezas": 54,
+        "es_default": true
       }
     ]
   },
@@ -5917,10 +6593,10 @@
     "paquetes": [
       {
         "id": "paquete_180",
-        "piezas": 180,
         "es_default": true,
-        "nombre_paquete": "Paquete de 180 piezas",
-        "sku": "P314-180PZ"
+        "piezas": 180,
+        "sku": "P314-180PZ",
+        "nombre_paquete": "Paquete de 180 piezas"
       }
     ]
   },
@@ -5937,10 +6613,10 @@
     "paquetes": [
       {
         "id": "paquete_54",
-        "es_default": true,
         "piezas": 54,
-        "sku": "P316-54PZ",
-        "nombre_paquete": "Paquete de 54 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 54 piezas",
+        "sku": "P316-54PZ"
       }
     ]
   },
@@ -5957,10 +6633,10 @@
     "paquetes": [
       {
         "id": "paquete_54",
-        "es_default": true,
         "piezas": 54,
-        "sku": "P316-54PZ",
-        "nombre_paquete": "Paquete de 54 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 54 piezas",
+        "sku": "P316-54PZ"
       }
     ]
   },
@@ -5977,10 +6653,10 @@
     "paquetes": [
       {
         "id": "paquete_54",
-        "es_default": true,
-        "piezas": 54,
         "sku": "P313-54PZ",
-        "nombre_paquete": "Paquete de 54 piezas"
+        "nombre_paquete": "Paquete de 54 piezas",
+        "piezas": 54,
+        "es_default": true
       }
     ]
   },
@@ -5997,20 +6673,20 @@
     "paquetes": [
       {
         "id": "2SinLMKRIFu3ARi4WlHf",
-        "sku": "GPA-1-NAT/CP-60PZ",
-        "piezas": 60,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772296720,
           "nanoseconds": 501000000
-        }
+        },
+        "piezas": 60,
+        "sku": "GPA-1-NAT/CP-60PZ"
       },
       {
         "id": "paquete_121",
-        "sku": "P320-121PZ",
-        "nombre_paquete": "Paquete de 121 piezas",
         "es_default": true,
-        "piezas": 121
+        "piezas": 121,
+        "nombre_paquete": "Paquete de 121 piezas",
+        "sku": "P320-121PZ"
       }
     ]
   },
@@ -6027,20 +6703,20 @@
     "paquetes": [
       {
         "id": "2SinLMKRIFu3ARi4WlHf",
-        "sku": "GPA-1-NAT/CP-60PZ",
-        "piezas": 60,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772296720,
           "nanoseconds": 501000000
-        }
+        },
+        "piezas": 60,
+        "sku": "GPA-1-NAT/CP-60PZ"
       },
       {
         "id": "paquete_121",
-        "sku": "P320-121PZ",
-        "nombre_paquete": "Paquete de 121 piezas",
         "es_default": true,
-        "piezas": 121
+        "piezas": 121,
+        "nombre_paquete": "Paquete de 121 piezas",
+        "sku": "P320-121PZ"
       }
     ]
   },
@@ -6057,10 +6733,10 @@
     "paquetes": [
       {
         "id": "paquete_180",
-        "piezas": 180,
         "es_default": true,
-        "nombre_paquete": "Paquete de 180 piezas",
-        "sku": "P314-180PZ"
+        "piezas": 180,
+        "sku": "P314-180PZ",
+        "nombre_paquete": "Paquete de 180 piezas"
       }
     ]
   },
@@ -6079,8 +6755,8 @@
         "id": "paquete_180",
         "sku": "P325-180PZ",
         "nombre_paquete": "Paquete de 180 piezas",
-        "es_default": true,
-        "piezas": 180
+        "piezas": 180,
+        "es_default": true
       }
     ]
   },
@@ -6097,10 +6773,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "piezas": 36,
-        "es_default": true,
         "nombre_paquete": "Paquete de 36 piezas",
-        "sku": "P324-36PZ"
+        "sku": "P324-36PZ",
+        "piezas": 36,
+        "es_default": true
       }
     ]
   },
@@ -6117,10 +6793,10 @@
     "paquetes": [
       {
         "id": "paquete_36",
-        "piezas": 36,
-        "es_default": true,
         "nombre_paquete": "Paquete de 36 piezas",
-        "sku": "P324-36PZ"
+        "sku": "P324-36PZ",
+        "piezas": 36,
+        "es_default": true
       }
     ]
   },
@@ -6139,8 +6815,8 @@
         "id": "paquete_180",
         "sku": "P325-180PZ",
         "nombre_paquete": "Paquete de 180 piezas",
-        "es_default": true,
-        "piezas": 180
+        "piezas": 180,
+        "es_default": true
       }
     ]
   },
@@ -6157,10 +6833,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P327-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "sku": "P327-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6177,10 +6853,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P327-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "sku": "P327-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6197,10 +6873,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P330-1PZ"
+        "sku": "P330-1PZ",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -6217,10 +6893,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P330-1PZ"
+        "sku": "P330-1PZ",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -6237,10 +6913,10 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "es_default": true,
-        "piezas": 70,
+        "nombre_paquete": "Paquete de 70 piezas",
         "sku": "P339-70PZ",
-        "nombre_paquete": "Paquete de 70 piezas"
+        "es_default": true,
+        "piezas": 70
       }
     ]
   },
@@ -6257,10 +6933,10 @@
     "paquetes": [
       {
         "id": "paquete_64",
-        "nombre_paquete": "Paquete de 64 piezas",
-        "sku": "P340-64PZ",
         "piezas": 64,
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 64 piezas",
+        "sku": "P340-64PZ"
       }
     ]
   },
@@ -6277,10 +6953,10 @@
     "paquetes": [
       {
         "id": "paquete_54",
-        "nombre_paquete": "Paquete de 54 piezas",
-        "sku": "P341-54PZ",
         "piezas": 54,
-        "es_default": true
+        "es_default": true,
+        "sku": "P341-54PZ",
+        "nombre_paquete": "Paquete de 54 piezas"
       }
     ]
   },
@@ -6297,10 +6973,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P342-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
         "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P342-100PZ"
       }
     ]
   },
@@ -6337,8 +7013,8 @@
     "paquetes": [
       {
         "id": "paquete_84",
-        "es_default": true,
         "piezas": 84,
+        "es_default": true,
         "sku": "P344-84PZ",
         "nombre_paquete": "Paquete de 84 piezas"
       }
@@ -6359,8 +7035,8 @@
         "id": "paquete_1",
         "es_default": true,
         "piezas": "1",
-        "sku": "P345-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P345-1PZ"
       }
     ]
   },
@@ -6377,10 +7053,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P346-1PZ"
+        "sku": "P346-1PZ",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -6397,10 +7073,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P347-1PZ"
+        "piezas": "1",
+        "sku": "P347-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6417,10 +7093,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P348-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "sku": "P348-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -6437,8 +7113,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
+        "piezas": "1",
         "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P349-1PZ"
       }
@@ -6457,10 +7133,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P35-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "sku": "P35-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6477,10 +7153,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P350-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "sku": "P350-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6497,10 +7173,10 @@
     "paquetes": [
       {
         "id": "paquete_2160",
-        "nombre_paquete": "Paquete de 2160 piezas",
-        "sku": "P351-2160PZ",
+        "es_default": true,
         "piezas": 2160,
-        "es_default": true
+        "sku": "P351-2160PZ",
+        "nombre_paquete": "Paquete de 2160 piezas"
       }
     ]
   },
@@ -6517,10 +7193,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P352-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "sku": "P352-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6539,8 +7215,8 @@
         "id": "paquete_1350",
         "nombre_paquete": "Paquete de 1350 piezas",
         "sku": "P353-1350PZ",
-        "piezas": 1350,
-        "es_default": true
+        "es_default": true,
+        "piezas": 1350
       }
     ]
   },
@@ -6557,8 +7233,8 @@
     "paquetes": [
       {
         "id": "paquete_75",
-        "es_default": true,
         "piezas": 75,
+        "es_default": true,
         "sku": "P354-75PZ",
         "nombre_paquete": "Paquete de 75 piezas"
       }
@@ -6577,10 +7253,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
         "sku": "P355-50PZ",
-        "piezas": 50,
-        "es_default": true
+        "nombre_paquete": "Paquete de 50 piezas",
+        "es_default": true,
+        "piezas": 50
       }
     ]
   },
@@ -6597,10 +7273,10 @@
     "paquetes": [
       {
         "id": "paquete_75",
-        "nombre_paquete": "Paquete de 75 piezas",
-        "sku": "P356-75PZ",
         "piezas": 75,
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 75 piezas",
+        "sku": "P356-75PZ"
       }
     ]
   },
@@ -6617,10 +7293,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
-        "sku": "P357-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P357-1PZ"
       }
     ]
   },
@@ -6637,10 +7313,10 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "sku": "P358-70PZ",
-        "nombre_paquete": "Paquete de 70 piezas",
+        "piezas": 70,
         "es_default": true,
-        "piezas": 70
+        "sku": "P358-70PZ",
+        "nombre_paquete": "Paquete de 70 piezas"
       }
     ]
   },
@@ -6657,10 +7333,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P359-1PZ"
+        "piezas": "1",
+        "sku": "P359-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6677,8 +7353,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P36-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas",
         "piezas": "1",
         "es_default": true
       }
@@ -6697,10 +7373,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
+        "sku": "P360-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P360-1PZ"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -6717,8 +7393,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
+        "piezas": "1",
         "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P361-1PZ"
       }
@@ -6739,8 +7415,8 @@
         "id": "paquete_1",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P362-1PZ"
+        "sku": "P362-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6757,10 +7433,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P363-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "sku": "P363-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -6777,10 +7453,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
+        "sku": "P364-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P364-1PZ"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -6797,10 +7473,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P365-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P365-1PZ"
       }
     ]
   },
@@ -6817,10 +7493,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P366-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -6837,10 +7513,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P367-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "sku": "P367-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -6857,10 +7533,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
+        "sku": "P368-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P368-1PZ"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -6877,10 +7553,10 @@
     "paquetes": [
       {
         "id": "paquete_150",
-        "nombre_paquete": "Paquete de 150 piezas",
-        "sku": "P37-150PZ",
+        "es_default": true,
         "piezas": 150,
-        "es_default": true
+        "sku": "P37-150PZ",
+        "nombre_paquete": "Paquete de 150 piezas"
       }
     ]
   },
@@ -6959,8 +7635,8 @@
         "id": "paquete_35",
         "es_default": true,
         "piezas": 35,
-        "sku": "P377-35PZ",
-        "nombre_paquete": "Paquete de 35 piezas"
+        "nombre_paquete": "Paquete de 35 piezas",
+        "sku": "P377-35PZ"
       }
     ]
   },
@@ -6977,13 +7653,13 @@
     "paquetes": [
       {
         "id": "7tzqCjVs55wS9vfXLM5W",
-        "sku": "PIN-5-P/CP-32PZ",
+        "piezas": 32,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772660089,
           "nanoseconds": 621000000
         },
-        "piezas": 32
+        "sku": "PIN-5-P/CP-32PZ"
       }
     ]
   },
@@ -7000,10 +7676,10 @@
     "paquetes": [
       {
         "id": "paquete_6",
-        "es_default": true,
-        "piezas": 6,
         "sku": "P379-6PZ",
-        "nombre_paquete": "Paquete de 6 piezas"
+        "nombre_paquete": "Paquete de 6 piezas",
+        "es_default": true,
+        "piezas": 6
       }
     ]
   },
@@ -7020,10 +7696,10 @@
     "paquetes": [
       {
         "id": "paquete_350",
-        "sku": "P38-350PZ",
-        "nombre_paquete": "Paquete de 350 piezas",
         "es_default": true,
-        "piezas": 350
+        "piezas": 350,
+        "sku": "P38-350PZ",
+        "nombre_paquete": "Paquete de 350 piezas"
       }
     ]
   },
@@ -7040,10 +7716,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P381-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "sku": "P381-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -7060,10 +7736,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
-        "sku": "P382-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P382-1PZ"
       }
     ]
   },
@@ -7080,10 +7756,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P383-1PZ"
+        "sku": "P383-1PZ",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -7102,8 +7778,8 @@
         "id": "paquete_1",
         "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P384-1PZ",
-        "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -7120,10 +7796,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P385-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "sku": "P385-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -7140,10 +7816,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P386-1PZ"
+        "piezas": "1",
+        "sku": "P386-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -7160,10 +7836,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P389-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P389-1PZ"
       }
     ]
   },
@@ -7180,10 +7856,10 @@
     "paquetes": [
       {
         "id": "paquete_128",
-        "sku": "P39-128PZ",
-        "nombre_paquete": "Paquete de 128 piezas",
         "es_default": true,
-        "piezas": 128
+        "piezas": 128,
+        "sku": "P39-128PZ",
+        "nombre_paquete": "Paquete de 128 piezas"
       }
     ]
   },
@@ -7200,8 +7876,8 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "piezas": 70,
         "es_default": true,
+        "piezas": 70,
         "nombre_paquete": "Paquete de 70 piezas",
         "sku": "P391-70PZ"
       }
@@ -7220,8 +7896,8 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "piezas": 70,
         "es_default": true,
+        "piezas": 70,
         "nombre_paquete": "Paquete de 70 piezas",
         "sku": "P391-70PZ"
       }
@@ -7242,8 +7918,8 @@
         "id": "paquete_40",
         "sku": "P393-40PZ",
         "nombre_paquete": "Paquete de 40 piezas",
-        "es_default": true,
-        "piezas": 40
+        "piezas": 40,
+        "es_default": true
       }
     ]
   },
@@ -7262,8 +7938,8 @@
         "id": "paquete_40",
         "sku": "P393-40PZ",
         "nombre_paquete": "Paquete de 40 piezas",
-        "es_default": true,
-        "piezas": 40
+        "piezas": 40,
+        "es_default": true
       }
     ]
   },
@@ -7280,8 +7956,8 @@
     "paquetes": [
       {
         "id": "paquete_32",
-        "nombre_paquete": "Paquete de 32 piezas",
         "sku": "P394-32PZ",
+        "nombre_paquete": "Paquete de 32 piezas",
         "piezas": 32,
         "es_default": true
       }
@@ -7300,10 +7976,10 @@
     "paquetes": [
       {
         "id": "paquete_32",
-        "es_default": true,
-        "piezas": 32,
+        "nombre_paquete": "Paquete de 32 piezas",
         "sku": "P414-32PZ",
-        "nombre_paquete": "Paquete de 32 piezas"
+        "piezas": 32,
+        "es_default": true
       }
     ]
   },
@@ -7320,10 +7996,10 @@
     "paquetes": [
       {
         "id": "paquete_135",
-        "es_default": true,
         "piezas": 135,
-        "sku": "P397-135PZ",
-        "nombre_paquete": "Paquete de 135 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 135 piezas",
+        "sku": "P397-135PZ"
       }
     ]
   },
@@ -7340,10 +8016,10 @@
     "paquetes": [
       {
         "id": "paquete_135",
-        "es_default": true,
         "piezas": 135,
-        "sku": "P397-135PZ",
-        "nombre_paquete": "Paquete de 135 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 135 piezas",
+        "sku": "P397-135PZ"
       }
     ]
   },
@@ -7360,10 +8036,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "P399-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "sku": "P399-50PZ",
+        "nombre_paquete": "Paquete de 50 piezas"
       }
     ]
   },
@@ -7380,10 +8056,10 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "sku": "P4-70PZ",
-        "nombre_paquete": "Paquete de 70 piezas",
+        "piezas": 70,
         "es_default": true,
-        "piezas": 70
+        "nombre_paquete": "Paquete de 70 piezas",
+        "sku": "P4-70PZ"
       }
     ]
   },
@@ -7400,10 +8076,10 @@
     "paquetes": [
       {
         "id": "paquete_126",
-        "nombre_paquete": "Paquete de 126 piezas",
-        "sku": "P40-126PZ",
+        "es_default": true,
         "piezas": 126,
-        "es_default": true
+        "nombre_paquete": "Paquete de 126 piezas",
+        "sku": "P40-126PZ"
       }
     ]
   },
@@ -7460,10 +8136,10 @@
     "paquetes": [
       {
         "id": "paquete_32",
-        "es_default": true,
         "piezas": 32,
-        "sku": "P403-32PZ",
-        "nombre_paquete": "Paquete de 32 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 32 piezas",
+        "sku": "P403-32PZ"
       }
     ]
   },
@@ -7480,10 +8156,10 @@
     "paquetes": [
       {
         "id": "paquete_32",
-        "es_default": true,
         "piezas": 32,
-        "sku": "P403-32PZ",
-        "nombre_paquete": "Paquete de 32 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 32 piezas",
+        "sku": "P403-32PZ"
       }
     ]
   },
@@ -7500,10 +8176,10 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "es_default": true,
-        "piezas": 70,
+        "nombre_paquete": "Paquete de 70 piezas",
         "sku": "P404-70PZ",
-        "nombre_paquete": "Paquete de 70 piezas"
+        "es_default": true,
+        "piezas": 70
       }
     ]
   },
@@ -7520,10 +8196,10 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "es_default": true,
-        "piezas": 70,
+        "nombre_paquete": "Paquete de 70 piezas",
         "sku": "P404-70PZ",
-        "nombre_paquete": "Paquete de 70 piezas"
+        "es_default": true,
+        "piezas": 70
       }
     ]
   },
@@ -7540,10 +8216,10 @@
     "paquetes": [
       {
         "id": "paquete_77",
-        "es_default": true,
-        "piezas": 77,
+        "nombre_paquete": "Paquete de 77 piezas",
         "sku": "P406-77PZ",
-        "nombre_paquete": "Paquete de 77 piezas"
+        "piezas": 77,
+        "es_default": true
       }
     ]
   },
@@ -7560,10 +8236,10 @@
     "paquetes": [
       {
         "id": "paquete_77",
-        "es_default": true,
-        "piezas": 77,
+        "nombre_paquete": "Paquete de 77 piezas",
         "sku": "P406-77PZ",
-        "nombre_paquete": "Paquete de 77 piezas"
+        "piezas": 77,
+        "es_default": true
       }
     ]
   },
@@ -7580,8 +8256,8 @@
     "paquetes": [
       {
         "id": "paquete_40",
-        "piezas": 40,
         "es_default": true,
+        "piezas": 40,
         "nombre_paquete": "Paquete de 40 piezas",
         "sku": "P408-40PZ"
       }
@@ -7600,8 +8276,8 @@
     "paquetes": [
       {
         "id": "paquete_40",
-        "piezas": 40,
         "es_default": true,
+        "piezas": 40,
         "nombre_paquete": "Paquete de 40 piezas",
         "sku": "P408-40PZ"
       }
@@ -7622,8 +8298,8 @@
         "id": "paquete_900",
         "es_default": true,
         "piezas": 900,
-        "sku": "P41-900PZ",
-        "nombre_paquete": "Paquete de 900 piezas"
+        "nombre_paquete": "Paquete de 900 piezas",
+        "sku": "P41-900PZ"
       }
     ]
   },
@@ -7640,8 +8316,8 @@
     "paquetes": [
       {
         "id": "paquete_150",
-        "nombre_paquete": "Paquete de 150 piezas",
         "sku": "P412-150PZ",
+        "nombre_paquete": "Paquete de 150 piezas",
         "piezas": 150,
         "es_default": true
       }
@@ -7660,10 +8336,10 @@
     "paquetes": [
       {
         "id": "paquete_32",
-        "es_default": true,
-        "piezas": 32,
+        "nombre_paquete": "Paquete de 32 piezas",
         "sku": "P414-32PZ",
-        "nombre_paquete": "Paquete de 32 piezas"
+        "piezas": 32,
+        "es_default": true
       }
     ]
   },
@@ -7680,10 +8356,10 @@
     "paquetes": [
       {
         "id": "paquete_32",
-        "es_default": true,
-        "piezas": 32,
+        "nombre_paquete": "Paquete de 32 piezas",
         "sku": "P414-32PZ",
-        "nombre_paquete": "Paquete de 32 piezas"
+        "piezas": 32,
+        "es_default": true
       }
     ]
   },
@@ -7740,10 +8416,10 @@
     "paquetes": [
       {
         "id": "paquete_50",
-        "sku": "P399-50PZ",
-        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
         "es_default": true,
-        "piezas": 50
+        "sku": "P399-50PZ",
+        "nombre_paquete": "Paquete de 50 piezas"
       }
     ]
   },
@@ -7760,8 +8436,8 @@
     "paquetes": [
       {
         "id": "paquete_91",
-        "es_default": true,
         "piezas": 91,
+        "es_default": true,
         "sku": "P425-91PZ",
         "nombre_paquete": "Paquete de 91 piezas"
       }
@@ -7780,8 +8456,8 @@
     "paquetes": [
       {
         "id": "paquete_91",
-        "es_default": true,
         "piezas": 91,
+        "es_default": true,
         "sku": "P425-91PZ",
         "nombre_paquete": "Paquete de 91 piezas"
       }
@@ -7824,10 +8500,10 @@
     "paquetes": [
       {
         "id": "paquete_98",
-        "sku": "P43-98PZ",
-        "nombre_paquete": "Paquete de 98 piezas",
+        "piezas": 98,
         "es_default": true,
-        "piezas": 98
+        "nombre_paquete": "Paquete de 98 piezas",
+        "sku": "P43-98PZ"
       }
     ]
   },
@@ -7868,10 +8544,10 @@
     "paquetes": [
       {
         "id": "paquete_108",
-        "piezas": 108,
-        "es_default": true,
         "nombre_paquete": "Paquete de 108 piezas",
-        "sku": "P435-108PZ"
+        "sku": "P435-108PZ",
+        "piezas": 108,
+        "es_default": true
       }
     ]
   },
@@ -7888,10 +8564,10 @@
     "paquetes": [
       {
         "id": "paquete_108",
-        "piezas": 108,
-        "es_default": true,
         "nombre_paquete": "Paquete de 108 piezas",
-        "sku": "P435-108PZ"
+        "sku": "P435-108PZ",
+        "piezas": 108,
+        "es_default": true
       }
     ]
   },
@@ -7908,10 +8584,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P436-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "sku": "P436-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -7928,8 +8604,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P437-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P437-100PZ",
         "es_default": true,
         "piezas": 100
       }
@@ -7970,8 +8646,8 @@
         "id": "paquete_100",
         "sku": "P439-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -7988,10 +8664,10 @@
     "paquetes": [
       {
         "id": "paquete_275",
-        "es_default": true,
-        "piezas": 275,
+        "nombre_paquete": "Paquete de 275 piezas",
         "sku": "P44-275PZ",
-        "nombre_paquete": "Paquete de 275 piezas"
+        "es_default": true,
+        "piezas": 275
       }
     ]
   },
@@ -8028,10 +8704,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P441-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
         "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "sku": "P441-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -8048,10 +8724,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P442-100PZ",
         "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P442-100PZ"
       }
     ]
   },
@@ -8068,10 +8744,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P443-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -8088,10 +8764,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
+        "sku": "P444-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P444-100PZ"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8108,8 +8784,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P449-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas",
         "piezas": 100,
         "es_default": true
       }
@@ -8128,10 +8804,10 @@
     "paquetes": [
       {
         "id": "paquete_126",
-        "es_default": true,
         "piezas": 126,
-        "sku": "P45-126PZ",
-        "nombre_paquete": "Paquete de 126 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 126 piezas",
+        "sku": "P45-126PZ"
       }
     ]
   },
@@ -8150,8 +8826,8 @@
         "id": "paquete_100",
         "sku": "P450-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -8170,8 +8846,8 @@
         "id": "paquete_100",
         "es_default": true,
         "piezas": 100,
-        "sku": "P451-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P451-100PZ"
       }
     ]
   },
@@ -8190,8 +8866,8 @@
         "id": "paquete_100",
         "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P452-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8208,10 +8884,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P453-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8248,10 +8924,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
         "sku": "P455-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8288,10 +8964,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P457-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -8310,8 +8986,8 @@
         "id": "paquete_100",
         "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P458-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8330,8 +9006,8 @@
         "id": "paquete_100",
         "es_default": true,
         "piezas": 100,
-        "sku": "P459-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P459-100PZ"
       }
     ]
   },
@@ -8348,8 +9024,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P460-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas",
         "piezas": 100,
         "es_default": true
       }
@@ -8368,10 +9044,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P461-100PZ"
+        "sku": "P461-100PZ",
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -8408,10 +9084,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
         "piezas": 100,
-        "sku": "P463-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P463-100PZ"
       }
     ]
   },
@@ -8428,10 +9104,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
         "es_default": true,
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P464-100PZ"
+        "piezas": 100,
+        "sku": "P464-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -8448,10 +9124,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P465-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
         "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P465-100PZ"
       }
     ]
   },
@@ -8470,8 +9146,8 @@
         "id": "paquete_100",
         "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P466-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8490,8 +9166,8 @@
         "id": "paquete_100",
         "es_default": true,
         "piezas": 100,
-        "sku": "P467-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P467-100PZ"
       }
     ]
   },
@@ -8508,10 +9184,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P468-100PZ",
         "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P468-100PZ"
       }
     ]
   },
@@ -8530,8 +9206,8 @@
         "id": "paquete_100",
         "piezas": 100,
         "es_default": true,
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P469-100PZ"
+        "sku": "P469-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -8548,10 +9224,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
         "sku": "P470-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8568,10 +9244,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
+        "sku": "P471-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P471-100PZ"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8588,10 +9264,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P472-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "sku": "P472-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -8608,10 +9284,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P473-100PZ",
         "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P473-100PZ"
       }
     ]
   },
@@ -8668,10 +9344,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P476-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P476-100PZ"
       }
     ]
   },
@@ -8688,10 +9364,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P477-100PZ",
+        "es_default": true,
         "piezas": 100,
-        "es_default": true
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P477-100PZ"
       }
     ]
   },
@@ -8710,8 +9386,8 @@
         "id": "paquete_100",
         "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P478-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8728,10 +9404,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P479-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P479-100PZ"
       }
     ]
   },
@@ -8748,10 +9424,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
+        "sku": "P480-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P480-100PZ"
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -8768,10 +9444,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
+        "sku": "P481-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P481-100PZ"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8788,10 +9464,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P482-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
         "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P482-100PZ"
       }
     ]
   },
@@ -8808,10 +9484,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P483-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "sku": "P483-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -8828,10 +9504,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P484-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P484-100PZ"
       }
     ]
   },
@@ -8848,10 +9524,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
         "sku": "P485-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8868,10 +9544,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P486-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P486-100PZ"
       }
     ]
   },
@@ -8888,10 +9564,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P487-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P487-100PZ"
       }
     ]
   },
@@ -8908,10 +9584,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
         "sku": "P488-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -8930,8 +9606,8 @@
         "id": "paquete_100",
         "es_default": true,
         "piezas": 100,
-        "sku": "P489-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P489-100PZ"
       }
     ]
   },
@@ -8948,10 +9624,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
         "sku": "P490-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -8968,8 +9644,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P493-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas",
         "piezas": 100,
         "es_default": true
       }
@@ -9008,10 +9684,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P495-100PZ",
         "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "sku": "P495-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -9028,10 +9704,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P496-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "nombre_paquete": "Paquete de 100 piezas",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -9048,10 +9724,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P497-100PZ",
+        "es_default": true,
         "piezas": 100,
-        "es_default": true
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P497-100PZ"
       }
     ]
   },
@@ -9068,10 +9744,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
         "sku": "P498-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -9088,10 +9764,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P499-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "nombre_paquete": "Paquete de 100 piezas",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -9108,10 +9784,10 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "es_default": true,
-        "piezas": 70,
         "sku": "P5-70PZ",
-        "nombre_paquete": "Paquete de 70 piezas"
+        "nombre_paquete": "Paquete de 70 piezas",
+        "es_default": true,
+        "piezas": 70
       }
     ]
   },
@@ -9128,10 +9804,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
         "es_default": true,
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P500-100PZ"
+        "piezas": 100,
+        "sku": "P500-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -9150,8 +9826,8 @@
         "id": "paquete_100",
         "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P501-100PZ",
-        "piezas": 100,
-        "es_default": true
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -9168,10 +9844,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
         "sku": "P502-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -9188,10 +9864,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P503-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -9210,8 +9886,8 @@
         "id": "paquete_100",
         "piezas": 100,
         "es_default": true,
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P504-100PZ"
+        "sku": "P504-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -9228,10 +9904,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P505-100PZ",
+        "es_default": true,
         "piezas": 100,
-        "es_default": true
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P505-100PZ"
       }
     ]
   },
@@ -9248,8 +9924,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
         "piezas": 100,
+        "es_default": true,
         "sku": "P506-100PZ",
         "nombre_paquete": "Paquete de 100 piezas"
       }
@@ -9268,8 +9944,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
         "piezas": 100,
+        "es_default": true,
         "sku": "P507-100PZ",
         "nombre_paquete": "Paquete de 100 piezas"
       }
@@ -9288,10 +9964,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
+        "sku": "P508-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P508-100PZ"
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -9310,8 +9986,8 @@
         "id": "paquete_100",
         "sku": "P509-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -9328,10 +10004,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P510-100PZ",
+        "es_default": true,
         "piezas": 100,
-        "es_default": true
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P510-100PZ"
       }
     ]
   },
@@ -9348,10 +10024,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P511-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
         "es_default": true,
-        "piezas": 100
+        "piezas": 100,
+        "sku": "P511-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -9368,10 +10044,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P512-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -9388,8 +10064,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P513-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P513-100PZ",
         "es_default": true,
         "piezas": 100
       }
@@ -9408,10 +10084,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
-        "es_default": true,
         "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P514-100PZ"
+        "sku": "P514-100PZ",
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -9428,10 +10104,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P515-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
-        "es_default": true,
-        "piezas": 100
+        "sku": "P515-100PZ",
+        "piezas": 100,
+        "es_default": true
       }
     ]
   },
@@ -9450,8 +10126,8 @@
         "id": "paquete_100",
         "piezas": 100,
         "es_default": true,
-        "nombre_paquete": "Paquete de 100 piezas",
-        "sku": "P516-100PZ"
+        "sku": "P516-100PZ",
+        "nombre_paquete": "Paquete de 100 piezas"
       }
     ]
   },
@@ -9468,8 +10144,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P517-100PZ",
         "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P517-100PZ",
         "es_default": true,
         "piezas": 100
       }
@@ -9490,8 +10166,8 @@
         "id": "paquete_100",
         "es_default": true,
         "piezas": 100,
-        "sku": "P518-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P518-100PZ"
       }
     ]
   },
@@ -9508,8 +10184,8 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "piezas": 100,
         "es_default": true,
+        "piezas": 100,
         "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P519-100PZ"
       }
@@ -9528,10 +10204,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "sku": "P520-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
         "es_default": true,
-        "piezas": 100
+        "nombre_paquete": "Paquete de 100 piezas",
+        "sku": "P520-100PZ"
       }
     ]
   },
@@ -9548,10 +10224,10 @@
     "paquetes": [
       {
         "id": "paquete_100",
-        "es_default": true,
-        "piezas": 100,
+        "nombre_paquete": "Paquete de 100 piezas",
         "sku": "P521-100PZ",
-        "nombre_paquete": "Paquete de 100 piezas"
+        "es_default": true,
+        "piezas": 100
       }
     ]
   },
@@ -9628,8 +10304,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P540-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P540-1PZ",
         "es_default": true,
         "piezas": "1"
       }
@@ -9648,10 +10324,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P542-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -9668,10 +10344,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P543-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "sku": "P543-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -9688,10 +10364,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P544-1PZ"
+        "sku": "P544-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -9708,10 +10384,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P545-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -9748,10 +10424,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P547-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "sku": "P547-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -9768,10 +10444,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P548-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P548-1PZ"
       }
     ]
   },
@@ -9788,10 +10464,10 @@
     "paquetes": [
       {
         "id": "paquete_430",
-        "sku": "P549-430PZ",
-        "nombre_paquete": "Paquete de 430 piezas",
         "es_default": true,
-        "piezas": 430
+        "piezas": 430,
+        "nombre_paquete": "Paquete de 430 piezas",
+        "sku": "P549-430PZ"
       }
     ]
   },
@@ -9810,8 +10486,8 @@
         "id": "paquete_180",
         "es_default": true,
         "piezas": 180,
-        "sku": "P56-180PZ",
-        "nombre_paquete": "Paquete de 180 piezas"
+        "nombre_paquete": "Paquete de 180 piezas",
+        "sku": "P56-180PZ"
       }
     ]
   },
@@ -9828,10 +10504,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P550-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P550-1PZ"
       }
     ]
   },
@@ -9848,10 +10524,10 @@
     "paquetes": [
       {
         "id": "paquete_350",
-        "es_default": true,
-        "piezas": 350,
         "sku": "P551-350PZ",
-        "nombre_paquete": "Paquete de 350 piezas"
+        "nombre_paquete": "Paquete de 350 piezas",
+        "piezas": 350,
+        "es_default": true
       }
     ]
   },
@@ -9888,10 +10564,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P554-1PZ"
+        "sku": "P554-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -9908,10 +10584,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P556-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "sku": "P556-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -9928,10 +10604,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P558-1PZ"
+        "piezas": "1",
+        "sku": "P558-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -9948,10 +10624,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P559-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -9970,8 +10646,8 @@
         "id": "paquete_180",
         "es_default": true,
         "piezas": 180,
-        "sku": "P56-180PZ",
-        "nombre_paquete": "Paquete de 180 piezas"
+        "nombre_paquete": "Paquete de 180 piezas",
+        "sku": "P56-180PZ"
       }
     ]
   },
@@ -9990,8 +10666,8 @@
         "id": "paquete_1",
         "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P564-1PZ",
-        "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -10008,10 +10684,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P566-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P566-1PZ"
       }
     ]
   },
@@ -10028,8 +10704,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
+        "es_default": true,
         "sku": "P567-1PZ",
         "nombre_paquete": "Paquete de 1 piezas"
       }
@@ -10068,10 +10744,10 @@
     "paquetes": [
       {
         "id": "paquete_2000",
-        "nombre_paquete": "Paquete de 2000 piezas",
-        "sku": "P570-2000PZ",
+        "es_default": true,
         "piezas": 2000,
-        "es_default": true
+        "sku": "P570-2000PZ",
+        "nombre_paquete": "Paquete de 2000 piezas"
       }
     ]
   },
@@ -10088,10 +10764,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P573-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -10108,10 +10784,10 @@
     "paquetes": [
       {
         "id": "paquete_500",
-        "es_default": true,
-        "piezas": 500,
         "sku": "P574-500PZ",
-        "nombre_paquete": "Paquete de 500 piezas"
+        "nombre_paquete": "Paquete de 500 piezas",
+        "piezas": 500,
+        "es_default": true
       }
     ]
   },
@@ -10128,10 +10804,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P575-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -10148,10 +10824,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P577-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "sku": "P577-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -10168,10 +10844,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P578-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -10188,8 +10864,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
+        "es_default": true,
         "sku": "P592-1PZ",
         "nombre_paquete": "Paquete de 1 piezas"
       }
@@ -10210,8 +10886,8 @@
         "id": "paquete_1",
         "es_default": true,
         "piezas": "1",
-        "sku": "P593-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P593-1PZ"
       }
     ]
   },
@@ -10228,10 +10904,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P596-1PZ"
+        "sku": "P596-1PZ",
+        "es_default": true,
+        "piezas": "1"
       }
     ]
   },
@@ -10248,10 +10924,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P597-1PZ"
+        "sku": "P597-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -10268,10 +10944,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P598-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "sku": "P598-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -10288,8 +10964,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P599-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas",
         "piezas": "1",
         "es_default": true
       }
@@ -10308,10 +10984,10 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "es_default": true,
         "piezas": 70,
-        "sku": "P6-70PZ",
-        "nombre_paquete": "Paquete de 70 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 70 piezas",
+        "sku": "P6-70PZ"
       }
     ]
   },
@@ -10330,8 +11006,8 @@
         "id": "paquete_1482",
         "es_default": true,
         "piezas": 1482,
-        "sku": "P60-1482PZ",
-        "nombre_paquete": "Paquete de 1482 piezas"
+        "nombre_paquete": "Paquete de 1482 piezas",
+        "sku": "P60-1482PZ"
       }
     ]
   },
@@ -10348,10 +11024,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P600-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P600-1PZ"
       }
     ]
   },
@@ -10370,8 +11046,8 @@
         "id": "paquete_1",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P601-1PZ"
+        "sku": "P601-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -10388,10 +11064,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P602-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P602-1PZ"
       }
     ]
   },
@@ -10408,10 +11084,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P603-1PZ"
+        "piezas": "1",
+        "sku": "P603-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -10428,10 +11104,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P604-1PZ"
+        "piezas": "1",
+        "sku": "P604-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -10450,8 +11126,8 @@
         "id": "paquete_1",
         "es_default": true,
         "piezas": "1",
-        "sku": "P605-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P605-1PZ"
       }
     ]
   },
@@ -10468,10 +11144,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P606-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -10488,10 +11164,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P607-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -10508,8 +11184,8 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "piezas": 5000,
         "es_default": true,
+        "piezas": 5000,
         "nombre_paquete": "Paquete de 5000 piezas",
         "sku": "P608-5000PZ"
       }
@@ -10548,10 +11224,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "piezas": 5000,
-        "es_default": true,
         "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P610-5000PZ"
+        "sku": "P610-5000PZ",
+        "piezas": 5000,
+        "es_default": true
       }
     ]
   },
@@ -10588,10 +11264,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P612-5000PZ",
         "piezas": 5000,
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "sku": "P612-5000PZ"
       }
     ]
   },
@@ -10610,8 +11286,8 @@
         "id": "paquete_5000",
         "nombre_paquete": "Paquete de 5000 piezas",
         "sku": "P613-5000PZ",
-        "piezas": 5000,
-        "es_default": true
+        "es_default": true,
+        "piezas": 5000
       }
     ]
   },
@@ -10628,10 +11304,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P614-5000PZ",
         "piezas": 5000,
-        "es_default": true
+        "es_default": true,
+        "sku": "P614-5000PZ",
+        "nombre_paquete": "Paquete de 5000 piezas"
       }
     ]
   },
@@ -10648,10 +11324,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "sku": "P615-5000PZ",
-        "nombre_paquete": "Paquete de 5000 piezas",
         "es_default": true,
-        "piezas": 5000
+        "piezas": 5000,
+        "sku": "P615-5000PZ",
+        "nombre_paquete": "Paquete de 5000 piezas"
       }
     ]
   },
@@ -10668,10 +11344,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "piezas": 5000,
-        "es_default": true,
         "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P616-5000PZ"
+        "sku": "P616-5000PZ",
+        "piezas": 5000,
+        "es_default": true
       }
     ]
   },
@@ -10688,10 +11364,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "es_default": true,
-        "piezas": 5000,
         "sku": "P617-5000PZ",
-        "nombre_paquete": "Paquete de 5000 piezas"
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "es_default": true,
+        "piezas": 5000
       }
     ]
   },
@@ -10708,10 +11384,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P618-5000PZ",
         "piezas": 5000,
-        "es_default": true
+        "es_default": true,
+        "sku": "P618-5000PZ",
+        "nombre_paquete": "Paquete de 5000 piezas"
       }
     ]
   },
@@ -10728,10 +11404,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "piezas": 5000,
-        "es_default": true,
+        "sku": "P619-5000PZ",
         "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P619-5000PZ"
+        "piezas": 5000,
+        "es_default": true
       }
     ]
   },
@@ -10748,8 +11424,8 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
         "sku": "P620-5000PZ",
+        "nombre_paquete": "Paquete de 5000 piezas",
         "piezas": 5000,
         "es_default": true
       }
@@ -10768,10 +11444,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "es_default": true,
-        "piezas": 5000,
         "sku": "P621-5000PZ",
-        "nombre_paquete": "Paquete de 5000 piezas"
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "es_default": true,
+        "piezas": 5000
       }
     ]
   },
@@ -10788,10 +11464,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "piezas": 5000,
-        "es_default": true,
+        "sku": "P622-5000PZ",
         "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P622-5000PZ"
+        "piezas": 5000,
+        "es_default": true
       }
     ]
   },
@@ -10810,8 +11486,8 @@
         "id": "paquete_5000",
         "piezas": 5000,
         "es_default": true,
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P623-5000PZ"
+        "sku": "P623-5000PZ",
+        "nombre_paquete": "Paquete de 5000 piezas"
       }
     ]
   },
@@ -10828,10 +11504,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "sku": "P624-5000PZ",
-        "nombre_paquete": "Paquete de 5000 piezas",
         "es_default": true,
-        "piezas": 5000
+        "piezas": 5000,
+        "sku": "P624-5000PZ",
+        "nombre_paquete": "Paquete de 5000 piezas"
       }
     ]
   },
@@ -10848,10 +11524,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "es_default": true,
-        "piezas": 5000,
+        "nombre_paquete": "Paquete de 5000 piezas",
         "sku": "P625-5000PZ",
-        "nombre_paquete": "Paquete de 5000 piezas"
+        "piezas": 5000,
+        "es_default": true
       }
     ]
   },
@@ -10870,8 +11546,8 @@
         "id": "paquete_5000",
         "nombre_paquete": "Paquete de 5000 piezas",
         "sku": "P626-5000PZ",
-        "piezas": 5000,
-        "es_default": true
+        "es_default": true,
+        "piezas": 5000
       }
     ]
   },
@@ -10888,8 +11564,8 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "es_default": true,
         "piezas": 5000,
+        "es_default": true,
         "sku": "P627-5000PZ",
         "nombre_paquete": "Paquete de 5000 piezas"
       }
@@ -10930,8 +11606,8 @@
         "id": "paquete_5000",
         "piezas": 5000,
         "es_default": true,
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P629-5000PZ"
+        "sku": "P629-5000PZ",
+        "nombre_paquete": "Paquete de 5000 piezas"
       }
     ]
   },
@@ -10948,10 +11624,10 @@
     "paquetes": [
       {
         "id": "paquete_210",
-        "piezas": 210,
-        "es_default": true,
+        "sku": "P64-210PZ",
         "nombre_paquete": "Paquete de 210 piezas",
-        "sku": "P64-210PZ"
+        "es_default": true,
+        "piezas": 210
       }
     ]
   },
@@ -10968,10 +11644,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "sku": "P630-5000PZ",
-        "nombre_paquete": "Paquete de 5000 piezas",
+        "piezas": 5000,
         "es_default": true,
-        "piezas": 5000
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "sku": "P630-5000PZ"
       }
     ]
   },
@@ -10988,10 +11664,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "sku": "P631-5000PZ",
-        "nombre_paquete": "Paquete de 5000 piezas",
         "es_default": true,
-        "piezas": 5000
+        "piezas": 5000,
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "sku": "P631-5000PZ"
       }
     ]
   },
@@ -11008,10 +11684,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "sku": "P632-5000PZ",
         "piezas": 5000,
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "sku": "P632-5000PZ"
       }
     ]
   },
@@ -11028,10 +11704,10 @@
     "paquetes": [
       {
         "id": "paquete_5000",
-        "sku": "P633-5000PZ",
         "nombre_paquete": "Paquete de 5000 piezas",
-        "es_default": true,
-        "piezas": 5000
+        "sku": "P633-5000PZ",
+        "piezas": 5000,
+        "es_default": true
       }
     ]
   },
@@ -11068,10 +11744,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P637-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "sku": "P637-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -11088,10 +11764,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P638-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P638-1PZ"
       }
     ]
   },
@@ -11108,10 +11784,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
-        "sku": "P639-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P639-1PZ"
       }
     ]
   },
@@ -11128,10 +11804,10 @@
     "paquetes": [
       {
         "id": "paquete_210",
-        "piezas": 210,
-        "es_default": true,
+        "sku": "P64-210PZ",
         "nombre_paquete": "Paquete de 210 piezas",
-        "sku": "P64-210PZ"
+        "es_default": true,
+        "piezas": 210
       }
     ]
   },
@@ -11148,10 +11824,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P640-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
         "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P640-1PZ"
       }
     ]
   },
@@ -11168,8 +11844,8 @@
     "paquetes": [
       {
         "id": "paquete_4",
-        "sku": "P641-4PZ",
         "nombre_paquete": "Paquete de 4 piezas",
+        "sku": "P641-4PZ",
         "es_default": true,
         "piezas": 4
       }
@@ -11188,10 +11864,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P642-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "sku": "P642-1PZ",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -11228,10 +11904,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
+        "sku": "P649-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P649-1PZ"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -11248,8 +11924,8 @@
     "paquetes": [
       {
         "id": "paquete_128",
-        "nombre_paquete": "Paquete de 128 piezas",
         "sku": "P66-128PZ",
+        "nombre_paquete": "Paquete de 128 piezas",
         "piezas": 128,
         "es_default": true
       }
@@ -11268,10 +11944,10 @@
     "paquetes": [
       {
         "id": "paquete_12",
-        "sku": "P652-12PZ",
-        "nombre_paquete": "Paquete de 12 piezas",
+        "piezas": 12,
         "es_default": true,
-        "piezas": 12
+        "nombre_paquete": "Paquete de 12 piezas",
+        "sku": "P652-12PZ"
       }
     ]
   },
@@ -11288,8 +11964,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P653-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P653-1PZ",
         "es_default": true,
         "piezas": "1"
       }
@@ -11308,8 +11984,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
         "piezas": "1",
+        "es_default": true,
         "sku": "P654-1PZ",
         "nombre_paquete": "Paquete de 1 piezas"
       }
@@ -11328,10 +12004,10 @@
     "paquetes": [
       {
         "id": "paquete_1000",
-        "sku": "P655-1000PZ",
-        "nombre_paquete": "Paquete de 1000 piezas",
         "es_default": true,
-        "piezas": 1000
+        "piezas": 1000,
+        "sku": "P655-1000PZ",
+        "nombre_paquete": "Paquete de 1000 piezas"
       }
     ]
   },
@@ -11350,8 +12026,8 @@
         "id": "paquete_1",
         "es_default": true,
         "piezas": "1",
-        "sku": "P656-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P656-1PZ"
       }
     ]
   },
@@ -11368,8 +12044,8 @@
     "paquetes": [
       {
         "id": "paquete_128",
-        "nombre_paquete": "Paquete de 128 piezas",
         "sku": "P66-128PZ",
+        "nombre_paquete": "Paquete de 128 piezas",
         "piezas": 128,
         "es_default": true
       }
@@ -11388,8 +12064,8 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P661-1PZ",
+        "nombre_paquete": "Paquete de 1 piezas",
         "piezas": "1",
         "es_default": true
       }
@@ -11408,10 +12084,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P662-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P662-1PZ"
       }
     ]
   },
@@ -11428,9 +12104,9 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P663-1PZ",
+        "piezas": "1",
+        "es_default": true,
         "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
@@ -11448,9 +12124,9 @@
     "paquetes": [
       {
         "id": "paquete_1",
+        "sku": "P67-1PZ",
         "es_default": true,
         "piezas": "1",
-        "sku": "P67-1PZ",
         "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
@@ -11468,10 +12144,10 @@
     "paquetes": [
       {
         "id": "paquete_162",
-        "es_default": true,
         "piezas": 162,
-        "sku": "P68-162PZ",
-        "nombre_paquete": "Paquete de 162 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 162 piezas",
+        "sku": "P68-162PZ"
       }
     ]
   },
@@ -11488,10 +12164,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
+        "sku": "P699-1PZ",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P699-1PZ"
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -11508,10 +12184,10 @@
     "paquetes": [
       {
         "id": "paquete_300",
-        "es_default": true,
-        "piezas": 300,
         "sku": "P7-300PZ",
-        "nombre_paquete": "Paquete de 300 piezas"
+        "nombre_paquete": "Paquete de 300 piezas",
+        "es_default": true,
+        "piezas": 300
       }
     ]
   },
@@ -11528,10 +12204,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P700-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "sku": "P700-1PZ"
       }
     ]
   },
@@ -11548,10 +12224,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P701-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P701-1PZ"
       }
     ]
   },
@@ -11568,9 +12244,9 @@
     "paquetes": [
       {
         "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P702-1PZ"
       }
     ]
@@ -11588,10 +12264,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
+        "sku": "P703-1PZ",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P703-1PZ"
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -11608,10 +12284,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P704-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -11628,10 +12304,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P705-1PZ",
         "piezas": "1",
-        "es_default": true
+        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P705-1PZ"
       }
     ]
   },
@@ -11648,10 +12324,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
-        "piezas": "1",
         "sku": "P708-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -11668,10 +12344,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "piezas": "1",
-        "es_default": true,
+        "sku": "P709-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P709-1PZ"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -11688,10 +12364,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P710-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P710-1PZ"
       }
     ]
   },
@@ -11730,8 +12406,8 @@
         "id": "paquete_1",
         "sku": "P714-1PZ",
         "nombre_paquete": "Paquete de 1 piezas",
-        "es_default": true,
-        "piezas": "1"
+        "piezas": "1",
+        "es_default": true
       }
     ]
   },
@@ -11748,10 +12424,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
         "piezas": "1",
-        "sku": "P715-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "sku": "P715-1PZ"
       }
     ]
   },
@@ -11768,10 +12444,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "es_default": true,
+        "nombre_paquete": "Paquete de 1 piezas",
         "piezas": "1",
-        "sku": "P716-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas"
+        "es_default": true,
+        "sku": "P716-1PZ"
       }
     ]
   },
@@ -11789,9 +12465,9 @@
       {
         "id": "paquete_189",
         "sku": "P72-189PZ",
-        "nombre_paquete": "Paquete de 189 piezas",
+        "piezas": 189,
         "es_default": true,
-        "piezas": 189
+        "nombre_paquete": "Paquete de 189 piezas"
       }
     ]
   },
@@ -11808,10 +12484,10 @@
     "paquetes": [
       {
         "id": "paquete_442",
-        "es_default": true,
         "piezas": 442,
-        "sku": "P73-442PZ",
-        "nombre_paquete": "Paquete de 442 piezas"
+        "es_default": true,
+        "nombre_paquete": "Paquete de 442 piezas",
+        "sku": "P73-442PZ"
       }
     ]
   },
@@ -11828,10 +12504,10 @@
     "paquetes": [
       {
         "id": "paquete_650",
-        "es_default": true,
-        "piezas": 650,
         "sku": "P74-650PZ",
-        "nombre_paquete": "Paquete de 650 piezas"
+        "nombre_paquete": "Paquete de 650 piezas",
+        "es_default": true,
+        "piezas": 650
       }
     ]
   },
@@ -11848,9 +12524,9 @@
     "paquetes": [
       {
         "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P741-1PZ"
       }
     ]
@@ -11869,9 +12545,9 @@
       {
         "id": "paquete_1",
         "sku": "P742-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -11889,9 +12565,9 @@
       {
         "id": "paquete_2500",
         "sku": "P743-2500PZ",
-        "nombre_paquete": "Paquete de 2500 piezas",
+        "piezas": 2500,
         "es_default": true,
-        "piezas": 2500
+        "nombre_paquete": "Paquete de 2500 piezas"
       }
     ]
   },
@@ -11908,10 +12584,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P745-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P745-1PZ"
       }
     ]
   },
@@ -11948,9 +12624,9 @@
     "paquetes": [
       {
         "id": "paquete_325",
+        "sku": "P80-325PZ",
         "es_default": true,
         "piezas": 325,
-        "sku": "P80-325PZ",
         "nombre_paquete": "Paquete de 325 piezas"
       }
     ]
@@ -11968,10 +12644,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "sku": "P752-1PZ",
-        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
         "es_default": true,
-        "piezas": "1"
+        "nombre_paquete": "Paquete de 1 piezas",
+        "sku": "P752-1PZ"
       }
     ]
   },
@@ -11988,10 +12664,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
+        "sku": "P753-1PZ",
         "piezas": "1",
         "es_default": true,
-        "nombre_paquete": "Paquete de 1 piezas",
-        "sku": "P753-1PZ"
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -12008,9 +12684,9 @@
     "paquetes": [
       {
         "id": "paquete_500",
+        "nombre_paquete": "Paquete de 500 piezas",
         "piezas": 500,
         "es_default": true,
-        "nombre_paquete": "Paquete de 500 piezas",
         "sku": "P754-500PZ"
       }
     ]
@@ -12028,10 +12704,10 @@
     "paquetes": [
       {
         "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
         "sku": "P755-1PZ",
+        "es_default": true,
         "piezas": "1",
-        "es_default": true
+        "nombre_paquete": "Paquete de 1 piezas"
       }
     ]
   },
@@ -12049,9 +12725,9 @@
       {
         "id": "paquete_200",
         "nombre_paquete": "Paquete de 200 piezas",
-        "sku": "P76-200PZ",
         "piezas": 200,
-        "es_default": true
+        "es_default": true,
+        "sku": "P76-200PZ"
       }
     ]
   },
@@ -12068,13 +12744,13 @@
     "paquetes": [
       {
         "id": "CnvXKB6jBKui0c6FYtwp",
-        "sku": "BPA-500-ST/CP-200PZ",
         "piezas": 200,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772251562,
           "nanoseconds": 534000000
-        }
+        },
+        "sku": "BPA-500-ST/CP-200PZ"
       }
     ]
   },
@@ -12091,10 +12767,10 @@
     "paquetes": [
       {
         "id": "paquete_92",
-        "sku": "P79-92PZ",
         "nombre_paquete": "Paquete de 92 piezas",
+        "piezas": 92,
         "es_default": true,
-        "piezas": 92
+        "sku": "P79-92PZ"
       }
     ]
   },
@@ -12111,10 +12787,10 @@
     "paquetes": [
       {
         "id": "paquete_92",
-        "sku": "P79-92PZ",
         "nombre_paquete": "Paquete de 92 piezas",
+        "piezas": 92,
         "es_default": true,
-        "piezas": 92
+        "sku": "P79-92PZ"
       }
     ]
   },
@@ -12154,9 +12830,9 @@
     "paquetes": [
       {
         "id": "paquete_325",
+        "sku": "P80-325PZ",
         "es_default": true,
         "piezas": 325,
-        "sku": "P80-325PZ",
         "nombre_paquete": "Paquete de 325 piezas"
       }
     ]
@@ -12174,9 +12850,9 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "es_default": true,
-        "piezas": 70,
         "sku": "P82-70PZ",
+        "piezas": 70,
+        "es_default": true,
         "nombre_paquete": "Paquete de 70 piezas"
       }
     ]
@@ -12194,9 +12870,9 @@
     "paquetes": [
       {
         "id": "paquete_70",
-        "es_default": true,
-        "piezas": 70,
         "sku": "P82-70PZ",
+        "piezas": 70,
+        "es_default": true,
         "nombre_paquete": "Paquete de 70 piezas"
       }
     ]
@@ -12214,10 +12890,10 @@
     "paquetes": [
       {
         "id": "paquete_145",
-        "nombre_paquete": "Paquete de 145 piezas",
-        "sku": "P86-145PZ",
+        "es_default": true,
         "piezas": 145,
-        "es_default": true
+        "sku": "P86-145PZ",
+        "nombre_paquete": "Paquete de 145 piezas"
       }
     ]
   },
@@ -12234,10 +12910,10 @@
     "paquetes": [
       {
         "id": "paquete_48",
+        "sku": "P9-48PZ",
         "piezas": 48,
         "es_default": true,
-        "nombre_paquete": "Paquete de 48 piezas",
-        "sku": "P9-48PZ"
+        "nombre_paquete": "Paquete de 48 piezas"
       }
     ]
   },
@@ -12255,9 +12931,9 @@
       {
         "id": "paquete_121",
         "sku": "P94-121PZ",
-        "nombre_paquete": "Paquete de 121 piezas",
         "es_default": true,
-        "piezas": 121
+        "piezas": 121,
+        "nombre_paquete": "Paquete de 121 piezas"
       }
     ]
   },
@@ -12275,9 +12951,9 @@
       {
         "id": "paquete_121",
         "sku": "P94-121PZ",
-        "nombre_paquete": "Paquete de 121 piezas",
         "es_default": true,
-        "piezas": 121
+        "piezas": 121,
+        "nombre_paquete": "Paquete de 121 piezas"
       }
     ]
   },
@@ -12294,10 +12970,10 @@
     "paquetes": [
       {
         "id": "paquete_210",
-        "sku": "P96-210PZ",
         "nombre_paquete": "Paquete de 210 piezas",
+        "piezas": 210,
         "es_default": true,
-        "piezas": 210
+        "sku": "P96-210PZ"
       }
     ]
   },
@@ -12314,12 +12990,24 @@
     "paquetes": [
       {
         "id": "paquete_210",
-        "sku": "P96-210PZ",
         "nombre_paquete": "Paquete de 210 piezas",
+        "piezas": 210,
         "es_default": true,
-        "piezas": 210
+        "sku": "P96-210PZ"
       }
     ]
+  },
+  {
+    "id": "txDKakkatlQVbL6b64FB",
+    "name": "PORRON INDUSTRIAL BLANCO DE 20 L C/TAPON SAMPSOM",
+    "category": "PAD",
+    "image": "https://i.ibb.co/LXK3n8p5/PORRON-INDUSTRIAL-BLANCO-DE-20-LITROS-CON-TAPON.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "PIB-20/CP",
+    "receta": null,
+    "paquetes": []
   },
   {
     "id": "vIzVsoT5SUxOkzvamueB",
@@ -12334,10 +13022,10 @@
     "paquetes": [
       {
         "id": "paquete_231",
-        "sku": "-OK_PSST-ZVUYJRO_SZL-231PZ",
-        "nombre_paquete": "Paquete de 231 piezas",
+        "piezas": 231,
         "es_default": true,
-        "piezas": 231
+        "sku": "-OK_PSST-ZVUYJRO_SZL-231PZ",
+        "nombre_paquete": "Paquete de 231 piezas"
       }
     ]
   },
@@ -12354,13 +13042,36 @@
     "paquetes": [
       {
         "id": "vviNh8fdWOWwOuwo8ROg",
-        "sku": "BPP-30-FT/CP-1000PZ",
-        "piezas": 1000,
         "fecha_creacion": {
           "type": "firestore/timestamp/1.0",
           "seconds": 1772903117,
           "nanoseconds": 728000000
-        }
+        },
+        "piezas": 1000,
+        "sku": "BPP-30-FT/CP-1000PZ"
+      }
+    ]
+  },
+  {
+    "id": "xlaTGZAv0YRkFDRO0XzV",
+    "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROJA 12X20X6 #88",
+    "category": "BOLSAS",
+    "image": "https://i.ibb.co/bRmsRBjj/BOLSA-STAND-UP-POUCH-CZIPPER-TRILAMINADA-ROJA-12-X20-X6-88-90.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BP88-SUP-ROJA-150/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "IndojPHyUMbMQiD6Vujl",
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773347185,
+          "nanoseconds": 420000000
+        },
+        "piezas": 100,
+        "sku": "BP88-SUP-ROJA-150/CP-100PZ"
       }
     ]
   }
