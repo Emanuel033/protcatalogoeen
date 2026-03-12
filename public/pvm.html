@@ -1135,114 +1135,113 @@ window.calculateChange = () => {
             
             const copies = [
                 { title: 'COPIA 1 - ALMACÉN', signType: 'warehouse' }, 
-                { title: 'COPIA 2 - FIRMA (SUCURSAL)', signType: 'client' }, 
-                { title: 'COPIA 3 - CLIENTE', signType: 'none' }
+                { title: 'COPIA 3 - CLIENTE', signType: 'none' },    
+                { title: 'COPIA 2 - FIRMA (SUCURSAL)', signType: 'client' }
             ];
             
             let html = '';
             copies.forEach((copy) => {
                 html += `
-                <div class="ticket-copy">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; font-family: 'Courier New', Courier, monospace;">
-                        <div style="width: 65%; display: flex; gap: 10px; align-items: flex-start;">
-                            <img src="${window.ticketLogoUrl}" style="height: 55px; width: auto; max-width: 90px; object-fit: contain; margin-top: 2px;">
+                <div class="ticket-copy" style="max-width: 100%; margin: 0 auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; font-family: 'Courier New', Courier, monospace;">
+                        <div style="width: 65%; display: flex; gap: 8px; align-items: flex-start;">
+                            <img src="${window.ticketLogoUrl}" style="height: 45px; width: auto; max-width: 80px; object-fit: contain; margin-top: 2px;">
                             <div>
-                                <h2 style="margin:0; font-size: 13pt; font-weight: 900; line-height: 1.1;">ENVASES LA ECONÓMICA DEL NORTE</h2>
-                                <p style="margin:6px 0 0 0; font-size: 9pt; line-height: 1.3;">
+                                <h2 style="margin:0; font-size: 11pt; font-weight: 900; line-height: 1.1;">ENVASES LA ECONÓMICA DEL NORTE</h2>
+                                <p style="margin:4px 0 0 0; font-size: 8pt; line-height: 1.3;">
                                     Calzada Guadalupe Victoria 105 Oriente,<br>
                                     Col. Obrerista, Monterrey, N.L. C.P. 64470
                                 </p>
                             </div>
                         </div>
                         <div style="width: 35%; text-align: right;">
-                            <h3 style="margin:0 0 8px 0; font-size: 12pt; font-weight: bold; padding: 6px; border: 2px solid #000; display: inline-block;">${copy.title}</h3>
-                            <p style="margin:3px 0; font-size: 11pt; font-weight: bold;">VENTA MOSTRADOR</p>
-                            <p style="margin:3px 0; font-size: 10pt; font-weight: bold;">Folio: ${venta.folio}</p>
-                            <p style="margin:3px 0; font-size: 10pt;">${fechaStr} - ${horaStr}</p>
-                            <p style="margin:3px 0; font-size: 9pt; font-weight: bold;">Cajero: ${venta.vendedor || 'General'}</p>
+                            <h3 style="margin:0 0 6px 0; font-size: 10pt; font-weight: bold; padding: 4px; border: 1.5px solid #000; display: inline-block;">${copy.title}</h3>
+                            <p style="margin:2px 0; font-size: 9pt; font-weight: bold;">VENTA MOSTRADOR</p>
+                            <p style="margin:2px 0; font-size: 8.5pt; font-weight: bold;">Folio: ${venta.folio}</p>
+                            <p style="margin:2px 0; font-size: 8.5pt;">${fechaStr} - ${horaStr}</p>
+                            <p style="margin:2px 0; font-size: 8pt; font-weight: bold;">Cajero: ${venta.vendedor || 'General'}</p>
                         </div>
                     </div>
                     
-                    <table style="width: 100%; font-size: 11pt; margin-bottom: 10px; font-family: 'Courier New', Courier, monospace; border-collapse: collapse;">
+                    <table style="width: 100%; font-size: 9pt; margin-bottom: 8px; font-family: 'Courier New', Courier, monospace; border-collapse: collapse;">
                         <tr>
-                            <th style="text-align:left; border-bottom: 1.5px solid #000; padding-bottom: 6px; width: 12%;">Cant</th>
-                            <th style="text-align:left; border-bottom: 1.5px solid #000; padding-bottom: 6px; width: 48%;">Cód / Descripción</th>
-                            <th style="text-align:right; border-bottom: 1.5px solid #000; padding-bottom: 6px; width: 20%;">P.U.</th>
-                            <th style="text-align:right; border-bottom: 1.5px solid #000; padding-bottom: 6px; width: 20%;">Total</th>
+                            <th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 10%;">Cant</th>
+                            <th style="text-align:left; border-bottom: 1px solid #000; padding-bottom: 4px; width: 50%;">Cód / Descripción</th>
+                            <th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">P.U.</th>
+                            <th style="text-align:right; border-bottom: 1px solid #000; padding-bottom: 4px; width: 20%;">Total</th>
                         </tr>
                 `;
                 
                 (venta.articulos || []).forEach(item => { 
                     html += `<tr>
-                        <td style="vertical-align: top; padding-top: 6px; font-weight: bold; font-size: 12pt;">${item.cantidad}x</td>
-                        <td style="vertical-align: top; padding-top: 6px; padding-right: 6px; font-size: 10pt;"><b>${item.codigo}</b><br>${item.nombre}</td>
-                        <td style="vertical-align: top; padding-top: 6px; text-align:right; font-size: 11pt;">${formatMoney(item.precio_unitario)}</td>
-                        <td style="vertical-align: top; padding-top: 6px; text-align:right; font-weight:bold; font-size: 11pt;">${formatMoney(item.subtotal)}</td>
+                        <td style="vertical-align: top; padding-top: 4px; font-weight: bold; font-size: 9.5pt;">${item.cantidad}x</td>
+                        <td style="vertical-align: top; padding-top: 4px; padding-right: 4px; font-size: 8.5pt;"><b>${item.codigo}</b><br>${item.nombre}</td>
+                        <td style="vertical-align: top; padding-top: 4px; text-align:right; font-size: 9pt;">${formatMoney(item.precio_unitario)}</td>
+                        <td style="vertical-align: top; padding-top: 4px; text-align:right; font-weight:bold; font-size: 9pt;">${formatMoney(item.subtotal)}</td>
                     </tr>`; 
                 });
                 
                 let infoPago = ''; 
                 if(venta.efectivo_recibido) { 
                     infoPago = `
-                    <div style="display: flex; justify-content: space-between; border-top: 1px dashed #000; margin-top: 6px; padding-top: 6px; color: #333;">
-                        <span style="font-size: 10pt;">Efectivo Recibido:</span> <span style="font-size: 10pt;">${formatMoney(venta.efectivo_recibido)}</span>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px dashed #000; margin-top: 4px; padding-top: 4px; color: #333;">
+                        <span style="font-size: 8.5pt;">Efectivo Recibido:</span> <span style="font-size: 8.5pt;">${formatMoney(venta.efectivo_recibido)}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; color: #333;">
-                        <span style="font-size: 10pt;">Cambio Entregado:</span> <span style="font-size: 10pt;">${formatMoney(venta.cambio_entregado || 0)}</span>
+                        <span style="font-size: 8.5pt;">Cambio Entregado:</span> <span style="font-size: 8.5pt;">${formatMoney(venta.cambio_entregado || 0)}</span>
                     </div>`; 
                 }
                 
                 html += `</table>
-                    <div style="border-top: 1.5px solid #000; padding-top: 10px; font-family: 'Courier New', Courier, monospace; font-size: 11pt; display: flex; justify-content: flex-end;">
-                        <div style="text-align: right; width: 250px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span style="color: #444;">Subtotal:</span> <span>${formatMoney(subtotal)}</span></div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span style="color: #444;">IVA (16%):</span> <span>${formatMoney(iva)}</span></div>
-                            <div style="display: flex; justify-content: space-between; border-top: 1px solid #000; margin-top: 6px; padding-top: 6px; font-weight: 900; font-size: 14pt;"><span>TOTAL:</span> <span>${formatMoney(venta.total)}</span></div>
+                    <div style="border-top: 1px solid #000; padding-top: 8px; font-family: 'Courier New', Courier, monospace; font-size: 9pt; display: flex; justify-content: flex-end;">
+                        <div style="text-align: right; width: 220px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #444;">Subtotal:</span> <span>${formatMoney(subtotal)}</span></div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 2px;"><span style="color: #444;">IVA (16%):</span> <span>${formatMoney(iva)}</span></div>
+                            <div style="display: flex; justify-content: space-between; border-top: 1px solid #000; margin-top: 4px; padding-top: 4px; font-weight: 900; font-size: 11pt;"><span>TOTAL:</span> <span>${formatMoney(venta.total)}</span></div>
                             ${infoPago}
                         </div>
                     </div>`;
 
-                // ESPACIO PARA FIRMAS AUMENTADO
                 if (copy.signType === 'client') {
                     html += `
-                    <div style="margin-top: 60px; margin-bottom: 15px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
-                        <div style="border-top: 1px solid #000; width: 70%; margin: 0 auto; padding-top: 8px; font-weight: bold; font-size: 11pt;">
+                    <div style="margin-top: 40px; margin-bottom: 10px; text-align: center; width: 100%; font-family: 'Courier New', Courier, monospace;">
+                        <div style="border-top: 1px solid #000; width: 60%; margin: 0 auto; padding-top: 6px; font-weight: bold; font-size: 9pt;">
                             Nombre y Firma de Recibido / Conformidad
                         </div>
                     </div>`;
                 } else if (copy.signType === 'warehouse') {
                     html += `
-                    <div style="margin-top: 60px; margin-bottom: 15px; display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace;">
-                        <div style="text-align: center; width: 45%;">
-                            <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 11pt;">Surtió</div>
+                    <div style="margin-top: 40px; margin-bottom: 10px; display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace;">
+                        <div style="text-align: center; width: 40%;">
+                            <div style="border-top: 1px solid #000; padding-top: 6px; font-weight: bold; font-size: 9pt;">Surtió</div>
                         </div>
-                        <div style="text-align: center; width: 45%;">
-                            <div style="border-top: 1px solid #000; padding-top: 8px; font-weight: bold; font-size: 11pt;">Revisó</div>
+                        <div style="text-align: center; width: 40%;">
+                            <div style="border-top: 1px solid #000; padding-top: 6px; font-weight: bold; font-size: 9pt;">Revisó</div>
                         </div>
                     </div>`;
                 } else {
-                    html += `<div style="margin-top: 20px;"></div>`; 
+                    html += `<div style="margin-top: 15px;"></div>`; 
                 }
 
                 html += `
-                    <div style="margin-top: 15px; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 10pt; line-height: 1.5; border-top: 1px dashed #000; padding-top: 15px; color: #000;">
-                        <div style="font-weight: bold; font-size: 11pt;">TELÉFONOS OFICINA</div>
+                    <div style="margin-top: 10px; text-align: center; font-family: 'Courier New', Courier, monospace; font-size: 8pt; line-height: 1.4; border-top: 1px dashed #000; padding-top: 10px; color: #000;">
+                        <div style="font-weight: bold; font-size: 9pt;">TELÉFONOS OFICINA</div>
                         <div>81 8375 4630 &bull; 81 8372 8736 &bull; 81 8374 6703 &bull; 81 8375 1518</div>
                         
-                        <div style="font-weight: bold; font-size: 11pt; margin-top: 8px;">WHATSAPP VENTAS</div>
+                        <div style="font-weight: bold; font-size: 9pt; margin-top: 6px;">WHATSAPP VENTAS</div>
                         <div>81 1372 8493 &bull; 81 1840 0503</div>
                         
-                        <div style="margin-top: 8px;"><b>Correo:</b> ventas@laeconomicamty.com</div>
+                        <div style="margin-top: 6px;"><b>Correo:</b> ventas@laeconomicamty.com</div>
                         
-                        <div style="margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 15px;">
-                            <img src="${window.ticketQrUrl}" style="width: 60px; height: 60px; border: 1px solid #ccc; padding: 3px;">
+                        <div style="margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                            <img src="${window.ticketQrUrl}" style="width: 50px; height: 50px; border: 1px solid #ccc; padding: 2px;">
                             <div style="text-align: left;">
-                                <div style="font-weight: 900; font-size: 12pt;">¡Escanea y compra en línea!</div>
-                                <div style="font-size: 11pt;">productoseen.web.app</div>
+                                <div style="font-weight: 900; font-size: 10pt;">¡Escanea y compra en línea!</div>
+                                <div style="font-size: 9pt;">productoseen.web.app</div>
                             </div>
                         </div>
 
-                        <div style="margin-top: 15px; font-weight: bold; font-size: 12pt;">¡GRACIAS POR SU PREFERENCIA!</div>
+                        <div style="margin-top: 10px; font-weight: bold; font-size: 10pt;">¡GRACIAS POR SU PREFERENCIA!</div>
                     </div>
                 `;
 
@@ -1251,7 +1250,6 @@ window.calculateChange = () => {
             
             printArea.innerHTML = html; 
             
-            // ESPERAR A QUE CARGUEN LAS IMÁGENES ANTES DE IMPRIMIR
             const images = printArea.querySelectorAll('img');
             let loadedCount = 0;
             
@@ -1261,7 +1259,7 @@ window.calculateChange = () => {
                     setTimeout(() => {
                         try { window.print(); } 
                         catch(e) { console.error(e); showToast("Venta guardada. Error al imprimir.", "error"); }
-                    }, 200); // Pequeña pausa final de seguridad
+                    }, 200); 
                 }
             };
 
@@ -1273,7 +1271,7 @@ window.calculateChange = () => {
                         checkAndPrint();
                     } else {
                         img.onload = checkAndPrint;
-                        img.onerror = checkAndPrint; // Si el logo falla por internet, que imprima de todos modos
+                        img.onerror = checkAndPrint; 
                     }
                 });
             }
