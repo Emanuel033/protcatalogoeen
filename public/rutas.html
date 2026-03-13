@@ -344,7 +344,26 @@
     </div>
 
 
-
+    <div id="modal-sugerencia" class="fixed inset-0 bg-slate-900/80 z-[130] hidden items-center justify-center p-4 backdrop-blur-sm transition-opacity opacity-0">
+        <div class="bg-white rounded-3xl p-6 max-w-[400px] w-full shadow-2xl transform scale-95 transition-transform text-center flex flex-col max-h-[90vh]" id="modal-sugerencia-content">
+            <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner shrink-0"><i class="fas fa-magic"></i></div>
+            <h3 class="text-xl font-black text-slate-800 mb-2 shrink-0">¡Sugerencia de Ruta!</h3>
+            <p class="text-sm text-slate-500 mb-4 shrink-0" id="sugerencia-texto">Detectamos otros pedidos a la misma dirección.</p>
+            
+            <ul id="sugerencia-lista" class="text-left bg-slate-50 p-3 rounded-xl mb-5 overflow-y-auto custom-scroll text-xs space-y-2 border border-slate-200 flex-1">
+                </ul>
+            
+            <div class="flex flex-col gap-2 shrink-0">
+                <button onclick="confirmarSugerencia(true)" class="w-full bg-indigo-600 text-white font-black py-3 rounded-xl text-sm shadow-md transition hover:bg-indigo-700 active:scale-95 flex justify-center items-center gap-2">
+                    <i class="fas fa-layer-group"></i> Asignar TODOS juntos
+                </button>
+                <button onclick="confirmarSugerencia(false)" class="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-sm transition hover:bg-slate-200">
+                    Solo asignar este pedido
+                </button>
+                <button onclick="cerrarModalSugerencia()" class="w-full text-slate-400 font-bold py-2 rounded-xl text-xs transition hover:text-slate-600">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
 
     <div id="modal-formulario" class="fixed inset-0 bg-slate-900/80 z-[100] hidden items-center justify-center p-2 sm:p-4 backdrop-blur-sm transition-opacity opacity-0">
@@ -3493,66 +3512,130 @@
 
         // --- LÓGICA DE ASIGNACIÓN 1 A 1 CON BLOQUEOS EN RUTA ---
 
+       // Variables globales para la sugerencia
+        let sugerenciaPendientes = [];
+        let tempVehiculoSugerencia = null;
+        let tempChoferSugerencia = null;
+
+        // --- LÓGICA DE ASIGNACIÓN CON SUGERENCIA INTELIGENTE ---
         window.asignarSinSalida = () => {
-
             const vId = window.vehiculoSeleccionadoTemp;
-
             const cId = document.getElementById('selector-chofer-dinamico').value;
-
             if(!vId) return showToast("Falta seleccionar el vehículo", "error");
-
             if(!cId) return showToast("Falta seleccionar el operador", "error");
-
             
-
-            // 1. Validaciones EN RUTA (Totalmente bloqueados si ya salieron de planta)
-
+            // 1. Validaciones EN RUTA
             const enRutaV = viajesAgrupados.some(p => p.vehiculo_asignado === vId && p.estado === 'camino' && p.fecha_salida);
-
             if(enRutaV) return showToast("El vehículo está actualmente en ruta activa.", "error");
 
-
-
             const enRutaC = viajesAgrupados.some(p => p.chofer_asignado === cId && p.estado === 'camino' && p.fecha_salida);
-
             if(enRutaC) return showToast("El operador está actualmente en ruta activa.", "error");
 
-
-
-            // 2. Validaciones EN RAMPA (Asignación exclusiva 1 a 1 antes de salir)
-
+            // 2. Validaciones EN RAMPA
             const pedidosEnRampa = viajesAgrupados.filter(p => p.estado === 'camino' && !p.fecha_salida);
-
             
-
             const vehiculoOcupado = pedidosEnRampa.find(p => p.vehiculo_asignado === vId && p.chofer_asignado !== cId);
-
             if(vehiculoOcupado) {
-
                 const nombreOtroChofer = choferesDB.find(ch => ch.id === vehiculoOcupado.chofer_asignado)?.nombre || 'Otro operador';
-
                 return showToast(`⚠️ El vehículo ya está asignado a ${nombreOtroChofer}.`, "error");
-
             }
-
-
 
             const choferOcupado = pedidosEnRampa.find(p => p.chofer_asignado === cId && p.vehiculo_asignado !== vId);
-
             if(choferOcupado) {
-
                 const nombreOtroVehiculo = flotaDB.find(f => f.id === choferOcupado.vehiculo_asignado)?.nombre || 'Otra unidad';
-
                 return showToast(`⚠️ El operador ya está armando ruta en: ${nombreOtroVehiculo}.`, "error");
-
             }
 
+            // 3. NUEVO: LÓGICA DE DETECCIÓN DE HERMANOS A LA MISMA DIRECCIÓN
+            const dirActualLimpia = viajeSeleccionado.direccion.trim().toLowerCase();
+            
+            // Buscar pendientes que NO sean el actual, y que tengan exactamente la misma dirección
+            sugerenciaPendientes = viajesAgrupados.filter(p => 
+                p.estado === 'pendiente' && 
+                p.id !== viajeSeleccionado.id && 
+                p.direccion.trim().toLowerCase() === dirActualLimpia
+            );
 
+            if (sugerenciaPendientes.length > 0) {
+                // Guardamos la selección temporalmente
+                tempVehiculoSugerencia = vId;
+                tempChoferSugerencia = cId;
 
-            // Pasa todas las pruebas de seguridad
+                // Armar texto del modal
+                document.getElementById('sugerencia-texto').innerHTML = `Hemos detectado <b>${sugerenciaPendientes.length} pedido(s) adicional(es)</b> pendientes para entregar en esta misma dirección exacta. <br><br>¿Deseas enviarlos juntos en este camión?`;
 
-            ejecutarAccionBatch('camino', vId, cId, false); 
+                // Construir la lista de los hermanos
+                const listaHtml = sugerenciaPendientes.map(p => {
+                    const fol = p.folio_pedido || p.folio_factura || 'Sin Folio';
+                    return `<li class="border-b border-slate-100 pb-1">
+                        <span class="font-bold text-indigo-700 block">${p.cliente_nombre}</span>
+                        <span class="text-slate-500 text-[10px]">Folio: ${fol}</span>
+                    </li>`;
+                }).join('');
+                document.getElementById('sugerencia-lista').innerHTML = listaHtml;
 
+                // Abrir modal
+                abrirModalSugerencia();
+            } else {
+                // Si no hay hermanos, se asigna normalmente
+                ejecutarAccionBatch('camino', vId, cId, false); 
+            }
+        };
+
+        // --- MANEJO DEL MODAL DE SUGERENCIA ---
+        window.abrirModalSugerencia = () => {
+            const modal = document.getElementById('modal-sugerencia');
+            const content = document.getElementById('modal-sugerencia-content');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+        };
+
+        window.cerrarModalSugerencia = () => {
+            const modal = document.getElementById('modal-sugerencia'); 
+            const content = document.getElementById('modal-sugerencia-content');
+            content.classList.add('scale-95'); modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        };
+
+        window.confirmarSugerencia = async (agruparTodos) => {
+            cerrarModalSugerencia();
+            
+            if(!tempVehiculoSugerencia || !tempChoferSugerencia) return;
+
+            if(!agruparTodos) {
+                // Si elige "Solo este", procedemos como la vieja escuela
+                ejecutarAccionBatch('camino', tempVehiculoSugerencia, tempChoferSugerencia, false);
+                return;
+            }
+
+            // Si elige agrupar, hacemos un batch update para TODOS
+            showToast("Asignando grupo completo...", "info");
+            
+            const batch = db.batch();
+            const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+            const datosUpdate = {
+                estado: 'camino', 
+                vehiculo_asignado: tempVehiculoSugerencia, 
+                chofer_asignado: tempChoferSugerencia, 
+                fecha_actualizacion: timestamp
+            };
+
+            // 1. Agregar el pedido principal al batch
+            batch.update(db.collection('rutas_logistica').doc(viajeSeleccionado.id), datosUpdate);
+
+            // 2. Agregar todos los pedidos hermanos al batch
+            sugerenciaPendientes.forEach(p => {
+                batch.update(db.collection('rutas_logistica').doc(p.id), datosUpdate);
+            });
+
+            try {
+                await batch.commit();
+                showToast(`¡${sugerenciaPendientes.length + 1} pedidos enviados a la misma unidad!`);
+                cerrarDetalle();
+            } catch(e) {
+                console.error(e);
+                showToast("Error al asignar el grupo", "error");
+            }
         };
 
 
