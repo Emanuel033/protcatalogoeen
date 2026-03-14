@@ -828,12 +828,15 @@
                     document.getElementById('userRoleBadge').innerText = userData.rol === 'admin' ? 'ADMINISTRADOR' : 'ALMACÉN';
                     
                     applyRoleRestrictions(userData.rol);
-                    initializeData(); 
+                    // ¡OJO AQUÍ! Pasamos el rol a la función de inicialización
+                    initializeData(userData.rol); 
                     
                     overlay.classList.add('opacity-0');
                     setTimeout(() => overlay.classList.add('hidden'), 300);
                 } catch(e) {
-                    showLoginError("Error de conexión al verificar permisos.");
+                    // ESTO ES CLAVE: Imprime el error real en la consola y en pantalla
+                    console.error("🚨 ERROR REAL DETECTADO:", e);
+                    showLoginError("Error real: " + (e.message || "Ver consola para detalles."));
                     auth.signOut();
                 }
             } else {
@@ -908,7 +911,7 @@
             }
         }
 
-        function initializeData() {
+        function initializeData(rolUsuario) {
             if (isDataInitialized) return;
             isDataInitialized = true;
 
@@ -929,14 +932,13 @@
 
                 if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
                 if(currentTab === 'import') renderImportTable(); 
-            });
+            }, (error) => console.error("Error al cargar productos:", error));
 
             facturacionRef.onSnapshot((snapshot) => {
                 facturacionCatalog = [];
                 snapshot.forEach(doc => { facturacionCatalog.push({ id: doc.id, ...doc.data() }); });
                 updateGlobalImportBadge();
 
-                // LLENAR EL DATALIST ORDENADO ALFABÉTICAMENTE
                 const datalist = document.getElementById('codigosFacturacionList');
                 if (datalist) {
                     datalist.innerHTML = '';
@@ -954,13 +956,16 @@
 
                 if(currentTab === 'master') renderGroupedTable();
                 if(currentTab === 'import') renderImportTable();
-            });
+            }, (error) => console.error("Error al cargar facturación:", error));
 
-            cashiersRef.onSnapshot((snapshot) => {
-                cashiersList = [];
-                snapshot.forEach(doc => { cashiersList.push({ id: doc.id, ...doc.data() }); });
-                if(currentTab === 'cashiers') renderCashiers();
-            });
+            // SOLO EL ADMIN PUEDE LEER CAJEROS. Así evitamos el error de permisos del almacén.
+            if (rolUsuario === 'admin') {
+                cashiersRef.onSnapshot((snapshot) => {
+                    cashiersList = [];
+                    snapshot.forEach(doc => { cashiersList.push({ id: doc.id, ...doc.data() }); });
+                    if(currentTab === 'cashiers') renderCashiers();
+                }, (error) => console.error("Error al cargar cajeros:", error));
+            }
 
             bitacoraRef.orderBy('fecha', 'desc').limit(20).onSnapshot(snap => {
                 const container = document.getElementById('bitacoraCards');
@@ -989,7 +994,7 @@
                             </div>
                         </div>`;
                 });
-            });
+            }, (error) => console.error("Error al cargar bitácora:", error));
         }
 
         // ==========================================
