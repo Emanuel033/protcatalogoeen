@@ -427,9 +427,12 @@
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3 z-10 w-full sm:w-auto">
-                        <!-- Inputs de archivo ocultos (uno para total, uno para parcial) -->
                         <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, false)">
                         <input type="file" id="csvSyncPartialInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, true)">
+
+                        <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-6 py-3.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap border border-slate-700" title="Exportar tabla de pendientes a Excel">
+                            <i class="fas fa-file-excel text-lg"></i> <span class="hidden sm:inline">Exportar Excel</span>
+                        </button>
 
                         <button onclick="document.getElementById('csvSyncPartialInput').click()" class="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap border border-emerald-400" title="Solo crea y actualiza productos nuevos (no elimina lo anterior)">
                             <i class="fas fa-file-import text-lg"></i> <span class="hidden sm:inline">Actualización Parcial</span>
