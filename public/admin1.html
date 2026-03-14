@@ -1936,70 +1936,74 @@
         }
 
         async function saveBaseProduct() {
-            clearAllErrors();
-            let hasErrors = false;
+    clearAllErrors();
+    let hasErrors = false;
 
-            const id = document.getElementById('editId').value;
-            const tipo = document.getElementById('editTipo').value;
-            let receta = null;
-            let heredaDe = document.getElementById('editHeredaEmpaques').value || null;
+    const id = document.getElementById('editId').value;
+    const tipo = document.getElementById('editTipo').value;
+    let receta = null;
+    let heredaDe = document.getElementById('editHeredaEmpaques').value || null;
 
-            if (tipo === 'PIEZA_BASE') heredaDe = null;
+    if (tipo === 'PIEZA_BASE') heredaDe = null;
 
-            if (tipo === 'KIT_FLEXIBLE') {
-                receta = {};
-                document.querySelectorAll('.row-receta').forEach(row => {
-                    const cId = row.querySelector('.r-select').value;
-                    const cQty = parseInt(row.querySelector('.r-qty').value);
-                    if(cId && cQty > 0) receta[cId] = cQty;
-                });
-                if(Object.keys(receta).length === 0) {
-                    document.getElementById('recetaWrap').classList.add('border-red-500', 'bg-red-50');
-                    setTimeout(()=>document.getElementById('recetaWrap').classList.remove('border-red-500', 'bg-red-50'), 2000);
-                    return showToast('Los Kits Web necesitan al menos 1 componente en su receta.', 'error');
-                }
-            }
-
-            const nombreFlexible = document.getElementById('editName').value.trim();
-            const codigoFacturacion = document.getElementById('editCodigo').value.trim();
-            const activo = document.getElementById('editActivo').checked;
-
-            if (!nombreFlexible) { markError('editName', true); hasErrors = true; }
-            if (!codigoFacturacion && tipo !== 'KIT_FLEXIBLE') { markError('editCodigo', true); hasErrors = true; }
-            
-            if(hasErrors) return showToast('Por favor, completa los campos requeridos.', 'error');
-
-            const dataToUpdate = {
-                nombre_flexible: nombreFlexible,
-                imagen_url: document.getElementById('editImage').value.trim(),
-                categoria: document.getElementById('editCategory').value.trim(),
-                codigo_sistema_oficial: codigoFacturacion,
-                tipo_item: tipo,
-                receta_desglose: receta,
-                hereda_empaques_de: heredaDe,
-                activo: activo
-            };
-
-            const wasImport = document.getElementById('importOldId').value;
-            if(wasImport) dataToUpdate.id_facturacion = wasImport;
-
-            try {
-                if (id) {
-                    await productsRef.doc(id).update(dataToUpdate);
-                    showToast('Guardado con éxito');
-                } else {
-                    dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
-                    dataToUpdate.stock_total_piezas = 0; 
-                    const docRef = await productsRef.add(dataToUpdate);
-                    
-                    if(wasImport) { showToast('¡Importado exitosamente!'); switchTab('master'); } 
-                    else { showToast('Producto guardado.'); }
-                    openEditModal(docRef.id);
-                    return; 
-                }
-                closeModal('editModal');
-            } catch (e) { showToast('Error al guardar', 'error'); }
+    if (tipo === 'KIT_FLEXIBLE') {
+        receta = {};
+        document.querySelectorAll('.row-receta').forEach(row => {
+            const cId = row.querySelector('.r-select').value;
+            const cQty = parseInt(row.querySelector('.r-qty').value);
+            if(cId && cQty > 0) receta[cId] = cQty;
+        });
+        if(Object.keys(receta).length === 0) {
+            document.getElementById('recetaWrap').classList.add('border-red-500', 'bg-red-50');
+            setTimeout(()=>document.getElementById('recetaWrap').classList.remove('border-red-500', 'bg-red-50'), 2000);
+            return showToast('Los Kits Web necesitan al menos 1 componente en su receta.', 'error');
         }
+    }
+
+    const nombreFlexible = document.getElementById('editName').value.trim();
+    const codigoFacturacion = document.getElementById('editCodigo').value.trim();
+    const activo = document.getElementById('editActivo').checked;
+
+    if (!nombreFlexible) { markError('editName', true); hasErrors = true; }
+    if (!codigoFacturacion && tipo !== 'KIT_FLEXIBLE') { markError('editCodigo', true); hasErrors = true; }
+    
+    if(hasErrors) return showToast('Por favor, completa los campos requeridos.', 'error');
+
+    const dataToUpdate = {
+        nombre_flexible: nombreFlexible,
+        imagen_url: document.getElementById('editImage').value.trim(),
+        categoria: document.getElementById('editCategory').value.trim(),
+        codigo_sistema_oficial: codigoFacturacion,
+        tipo_item: tipo,
+        receta_desglose: receta,
+        hereda_empaques_de: heredaDe,
+        activo: activo
+    };
+
+    const wasImport = document.getElementById('importOldId').value;
+    if(wasImport) dataToUpdate.id_facturacion = wasImport;
+
+    try {
+        if (id) {
+            await productsRef.doc(id).update(dataToUpdate);
+            showToast('Guardado con éxito');
+        } else {
+            dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
+            dataToUpdate.stock_total_piezas = 0; 
+            const docRef = await productsRef.add(dataToUpdate);
+            
+            if(wasImport) { showToast('¡Importado exitosamente!'); switchTab('master'); } 
+            else { showToast('Producto guardado.'); }
+            openEditModal(docRef.id);
+            return; 
+        }
+        closeModal('editModal');
+    } catch (error) { 
+        // AQUÍ ESTÁ EL CAMBIO CLAVE
+        console.error("🚨 Error real detectado por Firebase:", error);
+        showToast(error.message || 'Error desconocido al guardar', 'error'); 
+    }
+}
 
         function importProduct(factId) {
             const fact = facturacionCatalog.find(x => x.id === factId);
