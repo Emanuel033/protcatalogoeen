@@ -2749,6 +2749,29 @@
     ]
   },
   {
+    "id": "5DhGuJstnmhj3ZcQFPFv",
+    "name": "TAPA DE PLASTICO BLANCA C/ORIFICIO PARA 15Y19 L MUN",
+    "category": "TAPAS",
+    "image": "https://i.ibb.co/KjbCJCD5/TAPA-DE-PLASTICO-BLANCA-CON-ORIFICIO-PARA-CUBETA-DE-15-Y-19-L.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TPBO-19-M/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "NiP4RojOZfPTgGRaoKFB",
+        "piezas": 50,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773519424,
+          "nanoseconds": 661000000
+        },
+        "sku": "TPBO-19-M/CP-50PZ"
+      }
+    ]
+  },
+  {
     "id": "5TaFwE4Il0EaMY0BRpHk",
     "name": "TARRO DE POLIETILENO NATURAL DE 20 G R-28 C/TAPA",
     "category": "PAD",
@@ -2805,6 +2828,18 @@
     "paquetes": []
   },
   {
+    "id": "7bN0d4vXQWBW9ZHipJQc",
+    "name": "BOTELLA PET FARMACEUTICA 240 ML C/TAPA R-24",
+    "category": "PET",
+    "image": "https://i.ibb.co/DfzLBQWf/BOTELLA-PET-FARMACEUTICA-DE-240-ML-CON-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BPF-240-AM/CR-CT",
+    "receta": null,
+    "paquetes": []
+  },
+  {
     "id": "9QThI7RkYnCvOE6hciyG",
     "name": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA AZUL 12X20X6 #91",
     "category": "BOLSAS",
@@ -2838,6 +2873,29 @@
     "codigo_sistema": "FPP-110-AM-CT",
     "receta": null,
     "paquetes": []
+  },
+  {
+    "id": "A4fZ5KaMmHF38D9Xa8TD",
+    "name": "TAPA DE PLASTICO NEGRA C/ORIFICIO P/CUBETA DE 19 Y 15 L MUN",
+    "category": "TAPAS",
+    "image": "https://i.ibb.co/67fqyY5Q/TAPA-DE-PLASTICO-NEGRA-CON-ORIFICIO-PARA-CUBETA-DE-15-Y-19-L.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TPN-O-19-H/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "oKdGrciVqyidCk9L59yJ",
+        "piezas": 50,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773519473,
+          "nanoseconds": 723000000
+        },
+        "sku": "TPN-O-19-H/CP-50PZ"
+      }
+    ]
   },
   {
     "id": "AprNyzyLiLz7MnjRWrUW",
@@ -2895,6 +2953,29 @@
           "seconds": 1773347197,
           "nanoseconds": 671000000
         }
+      }
+    ]
+  },
+  {
+    "id": "DqhwioTok1XMQeAJAeaG",
+    "name": "TAPA DE PLASTICO AZUL LTH P/CUBETA DE 15 Y 19 L C/ORIFI MUN",
+    "category": "TAPAS",
+    "image": "https://i.ibb.co/zTGwv6L1/TAPA-DE-PLASTICO-AZUL-CON-ORIFICIO-PARA-CUBETA-DE-15-Y-19-L.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TPA-19-M/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "Cd9lXtkAM4dmYW6rhfq8",
+        "piezas": 50,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773519357,
+          "nanoseconds": 413000000
+        },
+        "sku": "TPA-19-M/CP-50PZ"
       }
     ]
   },
@@ -3035,6 +3116,29 @@
     "codigo_sistema": "FPEC-500-S/T/CP",
     "receta": null,
     "paquetes": []
+  },
+  {
+    "id": "MWOfNuaxLVGZypql8E3W",
+    "name": "TAPA DE PLASTICO AMARILLA P/CUBETA DE 15 Y 19 L C/ORIF MUN",
+    "category": "TAPAS",
+    "image": "https://i.ibb.co/tMnqMvSN/TAPA-DE-PLASTICO-AMARILLA-CON-ORIFICIO-PARA-CUBETA-DE-15-Y-19-L.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TPAO-19-M",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "AthRcU54B5PembS3ACMA",
+        "piezas": 50,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773519389,
+          "nanoseconds": 553000000
+        },
+        "sku": "TPAO-19-M-50PZ"
+      }
+    ]
   },
   {
     "id": "Pl0lBiheeZpdxYdtHX0v",
@@ -3197,6 +3301,18 @@
     "paquetes": []
   },
   {
+    "id": "TGsVBkhjHYjzZyFLAUiI",
+    "name": "FUNDA PARA BOTELLA PET PIRAMIDE DE 30 ML",
+    "category": "OTROS",
+    "image": "https://i.ibb.co/Zz6mXBzp/FUNDA-PARA-BOTELLA-PET-PIRAMIDE.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BPPC-30-FUN/CP",
+    "receta": null,
+    "paquetes": []
+  },
+  {
     "id": "TVYTgqKKZmQK35nZy55C",
     "name": "BOLSA STAND UP POUCH C/Z KRAFT CON TRANS. 15X23X7 #53",
     "category": "BOLSAS",
@@ -3220,6 +3336,26 @@
     ]
   },
   {
+    "id": "UaGgPDGtdSp3kVjPxOWB",
+    "name": "CUBETA DE PLASTICO BLANCA DE 15 L CON TAPA Y FLEX MUN",
+    "category": "CUBETA DE PLASTICO",
+    "image": "https://i.ibb.co/V0NJpKSS/CUBETA-DE-PLASTICO-BLANCA-DE-15-LITROS-MUN-CON-TAPA-Y-FLEX.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "KIT_OFICIAL",
+    "codigo_sistema": "CPB-TO-FLEX-15-M",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "paquete_24",
+        "es_default": true,
+        "piezas": 24,
+        "nombre_paquete": "Paquete de 24 piezas",
+        "sku": "-OL8DIBSH8NJMBAJTTAA-24PZ"
+      }
+    ]
+  },
+  {
     "id": "Ubm3i6ArBp1IhENOiOL4",
     "name": "BOTELLA PAD NAT ALCOHOLERA DE 30 ML R-22 C/TAPA",
     "category": "PAD",
@@ -3238,6 +3374,18 @@
         "nombre_paquete": "Paquete de 900 piezas"
       }
     ]
+  },
+  {
+    "id": "V590efCVcLRX0tc6bwY8",
+    "name": "BOTELLA PET FARMACEUTICA DE 240 ML CRISTAL S/TAPA",
+    "category": "PET",
+    "image": "https://i.ibb.co/GfrP9Vds/BOTELLA-PET-FARMACEUTICA-DE-240-ML-SIN-TAPA.png",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "BPF-240-CR/CP",
+    "receta": null,
+    "paquetes": []
   },
   {
     "id": "WpAh4VYwLNOQFK00nHfb",
@@ -3286,6 +3434,29 @@
     "codigo_sistema": "PINA-20-S/CP",
     "receta": null,
     "paquetes": []
+  },
+  {
+    "id": "Zo2YGrJnlPqtIZqqIXgS",
+    "name": "TAPA DE PLASTICO ROJA C/ORIFICIO PARA 19 L MUN",
+    "category": "TAPAS",
+    "image": "https://i.ibb.co/8n7tHPgM/TAPA-DE-PLASTICO-ROJA-CON-ORIFICIO-PARA-CUBETA-DE-15-Y-19-L.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "PIEZA_BASE",
+    "codigo_sistema": "TPRO-19-M/CP",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "TT3ZGOTASBcysJrlnm94",
+        "piezas": 50,
+        "fecha_creacion": {
+          "type": "firestore/timestamp/1.0",
+          "seconds": 1773519312,
+          "nanoseconds": 952000000
+        },
+        "sku": "TPRO-19-M/CP-50PZ"
+      }
+    ]
   },
   {
     "id": "Zq01tBdqv3rER22fBFao",
@@ -3401,18 +3572,6 @@
     ]
   },
   {
-    "id": "e3ThiNjkXcDaWtXe2sul",
-    "name": "BOTELLA PET FARMACEUTICA 120 ML CRISTAL C/TAPA R-24",
-    "category": "PET",
-    "image": "https://i.ibb.co/vxq2fpcV/BOTELLA-PET-FARMACEUTICA-DE-120-ML-CON-TAPA.png",
-    "piezas": 1,
-    "stock": 0,
-    "tipo_item": "KIT_OFICIAL",
-    "codigo_sistema": "BPF-120-CR-CT",
-    "receta": null,
-    "paquetes": []
-  },
-  {
     "id": "e4zfAGKa1qTNzXIpldU1",
     "name": "BOTELLA PAD NAT ALCOHOLERA 60 ML R-22 S/TAPA",
     "category": "PAD",
@@ -3493,6 +3652,26 @@
     "codigo_sistema": "FPE-150C/T/CP",
     "receta": null,
     "paquetes": []
+  },
+  {
+    "id": "fCyGhZOJBlsrrciF28wR",
+    "name": "CUBETA DE PLASTICO BLANCA DE 19 L CON TAPA LISA NEGRA MUN",
+    "category": "CUBETA DE PLASTICO",
+    "image": "https://i.ibb.co/8gQJ5Qmt/CUBETA-DE-PLASTICO-BLANCA-DE-19-LITROS-MUN-CON-TAPA-LISA-NEGRA.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "KIT_OFICIAL",
+    "codigo_sistema": "CPB-TLN-19-M",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "paquete_24",
+        "sku": "-OL8DOL7WRKI41LRYCU1-24PZ",
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "fYj52Nj6GzlOF758J4X5",
@@ -3654,18 +3833,6 @@
     "paquetes": []
   },
   {
-    "id": "kusMvINdgxwxqy9DnaTs",
-    "name": "BOTELLA PET FARMACEUTICA 120 ML CRISTAL S/TAPA",
-    "category": "PET",
-    "image": "https://i.ibb.co/xtfYywCt/BOTELLA-PET-FARMACEUTICA-DE-120-ML-SIN-TAPA.png",
-    "piezas": 1,
-    "stock": 0,
-    "tipo_item": "PIEZA_BASE",
-    "codigo_sistema": "BPF-120-CR/CP",
-    "receta": null,
-    "paquetes": []
-  },
-  {
     "id": "l0dcRiRyvyLBljaVGEAd",
     "name": "BOTELLA PAD BCO ALCOHOLERA DE 1 LT LISA C/TAPA R-28",
     "category": "PAD",
@@ -3743,6 +3910,26 @@
     "codigo_sistema": "TLA-CF-200-GAM/CP",
     "receta": null,
     "paquetes": []
+  },
+  {
+    "id": "mTuH1kTJObG9x30kl0VK",
+    "name": "CUBETA DE PLASTICO BLANCA DE 19 L CON TAPA LISA ROJA MUN",
+    "category": "CUBETA DE PLASTICO",
+    "image": "https://i.ibb.co/Z6MrhNSL/CUBETA-DE-PLASTICO-BLANCA-DE-19-LITROS-MUN-CON-TAPA-LISA-ROJA.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "KIT_OFICIAL",
+    "codigo_sistema": "CPB-TLR-19-M",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "paquete_24",
+        "sku": "-OL8DOL7WRKI41LRYCU1-24PZ",
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "ni84XPWjPccSOuzv3hj9",
@@ -5083,7 +5270,7 @@
   {
     "id": "p18",
     "name": "CUBETA DE LAMINA BCA DE 19 L S/FENOL  C/TAPA  *",
-    "category": "CUBETA DE LAMINA",
+    "category": "LAMINA",
     "image": "https://i.ibb.co/r2W5gB0N/CUBETA-DE-LAMINA-BLANCA-DE-19-L-CON-TAPA-LISA.jpg",
     "piezas": 1,
     "stock": 0,
@@ -5263,7 +5450,7 @@
   {
     "id": "p19",
     "name": "CUBETA DE LAMINA C26 DE 19 L C/FENOL BCA UNI C/TAPA   *",
-    "category": "CUBETA DE LAMINA",
+    "category": "LAMINA",
     "image": "https://i.ibb.co/SwwwS517/CUBETA-DE-LAMINA-C26-DE-19-L-CON-FENOL-BLANCA.jpg",
     "piezas": 1,
     "stock": 0,
@@ -5403,7 +5590,7 @@
   {
     "id": "p20",
     "name": "CUBETA DE LAMINA C26 DE 19 L CERRADA S/FENOL BCA",
-    "category": "CUBETA DE LAMINA",
+    "category": "LAMINA",
     "image": "https://i.ibb.co/ycKrVp7t/CUBETA-DE-LAMINA-BLANCA-DE-19-L-CERRADA.jpg",
     "piezas": 1,
     "stock": 0,
@@ -5423,7 +5610,7 @@
   {
     "id": "p21",
     "name": "CUBETA DE LAMINA DE 19 L CERRADA S/FENOL NEGRA EEE   *",
-    "category": "CUBETA DE LAMINA",
+    "category": "LAMINA",
     "image": "https://i.ibb.co/239H8JF5/CUBETA-DE-LAMINA-NEGRA-DE-19-L-CERRADA.jpg",
     "piezas": 1,
     "stock": 0,
@@ -5583,7 +5770,7 @@
   {
     "id": "p22",
     "name": "CUBETA DE LAMINA NEGRA DE 19 L S/FENOL EEE  C/TAPA   *",
-    "category": "CUBETA DE LAMINA",
+    "category": "LAMINA",
     "image": "https://i.ibb.co/7JjCVg4g/CUBETA-DE-LAMINA-NEGRA-DE-19-L-CON-TAPA-LISA.jpg",
     "piezas": 1,
     "stock": 0,
@@ -12994,6 +13181,26 @@
         "piezas": 210,
         "es_default": true,
         "sku": "P96-210PZ"
+      }
+    ]
+  },
+  {
+    "id": "puuhnrNwnpTmYVJ73P2m",
+    "name": "CUBETA DE PLASTICO BLANCA DE 19 L CON TAPA Y FLEX MUN",
+    "category": "CUBETA DE PLASTICO",
+    "image": "https://i.ibb.co/VcbQkPxs/CUBETA-DE-PLASTICO-BLANCA-DE-19-LITROS-MUN-CON-TAPA-Y-FLEX.jpg",
+    "piezas": 1,
+    "stock": 0,
+    "tipo_item": "KIT_OFICIAL",
+    "codigo_sistema": "CPB-TO-FLEX-19-M",
+    "receta": null,
+    "paquetes": [
+      {
+        "id": "paquete_24",
+        "sku": "-OL8DOL7WRKI41LRYCU1-24PZ",
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "es_default": true
       }
     ]
   },
