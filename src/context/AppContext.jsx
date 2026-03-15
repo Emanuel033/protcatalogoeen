@@ -205,7 +205,7 @@ export const AppProvider = ({ children }) => {
   };
 
   // ======================================================================
-  // 2. ENVÍO POR CORREO (Mismo desglose, sin asteriscos de negritas)
+  // 2. ENVÍO POR CORREO (Formato formal, sin emojis para B2B)
   // ======================================================================
   const sendEmail = (clientData) => {
     if(carrito.length === 0) return alert("Carrito vacío");
@@ -216,17 +216,20 @@ export const AppProvider = ({ children }) => {
     const payment = clientData.paymentMethod || paymentMethod || 'Por definir';
     const isOcurre = clientData.ocurre;
 
-    let msg = `Hola, mi nombre es ${name}.\nPedido:\n\n`;
+    // Saludo más formal
+    let msg = `Estimado equipo de Ventas,\n\nAdjunto los detalles del pedido solicitado por: ${name}\n\n`;
+    
+    msg += `--- DATOS DE LOGÍSTICA Y PAGO ---\n`;
 
     if(delivery === 'recoger') {
-        msg += `📍 Recoger en Sucursal\n💳 Pago: ${payment}\n\n`;
+        msg += `Método de entrega: Recoger en Sucursal\nForma de pago: ${payment}\n\n`;
     } else if(delivery === 'local') {
-        msg += `🚚 Envío Local\n📍 Dirección: ${clientData.address || 'N/A'}\n💳 Pago: ${payment}\n\n`;
+        msg += `Método de entrega: Envío Local\nDirección: ${clientData.address || 'No especificada'}\nForma de pago: ${payment}\n\n`;
     } else if(delivery === 'foraneo') {
-        msg += `✈️ Envío Foráneo\n📦 Modalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${clientData.fletera || 'N/A'}\n💳 Pago: ${payment}\n\n`;
+        msg += `Método de entrega: Envío Foráneo\nModalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\nFletera: ${clientData.fletera || 'No especificada'}\nForma de pago: ${payment}\n\n`;
     }
 
-    msg += `🛒 LISTA DE ARTÍCULOS:\n\n`;
+    msg += `--- LISTA DE ARTÍCULOS ---\n\n`;
 
     carrito.forEach((item, index) => {
         const prod = productos.find(p => p.id === item.id) || item;
@@ -244,24 +247,24 @@ export const AppProvider = ({ children }) => {
         const p = Math.floor(item.cantidad / packSize);
         const l = item.cantidad % packSize;
         let desgloseText = [];
-        if(p > 0) desgloseText.push(`📦 ${p} Paq`);
-        if(l > 0) desgloseText.push(`🧩 ${l} Sueltas`);
+        if(p > 0) desgloseText.push(`${p} Paquetes`);
+        if(l > 0) desgloseText.push(`${l} Sueltas`);
         
         msg += `${index + 1}. ${item.name}\n`;
         
         if (tipoItem === 'PIEZA_BASE' || tipoItem === 'KIT_OFICIAL') {
-            msg += `🔹 [${codigoOficial}]\n`;
+            msg += `   Código: [${codigoOficial}]\n`;
             if(packSize > 1) {
-                msg += `📝 Selección: ${desgloseText.join(' | ')} | 🏷️ Total: ${item.cantidad} pz\n`;
+                msg += `   Selección: ${desgloseText.join(' | ')} | Total: ${item.cantidad} pz\n`;
             } else {
-                msg += `📦 Total: ${item.cantidad} pz\n`;
+                msg += `   Total: ${item.cantidad} pz\n`;
             }
         } 
         else if (tipoItem === 'KIT_FLEXIBLE') {
             if(packSize > 1) {
-                msg += `📝 Selección: ${desgloseText.join(' | ')} | 🏷️ Total Kits: ${item.cantidad}\n`;
+                msg += `   Selección: ${desgloseText.join(' | ')} | Total Kits: ${item.cantidad}\n`;
             } else {
-                msg += `🔢 Total Kits armados: ${item.cantidad}\n`;
+                msg += `   Total Kits armados: ${item.cantidad}\n`;
             }
             
             msg += `   --- DESGLOSE PARA CAPTURA ---\n`;
@@ -269,13 +272,15 @@ export const AppProvider = ({ children }) => {
             obtenerDesgloseBase(prod.id, item.cantidad, productos, desgloseFinal);
             
             for (const [cod, info] of Object.entries(desgloseFinal)) {
-                msg += `   🔸 [${cod}] ${info.nombre}: ${info.cantidad} pz\n`;
+                // Viñeta limpia con guion en lugar de emoji
+                msg += `   - [${cod}] ${info.nombre}: ${info.cantidad} pz\n`;
             }
         }
         msg += `\n`; 
     });
 
-    const subject = encodeURIComponent(`Nuevo Pedido de ${name}`);
+    // Asunto más profesional y descriptivo
+    const subject = encodeURIComponent(`Nuevo Pedido Web - ${name}`);
     const body = encodeURIComponent(msg);
     window.location.href = `mailto:ventas@laeconomicamty.com?subject=${subject}&body=${body}`;
   };
