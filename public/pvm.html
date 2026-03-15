@@ -670,132 +670,28 @@ window.calculateChange = () => {
             document.getElementById('productsGrid').classList.add('hidden');
 
             try {
+                // 1. Revisar configuración de inventario (opcional, desde Firebase)
                 try {
                     const configDoc = await db.collection('configuracion').doc('pos_settings').get();
                     if (configDoc.exists) { showInventoryConfig = configDoc.data().mostrar_inventario === true; }
                 } catch(e) {}
                 if(showInventoryConfig) { document.getElementById('inventoryStatusBadge').classList.remove('hidden'); }
 
-                if (!forceRefresh) {
-                    const cachedData = localStorage.getItem('een_catalog_cache');
-                    const cacheTime = localStorage.getItem('een_catalog_cache_time');
-                    if (cachedData && cacheTime && (Date.now() - parseInt(cacheTime) < 43200000)) {
-                        catalogProducts = JSON.parse(cachedData);
-                        loadingUI.classList.add('hidden');
-                        document.getElementById('productsGrid').classList.remove('hidden');
-                        resetRenderLimitAndFilter();
-                        setTimeout(()=> document.getElementById('searchInput').focus(), 500);
-                        return; 
-                    }
-                }
-
                 if (forceRefresh) showToast("Descargando catálogo actualizado...", "info");
 
-                let tempCatalog = {};
+                // 2. DESCARGAR EL JSON (Ultra rápido)
+                // Usamos getTime() para evitar que el navegador guarde una versión vieja en caché
+                const response = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
+                if (!response.ok) throw new Error("No se pudo descargar el catálogo.");
+                const allData = await response.json();
 
-                // PASO 1: CARGAR TODO CATALOGO_FACTURACION
-                const factSnap = await db.collection('catalogo_facturacion').get();
-                if (factSnap.empty) throw new Error("No hay productos en catalogo_facturacion");
+                // 3. EL FILTRO MÁGICO: Solo dejamos lo facturable
+                catalogProducts = allData.filter(p => 
+                    p.tipo_item === 'PIEZA_BASE' || p.tipo_item === 'KIT_OFICIAL'
+                );
 
-                factSnap.forEach(doc => {
-                    const data = doc.data();
-                    
-                    // CORRECCIÓN: Priorizar codigo_sistema_oficial para evadir el problema de las diagonales en Firebase
-                    const codeRaw = data.codigo_sistema_oficial || data.codigo_oficial || data.Codigo_oficial || data.codigo || data.Codigo || data.CODIGO || data['Código'] || data['CÓDIGO'] || data.clave || data.Clave || data.CLAVE || data.sku || data.SKU || data.ItemCode || data.itemCode || doc.id;
-                    const code = String(codeRaw).trim();
-                    
-                    const nombreRaw = data.descripcion_oficial || data.Descripcion_oficial || data.nombre_oficial || data.nombre || data.Nombre || data.descripcion || data.Descripcion || data.DESCRIPCION || data['Descripción'] || data['DESCRIPCIÓN'] || data.concepto || data.Concepto || data.CONCEPTO || data.ItemName || data.itemName || 'Articulo S/N';
-                    const nombre = String(nombreRaw).trim();
-                    
-                    const p = data.precio || data.Precio || data.precio_unitario || data.Precio_unitario || data.PRECIO || data.Price || data.price || data.precio1 || data.Precio1 || 0;
-                    const cleanP = String(p).replace(/[^0-9.]/g, '');
-                    const precioParsed = parseFloat(cleanP) || 0;
-
-                    tempCatalog[doc.id] = {
-                        id_facturacion: doc.id,
-                        codigo: code,
-                        nombre: nombre,
-                        precio: precioParsed,
-                        imagenes: [], 
-                        empaques_tips: [], 
-                        stock: 0,
-                        ids_master_vinculados: [] 
-                    };
-                });
-
-                // PASO 2: BUSCAR APOYOS EN PRODUCTOS_MASTER
-                try {
-                    const masterSnap = await db.collection('productos_master').where('activo', '==', true).get();
-                    masterSnap.forEach(doc => {
-                        const data = doc.data();
-                        
-                        // CORRECCIÓN: Priorizar codigo_sistema_oficial también en el maestro
-                        const masterCodeRaw = data.codigo_sistema_oficial || data.codigo_oficial || data.codigo || data.codigo_barras || data.sku || data.SKU || '';
-                        
-                        // MINÚSCULAS PARA EVITAR PROBLEMAS DE CRUCE
-                        const masterCode = String(masterCodeRaw).trim().toLowerCase();
-
-                        if (masterCode) {
-                            for (const factId in tempCatalog) {
-                                // MINÚSCULAS PARA EVITAR PROBLEMAS DE CRUCE
-                                const codigoFacturacionLimpio = String(tempCatalog[factId].codigo).trim().toLowerCase();
-                                
-                                if (codigoFacturacionLimpio === masterCode) {
-                                    
-                                    tempCatalog[factId].ids_master_vinculados.push(doc.id);
-
-                                    const imgUrl = data.imagen || data.url_imagen || data.foto || data.imagen_url || null;
-                                    if (imgUrl && !tempCatalog[factId].imagenes.includes(imgUrl)) {
-                                        tempCatalog[factId].imagenes.push(imgUrl);
-                                    }
-
-                                    const stockNum = parseFloat(data.inventario_actual || data.stock || data.existencia || 0);
-                                    tempCatalog[factId].stock += stockNum; 
-
-                                    const pb = parseInt(data.piezas_por_caja_original) || 1;
-                                    if (pb > 1 && !tempCatalog[factId].empaques_tips.includes(pb)) {
-                                        tempCatalog[factId].empaques_tips.push(pb);
-                                    }
-                                }
-                            }
-                        }
-                    });
-                } catch(e) { console.warn("Aviso: No se pudo cargar el maestro para apoyo visual", e); }
-
-                // PASO 3: BUSCAR PAQUETES DE LOS MAESTROS VINCULADOS
-                const promesasPaquetes = [];
-                for (const factId in tempCatalog) {
-                    const idsMaster = tempCatalog[factId].ids_master_vinculados;
-                    if (idsMaster.length > 0) {
-                        for (const mId of idsMaster) {
-                            promesasPaquetes.push(
-                                db.collection('productos_master').doc(mId).collection('paquetes').get().then(pkgs => {
-                                    pkgs.forEach(pDoc => {
-                                        const pData = pDoc.data();
-                                        const pz = parseInt(pData.piezas);
-                                        if (pz && !tempCatalog[factId].empaques_tips.includes(pz)) {
-                                            tempCatalog[factId].empaques_tips.push(pz);
-                                        }
-                                    });
-                                }).catch(() => {}) 
-                            );
-                        }
-                    }
-                }
-                await Promise.all(promesasPaquetes); 
-
-                catalogProducts = Object.values(tempCatalog).map(p => {
-                    p.empaques_tips.sort((a,b) => a - b); 
-                    p.imagen = p.imagenes.length > 0 ? p.imagenes[0] : null; 
-                    return p;
-                });
-                
+                // 4. Ordenar alfabéticamente
                 catalogProducts.sort((a,b) => String(a.nombre).localeCompare(String(b.nombre)));
-
-                try {
-                    localStorage.setItem('een_catalog_cache', JSON.stringify(catalogProducts));
-                    localStorage.setItem('een_catalog_cache_time', Date.now().toString());
-                } catch (e) { console.warn("No se pudo guardar caché (memoria llena)", e); }
 
                 loadingUI.classList.add('hidden');
                 document.getElementById('productsGrid').classList.remove('hidden');
