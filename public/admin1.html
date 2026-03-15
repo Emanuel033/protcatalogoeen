@@ -417,32 +417,36 @@
             <!-- VISTA: BANDEJA DE IMPORTACIÓN -->
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
                 <!-- Bento Banner Importación -->
-                <div class="mb-6 shrink-0 bg-slate-900 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden shadow-lg shadow-slate-900/10">
-                    <div class="absolute right-0 top-0 w-64 h-64 bg-blue-600 opacity-20 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
-                    <div class="flex items-center gap-5 z-10">
-                        <div class="w-16 h-16 bg-white/10 backdrop-blur border border-white/20 text-white rounded-2xl flex items-center justify-center text-3xl shrink-0"><i class="fas fa-cloud-download-alt"></i></div>
-                        <div>
-                            <h2 class="font-black text-white text-2xl tracking-tight mb-1">Cruce de Catálogos</h2>
-                            <p class="text-sm text-slate-300 font-medium max-w-xl">Sincroniza tu inventario desde un archivo Excel/CSV. Elige si deseas reemplazar todo el catálogo o solo actualizar e ingresar registros nuevos.</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-3 z-10 w-full sm:w-auto">
-                        <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, false)">
-                        <input type="file" id="csvSyncPartialInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, true)">
+                <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 relative overflow-hidden shadow-sm">
+    <div class="absolute right-0 top-0 w-48 h-48 bg-blue-600 opacity-20 rounded-full blur-3xl transform translate-x-10 -translate-y-10 pointer-events-none"></div>
+    
+    <div class="flex items-center gap-4 z-10">
+        <div class="w-12 h-12 bg-white/10 backdrop-blur border border-white/20 text-white rounded-xl flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-cloud-download-alt"></i>
+        </div>
+        <div>
+            <h2 class="font-bold text-white text-lg tracking-tight leading-tight mb-0.5">Cruce de Catálogos</h2>
+            <p class="text-xs text-slate-400 font-medium max-w-xl leading-snug">Sincroniza inventario desde Excel/CSV. Elige reemplazar todo o solo actualizar registros nuevos.</p>
+        </div>
+    </div>
 
-                        <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-6 py-3.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap border border-slate-700" title="Exportar tabla de pendientes a Excel">
-                            <i class="fas fa-file-excel text-lg"></i> <span class="hidden sm:inline">Exportar Excel</span>
-                        </button>
+    <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
+        <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, false)">
+        <input type="file" id="csvSyncPartialInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, true)">
 
-                        <button onclick="document.getElementById('csvSyncPartialInput').click()" class="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap border border-emerald-400" title="Solo crea y actualiza productos nuevos (no elimina lo anterior)">
-                            <i class="fas fa-file-import text-lg"></i> <span class="hidden sm:inline">Actualización Parcial</span>
-                        </button>
-                        
-                        <button onclick="document.getElementById('csvSyncInput').click()" class="flex-1 sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-6 py-3.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap border border-blue-400" title="Reemplaza todo el catálogo (Elimina lo que no venga en el Excel)">
-                            <i class="fas fa-sync text-lg"></i> <span class="hidden sm:inline">Sincronización Total</span>
-                        </button>
-                    </div>
-                </div>
+        <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
+            <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar Excel</span>
+        </button>
+
+        <button onclick="document.getElementById('csvSyncPartialInput').click()" class="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-emerald-400 shadow-sm" title="Solo crea y actualiza productos nuevos (no elimina lo anterior)">
+            <i class="fas fa-file-import"></i> <span class="hidden sm:inline">Act. Parcial</span>
+        </button>
+        
+        <button onclick="document.getElementById('csvSyncInput').click()" class="flex-1 sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-blue-400 shadow-sm" title="Reemplaza todo el catálogo (Elimina lo que no venga en el Excel)">
+            <i class="fas fa-sync"></i> <span class="hidden sm:inline">Sinc. Total</span>
+        </button>
+    </div>
+</div>
 
                 <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                     <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll p-1">
