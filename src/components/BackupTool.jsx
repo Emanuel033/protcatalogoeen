@@ -8,7 +8,30 @@ function BackupTool() {
   const descargarCatalogoPerfecto = async () => {
     setCargando(true);
     try {
-      // 1. Traemos los productos activos
+      // ==========================================
+      // 1. NUEVO: Traemos los PRECIOS de catalogo_facturacion
+      // ==========================================
+      const factSnap = await getDocs(collection(db, 'catalogo_facturacion'));
+      const facturacionMap = {};
+      
+      factSnap.forEach(doc => {
+        const data = doc.data();
+        const codeRaw = data.codigo_sistema_oficial || data.codigo_oficial || data.codigo || data.sku || doc.id;
+        const codeLimpio = String(codeRaw).trim().toLowerCase(); // Minúsculas para cruzar sin errores
+        
+        const pRaw = data.precio || data.Precio || data.precio_unitario || data.precio1 || 0;
+        const precioLimpio = parseFloat(String(pRaw).replace(/[^0-9.]/g, '')) || 0;
+
+        facturacionMap[codeLimpio] = {
+          id_facturacion: doc.id,
+          precio: precioLimpio,
+          nombre_oficial: data.descripcion_oficial || data.nombre || data.descripcion || 'S/N'
+        };
+      });
+
+      // ==========================================
+      // 2. Traemos los productos activos del Master
+      // ==========================================
       const q = query(collection(db, 'productos_master'), where('activo', '==', true));
       const snapshot = await getDocs(q);
 
@@ -22,7 +45,7 @@ function BackupTool() {
         else if (data.hereda_empaques_de) basesToFetch.add(data.hereda_empaques_de);
       });
 
-      // 2. Traemos las subcolecciones de paquetes
+      // 3. Traemos las subcolecciones de paquetes
       const paquetesMap = {};
       const promesasPaquetes = Array.from(basesToFetch).map(async (baseId) => {
         try {
@@ -34,72 +57,63 @@ function BackupTool() {
       });
       await Promise.all(promesasPaquetes);
 
-      // 3. Armamos el objeto final UNIVERSAL (Sirve para Web y para PVM)
+      // ==========================================
+      // 4. FUSIÓN: Armamos el objeto final UNIVERSAL
+      // ==========================================
       const allProducts = rawProducts.map(data => {
         
-        // Asignación de paquetes según herencia
         let paquetesDelProducto = [];
         if (data.tipo_item === 'PIEZA_BASE') paquetesDelProducto = paquetesMap[data.id] || [];
         else if (data.hereda_empaques_de) paquetesDelProducto = paquetesMap[data.hereda_empaques_de] || [];
 
-        // ==========================================
-        // EXTRACCIÓN ROBUSTA PARA EL PUNTO DE VENTA (PVM)
-        // ==========================================
-
-        // 1. Precio (Limpiando caracteres raros, ej: "$ 150.00" -> 150.00)
-        const pRaw = data.precio || data.Precio || data.precio_unitario || data.precio1 || 0;
-        const precioLimpio = parseFloat(String(pRaw).replace(/[^0-9.]/g, '')) || 0;
-
-        // 2. Código (Priorizando código oficial contable)
         const codigoLimpio = String(data.codigo_sistema_oficial || data.codigo_oficial || data.codigo || data.sku || data.id).trim();
+        const codigoLower = codigoLimpio.toLowerCase();
 
-        // 3. Nombre (Priorizando descripción oficial contable)
-        const nombreLimpio = String(data.descripcion_oficial || data.nombre_oficial || data.nombre || data.nombre_flexible || 'Articulo S/N').trim();
+        // AQUÍ OCURRE LA MAGIA: Buscamos el código en el mapa de facturación
+        const datosContables = facturacionMap[codigoLower] || {};
 
-        // 4. Stock (Cubriendo diferentes nombres de variables)
+        const precioFinal = datosContables.precio || 0;
+        const idFacturacionFinal = datosContables.id_facturacion || data.id;
+        const nombreOficialFinal = datosContables.nombre_oficial || data.nombre_flexible || 'Articulo S/N';
+
         const stockReal = parseFloat(data.inventario_actual || data.stock_total_piezas || data.stock || data.existencia || 0);
 
-        // 5. Empaques tips (Array de números [12, 50] para los botones azules del PVM)
         const empaquesTipsSet = new Set();
         const piezasBase = parseInt(data.piezas_por_caja_original) || 1;
-        if (piezasBase > 1) empaquesTipsSet.add(piezasBase); // Agrega la caja base
+        if (piezasBase > 1) empaquesTipsSet.add(piezasBase);
         
         paquetesDelProducto.forEach(pkg => {
           const pz = parseInt(pkg.piezas);
-          if (pz > 1) empaquesTipsSet.add(pz); // Agrega los paquetes extras
+          if (pz > 1) empaquesTipsSet.add(pz);
         });
         const empaquesTipsArray = Array.from(empaquesTipsSet).sort((a, b) => a - b);
 
-        // 6. Imagen Segura
-        const imgUrl = data.imagen_url || data.imagen || data.url_imagen || data.foto || null; // El PVM usa null para mostrar el icono gris por defecto
+        const imgUrl = data.imagen_url || data.imagen || data.url_imagen || data.foto || null;
 
-        // ==========================================
-        // CONSTRUCCIÓN DEL OBJETO FINAL
-        // ==========================================
         return {
-          // --- CAMPOS WEB (Manteniendo compatibilidad) ---
+          // --- CAMPOS WEB ---
           id: data.id,
-          name: data.nombre_flexible || nombreLimpio,
+          name: data.nombre_flexible || nombreOficialFinal,
           category: data.categoria || 'General',
           image: imgUrl || 'https://via.placeholder.com/300?text=Sin+Imagen',
           piezas: piezasBase,
           tipo_item: data.tipo_item || 'PIEZA_BASE',
-          codigo_sistema: data.codigo_sistema_oficial || data.codigo_sistema || codigoLimpio,
+          codigo_sistema: codigoLimpio,
           receta: data.receta_desglose || data.receta || null,
           paquetes: paquetesDelProducto,
 
-          // --- CAMPOS PVM (Para la Caja Mostrador) ---
-          id_facturacion: data.id, 
+          // --- CAMPOS PVM (Nutridos por catalogo_facturacion) ---
+          id_facturacion: idFacturacionFinal, 
           codigo: codigoLimpio,
-          nombre: nombreLimpio,
-          precio: precioLimpio,
+          nombre: nombreOficialFinal,
+          precio: precioFinal, // ¡Ya no será 0!
           stock: stockReal,
           imagen: imgUrl,
           empaques_tips: empaquesTipsArray
         };
       });
 
-      // 4. Descargamos el JSON
+      // 5. Descargamos el JSON
       const jsonTexto = JSON.stringify(allProducts, null, 2);
       const blob = new Blob([jsonTexto], { type: 'application/json' });
       const enlace = document.createElement('a');
