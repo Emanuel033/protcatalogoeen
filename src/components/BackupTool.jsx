@@ -34,23 +34,69 @@ function BackupTool() {
       });
       await Promise.all(promesasPaquetes);
 
-      // 3. Armamos el objeto final perfecto
+      // 3. Armamos el objeto final UNIVERSAL (Sirve para Web y para PVM)
       const allProducts = rawProducts.map(data => {
-        const producto = {
+        
+        // Asignación de paquetes según herencia
+        let paquetesDelProducto = [];
+        if (data.tipo_item === 'PIEZA_BASE') paquetesDelProducto = paquetesMap[data.id] || [];
+        else if (data.hereda_empaques_de) paquetesDelProducto = paquetesMap[data.hereda_empaques_de] || [];
+
+        // ==========================================
+        // EXTRACCIÓN ROBUSTA PARA EL PUNTO DE VENTA (PVM)
+        // ==========================================
+
+        // 1. Precio (Limpiando caracteres raros, ej: "$ 150.00" -> 150.00)
+        const pRaw = data.precio || data.Precio || data.precio_unitario || data.precio1 || 0;
+        const precioLimpio = parseFloat(String(pRaw).replace(/[^0-9.]/g, '')) || 0;
+
+        // 2. Código (Priorizando código oficial contable)
+        const codigoLimpio = String(data.codigo_sistema_oficial || data.codigo_oficial || data.codigo || data.sku || data.id).trim();
+
+        // 3. Nombre (Priorizando descripción oficial contable)
+        const nombreLimpio = String(data.descripcion_oficial || data.nombre_oficial || data.nombre || data.nombre_flexible || 'Articulo S/N').trim();
+
+        // 4. Stock (Cubriendo diferentes nombres de variables)
+        const stockReal = parseFloat(data.inventario_actual || data.stock_total_piezas || data.stock || data.existencia || 0);
+
+        // 5. Empaques tips (Array de números [12, 50] para los botones azules del PVM)
+        const empaquesTipsSet = new Set();
+        const piezasBase = parseInt(data.piezas_por_caja_original) || 1;
+        if (piezasBase > 1) empaquesTipsSet.add(piezasBase); // Agrega la caja base
+        
+        paquetesDelProducto.forEach(pkg => {
+          const pz = parseInt(pkg.piezas);
+          if (pz > 1) empaquesTipsSet.add(pz); // Agrega los paquetes extras
+        });
+        const empaquesTipsArray = Array.from(empaquesTipsSet).sort((a, b) => a - b);
+
+        // 6. Imagen Segura
+        const imgUrl = data.imagen_url || data.imagen || data.url_imagen || data.foto || null; // El PVM usa null para mostrar el icono gris por defecto
+
+        // ==========================================
+        // CONSTRUCCIÓN DEL OBJETO FINAL
+        // ==========================================
+        return {
+          // --- CAMPOS WEB (Manteniendo compatibilidad) ---
           id: data.id,
-          name: data.nombre_flexible || 'Sin nombre',
+          name: data.nombre_flexible || nombreLimpio,
           category: data.categoria || 'General',
-          image: data.imagen_url || '[https://via.placeholder.com/300?text=Sin+Imagen](https://via.placeholder.com/300?text=Sin+Imagen)',
-          piezas: data.piezas_por_caja_original || 1,
-          stock: data.stock_total_piezas || 0,
+          image: imgUrl || 'https://via.placeholder.com/300?text=Sin+Imagen',
+          piezas: piezasBase,
           tipo_item: data.tipo_item || 'PIEZA_BASE',
-          codigo_sistema: data.codigo_sistema_oficial || data.codigo_sistema || null,
+          codigo_sistema: data.codigo_sistema_oficial || data.codigo_sistema || codigoLimpio,
           receta: data.receta_desglose || data.receta || null,
-          paquetes: [] 
+          paquetes: paquetesDelProducto,
+
+          // --- CAMPOS PVM (Para la Caja Mostrador) ---
+          id_facturacion: data.id, 
+          codigo: codigoLimpio,
+          nombre: nombreLimpio,
+          precio: precioLimpio,
+          stock: stockReal,
+          imagen: imgUrl,
+          empaques_tips: empaquesTipsArray
         };
-        if (producto.tipo_item === 'PIEZA_BASE') producto.paquetes = paquetesMap[producto.id] || [];
-        else if (data.hereda_empaques_de) producto.paquetes = paquetesMap[data.hereda_empaques_de] || [];
-        return producto;
       });
 
       // 4. Descargamos el JSON
