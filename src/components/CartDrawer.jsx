@@ -16,11 +16,25 @@ function CartDrawer() {
   const [ocurre, setOcurre] = useState(true);
 
   const handleSendWhatsApp = () => {
-    sendWhatsApp({ name: clientName, address, fletera, ocurre });
+    sendWhatsApp({ 
+      name: clientName, 
+      deliveryMethod, 
+      paymentMethod, 
+      address, 
+      fletera, 
+      ocurre 
+    });
   };
 
   const handleSendEmail = () => {
-    sendEmail({ name: clientName, address, fletera, ocurre });
+    sendEmail({ 
+      name: clientName, 
+      deliveryMethod, 
+      paymentMethod, 
+      address, 
+      fletera, 
+      ocurre 
+    });
   };
 
 // ==========================================
