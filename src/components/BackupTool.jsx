@@ -9,43 +9,45 @@ function BackupTool() {
     setCargando(true);
     try {
       // ==========================================
-      // 1. NUEVO: Traemos los PRECIOS de catalogo_facturacion
+      // PASO 1: Descargar la VERDAD ABSOLUTA del PVM (catalogo_facturacion)
       // ==========================================
       const factSnap = await getDocs(collection(db, 'catalogo_facturacion'));
-      const facturacionMap = {};
+      const facturacionMap = {}; // Lo guardamos en un diccionario temporal
       
       factSnap.forEach(doc => {
         const data = doc.data();
         const codeRaw = data.codigo_sistema_oficial || data.codigo_oficial || data.codigo || data.sku || doc.id;
-        const codeLimpio = String(codeRaw).trim().toLowerCase(); // Minúsculas para cruzar sin errores
+        const codeLimpio = String(codeRaw).trim().toLowerCase();
         
         const pRaw = data.precio || data.Precio || data.precio_unitario || data.precio1 || 0;
         const precioLimpio = parseFloat(String(pRaw).replace(/[^0-9.]/g, '')) || 0;
 
         facturacionMap[codeLimpio] = {
           id_facturacion: doc.id,
+          codigo_original: String(codeRaw).trim(),
           precio: precioLimpio,
-          nombre_oficial: data.descripcion_oficial || data.nombre || data.descripcion || 'S/N'
+          nombre_oficial: data.descripcion_oficial || data.nombre || data.descripcion || 'Articulo S/N',
+          stock_facturacion: parseFloat(data.stock || data.existencia || 0)
         };
       });
 
       // ==========================================
-      // 2. Traemos los productos activos del Master
+      // PASO 2: Descargar la base visual (productos_master)
       // ==========================================
       const q = query(collection(db, 'productos_master'), where('activo', '==', true));
-      const snapshot = await getDocs(q);
+      const masterSnap = await getDocs(q);
 
-      let rawProducts = [];
+      let rawMaster = [];
       let basesToFetch = new Set();
 
-      snapshot.forEach(doc => {
+      masterSnap.forEach(doc => {
         const data = doc.data();
-        rawProducts.push({ id: doc.id, ...data });
+        rawMaster.push({ id: doc.id, ...data });
         if (data.tipo_item === 'PIEZA_BASE') basesToFetch.add(doc.id);
         else if (data.hereda_empaques_de) basesToFetch.add(data.hereda_empaques_de);
       });
 
-      // 3. Traemos las subcolecciones de paquetes
+      // PASO 3: Traer paquetes para los botones azules de cajas
       const paquetesMap = {};
       const promesasPaquetes = Array.from(basesToFetch).map(async (baseId) => {
         try {
@@ -58,10 +60,11 @@ function BackupTool() {
       await Promise.all(promesasPaquetes);
 
       // ==========================================
-      // 4. FUSIÓN: Armamos el objeto final UNIVERSAL
+      // PASO 4: MEZCLA FASE 1 (Master + Facturación)
       // ==========================================
-      const allProducts = rawProducts.map(data => {
-        
+      const allProducts = [];
+
+      rawMaster.forEach(data => {
         let paquetesDelProducto = [];
         if (data.tipo_item === 'PIEZA_BASE') paquetesDelProducto = paquetesMap[data.id] || [];
         else if (data.hereda_empaques_de) paquetesDelProducto = paquetesMap[data.hereda_empaques_de] || [];
@@ -69,14 +72,16 @@ function BackupTool() {
         const codigoLimpio = String(data.codigo_sistema_oficial || data.codigo_oficial || data.codigo || data.sku || data.id).trim();
         const codigoLower = codigoLimpio.toLowerCase();
 
-        // AQUÍ OCURRE LA MAGIA: Buscamos el código en el mapa de facturación
+        // Buscamos si existe en facturación
         const datosContables = facturacionMap[codigoLower] || {};
+        
+        // ¡TRUCO CLAVE! Lo borramos del mapa de facturación porque ya lo procesamos
+        delete facturacionMap[codigoLower]; 
 
         const precioFinal = datosContables.precio || 0;
         const idFacturacionFinal = datosContables.id_facturacion || data.id;
         const nombreOficialFinal = datosContables.nombre_oficial || data.nombre_flexible || 'Articulo S/N';
-
-        const stockReal = parseFloat(data.inventario_actual || data.stock_total_piezas || data.stock || data.existencia || 0);
+        const stockReal = parseFloat(data.inventario_actual || data.stock_total_piezas || datosContables.stock_facturacion || 0);
 
         const empaquesTipsSet = new Set();
         const piezasBase = parseInt(data.piezas_por_caja_original) || 1;
@@ -86,12 +91,10 @@ function BackupTool() {
           const pz = parseInt(pkg.piezas);
           if (pz > 1) empaquesTipsSet.add(pz);
         });
-        const empaquesTipsArray = Array.from(empaquesTipsSet).sort((a, b) => a - b);
 
         const imgUrl = data.imagen_url || data.imagen || data.url_imagen || data.foto || null;
 
-        return {
-          // --- CAMPOS WEB ---
+        allProducts.push({
           id: data.id,
           name: data.nombre_flexible || nombreOficialFinal,
           category: data.categoria || 'General',
@@ -102,18 +105,45 @@ function BackupTool() {
           receta: data.receta_desglose || data.receta || null,
           paquetes: paquetesDelProducto,
 
-          // --- CAMPOS PVM (Nutridos por catalogo_facturacion) ---
           id_facturacion: idFacturacionFinal, 
           codigo: codigoLimpio,
           nombre: nombreOficialFinal,
-          precio: precioFinal, // ¡Ya no será 0!
+          precio: precioFinal,
           stock: stockReal,
           imagen: imgUrl,
-          empaques_tips: empaquesTipsArray
-        };
+          empaques_tips: Array.from(empaquesTipsSet).sort((a, b) => a - b)
+        });
       });
 
-      // 5. Descargamos el JSON
+      // ==========================================
+      // PASO 5: MEZCLA FASE 2 (Los "Huérfanos" de Facturación)
+      // Todo lo que sobró en el mapa (que no tiene equivalente en Master) entra aquí.
+      // ==========================================
+      Object.values(facturacionMap).forEach(factData => {
+        allProducts.push({
+          // Campos de relleno para que la web no truene si llega a leerlo
+          id: factData.id_facturacion,
+          name: factData.nombre_oficial,
+          category: 'Sistema (Sin Master)',
+          image: 'https://via.placeholder.com/300?text=S/I',
+          piezas: 1,
+          tipo_item: 'PIEZA_BASE', // ¡Obligatorio para que el PVM lo muestre!
+          codigo_sistema: factData.codigo_original,
+          receta: null,
+          paquetes: [],
+
+          // Campos reales para el PVM
+          id_facturacion: factData.id_facturacion,
+          codigo: factData.codigo_original,
+          nombre: factData.nombre_oficial,
+          precio: factData.precio,
+          stock: factData.stock_facturacion,
+          imagen: null, // Sin imagen, el PVM mostrará el ícono de cajita gris
+          empaques_tips: [] // Sin cajas extra
+        });
+      });
+
+      // 6. Descargamos el JSON
       const jsonTexto = JSON.stringify(allProducts, null, 2);
       const blob = new Blob([jsonTexto], { type: 'application/json' });
       const enlace = document.createElement('a');
@@ -123,7 +153,7 @@ function BackupTool() {
       enlace.click();
       document.body.removeChild(enlace);
       
-      alert(`¡Catálogo Completo exportado con éxito!`);
+      alert(`¡Catálogo Universal (Master + Huérfanos) exportado con éxito!`);
     } catch (error) {
       console.error(error);
       alert(`Error al generar el catálogo.`);
