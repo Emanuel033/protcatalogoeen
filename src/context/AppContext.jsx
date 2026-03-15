@@ -100,14 +100,22 @@ export const AppProvider = ({ children }) => {
   const eliminarProducto = (id) => setCarrito(prev => prev.filter(item => item.id !== id));
   const totalPiezas = carrito.reduce((sum, item) => sum + item.cantidad, 0);
 
- // ======================================================================
-  // MOTOR TRADUCTOR RECURSIVO (El desglose sagrado)
+ /// ======================================================================
+  // MOTOR TRADUCTOR RECURSIVO (A PRUEBA DE BALAS)
   // ======================================================================
   const obtenerDesgloseBase = (idItem, cantidadMultiplicador, catalogoGlobal, resultado = {}) => {
       const item = catalogoGlobal.find(p => p.id === idItem);
       if (!item) return resultado;
 
-      if (item.tipo_item !== 'KIT_FLEXIBLE') {
+      // 1. Limpiamos el texto por si hay espacios extra, minúsculas o dice "FLEXIBLES"
+      const tipoStr = String(item.tipo_item || 'PIEZA_BASE').toUpperCase().trim();
+      
+      // 2. Es kit si dice la palabra "FLEXIBLE" o si simplemente TIENE una receta válida.
+      const tieneReceta = item.receta && Object.keys(item.receta).length > 0;
+      const esKitFlexible = tipoStr.includes('FLEXIBLE') || tieneReceta;
+
+      if (!esKitFlexible) {
+          // Es una pieza base, la sumamos a la lista final
           const cod = item.codigo_sistema || item.codigo_sistema_oficial || 'SIN-CODIGO';
           if (!resultado[cod]) {
               resultado[cod] = { nombre: item.name || item.nombre_flexible, cantidad: 0 };
@@ -115,15 +123,19 @@ export const AppProvider = ({ children }) => {
           resultado[cod].cantidad += cantidadMultiplicador;
       } 
       else {
+          // Es un Kit, nos metemos a escarbar en sus entrañas
           const receta = item.receta || item.receta_desglose;
-          if (receta) {
+          
+          if (receta && Object.keys(receta).length > 0) {
               for (const [compId, compQty] of Object.entries(receta)) {
+                  // Se invoca a sí misma (Recursividad al rescate)
                   obtenerDesgloseBase(compId, cantidadMultiplicador * compQty, catalogoGlobal, resultado);
               }
           } else {
-              resultado['ERROR-RECETA'] = { nombre: `[Falta Receta] ${item.name || item.nombre_flexible}`, cantidad: cantidadMultiplicador };
+              resultado['ERROR-RECETA'] = { nombre: `[BD: Falta Receta] ${item.name || item.nombre_flexible}`, cantidad: cantidadMultiplicador };
           }
       }
+      
       return resultado;
   };
 
