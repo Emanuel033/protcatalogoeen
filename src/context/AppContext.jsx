@@ -104,13 +104,30 @@ export const AppProvider = ({ children }) => {
     if(carrito.length === 0) return alert("Carrito vacío");
     registrarEvento('begin_checkout', { total_items: totalPiezas });
 
+    // 1. Obtenemos los datos tal como lo hace tu función sendEmail
     const name = clientData.name || "Cliente Público";
+    const address = clientData.address || "No especificada";
+    const delivery = deliveryMethod;
+    const payment = paymentMethod || "No especificado";
+
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
     
+    // ==========================================
+    // ESTE ES TU DESGLOSE INTACTO (NO SE TOCÓ)
+    // ==========================================
     carrito.forEach((item, index) => {
         msg += `*${index + 1}. ${item.name}* - Cant: ${item.cantidad}\n`;
     });
+    // ==========================================
 
+    // 2. Agregamos los datos de entrega y pago al final, con formato WhatsApp
+    msg += `\n*--- DATOS DE ENTREGA Y PAGO ---*\n`;
+    msg += `*Método de entrega:* ${delivery.toUpperCase()}\n`;
+    if (delivery === 'local') msg += `*Dirección:* ${address}\n`;
+    if (delivery === 'foraneo') msg += `*Fletera:* ${clientData.fletera || 'No especificada'} (${clientData.ocurre ? 'Ocurre' : 'Domicilio'})\n`;
+    msg += `*Método de pago:* ${payment.toUpperCase()}\n`;
+
+    // 3. Enviamos el mensaje
     window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`, '_blank');
   };
   
