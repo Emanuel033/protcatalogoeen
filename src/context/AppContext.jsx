@@ -100,63 +100,183 @@ export const AppProvider = ({ children }) => {
   const eliminarProducto = (id) => setCarrito(prev => prev.filter(item => item.id !== id));
   const totalPiezas = carrito.reduce((sum, item) => sum + item.cantidad, 0);
 
+ // ======================================================================
+  // MOTOR TRADUCTOR RECURSIVO (El desglose sagrado)
+  // ======================================================================
+  const obtenerDesgloseBase = (idItem, cantidadMultiplicador, catalogoGlobal, resultado = {}) => {
+      const item = catalogoGlobal.find(p => p.id === idItem);
+      if (!item) return resultado;
+
+      if (item.tipo_item !== 'KIT_FLEXIBLE') {
+          const cod = item.codigo_sistema || item.codigo_sistema_oficial || 'SIN-CODIGO';
+          if (!resultado[cod]) {
+              resultado[cod] = { nombre: item.name || item.nombre_flexible, cantidad: 0 };
+          }
+          resultado[cod].cantidad += cantidadMultiplicador;
+      } 
+      else {
+          const receta = item.receta || item.receta_desglose;
+          if (receta) {
+              for (const [compId, compQty] of Object.entries(receta)) {
+                  obtenerDesgloseBase(compId, cantidadMultiplicador * compQty, catalogoGlobal, resultado);
+              }
+          } else {
+              resultado['ERROR-RECETA'] = { nombre: `[Falta Receta] ${item.name || item.nombre_flexible}`, cantidad: cantidadMultiplicador };
+          }
+      }
+      return resultado;
+  };
+
+  // ======================================================================
+  // 1. ENVÍO POR WHATSAPP (Con negritas y emojis)
+  // ======================================================================
   const sendWhatsApp = (clientData) => {
     if(carrito.length === 0) return alert("Carrito vacío");
     registrarEvento('begin_checkout', { total_items: totalPiezas });
 
-    // 1. Obtenemos los datos tal como lo hace tu función sendEmail
     const name = clientData.name || "Cliente Público";
-    const address = clientData.address || "No especificada";
-    const delivery = deliveryMethod;
-    const payment = paymentMethod || "No especificado";
+    const delivery = clientData.deliveryMethod || deliveryMethod;
+    const payment = clientData.paymentMethod || paymentMethod || 'Por definir';
+    const isOcurre = clientData.ocurre;
 
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
-    
-    // ==========================================
-    // ESTE ES TU DESGLOSE INTACTO (NO SE TOCÓ)
-    // ==========================================
+
+    // Datos de entrega
+    if(delivery === 'recoger') {
+        msg += `📍 *Recoger en Sucursal*\n💳 Pago: ${payment}\n\n`;
+    } else if(delivery === 'local') {
+        msg += `🚚 *Envío Local*\n📍 Dirección: ${clientData.address || 'N/A'}\n💳 Pago: ${payment}\n\n`;
+    } else if(delivery === 'foraneo') {
+        msg += `✈️ *Envío Foráneo*\n📦 Modalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${clientData.fletera || 'N/A'}\n💳 Pago: ${payment}\n\n`;
+    }
+
+    msg += `*🛒 LISTA DE ARTÍCULOS:*\n\n`;
+
+    // Recorremos el carrito con tu lógica exacta
     carrito.forEach((item, index) => {
-        msg += `*${index + 1}. ${item.name}* - Cant: ${item.cantidad}\n`;
+        const prod = productos.find(p => p.id === item.id) || item;
+        const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
+        const paquetes = prod.paquetes || item.paquetes || [];
+        
+        let packSize = 1;
+        if (paquetes.length > 0) packSize = parseInt(paquetes[0].piezas);
+        else if (isBolsas) packSize = 100;
+        else packSize = parseInt(prod.piezas) || 0;
+
+        const tipoItem = prod.tipo_item || item.tipo_item || 'PIEZA_BASE';
+        const codigoOficial = prod.codigo_sistema || prod.codigo_sistema_oficial || item.codigo_sistema || 'SIN_CODIGO';
+        
+        // En React tu cantidad está en "item.cantidad" (en el viejo era item.quantity)
+        const p = Math.floor(item.cantidad / packSize);
+        const l = item.cantidad % packSize;
+        let desgloseText = [];
+        if(p > 0) desgloseText.push(`📦 ${p} Paq`);
+        if(l > 0) desgloseText.push(`🧩 ${l} Sueltas`);
+        
+        msg += `*${index + 1}. ${item.name}*\n`;
+        
+        if (tipoItem === 'PIEZA_BASE' || tipoItem === 'KIT_OFICIAL') {
+            msg += `🔹 [${codigoOficial}]\n`;
+            if(packSize > 1) {
+                msg += `📝 Selección: ${desgloseText.join(' | ')} | 🏷️ Total: ${item.cantidad} pz\n`;
+            } else {
+                msg += `📦 Total: ${item.cantidad} pz\n`;
+            }
+        } 
+        else if (tipoItem === 'KIT_FLEXIBLE') {
+            if(packSize > 1) {
+                msg += `📝 Selección: ${desgloseText.join(' | ')} | 🏷️ Total Kits: ${item.cantidad}\n`;
+            } else {
+                msg += `🔢 Total Kits armados: ${item.cantidad}\n`;
+            }
+            
+            msg += `   *--- DESGLOSE PARA CAPTURA ---*\n`;
+            const desgloseFinal = {};
+            obtenerDesgloseBase(prod.id, item.cantidad, productos, desgloseFinal);
+            
+            for (const [cod, info] of Object.entries(desgloseFinal)) {
+                msg += `   🔸 [${cod}] ${info.nombre}: ${info.cantidad} pz\n`;
+            }
+        }
+        msg += `\n`; 
     });
-    // ==========================================
 
-    // 2. Agregamos los datos de entrega y pago al final, con formato WhatsApp
-    msg += `\n*--- DATOS DE ENTREGA Y PAGO ---*\n`;
-    msg += `*Método de entrega:* ${delivery.toUpperCase()}\n`;
-    if (delivery === 'local') msg += `*Dirección:* ${address}\n`;
-    if (delivery === 'foraneo') msg += `*Fletera:* ${clientData.fletera || 'No especificada'} (${clientData.ocurre ? 'Ocurre' : 'Domicilio'})\n`;
-    msg += `*Método de pago:* ${payment.toUpperCase()}\n`;
-
-    // 3. Enviamos el mensaje
     window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`, '_blank');
   };
-  
-// --- NUEVA FUNCIÓN: Enviar por Correo ---
+
+  // ======================================================================
+  // 2. ENVÍO POR CORREO (Mismo desglose, sin asteriscos de negritas)
+  // ======================================================================
   const sendEmail = (clientData) => {
     if(carrito.length === 0) return alert("Carrito vacío");
     registrarEvento('begin_checkout_email', { total_items: totalPiezas });
 
     const name = clientData.name || "Cliente Público";
-    const address = clientData.address || "No especificada";
-    const delivery = deliveryMethod;
-    const payment = paymentMethod || "No especificado";
+    const delivery = clientData.deliveryMethod || deliveryMethod;
+    const payment = clientData.paymentMethod || paymentMethod || 'Por definir';
+    const isOcurre = clientData.ocurre;
 
-    let msg = `Hola, mi nombre es ${name}.\n\nAdjunto los detalles de mi pedido:\n\n`;
-    
+    let msg = `Hola, mi nombre es ${name}.\nPedido:\n\n`;
+
+    if(delivery === 'recoger') {
+        msg += `📍 Recoger en Sucursal\n💳 Pago: ${payment}\n\n`;
+    } else if(delivery === 'local') {
+        msg += `🚚 Envío Local\n📍 Dirección: ${clientData.address || 'N/A'}\n💳 Pago: ${payment}\n\n`;
+    } else if(delivery === 'foraneo') {
+        msg += `✈️ Envío Foráneo\n📦 Modalidad: ${isOcurre ? 'OCURRE' : 'DOMICILIO'}\n🚛 Fletera: ${clientData.fletera || 'N/A'}\n💳 Pago: ${payment}\n\n`;
+    }
+
+    msg += `🛒 LISTA DE ARTÍCULOS:\n\n`;
+
     carrito.forEach((item, index) => {
-        msg += `${index + 1}. ${item.name} - Cantidad: ${item.cantidad}\n`;
-    });
+        const prod = productos.find(p => p.id === item.id) || item;
+        const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
+        const paquetes = prod.paquetes || item.paquetes || [];
+        
+        let packSize = 1;
+        if (paquetes.length > 0) packSize = parseInt(paquetes[0].piezas);
+        else if (isBolsas) packSize = 100;
+        else packSize = parseInt(prod.piezas) || 0;
 
-    msg += `\n--- DATOS DE ENTREGA Y PAGO ---\n`;
-    msg += `Método de entrega: ${delivery.toUpperCase()}\n`;
-    if (delivery === 'local') msg += `Dirección: ${address}\n`;
-    if (delivery === 'foraneo') msg += `Fletera: ${clientData.fletera || 'No especificada'} (${clientData.ocurre ? 'Ocurre' : 'Domicilio'})\n`;
-    msg += `Método de pago: ${payment.toUpperCase()}\n\n`;
+        const tipoItem = prod.tipo_item || item.tipo_item || 'PIEZA_BASE';
+        const codigoOficial = prod.codigo_sistema || prod.codigo_sistema_oficial || item.codigo_sistema || 'SIN_CODIGO';
+        
+        const p = Math.floor(item.cantidad / packSize);
+        const l = item.cantidad % packSize;
+        let desgloseText = [];
+        if(p > 0) desgloseText.push(`📦 ${p} Paq`);
+        if(l > 0) desgloseText.push(`🧩 ${l} Sueltas`);
+        
+        msg += `${index + 1}. ${item.name}\n`;
+        
+        if (tipoItem === 'PIEZA_BASE' || tipoItem === 'KIT_OFICIAL') {
+            msg += `🔹 [${codigoOficial}]\n`;
+            if(packSize > 1) {
+                msg += `📝 Selección: ${desgloseText.join(' | ')} | 🏷️ Total: ${item.cantidad} pz\n`;
+            } else {
+                msg += `📦 Total: ${item.cantidad} pz\n`;
+            }
+        } 
+        else if (tipoItem === 'KIT_FLEXIBLE') {
+            if(packSize > 1) {
+                msg += `📝 Selección: ${desgloseText.join(' | ')} | 🏷️ Total Kits: ${item.cantidad}\n`;
+            } else {
+                msg += `🔢 Total Kits armados: ${item.cantidad}\n`;
+            }
+            
+            msg += `   --- DESGLOSE PARA CAPTURA ---\n`;
+            const desgloseFinal = {};
+            obtenerDesgloseBase(prod.id, item.cantidad, productos, desgloseFinal);
+            
+            for (const [cod, info] of Object.entries(desgloseFinal)) {
+                msg += `   🔸 [${cod}] ${info.nombre}: ${info.cantidad} pz\n`;
+            }
+        }
+        msg += `\n`; 
+    });
 
     const subject = encodeURIComponent(`Nuevo Pedido de ${name}`);
     const body = encodeURIComponent(msg);
-    
-    // Cambia el correo "ventas@laeconomicamty.com" 
     window.location.href = `mailto:ventas@laeconomicamty.com?subject=${subject}&body=${body}`;
   };
 
