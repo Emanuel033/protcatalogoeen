@@ -3,7 +3,7 @@ name: Deploy to Firebase Hosting on merge
   push:
     branches:
       - main
-      # ESTO ES LO IMPORTANTE: Escucha el grito de Vercel
+  # ESTO ES LO IMPORTANTE: Escucha el grito de Vercel
   repository_dispatch:
     types: [actualizar-catalogo]
 jobs:
@@ -12,13 +12,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # 1. Instalar dependencias
+      # 1. Instalar dependencias normales de tu proyecto
       - run: npm ci
       
-      # 2. Compilar React (Esto junta React y tus HTML en la carpeta dist)
+      # 2. Instalar Firebase Admin (Solo para el script generador)
+      - name: Instalar Firebase Admin
+        run: npm install firebase-admin
+      
+      # 3. EJECUTAR EL SCRIPT GENERADOR DE JSON
+      - name: Generar catalogo.json dinámico
+        env:
+          # Usamos el secreto que ya tienes configurado para Firebase Hosting
+          FIREBASE_SERVICE_ACCOUNT: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRODUCTOSEEN }}'
+        run: node generar_catalogo.js
+      
+      # 4. Compilar React (Esto junta React, tus HTML y el nuevo catalogo.json en la carpeta dist)
       - run: npm run build
       
-      # 3. Subir a Firebase
+      # 5. Subir todo a Firebase Hosting
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
