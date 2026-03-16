@@ -249,6 +249,7 @@
                 <button onclick="exportPendingMasterToExcel()" id="btnExportPending" class="flex-none bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 px-3 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 transition" title="Exportar Faltantes Web"><i class="fas fa-file-excel text-sm"></i></button>
                 <button id="btn-mass-qr" onclick="openMassActions()" class="hidden md:flex flex-none bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm items-center gap-2 transition"><i class="fas fa-qrcode"></i> QRs</button>
                 <button id="btn-new-product" onclick="openEditModal()" class="hidden md:flex bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-slate-900/20 items-center gap-2"><i class="fas fa-plus"></i> Crear Producto</button>
+                <button id="btn-deploy" onclick="solicitarActualizacionGitHub()" class="hidden md:flex bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-blue-600/30 items-center gap-2"><i class="fas fa-rocket"></i> Publicar Web</button>
             </div>
         </div>
 
@@ -259,7 +260,7 @@
             <div id="view-master" class="h-full flex flex-col w-full px-4 md:px-8 py-6 max-w-[1400px] mx-auto fade-in">
                 
                 <!-- BENTO GRID STATS -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-5 shrink-0">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 shrink-0">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between relative overflow-hidden">
                         <div class="absolute -right-4 -bottom-4 opacity-[0.03]"><i class="fas fa-boxes text-8xl"></i></div>
                         <div class="relative z-10">
@@ -275,15 +276,6 @@
                             <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-4"><i class="fas fa-exclamation text-lg"></i></div>
                             <p class="text-[11px] text-orange-600 font-bold uppercase tracking-wider mb-1">Por Configurar / Heredar</p>
                             <p class="text-4xl lg:text-5xl font-black text-orange-600 tracking-tight" id="count-pending">0</p>
-                        </div>
-                    </div>
-
-                    <div class="hidden lg:flex bg-slate-900 text-white p-6 rounded-3xl shadow-lg shadow-slate-900/10 flex-col justify-center items-center relative overflow-hidden group cursor-pointer border border-slate-800 hover:border-slate-700 transition-colors" onclick="openEditModal()">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 opacity-20 rounded-full blur-3xl transform translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700"></div>
-                        <div class="relative z-10 text-center">
-                            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-white/10 group-hover:bg-white/20 transition-colors"><i class="fas fa-plus"></i></div>
-                            <p class="font-bold text-lg tracking-tight">Nuevo Producto</p>
-                            <p class="text-[11px] text-slate-400 font-medium mt-1">Dar de alta manualmente</p>
                         </div>
                     </div>
                 </div>
@@ -426,20 +418,36 @@
             <!-- VISTA: BANDEJA DE IMPORTACIÓN -->
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
                 <!-- Bento Banner Importación -->
-                <div class="mb-6 shrink-0 bg-slate-900 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden shadow-lg shadow-slate-900/10">
-                    <div class="absolute right-0 top-0 w-64 h-64 bg-blue-600 opacity-20 rounded-full blur-3xl transform translate-x-20 -translate-y-20"></div>
-                    <div class="flex items-center gap-5 z-10">
-                        <div class="w-16 h-16 bg-white/10 backdrop-blur border border-white/20 text-white rounded-2xl flex items-center justify-center text-3xl shrink-0"><i class="fas fa-cloud-download-alt"></i></div>
-                        <div>
-                            <h2 class="font-black text-white text-2xl tracking-tight mb-1">Cruce de Catálogos</h2>
-                            <p class="text-sm text-slate-300 font-medium max-w-xl">Códigos detectados en tu sistema de facturación que aún no tienen una ficha visual (foto, recetas, empaques) en el portal web.</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-3 z-10 w-full sm:w-auto">
-                        <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event)">
-                        <button onclick="document.getElementById('csvSyncInput').click()" class="flex-1 sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-6 py-3.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap border border-blue-400"><i class="fas fa-file-upload text-lg"></i> <span class="hidden sm:inline">Subir Excel Físico</span></button>
-                    </div>
-                </div>
+                <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 relative overflow-hidden shadow-sm">
+    <div class="absolute right-0 top-0 w-48 h-48 bg-blue-600 opacity-20 rounded-full blur-3xl transform translate-x-10 -translate-y-10 pointer-events-none"></div>
+    
+    <div class="flex items-center gap-4 z-10">
+        <div class="w-12 h-12 bg-white/10 backdrop-blur border border-white/20 text-white rounded-xl flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-cloud-download-alt"></i>
+        </div>
+        <div>
+            <h2 class="font-bold text-white text-lg tracking-tight leading-tight mb-0.5">Cruce de Catálogos</h2>
+            <p class="text-xs text-slate-400 font-medium max-w-xl leading-snug">Sincroniza inventario desde Excel/CSV. Elige reemplazar todo o solo actualizar registros nuevos.</p>
+        </div>
+    </div>
+
+    <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
+        <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, false)">
+        <input type="file" id="csvSyncPartialInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, true)">
+
+        <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
+            <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar Excel</span>
+        </button>
+
+        <button onclick="document.getElementById('csvSyncPartialInput').click()" class="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-emerald-400 shadow-sm" title="Solo crea y actualiza productos nuevos (no elimina lo anterior)">
+            <i class="fas fa-file-import"></i> <span class="hidden sm:inline">Act. Parcial</span>
+        </button>
+        
+        <button onclick="document.getElementById('csvSyncInput').click()" class="flex-1 sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-blue-400 shadow-sm" title="Reemplaza todo el catálogo (Elimina lo que no venga en el Excel)">
+            <i class="fas fa-sync"></i> <span class="hidden sm:inline">Sinc. Total</span>
+        </button>
+    </div>
+</div>
 
                 <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                     <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll p-1">
@@ -775,7 +783,7 @@
         // ==========================================
         // REGISTRO DE SERVICE WORKER (PWA)
         // ==========================================
-    
+       
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
@@ -784,9 +792,7 @@
         });
     }
 
-
-        const IMGBB_API_KEY = "43034dab40f80fe91cd054d4949e5d5c"; 
-        const IMGBB_URL_ENDPOINT = "https://api.imgbb.com/1/upload";
+       
 
         let allItems = []; 
         let facturacionCatalog = []; 
@@ -829,12 +835,15 @@
                     document.getElementById('userRoleBadge').innerText = userData.rol === 'admin' ? 'ADMINISTRADOR' : 'ALMACÉN';
                     
                     applyRoleRestrictions(userData.rol);
-                    initializeData(); 
+                    // ¡OJO AQUÍ! Pasamos el rol a la función de inicialización
+                    initializeData(userData.rol); 
                     
                     overlay.classList.add('opacity-0');
                     setTimeout(() => overlay.classList.add('hidden'), 300);
                 } catch(e) {
-                    showLoginError("Error de conexión al verificar permisos.");
+                    // ESTO ES CLAVE: Imprime el error real en la consola y en pantalla
+                    console.error("🚨 ERROR REAL DETECTADO:", e);
+                    showLoginError("Error real: " + (e.message || "Ver consola para detalles."));
                     auth.signOut();
                 }
             } else {
@@ -909,7 +918,7 @@
             }
         }
 
-        function initializeData() {
+        function initializeData(rolUsuario) {
             if (isDataInitialized) return;
             isDataInitialized = true;
 
@@ -930,14 +939,13 @@
 
                 if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
                 if(currentTab === 'import') renderImportTable(); 
-            });
+            }, (error) => console.error("Error al cargar productos:", error));
 
             facturacionRef.onSnapshot((snapshot) => {
                 facturacionCatalog = [];
                 snapshot.forEach(doc => { facturacionCatalog.push({ id: doc.id, ...doc.data() }); });
                 updateGlobalImportBadge();
 
-                // LLENAR EL DATALIST ORDENADO ALFABÉTICAMENTE
                 const datalist = document.getElementById('codigosFacturacionList');
                 if (datalist) {
                     datalist.innerHTML = '';
@@ -955,13 +963,16 @@
 
                 if(currentTab === 'master') renderGroupedTable();
                 if(currentTab === 'import') renderImportTable();
-            });
+            }, (error) => console.error("Error al cargar facturación:", error));
 
-            cashiersRef.onSnapshot((snapshot) => {
-                cashiersList = [];
-                snapshot.forEach(doc => { cashiersList.push({ id: doc.id, ...doc.data() }); });
-                if(currentTab === 'cashiers') renderCashiers();
-            });
+            // SOLO EL ADMIN PUEDE LEER CAJEROS. Así evitamos el error de permisos del almacén.
+            if (rolUsuario === 'admin') {
+                cashiersRef.onSnapshot((snapshot) => {
+                    cashiersList = [];
+                    snapshot.forEach(doc => { cashiersList.push({ id: doc.id, ...doc.data() }); });
+                    if(currentTab === 'cashiers') renderCashiers();
+                }, (error) => console.error("Error al cargar cajeros:", error));
+            }
 
             bitacoraRef.orderBy('fecha', 'desc').limit(20).onSnapshot(snap => {
                 const container = document.getElementById('bitacoraCards');
@@ -990,7 +1001,7 @@
                             </div>
                         </div>`;
                 });
-            });
+            }, (error) => console.error("Error al cargar bitácora:", error));
         }
 
         // ==========================================
@@ -1101,32 +1112,79 @@
             setTimeout(() => { t.classList.add('hidden'); t.classList.remove('scale-in'); }, 3000);
         }
 
-        async function handleImageUpload(event) {
-            if(!IMGBB_API_KEY || IMGBB_API_KEY.includes("PON_TU_KEY_AQUI")) {
-                return showToast("Falta colocar tu API Key de ImgBB.", "error");
-            }
+        // ==========================================
+// CONEXIÓN A BÓVEDA SERVERLESS (VERCEL)
+// ==========================================
+const URL_VERCEL_IMGBB = 'api-proxy-een.vercel.app/api/upload';
+const URL_VERCEL_DEPLOY = 'api-proxy-een.vercel.app/api/deploy';
 
-            const file = event.target.files[0];
-            if(!file) return;
+const convertirABase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+});
 
-            const status = document.getElementById('uploadStatus');
-            const urlInput = document.getElementById('editImage');
-            const preview = document.getElementById('editImgPreview');
-            const btn = event.target.previousElementSibling; 
+async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if(!file) return;
 
-            status.classList.remove('hidden'); btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+    const status = document.getElementById('uploadStatus');
+    const urlInput = document.getElementById('editImage');
+    const preview = document.getElementById('editImgPreview');
+    const btn = event.target.previousElementSibling; 
 
-            const formData = new FormData(); formData.append('image', file);
-            try {
-                const response = await fetch(`${IMGBB_URL_ENDPOINT}?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
-                const data = await response.json();
-                if(data.success) {
-                    urlInput.value = data.data.url; preview.src = data.data.url;   
-                    showToast("Imagen subida con éxito");
-                } else showToast("Error al procesar en ImgBB", "error");
-            } catch (error) { showToast("Error de conexión al subir la imagen", "error");
-            } finally { status.classList.add('hidden'); btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); event.target.value = ''; }
+    status.classList.remove('hidden'); btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+    try {
+        const base64String = await convertirABase64(file);
+        
+        const response = await fetch(URL_VERCEL_IMGBB, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: base64String })
+        });
+        
+        const data = await response.json();
+
+        if(response.ok) {
+            urlInput.value = data.url; preview.src = data.url;   
+            showToast("Imagen subida con bóveda segura");
+        } else {
+            showToast("Error de la API: " + (data.error || 'Desconocido'), "error");
         }
+    } catch (error) { 
+        showToast("Error de conexión al subir la imagen", "error");
+    } finally { 
+        status.classList.add('hidden'); btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); event.target.value = ''; 
+    }
+}
+
+window.solicitarActualizacionGitHub = async () => {
+    if(!(await customConfirm('¿Actualizar el catálogo en vivo?\n\nEsto enviará la orden a GitHub para compilar la nueva versión y tardará un par de minutos en reflejarse.'))) return;
+
+    const overlay = document.getElementById('syncOverlay');
+    const statusText = document.getElementById('syncStatusText');
+    overlay.classList.remove('hidden');
+    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+    statusText.innerText = "Despertando bóveda y contactando a GitHub...";
+
+    try {
+        const respuesta = await fetch(URL_VERCEL_DEPLOY, { method: 'POST' });
+
+        if (respuesta.ok) {
+            showToast("¡Orden enviada! En breve la web estará actualizada.", "success");
+        } else {
+            const errData = await respuesta.json();
+            showToast("Fallo al contactar a la Bóveda. Error: " + errData.error, "error");
+        }
+    } catch (error) {
+        showToast("Error de conexión al intentar publicar.", "error");
+    } finally {
+        overlay.classList.add('opacity-0');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+    }
+};
 
         function getCalculatedStock(itemId, visited = new Set()) {
             if (visited.has(itemId)) return 0;
@@ -1929,70 +1987,74 @@
         }
 
         async function saveBaseProduct() {
-            clearAllErrors();
-            let hasErrors = false;
+    clearAllErrors();
+    let hasErrors = false;
 
-            const id = document.getElementById('editId').value;
-            const tipo = document.getElementById('editTipo').value;
-            let receta = null;
-            let heredaDe = document.getElementById('editHeredaEmpaques').value || null;
+    const id = document.getElementById('editId').value;
+    const tipo = document.getElementById('editTipo').value;
+    let receta = null;
+    let heredaDe = document.getElementById('editHeredaEmpaques').value || null;
 
-            if (tipo === 'PIEZA_BASE') heredaDe = null;
+    if (tipo === 'PIEZA_BASE') heredaDe = null;
 
-            if (tipo === 'KIT_FLEXIBLE') {
-                receta = {};
-                document.querySelectorAll('.row-receta').forEach(row => {
-                    const cId = row.querySelector('.r-select').value;
-                    const cQty = parseInt(row.querySelector('.r-qty').value);
-                    if(cId && cQty > 0) receta[cId] = cQty;
-                });
-                if(Object.keys(receta).length === 0) {
-                    document.getElementById('recetaWrap').classList.add('border-red-500', 'bg-red-50');
-                    setTimeout(()=>document.getElementById('recetaWrap').classList.remove('border-red-500', 'bg-red-50'), 2000);
-                    return showToast('Los Kits Web necesitan al menos 1 componente en su receta.', 'error');
-                }
-            }
-
-            const nombreFlexible = document.getElementById('editName').value.trim();
-            const codigoFacturacion = document.getElementById('editCodigo').value.trim();
-            const activo = document.getElementById('editActivo').checked;
-
-            if (!nombreFlexible) { markError('editName', true); hasErrors = true; }
-            if (!codigoFacturacion && tipo !== 'KIT_FLEXIBLE') { markError('editCodigo', true); hasErrors = true; }
-            
-            if(hasErrors) return showToast('Por favor, completa los campos requeridos.', 'error');
-
-            const dataToUpdate = {
-                nombre_flexible: nombreFlexible,
-                imagen_url: document.getElementById('editImage').value.trim(),
-                categoria: document.getElementById('editCategory').value.trim(),
-                codigo_sistema_oficial: codigoFacturacion,
-                tipo_item: tipo,
-                receta_desglose: receta,
-                hereda_empaques_de: heredaDe,
-                activo: activo
-            };
-
-            const wasImport = document.getElementById('importOldId').value;
-            if(wasImport) dataToUpdate.id_facturacion = wasImport;
-
-            try {
-                if (id) {
-                    await productsRef.doc(id).update(dataToUpdate);
-                    showToast('Guardado con éxito');
-                } else {
-                    dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
-                    dataToUpdate.stock_total_piezas = 0; 
-                    const docRef = await productsRef.add(dataToUpdate);
-                    
-                    if(wasImport) { showToast('¡Importado exitosamente!'); switchTab('master'); } 
-                    else { showToast('Producto guardado.'); }
-                    openEditModal(docRef.id);
-                    return; 
-                }
-                closeModal('editModal');
-            } catch (e) { showToast('Error al guardar', 'error'); }
+    if (tipo === 'KIT_FLEXIBLE') {
+        receta = {};
+        document.querySelectorAll('.row-receta').forEach(row => {
+            const cId = row.querySelector('.r-select').value;
+            const cQty = parseInt(row.querySelector('.r-qty').value);
+            if(cId && cQty > 0) receta[cId] = cQty;
+        });
+        if(Object.keys(receta).length === 0) {
+            document.getElementById('recetaWrap').classList.add('border-red-500', 'bg-red-50');
+            setTimeout(()=>document.getElementById('recetaWrap').classList.remove('border-red-500', 'bg-red-50'), 2000);
+            return showToast('Los Kits Web necesitan al menos 1 componente en su receta.', 'error');
         }
+    }
+
+    const nombreFlexible = document.getElementById('editName').value.trim();
+    const codigoFacturacion = document.getElementById('editCodigo').value.trim();
+    const activo = document.getElementById('editActivo').checked;
+
+    if (!nombreFlexible) { markError('editName', true); hasErrors = true; }
+    if (!codigoFacturacion && tipo !== 'KIT_FLEXIBLE') { markError('editCodigo', true); hasErrors = true; }
+    
+    if(hasErrors) return showToast('Por favor, completa los campos requeridos.', 'error');
+
+    const dataToUpdate = {
+        nombre_flexible: nombreFlexible,
+        imagen_url: document.getElementById('editImage').value.trim(),
+        categoria: document.getElementById('editCategory').value.trim(),
+        codigo_sistema_oficial: codigoFacturacion,
+        tipo_item: tipo,
+        receta_desglose: receta,
+        hereda_empaques_de: heredaDe,
+        activo: activo
+    };
+
+    const wasImport = document.getElementById('importOldId').value;
+    if(wasImport) dataToUpdate.id_facturacion = wasImport;
+
+    try {
+        if (id) {
+            await productsRef.doc(id).update(dataToUpdate);
+            showToast('Guardado con éxito');
+        } else {
+            dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
+            dataToUpdate.stock_total_piezas = 0; 
+            const docRef = await productsRef.add(dataToUpdate);
+            
+            if(wasImport) { showToast('¡Importado exitosamente!'); switchTab('master'); } 
+            else { showToast('Producto guardado.'); }
+            openEditModal(docRef.id);
+            return; 
+        }
+        closeModal('editModal');
+    } catch (error) { 
+        // AQUÍ ESTÁ EL CAMBIO CLAVE
+        console.error("🚨 Error real detectado por Firebase:", error);
+        showToast(error.message || 'Error desconocido al guardar', 'error'); 
+    }
+}
 
         function importProduct(factId) {
             const fact = facturacionCatalog.find(x => x.id === factId);
@@ -2311,7 +2373,7 @@
         };
 
         // --- LÓGICA: SINCRONIZAR CSV/EXCEL DESDE LA WEB ---
-        async function handleCSVUpload(event) {
+        async function handleCSVUpload(event, isPartial = false) {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -2360,30 +2422,34 @@
                     statusText.innerText = `Comparando ${productosCSV.length} productos con la base de datos...`;
 
                     const coleccion = 'catalogo_facturacion';
-                    const snapshotActual = await db.collection(coleccion).get();
-                    const idsAEliminar = [];
-
-                    snapshotActual.forEach(doc => {
-                        if (!idsOficialesCSV.has(doc.id)) {
-                            idsAEliminar.push(doc.id);
-                        }
-                    });
-
+                    
                     const dividirEnLotes = (arreglo, tamano = 500) => {
                         const lotes = [];
                         for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano));
                         return lotes;
                     };
 
-                    if (idsAEliminar.length > 0) {
-                        statusText.innerText = `Eliminando ${idsAEliminar.length} productos descontinuados...`;
-                        const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
-                        for (const lote of lotesBorrado) {
-                            const batch = db.batch();
-                            lote.forEach(id => {
-                                batch.delete(db.collection(coleccion).doc(id));
-                            });
-                            await batch.commit();
+                    // SÓLO ELIMINAR SI NO ES PARCIAL
+                    if (!isPartial) {
+                        const snapshotActual = await db.collection(coleccion).get();
+                        const idsAEliminar = [];
+
+                        snapshotActual.forEach(doc => {
+                            if (!idsOficialesCSV.has(doc.id)) {
+                                idsAEliminar.push(doc.id);
+                            }
+                        });
+
+                        if (idsAEliminar.length > 0) {
+                            statusText.innerText = `Eliminando ${idsAEliminar.length} productos descontinuados...`;
+                            const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
+                            for (const lote of lotesBorrado) {
+                                const batch = db.batch();
+                                lote.forEach(id => {
+                                    batch.delete(db.collection(coleccion).doc(id));
+                                });
+                                await batch.commit();
+                            }
                         }
                     }
 
@@ -2399,7 +2465,7 @@
                         await batch.commit();
                     }
 
-                    showToast('¡Sincronización finalizada exitosamente!', 'success');
+                    showToast(isPartial ? '¡Actualización Parcial finalizada!' : '¡Sincronización Total finalizada!', 'success');
 
                 } catch (error) {
                     console.error("Error en sincronización:", error);
