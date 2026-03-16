@@ -3,6 +3,9 @@ name: Deploy to Firebase Hosting on merge
   push:
     branches:
       - main
+      # ESTO ES LO IMPORTANTE: Escucha el grito de Vercel
+  repository_dispatch:
+    types: [actualizar-catalogo]
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
