@@ -18,7 +18,7 @@
     <!-- PWA Manifest & App Config -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f8fafc">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/192">
+    <link rel="apple-touch-icon" href="https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -577,7 +577,7 @@
                     <div class="flex flex-col md:flex-row gap-6 items-start">
                         <div class="w-full md:w-auto flex flex-col items-center gap-3 shrink-0">
                             <div class="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden relative group cursor-zoom-in" onclick="openImageLightbox(document.getElementById('editImgPreview').src)">
-                                <img id="editImgPreview" src="https://via.placeholder.com/200" class="w-full h-full object-cover z-10 group-hover:scale-110 transition-transform duration-500">
+                                <img id="editImgPreview" src="https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO" class="w-full h-full object-cover z-10 group-hover:scale-110 transition-transform duration-500">
                                 <i class="fas fa-image absolute text-slate-300 text-4xl z-0"></i>
                             </div>
                         </div>
@@ -591,7 +591,7 @@
                                 <div class="md:col-span-2">
                                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Imagen del Producto</label>
                                     <div class="flex gap-2">
-                                        <input type="url" id="editImage" oninput="document.getElementById('editImgPreview').src = this.value || 'https://via.placeholder.com/200'" class="w-full input-modern px-4 py-3 rounded-xl text-slate-600 text-sm" placeholder="Pega una URL o sube una foto...">
+                                        <input type="url" id="editImage" oninput="document.getElementById('editImgPreview').src = this.value || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'" class="w-full input-modern px-4 py-3 rounded-xl text-slate-600 text-sm" placeholder="Pega una URL o sube una foto...">
                                         <button type="button" onclick="document.getElementById('imgUploadInput').click()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border border-indigo-200 shrink-0"><i class="fas fa-upload"></i> <span class="hidden sm:inline">Subir</span></button>
                                         <input type="file" id="imgUploadInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                                     </div>
@@ -1421,7 +1421,7 @@ window.solicitarActualizacionGitHub = async () => {
                 tr.innerHTML = `
                     <td class="px-3 py-3 text-center border-b border-slate-100"><input type="checkbox" class="row-cb cb-modern focus:ring-blue-500" value="${p.id}" onchange="updateBulkSelection()"></td>
                     <td class="px-3 py-3 flex items-center gap-4 border-b border-slate-100 min-w-[280px]">
-                        <img src="${p.imagen_url || 'https://via.placeholder.com/40'}" class="w-10 h-10 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform ${!isActivo ? 'grayscale' : ''}" onclick="openImageLightbox(this.src)">
+                        <img src="${p.imagen_url || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'}" class="w-10 h-10 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform ${!isActivo ? 'grayscale' : ''}" onclick="openImageLightbox(this.src)">
                         <div class="min-w-0 pr-2"><p class="font-black text-slate-800 text-sm truncate group-hover:text-blue-600 transition-colors cursor-pointer ${!isActivo ? 'line-through decoration-slate-300' : ''}" onclick="openEditModal('${p.id}')">${p.nombre_flexible || 'S/N'}</p>${statusBadge}</div>
                     </td>
                     <td class="px-3 py-3 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider">${p.categoria || 'N/A'}</span></td>
@@ -1583,7 +1583,7 @@ window.solicitarActualizacionGitHub = async () => {
             openEditModal(); 
             document.getElementById('modalTitle').innerText = 'Clonar Producto'; document.getElementById('editName').value = (p.nombre_flexible || 'Sin Nombre') + ' (Copia)';
             document.getElementById('editCategory').value = p.categoria || ''; document.getElementById('editImage').value = p.imagen_url || '';
-            document.getElementById('editImgPreview').src = p.imagen_url || 'https://via.placeholder.com/200'; document.getElementById('editCodigo').value = p.codigo_sistema_oficial ? p.codigo_sistema_oficial + '-COPIA' : '';
+            document.getElementById('editImgPreview').src = p.imagen_url || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'; document.getElementById('editCodigo').value = p.codigo_sistema_oficial ? p.codigo_sistema_oficial + '-COPIA' : '';
             document.getElementById('editTipo').value = p.tipo_item || 'PIEZA_BASE'; document.getElementById('editActivo').checked = p.activo !== false;
             
             document.getElementById('recetaContainer').innerHTML = '';
@@ -1724,7 +1724,7 @@ window.solicitarActualizacionGitHub = async () => {
             document.getElementById('scanProductName').innerText = p.nombre_flexible;
             document.getElementById('scanProductCode').innerText = p.codigo_sistema_oficial || 'PIEZA BASE';
             document.getElementById('scanProductStock').innerText = getCalculatedStock(p.id);
-            document.getElementById('scanProductId').value = p.id; document.getElementById('scanProductImg').src = p.imagen_url || 'https://via.placeholder.com/80';
+            document.getElementById('scanProductId').value = p.id; document.getElementById('scanProductImg').src = p.imagen_url || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO';
             
             try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
 
@@ -1920,7 +1920,7 @@ window.solicitarActualizacionGitHub = async () => {
             if (id) {
                 const p = allItems.find(x => x.id === id); if(!p) return;
                 document.getElementById('modalTitle').innerText = 'Configurar Producto'; document.getElementById('editId').value = p.id;
-                document.getElementById('editImgPreview').src = p.imagen_url || 'https://via.placeholder.com/200'; document.getElementById('editImage').value = p.imagen_url || '';
+                document.getElementById('editImgPreview').src = p.imagen_url || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'; document.getElementById('editImage').value = p.imagen_url || '';
                 document.getElementById('editName').value = p.nombre_flexible || ''; document.getElementById('editCategory').value = p.categoria || '';
                 document.getElementById('editCodigo').value = p.codigo_sistema_oficial || ''; document.getElementById('editTipo').value = p.tipo_item || 'PIEZA_BASE';
                 document.getElementById('editActivo').checked = p.activo !== false; 
@@ -1940,7 +1940,7 @@ window.solicitarActualizacionGitHub = async () => {
                 loadSubcollection(p.id);
             } else {
                 document.getElementById('modalTitle').innerText = 'Nuevo Producto'; document.getElementById('editId').value = '';
-                document.getElementById('editImgPreview').src = 'https://via.placeholder.com/200'; document.getElementById('editImage').value = '';
+                document.getElementById('editImgPreview').src = 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'; document.getElementById('editImage').value = '';
                 document.getElementById('editName').value = ''; document.getElementById('editCategory').value = '';
                 document.getElementById('editCodigo').value = ''; document.getElementById('editTipo').value = 'PIEZA_BASE';
                 document.getElementById('editActivo').checked = true; document.getElementById('recetaContainer').innerHTML = '';
@@ -2062,7 +2062,7 @@ window.solicitarActualizacionGitHub = async () => {
             document.getElementById('importOldId').value = fact.id; 
             document.getElementById('modalTitle').innerText = 'Completar Ficha Web';
             document.getElementById('editId').value = ''; 
-            document.getElementById('editImgPreview').src = 'https://via.placeholder.com/200';
+            document.getElementById('editImgPreview').src = 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO';
             document.getElementById('editImage').value = '';
             document.getElementById('editActivo').checked = true;
             
