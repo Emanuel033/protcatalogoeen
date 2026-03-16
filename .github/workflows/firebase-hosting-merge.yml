@@ -1,11 +1,17 @@
 name: Deploy to Firebase Hosting on merge
+
 'on':
   push:
     branches:
       - main
-  # ESTO ES LO IMPORTANTE: Escucha el grito de Vercel
+  # Escucha el grito de Vercel
   repository_dispatch:
     types: [actualizar-catalogo]
+
+# ESTA ES LA LÍNEA NUEVA: Obliga a GitHub a usar Node 24 y quita la advertencia
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
