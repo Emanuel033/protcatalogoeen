@@ -1079,7 +1079,7 @@
 
 
     <script>
-
+navigator.serviceWorker.register('./sw-rutas.js')
         document.getElementById('fecha-hoy').innerText = new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
 
 
