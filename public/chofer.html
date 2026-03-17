@@ -286,7 +286,7 @@
                     // alpha: false reduce significativamente el uso de memoria en el renderizado
                     const ctx = canvas.getContext('2d', { alpha: false }); 
                     
-                    const MAX_WIDTH = 800;
+                    const MAX_WIDTH = 600;
                     let width = img.width; 
                     let height = img.height;
                     
@@ -299,7 +299,7 @@
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    const base64 = canvas.toDataURL('image/jpeg', 0.6); 
+                    const base64 = canvas.toDataURL('image/jpeg', 0.4); 
                     
                     // 2. LIBERACIÓN AGRESIVA DE MEMORIA (Vital para evitar crasheos en móviles)
                     canvas.width = 0;
@@ -447,6 +447,8 @@
         }
 
         function renderizarViajes() {
+            // ¡NUEVO! Si un modal está abierto, no gastamos CPU/RAM renderizando el fondo
+            if (idViajeActivo !== null) return;
             const cont = document.getElementById('contenedor-viajes');
             const filtrados = misViajes.filter(v => tabActual === 'camino' ? v.estado === 'camino' : (v.estado === 'entregado' || v.estado === 'fallido'));
             
@@ -613,40 +615,50 @@
         };
 
         window.procesarEntrega = async () => {
-            const btn = document.getElementById('btn-confirmar-entrega');
-            const fileInputDoc = document.getElementById('cam-doc');
-            const fileInputMat = document.getElementById('cam-mat');
-            
-            if(!fileInputDoc.files || fileInputDoc.files.length === 0 || !fileInputMat.files || fileInputMat.files.length === 0) {
-                return showToast("⚠️ Debes capturar AMBAS fotos (Documento y Material)", "error");
-            }
+    const btn = document.getElementById('btn-confirmar-entrega');
+    const fileInputDoc = document.getElementById('cam-doc');
+    const fileInputMat = document.getElementById('cam-mat');
+    
+    if(!fileInputDoc.files || fileInputDoc.files.length === 0 || !fileInputMat.files || fileInputMat.files.length === 0) {
+        return showToast("⚠️ Debes capturar AMBAS fotos (Documento y Material)", "error");
+    }
 
-            btn.disabled = true; 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando evidencias (1/2)...';
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando evidencias...';
 
-            try {
-                // Pasamos el ID del preview para reutilizar la referencia en memoria y ahorrar doble carga de imagen
-                const b64Doc = await compressImage('cam-doc', 'preview-doc');
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo a la nube (2/2)...';
-                const b64Mat = await compressImage('cam-mat', 'preview-mat');
+    try {
+        // 1. Extraemos los Base64
+        const b64Doc = await compressImage('cam-doc', 'preview-doc');
+        const b64Mat = await compressImage('cam-mat', 'preview-mat');
 
-                await db.collection('rutas_logistica').doc(idViajeActivo).update({
-                    estado: 'entregado',
-                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(),
-                    fecha_entrega: firebase.firestore.FieldValue.serverTimestamp(), // AQUÍ ESTÁ EL CAMBIO SOLICITADO
-                    foto_evidencia: b64Doc, 
-                    foto_evidencia_material: b64Mat 
-                });
+        // 2. ¡NUEVO! Limpieza agresiva de RAM antes de la llamada a red
+        // Destruimos los pre-visualizadores y vaciamos los inputs para liberar memoria del navegador
+        resetPreview('cam-doc', 'preview-doc', 'Enviando...');
+        resetPreview('cam-mat', 'preview-mat', 'Enviando...');
+        fileInputDoc.value = '';
+        fileInputMat.value = '';
 
-                showToast("¡Entrega completada con éxito!");
-                cerrarModalEntrega();
-            } catch(e) {
-                showToast("Error de conexión. Intenta de nuevo.", "error");
-            } finally {
-                btn.disabled = false; 
-                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Subir y Finalizar';
-            }
-        };
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo a la nube...';
+
+        // 3. Subimos a Firestore
+        await db.collection('rutas_logistica').doc(idViajeActivo).update({
+            estado: 'entregado',
+            fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(),
+            fecha_entrega: firebase.firestore.FieldValue.serverTimestamp(),
+            foto_evidencia: b64Doc, 
+            foto_evidencia_material: b64Mat 
+        });
+
+        showToast("¡Entrega completada con éxito!");
+        cerrarModalEntrega();
+    } catch(e) {
+        console.error(e);
+        showToast("Error de conexión o archivo muy pesado.", "error");
+    } finally {
+        btn.disabled = false; 
+        btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Subir y Finalizar';
+    }
+};
 
         // ==========================================
         // MANEJO DE FALLAS (Misma seguridad aplicada)
