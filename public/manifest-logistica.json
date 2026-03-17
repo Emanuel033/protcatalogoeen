@@ -1,8 +1,8 @@
 {
-  "id": "/app-rutas",
+  "id": "/app-rutas-v1",
   "name": "Logistica EEN",
   "short_name": "Rutas EEN",
-  "start_url": "./rutas.html",
+  "start_url": "./rutas.html?modo=app",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
