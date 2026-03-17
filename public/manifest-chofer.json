@@ -1,8 +1,8 @@
 {
-  "id": "/app-chofer",
+  "id": "/app-chofer-v1",
   "name": "EEN Operador",
   "short_name": "Ruta EEN",
-  "start_url": "./chofer.html",
+  "start_url": "./chofer.html?modo=app",
   "display": "standalone",
   "theme_color": "#1e293b",
   "icons": [
