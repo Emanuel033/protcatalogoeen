@@ -1,5 +1,6 @@
 {
   "id": "/app-pvm-v1",
+  "scope": "/pvm.html",
   "name": "Ventas Mostrador EEN",
   "short_name": "PVM",
   "start_url": "./pvm.html?modo=app",
