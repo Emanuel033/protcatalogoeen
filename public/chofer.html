@@ -246,6 +246,9 @@
 
         // Cache para liberar la memoria de las vistas previas
         const imageCache = {};
+        
+        navigator.serviceWorker.register('./sw-chofer.js')
+        
 
         window.showToast = (msg, type='success') => {
             const t = document.createElement('div');
