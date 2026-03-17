@@ -68,8 +68,13 @@ export const AppProvider = ({ children }) => {
         if (!response.ok) throw new Error("Archivo JSON no encontrado");
         
         const allProducts = await response.json();
-        setProductos(allProducts);
-        extraerCategorias(allProducts);
+        // 🛑 EL FILTRO MÁGICO: 
+        // Le decimos a la web que ignore cualquier producto que sea del "Sistema"
+        const productosParaWeb = allProducts.filter(producto => 
+            producto.category !== 'Sistema (Sin Master)'
+        );
+        setProductos(productosParaWeb);
+        extraerCategorias(productosParaWeb);
         setCargando(false);
       } catch (error) {
         console.error("Error al cargar productos:", error);
