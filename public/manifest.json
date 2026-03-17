@@ -1,8 +1,8 @@
 {
-  "id": "/app-catalogo",
+  "id": "/app-catalogo-v1",
   "name": "Catálogo La Económica",
   "short_name": "Catálogo",
-  "start_url": "./",
+  "start_url": "./index.html?modo=app",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
