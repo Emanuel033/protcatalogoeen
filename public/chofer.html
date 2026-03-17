@@ -41,6 +41,11 @@
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        // ¡NUEVO! Habilitar caché offline
+        db.enablePersistence()
+          .catch((err) => {
+              console.warn("Error de persistencia offline:", err.code);
+          });
     </script>
 
     <header class="bg-slate-900 text-white pt-safe border-b border-slate-800 shrink-0 z-20 shadow-md">
