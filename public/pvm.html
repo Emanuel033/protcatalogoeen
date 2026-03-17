@@ -436,7 +436,7 @@
         window.reporteFacturasEfectivo = []; window.reporteFacturasTodas = []; window.reporteMostrador = [];        
         let showInventoryConfig = false;
         let currentRenderLimit = 100;
-
+        navigator.serviceWorker.register('./sw-pvm.js')
         // --- NUEVO: Variables para impresión local ---
         window.ticketLogoUrl = "https://i.ibb.co/dJr7BzL5/logoeen.png";
         window.ticketQrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://productoseen.web.app";
