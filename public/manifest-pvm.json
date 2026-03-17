@@ -1,8 +1,8 @@
 {
-  "id": "/app-pvm",
+  "id": "/app-pvm-v1",
   "name": "Ventas Mostrador EEN",
   "short_name": "PVM",
-  "start_url": "./pvm.html",
+  "start_url": "./pvm.html?modo=app",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
