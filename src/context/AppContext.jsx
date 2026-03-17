@@ -40,14 +40,27 @@ export const AppProvider = ({ children }) => {
   const [cargando, setCargando] = useState(true);
   const [categoriaActiva, setCategoriaActiva] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
-  const [carrito, setCarrito] = useState([]);
+  // 1. Al iniciar, intenta recuperar el carrito guardado
+  const [carrito, setCarrito] = useState(() => {
+    try {
+      const carritoGuardado = localStorage.getItem('carrito_een');
+      return carritoGuardado ? JSON.parse(carritoGuardado) : [];
+    } catch (error) {
+      return [];
+    }
+  });
+
+  // 2. Cada vez que 'carrito' cambie, guárdalo en la memoria del navegador
+  useEffect(() => {
+    localStorage.setItem('carrito_een', JSON.stringify(carrito));
+  }, [carrito]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState('recoger');
   const [paymentMethod, setPaymentMethod] = useState('');
   
   // NUEVO: Estado para el modo secreto
   const [esAdmin, setEsAdmin] = useState(false);
-
+  
   const registrarEvento = (nombreEvento, parametros = {}) => {
     if (analytics) logEvent(analytics, nombreEvento, parametros);
   };
