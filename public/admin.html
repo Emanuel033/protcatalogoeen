@@ -2226,25 +2226,103 @@ window.solicitarActualizacionGitHub = async () => {
             const modal = document.getElementById('massActionsModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
 
-        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl) {
-            let html = `<html><head><title>Imprimir QR - EEN</title><style>
-                body{font-family:sans-serif; text-align:center; padding: 10px; margin:0;} 
-                .label{display:inline-block; margin:5px; padding:15px; border:2px solid #000; width:200px; border-radius: 12px; vertical-align: top; box-sizing: border-box;} 
-                img{width:140px; height:140px; margin: 10px auto; display: block;}
-                h4{margin: 0 0 5px 0; font-size: 13px; line-height: 1.2; font-weight: bold;}
-                p{margin: 0; font-size: 11px; color: #333; font-weight: bold;}
-            </style></head><body>`;
-            
-            dataArray.forEach(item => {
-                let qrVal = isVitrina ? baseUrl + item.id : item.id;
-                let qr = new QRious({value: qrVal, size: 250, level: 'M'});
-                for(let i=0; i<qty; i++) {
-                    html += `<div class="label"><h4>${item.title}</h4><img src="${qr.toDataURL()}"><p>${isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub}</p></div>`;
-                }
+        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl, plantilla = '3x5') {
+    // 1. Aplanar el arreglo (crear una lista con todas las etiquetas a imprimir según la cantidad)
+    let labelsToPrint = [];
+    dataArray.forEach(item => {
+        let qrVal = isVitrina ? baseUrl + item.id : item.id;
+        // Generamos el QR una sola vez por item para optimizar memoria
+        let qr = new QRious({value: qrVal, size: 250, level: 'M'}).toDataURL();
+        
+        for(let i=0; i<qty; i++) {
+            labelsToPrint.push({
+                title: item.title,
+                sub: isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub,
+                qrData: qr
             });
-            html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
-            return html;
         }
+    });
+
+    // 2. Configurar medidas según la plantilla elegida
+    let labelsPerPage = plantilla === '3x10' ? 30 : 15;
+    let gridClass = plantilla === '3x10' ? 'grid-3x10' : 'grid-3x5';
+
+    // 3. Construir el HTML con CSS Grid y medidas Físicas (pulgadas)
+    let html = `<html><head><title>Imprimir QR - EEN</title>
+    <style>
+        /* Forzar tamaño carta y quitar márgenes de la impresora */
+        @page { margin: 0; size: letter; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif, Arial; margin: 0; padding: 0; box-sizing: border-box; background: #fff; }
+        
+        .page {
+            width: 8.5in; 
+            height: 11in;
+            /* Margen superior/inferior de 0.5in y lateral de 0.15in (Estándar Avery) */
+            padding: 0.5in 0.15in; 
+            box-sizing: border-box;
+            page-break-after: always; /* Salto de página estricto */
+            display: grid;
+            justify-content: center;
+        }
+        .page:last-child { page-break-after: auto; }
+        
+        /* Borde punteado para guiarte en pantalla, no sale en la impresora */
+        .label { overflow: hidden; box-sizing: border-box; outline: 1px dashed #e2e8f0; }
+        @media print { .label { outline: none !important; } }
+
+        /* --- PLANTILLA 3x10 (Etiquetas pequeñas, ej. Avery 5160) --- */
+        .grid-3x10 { 
+            grid-template-columns: repeat(3, 2.625in); 
+            grid-template-rows: repeat(10, 1in); 
+            gap: 0in 0.125in; 
+        }
+        .grid-3x10 .label { display: flex; align-items: center; padding: 0.05in; }
+        .grid-3x10 img { width: 0.85in; height: 0.85in; margin-right: 0.08in; }
+        .grid-3x10 .text-content { flex: 1; min-width: 0; }
+        .grid-3x10 h4 { margin: 0 0 2px 0; font-size: 8px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .grid-3x10 p { margin: 0; font-size: 7px; color: #475569; font-weight: bold; }
+
+        /* --- PLANTILLA 3x5 (Etiquetas medianas) --- */
+        .grid-3x5 { 
+            grid-template-columns: repeat(3, 2.625in); 
+            grid-template-rows: repeat(5, 2in); 
+            gap: 0in 0.125in; 
+        }
+        .grid-3x5 .label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.1in; text-align: center; }
+        .grid-3x5 img { width: 1.25in; height: 1.25in; margin-bottom: 0.05in; }
+        .grid-3x5 h4 { margin: 0 0 4px 0; font-size: 11px; line-height: 1.1; max-height: 24px; overflow: hidden; }
+        .grid-3x5 p { margin: 0; font-size: 9px; color: #475569; font-weight: bold; }
+    </style>
+    </head><body>`;
+
+    // 4. Dividir las etiquetas en "Páginas"
+    for (let i = 0; i < labelsToPrint.length; i += labelsPerPage) {
+        let chunk = labelsToPrint.slice(i, i + labelsPerPage);
+        
+        html += `<div class="page ${gridClass}">`;
+        
+        chunk.forEach(lbl => {
+            html += `
+                <div class="label">
+                    <img src="${lbl.qrData}">
+                    <div class="text-content">
+                        <h4>${lbl.title}</h4>
+                        <p>${lbl.sub}</p>
+                    </div>
+                </div>`;
+        });
+
+        // Rellenar espacios vacíos si la página no se llena (vital para que el Grid no se colapse)
+        for (let j = chunk.length; j < labelsPerPage; j++) {
+            html += `<div class="label empty" style="border:none; outline:none;"></div>`;
+        }
+        
+        html += `</div>`;
+    }
+
+    html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
+    return html;
+}
 
         function getFilteredProductsForPrint() {
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
@@ -2289,7 +2367,8 @@ window.solicitarActualizacionGitHub = async () => {
                 const qty = await customPrompt(`Se encontraron ${dataArray.length} cajas base.\n¿Cuántas etiquetas POR CAJA imprimir?`, "1"); 
                 if (!qty || qty <= 0) return; 
                 
-                const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '')); pw.document.close(); 
+                // Usamos '3x10' por defecto para las cajas. Si tus cajas necesitan etiquetas más grandes, cámbialo a '3x5'
+const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
             } catch (e) { showToast("Error al obtener los paquetes.", "error"); }
         };
 
@@ -2308,7 +2387,9 @@ window.solicitarActualizacionGitHub = async () => {
             if (!qty || qty <= 0) return; 
             
             const dataArray = filtered.map(p => ({ id: p.id, title: p.nombre_flexible, sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'}` }));
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); pw.document.close(); 
+            const isVitrina = printType === 'vitrina';
+const formato = isVitrina ? '3x5' : '3x10';
+const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, isVitrina, baseUrl, formato)); pw.document.close();
         };
 
         window.printSingleQR = async (id, printType = 'inventario') => { 
@@ -2328,7 +2409,9 @@ window.solicitarActualizacionGitHub = async () => {
             if (!qty || qty <= 0) return; 
             
             const dataArray = [{ id: p.id, title: p.nombre_flexible, sub: printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)` }];
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); pw.document.close(); 
+            const isVitrina = printType === 'vitrina';
+const formato = isVitrina ? '3x5' : '3x10';
+const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, isVitrina, baseUrl, formato)); pw.document.close();
         };
 
         window.openPackagePrintSelector = async (productId) => {
@@ -2374,7 +2457,8 @@ window.solicitarActualizacionGitHub = async () => {
             
             const qrVal = `PKG|${productId}|${sku}|${piezas}`;
             const dataArray = [{ id: qrVal, title: `${p.nombre_flexible}`, sub: `SKU: ${sku} (${piezas} PZ)` }];
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '')); pw.document.close();
+            // Igual aquí, le pasamos '3x10' al final
+const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
         };
 
         // --- LÓGICA: SINCRONIZAR CSV/EXCEL DESDE LA WEB ---
