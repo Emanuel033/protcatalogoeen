@@ -24,12 +24,11 @@ jobs:
       # 2. Instalar Firebase Admin (Solo para el script generador)
       - name: Instalar Firebase Admin
         run: npm install firebase-admin
-      
-      # 3. EJECUTAR EL SCRIPT GENERADOR DE JSON
+      # 3. EJECUTAR EL SCRIPT GENERADOR DE JSON (SOLO CUANDO CAMBIAN LOS DATOS)
       - name: Generar catalogo.json dinámico
+        if: github.event_name == 'repository_dispatch'
         env:
           FIREBASE_SERVICE_ACCOUNT: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRODUCTOSEEN }}'
-        # AQUÍ ESTÁ EL CAMBIO (agregando la c):
         run: node generar_catalogo.cjs
       
       # 4. Compilar React (Esto junta React, tus HTML y el nuevo catalogo.json en la carpeta dist)
