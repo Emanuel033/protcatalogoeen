@@ -206,22 +206,34 @@ if (!navigator.onLine) {
                 
                 <div class="space-y-4">
                     <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
-                        <label class="block text-[11px] font-black text-blue-800 uppercase tracking-wider mb-2"><i class="fas fa-file-signature text-blue-500 mr-1"></i> 1. Documento Firmado</label>
-                        <!-- Se añadió "preview-doc" al callback -->
-                        <input type="file" accept="image/*" id="cam-doc" class="hidden" onchange="previewImg(this, 'preview-doc')">
-                        <div id="preview-doc" onclick="document.getElementById('cam-doc').click()" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent cursor-pointer bg-cover bg-center flex flex-col justify-end p-2">
-                            <span id="label-doc" class="bg-slate-900/70 text-white text-[10px] font-bold py-1 px-2 rounded backdrop-blur-sm self-center transition"><i class="fas fa-camera mr-1"></i> Tomar Foto</span>
-                        </div>
-                    </div>
+    <label class="block text-[11px] font-black text-blue-800 uppercase tracking-wider mb-2"><i class="fas fa-file-signature text-blue-500 mr-1"></i> 1. Documento Firmado</label>
+    
+    <input type="file" accept="image/*" id="cam-doc" class="hidden" onchange="previewImg(this, 'preview-doc')">
+    
+    <div id="preview-doc" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent bg-cover bg-center flex flex-col justify-end p-2 mb-3">
+        <span id="label-doc" class="hidden"></span>
+    </div>
+
+    <div class="flex gap-2">
+        <button type="button" onclick="elegirFoto('cam-doc', true)" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-camera mr-1 text-blue-400"></i> Cámara</button>
+        <button type="button" onclick="elegirFoto('cam-doc', false)" class="flex-1 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-images mr-1 text-indigo-500"></i> Galería</button>
+    </div>
+</div>
 
                     <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
-                        <label class="block text-[11px] font-black text-amber-800 uppercase tracking-wider mb-2"><i class="fas fa-boxes text-amber-500 mr-1"></i> 2. Material Físico</label>
-                        <!-- Se añadió "preview-mat" al callback -->
-                        <input type="file" accept="image/*" id="cam-mat" class="hidden" onchange="previewImg(this, 'preview-mat')">
-                        <div id="preview-mat" onclick="document.getElementById('cam-mat').click()" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent cursor-pointer bg-cover bg-center flex flex-col justify-end p-2">
-                            <span id="label-mat" class="bg-slate-900/70 text-white text-[10px] font-bold py-1 px-2 rounded backdrop-blur-sm self-center transition"><i class="fas fa-camera mr-1"></i> Tomar Foto</span>
-                        </div>
-                    </div>
+    <label class="block text-[11px] font-black text-amber-800 uppercase tracking-wider mb-2"><i class="fas fa-boxes text-amber-500 mr-1"></i> 2. Material Físico</label>
+    
+    <input type="file" accept="image/*" id="cam-mat" class="hidden" onchange="previewImg(this, 'preview-mat')">
+    
+    <div id="preview-mat" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent bg-cover bg-center flex flex-col justify-end p-2 mb-3">
+        <span id="label-mat" class="hidden"></span>
+    </div>
+
+    <div class="flex gap-2">
+        <button type="button" onclick="elegirFoto('cam-mat', true)" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-camera mr-1 text-blue-400"></i> Cámara</button>
+        <button type="button" onclick="elegirFoto('cam-mat', false)" class="flex-1 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-images mr-1 text-indigo-500"></i> Galería</button>
+    </div>
+</div>
                 </div>
             </div>
             
@@ -242,13 +254,20 @@ if (!navigator.onLine) {
             <div class="p-4 overflow-y-auto hide-scroll flex-1">
                 <label class="block text-xs font-bold text-slate-600 mb-2">¿Qué sucedió? Describe el problema detalladamente.</label>
                 <textarea id="falla-motivo" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 font-medium text-sm text-slate-800 outline-none focus:border-red-500 mb-4" placeholder="Ej. El cliente no está, la dirección no existe, nadie salió..."></textarea>
-                <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
-                    <label class="block text-[11px] font-black text-slate-500 uppercase tracking-wider mb-2"><i class="fas fa-camera text-slate-400 mr-1"></i> Evidencia (Opcional pero recomendada)</label>
-                    <input type="file" accept="image/*" id="cam-falla" class="hidden" onchange="previewImg(this, 'preview-falla')">
-                    <div id="preview-falla" onclick="document.getElementById('cam-falla').click()" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border border-slate-200 cursor-pointer bg-cover bg-center flex flex-col justify-end p-2">
-                        <span id="label-falla" class="bg-slate-900/70 text-white text-[10px] font-bold py-1 px-2 rounded backdrop-blur-sm self-center transition"><i class="fas fa-camera mr-1"></i> Tomar Foto del Lugar</span>
-                    </div>
-                </div>
+               <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
+    <label class="block text-[11px] font-black text-amber-800 uppercase tracking-wider mb-2"><i class="fas fa-boxes text-amber-500 mr-1"></i> 2. Material Físico</label>
+    
+    <input type="file" accept="image/*" id="cam-mat" class="hidden" onchange="previewImg(this, 'preview-mat')">
+    
+    <div id="preview-mat" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent bg-cover bg-center flex flex-col justify-end p-2 mb-3">
+        <span id="label-mat" class="hidden"></span>
+    </div>
+
+    <div class="flex gap-2">
+        <button type="button" onclick="elegirFoto('cam-mat', true)" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-camera mr-1 text-blue-400"></i> Cámara</button>
+        <button type="button" onclick="elegirFoto('cam-mat', false)" class="flex-1 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-images mr-1 text-indigo-500"></i> Galería</button>
+    </div>
+</div>
             </div>
             <div class="p-4 bg-white border-t border-slate-100 shrink-0 pb-safe">
                 <button id="btn-confirmar-falla" onclick="procesarFalla()" class="w-full bg-red-500 hover:bg-red-600 text-white font-black py-4 rounded-xl shadow-lg shadow-red-500/30 text-lg transition active:scale-95 flex items-center justify-center gap-2">
@@ -279,6 +298,15 @@ if (!navigator.onLine) {
             document.getElementById('toast-container').appendChild(t);
             setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
         };
+        window.elegirFoto = (inputId, usarCamara) => {
+    const input = document.getElementById(inputId);
+    if (usarCamara) {
+        input.setAttribute('capture', 'environment'); // Obliga a usar la cámara
+    } else {
+        input.removeAttribute('capture'); // Abre la galería
+    }
+    input.click();
+};
 
         // ==========================================
         // COMPRESIÓN ULTRA OPTIMIZADA (SIN MEMORY LEAKS)
