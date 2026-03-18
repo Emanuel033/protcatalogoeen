@@ -2,7 +2,7 @@ const CACHE_NAME = 'een-sistema-v3';
 
 // Ya no cacheamos archivos dinámicos, solo lo mínimo para que sea instalable
 const urlsToCache = [
-  './',
+  './pvm.html',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 
