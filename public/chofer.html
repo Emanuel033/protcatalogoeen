@@ -255,17 +255,17 @@ if (!navigator.onLine) {
                 <label class="block text-xs font-bold text-slate-600 mb-2">¿Qué sucedió? Describe el problema detalladamente.</label>
                 <textarea id="falla-motivo" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 font-medium text-sm text-slate-800 outline-none focus:border-red-500 mb-4" placeholder="Ej. El cliente no está, la dirección no existe, nadie salió..."></textarea>
                <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
-    <label class="block text-[11px] font-black text-amber-800 uppercase tracking-wider mb-2"><i class="fas fa-boxes text-amber-500 mr-1"></i> 2. Material Físico</label>
+    <label class="block text-[11px] font-black text-slate-500 uppercase tracking-wider mb-2"><i class="fas fa-camera text-slate-400 mr-1"></i> Evidencia (Opcional)</label>
     
-    <input type="file" accept="image/*" id="cam-mat" class="hidden" onchange="previewImg(this, 'preview-mat')">
+    <input type="file" accept="image/*" id="cam-falla" class="hidden" onchange="previewImg(this, 'preview-falla')">
     
-    <div id="preview-mat" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent bg-cover bg-center flex flex-col justify-end p-2 mb-3">
-        <span id="label-mat" class="hidden"></span>
+    <div id="preview-falla" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border border-slate-200 bg-cover bg-center flex flex-col justify-end p-2 mb-3">
+        <span id="label-falla" class="hidden"></span>
     </div>
 
     <div class="flex gap-2">
-        <button type="button" onclick="elegirFoto('cam-mat', true)" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-camera mr-1 text-blue-400"></i> Cámara</button>
-        <button type="button" onclick="elegirFoto('cam-mat', false)" class="flex-1 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-images mr-1 text-indigo-500"></i> Galería</button>
+        <button type="button" onclick="elegirFoto('cam-falla', true)" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-camera mr-1 text-blue-400"></i> Cámara</button>
+        <button type="button" onclick="elegirFoto('cam-falla', false)" class="flex-1 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl shadow-sm transition"><i class="fas fa-images mr-1 text-indigo-500"></i> Galería</button>
     </div>
 </div>
             </div>
