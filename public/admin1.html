@@ -929,47 +929,22 @@
 
             productsRef.onSnapshot((snapshot) => {
                 allItems = []; baseItems = []; let pendingCount = 0;
-                // 🚀 Iteramos SOLO sobre los documentos que sufrieron cambios
-    snapshot.docChanges().forEach((change) => {
-        const itemData = { id: change.doc.id, ...change.doc.data() };
-        const esBase = !itemData.tipo_item || itemData.tipo_item === 'PIEZA_BASE';
+                snapshot.forEach((doc) => {
+                    const item = { id: doc.id, ...doc.data() };
+                    allItems.push(item);
+                    if(!item.tipo_item || item.tipo_item === 'PIEZA_BASE') baseItems.push(item);
+                });
+                
+                allItems.forEach(p => { if(isProductPending(p)) pendingCount++; });
+                
+                document.getElementById('count-total').innerText = allItems.length;
+                document.getElementById('count-pending').innerText = pendingCount;
+                
+                updateGlobalImportBadge();
 
-        if (change.type === "added") {
-            allItems.push(itemData);
-            if(esBase) baseItems.push(itemData);
-        } 
-        else if (change.type === "modified") {
-            // Buscamos el índice y lo actualizamos sin borrar todo el arreglo
-            const indexAll = allItems.findIndex(item => item.id === itemData.id);
-            if(indexAll !== -1) allItems[indexAll] = itemData;
-
-            const indexBase = baseItems.findIndex(item => item.id === itemData.id);
-            if(indexBase !== -1) {
-                if(esBase) baseItems[indexBase] = itemData;
-                else baseItems.splice(indexBase, 1); // Si cambió de tipo, lo quitamos
-            } else if(esBase) {
-                baseItems.push(itemData); // Si se volvió PIEZA_BASE, lo agregamos
-            }
-        } 
-        else if (change.type === "removed") {
-            allItems = allItems.filter(item => item.id !== itemData.id);
-            baseItems = baseItems.filter(item => item.id !== itemData.id);
-        }
-    });
-    
-    // Recalcular pendientes (esto es rápido en memoria)
-    allItems.forEach(p => { if(isProductPending(p)) pendingCount++; });
-    
-    // Actualizar UI general
-    document.getElementById('count-total').innerText = allItems.length;
-    document.getElementById('count-pending').innerText = pendingCount;
-    updateGlobalImportBadge();
-
-    // Actualizar tablas solo si estás en esa vista
-    if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
-    if(currentTab === 'import') renderImportTable(); 
-    
-}, (error) => console.error("Error al cargar productos:", error));
+                if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
+                if(currentTab === 'import') renderImportTable(); 
+            }, (error) => console.error("Error al cargar productos:", error));
 
             facturacionRef.onSnapshot((snapshot) => {
                 facturacionCatalog = [];
@@ -1674,39 +1649,28 @@ window.solicitarActualizacionGitHub = async () => {
         }
 
         function renderImportTable() {
-    const tbody = document.getElementById('importTableBody'); 
-    let pendingToImport = getPendingToImport();
+            const tbody = document.getElementById('importTableBody'); tbody.innerHTML = '';
+            let pendingToImport = getPendingToImport();
 
-    // Validaciones iniciales
-    if(pendingToImport.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-16 text-center text-slate-400 font-bold"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-emerald-400"></i></div> Todo importado y al día o no coincide con tu búsqueda.</td></tr>`; 
-        return;
-    }
-    
-    // Sorting (se queda igual)
-    pendingToImport.sort((a,b) => {
-        const valA = sortImportConfig.key === 'codigo' ? String(a.codigo_sistema_oficial || a.id) : String(a.descripcion_oficial || a.nombre);
-        const valB = sortImportConfig.key === 'codigo' ? String(b.codigo_sistema_oficial || b.id) : String(b.descripcion_oficial || b.nombre);
-        return sortImportConfig.desc ? valB.localeCompare(valA) : valA.localeCompare(valB);
-    });
+            if(pendingToImport.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-16 text-center text-slate-400 font-bold"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-emerald-400"></i></div> Todo importado y al día o no coincide con tu búsqueda.</td></tr>`; return;
+            }
+            
+            pendingToImport.sort((a,b) => {
+                const valA = sortImportConfig.key === 'codigo' ? String(a.codigo_sistema_oficial || a.id) : String(a.descripcion_oficial || a.nombre);
+                const valB = sortImportConfig.key === 'codigo' ? String(b.codigo_sistema_oficial || b.id) : String(b.descripcion_oficial || b.nombre);
+                return sortImportConfig.desc ? valB.localeCompare(valA) : valA.localeCompare(valB);
+            });
 
-    // 🚀 LA OPTIMIZACIÓN: Usamos .map().join('') para crear un solo String gigante
-    const filasHTML = pendingToImport.map(fact => {
-        const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || ''); 
-        const name = String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción');
-        
-        return `<tr class="hover:bg-blue-50/30 transition-colors">
-            <td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-50">${code}</td>
-            <td class="px-6 py-4 font-bold text-slate-800 text-sm border-b border-slate-50">${name}</td>
-            <td class="px-6 py-4 text-right border-b border-slate-50">
-                <button onclick="importProduct('${fact.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto border border-blue-100">Crear Ficha <i class="fas fa-arrow-right"></i></button>
-            </td>
-        </tr>`;
-    }).join(''); // join('') une todo el arreglo en un solo texto
-
-    // 🚀 Tocamos el DOM una sola vez
-    tbody.innerHTML = filasHTML;
-}
+            pendingToImport.forEach(fact => {
+                const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || ''); 
+                const name = String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción');
+                
+                const tr = document.createElement('tr'); tr.className = "hover:bg-blue-50/30 transition-colors";
+                tr.innerHTML = `<td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-50">${code}</td><td class="px-6 py-4 font-bold text-slate-800 text-sm border-b border-slate-50">${name}</td><td class="px-6 py-4 text-right border-b border-slate-50"><button onclick="importProduct('${fact.id}')" class="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto border border-blue-100">Crear Ficha <i class="fas fa-arrow-right"></i></button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
 
         // --- FUNCIONES DE ESCÁNER ---
         function startScanner() {
@@ -2262,25 +2226,103 @@ window.solicitarActualizacionGitHub = async () => {
             const modal = document.getElementById('massActionsModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
 
-        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl) {
-            let html = `<html><head><title>Imprimir QR - EEN</title><style>
-                body{font-family:sans-serif; text-align:center; padding: 10px; margin:0;} 
-                .label{display:inline-block; margin:5px; padding:15px; border:2px solid #000; width:200px; border-radius: 12px; vertical-align: top; box-sizing: border-box;} 
-                img{width:140px; height:140px; margin: 10px auto; display: block;}
-                h4{margin: 0 0 5px 0; font-size: 13px; line-height: 1.2; font-weight: bold;}
-                p{margin: 0; font-size: 11px; color: #333; font-weight: bold;}
-            </style></head><body>`;
-            
-            dataArray.forEach(item => {
-                let qrVal = isVitrina ? baseUrl + item.id : item.id;
-                let qr = new QRious({value: qrVal, size: 250, level: 'M'});
-                for(let i=0; i<qty; i++) {
-                    html += `<div class="label"><h4>${item.title}</h4><img src="${qr.toDataURL()}"><p>${isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub}</p></div>`;
-                }
+        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl, plantilla = '3x5') {
+    // 1. Aplanar el arreglo (crear una lista con todas las etiquetas a imprimir según la cantidad)
+    let labelsToPrint = [];
+    dataArray.forEach(item => {
+        let qrVal = isVitrina ? baseUrl + item.id : item.id;
+        // Generamos el QR una sola vez por item para optimizar memoria
+        let qr = new QRious({value: qrVal, size: 250, level: 'M'}).toDataURL();
+        
+        for(let i=0; i<qty; i++) {
+            labelsToPrint.push({
+                title: item.title,
+                sub: isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub,
+                qrData: qr
             });
-            html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
-            return html;
         }
+    });
+
+    // 2. Configurar medidas según la plantilla elegida
+    let labelsPerPage = plantilla === '3x10' ? 30 : 15;
+    let gridClass = plantilla === '3x10' ? 'grid-3x10' : 'grid-3x5';
+
+    // 3. Construir el HTML con CSS Grid y medidas Físicas (pulgadas)
+    let html = `<html><head><title>Imprimir QR - EEN</title>
+    <style>
+        /* Forzar tamaño carta y quitar márgenes de la impresora */
+        @page { margin: 0; size: letter; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif, Arial; margin: 0; padding: 0; box-sizing: border-box; background: #fff; }
+        
+        .page {
+            width: 8.5in; 
+            height: 11in;
+            /* Margen superior/inferior de 0.5in y lateral de 0.15in (Estándar Avery) */
+            padding: 0.5in 0.15in; 
+            box-sizing: border-box;
+            page-break-after: always; /* Salto de página estricto */
+            display: grid;
+            justify-content: center;
+        }
+        .page:last-child { page-break-after: auto; }
+        
+        /* Borde punteado para guiarte en pantalla, no sale en la impresora */
+        .label { overflow: hidden; box-sizing: border-box; outline: 1px dashed #e2e8f0; }
+        @media print { .label { outline: none !important; } }
+
+        /* --- PLANTILLA 3x10 (Etiquetas pequeñas, ej. Avery 5160) --- */
+        .grid-3x10 { 
+            grid-template-columns: repeat(3, 2.625in); 
+            grid-template-rows: repeat(10, 1in); 
+            gap: 0in 0.125in; 
+        }
+        .grid-3x10 .label { display: flex; align-items: center; padding: 0.05in; }
+        .grid-3x10 img { width: 0.85in; height: 0.85in; margin-right: 0.08in; }
+        .grid-3x10 .text-content { flex: 1; min-width: 0; }
+        .grid-3x10 h4 { margin: 0 0 2px 0; font-size: 8px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .grid-3x10 p { margin: 0; font-size: 7px; color: #475569; font-weight: bold; }
+
+        /* --- PLANTILLA 3x5 (Etiquetas medianas) --- */
+        .grid-3x5 { 
+            grid-template-columns: repeat(3, 2.625in); 
+            grid-template-rows: repeat(5, 2in); 
+            gap: 0in 0.125in; 
+        }
+        .grid-3x5 .label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.1in; text-align: center; }
+        .grid-3x5 img { width: 1.25in; height: 1.25in; margin-bottom: 0.05in; }
+        .grid-3x5 h4 { margin: 0 0 4px 0; font-size: 11px; line-height: 1.1; max-height: 24px; overflow: hidden; }
+        .grid-3x5 p { margin: 0; font-size: 9px; color: #475569; font-weight: bold; }
+    </style>
+    </head><body>`;
+
+    // 4. Dividir las etiquetas en "Páginas"
+    for (let i = 0; i < labelsToPrint.length; i += labelsPerPage) {
+        let chunk = labelsToPrint.slice(i, i + labelsPerPage);
+        
+        html += `<div class="page ${gridClass}">`;
+        
+        chunk.forEach(lbl => {
+            html += `
+                <div class="label">
+                    <img src="${lbl.qrData}">
+                    <div class="text-content">
+                        <h4>${lbl.title}</h4>
+                        <p>${lbl.sub}</p>
+                    </div>
+                </div>`;
+        });
+
+        // Rellenar espacios vacíos si la página no se llena (vital para que el Grid no se colapse)
+        for (let j = chunk.length; j < labelsPerPage; j++) {
+            html += `<div class="label empty" style="border:none; outline:none;"></div>`;
+        }
+        
+        html += `</div>`;
+    }
+
+    html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
+    return html;
+}
 
         function getFilteredProductsForPrint() {
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
@@ -2325,7 +2367,8 @@ window.solicitarActualizacionGitHub = async () => {
                 const qty = await customPrompt(`Se encontraron ${dataArray.length} cajas base.\n¿Cuántas etiquetas POR CAJA imprimir?`, "1"); 
                 if (!qty || qty <= 0) return; 
                 
-                const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '')); pw.document.close(); 
+                // Usamos '3x10' por defecto para las cajas. Si tus cajas necesitan etiquetas más grandes, cámbialo a '3x5'
+const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
             } catch (e) { showToast("Error al obtener los paquetes.", "error"); }
         };
 
@@ -2344,7 +2387,9 @@ window.solicitarActualizacionGitHub = async () => {
             if (!qty || qty <= 0) return; 
             
             const dataArray = filtered.map(p => ({ id: p.id, title: p.nombre_flexible, sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'}` }));
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); pw.document.close(); 
+            const isVitrina = printType === 'vitrina';
+const formato = isVitrina ? '3x5' : '3x10';
+const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, isVitrina, baseUrl, formato)); pw.document.close();
         };
 
         window.printSingleQR = async (id, printType = 'inventario') => { 
@@ -2364,7 +2409,9 @@ window.solicitarActualizacionGitHub = async () => {
             if (!qty || qty <= 0) return; 
             
             const dataArray = [{ id: p.id, title: p.nombre_flexible, sub: printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)` }];
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, printType === 'vitrina', baseUrl)); pw.document.close(); 
+            const isVitrina = printType === 'vitrina';
+const formato = isVitrina ? '3x5' : '3x10';
+const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, isVitrina, baseUrl, formato)); pw.document.close();
         };
 
         window.openPackagePrintSelector = async (productId) => {
@@ -2410,7 +2457,8 @@ window.solicitarActualizacionGitHub = async () => {
             
             const qrVal = `PKG|${productId}|${sku}|${piezas}`;
             const dataArray = [{ id: qrVal, title: `${p.nombre_flexible}`, sub: `SKU: ${sku} (${piezas} PZ)` }];
-            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '')); pw.document.close();
+            // Igual aquí, le pasamos '3x10' al final
+const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
         };
 
         // --- LÓGICA: SINCRONIZAR CSV/EXCEL DESDE LA WEB ---
