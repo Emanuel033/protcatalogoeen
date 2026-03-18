@@ -424,34 +424,22 @@
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
                 <!-- Bento Banner Importación -->
                 <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 relative overflow-hidden shadow-sm">
-    <div class="absolute right-0 top-0 w-48 h-48 bg-blue-600 opacity-20 rounded-full blur-3xl transform translate-x-10 -translate-y-10 pointer-events-none"></div>
+                   <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
+    <input type="file" id="csvSyncBase" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE')">
+    <input type="file" id="csvSyncKits" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL')">
+
+    <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
+        <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar Excel</span>
+    </button>
+
+    <button onclick="document.getElementById('csvSyncKits').click()" class="flex-1 sm:flex-none bg-purple-500 hover:bg-purple-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm" title="Sube el reporte de Paquetes/Kits">
+        <i class="fas fa-boxes"></i> <span class="hidden sm:inline">Subir Kits</span>
+    </button>
     
-    <div class="flex items-center gap-4 z-10">
-        <div class="w-12 h-12 bg-white/10 backdrop-blur border border-white/20 text-white rounded-xl flex items-center justify-center text-xl shrink-0">
-            <i class="fas fa-cloud-download-alt"></i>
-        </div>
-        <div>
-            <h2 class="font-bold text-white text-lg tracking-tight leading-tight mb-0.5">Cruce de Catálogos</h2>
-            <p class="text-xs text-slate-400 font-medium max-w-xl leading-snug">Sincroniza inventario desde Excel/CSV. Elige reemplazar todo o solo actualizar registros nuevos.</p>
-        </div>
-    </div>
-
-    <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
-        <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, false)">
-        <input type="file" id="csvSyncPartialInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, true)">
-
-        <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
-            <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar Excel</span>
-        </button>
-
-        <button onclick="document.getElementById('csvSyncPartialInput').click()" class="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-emerald-400 shadow-sm" title="Solo crea y actualiza productos nuevos (no elimina lo anterior)">
-            <i class="fas fa-file-import"></i> <span class="hidden sm:inline">Act. Parcial</span>
-        </button>
-        
-        <button onclick="document.getElementById('csvSyncInput').click()" class="flex-1 sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-blue-400 shadow-sm" title="Reemplaza todo el catálogo (Elimina lo que no venga en el Excel)">
-            <i class="fas fa-sync"></i> <span class="hidden sm:inline">Sinc. Total</span>
-        </button>
-    </div>
+    <button onclick="document.getElementById('csvSyncBase').click()" class="flex-1 sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm" title="Sube el reporte de Piezas Base (Reemplazo Total)">
+        <i class="fas fa-cube"></i> <span class="hidden sm:inline">Subir Piezas Base</span>
+    </button>
+</div>
 </div>
 
                 <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
@@ -2461,113 +2449,147 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
 const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
         };
 
-        // --- LÓGICA: SINCRONIZAR CSV/EXCEL DESDE LA WEB ---
-        async function handleCSVUpload(event, isPartial = false) {
-            const file = event.target.files[0];
-            if (!file) return;
+        // --- LÓGICA: SINCRONIZAR CSV/EXCEL A PRUEBA DE TONTOS Y AHORRANDO COSTOS ---
+async function handleCSVUpload(event, tipoAsignado) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-            const overlay = document.getElementById('syncOverlay');
-            const statusText = document.getElementById('syncStatusText');
+    const overlay = document.getElementById('syncOverlay');
+    const statusText = document.getElementById('syncStatusText');
+    
+    overlay.classList.remove('hidden');
+    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+    statusText.innerText = "Analizando el reporte...";
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
             
-            overlay.classList.remove('hidden');
-            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            statusText.innerText = "Leyendo archivo...";
+            // Defval: "" evita undefineds raros si hay celdas vacías
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = e.target.result;
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+            const productosAActualizar = [];
+            const idsProcesados = new Set();
+            let updatesCount = 0; // Para saber cuántas escrituras nos ahorramos
 
-                    const productosCSV = [];
-                    const idsOficialesCSV = new Set();
+            statusText.innerText = "Extrayendo datos y comparando diferencias...";
 
-                    statusText.innerText = "Procesando filas del archivo...";
+            jsonRows.forEach(row => {
+                // 1. Búsqueda difusa de columnas (A prueba de tontos)
+                // Convierte todas las llaves a minúsculas para encontrar sin importar cómo lo exporte el POS
+                const cleanRow = {};
+                for (let key in row) {
+                    cleanRow[key.toLowerCase().trim()] = row[key];
+                }
 
-                    jsonRows.forEach(row => {
-                        const codigo = row.codigo_sistema || row.codigo || row.Codigo || row.CODIGO;
-                        if (codigo) {
-                            let precioNumerico = parseFloat(row.precio || row.Precio || 0);
-                            if (isNaN(precioNumerico)) precioNumerico = 0;
+                // Busca la columna de código
+                const codigo = cleanRow['codigo_sistema'] || cleanRow['codigo'] || cleanRow['cve'] || cleanRow['clave'] || cleanRow['articulo'] || cleanRow['código'];
+                
+                // Busca la columna de descripción
+                const descripcion = cleanRow['descripcion_oficial'] || cleanRow['descripcion'] || cleanRow['descripción'] || cleanRow['nombre'] || cleanRow['concepto'] || '';
+                
+                // Busca la columna de precio
+                const precioRaw = cleanRow['precio'] || cleanRow['p.publico'] || cleanRow['precio publico'] || cleanRow['importe'] || 0;
 
-                            const idSeguroFirebase = String(codigo).replace(/\//g, '-').replace(/\\/g, '-');
-                            idsOficialesCSV.add(idSeguroFirebase);
+                if (codigo && String(codigo).trim() !== "") {
+                    let precioNumerico = parseFloat(String(precioRaw).replace(/[^0-9.-]+/g,"")); // Limpia signos de pesos o comas
+                    if (isNaN(precioNumerico)) precioNumerico = 0;
 
-                            productosCSV.push({
-                                id: idSeguroFirebase,
-                                datos: {
-                                    codigo_sistema_oficial: String(codigo),
-                                    descripcion_oficial: row.descripcion_oficial || row.descripcion || row.Descripcion || row.nombre || '',
-                                    precio: precioNumerico,
-                                    tipo_articulo_sistema: row.tipo_articulo_sistema || row.tipo || 'PIEZA_BASE'
-                                }
-                            });
-                        }
-                    });
+                    const idSeguroFirebase = String(codigo).replace(/\//g, '-').replace(/\\/g, '-');
+                    idsProcesados.add(idSeguroFirebase);
 
-                    statusText.innerText = `Comparando ${productosCSV.length} productos con la base de datos...`;
-
-                    const coleccion = 'catalogo_facturacion';
+                    // 2. VERIFICACIÓN DE DIFERENCIAS (Ahorro masivo de Firebase)
+                    // Buscamos si ya existe en facturacionCatalog (que ya tienes en memoria, costo: $0)
+                    const itemExistente = facturacionCatalog.find(f => f.id === idSeguroFirebase);
                     
-                    const dividirEnLotes = (arreglo, tamano = 500) => {
-                        const lotes = [];
-                        for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano));
-                        return lotes;
-                    };
+                    const descLimpia = String(descripcion).trim();
+                    const hasChanges = !itemExistente || 
+                                       itemExistente.descripcion_oficial !== descLimpia || 
+                                       itemExistente.precio !== precioNumerico ||
+                                       itemExistente.tipo_articulo_sistema !== tipoAsignado;
 
-                    // SÓLO ELIMINAR SI NO ES PARCIAL
-                    if (!isPartial) {
-                        const snapshotActual = await db.collection(coleccion).get();
-                        const idsAEliminar = [];
-
-                        snapshotActual.forEach(doc => {
-                            if (!idsOficialesCSV.has(doc.id)) {
-                                idsAEliminar.push(doc.id);
+                    if (hasChanges) {
+                        productosAActualizar.push({
+                            id: idSeguroFirebase,
+                            datos: {
+                                codigo_sistema_oficial: String(codigo),
+                                descripcion_oficial: descLimpia,
+                                precio: precioNumerico,
+                                tipo_articulo_sistema: tipoAsignado
                             }
                         });
-
-                        if (idsAEliminar.length > 0) {
-                            statusText.innerText = `Eliminando ${idsAEliminar.length} productos descontinuados...`;
-                            const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
-                            for (const lote of lotesBorrado) {
-                                const batch = db.batch();
-                                lote.forEach(id => {
-                                    batch.delete(db.collection(coleccion).doc(id));
-                                });
-                                await batch.commit();
-                            }
-                        }
                     }
+                }
+            });
 
-                    statusText.innerText = `Subiendo ${productosCSV.length} productos actualizados...`;
-                    const lotesSubida = dividirEnLotes(productosCSV, 500);
-                    for (let i = 0; i < lotesSubida.length; i++) {
-                        statusText.innerText = `Procesando lote ${i + 1} de ${lotesSubida.length}...`;
+            // 3. PROCESAMIENTO BATCH
+            const coleccion = 'catalogo_facturacion';
+            const dividirEnLotes = (arreglo, tamano = 500) => {
+                const lotes = [];
+                for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano));
+                return lotes;
+            };
+
+            // Solo hacemos eliminación si es la subida de PIEZA_BASE (Sincronización Total)
+            let eliminadosCount = 0;
+            if (tipoAsignado === 'PIEZA_BASE') {
+                const idsAEliminar = [];
+                // Comparamos contra la memoria, ¡cero lecturas a Firebase!
+                facturacionCatalog.forEach(doc => {
+                    // Si en BD es PIEZA_BASE y no viene en el Excel nuevo, va pa' fuera
+                    if (doc.tipo_articulo_sistema === 'PIEZA_BASE' && !idsProcesados.has(doc.id)) {
+                        idsAEliminar.push(doc.id);
+                    }
+                });
+
+                if (idsAEliminar.length > 0) {
+                    statusText.innerText = `Limpiando ${idsAEliminar.length} artículos descontinuados...`;
+                    const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
+                    for (const lote of lotesBorrado) {
                         const batch = db.batch();
-                        lotesSubida[i].forEach(producto => {
-                            const docRef = db.collection(coleccion).doc(producto.id);
-                            batch.set(docRef, producto.datos, { merge: true });
-                        });
+                        lote.forEach(id => batch.delete(db.collection(coleccion).doc(id)));
                         await batch.commit();
                     }
-
-                    showToast(isPartial ? '¡Actualización Parcial finalizada!' : '¡Sincronización Total finalizada!', 'success');
-
-                } catch (error) {
-                    console.error("Error en sincronización:", error);
-                    showToast("Ocurrió un error en la sincronización.", "error");
-                } finally {
-                    overlay.classList.add('opacity-0');
-                    setTimeout(() => overlay.classList.add('hidden'), 300);
-                    event.target.value = ''; 
+                    eliminadosCount = idsAEliminar.length;
                 }
-            };
+            }
+
+            // Guardar solo lo que cambió
+            if (productosAActualizar.length > 0) {
+                statusText.innerText = `Subiendo ${productosAActualizar.length} artículos nuevos/modificados...`;
+                const lotesSubida = dividirEnLotes(productosAActualizar, 500);
+                for (let i = 0; i < lotesSubida.length; i++) {
+                    const batch = db.batch();
+                    lotesSubida[i].forEach(producto => {
+                        const docRef = db.collection(coleccion).doc(producto.id);
+                        batch.set(docRef, producto.datos, { merge: true });
+                    });
+                    await batch.commit();
+                }
+            }
+
+            // Mostrar resumen de la magia
+            const ahorrados = idsProcesados.size - productosAActualizar.length;
+            console.log(`Reporte procesado: ${idsProcesados.size} filas. Actualizados: ${productosAActualizar.length}. Ignorados por ser idénticos: ${ahorrados}.`);
             
-            reader.readAsArrayBuffer(file);
+            showToast(`¡Listo! ${productosAActualizar.length} actualizados, ${eliminadosCount} eliminados. (${ahorrados} omitidos para ahorrar base de datos)`, 'success');
+
+        } catch (error) {
+            console.error("Error en sincronización:", error);
+            showToast("Error al leer el Excel. Asegúrate de que no esté corrupto.", "error");
+        } finally {
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+            event.target.value = ''; // Limpiar el input para permitir resubir el mismo archivo
         }
+    };
+    
+    reader.readAsArrayBuffer(file);
+}
     </script>
 </body>
 </html>
