@@ -46,9 +46,26 @@
           .catch((err) => {
               console.warn("Error de persistencia offline:", err.code);
           });
+        window.addEventListener('online', () => {
+    document.getElementById('offline-banner').classList.add('hidden');
+    showToast("Conexión restaurada. Sincronizando entregas...", "success");
+});
+
+window.addEventListener('offline', () => {
+    document.getElementById('offline-banner').classList.remove('hidden');
+    showToast("Sin conexión. Modo offline activado.", "error");
+});
+
+// Comprobar estado inicial al cargar
+if (!navigator.onLine) {
+    document.getElementById('offline-banner').classList.remove('hidden');
+}
     </script>
 
     <header class="bg-slate-900 text-white pt-safe border-b border-slate-800 shrink-0 z-20 shadow-md">
+        <div id="offline-banner" class="hidden bg-red-600 text-white text-center text-[10px] font-black py-1 uppercase tracking-wider shadow-inner z-50">
+    <i class="fas fa-wifi"></i> Modo Sin Conexión - Las entregas se guardarán localmente
+</div>
         <div class="px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-inner font-black text-xl">
@@ -191,7 +208,7 @@
                     <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
                         <label class="block text-[11px] font-black text-blue-800 uppercase tracking-wider mb-2"><i class="fas fa-file-signature text-blue-500 mr-1"></i> 1. Documento Firmado</label>
                         <!-- Se añadió "preview-doc" al callback -->
-                        <input type="file" accept="image/*" capture="environment" id="cam-doc" class="hidden" onchange="previewImg(this, 'preview-doc')">
+                        <input type="file" accept="image/*" id="cam-doc" class="hidden" onchange="previewImg(this, 'preview-doc')">
                         <div id="preview-doc" onclick="document.getElementById('cam-doc').click()" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent cursor-pointer bg-cover bg-center flex flex-col justify-end p-2">
                             <span id="label-doc" class="bg-slate-900/70 text-white text-[10px] font-bold py-1 px-2 rounded backdrop-blur-sm self-center transition"><i class="fas fa-camera mr-1"></i> Tomar Foto</span>
                         </div>
@@ -200,7 +217,7 @@
                     <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
                         <label class="block text-[11px] font-black text-amber-800 uppercase tracking-wider mb-2"><i class="fas fa-boxes text-amber-500 mr-1"></i> 2. Material Físico</label>
                         <!-- Se añadió "preview-mat" al callback -->
-                        <input type="file" accept="image/*" capture="environment" id="cam-mat" class="hidden" onchange="previewImg(this, 'preview-mat')">
+                        <input type="file" accept="image/*" id="cam-mat" class="hidden" onchange="previewImg(this, 'preview-mat')">
                         <div id="preview-mat" onclick="document.getElementById('cam-mat').click()" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border-2 border-transparent cursor-pointer bg-cover bg-center flex flex-col justify-end p-2">
                             <span id="label-mat" class="bg-slate-900/70 text-white text-[10px] font-bold py-1 px-2 rounded backdrop-blur-sm self-center transition"><i class="fas fa-camera mr-1"></i> Tomar Foto</span>
                         </div>
@@ -227,7 +244,7 @@
                 <textarea id="falla-motivo" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 font-medium text-sm text-slate-800 outline-none focus:border-red-500 mb-4" placeholder="Ej. El cliente no está, la dirección no existe, nadie salió..."></textarea>
                 <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 text-center relative overflow-hidden group">
                     <label class="block text-[11px] font-black text-slate-500 uppercase tracking-wider mb-2"><i class="fas fa-camera text-slate-400 mr-1"></i> Evidencia (Opcional pero recomendada)</label>
-                    <input type="file" accept="image/*" capture="environment" id="cam-falla" class="hidden" onchange="previewImg(this, 'preview-falla')">
+                    <input type="file" accept="image/*" id="cam-falla" class="hidden" onchange="previewImg(this, 'preview-falla')">
                     <div id="preview-falla" onclick="document.getElementById('cam-falla').click()" class="foto-preview w-full h-32 bg-slate-100 rounded-xl border border-slate-200 cursor-pointer bg-cover bg-center flex flex-col justify-end p-2">
                         <span id="label-falla" class="bg-slate-900/70 text-white text-[10px] font-bold py-1 px-2 rounded backdrop-blur-sm self-center transition"><i class="fas fa-camera mr-1"></i> Tomar Foto del Lugar</span>
                     </div>
