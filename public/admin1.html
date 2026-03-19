@@ -424,34 +424,35 @@
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
                 <!-- Bento Banner Importación -->
                 <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 relative overflow-hidden shadow-sm">
-    <div class="absolute right-0 top-0 w-48 h-48 bg-blue-600 opacity-20 rounded-full blur-3xl transform translate-x-10 -translate-y-10 pointer-events-none"></div>
-    
-    <div class="flex items-center gap-4 z-10">
-        <div class="w-12 h-12 bg-white/10 backdrop-blur border border-white/20 text-white rounded-xl flex items-center justify-center text-xl shrink-0">
-            <i class="fas fa-cloud-download-alt"></i>
-        </div>
-        <div>
-            <h2 class="font-bold text-white text-lg tracking-tight leading-tight mb-0.5">Cruce de Catálogos</h2>
-            <p class="text-xs text-slate-400 font-medium max-w-xl leading-snug">Sincroniza inventario desde Excel/CSV. Elige reemplazar todo o solo actualizar registros nuevos.</p>
-        </div>
-    </div>
+                   <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
+    <input type="file" id="csvSyncKitsPartial" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL', true)">
+    <input type="file" id="csvSyncKitsTotal" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL', false)">
+    <input type="file" id="csvSyncBasePartial" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE', true)">
+    <input type="file" id="csvSyncBaseTotal" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE', false)">
 
-    <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
-        <input type="file" id="csvSyncInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, false)">
-        <input type="file" id="csvSyncPartialInput" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, true)">
+    <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
+        <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span>
+    </button>
 
-        <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
-            <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar Excel</span>
+    <div class="flex flex-1 sm:flex-none gap-1">
+        <button onclick="document.getElementById('csvSyncKitsPartial').click()" class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Solo agrega/actualiza Paquetes">
+            <i class="fas fa-plus"></i> Paquetes (Parcial)
         </button>
-
-        <button onclick="document.getElementById('csvSyncPartialInput').click()" class="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-emerald-400 shadow-sm" title="Solo crea y actualiza productos nuevos (no elimina lo anterior)">
-            <i class="fas fa-file-import"></i> <span class="hidden sm:inline">Act. Parcial</span>
-        </button>
-        
-        <button onclick="document.getElementById('csvSyncInput').click()" class="flex-1 sm:flex-none bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-blue-400 shadow-sm" title="Reemplaza todo el catálogo (Elimina lo que no venga en el Excel)">
-            <i class="fas fa-sync"></i> <span class="hidden sm:inline">Sinc. Total</span>
+        <button onclick="document.getElementById('csvSyncKitsTotal').click()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Reemplaza todos los Paquetes(por los del reporte del sistema)">
+            <i class="fas fa-sync"></i> Paquetes (Total)
         </button>
     </div>
+
+    <div class="flex flex-1 sm:flex-none gap-1">
+        <button onclick="document.getElementById('csvSyncBasePartial').click()" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Solo agrega/actualiza productos">
+            <i class="fas fa-plus"></i> Producto (Parcial)
+        </button>
+        <button onclick="document.getElementById('csvSyncBaseTotal').click()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Reemplaza todas las productos
+        ">
+            <i class="fas fa-sync"></i> Producto (Total)
+        </button>
+    </div>
+</div>
 </div>
 
                 <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
@@ -2461,113 +2462,170 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
 const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
         };
 
-        // --- LÓGICA: SINCRONIZAR CSV/EXCEL DESDE LA WEB ---
-        async function handleCSVUpload(event, isPartial = false) {
-            const file = event.target.files[0];
-            if (!file) return;
+        // --- LÓGICA: SINCRONIZAR CSV/EXCEL A PRUEBA DE TONTOS Y AHORRANDO COSTOS ---
+        async function handleCSVUpload(event, tipoAsignado, isPartial) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-            const overlay = document.getElementById('syncOverlay');
-            const statusText = document.getElementById('syncStatusText');
+    const overlay = document.getElementById('syncOverlay');
+    const statusText = document.getElementById('syncStatusText');
+    
+    overlay.classList.remove('hidden');
+    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+    statusText.innerText = "Limpiando reporte y buscando cabeceras...";
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
             
-            overlay.classList.remove('hidden');
-            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            statusText.innerText = "Leyendo archivo...";
+            // 1. ESCÁNER INTELIGENTE: Leemos en crudo para encontrar dónde empiezan las cabeceras reales
+            const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+            let headerRowIndex = 0;
+            
+            for (let i = 0; i < Math.min(20, rawData.length); i++) {
+                // Juntamos toda la fila en un solo texto en minúsculas para buscar
+                const rowText = rawData[i].join('').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (rowText.includes('cod') || rowText.includes('sku') || rowText.includes('clave')) {
+                    headerRowIndex = i; // ¡Encontramos la fila 6 (índice 5)!
+                    console.log(`✅ ¡Cabeceras reales detectadas en la fila Excel ${i + 1}! Cortando basura superior...`);
+                    break;
+                }
+            }
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = e.target.result;
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+            // 2. AHORA SÍ LEEMOS BIEN: range le dice que ignore las filas anteriores a la cabecera
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: "", blankrows: false });
 
-                    const productosCSV = [];
-                    const idsOficialesCSV = new Set();
+            const productosAActualizar = [];
+            const idsProcesados = new Set();
 
-                    statusText.innerText = "Procesando filas del archivo...";
+            statusText.innerText = "Buscando columnas y detectando cambios...";
 
-                    jsonRows.forEach(row => {
-                        const codigo = row.codigo_sistema || row.codigo || row.Codigo || row.CODIGO;
-                        if (codigo) {
-                            let precioNumerico = parseFloat(row.precio || row.Precio || 0);
-                            if (isNaN(precioNumerico)) precioNumerico = 0;
+            jsonRows.forEach(row => {
+                const cleanRow = {};
+                for (let key in row) {
+                    const cleanKey = String(key)
+                        .toLowerCase()
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                        .replace(/\s+/g, '');
+                    cleanRow[cleanKey] = row[key];
+                }
 
-                            const idSeguroFirebase = String(codigo).replace(/\//g, '-').replace(/\\/g, '-');
-                            idsOficialesCSV.add(idSeguroFirebase);
-
-                            productosCSV.push({
-                                id: idSeguroFirebase,
-                                datos: {
-                                    codigo_sistema_oficial: String(codigo),
-                                    descripcion_oficial: row.descripcion_oficial || row.descripcion || row.Descripcion || row.nombre || '',
-                                    precio: precioNumerico,
-                                    tipo_articulo_sistema: row.tipo_articulo_sistema || row.tipo || 'PIEZA_BASE'
-                                }
-                            });
-                        }
-                    });
-
-                    statusText.innerText = `Comparando ${productosCSV.length} productos con la base de datos...`;
-
-                    const coleccion = 'catalogo_facturacion';
-                    
-                    const dividirEnLotes = (arreglo, tamano = 500) => {
-                        const lotes = [];
-                        for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano));
-                        return lotes;
-                    };
-
-                    // SÓLO ELIMINAR SI NO ES PARCIAL
-                    if (!isPartial) {
-                        const snapshotActual = await db.collection(coleccion).get();
-                        const idsAEliminar = [];
-
-                        snapshotActual.forEach(doc => {
-                            if (!idsOficialesCSV.has(doc.id)) {
-                                idsAEliminar.push(doc.id);
-                            }
-                        });
-
-                        if (idsAEliminar.length > 0) {
-                            statusText.innerText = `Eliminando ${idsAEliminar.length} productos descontinuados...`;
-                            const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
-                            for (const lote of lotesBorrado) {
-                                const batch = db.batch();
-                                lote.forEach(id => {
-                                    batch.delete(db.collection(coleccion).doc(id));
-                                });
-                                await batch.commit();
-                            }
-                        }
+                // BÚSQUEDA AGRESIVA DEL CÓDIGO
+                let codigoRaw = "";
+                for (let key in cleanRow) {
+                    if (key.includes('cod') || key.includes('sku') || key.includes('clave')) {
+                        codigoRaw = cleanRow[key];
+                        break;
                     }
+                }
 
-                    statusText.innerText = `Subiendo ${productosCSV.length} productos actualizados...`;
-                    const lotesSubida = dividirEnLotes(productosCSV, 500);
-                    for (let i = 0; i < lotesSubida.length; i++) {
-                        statusText.innerText = `Procesando lote ${i + 1} de ${lotesSubida.length}...`;
-                        const batch = db.batch();
-                        lotesSubida[i].forEach(producto => {
-                            const docRef = db.collection(coleccion).doc(producto.id);
-                            batch.set(docRef, producto.datos, { merge: true });
+                // Búsqueda agresiva de descripción
+                const descripcion = cleanRow['nombre(prod)'] || cleanRow['nombre'] || cleanRow['descripcion'] || cleanRow['articulo'];
+                
+                // Búsqueda agresiva de precio
+                let precioRaw = 0;
+                for (let key in cleanRow) {
+                    if (key.includes('precio') || key.includes('prec') || key.includes('costo') || key.includes('importe') || key.includes('valor')) {
+                        precioRaw = cleanRow[key];
+                        break;
+                    }
+                }
+
+                // Si tiene un código válido, procesamos (esto saltará automáticamente la fila 7 si está vacía)
+                if (codigoRaw && String(codigoRaw).trim() !== "") {
+                    let precioNumerico = parseFloat(String(precioRaw).replace(/[^0-9.-]+/g,"")); 
+                    if (isNaN(precioNumerico)) precioNumerico = 0;
+
+                    const idSeguroFirebase = String(codigoRaw).replace(/\//g, '-').replace(/\\/g, '-');
+                    idsProcesados.add(idSeguroFirebase);
+
+                    const itemExistente = facturacionCatalog.find(f => f.id === idSeguroFirebase);
+                    const descLimpia = String(descripcion || "SIN NOMBRE").trim();
+                    const precioFirebase = itemExistente ? parseFloat(itemExistente.precio || 0) : 0;
+                    
+                    const hasChanges = !itemExistente || 
+                                       itemExistente.descripcion_oficial !== descLimpia || 
+                                       precioFirebase !== precioNumerico ||
+                                       itemExistente.tipo_articulo_sistema !== tipoAsignado;
+
+                    if (hasChanges) {
+                        productosAActualizar.push({
+                            id: idSeguroFirebase,
+                            datos: {
+                                codigo_sistema_oficial: String(codigoRaw),
+                                descripcion_oficial: descLimpia,
+                                precio: precioNumerico,
+                                tipo_articulo_sistema: tipoAsignado
+                            }
                         });
+                    }
+                }
+            });
+
+            const coleccion = 'catalogo_facturacion';
+            const dividirEnLotes = (arreglo, tamano = 500) => {
+                const lotes = [];
+                for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano));
+                return lotes;
+            };
+
+            let eliminadosCount = 0;
+
+            if (!isPartial) {
+                const idsAEliminar = [];
+                facturacionCatalog.forEach(doc => {
+                    if (doc.tipo_articulo_sistema === tipoAsignado && !idsProcesados.has(doc.id)) {
+                        idsAEliminar.push(doc.id);
+                    }
+                });
+
+                if (idsAEliminar.length > 0) {
+                    statusText.innerText = `Eliminando ${idsAEliminar.length} registros descontinuados...`;
+                    const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
+                    for (const lote of lotesBorrado) {
+                        const batch = db.batch();
+                        lote.forEach(id => batch.delete(db.collection(coleccion).doc(id)));
                         await batch.commit();
                     }
-
-                    showToast(isPartial ? '¡Actualización Parcial finalizada!' : '¡Sincronización Total finalizada!', 'success');
-
-                } catch (error) {
-                    console.error("Error en sincronización:", error);
-                    showToast("Ocurrió un error en la sincronización.", "error");
-                } finally {
-                    overlay.classList.add('opacity-0');
-                    setTimeout(() => overlay.classList.add('hidden'), 300);
-                    event.target.value = ''; 
+                    eliminadosCount = idsAEliminar.length;
                 }
-            };
+            }
+
+            if (productosAActualizar.length > 0) {
+                statusText.innerText = `Subiendo ${productosAActualizar.length} artículos...`;
+                const lotesSubida = dividirEnLotes(productosAActualizar, 500);
+                for (let i = 0; i < lotesSubida.length; i++) {
+                    const batch = db.batch();
+                    lotesSubida[i].forEach(producto => {
+                        const docRef = db.collection(coleccion).doc(producto.id);
+                        batch.set(docRef, producto.datos, { merge: true });
+                    });
+                    await batch.commit();
+                }
+            }
+
+            const ahorrados = idsProcesados.size - productosAActualizar.length;
+            const tipoMsg = isPartial ? 'Act. Parcial' : 'Sinc. Total';
+            const targetMsg = tipoAsignado === 'PIEZA_BASE' ? 'Producto Base' : 'Paquetes';
             
-            reader.readAsArrayBuffer(file);
+            showToast(`${tipoMsg} de ${targetMsg} lista. ${productosAActualizar.length} act/nuevos, ${eliminadosCount} borrados. (${ahorrados} omitidos)`, 'success');
+
+        } catch (error) {
+            console.error("Error en sincronización:", error);
+            showToast("Error al procesar el archivo. Revisa la consola.", "error");
+        } finally {
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+            event.target.value = ''; 
         }
+    };
+    
+    reader.readAsArrayBuffer(file);
+}
     </script>
 </body>
 </html>
