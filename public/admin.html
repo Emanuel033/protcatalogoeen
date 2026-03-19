@@ -2472,7 +2472,7 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
     
     overlay.classList.remove('hidden');
     setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-    statusText.innerText = "Analizando el reporte...";
+    statusText.innerText = "Limpiando reporte y buscando cabeceras...";
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -2482,16 +2482,22 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
             
-            // Le decimos a la librería que ignore las filas totalmente vacías
-            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "", blankrows: false });
+            // 1. ESCÁNER INTELIGENTE: Leemos en crudo para encontrar dónde empiezan las cabeceras reales
+            const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+            let headerRowIndex = 0;
+            
+            for (let i = 0; i < Math.min(20, rawData.length); i++) {
+                // Juntamos toda la fila en un solo texto en minúsculas para buscar
+                const rowText = rawData[i].join('').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (rowText.includes('cod') || rowText.includes('sku') || rowText.includes('clave')) {
+                    headerRowIndex = i; // ¡Encontramos la fila 6 (índice 5)!
+                    console.log(`✅ ¡Cabeceras reales detectadas en la fila Excel ${i + 1}! Cortando basura superior...`);
+                    break;
+                }
+            }
 
-            // 🚨 ESCÁNER DE RAYOS X PARA LA CONSOLA 🚨
-            console.log("🚨 --- INICIO DE LECTURA RAW --- 🚨");
-            console.log("Total de filas detectadas:", jsonRows.length);
-            if(jsonRows.length > 0) console.log("Fila 1 (Raw):", jsonRows[0]);
-            if(jsonRows.length > 1) console.log("Fila 2 (Raw):", jsonRows[1]);
-            if(jsonRows.length > 2) console.log("Fila 3 (Raw):", jsonRows[2]);
-            console.log("-----------------------------------");
+            // 2. AHORA SÍ LEEMOS BIEN: range le dice que ignore las filas anteriores a la cabecera
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: "", blankrows: false });
 
             const productosAActualizar = [];
             const idsProcesados = new Set();
@@ -2517,20 +2523,19 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
                     }
                 }
 
-                // Búsqueda de descripción
+                // Búsqueda agresiva de descripción
                 const descripcion = cleanRow['nombre(prod)'] || cleanRow['nombre'] || cleanRow['descripcion'] || cleanRow['articulo'];
                 
                 // Búsqueda agresiva de precio
                 let precioRaw = 0;
-                let nombreColumnaPrecio = "NINGUNA";
                 for (let key in cleanRow) {
                     if (key.includes('precio') || key.includes('prec') || key.includes('costo') || key.includes('importe') || key.includes('valor')) {
                         precioRaw = cleanRow[key];
-                        nombreColumnaPrecio = key;
                         break;
                     }
                 }
 
+                // Si tiene un código válido, procesamos (esto saltará automáticamente la fila 7 si está vacía)
                 if (codigoRaw && String(codigoRaw).trim() !== "") {
                     let precioNumerico = parseFloat(String(precioRaw).replace(/[^0-9.-]+/g,"")); 
                     if (isNaN(precioNumerico)) precioNumerico = 0;
@@ -2546,14 +2551,6 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
                                        itemExistente.descripcion_oficial !== descLimpia || 
                                        precioFirebase !== precioNumerico ||
                                        itemExistente.tipo_articulo_sistema !== tipoAsignado;
-
-                    // Diagnóstico del primer producto válido
-                    if (idsProcesados.size === 1) {
-                        console.log("✅ ¡PRIMER PRODUCTO DETECTADO!");
-                        console.log("Código Extraído:", idSeguroFirebase);
-                        console.log("Descripción Extraída:", descLimpia);
-                        console.log("Columna Dinero:", nombreColumnaPrecio, "-> $", precioNumerico);
-                    }
 
                     if (hasChanges) {
                         productosAActualizar.push({
@@ -2615,11 +2612,11 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
             const tipoMsg = isPartial ? 'Act. Parcial' : 'Sinc. Total';
             const targetMsg = tipoAsignado === 'PIEZA_BASE' ? 'Producto Base' : 'Paquetes';
             
-            showToast(`${tipoMsg} de ${targetMsg} lista. ${productosAActualizar.length} act/nuevos, ${eliminadosCount} borrados. (${ahorrados} omitidos sin cambios)`, 'success');
+            showToast(`${tipoMsg} de ${targetMsg} lista. ${productosAActualizar.length} act/nuevos, ${eliminadosCount} borrados. (${ahorrados} omitidos)`, 'success');
 
         } catch (error) {
             console.error("Error en sincronización:", error);
-            showToast("Error al leer el Excel. Verifica las columnas.", "error");
+            showToast("Error al procesar el archivo. Revisa la consola.", "error");
         } finally {
             overlay.classList.add('opacity-0');
             setTimeout(() => overlay.classList.add('hidden'), 300);
