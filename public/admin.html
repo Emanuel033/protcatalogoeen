@@ -229,32 +229,45 @@
         </header>
 
         <!-- TOP BAR: Buscador Flotante, Filtros y Botones de Acción Global -->
-        <div class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 shrink-0 z-10" id="globalSearchContainer">
-            <div class="relative w-full sm:max-w-md">
+        <div class="bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 md:px-6 py-4 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0 z-10 shadow-sm" id="globalSearchContainer">
+            
+            <div class="relative w-full xl:w-96 shrink-0">
                 <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                <input type="text" id="globalSearch" oninput="debouncedSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-11 pr-4 py-2.5 rounded-xl input-modern text-sm font-semibold shadow-sm focus:bg-white bg-slate-50">
+                <input type="text" id="globalSearch" oninput="debouncedSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-11 pr-4 py-3 rounded-xl input-modern text-sm font-semibold shadow-inner focus:bg-white bg-slate-50 border-slate-200 transition-all">
             </div>
-            <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scroll">
-                <!-- Filtros para la vista Master -->
-                <select id="filterType" onchange="filterTable()" class="flex-none bg-white px-3 py-2.5 rounded-xl border border-slate-200 font-bold text-xs shadow-sm outline-none text-slate-700 appearance-none cursor-pointer">
-                    <option value="ALL">📦 Todos</option>
-                    <option value="PIEZA_BASE">Cube Piezas</option>
-                    <option value="KIT_FLEXIBLE">Árbol Web</option>
-                    <option value="KIT_OFICIAL">Cajas Oficiales</option>
-                </select>
-
-                <label class="flex-none flex items-center gap-2 cursor-pointer bg-white px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-xs shadow-sm hover:bg-slate-50 transition select-none" id="filterPendingLabel">
-                    <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
-                    <span class="text-slate-700">Solo Faltantes</span>
-                </label>
+            
+            <div class="flex flex-wrap items-center justify-start xl:justify-end gap-3 w-full xl:w-auto">
                 
-                <div class="w-px h-6 bg-slate-200 mx-1 hidden sm:block"></div>
+                <div class="flex items-center gap-2 bg-slate-100/70 p-1.5 rounded-xl border border-slate-200/60 w-full sm:w-auto">
+                    <select id="filterType" onchange="filterTable()" class="flex-1 sm:flex-none bg-white px-3 py-2 rounded-lg border border-slate-200 font-bold text-[11px] md:text-xs shadow-sm outline-none text-slate-700 appearance-none cursor-pointer">
+                        <option value="ALL">📦 Todos</option>
+                        <option value="PIEZA_BASE">Cube Piezas</option>
+                        <option value="KIT_FLEXIBLE">Árbol Web</option>
+                        <option value="KIT_OFICIAL">Cajas Oficiales</option>
+                    </select>
 
-                <!-- Acciones Rápidas (Desktop) -->
-                <button onclick="exportPendingMasterToExcel()" id="btnExportPending" class="flex-none bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 px-3 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 transition" title="Exportar Faltantes Web"><i class="fas fa-file-excel text-sm"></i></button>
-                <button id="btn-mass-qr" onclick="openMassActions()" class="hidden md:flex flex-none bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm items-center gap-2 transition"><i class="fas fa-qrcode"></i> QRs</button>
-                <button id="btn-new-product" onclick="openEditModal()" class="hidden md:flex bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-slate-900/20 items-center gap-2"><i class="fas fa-plus"></i> Crear Producto</button>
-                <button id="btn-deploy" onclick="solicitarActualizacionGitHub()" class="hidden md:flex bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-blue-600/30 items-center gap-2"><i class="fas fa-rocket"></i> Publicar Web</button>
+                    <label class="flex-1 sm:flex-none flex items-center justify-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border border-slate-200 font-bold text-[11px] md:text-xs shadow-sm hover:bg-slate-50 transition select-none" id="filterPendingLabel">
+                        <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
+                        <span class="text-slate-700 whitespace-nowrap">Solo Faltantes</span>
+                    </label>
+                </div>
+                
+                <div class="hidden sm:block w-px h-8 bg-slate-200 mx-1"></div>
+
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <button onclick="exportPendingMasterToExcel()" id="btnExportPending" class="flex-1 sm:flex-none justify-center bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 transition" title="Exportar Faltantes Web">
+                        <i class="fas fa-file-excel text-sm"></i> <span class="whitespace-nowrap">Exportar Faltantes</span>
+                    </button>
+                    <button id="btn-mass-qr" onclick="openMassActions()" class="flex-1 sm:flex-none justify-center md:flex bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm items-center gap-2 transition">
+                        <i class="fas fa-qrcode text-sm text-slate-400"></i> <span class="whitespace-nowrap">Imprimir QRs</span>
+                    </button>
+                    <button id="btn-new-product" onclick="openEditModal()" class="flex-1 sm:flex-none justify-center md:flex bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-slate-900/20 items-center gap-2">
+                        <i class="fas fa-plus"></i> <span class="whitespace-nowrap">Crear</span>
+                    </button>
+                    <button id="btn-deploy" onclick="solicitarActualizacionGitHub()" class="flex-1 sm:flex-none justify-center md:flex bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-blue-600/30 items-center gap-2">
+                        <i class="fas fa-rocket"></i> <span class="whitespace-nowrap">Publicar Web</span>
+                    </button>
+                </div>
             </div>
         </div>
 
