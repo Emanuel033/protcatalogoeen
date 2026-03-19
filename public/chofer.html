@@ -48,7 +48,8 @@
           });
         window.addEventListener('online', () => {
     document.getElementById('offline-banner').classList.add('hidden');
-    showToast("Conexión restaurada. Sincronizando entregas...", "success");
+    showToast("Conexión restaurada. Sincronizando...", "success");
+    setTimeout(sincronizarColaBlindada, 1500); // Esperar a que la red se estabilice
 });
 
 window.addEventListener('offline', () => {
@@ -56,10 +57,58 @@ window.addEventListener('offline', () => {
     showToast("Sin conexión. Modo offline activado.", "error");
 });
 
-// Comprobar estado inicial al cargar
 if (!navigator.onLine) {
     document.getElementById('offline-banner').classList.remove('hidden');
 }
+
+// ==========================================
+// SISTEMA BLINDADO DE SINCRONIZACIÓN OFFLINE
+// ==========================================
+window.guardarEnColaLocal = (id, dataObj) => {
+    try {
+        let cola = JSON.parse(localStorage.getItem('een_cola_sync') || '[]');
+        // Remover si ya existía para no duplicar
+        cola = cola.filter(item => item.id !== id);
+        // Guardar la nueva acción
+        cola.push({ id: id, data: dataObj, timestamp: new Date().getTime() });
+        localStorage.setItem('een_cola_sync', JSON.stringify(cola));
+    } catch(e) {
+        console.warn("Memoria local llena.", e);
+    }
+};
+
+window.sincronizarColaBlindada = async () => {
+    if (!navigator.onLine) return;
+    
+    let cola = JSON.parse(localStorage.getItem('een_cola_sync') || '[]');
+    if (cola.length === 0) return;
+
+    showToast(`Subiendo ${cola.length} entregas offline guardadas...`, "success");
+    let pendientesRestantes = [];
+
+    for (let item of cola) {
+        try {
+            // Re-inyectamos las horas del servidor
+            let payload = { ...item.data };
+            payload.fecha_actualizacion = firebase.firestore.FieldValue.serverTimestamp();
+            if (payload.estado === 'entregado') {
+                payload.fecha_entrega = firebase.firestore.FieldValue.serverTimestamp();
+            }
+
+            // Usamos .set con merge (Es más seguro que .update si la caché falla)
+            await db.collection('rutas_logistica').doc(item.id).set(payload, { merge: true });
+        } catch (error) {
+            console.error("Fallo al sincronizar", item.id, error);
+            pendientesRestantes.push(item); // Lo regresamos a la cola para intentar después
+        }
+    }
+
+    // Actualizamos la memoria del celular
+    localStorage.setItem('een_cola_sync', JSON.stringify(pendientesRestantes));
+    if(cola.length > 0 && pendientesRestantes.length === 0) {
+        showToast("¡Todas las entregas offline se sincronizaron con la oficina!", "success");
+    }
+};
     </script>
 
     <header class="bg-slate-900 text-white pt-safe border-b border-slate-800 shrink-0 z-20 shadow-md">
@@ -690,13 +739,25 @@ if (!navigator.onLine) {
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
                 // 3. Subimos a Firestore (¡SIN AWAIT! Para que guarde en caché instantáneamente si no hay red)
-                db.collection('rutas_logistica').doc(idViajeActivo).update({
+               // --- NUEVO GUARDADO BLINDADO ---
+                let datosEntrega = {
                     estado: 'entregado',
-                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(),
-                    fecha_entrega: firebase.firestore.FieldValue.serverTimestamp(),
                     foto_evidencia: b64Doc, 
-                    foto_evidencia_material: b64Mat 
-                });
+                    foto_evidencia_material: b64Mat
+                };
+
+                // 1. Lo metemos a la caja fuerte del celular primero
+                guardarEnColaLocal(idViajeActivo, datosEntrega);
+
+                // 2. Intentamos mandarlo a Firebase en segundo plano
+                db.collection('rutas_logistica').doc(idViajeActivo).set({
+                    ...datosEntrega,
+                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(),
+                    fecha_entrega: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                // 3. Revisamos si podemos sincronizar de una vez
+                sincronizarColaBlindada();
 
                 // Mostramos mensaje dinámico dependiendo de si hay internet
                 if(navigator.onLine) {
@@ -742,15 +803,22 @@ if (!navigator.onLine) {
 
             try {
                 const b64Foto = await compressImage('cam-falla', 'preview-falla'); 
-                let data = {
+                // --- NUEVO GUARDADO BLINDADO ---
+                let datosFalla = {
                     estado: 'fallido',
-                    motivo_falla: motivo,
-                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                    motivo_falla: motivo
                 };
-                if(b64Foto) data.foto_evidencia = b64Foto;
+                if(b64Foto) datosFalla.foto_evidencia = b64Foto;
 
-                // ¡SIN AWAIT! Fuego y olvido (Fire and forget)
-                db.collection('rutas_logistica').doc(idViajeActivo).update(data);
+                guardarEnColaLocal(idViajeActivo, datosFalla);
+
+                db.collection('rutas_logistica').doc(idViajeActivo).set({
+                    ...datosFalla,
+                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                sincronizarColaBlindada();
+                // --------------------------------
 
                 if(navigator.onLine) {
                     showToast("Reporte enviado a la oficina");
