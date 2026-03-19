@@ -665,50 +665,55 @@ if (!navigator.onLine) {
         };
 
         window.procesarEntrega = async () => {
-    const btn = document.getElementById('btn-confirmar-entrega');
-    const fileInputDoc = document.getElementById('cam-doc');
-    const fileInputMat = document.getElementById('cam-mat');
-    
-    if(!fileInputDoc.files || fileInputDoc.files.length === 0 || !fileInputMat.files || fileInputMat.files.length === 0) {
-        return showToast("⚠️ Debes capturar AMBAS fotos (Documento y Material)", "error");
-    }
+            const btn = document.getElementById('btn-confirmar-entrega');
+            const fileInputDoc = document.getElementById('cam-doc');
+            const fileInputMat = document.getElementById('cam-mat');
+            
+            if(!fileInputDoc.files || fileInputDoc.files.length === 0 || !fileInputMat.files || fileInputMat.files.length === 0) {
+                return showToast("⚠️ Debes capturar AMBAS fotos (Documento y Material)", "error");
+            }
 
-    btn.disabled = true; 
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando evidencias...';
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando evidencias...';
 
-    try {
-        // 1. Extraemos los Base64
-        const b64Doc = await compressImage('cam-doc', 'preview-doc');
-        const b64Mat = await compressImage('cam-mat', 'preview-mat');
+            try {
+                // 1. Extraemos los Base64 (Esto se queda con await porque es trabajo local del celular)
+                const b64Doc = await compressImage('cam-doc', 'preview-doc');
+                const b64Mat = await compressImage('cam-mat', 'preview-mat');
 
-        // 2. ¡NUEVO! Limpieza agresiva de RAM antes de la llamada a red
-        // Destruimos los pre-visualizadores y vaciamos los inputs para liberar memoria del navegador
-        resetPreview('cam-doc', 'preview-doc', 'Enviando...');
-        resetPreview('cam-mat', 'preview-mat', 'Enviando...');
-        fileInputDoc.value = '';
-        fileInputMat.value = '';
+                // 2. Limpieza agresiva de RAM antes de la llamada a red
+                resetPreview('cam-doc', 'preview-doc', 'Enviando...');
+                resetPreview('cam-mat', 'preview-mat', 'Enviando...');
+                fileInputDoc.value = '';
+                fileInputMat.value = '';
 
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo a la nube...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-        // 3. Subimos a Firestore
-        await db.collection('rutas_logistica').doc(idViajeActivo).update({
-            estado: 'entregado',
-            fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(),
-            fecha_entrega: firebase.firestore.FieldValue.serverTimestamp(),
-            foto_evidencia: b64Doc, 
-            foto_evidencia_material: b64Mat 
-        });
+                // 3. Subimos a Firestore (¡SIN AWAIT! Para que guarde en caché instantáneamente si no hay red)
+                db.collection('rutas_logistica').doc(idViajeActivo).update({
+                    estado: 'entregado',
+                    fecha_actualizacion: firebase.firestore.FieldValue.serverTimestamp(),
+                    fecha_entrega: firebase.firestore.FieldValue.serverTimestamp(),
+                    foto_evidencia: b64Doc, 
+                    foto_evidencia_material: b64Mat 
+                });
 
-        showToast("¡Entrega completada con éxito!");
-        cerrarModalEntrega();
-    } catch(e) {
-        console.error(e);
-        showToast("Error de conexión o archivo muy pesado.", "error");
-    } finally {
-        btn.disabled = false; 
-        btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Subir y Finalizar';
-    }
-};
+                // Mostramos mensaje dinámico dependiendo de si hay internet
+                if(navigator.onLine) {
+                    showToast("¡Entrega completada con éxito!");
+                } else {
+                    showToast("Guardado offline. Se enviará al tener red.", "success");
+                }
+                
+                cerrarModalEntrega();
+            } catch(e) {
+                console.error(e);
+                showToast("Error al procesar las imágenes.", "error");
+            } finally {
+                btn.disabled = false; 
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Subir y Finalizar';
+            }
+        };
 
         // ==========================================
         // MANEJO DE FALLAS (Misma seguridad aplicada)
@@ -733,10 +738,9 @@ if (!navigator.onLine) {
             if(!motivo) return showToast("Escribe el motivo del problema", "error");
             
             const btn = document.getElementById('btn-confirmar-falla');
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
             try {
-                // Mismo proceso de optimización para fallas
                 const b64Foto = await compressImage('cam-falla', 'preview-falla'); 
                 let data = {
                     estado: 'fallido',
@@ -745,17 +749,23 @@ if (!navigator.onLine) {
                 };
                 if(b64Foto) data.foto_evidencia = b64Foto;
 
-                await db.collection('rutas_logistica').doc(idViajeActivo).update(data);
+                // ¡SIN AWAIT! Fuego y olvido (Fire and forget)
+                db.collection('rutas_logistica').doc(idViajeActivo).update(data);
 
-                showToast("Reporte enviado a la oficina");
+                if(navigator.onLine) {
+                    showToast("Reporte enviado a la oficina");
+                } else {
+                    showToast("Reporte guardado. Se enviará al tener red.", "success");
+                }
+                
                 cerrarModalFalla();
             } catch(e) {
-                showToast("Error al reportar", "error");
+                showToast("Error al procesar la imagen", "error");
             } finally {
                 btn.disabled = false; btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> Enviar Reporte';
             }
         };
-// ==========================================
+        // ==========================================
         // MODAL QR ZOOM Y BRILLO (OPTIMIZADO)
         // ==========================================
 
