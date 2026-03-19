@@ -2487,28 +2487,36 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
             const productosAActualizar = [];
             const idsProcesados = new Set();
 
-            statusText.innerText = "Buscando columnas Código, Nombre y Precio...";
+            statusText.innerText = "Buscando columnas y detectando cambios...";
 
             jsonRows.forEach(row => {
                 const cleanRow = {};
                 for (let key in row) {
-                    const cleanKey = String(key).toLowerCase().replace(/\s+/g, '');
+                    // Súper limpieza: Quita acentos, espacios y pasa a minúsculas
+                    const cleanKey = String(key)
+                        .toLowerCase()
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita acentos (Précio -> precio)
+                        .replace(/\s+/g, '');
                     cleanRow[cleanKey] = row[key];
                 }
 
-                // Detección basada en tus cabeceras exactas
-                const codigo = cleanRow['código'] || cleanRow['codigo'];
+                // Detección basada en las llaves ya limpias sin acentos
+                const codigo = cleanRow['codigo'];
                 const descripcion = cleanRow['nombre(prod)'] || cleanRow['nombre'] || cleanRow['descripcion'];
                 
+                // Búsqueda agresiva de la columna de dinero
                 let precioRaw = 0;
+                let nombreColumnaPrecio = "NINGUNA";
                 for (let key in cleanRow) {
-                    if (key.includes('precio')) {
+                    if (key.includes('precio') || key.includes('prec') || key.includes('costo') || key.includes('importe') || key.includes('valor')) {
                         precioRaw = cleanRow[key];
+                        nombreColumnaPrecio = key;
                         break;
                     }
                 }
 
                 if (codigo && String(codigo).trim() !== "") {
+                    // Limpieza rigurosa de números
                     let precioNumerico = parseFloat(String(precioRaw).replace(/[^0-9.-]+/g,"")); 
                     if (isNaN(precioNumerico)) precioNumerico = 0;
 
@@ -2518,10 +2526,24 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
                     const itemExistente = facturacionCatalog.find(f => f.id === idSeguroFirebase);
                     const descLimpia = String(descripcion).trim();
                     
+                    // Aseguramos que Firebase compare Número contra Número
+                    const precioFirebase = itemExistente ? parseFloat(itemExistente.precio || 0) : 0;
+                    
                     const hasChanges = !itemExistente || 
                                        itemExistente.descripcion_oficial !== descLimpia || 
-                                       itemExistente.precio !== precioNumerico ||
+                                       precioFirebase !== precioNumerico ||
                                        itemExistente.tipo_articulo_sistema !== tipoAsignado;
+
+                    // 🚨 MODO DIAGNÓSTICO: Imprime en consola sólo el primer artículo que lee
+                    if (idsProcesados.size === 1) {
+                        console.log("🔍 --- DIAGNÓSTICO DE LECTURA DE EXCEL ---");
+                        console.log("1. Cabeceras detectadas (limpias):", Object.keys(cleanRow));
+                        console.log("2. Código extraído:", codigo);
+                        console.log("3. Columna de Dinero usada:", nombreColumnaPrecio);
+                        console.log(`4. Precio Excel: $${precioNumerico} | Precio Firebase: $${precioFirebase}`);
+                        console.log("5. ¿Detectó cambios esta fila?:", hasChanges);
+                        console.log("-----------------------------------------");
+                    }
 
                     if (hasChanges) {
                         productosAActualizar.push({
@@ -2546,12 +2568,9 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
 
             let eliminadosCount = 0;
 
-            // 3. Borrado Dinámico e Inteligente (SÓLO SI ES SINC. TOTAL)
             if (!isPartial) {
                 const idsAEliminar = [];
-                
                 facturacionCatalog.forEach(doc => {
-                    // EL ESCUDO: Solo evalúa borrar si el documento es del MISMO TIPO que estamos importando
                     if (doc.tipo_articulo_sistema === tipoAsignado && !idsProcesados.has(doc.id)) {
                         idsAEliminar.push(doc.id);
                     }
@@ -2569,7 +2588,6 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
                 }
             }
 
-            // 4. Subida de datos nuevos o modificados
             if (productosAActualizar.length > 0) {
                 statusText.innerText = `Subiendo ${productosAActualizar.length} artículos...`;
                 const lotesSubida = dividirEnLotes(productosAActualizar, 500);
@@ -2585,9 +2603,9 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
 
             const ahorrados = idsProcesados.size - productosAActualizar.length;
             const tipoMsg = isPartial ? 'Act. Parcial' : 'Sinc. Total';
-            const targetMsg = tipoAsignado === 'PIEZA_BASE' ? 'Base' : 'Kits';
+            const targetMsg = tipoAsignado === 'PIEZA_BASE' ? 'Producto Base' : 'Paquetes';
             
-            showToast(`${tipoMsg} de ${targetMsg} lista. ${productosAActualizar.length} guardados, ${eliminadosCount} eliminados. (${ahorrados} omitidos)`, 'success');
+            showToast(`${tipoMsg} de ${targetMsg} lista. ${productosAActualizar.length} act/nuevos, ${eliminadosCount} borrados. (${ahorrados} omitidos sin cambios)`, 'success');
 
         } catch (error) {
             console.error("Error en sincronización:", error);
