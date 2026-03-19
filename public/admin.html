@@ -2463,7 +2463,7 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
         };
 
         // --- LÓGICA: SINCRONIZAR CSV/EXCEL A PRUEBA DE TONTOS Y AHORRANDO COSTOS ---
-async function handleCSVUpload(event, tipoAsignado, isPartial) {
+        async function handleCSVUpload(event, tipoAsignado, isPartial) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -2482,7 +2482,16 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
             
-            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+            // Le decimos a la librería que ignore las filas totalmente vacías
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "", blankrows: false });
+
+            // 🚨 ESCÁNER DE RAYOS X PARA LA CONSOLA 🚨
+            console.log("🚨 --- INICIO DE LECTURA RAW --- 🚨");
+            console.log("Total de filas detectadas:", jsonRows.length);
+            if(jsonRows.length > 0) console.log("Fila 1 (Raw):", jsonRows[0]);
+            if(jsonRows.length > 1) console.log("Fila 2 (Raw):", jsonRows[1]);
+            if(jsonRows.length > 2) console.log("Fila 3 (Raw):", jsonRows[2]);
+            console.log("-----------------------------------");
 
             const productosAActualizar = [];
             const idsProcesados = new Set();
@@ -2492,19 +2501,26 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
             jsonRows.forEach(row => {
                 const cleanRow = {};
                 for (let key in row) {
-                    // Súper limpieza: Quita acentos, espacios y pasa a minúsculas
                     const cleanKey = String(key)
                         .toLowerCase()
-                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita acentos (Précio -> precio)
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                         .replace(/\s+/g, '');
                     cleanRow[cleanKey] = row[key];
                 }
 
-                // Detección basada en las llaves ya limpias sin acentos
-                const codigo = cleanRow['codigo'];
-                const descripcion = cleanRow['nombre(prod)'] || cleanRow['nombre'] || cleanRow['descripcion'];
+                // BÚSQUEDA AGRESIVA DEL CÓDIGO
+                let codigoRaw = "";
+                for (let key in cleanRow) {
+                    if (key.includes('cod') || key.includes('sku') || key.includes('clave')) {
+                        codigoRaw = cleanRow[key];
+                        break;
+                    }
+                }
+
+                // Búsqueda de descripción
+                const descripcion = cleanRow['nombre(prod)'] || cleanRow['nombre'] || cleanRow['descripcion'] || cleanRow['articulo'];
                 
-                // Búsqueda agresiva de la columna de dinero
+                // Búsqueda agresiva de precio
                 let precioRaw = 0;
                 let nombreColumnaPrecio = "NINGUNA";
                 for (let key in cleanRow) {
@@ -2515,18 +2531,15 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
                     }
                 }
 
-                if (codigo && String(codigo).trim() !== "") {
-                    // Limpieza rigurosa de números
+                if (codigoRaw && String(codigoRaw).trim() !== "") {
                     let precioNumerico = parseFloat(String(precioRaw).replace(/[^0-9.-]+/g,"")); 
                     if (isNaN(precioNumerico)) precioNumerico = 0;
 
-                    const idSeguroFirebase = String(codigo).replace(/\//g, '-').replace(/\\/g, '-');
+                    const idSeguroFirebase = String(codigoRaw).replace(/\//g, '-').replace(/\\/g, '-');
                     idsProcesados.add(idSeguroFirebase);
 
                     const itemExistente = facturacionCatalog.find(f => f.id === idSeguroFirebase);
-                    const descLimpia = String(descripcion).trim();
-                    
-                    // Aseguramos que Firebase compare Número contra Número
+                    const descLimpia = String(descripcion || "SIN NOMBRE").trim();
                     const precioFirebase = itemExistente ? parseFloat(itemExistente.precio || 0) : 0;
                     
                     const hasChanges = !itemExistente || 
@@ -2534,22 +2547,19 @@ async function handleCSVUpload(event, tipoAsignado, isPartial) {
                                        precioFirebase !== precioNumerico ||
                                        itemExistente.tipo_articulo_sistema !== tipoAsignado;
 
-                    // 🚨 MODO DIAGNÓSTICO: Imprime en consola sólo el primer artículo que lee
+                    // Diagnóstico del primer producto válido
                     if (idsProcesados.size === 1) {
-                        console.log("🔍 --- DIAGNÓSTICO DE LECTURA DE EXCEL ---");
-                        console.log("1. Cabeceras detectadas (limpias):", Object.keys(cleanRow));
-                        console.log("2. Código extraído:", codigo);
-                        console.log("3. Columna de Dinero usada:", nombreColumnaPrecio);
-                        console.log(`4. Precio Excel: $${precioNumerico} | Precio Firebase: $${precioFirebase}`);
-                        console.log("5. ¿Detectó cambios esta fila?:", hasChanges);
-                        console.log("-----------------------------------------");
+                        console.log("✅ ¡PRIMER PRODUCTO DETECTADO!");
+                        console.log("Código Extraído:", idSeguroFirebase);
+                        console.log("Descripción Extraída:", descLimpia);
+                        console.log("Columna Dinero:", nombreColumnaPrecio, "-> $", precioNumerico);
                     }
 
                     if (hasChanges) {
                         productosAActualizar.push({
                             id: idSeguroFirebase,
                             datos: {
-                                codigo_sistema_oficial: String(codigo),
+                                codigo_sistema_oficial: String(codigoRaw),
                                 descripcion_oficial: descLimpia,
                                 precio: precioNumerico,
                                 tipo_articulo_sistema: tipoAsignado
