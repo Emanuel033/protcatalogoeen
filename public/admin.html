@@ -2297,103 +2297,131 @@ window.solicitarActualizacionGitHub = async () => {
             const modal = document.getElementById('massActionsModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
 
-        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl, plantilla = '3x5') {
-    // 1. Aplanar el arreglo (crear una lista con todas las etiquetas a imprimir según la cantidad)
-    let labelsToPrint = [];
-    dataArray.forEach(item => {
-        let qrVal = isVitrina ? baseUrl + item.id : item.id;
-        // Generamos el QR una sola vez por item para optimizar memoria
-        let qr = new QRious({value: qrVal, size: 250, level: 'M'}).toDataURL();
-        
-        for(let i=0; i<qty; i++) {
-            labelsToPrint.push({
-                title: item.title,
-                sub: isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub,
-                qrData: qr
+        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl, plantilla = '3x10') {
+            let labelsToPrint = [];
+            dataArray.forEach(item => {
+                let qrVal = isVitrina ? baseUrl + item.id : item.id;
+                // Generamos el código QR
+                let qr = new QRious({value: qrVal, size: 250, level: 'M'}).toDataURL();
+                
+                for(let i=0; i<qty; i++) {
+                    labelsToPrint.push({
+                        title: item.title,
+                        sub: isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub,
+                        qrData: qr
+                    });
+                }
             });
+
+            // Determinar cuántas etiquetas caben por hoja según el formato
+            let labelsPerPage = plantilla === '3x10' ? 30 : 15;
+            let gridClass = plantilla === '3x10' ? 'grid-3x10' : 'grid-3x5';
+
+            let html = `<html><head><title>Imprimir QR - EEN</title>
+            <style>
+                /* RESET TOTAL PARA EVITAR INTERFERENCIA DEL NAVEGADOR */
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #fff; }
+                
+                /* CONFIGURACIÓN ESTRICTA DE LA PÁGINA FÍSICA */
+                @page { 
+                    size: letter; /* Carta: 8.5in x 11in */
+                    margin: 0in !important; /* Apaga márgenes del navegador */
+                }
+
+                .sheet {
+                    width: 8.5in; 
+                    height: 11in;
+                    /* Márgenes exactos de la hoja física Avery */
+                    padding-top: 0.5in;
+                    padding-bottom: 0.5in;
+                    padding-left: 0.19in; 
+                    padding-right: 0.19in;
+                    display: grid;
+                    page-break-after: always;
+                }
+                .sheet:last-child { page-break-after: auto; }
+
+                /* =========================================================
+                   PLANTILLA 3x10 (Inventario Interno / Cajas) - 30 por hoja
+                   ========================================================= */
+                .grid-3x10 {
+                    grid-template-columns: repeat(3, 2.625in);
+                    grid-template-rows: repeat(10, 1in);
+                    column-gap: 0.125in;
+                    row-gap: 0in; 
+                }
+                .grid-3x10 .label { 
+                    width: 2.625in; height: 1in;
+                    display: flex; align-items: center; padding: 0.08in; overflow: hidden; 
+                }
+                .grid-3x10 img { 
+                    width: 0.8in !important; height: 0.8in !important; 
+                    flex-shrink: 0; /* QR Inamovible */
+                    margin-right: 0.1in; object-fit: contain;
+                }
+                .grid-3x10 h4 { 
+                    margin: 0 0 2px 0; font-size: 8pt; line-height: 1.1; font-weight: 800;
+                    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+                }
+                .grid-3x10 p { margin: 0; font-size: 6.5pt; font-weight: bold; }
+
+                /* =========================================================
+                   PLANTILLA 3x5 (Vitrina / Carrito Web) - 15 por hoja
+                   ========================================================= */
+                .grid-3x5 {
+                    grid-template-columns: repeat(3, 2.625in);
+                    grid-template-rows: repeat(5, 2in);
+                    column-gap: 0.125in;
+                    row-gap: 0in; 
+                }
+                .grid-3x5 .label { 
+                    width: 2.625in; height: 2in;
+                    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+                    padding: 0.1in; text-align: center; overflow: hidden;
+                }
+                .grid-3x5 img { 
+                    width: 1.3in !important; height: 1.3in !important; 
+                    flex-shrink: 0; /* QR Inamovible */
+                    margin-bottom: 0.05in; object-fit: contain;
+                }
+                .grid-3x5 h4 { 
+                    margin: 0 0 4px 0; font-size: 10pt; line-height: 1.1; font-weight: 800;
+                    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+                }
+                .grid-3x5 p { margin: 0; font-size: 8pt; color: #475569; font-weight: bold; }
+
+            </style>
+            </head><body>`;
+
+            // Lógica para armar las hojas (Sheets)
+            for (let i = 0; i < labelsToPrint.length; i += labelsPerPage) {
+                let chunk = labelsToPrint.slice(i, i + labelsPerPage);
+                
+                html += `<div class="sheet ${gridClass}">`;
+                
+                chunk.forEach(lbl => {
+                    html += `
+                        <div class="label">
+                            <img src="${lbl.qrData}">
+                            <div>
+                                <h4>${lbl.title}</h4>
+                                <p>${lbl.sub}</p>
+                            </div>
+                        </div>`;
+                });
+
+                // Rellenar espacios vacíos para no romper el grid
+                for (let j = chunk.length; j < labelsPerPage; j++) {
+                    html += `<div class="label"></div>`;
+                }
+                
+                html += `</div>`;
+            }
+
+            html += '<script>window.onload=function(){ setTimeout(() => { window.print(); }, 500); }<\/script></body></html>';
+            return html;
         }
-    });
-
-    // 2. Configurar medidas según la plantilla elegida
-    let labelsPerPage = plantilla === '3x10' ? 30 : 15;
-    let gridClass = plantilla === '3x10' ? 'grid-3x10' : 'grid-3x5';
-
-    // 3. Construir el HTML con CSS Grid y medidas Físicas (pulgadas)
-    let html = `<html><head><title>Imprimir QR - EEN</title>
-    <style>
-        /* Forzar tamaño carta y quitar márgenes de la impresora */
-        @page { margin: 0; size: letter; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif, Arial; margin: 0; padding: 0; box-sizing: border-box; background: #fff; }
-        
-        .page {
-            width: 8.5in; 
-            height: 11in;
-            /* Margen superior/inferior de 0.5in y lateral de 0.15in (Estándar Avery) */
-            padding: 0.5in 0.15in; 
-            box-sizing: border-box;
-            page-break-after: always; /* Salto de página estricto */
-            display: grid;
-            justify-content: center;
-        }
-        .page:last-child { page-break-after: auto; }
-        
-        /* Borde punteado para guiarte en pantalla, no sale en la impresora */
-        .label { overflow: hidden; box-sizing: border-box; outline: 1px dashed #e2e8f0; }
-        @media print { .label { outline: none !important; } }
-
-        /* --- PLANTILLA 3x10 (Etiquetas pequeñas, ej. Avery 5160) --- */
-        .grid-3x10 { 
-            grid-template-columns: repeat(3, 2.625in); 
-            grid-template-rows: repeat(10, 1in); 
-            gap: 0in 0.125in; 
-        }
-        .grid-3x10 .label { display: flex; align-items: center; padding: 0.05in; }
-        .grid-3x10 img { width: 0.85in; height: 0.85in; margin-right: 0.08in; }
-        .grid-3x10 .text-content { flex: 1; min-width: 0; }
-        .grid-3x10 h4 { margin: 0 0 2px 0; font-size: 8px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-        .grid-3x10 p { margin: 0; font-size: 7px; color: #475569; font-weight: bold; }
-
-        /* --- PLANTILLA 3x5 (Etiquetas medianas) --- */
-        .grid-3x5 { 
-            grid-template-columns: repeat(3, 2.625in); 
-            grid-template-rows: repeat(5, 2in); 
-            gap: 0in 0.125in; 
-        }
-        .grid-3x5 .label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.1in; text-align: center; }
-        .grid-3x5 img { width: 1.25in; height: 1.25in; margin-bottom: 0.05in; }
-        .grid-3x5 h4 { margin: 0 0 4px 0; font-size: 11px; line-height: 1.1; max-height: 24px; overflow: hidden; }
-        .grid-3x5 p { margin: 0; font-size: 9px; color: #475569; font-weight: bold; }
-    </style>
-    </head><body>`;
-
-    // 4. Dividir las etiquetas en "Páginas"
-    for (let i = 0; i < labelsToPrint.length; i += labelsPerPage) {
-        let chunk = labelsToPrint.slice(i, i + labelsPerPage);
-        
-        html += `<div class="page ${gridClass}">`;
-        
-        chunk.forEach(lbl => {
-            html += `
-                <div class="label">
-                    <img src="${lbl.qrData}">
-                    <div class="text-content">
-                        <h4>${lbl.title}</h4>
-                        <p>${lbl.sub}</p>
-                    </div>
-                </div>`;
-        });
-
-        // Rellenar espacios vacíos si la página no se llena (vital para que el Grid no se colapse)
-        for (let j = chunk.length; j < labelsPerPage; j++) {
-            html += `<div class="label empty" style="border:none; outline:none;"></div>`;
-        }
-        
-        html += `</div>`;
-    }
-
-    html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
-    return html;
-}
 
         function getFilteredProductsForPrint() {
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
