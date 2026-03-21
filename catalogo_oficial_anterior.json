@@ -1,0 +1,7211 @@
+[
+  {
+    "codigo": "AC-A/CP 01",
+    "precio": 153,
+    "stock": 1401,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AC-P/CP",
+    "precio": 88.59,
+    "stock": 8246,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AD-R20/410-C-BCO/CP",
+    "precio": 3.63,
+    "stock": 515965,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AD-R20/410-C-MOR/CP",
+    "precio": 7.45,
+    "stock": 20295,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AD-R20/410-C-MPLA/CP",
+    "precio": 7.45,
+    "stock": 21340,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AD-R24/410-C-BCO/CP",
+    "precio": 3.99,
+    "stock": 380968,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AD-R24/410-C-MOR/CP",
+    "precio": 7.6,
+    "stock": 24340,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AD-R24/410-C-MPLA/CP",
+    "precio": 7.6,
+    "stock": 25539,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AD-R28/410-C-BCO/CP",
+    "precio": 4.82,
+    "stock": 30041,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "A-FK/CP",
+    "precio": 259.13,
+    "stock": 235,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AP-28-ECO/CP",
+    "precio": 8,
+    "stock": 2030349,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AP-UR-28-CHI/CP",
+    "precio": 8.5,
+    "stock": 292652,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "AP-UR-28-CNY/CP",
+    "precio": 17.85,
+    "stock": 405477,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "A-TP50L/CP",
+    "precio": 0,
+    "stock": 780,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BAPOL-BCA/CP",
+    "precio": 9.86,
+    "stock": 18816,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BAPOL-NAT/CP",
+    "precio": 9.86,
+    "stock": 1340,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BCA-1-BCO/CP",
+    "precio": 9.76,
+    "stock": 143798,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BCA-1-BCO-CT",
+    "precio": 10.36,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BCA-1-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BCA-1-NAT/CP",
+    "precio": 9.45,
+    "stock": 99282,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BCA-1-NAT-CT",
+    "precio": 10.06,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BCA-1-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BD-24/410/CP",
+    "precio": 8.89,
+    "stock": 35764,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BD-24/415/CP",
+    "precio": 8.89,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BD-28/400/CP",
+    "precio": 14.01,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BD-28/410/CP",
+    "precio": 8.26,
+    "stock": 35096,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BD-28/415/CP",
+    "precio": 8.26,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BD-38/400-R/CP",
+    "precio": 26,
+    "stock": 6163,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BD-38/400-S/CP",
+    "precio": 23.71,
+    "stock": 203297,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BD-48/400/CP",
+    "precio": 22.25,
+    "stock": 3831,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BFND-125/CP",
+    "precio": 63.95,
+    "stock": 1075,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLCF-TTP-1/CP",
+    "precio": 14.68,
+    "stock": 128667,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLCF-TTP-4/CP",
+    "precio": 31.88,
+    "stock": 68386,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLPS-2/CP",
+    "precio": 31.32,
+    "stock": 19563,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLS-16/CP",
+    "precio": 12.49,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLS-20/CP",
+    "precio": 13.51,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-CDO-1-GZ/CP",
+    "precio": 11.7,
+    "stock": 289878,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-CDO-4-GZ/CP",
+    "precio": 27.83,
+    "stock": 131054,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-CDO-4-GZ-CA/CP",
+    "precio": 32.48,
+    "stock": 166276,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-FSTYLE-4/CP",
+    "precio": 50,
+    "stock": 3722,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-ST-1/CP",
+    "precio": 11.51,
+    "stock": 259168.52,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-ST-125./CP",
+    "precio": 7.1,
+    "stock": 60155,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-ST-250/CP",
+    "precio": 7.46,
+    "stock": 236649,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-ST-500/CP",
+    "precio": 8.8,
+    "stock": 336408,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-TTP-1A/CP",
+    "precio": 14.78,
+    "stock": 199547,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-TTP-1-GZ/CP",
+    "precio": 11.86,
+    "stock": 1036984,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-TTP-250-GZ/CP",
+    "precio": 7.1,
+    "stock": 1650821,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-TTP-4-GZ/CP",
+    "precio": 27.34,
+    "stock": 345623,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-TTP-500-GZ/CP",
+    "precio": 8.32,
+    "stock": 1188295,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BLSF-TTP-GAL/CP",
+    "precio": 30.85,
+    "stock": 105129,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BM-.500-BCA/CP",
+    "precio": 7.38,
+    "stock": 25249,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BM-1/2-NEGRO/CP",
+    "precio": 0,
+    "stock": 4958,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BM-1000-BCA-CT",
+    "precio": 15.36,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BM-1-BCA/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-49/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BM-1000-NAT-CT",
+    "precio": 15.36,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BM-1-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-49/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BM-1000-NAT-R50-BCA-CT",
+    "precio": 15.36,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BM-1-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-49/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BM-1000-NEG-CT",
+    "precio": 15.76,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BM-1-NEGRO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-49/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BM-1000-ROJ-CT",
+    "precio": 15.36,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BM-1-ROJA/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-49/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BM-1-BCA/CP",
+    "precio": 12.51,
+    "stock": 67649,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BM-1-NAT/CP",
+    "precio": 12.51,
+    "stock": 12339,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BM-1-NEGRO/CP",
+    "precio": 12.51,
+    "stock": 11256,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BM-1-ROJA/CP",
+    "precio": 12.51,
+    "stock": 1215,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BM-250-BCA/CP",
+    "precio": 6.32,
+    "stock": 6981,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BM-250-BCA-CT",
+    "precio": 8.66,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BM-250-BCA/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-49/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BM-500-BCA-CT",
+    "precio": 9.52,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BM-.500-BCA/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-49/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BMC-B-N-1/CP",
+    "precio": 7.63,
+    "stock": 31305,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BO-E120/CP",
+    "precio": 22.44,
+    "stock": 6707,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BO-E250/CP",
+    "precio": 26.8,
+    "stock": 5324,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BO-E80/CP",
+    "precio": 18.28,
+    "stock": 2335,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP01-SU-PLATA-70-1/CP",
+    "precio": 3.57,
+    "stock": 16370,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP02-SU-PLATA-150/CP",
+    "precio": 3.46,
+    "stock": 17887,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP03-SU-PLATA-250/CP",
+    "precio": 3.06,
+    "stock": 7781,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP04-SU-PLATA-500/CP",
+    "precio": 4.39,
+    "stock": 7328,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP05-SU-PLATA-1/CP",
+    "precio": 6.88,
+    "stock": 6700,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP06-SU-DORADA-70/CP",
+    "precio": 3.68,
+    "stock": 19100,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP07-SU-DORADA-150/CP",
+    "precio": 3.75,
+    "stock": 8700,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP08-SU-DORADA-250/CP",
+    "precio": 2.98,
+    "stock": 5828,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP09-SU-DORADA-500/CP",
+    "precio": 4.86,
+    "stock": 11910,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP100-SU-LIQP-2/CP",
+    "precio": 17.4,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP101-SU-LIQP-3/CP",
+    "precio": 22.65,
+    "stock": 5100,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP102-SU-LIQP-5/CP",
+    "precio": 26.7,
+    "stock": 5300,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP10-SU-DORADA-1/CP",
+    "precio": 6.45,
+    "stock": 6959,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP11-SU-BLANCA-70/CP",
+    "precio": 4.5,
+    "stock": 16387,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP12-SU-BLANCA-150/CP",
+    "precio": 4.65,
+    "stock": 8500,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP13-SU-BLANCA-250/CP",
+    "precio": 4.59,
+    "stock": 7013,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP14-SU-BLANCA-500/CP",
+    "precio": 6.86,
+    "stock": 11812,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP15-SU-BLANCA-1/CP",
+    "precio": 8.39,
+    "stock": 8000,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP16-SU-PLATA-TRANS-70/CP",
+    "precio": 3.88,
+    "stock": 48380,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP17-SU-PLATA-TRANS-150/CP",
+    "precio": 4.07,
+    "stock": 35987,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP18-SU-PLATA-TRANS-250/CP",
+    "precio": 3.95,
+    "stock": 22280,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP19-SU-PLATA-TRANS-500/CP",
+    "precio": 5.39,
+    "stock": 9295,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP-20-FND-30/CP",
+    "precio": 63.95,
+    "stock": 7415,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP20-SU-PLATA-TRANS-1/CP",
+    "precio": 8.16,
+    "stock": 17238,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP21-SU-TRANS-70/CP",
+    "precio": 3.55,
+    "stock": 20066,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP22-SU-TRANS-150/CP",
+    "precio": 3.45,
+    "stock": 8700,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP23-SU-TRANS-250/CP",
+    "precio": 2.79,
+    "stock": 19400,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP24-SU-TRANS-500/CP",
+    "precio": 4.16,
+    "stock": 12416,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP25-SU-TRANS-1/CP",
+    "precio": 6.01,
+    "stock": 11600,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP26-SU-BICAPA-NEGRA 150/CP",
+    "precio": 5.78,
+    "stock": 8853,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP27-SU-BICAPA-NEGRA 250/CP",
+    "precio": 4.89,
+    "stock": 1900,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP28-SU-BICAPA-NEGRA 500/CP",
+    "precio": 6.33,
+    "stock": 1700,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP29-SU-BICAPA-NEGRA 1/CP",
+    "precio": 10.78,
+    "stock": 6174,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP30-SU-NEGRA-MATE250/CP",
+    "precio": 5.36,
+    "stock": 19487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP31-SU-NEGRA-MATE500/CP",
+    "precio": 6.93,
+    "stock": 16887,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP32-SU-NEGRA-TRANS-250/CP",
+    "precio": 5.36,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP33-SU-NEGRA-CV-500/CP",
+    "precio": 8.39,
+    "stock": 5987,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP34-SU-BCA-TRANS-150/CP",
+    "precio": 3.84,
+    "stock": 10686,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP35-SU-DORADA-TRANS-150/CP",
+    "precio": 4,
+    "stock": 10639,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP36-SU-KRAFT-70/CP",
+    "precio": 4.76,
+    "stock": 4487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP37-SU-KRAFT-150/CP",
+    "precio": 5.53,
+    "stock": 4886,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP38-SU-KRAFT-250/CP",
+    "precio": 8.45,
+    "stock": 10787,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP39-SU-KRAFT-500/CP",
+    "precio": 9.69,
+    "stock": 6487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP40-SU-KRAFT-CV-70/CP",
+    "precio": 5.9,
+    "stock": 5474,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP41-SU-KRAFT-CV-150/CP",
+    "precio": 7.69,
+    "stock": 8974,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP42-SU-KRAFT-CV-250/CP",
+    "precio": 8.46,
+    "stock": 8084,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP43-SU-KRAFT-CV-500/CP",
+    "precio": 15.15,
+    "stock": 6300,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP44-SU-PA-VERDE-CV-70/CP",
+    "precio": 5.16,
+    "stock": 4187,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP45-SU-PA-VERDE-CV-150/CP",
+    "precio": 6.62,
+    "stock": 6657,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP46-SU-PA-VERDE-CV-250/CP",
+    "precio": 8.15,
+    "stock": 9997,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP47-SU-PA-VERDE-CV-500/CP",
+    "precio": 9.52,
+    "stock": 10387,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP48-SU-PA-BCA-CV-70/CP",
+    "precio": 7.53,
+    "stock": 5088,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP49-SU-PA-BCA-CV-150/CP",
+    "precio": 7.83,
+    "stock": 7100,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP-50-PVC/CP",
+    "precio": 1285,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP50-SU-PA-BCA-CV-250/CP",
+    "precio": 8.15,
+    "stock": 6597,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP51-SU-PA-BCA-CV-500/CP",
+    "precio": 9.52,
+    "stock": 6287,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP52-SU-KRAFT-TRANS-150/CP",
+    "precio": 7.69,
+    "stock": 4300,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP53-SU-KRAFT-TRANS-250/CP",
+    "precio": 8.46,
+    "stock": 5850,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP54-KRAFT-CV-TINTIE-500/CP",
+    "precio": 6.62,
+    "stock": 6587,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP55-KRAFT-CV-TINTIE-1/CP",
+    "precio": 7.8,
+    "stock": 2296,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP56-KRAFT-CV-TINTIE-250/CP",
+    "precio": 5.85,
+    "stock": 8287,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP57-FUELLE-PLATA-500/CP",
+    "precio": 6.62,
+    "stock": 5187,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP58-FUELLE-PLATA-1/CP",
+    "precio": 7.69,
+    "stock": 6487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP59-FUELLE-PLATA-250/CP",
+    "precio": 6.15,
+    "stock": 3687,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP60-FUELLE-ROJA-250/CP",
+    "precio": 6.15,
+    "stock": 2587,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP61-FUELLE-ROJA-500/CP",
+    "precio": 7.74,
+    "stock": 6500,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP62-FUELLE-ROJA-1/CP",
+    "precio": 7.69,
+    "stock": 6487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP63-FUELLE-NEGMATE-250/CP",
+    "precio": 6.15,
+    "stock": 2387,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP64-FUELLE-NEGMATE-500/CP",
+    "precio": 6.62,
+    "stock": 4987,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP65-FUELLE-NEGMATE-1/CP",
+    "precio": 7.69,
+    "stock": 9100,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP66-FUELLE-BCAMATE-250/CP",
+    "precio": 6.15,
+    "stock": 6487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP67-FUELLE-BCAMATE-500/CP",
+    "precio": 6.62,
+    "stock": 7787,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP68-FUELLE-BCAMATE-1/CP",
+    "precio": 7.69,
+    "stock": 4342,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP69-FUELLE-VERMATE-250/CP",
+    "precio": 6.15,
+    "stock": 5187,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP70-FUELLE-VERMATE-500/CP",
+    "precio": 6.62,
+    "stock": 1287,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP71-FUELLE-VERMATE-1/CP",
+    "precio": 7.69,
+    "stock": 6487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP72-FUELLE-AZULMATE-250/CP",
+    "precio": 6.15,
+    "stock": 2387,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP73-FUELLE-AZULMATE-500/CP",
+    "precio": 6.62,
+    "stock": 6487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP74-FUELLE-AZULMATE-1/CP",
+    "precio": 7.69,
+    "stock": 6487,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP75-SU-LIQ-250/CP",
+    "precio": 5.7,
+    "stock": 4200,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP76-SU-LIQ-500/CP",
+    "precio": 7.23,
+    "stock": 178461,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP77-SU-LIQ-1/CP",
+    "precio": 9.09,
+    "stock": 8800,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP78-PL-3SELLOS-PLATA-75/CP",
+    "precio": 2.85,
+    "stock": 3900,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP79-PL-3SELLOS-PLATA-500/CP",
+    "precio": 3.84,
+    "stock": 2987,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP80-PL-2SELLOS-TRANS-150/CP",
+    "precio": 2.85,
+    "stock": 7714,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP81-POLLERA-PLATA-1/CP",
+    "precio": 5.09,
+    "stock": 18300,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP82-POLLERA-PLATA-1.5/CP",
+    "precio": 3.99,
+    "stock": 8900,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP83-SU-BCA-TRANS-250/CP",
+    "precio": 3.55,
+    "stock": 10127,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP84-BLANCA-TRANS-500/CP",
+    "precio": 6.38,
+    "stock": 12100,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP85-SU-NEG-CV-150/CP",
+    "precio": 7.64,
+    "stock": 6100,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP86-SU-NEG-CV-250/CP",
+    "precio": 5.28,
+    "stock": 6200,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP87-SU-NEG-CV-500/CP",
+    "precio": 6.72,
+    "stock": 7100,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP88-SUP-ROJA-150/CP",
+    "precio": 4.79,
+    "stock": 5000,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP89-SUP-ROJA-250/CP",
+    "precio": 5.94,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP90-SUP-ROJA-500/CP",
+    "precio": 7.59,
+    "stock": 5200,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP91-SUP-AZUL-150/CP",
+    "precio": 4.84,
+    "stock": 5400,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP92-SUP-AZUL-250/CP",
+    "precio": 5.94,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP93-SUP-AZUL-500/CP",
+    "precio": 0,
+    "stock": 6500,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP94-SUP-ROSA-150/CP",
+    "precio": 4.79,
+    "stock": 6500,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP95-SUP-ROSA-250/CP",
+    "precio": 5.94,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP96-SUP-ROSA-500/CP",
+    "precio": 7.59,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP97-SU-LIQP-250/CP",
+    "precio": 4,
+    "stock": 7800,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP98-SU-LIQP-500/CP",
+    "precio": 4.65,
+    "stock": 6500,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP99-SU-LIQP-1/CP",
+    "precio": 5.53,
+    "stock": 6500,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPA-1.5/CP",
+    "precio": 4.26,
+    "stock": 15108,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPA-1.5-CT",
+    "precio": 4.26,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPA-1.5/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPA-1-CT",
+    "precio": 3.89,
+    "stock": -313417,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPA-1-S/T/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPA-1-S/T/CP",
+    "precio": 3.39,
+    "stock": 40174,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPA-250-CT",
+    "precio": 2.72,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPA-250-S/T/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPA-250-S/T/CP",
+    "precio": 2.72,
+    "stock": 114868,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPA-500-CT",
+    "precio": 2.89,
+    "stock": -369460,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPA-500-ST/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPA-500-ST/CP",
+    "precio": 2.65,
+    "stock": 165877,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAF-1L/CP",
+    "precio": 9.18,
+    "stock": 161610,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAF-4L/CP",
+    "precio": 25.5,
+    "stock": 27352,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAGR-1-BCA/CP",
+    "precio": 10.34,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAGR-1-TRANS/CP",
+    "precio": 10.34,
+    "stock": 15319,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAGR-500-TRANS/CP",
+    "precio": 9.63,
+    "stock": 15167,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAN-1/CP",
+    "precio": 3.7,
+    "stock": 2072,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAN-1-CT",
+    "precio": 4,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPAN-1/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPAT-1/CP",
+    "precio": 7.65,
+    "stock": 226875,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAT-1-BCA/CP",
+    "precio": 9.21,
+    "stock": 108945,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPAT-600/CP",
+    "precio": 6.58,
+    "stock": 23465,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPB-1000/CP",
+    "precio": 6.69,
+    "stock": 90271,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPB-120/CP",
+    "precio": 2.81,
+    "stock": 40887,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPB-250/CP",
+    "precio": 3.91,
+    "stock": 77476,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPB-500/CP",
+    "precio": 4.63,
+    "stock": 62626,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPB-60/CP",
+    "precio": 2.01,
+    "stock": 41223,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPB-60-BCA/CP",
+    "precio": 2.5,
+    "stock": 87316,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPC-1L-CT",
+    "precio": 5.23,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPC-1L-ST/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPI-R28-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPC-1L-ST/CP",
+    "precio": 4.29,
+    "stock": 54222,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPC-250/CP",
+    "precio": 4.58,
+    "stock": 27656,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPC-500/CP",
+    "precio": 5.87,
+    "stock": 18808,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPC-500-CT",
+    "precio": 3.9,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPC-500-ST/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPI-R28-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPC-500-ST/CP",
+    "precio": 2.96,
+    "stock": 35528,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPCB-1-L/CP",
+    "precio": 5.87,
+    "stock": 7081,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPCB-1-L-CT",
+    "precio": 6.16,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPCN-1-L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPCN-1-L/CP",
+    "precio": 5.87,
+    "stock": 4661,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPCN-1-L-CT",
+    "precio": 6.16,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPCN-1-L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPF-120-AMB/CP",
+    "precio": 4.46,
+    "stock": 53883,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPF-120-AMB-CT",
+    "precio": 4.96,
+    "stock": -59033,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPF-120-AMB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R24/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPF-120-CR/CP",
+    "precio": 4.46,
+    "stock": 85990,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPF-120-CR-CT",
+    "precio": 4.96,
+    "stock": -2730,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPF-120-CR/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R24/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPF-240-AM/CP",
+    "precio": 5.59,
+    "stock": 41169,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPF-240-AM/CR-CT",
+    "precio": 5.59,
+    "stock": -40677,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPF-240-CR/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R24/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPF-240-AM-CT",
+    "precio": 5.59,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPF-240-AM/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R24/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPF-240-CR/CP",
+    "precio": 5.59,
+    "stock": 17338,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPF-30-CR/CP",
+    "precio": 2.4,
+    "stock": 25930,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPF-60-AMB/CP",
+    "precio": 3.18,
+    "stock": 45758,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPF-60-AMB-CT",
+    "precio": 3.78,
+    "stock": -1040,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPF-60-AMB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R24/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPF-60-CR/CP",
+    "precio": 2.69,
+    "stock": 39235,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPF-60-CR-CT",
+    "precio": 3.25,
+    "stock": -2119,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPF-60-CR/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R24/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPF-R30/CP",
+    "precio": 49.78,
+    "stock": 7132,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPG-ACP-500-R-28/CP",
+    "precio": 11.47,
+    "stock": 3762,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPGE-500/CP",
+    "precio": 2.39,
+    "stock": 125680,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPGE-500-CT",
+    "precio": 3.08,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPGE-500/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPGE-930/CP",
+    "precio": 2.6,
+    "stock": 89543,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPGE-930-CT",
+    "precio": 3.36,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPGE-930/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BP-GLPP/CP",
+    "precio": 14.3,
+    "stock": 6384,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPH-180/CP",
+    "precio": 2.55,
+    "stock": 30491,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPL-125/CP",
+    "precio": 3.01,
+    "stock": 119849,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPL-125-CT",
+    "precio": 3.29,
+    "stock": -129688,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPL-125/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R24/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPL-900/CP",
+    "precio": 5.72,
+    "stock": 52537,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPL-900-CT",
+    "precio": 5.72,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPL-900/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TFT-28/410-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLA-10/CP",
+    "precio": 1.04,
+    "stock": 27986,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLA-1-CT",
+    "precio": 5.08,
+    "stock": -2149706,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLAN-1-L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLA-250-CT",
+    "precio": 2.63,
+    "stock": -16016,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLA-250-L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLA-250-L/CP",
+    "precio": 1.95,
+    "stock": 108023,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLA-30/CP",
+    "precio": 1.12,
+    "stock": 33789,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLA-30-CT",
+    "precio": 1.73,
+    "stock": -8541,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLA-30/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R24/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLA-500/CP",
+    "precio": 2.72,
+    "stock": 77866,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLA-500-CT",
+    "precio": 3.33,
+    "stock": -57460,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLA-500/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLA-60/CP",
+    "precio": 1.36,
+    "stock": 33149,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLA-60-CT",
+    "precio": 1.97,
+    "stock": -101179,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLA-60/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R20/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLA-A-110-CT",
+    "precio": 2.21,
+    "stock": -664521,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLA-L-110/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R22/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLAB-1-CT",
+    "precio": 6.08,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLAB-1-L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLAB-1-L/CP",
+    "precio": 4.75,
+    "stock": 10712,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLA-L-110/CP",
+    "precio": 1.6,
+    "stock": 89240,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLAN-1-L/CP",
+    "precio": 4.32,
+    "stock": 143901,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLB-1-BCO/CP",
+    "precio": 4.79,
+    "stock": 91622,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLB-1-BCO-CT",
+    "precio": 5.51,
+    "stock": -18889,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLB-1-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28/410-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPLB-1-NEG/CP",
+    "precio": 5.6,
+    "stock": 16856,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLB-240-BCO/CP",
+    "precio": 2.9,
+    "stock": 47953,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLB-500-BCO/CP",
+    "precio": 4.52,
+    "stock": 40147,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLB-60-BCO/CP",
+    "precio": 1.43,
+    "stock": 121032,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLB-60-NAT/CP",
+    "precio": 1.04,
+    "stock": 118105,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPLN-1-NGR-CT",
+    "precio": 6.2,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPLB-1-NEG/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28/410-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPM-250/CP",
+    "precio": 2.38,
+    "stock": 396584,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPO-125/CP",
+    "precio": 3.45,
+    "stock": 21775,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPO-250/CP",
+    "precio": 5.25,
+    "stock": 24123,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPO-60/CP",
+    "precio": 1.93,
+    "stock": 36445,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPP-30-CFT",
+    "precio": 7.78,
+    "stock": -155649,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPP-30-FT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "BPP-30-FUN/CPINACTIVO",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TFT-15/415/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPP-30-FT/CP",
+    "precio": 7.78,
+    "stock": 11792,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPP-30-SFT",
+    "precio": 4.28,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPP-30-FT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TFT-15/415/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPPC-30-FUN/CP",
+    "precio": 4.61,
+    "stock": 20725,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPQ-1-AM-CT",
+    "precio": 5.89,
+    "stock": -45669,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPQ-1L-AM/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPI-R28-V/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPQ-1L-AM/CP",
+    "precio": 5.89,
+    "stock": 11002,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPQ-1L-CR/CP",
+    "precio": 5.81,
+    "stock": 23690,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPQ-1L-CR-CT",
+    "precio": 5.81,
+    "stock": -110838,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPQ-1L-CR/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPI-R28-V/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPQ-500-AM/CP",
+    "precio": 5.5,
+    "stock": 18743,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPQ-500-AM-CT",
+    "precio": 5.5,
+    "stock": -18486,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPQ-500-AM/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPQ-500-CR/CP",
+    "precio": 4.21,
+    "stock": 8572,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPQ-500-CR-CT",
+    "precio": 4.21,
+    "stock": -4563,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPQ-500-CR/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BP-RE-40X60/CP",
+    "precio": 0,
+    "stock": 2605,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP-RE-60X90/CP",
+    "precio": 66.16,
+    "stock": 45145,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BP-RE-90X120/CP",
+    "precio": 0,
+    "stock": 35051.04,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPS-3L/CP",
+    "precio": 9.75,
+    "stock": 6750,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPS-3L-CT",
+    "precio": 13.43,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPS-3L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPS-R63/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VPS-R-63/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPSQ-250/CP",
+    "precio": 5.79,
+    "stock": 120178,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPSQ-250-CT",
+    "precio": 6.44,
+    "stock": -132080,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPSQ-250/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TFT-R33/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPSQ-500/CP",
+    "precio": 5.9,
+    "stock": 27659,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPSQ-500-CT",
+    "precio": 6.69,
+    "stock": -62725,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPSQ-500/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TFT-R33/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPSQ-900/CP",
+    "precio": 9.22,
+    "stock": 3096,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPSQ-900-CT",
+    "precio": 10.56,
+    "stock": -559,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPSQ-900/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TFT-R38/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPT-CIL-BCO-1/CP",
+    "precio": 11.68,
+    "stock": 56935,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPT-CON-BCO-1/CP",
+    "precio": 11.68,
+    "stock": 29690,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPT-CON-NEG-1/CP",
+    "precio": 10.78,
+    "stock": 13382,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPT-DP/CP",
+    "precio": 2197.44,
+    "stock": 97,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPT-S/CP",
+    "precio": 0,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPW-1/CP",
+    "precio": 5.02,
+    "stock": 33084,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPW-1-CT",
+    "precio": 5.6,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPW-1/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BPW-500/CP",
+    "precio": 4.62,
+    "stock": 69519,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPW-500-CT",
+    "precio": 5.1,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPW-500/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R28/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "BT-100X60-AZ/CP",
+    "precio": 0.41,
+    "stock": 40005,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CINCHO200",
+    "precio": 0,
+    "stock": 1170,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CIN-IMP/CP",
+    "precio": 0,
+    "stock": 23894,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLCF-C26-19-B/CT",
+    "precio": 136.5,
+    "stock": 18742,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLCF-C26-19-N/CT",
+    "precio": 136.5,
+    "stock": 210,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-19-B-E/CT",
+    "precio": 131.5,
+    "stock": 52256,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-19-B-GZ/CT",
+    "precio": 154.26,
+    "stock": 101776,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-19-BN-ST",
+    "precio": 138.83,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-19-N-E/CT",
+    "precio": 131.5,
+    "stock": 58892,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-19-N-GZ/CT",
+    "precio": 0,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-19-REP-GZ/CT",
+    "precio": 0,
+    "stock": 195,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-C26-19-B-U/CT",
+    "precio": 0,
+    "stock": 37725,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-C26-19-N-U/CT",
+    "precio": 0,
+    "stock": 2756,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-CDA-19-B-E/",
+    "precio": 136.5,
+    "stock": 144188,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-CDA-19-B-E-IMP/CP",
+    "precio": 173.26,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-CDA-19-B-U/",
+    "precio": 0,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-CDA-19-N-E/",
+    "precio": 136.5,
+    "stock": 54444,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CLSF-CDA-19-N-U/",
+    "precio": 0,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPA-19-M/CP",
+    "precio": 64.7,
+    "stock": 21047,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPA-TL-19-M",
+    "precio": 75.4,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPA-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPA-19-M-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPA-TO-FLEX-M",
+    "precio": 83.95,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPA-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STDB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPA-19-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-1/2/CP",
+    "precio": 9.44,
+    "stock": 7840,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-1/CP",
+    "precio": 11.16,
+    "stock": 14591,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-10-N-P/CP",
+    "precio": 47.87,
+    "stock": 57573,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-10-U/CP",
+    "precio": 47.87,
+    "stock": 36211,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-15-M/CP",
+    "precio": 60.38,
+    "stock": 16306,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-15-U/CP",
+    "precio": 81.56,
+    "stock": 31241,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-19-M/CP",
+    "precio": 63.2,
+    "stock": 274522.12,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-19-REC-GB/CP",
+    "precio": 52.52,
+    "stock": 119788,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-19-U/CP",
+    "precio": 77.81,
+    "stock": 18667,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-1-RE/CP",
+    "precio": 7.58,
+    "stock": 2096,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-2/CP",
+    "precio": 16.63,
+    "stock": 41003,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-225/CP",
+    "precio": 9.38,
+    "stock": 4355,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-23/CP",
+    "precio": 0,
+    "stock": 4004,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-4-GDL/CP",
+    "precio": 18.76,
+    "stock": 333627,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-4-M/CP",
+    "precio": 20.88,
+    "stock": 60517,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-4-REC-GDL/CP",
+    "precio": 13.9,
+    "stock": 1916646.83,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-5-GDL/CP",
+    "precio": 31.98,
+    "stock": 28373,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-8/CP",
+    "precio": 59.78,
+    "stock": 63967,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-RE-2/CP",
+    "precio": 13.16,
+    "stock": 5697,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-TL-10-N-P",
+    "precio": 59.05,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-10-N-P/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPN-8/10/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-10-U",
+    "precio": 59.05,
+    "stock": -190502,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-10-U/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPB-8/10/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-15-M",
+    "precio": 67.5,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-15-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBL-19-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-15-U",
+    "precio": 82.29,
+    "stock": -154102,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-15-U/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBL-19-U/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-19-M",
+    "precio": 69.55,
+    "stock": -382304,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBL-19-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-19-U",
+    "precio": 87.2,
+    "stock": -972829,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-U/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBL-19-U/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-23",
+    "precio": 87.21,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-23/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBL-23/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-4-GDL",
+    "precio": 19.5,
+    "stock": -1440452,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-4-GDL/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPB-4-GDL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-4-M",
+    "precio": 22.65,
+    "stock": -207831,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-4-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBL-4-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-5-GDL",
+    "precio": 36.66,
+    "stock": -65117,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-5-GDL/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPB-5-GDL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TL-8-U",
+    "precio": 67.41,
+    "stock": -55055,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-8/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPB-8/10/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TLA-19-M",
+    "precio": 84.5,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPA-19-M-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TLN-19-M",
+    "precio": 69.55,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPNL-19-U/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TLR-19-M",
+    "precio": 80.15,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPRL-19/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TO-FLEX-15-M",
+    "precio": 74.86,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-15-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STD/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBO-19-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TO-FLEX-15-U",
+    "precio": 89.04,
+    "stock": -27950,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-15-U/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STD/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBO-19-U/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TO-FLEX-19-M",
+    "precio": 76.91,
+    "stock": -26780,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STD/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBO-19-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TO-FLEX-19-U",
+    "precio": 93.95,
+    "stock": -385957,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-U/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STD/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPBO-19-U/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TONEG-FLEX-M",
+    "precio": 84.23,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STD/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPNO-19-U/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPB-TOR-FLEX-19-M",
+    "precio": 86.9,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STD/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPRO-19-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPD-4-NAT/CP",
+    "precio": 23.08,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPN-19-M/CP",
+    "precio": 63.2,
+    "stock": 60212,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPN-19U/CP",
+    "precio": 79.08,
+    "stock": 952,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPN-4-M/CP",
+    "precio": 23.2,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPN-TL-19-M",
+    "precio": 74.3,
+    "stock": -5161,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPN-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPNL-19-U/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPN-TL-4-M",
+    "precio": 20.15,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPN-4-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPNL-4-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPN-TLAM-19-M",
+    "precio": 86.9,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPN-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STDB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPAO-19-M",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPN-TO-FLEX-M",
+    "precio": 84.23,
+    "stock": -12207,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPN-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STD/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPNO-19-U/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPN-TOROJ-19-M",
+    "precio": 86.9,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPN-19-M/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STDB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPRO-19-M/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPOLVO-30ML/CP",
+    "precio": 2.34,
+    "stock": 263586,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPOLVO-50-ML/CP",
+    "precio": 2.48,
+    "stock": 15831,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-1/CP",
+    "precio": 2.57,
+    "stock": 54968,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-200-N/CP",
+    "precio": 17.42,
+    "stock": 7033,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-3/CP",
+    "precio": 3,
+    "stock": 35203,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-4/CP",
+    "precio": 4.48,
+    "stock": 25544,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP780X490M",
+    "precio": 2872.35,
+    "stock": 27,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-80-N/CP",
+    "precio": 6.44,
+    "stock": 6155,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-JR-P/CP",
+    "precio": 2.07,
+    "stock": 17968,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-JR-R/CP",
+    "precio": 4.15,
+    "stock": 68243,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-JR-RB/CP",
+    "precio": 4.5,
+    "stock": 23960,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPP-JR-RN/CP",
+    "precio": 4.5,
+    "stock": 26000,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPPT-200/CP",
+    "precio": 13.5,
+    "stock": 16616,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPPT-200-CLICK/CP",
+    "precio": 13.5,
+    "stock": 22032,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPR-19-M/CP",
+    "precio": 70.4,
+    "stock": 200,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPREC-TL-4-GDL",
+    "precio": 14.63,
+    "stock": -921037,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-4-REC-GDL/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPL-4-REC-GDL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPREC-TLBEIGE-19",
+    "precio": 53.35,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-REC-GB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPL-19-REC-COL--GB/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPREC-TLN-19",
+    "precio": 53.35,
+    "stock": -535405,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-REC-GB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPL-19-REC-COL--GB/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPREC-TLV-19",
+    "precio": 53.35,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-REC-GB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPL-19-REC-COL--GB/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPREC-TOB-FLEX-19-GB",
+    "precio": 60.71,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-REC-GB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPOB-19-REC-GB/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "CPREC-TO-FLEX-19-GB",
+    "precio": 60.71,
+    "stock": -148811,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "CPB-19-REC-GB/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-STD/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPO-19-REC-GB/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "C-R-ROJA/CP",
+    "precio": 0,
+    "stock": 13000,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CT-1000/CP",
+    "precio": 7840.8,
+    "stock": 71,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTBC12",
+    "precio": 2.15,
+    "stock": 3550,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTCC15",
+    "precio": 2,
+    "stock": 3000,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTGC12",
+    "precio": 2.43,
+    "stock": 3000,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTP-20/CP",
+    "precio": 8,
+    "stock": 5881,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTP-24/CP",
+    "precio": 0.38,
+    "stock": 17331,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTP-28/CP",
+    "precio": 0.38,
+    "stock": 154791,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTP-4/5/CP",
+    "precio": 1.51,
+    "stock": 16113,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTP-GAL/CP",
+    "precio": 0.56,
+    "stock": 214043,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "ECI-R/CP",
+    "precio": 13.68,
+    "stock": 1307,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EN-1/CP",
+    "precio": 5.93,
+    "stock": 135209.6,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EN-125/CP",
+    "precio": 1.87,
+    "stock": 131604,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EN-1-REC/CP",
+    "precio": 4.26,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EN-2/CP",
+    "precio": 9.65,
+    "stock": 24290,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EN-250/CP",
+    "precio": 2,
+    "stock": 321223,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EN-500/CP",
+    "precio": 4.45,
+    "stock": 131538,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "ENN-1/CP",
+    "precio": 6.3,
+    "stock": 28790,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPL-1/2-GAL/CP",
+    "precio": 3.83,
+    "stock": 298248,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPL-1/2-GAL-CT",
+    "precio": 4.2,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "EPL-1/2-GAL/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-EL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "EPL-1/CP",
+    "precio": 2.63,
+    "stock": 1119973.95,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPL-1-CT",
+    "precio": 3.2,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "EPL-1/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-EL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "EPL-250/CP",
+    "precio": 1.34,
+    "stock": 149480,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPL-250-CT",
+    "precio": 2.06,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "EPL-250/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-EL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "EPL-500/CP",
+    "precio": 1.48,
+    "stock": 88426,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPL-500-CT",
+    "precio": 2.08,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "EPL-500/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-EL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "EPL-GAL/CP",
+    "precio": 5.89,
+    "stock": 425636,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPL-GAL-CT",
+    "precio": 6.53,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "EPL-GAL/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-EL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "EPP-BCA/CP",
+    "precio": 12.63,
+    "stock": 901,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPP-CIL-1000/CP",
+    "precio": 7.5,
+    "stock": 22769,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPP-CIL-125/CP",
+    "precio": 2.5,
+    "stock": 14425,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPP-CIL-250/CP",
+    "precio": 2.65,
+    "stock": 11733,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPP-CIL-30/CP",
+    "precio": 1.38,
+    "stock": 24470,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPP-CIL-500/CP",
+    "precio": 5.24,
+    "stock": 9436,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPP-CIL-60/CP",
+    "precio": 2.97,
+    "stock": 42891,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPP-NGA/CP",
+    "precio": 12.63,
+    "stock": 1640,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPP-OV-125/CP",
+    "precio": 2.63,
+    "stock": 9820,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "EPT/CP",
+    "precio": 13.68,
+    "stock": 345,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "F-2007/CP",
+    "precio": 0,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPE-120/CP",
+    "precio": 3.27,
+    "stock": 218141,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPE-120--CTN",
+    "precio": 4.2,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPE-120/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-R38-LS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPE-120-CTR",
+    "precio": 4.2,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPE-120/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-R38-LS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPE-150C/T/CP",
+    "precio": 4,
+    "stock": 22262,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPE-150-CTN",
+    "precio": 4.2,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPE-150C/T/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-R38-LS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPE-150-CTR",
+    "precio": 4.2,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPE-150C/T/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-R38-LS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPEC-500-CTN",
+    "precio": 10,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPEC-500-S/T/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-LS-63-C/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPEC-500-CTR",
+    "precio": 10,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPEC-500-S/T/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-LS-63-C/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPEC-500-S/T/CP",
+    "precio": 6.57,
+    "stock": 38560,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPER-1-CTN",
+    "precio": 12.13,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPER-1-S/T/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-LS-63-C/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPER-1-CTR",
+    "precio": 12.13,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPER-1-S/T/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TF-LS-63-C/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPER-1-S/T/CP",
+    "precio": 9.11,
+    "stock": 13942,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPP-110-AM/CP",
+    "precio": 3.4,
+    "stock": 11190,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPP-110-AM-CT",
+    "precio": 4.08,
+    "stock": -50778,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPP-110-AM/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-38/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPP-110-CR/CP",
+    "precio": 2.95,
+    "stock": 170506,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPP-110-CR-CT",
+    "precio": 3.89,
+    "stock": -301548,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPP-110-CR/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-38/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPP-150-AM/CP",
+    "precio": 4.11,
+    "stock": 30431,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPP-150-AM-CT",
+    "precio": 4.41,
+    "stock": -7553,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPP-150-AM/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-38/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPP-150-CR/CP",
+    "precio": 4.11,
+    "stock": 37249,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPP-150-CR-CT",
+    "precio": 4.41,
+    "stock": -43745,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPP-150-CR/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LE-38/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "FPPOL-150-BCO/CP",
+    "precio": 4.02,
+    "stock": 40586,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "FPPOL-150-BCO-CT",
+    "precio": 4.32,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "FPPOL-150-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GA-125/CP",
+    "precio": 4.5,
+    "stock": 125156,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GA-250/CP",
+    "precio": 5.31,
+    "stock": 48957,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GA-30/CP",
+    "precio": 2.07,
+    "stock": 36425,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GA-60/CP",
+    "precio": 3.01,
+    "stock": 22918,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GCPB*1LT C/T",
+    "precio": 13.41,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GCPB-1LT S/T",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GCPB-1LT S/T",
+    "precio": 12.5,
+    "stock": 7853,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GCPNAT-1L C/T",
+    "precio": 13.41,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GCPNAT-1LT S/T",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GCPNAT-1LT S/T",
+    "precio": 12.5,
+    "stock": 6472,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GCPNGR-1LT C/T",
+    "precio": 13.41,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GCPNGR-1LT S/T",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R50-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GCPNGR-1LT S/T",
+    "precio": 12.5,
+    "stock": 2973,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GIC-NAT/CP",
+    "precio": 9.82,
+    "stock": 117135,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GIC-NAT-CTBCC",
+    "precio": 10.78,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GIC-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GIC-NAT-CTBSC",
+    "precio": 10.78,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GIC-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GIR-BCO/CP",
+    "precio": 11.82,
+    "stock": 14663,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GIR-BCO-CT",
+    "precio": 11.82,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GIR-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GIR-NAT/CP",
+    "precio": 9.82,
+    "stock": 253179,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GIR-NAT-CTCC",
+    "precio": 10.78,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GIR-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GIR-NAT-CTSC",
+    "precio": 10.78,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GIR-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "G-NB-10/CP",
+    "precio": 1.83,
+    "stock": 293080,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "G-NB-20/CP",
+    "precio": 2.01,
+    "stock": 314713,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "G-NB-30/CP",
+    "precio": 2.28,
+    "stock": 138412,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "G-NB-45/CP",
+    "precio": 2.44,
+    "stock": 26298,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "G-NB-55/CP",
+    "precio": 2.51,
+    "stock": 220196,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GP-4-BCA/CP",
+    "precio": 15.95,
+    "stock": 144136,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GP-4-BCA-CT",
+    "precio": 16.25,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GP-4-BCA/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GP-4-NAT/CP",
+    "precio": 15.95,
+    "stock": 12489,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GP-4-NAT-CT",
+    "precio": 16.25,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GP-4-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GP-5-NAT/CP",
+    "precio": 18,
+    "stock": 10396,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GP-5-NAT-CT",
+    "precio": 18.3,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GP-5-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-1-BCO/CP",
+    "precio": 9.08,
+    "stock": 199035,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-1-BCO-CT",
+    "precio": 9.07,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-1-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-1-N/CP",
+    "precio": 6.89,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-1-NAT/CP",
+    "precio": 8.93,
+    "stock": 128719,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-1-NAT-CT",
+    "precio": 9.83,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-1-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-1-NTE-CT",
+    "precio": 7.67,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-1-N/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "LFA-38/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-250-BCO/CP",
+    "precio": 5.4,
+    "stock": 7732,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-250-BCO-CT",
+    "precio": 5.85,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-250-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-250-NAT/CP",
+    "precio": 5.4,
+    "stock": 21300,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-250-NAT-CT",
+    "precio": 5.85,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-250-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-2L/CP",
+    "precio": 7.2,
+    "stock": 552,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-2L-CT",
+    "precio": 8.4,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-2L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-4-BCO/CP",
+    "precio": 14.83,
+    "stock": 120303,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-4-BCO-CT",
+    "precio": 15.28,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-4-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-4-BCOS/T",
+    "precio": 12.39,
+    "stock": 75089,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-4-NAT/CP",
+    "precio": 12.24,
+    "stock": 132894,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPA-4-NAT-CT",
+    "precio": 14.14,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-4-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPA-4-NTE-CT",
+    "precio": 13.3,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPA-4-BCOS/T",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-CC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "G-PAD-1/2GAL-ESD",
+    "precio": 13.43,
+    "stock": 1200,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "G-PAD-GAL-ESD/CP",
+    "precio": 20.34,
+    "stock": 1050,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPAZ-19L/CP",
+    "precio": 80.61,
+    "stock": 5404,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPB-6L/CP",
+    "precio": 0,
+    "stock": 4,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPB-9L/CP",
+    "precio": 40.35,
+    "stock": 4152,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPBVV-6L/CP",
+    "precio": 59.58,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPB-6L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TV-R-40/410/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VM-R63/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPBVV-9L/CP",
+    "precio": 51.63,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "GPB-9L/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TV-R-40/410/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VM-R63/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "GPC-GAL/CP",
+    "precio": 13.61,
+    "stock": 18520,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPI-1/CP",
+    "precio": 4.85,
+    "stock": 25529,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPI-125/CP",
+    "precio": 2.97,
+    "stock": 9225,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPI-2/CP",
+    "precio": 14.51,
+    "stock": 34935,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPI-250/CP",
+    "precio": 4.95,
+    "stock": 34446,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPI-5/CP",
+    "precio": 16.2,
+    "stock": 37961,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPI-500/CP",
+    "precio": 5.86,
+    "stock": 27466,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPL-10/CP",
+    "precio": 16.1,
+    "stock": 8054,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPL-5/CP",
+    "precio": 13.5,
+    "stock": 19408,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPP-1/CP",
+    "precio": 4.32,
+    "stock": 40322,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPP-440/CP",
+    "precio": 3.08,
+    "stock": 39322,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "GPP-GAL/CP",
+    "precio": 8.25,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "IMPR",
+    "precio": 0,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "JM-1/CP",
+    "precio": 33.75,
+    "stock": 26,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-110/CP",
+    "precio": 0.48,
+    "stock": 162786,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-120/CP",
+    "precio": 1.15,
+    "stock": 191750,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-24/CP",
+    "precio": 0.39,
+    "stock": 1445990,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-28/CP",
+    "precio": 0.19,
+    "stock": 3203127,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-33/CP",
+    "precio": 0.28,
+    "stock": 4824,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-38/CP",
+    "precio": 0.35,
+    "stock": 3370151,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-45/CP",
+    "precio": 0.45,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-49/CP",
+    "precio": 0.46,
+    "stock": 1083246,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-58/CP",
+    "precio": 0.46,
+    "stock": 494728,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-63/CP",
+    "precio": 0.45,
+    "stock": 431502,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-70/CP",
+    "precio": 0.46,
+    "stock": 2880848,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LE-89/CP",
+    "precio": 0.65,
+    "stock": 77328,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-110/CP",
+    "precio": 2.38,
+    "stock": 31780,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-20/CP",
+    "precio": 0.15,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-24/CP",
+    "precio": 0.18,
+    "stock": 143005,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-28/CP",
+    "precio": 0.65,
+    "stock": 409834,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-33/CP",
+    "precio": 0.24,
+    "stock": 14898,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-38/CP",
+    "precio": 0.7,
+    "stock": 568603,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA--45/CP",
+    "precio": 0.48,
+    "stock": 601915,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-49/CP´",
+    "precio": 0.55,
+    "stock": 51075,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-52/CP",
+    "precio": 0.57,
+    "stock": 75600,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-58/CP",
+    "precio": 0.69,
+    "stock": 129640,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-63/CP",
+    "precio": 0.77,
+    "stock": 101090,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-70/CP",
+    "precio": 0.95,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LFA-89/CP",
+    "precio": 1.54,
+    "stock": 61312,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LLC-W-168-4P/CP",
+    "precio": 1068.3,
+    "stock": 67,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LLFK-2/CP",
+    "precio": 614.46,
+    "stock": 220,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LL-PP-10/CP",
+    "precio": 159.38,
+    "stock": 103,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LL-PP-20/50/CP",
+    "precio": 173.23,
+    "stock": 440,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LLPTR38/CP",
+    "precio": 0,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-110/CP",
+    "precio": 2.66,
+    "stock": 340789,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-20/CP",
+    "precio": 0.14,
+    "stock": 283661,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-22/CP",
+    "precio": 0.15,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-24/CP",
+    "precio": 0.19,
+    "stock": 531146,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-28/CP",
+    "precio": 0.27,
+    "stock": 330817,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-33",
+    "precio": 0.43,
+    "stock": 674862.95,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-35",
+    "precio": 0.17,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-35/CP",
+    "precio": 0.29,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-38/CP",
+    "precio": 0.38,
+    "stock": 281284,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-49/CP",
+    "precio": 0.49,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-58/CP",
+    "precio": 0.4,
+    "stock": 232,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-63/CP",
+    "precio": 0.83,
+    "stock": 241129,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-70/CP",
+    "precio": 0.91,
+    "stock": 98500,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "LS-89/CP",
+    "precio": 1.52,
+    "stock": 657499,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "M-125-NAT/CP",
+    "precio": 5.06,
+    "stock": 10449,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "M-250/CP",
+    "precio": 6.67,
+    "stock": 40094,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "M-500/CP",
+    "precio": 11.33,
+    "stock": 22634,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "M-750-NAT/CP",
+    "precio": 15.88,
+    "stock": 6318,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "M-HU-22/CP",
+    "precio": 135.8,
+    "stock": 67,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "M-HU-24/CP",
+    "precio": 85.63,
+    "stock": 6,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "M-IND-CG",
+    "precio": 0,
+    "stock": 9,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "MPG15N",
+    "precio": 379.08,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "MPM24N",
+    "precio": 379.08,
+    "stock": 5,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "MPMG6M12N",
+    "precio": 379.08,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PAMT-20/410-COL/CP",
+    "precio": 5.47,
+    "stock": 3750,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PAMT-24-410-COL/CP",
+    "precio": 6.08,
+    "stock": 21526,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIA-20-S/CP",
+    "precio": 71.89,
+    "stock": 11989,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIB-20/CP",
+    "precio": 71.89,
+    "stock": 38755,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIB-5-P/CP",
+    "precio": 34.9,
+    "stock": 39694,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIG-20-S/CP",
+    "precio": 71.89,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-10-P/CP",
+    "precio": 38.96,
+    "stock": 20831,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-10-U/CP",
+    "precio": 50.33,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-20-P/CP",
+    "precio": 70.2,
+    "stock": 8491,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-20-S/CP",
+    "precio": 65,
+    "stock": 130857,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-20-U/CP",
+    "precio": 79.75,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-25-P/CP",
+    "precio": 106.2,
+    "stock": 8274,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-25-U/CP",
+    "precio": 118.94,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-4-P/CP",
+    "precio": 18.85,
+    "stock": 41824,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-50-P/CP",
+    "precio": 186,
+    "stock": 23151,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-50-U/CP",
+    "precio": 202.5,
+    "stock": 8886,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PIN-5-P/CP",
+    "precio": 21.45,
+    "stock": 30568,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PINA-20-S/CP",
+    "precio": 71.25,
+    "stock": 25686,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PING-20-S/CP",
+    "precio": 76.95,
+    "stock": 13023,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PING-20-U/CP",
+    "precio": 81.25,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PP-1/CP",
+    "precio": 27.3,
+    "stock": 3618,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PP-250/CP",
+    "precio": 20.76,
+    "stock": 13999,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PP-500/CP",
+    "precio": 23.23,
+    "stock": 6938,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPB-DF-120/CP",
+    "precio": 17.78,
+    "stock": 15333,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPB-DF-240/CP",
+    "precio": 23.1,
+    "stock": 10683,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPB-DF-30/CP",
+    "precio": 11.94,
+    "stock": 19376,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPB-DF-60/CP",
+    "precio": 13.9,
+    "stock": 34712,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPCF-RIE/CP",
+    "precio": 13611.98,
+    "stock": 352,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPCL-RIE/CP",
+    "precio": 14116.12,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPCL-TEO/CP",
+    "precio": 10863,
+    "stock": 57,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPCN-DF-30/CP",
+    "precio": 17.8,
+    "stock": 6148,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPN-DF-120/CP",
+    "precio": 17.78,
+    "stock": 22639,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPN-DF-240/CP",
+    "precio": 23.1,
+    "stock": 5275,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPN-DF-30/CP",
+    "precio": 11.94,
+    "stock": 9994,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPN-DF-60/CP",
+    "precio": 13.9,
+    "stock": 4948,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPSG-30-RIE/CP",
+    "precio": 14648.65,
+    "stock": 52,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PPSG-G10-RIE/CP",
+    "precio": 14648.65,
+    "stock": 21,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "PSF-E-18X50X900/CP",
+    "precio": 68.09,
+    "stock": 28959,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "REPSELL-001/CP",
+    "precio": 0,
+    "stock": 13,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "SGAA-2/CP",
+    "precio": 5.5,
+    "stock": 249754,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "SGAA-3/4/CP",
+    "precio": 4.5,
+    "stock": 34387,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "SGAP-2/CP",
+    "precio": 13.73,
+    "stock": 80344,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "SGAP-3/4/CP",
+    "precio": 5.51,
+    "stock": 95040,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "SGL-TOV-2/CP",
+    "precio": 11.03,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "SGL-TOV-3/4/CP",
+    "precio": 7.71,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "SMT-30CM/CP",
+    "precio": 1176,
+    "stock": 183,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "SPAM-T-200/CP",
+    "precio": 3.12,
+    "stock": 6703,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-40",
+    "precio": 2.5,
+    "stock": 16796,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TA-24/CP",
+    "precio": 0,
+    "stock": 18656.2,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TAPL-R20/CP",
+    "precio": 1.82,
+    "stock": 2210,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TARIMA",
+    "precio": 62.5,
+    "stock": 611,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TCH-28/CP",
+    "precio": 1.5,
+    "stock": 105424,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TCH-33/CP",
+    "precio": 1.64,
+    "stock": 185289,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TCH-38/CP",
+    "precio": 1.68,
+    "stock": 44874,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TCI-R18/CP",
+    "precio": 4.27,
+    "stock": 90650,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TD-BCO-250/CP",
+    "precio": 5.57,
+    "stock": 87051,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TD-NAT-250/CP",
+    "precio": 5.57,
+    "stock": 20,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TDS-28-COL/CP/",
+    "precio": 1.25,
+    "stock": 892512,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TDT-20/410/CP",
+    "precio": 1.71,
+    "stock": 504293,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TDT-24/410/CP",
+    "precio": 1.8,
+    "stock": 113761,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TDT-24/415/CP",
+    "precio": 2.02,
+    "stock": 80291,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TDT-28/410/CP",
+    "precio": 1.92,
+    "stock": 222288,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TDT-28/415/CP",
+    "precio": 2.02,
+    "stock": 396287,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TF-JR/CP",
+    "precio": 2,
+    "stock": 2129726,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TF-LS-63-C/CP",
+    "precio": 4.01,
+    "stock": 153868,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TF-R38-LS/CP",
+    "precio": 1.92,
+    "stock": 268107,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TF-STD/CP",
+    "precio": 6.59,
+    "stock": 1739363,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TF-STDB/CP",
+    "precio": 6.59,
+    "stock": 353312,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-15/415/CP",
+    "precio": 1.5,
+    "stock": 18411,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-20/410/CP",
+    "precio": 1.62,
+    "stock": 69695,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-22/415",
+    "precio": 0,
+    "stock": 11570,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-24/410-BCA/CP",
+    "precio": 2.39,
+    "stock": 349807.93,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-24/410-NEG/CP",
+    "precio": 0,
+    "stock": 12960,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-24/415/CP",
+    "precio": 2.39,
+    "stock": 154635,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-28/410-COL/CP",
+    "precio": 2.04,
+    "stock": 173051,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-28/410-L/CP",
+    "precio": 1.49,
+    "stock": 129818,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-R33/CP",
+    "precio": 1.8,
+    "stock": 347691,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TFT-R38/CP",
+    "precio": 1.8,
+    "stock": 90909,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLA-200/CP",
+    "precio": 1755,
+    "stock": 149,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLA-CF-200-GAM/CP",
+    "precio": 1834.8,
+    "stock": 52,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLA-SF-100/CP",
+    "precio": 1128,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLC-CF-200/CP",
+    "precio": 1834.8,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLCF-BCA-L/CP",
+    "precio": 45.29,
+    "stock": 336714,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLCF-BCA-O/CP",
+    "precio": 46.29,
+    "stock": 3146,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLCF-NGA-L/CP",
+    "precio": 45.29,
+    "stock": 1023315,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLC-SF-200/CP",
+    "precio": 1668,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLNSF-19-EEEO/CP",
+    "precio": 46.29,
+    "stock": 86267,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TL-PT-2/CP",
+    "precio": 20.29,
+    "stock": 3618,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TL-PT-3/4/CP",
+    "precio": 20.29,
+    "stock": 9646,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLSF-BCA-L/CP",
+    "precio": 45.29,
+    "stock": 1065911,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TLSF-BCA-O/CP",
+    "precio": 46.29,
+    "stock": 49313,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-500-R89-BCO/CP",
+    "precio": 8.65,
+    "stock": 30290,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-500-R89-BCO-CT",
+    "precio": 7.86,
+    "stock": -27716,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-500-R89-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R89-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPA-120-A/CP",
+    "precio": 687.7,
+    "stock": 820,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPA-19-M/CP",
+    "precio": 27.72,
+    "stock": 10994,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPA-19-M-L/CP",
+    "precio": 27.72,
+    "stock": 31549,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPA-200/CP",
+    "precio": 891.1,
+    "stock": 1236,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPA-220-A/CP",
+    "precio": 1090.7,
+    "stock": 129,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPA220A-REC",
+    "precio": 500,
+    "stock": 343,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPA-220-C/CP",
+    "precio": 891.1,
+    "stock": 5477,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPA-50-A/CP",
+    "precio": 462.8,
+    "stock": 4322,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPAL-19M",
+    "precio": 27.72,
+    "stock": 200,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPAO-19-M",
+    "precio": 27.72,
+    "stock": 9073,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPB-4-GDL/CP",
+    "precio": 12.29,
+    "stock": 304938,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPB-5-GDL/CP",
+    "precio": 12.29,
+    "stock": 30563,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPB-8/10/CP",
+    "precio": 19.94,
+    "stock": 41215,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPBL-19-M/CP",
+    "precio": 27.72,
+    "stock": 88276,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPBL-19-U/CP",
+    "precio": 43.15,
+    "stock": 52398,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPBL-23/CP",
+    "precio": 0,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPBL-4-M/CP",
+    "precio": 12.29,
+    "stock": 79807,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPBO-19-M/CP",
+    "precio": 25.2,
+    "stock": 153374,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPBO-19-U/CP",
+    "precio": 43.15,
+    "stock": 18917,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPC-200-AC/CP",
+    "precio": 891.1,
+    "stock": 2802,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPC-200-B/CP",
+    "precio": 891.1,
+    "stock": 211,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPC-200-N/CP",
+    "precio": 891.1,
+    "stock": 755,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-CIL-1000/CP",
+    "precio": 6.63,
+    "stock": 127584,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-CIL-1-CT",
+    "precio": 7.85,
+    "stock": -516542,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-CIL-1000/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R63B/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TP-CIL-250/CP",
+    "precio": 3.71,
+    "stock": 164700,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-CIL-250-CT",
+    "precio": 4.75,
+    "stock": -889226,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-CIL-250/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R63B/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TP-CIL-500/CP",
+    "precio": 4.21,
+    "stock": 95317,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-CIL-500-CT",
+    "precio": 5.19,
+    "stock": -312455,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-CIL-500/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R63B/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TP-CIL-750/CP",
+    "precio": 6.04,
+    "stock": 20793,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-CIL-750-CT",
+    "precio": 7.75,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-CIL-750/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R63B/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TP-EL/CP",
+    "precio": 0.45,
+    "stock": 1641303,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPET-750-PS/CP",
+    "precio": 7.16,
+    "stock": 20736,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPET-750-PSAMA-TN/CP",
+    "precio": 10.42,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPET-750-PS/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R63-PS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPET-750-PSAZU-TN/CP",
+    "precio": 10.42,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPET-750-PS/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R63-PS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPET-750-PSHUM-TN/CP",
+    "precio": 10.42,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPET-750-PS/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R63-PS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPET-750-PSROJ-TN/CP",
+    "precio": 10.42,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPET-750-PS/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R63-PS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPET-750-PSROS-TN/CP",
+    "precio": 10.42,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPET-750-PS/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R63-PS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPET-750-PSVER-TB/CP",
+    "precio": 10.42,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPET-750-PS/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R63-PS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPET-750-PSVER-TN/CP",
+    "precio": 10.42,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPET-750-PS/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R63-PS/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TP-G-R20",
+    "precio": 0.81,
+    "stock": 80464,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPI-R24/CP",
+    "precio": 1,
+    "stock": 379308,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPI-R28-COL/CP",
+    "precio": 0.6,
+    "stock": 445663,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPI-R38-COL/CP",
+    "precio": 1.53,
+    "stock": 29969,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-1.5-R110-B/CP",
+    "precio": 5.6,
+    "stock": 19411,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-1.5-R110-B-CT",
+    "precio": 14.93,
+    "stock": -31811,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-1.5-R110-B/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-125-R58-NAT/CP",
+    "precio": 2.4,
+    "stock": 119212,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-125-R58-NAT-CT",
+    "precio": 3.65,
+    "stock": -139204,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-125-R58-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R58/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-19-REC-COL--GB/CP",
+    "precio": 23.4,
+    "stock": 95848,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-1-R89-BCO/CP",
+    "precio": 8.87,
+    "stock": 279041,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-1-R89-BCO-CT",
+    "precio": 9.34,
+    "stock": -879125,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-1-R89-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R89-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-1-R89-NAT/CP",
+    "precio": 8.87,
+    "stock": 29570,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-1-R89-NAT-CT",
+    "precio": 9.34,
+    "stock": -137644,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-1-R89-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R89-COL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-20-R28-NAT/CP",
+    "precio": 0.85,
+    "stock": 95037,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-20-R28-NAT-CT",
+    "precio": 1.5,
+    "stock": -93548,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-20-R28-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R28-B-L/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-250-R70-NAT/CP",
+    "precio": 2.25,
+    "stock": 101673,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-250-R70-NAT-CT",
+    "precio": 3.9,
+    "stock": -510536,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-250-R70-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R70/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-250-R70-NEG/CP",
+    "precio": 4.22,
+    "stock": 92768,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-250-R70-NEG-CT",
+    "precio": 4.29,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-250-R70-NEG/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R70/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPL-250-R70-NEG/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R70/CPINACTIVO",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-2-R110-BCO/CP",
+    "precio": 15.33,
+    "stock": 75156,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-2-R110-BCO-CT",
+    "precio": 18.09,
+    "stock": -99099,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-2-R110-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-2-R110-NAT/CP",
+    "precio": 15.33,
+    "stock": 14549,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-2-R110-NAT-CT",
+    "precio": 18.09,
+    "stock": -29081,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-2-R110-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-40-R38-NAT/CP",
+    "precio": 1.04,
+    "stock": 244511,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-40-R38-NAT-CT",
+    "precio": 1.82,
+    "stock": -150761,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-40-R38-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-4-R110-BCO/CP",
+    "precio": 18.45,
+    "stock": 29878,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-4-R110-BCO-CT",
+    "precio": 20.83,
+    "stock": -96577,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-4-R110-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-4-R110-NAT/CP",
+    "precio": 18.45,
+    "stock": 8681,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-4-R110-NAT-CT.",
+    "precio": 20.83,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-4-R110-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-4-REC-GDL/CP",
+    "precio": 5.65,
+    "stock": 162812,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-500-R70-BCO/CP",
+    "precio": 7.22,
+    "stock": 96904,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-500-R70-BCO-CT",
+    "precio": 8.72,
+    "stock": -224094,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-500-R70-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R70/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-500-R70-NAT/CP",
+    "precio": 7.22,
+    "stock": 52544,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-500-R70-NAT-CT",
+    "precio": 7.72,
+    "stock": -53820,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-500-R70-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "T-R70/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-500-R89-BCO/CP",
+    "precio": 7.09,
+    "stock": 132329,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPLG-1-R110-BCO/CP",
+    "precio": 5.46,
+    "stock": 27547,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPLG-1-R110-BCO-CT",
+    "precio": 8.71,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPLG-1-R110-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPLG-500-R110-BCO/CP",
+    "precio": 3.64,
+    "stock": 23804,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPLG-500-R110-BCO-CT",
+    "precio": 6.89,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPLG-500-R110-BCO/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPL-R50-NAT/CP",
+    "precio": 1.04,
+    "stock": 40948,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPL-R50-NAT-CT",
+    "precio": 1.82,
+    "stock": -2990,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TPL-R50-NAT/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TP-R38-SC/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "TPN-8/10/CP",
+    "precio": 22.16,
+    "stock": 70509,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPNL-19-U/CP",
+    "precio": 43.15,
+    "stock": 72715,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPNL-4-M/CP",
+    "precio": 12.29,
+    "stock": 5000,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPN-O-19-H/CP",
+    "precio": 43.15,
+    "stock": 17949,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPNO-19-U/CP",
+    "precio": 43.15,
+    "stock": 38593,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPO-19-REC-GB/CP",
+    "precio": 20,
+    "stock": 34768,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPOB-19-REC-GB/CP",
+    "precio": 20,
+    "stock": 20228,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-10/5/4-N/CP",
+    "precio": 13.75,
+    "stock": 6103,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-10/CP",
+    "precio": 6.75,
+    "stock": 10279,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-20/50-VA/CP",
+    "precio": 25,
+    "stock": 7787,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-20/50-VM/CP",
+    "precio": 25,
+    "stock": 39000,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-20-50-COL/CP",
+    "precio": 14.16,
+    "stock": 68955,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-20-LL/CP",
+    "precio": 70.91,
+    "stock": 857,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-20-LLF/CP",
+    "precio": 306.25,
+    "stock": 164,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-5/CP",
+    "precio": 3.3,
+    "stock": 40003,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-60/CP",
+    "precio": 4.93,
+    "stock": 25206,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPPC-5/CP",
+    "precio": 3.34,
+    "stock": 26243,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-PGA/CP",
+    "precio": 0.7,
+    "stock": 25171,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPPT-RF-2/CP",
+    "precio": 20.51,
+    "stock": 57569,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPPT-RS-2/CP",
+    "precio": 20.51,
+    "stock": 15123,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPP-VM/CP",
+    "precio": 12.66,
+    "stock": 61218,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R110/CP",
+    "precio": 3,
+    "stock": 1219803,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R18/CP",
+    "precio": 1.41,
+    "stock": 155650,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R20/CP",
+    "precio": 0.87,
+    "stock": 164855,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R22/CP",
+    "precio": 0.53,
+    "stock": 196965,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R24/CP",
+    "precio": 0.54,
+    "stock": 116098,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R28/CP",
+    "precio": 0.69,
+    "stock": 753610,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R28-NEG-FALDON/CP",
+    "precio": 1.85,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R38-CC/CP",
+    "precio": 1.47,
+    "stock": 656336,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R38-SC/CP",
+    "precio": 0.9,
+    "stock": 2116707,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPR-45",
+    "precio": 2.97,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R58/CP",
+    "precio": 1.88,
+    "stock": 203527,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R63-PS/CP",
+    "precio": 4,
+    "stock": 52551,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TP-R89-COL/CP",
+    "precio": 2.3,
+    "stock": 365974,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPRL-19/CP",
+    "precio": 27.3,
+    "stock": 21486,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPRO-19-M/CP",
+    "precio": 30,
+    "stock": 12443,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TPS-R63/CP",
+    "precio": 2.1,
+    "stock": 7543,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R110-ASA/CP",
+    "precio": 5.29,
+    "stock": 12685,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R110-BM/CP",
+    "precio": 53.69,
+    "stock": 182,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R28/410-B-L/CP",
+    "precio": 0.66,
+    "stock": 211018,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R28-B-L/CP",
+    "precio": 0.66,
+    "stock": 1113536,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R40-B/CP",
+    "precio": 2.5,
+    "stock": 29042,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R48/CP",
+    "precio": 0.8,
+    "stock": 66115,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R50/CP",
+    "precio": 1.08,
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R50-COL/CP",
+    "precio": 1.08,
+    "stock": 264715,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R53/CP",
+    "precio": 1.34,
+    "stock": 15696,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R63-AM/CP",
+    "precio": 1.56,
+    "stock": 11292,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R63B/CP",
+    "precio": 1.56,
+    "stock": 322565,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R63-COL-CH/CP",
+    "precio": 2.03,
+    "stock": 429123,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R63-R/CP",
+    "precio": 1.56,
+    "stock": 32379,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "T-R70/CP",
+    "precio": 2.2,
+    "stock": 514716,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TS-HZ24-R/CP",
+    "precio": 2,
+    "stock": 2307103,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TS-NEG/CP",
+    "precio": 200,
+    "stock": 1040,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TTP-CF4/CP",
+    "precio": 11.56,
+    "stock": 15558,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TTP-SF1/2/CP",
+    "precio": 3.18,
+    "stock": 1027959,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TTP-SF1/4/CP",
+    "precio": 2.69,
+    "stock": 858378,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TTP-SF1/CP",
+    "precio": 4.35,
+    "stock": 286758,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TTP-SF4/CP",
+    "precio": 9.53,
+    "stock": 184863,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "TV-R-40/410/CP",
+    "precio": 0,
+    "stock": 4210,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VD-28/20/CP",
+    "precio": 0.65,
+    "stock": 87670,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VM-R63/CP",
+    "precio": 3.9,
+    "stock": 4262,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VP-450-R89/CP",
+    "precio": 6.45,
+    "stock": 26278,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VP-450-R89-CT",
+    "precio": 7.95,
+    "stock": -8671,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-R89-COL/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VP-450-R89/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "VP-4-R110/CP",
+    "precio": 14.26,
+    "stock": 12363,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VP-4-R110-CT",
+    "precio": 16.76,
+    "stock": -38831,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VP-4-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "VPC-1/2-GAL/CP",
+    "precio": 8.91,
+    "stock": 38330,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VPC-1/2-GAL-CT",
+    "precio": 11.87,
+    "stock": -99918,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VPC-1/2-GAL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "VPC-1-R110/CP",
+    "precio": 7.5,
+    "stock": 52727,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VPC-1-R110-CT",
+    "precio": 10.03,
+    "stock": -81965,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VPC-1-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "VPC-1-R110-R-CT",
+    "precio": 10.03,
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VPC-1-R110/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "VPC-GAL/CP",
+    "precio": 14.26,
+    "stock": 21486,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VPC-GAL-CT",
+    "precio": 16.76,
+    "stock": -149968,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VPC-GAL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "VPR-1/2-GAL/CP",
+    "precio": 8.91,
+    "stock": 42175,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "VPR-1/2-GAL-CT",
+    "precio": 11.05,
+    "stock": -57980,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "TP-R110/CP",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "VPR-1/2-GAL/CP",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
+    "codigo": "VPS-R-63/CP",
+    "precio": 1.58,
+    "stock": 7544,
+    "tipo": 1,
+    "receta": null
+  }
+]
