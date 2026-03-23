@@ -8,9 +8,13 @@ name: Deploy to Firebase Hosting on merge
   repository_dispatch:
     types: [actualizar-catalogo]
 
-# ESTA ES LA LÍNEA NUEVA: Obliga a GitHub a usar Node 24 y quita la advertencia
+# Obliga a GitHub a usar Node 24 y quita la advertencia
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+# PERMISOS: Necesarios para que el bot pueda guardar los JSON en tu repositorio
+permissions:
+  contents: write
 
 jobs:
   build_and_deploy:
@@ -24,6 +28,7 @@ jobs:
       # 2. Instalar Firebase Admin (Solo para el script generador)
       - name: Instalar Firebase Admin
         run: npm install firebase-admin
+
       # 3. EJECUTAR EL SCRIPT GENERADOR DE JSON (SOLO CUANDO CAMBIAN LOS DATOS)
       - name: Generar catalogo.json dinámico
         if: github.event_name == 'repository_dispatch'
@@ -31,6 +36,23 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRODUCTOSEEN }}'
         run: node generar_catalogo.cjs
       
+      # ------------------------------------------------------------------------
+      # 3.5. GUARDAR LOS JSON GENERADOS EN GITHUB (LA PIEZA FALTANTE)
+      # ------------------------------------------------------------------------
+      - name: Commit y Push de pm.json
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          
+          # Forzamos agregar los archivos (incluso si estuvieran ignorados)
+          git add -f pm.json
+          git add -f public/catalogo_completo.json
+          
+          # Si hay cambios reales, hace el commit y los empuja a tu rama main
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-Update: pm.json actualizado desde Admin" && git push)
+      # ------------------------------------------------------------------------
+
       # 4. Compilar React (Esto junta React, tus HTML y el nuevo catalogo.json en la carpeta dist)
       - run: npm run build
       
