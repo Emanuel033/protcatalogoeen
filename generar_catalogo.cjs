@@ -39,6 +39,7 @@ async function construirJSON() {
                 facturacionMap[codeLimpio] = {
                     id_facturacion: item.codigo,
                     codigo_original: item.codigo,
+                    nombre_oficial: item.nombre, // <--- AHORA SÍ LEEMOS EL NOMBRE DESDE EL ARCHIVO LOCAL
                     precio: item.precio || 0,
                     stock_facturacion: item.stock || 0,
                     tipo_item: item.tipo === 1 ? 'PIEZA_BASE' : 'KIT_OFICIAL',
@@ -187,23 +188,27 @@ async function construirJSON() {
 
         // 3.2 Agregar los "Huérfanos" (Lo que sobró en CONTPAQi y no tiene foto ni master)
         Object.values(facturacionMap).forEach(factData => {
+            
+            // Extraemos el nombre que trajo factData desde CONTPAQi
+            const nombreOficial = factData.nombre_oficial || factData.codigo_original;
+
             allProducts.push({
-                id: factData.id_facturacion,
-                name: `[NUEVO] ${factData.codigo_original}`, // Como solo viene de contpaqi, no tenemos el nombre comercial
+                id: factData.codigo_original,
+                name: nombreOficial,                                  
                 category: 'Sistema (Sin Master)',
-                image: 'https://dummyimage.com/300x300/e2e8f0/0f172a&text=S/I',
+                image: 'https://via.placeholder.com/300?text=S/I',    
                 piezas: 1,
-                tipo_item: factData.tipo_item, 
+                tipo_item: factData.tipo_item || "PIEZA_BASE",
                 codigo_sistema: factData.codigo_original,
-                receta: factData.receta,
+                receta: factData.receta || null,              
                 paquetes: [],
-                id_facturacion: factData.id_facturacion,
+                id_facturacion: factData.codigo_original,
                 codigo: factData.codigo_original,
-                nombre: `[NUEVO] ${factData.codigo_original}`,
-                precio: factData.precio,
-                stock: factData.stock_facturacion,
-                imagen: null, 
-                empaques_tips: [] 
+                nombre: nombreOficial,                                
+                precio: factData.precio || 0,
+                stock: factData.stock_facturacion || 0,
+                imagen: null,
+                empaques_tips: []
             });
         });
 
