@@ -50,7 +50,7 @@ jobs:
           git add -f public/catalogo_completo.json
           
           # Si hay cambios reales, hace el commit y los empuja a tu rama main
-          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-Update: pm.json actualizado desde Admin" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-Sync: Catálogo Web y pm.json Sincronizados" && git push)
       # ------------------------------------------------------------------------
 
       # 4. Compilar React (Esto junta React, tus HTML y el nuevo catalogo.json en la carpeta dist)
