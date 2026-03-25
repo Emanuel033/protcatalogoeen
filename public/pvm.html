@@ -702,41 +702,39 @@ window.calculateChange = () => {
                     console.warn("Aviso: No se pudo leer el inventario sombra", e);
                 }
 
-                // 4. APLICAR FILTRO Y RESTAR INVENTARIO SOMBRA
+                // 4. APLICAR FILTRO Y GUARDAR AMBOS STOCKS
                 catalogProducts = allData.filter(p => 
                     p.tipo_item === 'PIEZA_BASE' || p.tipo_item === 'KIT_OFICIAL'
                 ).map(p => {
                     const vendidosPorFuera = shadowStock[p.codigo] || 0;
                     return {
                         ...p,
-                        stock_oficial: p.stock, 
-                        stock: p.stock - vendidosPorFuera // Aquí hacemos la resta de la doble capa
+                        stock_oficial: p.stock, // Guardamos el de CONTPAQi intacto
+                        stock: Math.max(0, p.stock - vendidosPorFuera) // El ESTIMADO (real)
                     };
                 });
 
-                // 5. MAGIA PURA: CALCULAR STOCK DE KITS EN VIVO
+                // 5. MAGIA PURA: CALCULAR STOCK DE KITS EN VIVO (Para ambos números)
                 catalogProducts.forEach(p => {
-                    // Si es un KIT y tiene una receta adentro
                     if (p.tipo_item === 'KIT_OFICIAL' && p.receta && p.receta.length > 0) {
-                        let maxKitsPosibles = Infinity;
+                        let maxKitsOficial = Infinity;
+                        let maxKitsEstimado = Infinity;
                         
-                        // Revisamos cuántas piezas hay para armar este kit
                         p.receta.forEach(r => {
                             const pieza = catalogProducts.find(x => x.codigo === r.codigo_pieza);
                             if (pieza) {
-                                // Ej: Si el kit pide 2 tapas y hay 10 tapas sueltas, alcanza para 5 kits
-                                const kitsConEstaPieza = Math.floor(pieza.stock / r.cantidad);
-                                if (kitsConEstaPieza < maxKitsPosibles) {
-                                    maxKitsPosibles = kitsConEstaPieza;
-                                }
+                                const kitsOficial = Math.floor(pieza.stock_oficial / r.cantidad);
+                                const kitsEstimado = Math.floor(pieza.stock / r.cantidad);
+                                
+                                if (kitsOficial < maxKitsOficial) maxKitsOficial = kitsOficial;
+                                if (kitsEstimado < maxKitsEstimado) maxKitsEstimado = kitsEstimado;
                             } else {
-                                // Si falta una pieza en el sistema, no se puede armar el kit
-                                maxKitsPosibles = 0;
+                                maxKitsOficial = 0; maxKitsEstimado = 0;
                             }
                         });
                         
-                        // Asignamos el stock real que se puede armar (sin números negativos)
-                        p.stock = maxKitsPosibles === Infinity ? 0 : Math.max(0, maxKitsPosibles);
+                        p.stock_oficial = maxKitsOficial === Infinity ? 0 : Math.max(0, maxKitsOficial);
+                        p.stock = maxKitsEstimado === Infinity ? 0 : Math.max(0, maxKitsEstimado);
                     }
                 });
 
@@ -794,10 +792,18 @@ window.calculateChange = () => {
                     tipsHTML += `</div>`;
                 }
 
-                let inventoryBadge = '';
+               let inventoryBadge = '';
                 if (showInventoryConfig) {
-                    if (p.stock <= 5) { inventoryBadge = `<span class="text-[8px] md:text-[9px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded border border-red-200"><i class="fas fa-exclamation-triangle mr-1"></i>${p.stock}</span>`; } 
-                    else { inventoryBadge = `<span class="text-[8px] md:text-[9px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200"><i class="fas fa-cubes mr-1"></i>${p.stock}</span>`; }
+                    // Diseño del Estimado (Rojo si hay poco, Indigo/Azul si hay suficiente)
+                    let estClass = p.stock <= 5 ? "bg-red-100 text-red-700 border-red-200" : "bg-indigo-100 text-indigo-700 border-indigo-200";
+                    let estIcon = p.stock <= 5 ? "fa-exclamation-triangle" : "fa-bolt";
+                    
+                    inventoryBadge = `
+                        <div class="flex items-center bg-slate-50 border border-slate-200 rounded-md p-0.5 shrink-0">
+                            <span class="text-[7px] md:text-[8px] font-bold text-slate-400 px-1.5 border-r border-slate-200" title="Stock en CONTPAQi">Oficial: ${p.stock_oficial}</span>
+                            <span class="text-[9px] md:text-[10px] font-black ${estClass} px-1.5 py-0.5 rounded shadow-sm ml-0.5" title="Stock Estimado Real"><i class="fas ${estIcon} mr-1"></i>Est: ${p.stock}</span>
+                        </div>
+                    `;
                 }
 
                 const safeName = p.nombre.replace(/'/g, "\\'").replace(/"/g, '&quot;');
