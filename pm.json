@@ -12355,42 +12355,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p435"
     },
-    "paquetes": [
-      {
-        "id": "paquete_108",
-        "nombre_paquete": "Paquete de 108 piezas",
-        "piezas": 108,
-        "sku": "P435-108PZ",
-        "es_default": true
-      }
-    ]
-  },
-  {
-    "id": "p435",
-    "firebase_data": {
-      "id": "p435",
-      "nombre_flexible": "ENVASE PLASTICO LECHERO DE MEDIO GALON S/TAPA",
-      "tipo_item": "PIEZA_BASE",
-      "stock_total_piezas": 0,
-      "categoria": "PBD",
-      "imagen_url": "https://i.ibb.co/5hw0Bvz1/ENVASE-LECHERO-DE-MEDIO-GALON.jpg",
-      "activo": true,
-      "fecha_creacion": {
-        "_seconds": 1771885778,
-        "_nanoseconds": 735000000
-      },
-      "codigo_sistema_oficial": "EPL-1/2-GAL/CP",
-      "receta_desglose": null
-    },
-    "paquetes": [
-      {
-        "id": "paquete_108",
-        "nombre_paquete": "Paquete de 108 piezas",
-        "piezas": 108,
-        "sku": "P435-108PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p436",
