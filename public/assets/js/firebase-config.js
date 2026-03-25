@@ -19,7 +19,7 @@ if (!firebase.apps.length) {
 
 // Exportar las referencias globales (Base de datos y Autenticación)
 const db = firebase.firestore();
-const rtdb = firebase.database();
+//const rtdb = firebase.database();
 const auth = firebase.auth(); // <-- Agregado para gestionar sesiones en cualquier página
 
 // Colecciones principales del sistema EEN
