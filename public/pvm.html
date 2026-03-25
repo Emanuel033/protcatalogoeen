@@ -87,7 +87,7 @@
 
     <script src="assets/js/firebase-config.js"></script>
     <script>
-        const db = firebase.firestore();
+        
         try {
             db.enablePersistence({synchronizeTabs: true}).catch(function(err) {
                 console.warn("Aviso: No se pudo habilitar caché offline completa.", err.code);
