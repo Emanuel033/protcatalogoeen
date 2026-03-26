@@ -179,7 +179,7 @@
                     <div id="loadingProducts" class="text-center py-10 text-slate-400 font-bold absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-50/80 backdrop-blur-sm">
                         <i class="fas fa-spinner fa-spin text-3xl mb-3 text-blue-500"></i><span class="text-sm">Cargando catálogo...</span>
                     </div>
-                    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 hidden"></div>
+                    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2 md:gap-3 hidden"></div>
                 </div>
             </div>
 
@@ -709,7 +709,7 @@
         window.resetRenderLimitAndFilter = () => { currentRenderLimit = 100; filterCatalog(); };
         window.loadMoreProducts = () => { currentRenderLimit += 100; filterCatalog(); };
 
-        // >>> AQUI SE MODIFICÓ LA APARIENCIA DE LAS TARJETAS <<<
+        // >>> LA VISTA TIPO LISTA HA VUELTO (TARJETAS HORIZONTALES) <<<
         function filterCatalog() {
             const term = document.getElementById('searchInput').value.toLowerCase().trim();
             const grid = document.getElementById('productsGrid'); 
@@ -742,43 +742,43 @@
                     let estClass = p.stock <= 5 ? "bg-red-100 text-red-700 border-red-200" : "bg-indigo-100 text-indigo-700 border-indigo-200";
                     let estIcon = p.stock <= 5 ? "fa-exclamation-triangle" : "fa-bolt";
                     
+                    // Se usan palabras completas (Oficial, Estimado)
                     inventoryBadge = `
-                        <div class="flex items-center bg-slate-50 border border-slate-200 rounded p-1 shrink-0 mt-1.5">
-                            <span class="text-[8px] md:text-[9px] font-bold text-slate-500 px-1 border-r border-slate-200" title="Stock en CONTPAQi">Ofc: ${p.stock_oficial}</span>
-                            <span class="text-[9px] font-black ${estClass} px-1.5 py-0.5 rounded shadow-sm ml-1" title="Stock Estimado Real"><i class="fas ${estIcon} mr-0.5"></i>Est: ${p.stock}</span>
+                        <div class="flex items-center bg-slate-50 border border-slate-200 rounded p-1 shrink-0 mt-1">
+                            <span class="text-[9px] md:text-[10px] font-bold text-slate-500 px-1.5 border-r border-slate-200" title="Stock en CONTPAQi">Oficial: ${p.stock_oficial}</span>
+                            <span class="text-[9px] md:text-[10px] font-black ${estClass} px-1.5 py-0.5 rounded shadow-sm ml-1" title="Stock Estimado Real"><i class="fas ${estIcon} mr-1"></i>Estimado: ${p.stock}</span>
                         </div>
                     `;
                 }
 
                 const safeName = p.nombre.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 let imageBlock = '';
-                // Diseño de imagen: a la izquierda en móvil, arriba en PC (md:flex-col)
+                
+                // Imagen tipo icono a la izquierda siempre (Horizontal layout)
                 if (p.imagen) {
                     imageBlock = `
-                        <div class="w-16 h-16 md:w-full md:h-28 shrink-0 relative group rounded-xl overflow-hidden border border-slate-100 bg-white" onclick="event.stopPropagation(); showImage('${p.imagen}', '${safeName}', '${p.codigo}')">
+                        <div class="w-16 h-16 md:w-20 md:h-20 shrink-0 relative group rounded-xl overflow-hidden border border-slate-200 bg-white" onclick="event.stopPropagation(); showImage('${p.imagen}', '${safeName}', '${p.codigo}')">
                             <img src="${p.imagen}" class="w-full h-full object-contain p-1 group-hover:scale-110 transition-transform cursor-zoom-in" onerror="this.src='https://placehold.co/100x100/f1f5f9/94a3b8?text=Error'">
                             <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-zoom-in"><i class="fas fa-search-plus text-white text-lg"></i></div>
                         </div>`;
                 } else {
-                    imageBlock = `<div class="w-16 h-16 md:w-full md:h-28 shrink-0 bg-slate-50 border border-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-300"><i class="fas fa-box text-xl mb-1"></i><span class="text-[9px] font-bold">S/I</span></div>`;
+                    imageBlock = `<div class="w-16 h-16 md:w-20 md:h-20 shrink-0 bg-slate-50 border border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-300"><i class="fas fa-box text-xl mb-1"></i><span class="text-[9px] font-bold">S/I</span></div>`;
                 }
 
                 const card = document.createElement('div');
-                // IMPORTANTE: flex-row en móvil, flex-col en PC
-                card.className = "bg-white border border-slate-200 p-2 md:p-3 rounded-2xl shadow-sm hover:border-blue-400 hover:shadow-md transition cursor-pointer flex flex-row md:flex-col items-center md:items-stretch gap-2 md:gap-3 fade-in relative overflow-hidden group h-full";
+                // Estructura siempre horizontal: flex-row en móvil y PC
+                card.className = "bg-white border border-slate-200 p-2 md:p-3 rounded-2xl shadow-sm hover:border-blue-400 hover:shadow-md transition cursor-pointer flex flex-row items-center gap-3 fade-in relative overflow-hidden group h-full";
                 card.onclick = () => addToCart(p);
                 
                 card.innerHTML = `
                     ${imageBlock}
-                    <div class="flex-1 flex flex-col justify-start md:justify-between min-w-0">
-                        <div>
-                            <div class="flex justify-between items-start mb-1 gap-2">
-                                <span class="font-mono text-[9px] md:text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold border border-slate-200 break-words whitespace-normal leading-tight">${p.codigo}</span>
-                                <span class="text-xs md:text-sm font-black text-emerald-600 shrink-0">${formatMoney(p.precio)}</span>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-[11px] md:text-xs leading-snug break-words whitespace-normal line-clamp-3" title="${p.nombre}">${p.nombre}</h4>
+                    <div class="flex-1 flex flex-col justify-center min-w-0 py-1">
+                        <div class="flex justify-between items-start mb-1 gap-2">
+                            <span class="font-mono text-[9px] md:text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold border border-slate-200 break-words whitespace-normal leading-tight">${p.codigo}</span>
+                            <span class="text-xs md:text-sm font-black text-emerald-600 shrink-0">${formatMoney(p.precio)}</span>
                         </div>
-                        <div class="mt-auto pt-1">
+                        <h4 class="font-bold text-slate-800 text-[11px] md:text-xs leading-snug break-words whitespace-normal line-clamp-2" title="${p.nombre}">${p.nombre}</h4>
+                        <div class="mt-1 flex flex-col items-start gap-1">
                             ${inventoryBadge}
                             ${tipsHTML}
                         </div>
@@ -819,7 +819,6 @@
             });
         }
 
-        // >>> AQUI SE MODIFICÓ LA APARIENCIA DEL CARRITO <<<
         function renderCart() {
             const container = document.getElementById('cartItems'); const btnPreparar = document.getElementById('btnPrepararCobro');
             if (cart.length === 0) {
