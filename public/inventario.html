@@ -7,10 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script> <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800 font-sans">
+<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800 font-sans pb-10">
 
     <script src="assets/js/firebase-config.js"></script>
 
@@ -27,15 +27,15 @@
     <main class="flex-1 p-4 flex flex-col gap-4 max-w-md mx-auto w-full">
         
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 text-center">
-            <div id="reader" class="w-full rounded-xl overflow-hidden mb-4 bg-slate-100 min-h-[250px] flex items-center justify-center border-2 border-dashed border-slate-300">
-                <p class="text-slate-400 text-sm font-bold"><i class="fas fa-camera text-2xl mb-2 block"></i>Cámara apagada</p>
+            <div id="reader" class="w-full rounded-xl overflow-hidden mb-4 bg-slate-100 min-h-[200px] flex items-center justify-center border-2 border-dashed border-slate-300">
+                <p class="text-slate-400 text-sm font-bold"><i class="fas fa-camera text-2xl mb-2 block"></i>Cámara apagada / Lista</p>
             </div>
             <div class="flex gap-2">
                 <button id="btnScan" onclick="toggleScanner()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-blue-700 transition flex items-center justify-center gap-2">
                     <i class="fas fa-qrcode"></i> Escanear
                 </button>
                 <button onclick="buscarManual()" class="flex-1 bg-slate-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-300 transition flex items-center justify-center gap-2">
-                    <i class="fas fa-keyboard"></i> Manual
+                    <i class="fas fa-search"></i> Manual
                 </button>
             </div>
         </div>
@@ -45,13 +45,32 @@
             <h2 id="prodNombre" class="font-black text-lg leading-tight mb-2">Cargando...</h2>
             <p class="font-mono text-xs bg-slate-100 inline-block px-2 py-1 rounded text-slate-600 mb-4" id="prodCodigo">---</p>
             
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4">
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Conteo Físico Real:</label>
-                <input type="number" id="conteoFisico" class="w-full text-center text-3xl font-black text-slate-900 bg-white border-2 border-blue-200 rounded-xl py-3 outline-none focus:border-blue-500 transition-colors" placeholder="0">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4">
+                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3"><i class="fas fa-layer-group text-blue-500 mr-1"></i> Desglose de Conteo</h3>
+                
+                <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-200">
+                    <div>
+                        <span class="font-bold text-slate-700 block text-sm">Piezas Sueltas</span>
+                        <span class="text-[10px] text-slate-500">Unidades individuales</span>
+                    </div>
+                    <input type="number" id="conteoSueltas" oninput="recalcularTotalFisico()" class="w-20 text-center font-black text-slate-900 bg-white border-2 border-slate-300 rounded-lg py-2 outline-none focus:border-blue-500 transition-colors" placeholder="0">
+                </div>
+
+                <div id="contenedorEmpaques" class="space-y-3 mb-3">
+                    </div>
+
+                <button onclick="crearNuevoEmpaque()" class="w-full text-xs font-bold text-blue-600 bg-blue-50 py-2 rounded border border-blue-200 hover:bg-blue-100 transition border-dashed">
+                    <i class="fas fa-plus"></i> Añadir Tipo de Empaque
+                </button>
+            </div>
+
+            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-4 text-center">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Total Calculado (Piezas):</label>
+                <div id="conteoFisicoTotalDisplay" class="text-4xl font-black text-blue-700">0</div>
             </div>
 
             <button onclick="guardarAuditoria()" id="btnGuardar" class="w-full bg-emerald-500 text-white py-4 rounded-xl font-black shadow-lg shadow-emerald-500/30 text-lg flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                <i class="fas fa-save"></i> Guardar Conteo
+                <i class="fas fa-save"></i> Guardar Conteo Final
             </button>
         </div>
 
@@ -65,19 +84,18 @@
     </style>
 
     <script>
-        // Eliminamos "const db" porque ya viene de tu firebase-config.js
         let html5QrcodeScanner = null;
         let isScanning = false;
         let productoActual = null;
+        let empaquesActuales = [];
         let catalogoEnMemoria = [];
 
-        // Cargamos el mismo catálogo que usa PVM para tener los números exactos
         window.onload = async () => {
             try {
                 const res = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
                 catalogoEnMemoria = await res.json();
             } catch(e) {
-                showToast("Error al cargar catálogo base", true);
+                showToast("Aviso: Catálogo local no cargado", true);
             }
         };
 
@@ -94,15 +112,17 @@
                 html5QrcodeScanner.clear();
                 isScanning = false;
                 document.getElementById('btnScan').innerHTML = '<i class="fas fa-qrcode"></i> Escanear';
-                document.getElementById('reader').innerHTML = '<p class="text-slate-400 text-sm font-bold"><i class="fas fa-camera text-2xl mb-2 block"></i>Cámara apagada</p>';
             } else {
                 html5QrcodeScanner = new Html5Qrcode("reader");
                 html5QrcodeScanner.start(
                     { facingMode: "environment" },
                     { fps: 10, qrbox: { width: 250, height: 250 } },
                     onScanSuccess,
-                    (err) => {} // ignorar errores constantes
-                );
+                    (err) => {} // ignorar errores cámara
+                ).catch(e => {
+                    showToast("Error de cámara. Asegúrate de dar permisos.", true);
+                    isScanning = false;
+                });
                 isScanning = true;
                 document.getElementById('btnScan').innerHTML = '<i class="fas fa-stop"></i> Detener';
             }
@@ -114,79 +134,176 @@
         }
 
         async function buscarManual() {
-            const codigo = prompt("Ingresa el código oficial del producto:");
-            if(codigo) procesarCodigo(codigo);
+            const codigo = prompt("Ingresa el código base, SKU de paquete, o código de barras:");
+            if(codigo) procesarCodigo(codigo.trim());
         }
 
-        async function procesarCodigo(codigo) {
-            if(catalogoEnMemoria.length === 0) return showToast("El catálogo aún no carga, espera un segundo.", true);
-            showToast("Buscando producto...");
+        async function procesarCodigo(codigoBuscado) {
+            showToast("Buscando...");
+            document.getElementById('fichaProducto').classList.add('hidden');
             
             try {
-                // 1. Buscamos el stock oficial en el JSON (Igual que PVM)
-                const prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === String(codigo).toLowerCase());
+                // 1. Buscar en memoria (JSON) primero, busca Base o Empaque
+                let prodEncontrado = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
                 
-                if(!prodBase) return showToast("Producto no encontrado en catálogo", true);
-
-                // 2. Buscamos la Sombra Web en la colección correcta
-                let sombraCant = 0;
-                const sombraDoc = await db.collection('stock_por_fuera').doc(prodBase.codigo).get();
-                if(sombraDoc.exists) {
-                    sombraCant = sombraDoc.data().cantidad_vendida || 0;
+                // Si no se encuentra como base, buscar si es el SKU de un empaque
+                if (!prodEncontrado) {
+                    for (const p of catalogoEnMemoria) {
+                        if (p.empaques && p.empaques.some(e => String(e.sku).toLowerCase() === codigoBuscado.toLowerCase() || String(e.codigo_barras).toLowerCase() === codigoBuscado.toLowerCase())) {
+                            prodEncontrado = p; break;
+                        }
+                    }
                 }
 
-                // 3. Tomamos la Fotografía
-                productoActual = {
-                    codigo_contpaqi: prodBase.codigo,
-                    nombre_producto: prodBase.nombre,
-                    stock_oficial_snapshot: prodBase.stock || 0,
-                    sombra_web_snapshot: sombraCant
-                };
+                // 2. Si lo encontramos, bajamos la versión FRESCA de Firebase para poder editar empaques
+                if (prodEncontrado) {
+                    const doc = await db.collection('productos').doc(prodEncontrado.id).get();
+                    if(doc.exists) {
+                        const data = doc.data();
+                        
+                        // SANITIZAMOS LA DIAGONAL PARA BUSCAR LA SOMBRA CORRECTA
+                        const codigoSeguro = String(data.codigo_sistema_oficial).replace(/\//g, '_SLASH_');
+                        let sombraCant = 0;
+                        const sombraDoc = await db.collection('stock_por_fuera').doc(codigoSeguro).get();
+                        if(sombraDoc.exists) sombraCant = sombraDoc.data().cantidad_vendida || 0;
 
-                document.getElementById('prodNombre').innerText = productoActual.nombre_producto;
-                document.getElementById('prodCodigo').innerText = productoActual.codigo_contpaqi;
-                document.getElementById('conteoFisico').value = '';
-                document.getElementById('fichaProducto').classList.remove('hidden');
-                setTimeout(() => document.getElementById('conteoFisico').focus(), 100);
+                        productoActual = {
+                            id: doc.id,
+                            codigo_contpaqi: data.codigo_sistema_oficial,
+                            nombre_producto: data.nombre_flexible || data.descripcion_sistema_oficial,
+                            stock_oficial_snapshot: data.stock_oficial || 0,
+                            sombra_web_snapshot: sombraCant
+                        };
 
+                        empaquesActuales = data.empaques || [];
+                        renderEmpaques();
+
+                        document.getElementById('prodNombre').innerText = productoActual.nombre_producto;
+                        document.getElementById('prodCodigo').innerText = productoActual.codigo_contpaqi;
+                        document.getElementById('conteoSueltas').value = '';
+                        document.getElementById('conteoFisicoTotalDisplay').innerText = '0';
+                        document.getElementById('fichaProducto').classList.remove('hidden');
+                        
+                        // Pequeña animación si detectó un paquete específico
+                        if(codigoBuscado !== productoActual.codigo_contpaqi) {
+                            showToast("¡Paquete detectado!");
+                        }
+                    }
+                } else {
+                    showToast("Producto o paquete no encontrado", true);
+                }
             } catch (error) {
                 console.error(error);
                 showToast("Error de conexión", true);
             }
         }
 
+        function renderEmpaques() {
+            const container = document.getElementById('contenedorEmpaques');
+            container.innerHTML = '';
+            
+            empaquesActuales.forEach((emp, index) => {
+                const pzas = emp.cantidad_piezas || emp.cantidad || 0;
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-white p-2 border border-slate-200 rounded shadow-sm">
+                        <div class="flex-1">
+                            <span class="font-bold text-slate-700 block text-xs">Paquetes de ${pzas} pzs</span>
+                            <span class="text-[9px] font-mono text-slate-400">${emp.sku || 'S/SKU'}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-400 font-bold">Cant:</span>
+                            <input type="number" id="conteoEmpaque_${index}" data-piezas="${pzas}" oninput="recalcularTotalFisico()" class="w-16 text-center font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded py-1 outline-none focus:border-blue-500" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function recalcularTotalFisico() {
+            let total = 0;
+            // Sumar sueltas
+            const sueltas = parseInt(document.getElementById('conteoSueltas').value) || 0;
+            total += sueltas;
+
+            // Sumar empaques (Cajas * Piezas por caja)
+            empaquesActuales.forEach((emp, index) => {
+                const cajas = parseInt(document.getElementById(`conteoEmpaque_${index}`).value) || 0;
+                const pzasPorCaja = emp.cantidad_piezas || emp.cantidad || 0;
+                total += (cajas * pzasPorCaja);
+            });
+
+            document.getElementById('conteoFisicoTotalDisplay').innerText = total;
+        }
+
+        async function crearNuevoEmpaque() {
+            if(!productoActual) return;
+            const pzasStr = prompt(`Crear nuevo empaque para ${productoActual.codigo_contpaqi}\n¿Cuántas piezas contiene el nuevo paquete?`);
+            const pzas = parseInt(pzasStr);
+            
+            if(isNaN(pzas) || pzas <= 0) return showToast("Cantidad no válida", true);
+
+            const nuevoSku = `${productoActual.codigo_contpaqi}-${pzas}`;
+            const nuevoEmpaque = { sku: nuevoSku, cantidad_piezas: pzas, codigo_barras: nuevoSku };
+
+            try {
+                showToast("Creando paquete...");
+                await db.collection('productos').doc(productoActual.id).update({
+                    empaques: firebase.firestore.FieldValue.arrayUnion(nuevoEmpaque)
+                });
+                empaquesActuales.push(nuevoEmpaque);
+                renderEmpaques();
+                showToast(`Paquete ${nuevoSku} creado.`);
+            } catch(e) {
+                console.error(e);
+                showToast("Error al guardar paquete", true);
+            }
+        }
+
         async function guardarAuditoria() {
-            const conteo = parseInt(document.getElementById('conteoFisico').value);
-            if (isNaN(conteo) || conteo < 0) return showToast("Ingresa un conteo válido", true);
+            const conteoTotal = parseInt(document.getElementById('conteoFisicoTotalDisplay').innerText);
+            if (isNaN(conteoTotal) || conteoTotal < 0) return showToast("El conteo no es válido", true);
             if (!productoActual) return;
 
             const btn = document.getElementById('btnGuardar');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
             btn.disabled = true;
 
-            // FOTOGRAFÍA: Lo que CONTPAQi decía menos lo que Mostrador ya vendió
+            // FOTOGRAFÍA: Lo que CONTPAQi decía MENOS lo que Mostrador ya vendió
             const esperado = productoActual.stock_oficial_snapshot - productoActual.sombra_web_snapshot;
-            const ajuste = conteo - esperado;
+            const ajuste = conteoTotal - esperado;
+
+            // Guardamos todo el detalle para la bitácora
+            const detalleConteo = {
+                sueltas: parseInt(document.getElementById('conteoSueltas').value) || 0,
+                empaques: empaquesActuales.map((emp, idx) => ({
+                    sku: emp.sku,
+                    piezas_por_paquete: emp.cantidad_piezas || emp.cantidad || 0,
+                    cantidad_paquetes: parseInt(document.getElementById(`conteoEmpaque_${idx}`).value) || 0
+                }))
+            };
 
             const ticket = {
-                ...productoActual,
+                id_producto: productoActual.id,
+                codigo_contpaqi: productoActual.codigo_contpaqi,
+                nombre_producto: productoActual.nombre_producto,
                 esperado: esperado,
-                conteo_fisico: conteo,
+                conteo_fisico: conteoTotal, // Siempre mandamos el total en PIEZAS a Admin/Contpaqi
                 ajuste_calculado: ajuste,
+                detalle_conteo: detalleConteo,
                 fecha: firebase.firestore.FieldValue.serverTimestamp(),
                 estado: 'pendiente'
             };
 
             try {
                 await db.collection('auditorias_pendientes').add(ticket);
-                showToast("¡Conteo guardado y enviado a Admin!");
+                showToast("¡Inventario guardado!");
                 document.getElementById('fichaProducto').classList.add('hidden');
                 productoActual = null;
             } catch (error) {
                 console.error(error);
-                showToast("Error al guardar el conteo", true);
+                showToast("Error al guardar", true);
             } finally {
-                btn.innerHTML = '<i class="fas fa-save"></i> Guardar Conteo';
+                btn.innerHTML = '<i class="fas fa-save"></i> Guardar Conteo Final';
                 btn.disabled = false;
             }
         }
