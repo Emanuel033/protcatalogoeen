@@ -169,7 +169,7 @@
                     } else {
                         // Plan B: Intentar con el ID sanitizado por si Vercel lo guardó con guiones bajos
                         const idSeguro = String(prodEncontrado.id).replace(/\//g, '_');
-                        const docAlterno = await db.collection('productos').doc(idSeguro).get();
+                        const docAlterno = await db.collection('catalogo_facturacion').doc(idSeguro).get();
                         if (docAlterno.exists) docReal = docAlterno;
                     }
 
