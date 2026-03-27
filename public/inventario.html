@@ -65,10 +65,21 @@
     </style>
 
     <script>
-        const db = firebase.firestore();
+        // Eliminamos "const db" porque ya viene de tu firebase-config.js
         let html5QrcodeScanner = null;
         let isScanning = false;
-        let productoActual = null; // Guardará el snapshot
+        let productoActual = null;
+        let catalogoEnMemoria = [];
+
+        // Cargamos el mismo catálogo que usa PVM para tener los números exactos
+        window.onload = async () => {
+            try {
+                const res = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
+                catalogoEnMemoria = await res.json();
+            } catch(e) {
+                showToast("Error al cargar catálogo base", true);
+            }
+        };
 
         function showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
@@ -90,7 +101,7 @@
                     { facingMode: "environment" },
                     { fps: 10, qrbox: { width: 250, height: 250 } },
                     onScanSuccess,
-                    (err) => {} // ignorar errores constantes de lectura
+                    (err) => {} // ignorar errores constantes
                 );
                 isScanning = true;
                 document.getElementById('btnScan').innerHTML = '<i class="fas fa-stop"></i> Detener';
@@ -103,45 +114,41 @@
         }
 
         async function buscarManual() {
-            const codigo = prompt("Ingresa el código o ID del producto:");
+            const codigo = prompt("Ingresa el código oficial del producto:");
             if(codigo) procesarCodigo(codigo);
         }
 
         async function procesarCodigo(codigo) {
+            if(catalogoEnMemoria.length === 0) return showToast("El catálogo aún no carga, espera un segundo.", true);
             showToast("Buscando producto...");
+            
             try {
-                // Buscar en Firestore (Ajusta 'productos' al nombre real de tu colección si es diferente)
-                const snapshot = await db.collection('productos').where('codigo_sistema_oficial', '==', codigo).get();
+                // 1. Buscamos el stock oficial en el JSON (Igual que PVM)
+                const prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === String(codigo).toLowerCase());
                 
-                let doc = null;
-                if (!snapshot.empty) {
-                    doc = snapshot.docs[0];
-                } else {
-                    // Si no lo encuentra por código, intenta por ID de Firebase
-                    const docById = await db.collection('productos').doc(codigo).get();
-                    if(docById.exists) doc = docById;
+                if(!prodBase) return showToast("Producto no encontrado en catálogo", true);
+
+                // 2. Buscamos la Sombra Web en la colección correcta
+                let sombraCant = 0;
+                const sombraDoc = await db.collection('stock_por_fuera').doc(prodBase.codigo).get();
+                if(sombraDoc.exists) {
+                    sombraCant = sombraDoc.data().cantidad_vendida || 0;
                 }
 
-                if(doc) {
-                    const data = doc.data();
-                    
-                    // TOMAMOS LA FOTOGRAFÍA AL INSTANTE
-                    productoActual = {
-                        id: doc.id,
-                        codigo_contpaqi: data.codigo_sistema_oficial || 'S/N',
-                        nombre_producto: data.nombre_flexible || 'Desconocido',
-                        stock_oficial_snapshot: data.stock_oficial || 0, // Lo que diga la BD maestra
-                        sombra_web_snapshot: data.sombra_web || 0       // Las ventas pendientes de PVM
-                    };
+                // 3. Tomamos la Fotografía
+                productoActual = {
+                    codigo_contpaqi: prodBase.codigo,
+                    nombre_producto: prodBase.nombre,
+                    stock_oficial_snapshot: prodBase.stock || 0,
+                    sombra_web_snapshot: sombraCant
+                };
 
-                    document.getElementById('prodNombre').innerText = productoActual.nombre_producto;
-                    document.getElementById('prodCodigo').innerText = productoActual.codigo_contpaqi;
-                    document.getElementById('conteoFisico').value = '';
-                    document.getElementById('fichaProducto').classList.remove('hidden');
-                    setTimeout(() => document.getElementById('conteoFisico').focus(), 100);
-                } else {
-                    showToast("Producto no encontrado en la base de datos", true);
-                }
+                document.getElementById('prodNombre').innerText = productoActual.nombre_producto;
+                document.getElementById('prodCodigo').innerText = productoActual.codigo_contpaqi;
+                document.getElementById('conteoFisico').value = '';
+                document.getElementById('fichaProducto').classList.remove('hidden');
+                setTimeout(() => document.getElementById('conteoFisico').focus(), 100);
+
             } catch (error) {
                 console.error(error);
                 showToast("Error de conexión", true);
@@ -157,8 +164,8 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
             btn.disabled = true;
 
-            // CÁLCULO DE LA FOTOGRAFÍA
-            const esperado = productoActual.stock_oficial_snapshot + productoActual.sombra_web_snapshot;
+            // FOTOGRAFÍA: Lo que CONTPAQi decía menos lo que Mostrador ya vendió
+            const esperado = productoActual.stock_oficial_snapshot - productoActual.sombra_web_snapshot;
             const ajuste = conteo - esperado;
 
             const ticket = {
@@ -167,11 +174,10 @@
                 conteo_fisico: conteo,
                 ajuste_calculado: ajuste,
                 fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                estado: 'pendiente' // Clave para que aparezca en el admin.html
+                estado: 'pendiente'
             };
 
             try {
-                // Guardamos el ticket en una colección dedicada a auditorías
                 await db.collection('auditorias_pendientes').add(ticket);
                 showToast("¡Conteo guardado y enviado a Admin!");
                 document.getElementById('fichaProducto').classList.add('hidden');
