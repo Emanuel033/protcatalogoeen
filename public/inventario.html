@@ -162,7 +162,7 @@
                     
                     // CORRECCIÓN PRINCIPAL: Buscamos usando .where() para que la diagonal (/) no rompa el sistema
                     // NOTA: Si tu colección oficial se llama 'catalogo_facturacion', cámbialo aquí abajo.
-                    const snapshot = await db.collection('productos').where('codigo_sistema_oficial', '==', prodEncontrado.codigo).get();
+                    const snapshot = await db.collection('catalogo_facturacion').where('codigo_sistema_oficial', '==', prodEncontrado.codigo).get();
                     
                     if (!snapshot.empty) {
                         docReal = snapshot.docs[0];
