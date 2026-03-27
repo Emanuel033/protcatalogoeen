@@ -661,10 +661,14 @@
                 if (!response.ok) throw new Error("No se pudo descargar el catálogo.");
                 const allData = await response.json();
 
-                let shadowStock = {};
+               let shadowStock = {};
                 try {
                     const snap = await db.collection('stock_por_fuera').get();
-                    snap.forEach(doc => { shadowStock[doc.id] = doc.data().cantidad_vendida || 0; });
+                    snap.forEach(doc => { 
+                        // Regresamos el guion bajo a diagonal para que cruce con el JSON
+                        const codigoReal = doc.id.replace(/_/g, '/');
+                        shadowStock[codigoReal] = doc.data().cantidad_vendida || 0; 
+                    });
                 } catch(e) { console.warn("Aviso: No se pudo leer el inventario sombra", e); }
 
                 catalogProducts = allData.filter(p => p.tipo_item === 'PIEZA_BASE' || p.tipo_item === 'KIT_OFICIAL').map(p => {
@@ -962,10 +966,14 @@
                     transaction.set(newSaleRef, saleData); 
                 });
                 
+              
                 // 2. MAGIA: Sumar al Inventario Sombra por fuera (Batch)
                 const batchSombra = db.batch();
                 articulosLimpios.forEach(art => {
-                    const sombraRef = db.collection('stock_por_fuera').doc(art.codigo);
+                    // SANITIZAMOS: Cambiamos cualquier diagonal (/) por un guion bajo (_)
+                    const codigoSeguro = String(art.codigo).replace(/\//g, '_');
+                    
+                    const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
                     batchSombra.set(sombraRef, {
                         cantidad_vendida: firebase.firestore.FieldValue.increment(art.cantidad),
                         ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
