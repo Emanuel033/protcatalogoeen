@@ -2581,10 +2581,17 @@ async function procesarAjustesSeleccionados() {
             const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
             batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
 
-            // 2. CORRECCIÓN: Resetear la Sombra Web en la colección correcta ('stock_por_fuera')
+            
+            // 2. Resetear sombra web del producto a 0
             if(ticketData && ticketData.codigo_contpaqi) {
-                const sombraRef = db.collection('stock_por_fuera').doc(ticketData.codigo_contpaqi);
-                batch.set(sombraRef, { cantidad_vendida: 0, ultima_venta: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+                // Sanitizamos la diagonal para encontrar el documento correcto
+                const codigoSeguro = String(ticketData.codigo_contpaqi).replace(/\//g, '_');
+                
+                const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                batch.set(sombraRef, { 
+                    cantidad_vendida: 0, 
+                    ultima_venta: firebase.firestore.FieldValue.serverTimestamp() 
+                }, { merge: true });
             }
         });
 
