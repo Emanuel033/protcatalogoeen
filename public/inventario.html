@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Conteo Físico - EEN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        #reader { border: none !important; border-radius: 1rem; overflow: hidden; }
+        #reader video { object-fit: cover; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <script src="assets/js/firebase-config.js"></script>
+
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between shrink-0 shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-slate-900 text-xl"><i class="fas fa-clipboard-check"></i></div>
+            <div>
+                <h1 class="font-black text-lg leading-none">Auditoría EEN</h1>
+                <p class="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-1">Conteo Físico</p>
+            </div>
+        </div>
+        <button onclick="window.location.href='ADMIN.html'" class="w-10 h-10 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center"><i class="fas fa-home"></i></button>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+        
+        <div class="bg-slate-800 p-5 rounded-3xl shadow-inner border border-slate-700">
+            <div id="readerWrapper" class="w-full bg-slate-900 rounded-2xl overflow-hidden aspect-square flex items-center justify-center relative mb-4">
+                <i class="fas fa-qrcode text-slate-700 text-6xl"></i>
+                <div id="reader" class="absolute inset-0 w-full h-full object-cover"></div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button id="btnStartScan" onclick="startScanner()" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2"><i class="fas fa-camera"></i> Escanear QR</button>
+                <button id="btnStopScan" onclick="stopScanner()" class="flex-1 bg-red-500 text-white py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 hidden"><i class="fas fa-times"></i> Detener</button>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+                <input type="text" id="searchInput" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 text-white text-center font-bold" placeholder="O teclea el código manual">
+                <button onclick="searchManual()" class="bg-slate-700 text-white px-6 py-3 rounded-xl font-bold"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <div id="resultCard" class="hidden bg-slate-800 p-5 rounded-3xl border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+            <div class="flex items-start gap-4 mb-4 border-b border-slate-700 pb-4">
+                <img id="prodImg" src="" class="w-16 h-16 rounded-xl bg-white object-cover">
+                <div>
+                    <h2 id="prodName" class="font-black text-lg text-white leading-tight">Producto</h2>
+                    <span id="prodCode" class="text-xs font-mono text-amber-400 bg-amber-400/10 px-2 py-1 rounded mt-1 inline-block">COD-000</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-slate-900 p-3 rounded-xl text-center">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">Stock CONTPAQi</p>
+                    <p id="stockOficial" class="text-xl font-black text-slate-300">0</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-xl text-center">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">Sombra Web</p>
+                    <p id="stockSombra" class="text-xl font-black text-red-400">-0</p>
+                </div>
+                <div class="col-span-2 bg-blue-600/20 border border-blue-500/30 p-4 rounded-xl text-center">
+                    <p class="text-[11px] text-blue-300 font-bold uppercase tracking-widest mb-1">Debes tener en físico:</p>
+                    <p id="stockEsperado" class="text-4xl font-black text-blue-400">0</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-4 rounded-2xl">
+                <label class="block text-center text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">¿Cuántos contaste en realidad?</label>
+                <input type="number" id="conteoFisico" class="w-full bg-slate-800 border-2 border-slate-600 text-white text-4xl text-center font-black py-4 rounded-xl focus:border-amber-500 outline-none transition-colors" placeholder="0">
+                <button onclick="guardarAuditoria()" class="w-full mt-4 bg-amber-500 hover:bg-amber-600 text-slate-900 py-4 rounded-xl font-black text-lg shadow-lg flex justify-center items-center gap-2"><i class="fas fa-save"></i> Guardar Conteo</button>
+            </div>
+            <input type="hidden" id="prodIdHidden">
+        </div>
+    </main>
+
+    <div id="toast" class="fixed bottom-4 left-4 right-4 bg-emerald-500 text-white p-4 rounded-xl font-bold shadow-2xl text-center transition-transform transform translate-y-32 z-50">Mensaje</div>
+
+    <script>
+        const db = firebase.firestore();
+        let html5QrcodeScanner = null;
+        let currentSnapshot = {};
+
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.className = `fixed bottom-4 left-4 right-4 text-white p-4 rounded-xl font-bold shadow-2xl text-center transition-transform transform z-50 ${isError ? 'bg-red-500' : 'bg-emerald-500'}`;
+            t.innerText = msg;
+            t.classList.remove('translate-y-32');
+            setTimeout(() => t.classList.add('translate-y-32'), 3000);
+        }
+
+        function startScanner() {
+            document.getElementById('btnStartScan').classList.add('hidden');
+            document.getElementById('btnStopScan').classList.remove('hidden');
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    stopScanner();
+                    let id = decodedText;
+                    if (decodedText.startsWith('http')) {
+                        const url = new URL(decodedText);
+                        id = url.searchParams.get('id') || url.searchParams.get('add') || decodedText.split('=').pop();
+                    }
+                    buscarProducto(id);
+                }, (err) => {}
+            ).catch(err => { showToast("Cámara no disponible", true); stopScanner(); });
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('btnStartScan').classList.remove('hidden');
+                    document.getElementById('btnStopScan').classList.add('hidden');
+                });
+            }
+        }
+
+        function searchManual() {
+            const val = document.getElementById('searchInput').value.trim();
+            if(!val) return showToast("Escribe un código", true);
+            buscarPorCodigo(val);
+        }
+
+        async function buscarPorCodigo(codigo) {
+            try {
+                const snapshot = await db.collection('productos').where('codigo_sistema_oficial', '==', codigo).get();
+                if (snapshot.empty) return showToast("Código no encontrado", true);
+                buscarProducto(snapshot.docs[0].id);
+            } catch (error) { showToast("Error al buscar", true); }
+        }
+
+        async function buscarProducto(id) {
+            try {
+                const doc = await db.collection('productos').doc(id).get();
+                if (!doc.exists) return showToast("Producto no encontrado", true);
+                
+                const p = doc.data();
+                if(p.tipo_item && p.tipo_item !== 'PIEZA_BASE') return showToast("Solo escanea piezas base", true);
+
+                // Obtener Sombra
+                const sombraDoc = await db.collection('stock_por_fuera').doc(p.codigo_sistema_oficial).get();
+                const sombraVendida = sombraDoc.exists ? (sombraDoc.data().cantidad_vendida || 0) : 0;
+                
+                const oficial = p.stock_total_piezas || 0;
+                const esperado = oficial - sombraVendida;
+
+                // Guardar la foto del momento en memoria
+                currentSnapshot = {
+                    producto_id: id,
+                    codigo: p.codigo_sistema_oficial || 'S/N',
+                    nombre: p.nombre_flexible,
+                    stock_oficial: oficial,
+                    sombra: sombraVendida,
+                    esperado: esperado
+                };
+
+                // Pintar UI
+                document.getElementById('prodName').innerText = p.nombre_flexible;
+                document.getElementById('prodCode').innerText = p.codigo_sistema_oficial;
+                document.getElementById('prodImg').src = p.imagen_url || 'https://dummyimage.com/100';
+                document.getElementById('stockOficial').innerText = oficial;
+                document.getElementById('stockSombra').innerText = `-${sombraVendida}`;
+                document.getElementById('stockEsperado').innerText = esperado;
+                document.getElementById('conteoFisico').value = '';
+                document.getElementById('prodIdHidden').value = id;
+
+                document.getElementById('resultCard').classList.remove('hidden');
+                document.getElementById('conteoFisico').focus();
+                
+            } catch (error) { showToast("Error de conexión", true); }
+        }
+
+        async function guardarAuditoria() {
+            const fisico = parseInt(document.getElementById('conteoFisico').value);
+            if (isNaN(fisico) || fisico < 0) return showToast("Ingresa un número válido", true);
+
+            const diferencia = fisico - currentSnapshot.esperado;
+
+            const ticket = {
+                ...currentSnapshot,
+                conteo_fisico: fisico,
+                diferencia: diferencia,
+                fecha: firebase.firestore.FieldValue.serverTimestamp(),
+                estado: 'pendiente' // 'pendiente' significa que falta hacer el ajuste en CONTPAQi
+            };
+
+            try {
+                await db.collection('auditorias_pendientes').add(ticket);
+                showToast("¡Conteo Guardado y enviado a oficina!");
+                document.getElementById('resultCard').classList.add('hidden');
+                document.getElementById('searchInput').value = '';
+                currentSnapshot = {};
+            } catch (error) {
+                showToast("Error al guardar conteo", true);
+            }
+        }
+    </script>
+</body>
+</html>
