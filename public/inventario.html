@@ -139,6 +139,7 @@
         }
 
         async function procesarCodigo(codigoBuscado) {
+            if(catalogoEnMemoria.length === 0) return showToast("El catálogo aún no carga, espera un segundo.", true);
             showToast("Buscando...");
             document.getElementById('fichaProducto').classList.add('hidden');
             
@@ -155,27 +156,41 @@
                     }
                 }
 
-                // 2. Si lo encontramos, bajamos la versión FRESCA de Firebase para poder editar empaques
+                // 2. Si lo encontramos, bajamos la versión FRESCA de Firebase
                 if (prodEncontrado) {
-                    const doc = await db.collection('productos').doc(prodEncontrado.id).get();
-                    if(doc.exists) {
-                        const data = doc.data();
+                    let docReal = null;
+                    
+                    // CORRECCIÓN PRINCIPAL: Buscamos usando .where() para que la diagonal (/) no rompa el sistema
+                    // NOTA: Si tu colección oficial se llama 'catalogo_facturacion', cámbialo aquí abajo.
+                    const snapshot = await db.collection('productos').where('codigo_sistema_oficial', '==', prodEncontrado.codigo).get();
+                    
+                    if (!snapshot.empty) {
+                        docReal = snapshot.docs[0];
+                    } else {
+                        // Plan B: Intentar con el ID sanitizado por si Vercel lo guardó con guiones bajos
+                        const idSeguro = String(prodEncontrado.id).replace(/\//g, '_');
+                        const docAlterno = await db.collection('productos').doc(idSeguro).get();
+                        if (docAlterno.exists) docReal = docAlterno;
+                    }
+
+                    if(docReal) {
+                        const data = docReal.data();
                         
                         // SANITIZAMOS LA DIAGONAL PARA BUSCAR LA SOMBRA CORRECTA
-                        const codigoSeguro = String(data.codigo_sistema_oficial).replace(/\//g, '_SLASH_');
+                        const codigoSeguro = String(prodEncontrado.codigo).replace(/\//g, '_');
                         let sombraCant = 0;
                         const sombraDoc = await db.collection('stock_por_fuera').doc(codigoSeguro).get();
                         if(sombraDoc.exists) sombraCant = sombraDoc.data().cantidad_vendida || 0;
 
                         productoActual = {
-                            id: doc.id,
-                            codigo_contpaqi: data.codigo_sistema_oficial,
-                            nombre_producto: data.nombre_flexible || data.descripcion_sistema_oficial,
-                            stock_oficial_snapshot: data.stock_oficial || 0,
+                            id: docReal.id, // Guardamos el ID real con el que lo encontró
+                            codigo_contpaqi: prodEncontrado.codigo,
+                            nombre_producto: data.nombre_flexible || data.descripcion_sistema_oficial || prodEncontrado.nombre,
+                            stock_oficial_snapshot: data.stock_oficial || prodEncontrado.stock || 0,
                             sombra_web_snapshot: sombraCant
                         };
 
-                        empaquesActuales = data.empaques || [];
+                        empaquesActuales = data.empaques || prodEncontrado.empaques || [];
                         renderEmpaques();
 
                         document.getElementById('prodNombre').innerText = productoActual.nombre_producto;
@@ -188,13 +203,15 @@
                         if(codigoBuscado !== productoActual.codigo_contpaqi) {
                             showToast("¡Paquete detectado!");
                         }
+                    } else {
+                        showToast("Producto en JSON pero no en la Base de Datos en vivo.", true);
                     }
                 } else {
                     showToast("Producto o paquete no encontrado", true);
                 }
             } catch (error) {
                 console.error(error);
-                showToast("Error de conexión", true);
+                showToast("Error de conexión al buscar", true);
             }
         }
 
