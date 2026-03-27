@@ -987,6 +987,9 @@
                 if(document.getElementById('view-historial').classList.contains('flex')) loadHistory();
                 if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales();
 
+                // >>> AGREGA ESTA LÍNEA MÁGICA AQUÍ <<<
+                loadData(false); // Esto recarga el stock restando la sombra al instante
+
                 printTicketHTML(printData);
                 setTimeout(() => document.getElementById('searchInput').focus(), 500);
 
