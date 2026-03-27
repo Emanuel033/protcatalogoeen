@@ -2581,10 +2581,10 @@ async function procesarAjustesSeleccionados() {
             const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
             batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
 
-            // 2. Resetear sombra web del producto a 0
-            if(ticketData && ticketData.id) {
-                const prodRef = db.collection('productos').doc(ticketData.id);
-                batch.update(prodRef, { sombra_web: 0 });
+            // 2. CORRECCIÓN: Resetear la Sombra Web en la colección correcta ('stock_por_fuera')
+            if(ticketData && ticketData.codigo_contpaqi) {
+                const sombraRef = db.collection('stock_por_fuera').doc(ticketData.codigo_contpaqi);
+                batch.set(sombraRef, { cantidad_vendida: 0, ultima_venta: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
             }
         });
 
