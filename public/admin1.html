@@ -3,27 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Configurador Maestro - Premium</title>
+    <title>Centro de Comando - Auditoría EEN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
-    <!-- LIBRERÍAS PARA QR, CÁMARA Y EXCEL -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <!-- PWA Manifest & App Config -->
-    
     <meta name="theme-color" content="#f8fafc">
-
-<link rel="icon" type="image/png" href="./icons/admin-192.png" />
-  
-  <link rel="apple-touch-icon" href="./icons/admin-192.png" />
-  
-  <link rel="manifest" href="./manifest-admin.json" />
+    <link rel="icon" type="image/png" href="./icons/admin-192.png" />
+    <link rel="apple-touch-icon" href="./icons/admin-192.png" />
+    <link rel="manifest" href="./manifest-admin.json" />
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -92,9 +85,6 @@
             -webkit-backdrop-filter: blur(12px);
             border-top: 1px solid rgba(226, 232, 240, 0.8);
         }
-
-        #reader { border: none !important; border-radius: 1rem; overflow: hidden; }
-        #reader video { object-fit: cover; }
         
         .sort-icon { opacity: 0.3; transition: opacity 0.2s; }
         .sort-active { opacity: 1; color: #3b82f6; }
@@ -102,10 +92,8 @@
 </head>
 <body class="h-screen flex overflow-hidden relative pb-[70px] md:pb-0">
 
-    <!-- CREDENCIALES FIREBASE CENTRALIZADAS -->
     <script src="assets/js/firebase-config.js"></script>
 
-    <!-- OVERLAY DE LOGIN -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-xl z-[999] flex flex-col items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md flex flex-col items-center scale-in border border-slate-100 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 opacity-5 rounded-full blur-3xl transform translate-x-10 -translate-y-10"></div>
@@ -115,7 +103,7 @@
             </div>
             
             <h2 class="text-2xl font-black text-slate-900 mb-1 z-10 tracking-tight">Acceso Restringido</h2>
-            <p class="text-xs text-slate-500 font-bold mb-8 text-center z-10 uppercase tracking-wider">Panel de Control Maestro EEN</p>
+            <p class="text-xs text-slate-500 font-bold mb-8 text-center z-10 uppercase tracking-wider">Centro de Comando EEN</p>
             
             <div class="w-full space-y-4 mb-6 z-10">
                 <div>
@@ -141,7 +129,6 @@
         </div>
     </div>
 
-    <!-- VISOR DE IMÁGENES -->
     <div id="imageLightbox" class="fixed inset-0 bg-slate-900/95 z-[100] hidden flex flex-col items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="closeImageLightbox()">
         <div class="absolute top-4 right-4 md:top-8 md:right-8 z-10">
             <button class="w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full text-white flex items-center justify-center transition" onclick="closeImageLightbox()">
@@ -151,33 +138,34 @@
         <img id="lightboxImg" src="" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
     </div>
 
-    <!-- SIDEBAR COLAPSABLE - EXCLUSIVA PARA PC/TABLET (Dashboard Style) -->
     <aside id="mainSidebar" class="hidden md:flex w-[250px] lg:w-[280px] bg-white border-r border-slate-200 flex-col z-30 shrink-0 shadow-sm relative transition-all duration-300">
-        <!-- Toggle Button flotante -->
         <button onclick="toggleSidebar()" class="absolute -right-3.5 top-6 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 rounded-full w-7 h-7 flex items-center justify-center shadow-md z-50 transition-transform" id="sidebarToggleBtn">
             <i class="fas fa-chevron-left text-xs"></i>
         </button>
 
         <div class="h-20 flex items-center px-6 border-b border-slate-100 sidebar-btn">
             <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center mr-3 shadow-md shadow-blue-500/20 shrink-0 sidebar-icon-container">
-                <i class="fas fa-layer-group text-white text-[15px]"></i>
+                <i class="fas fa-server text-white text-[15px]"></i>
             </div>
             <div class="sidebar-text overflow-hidden">
-                <span class="text-xl font-black tracking-tight text-slate-900 leading-none block truncate">Panel EEN</span>
-                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">Gestión Maestra</p>
+                <span class="text-xl font-black tracking-tight text-slate-900 leading-none block truncate">Admin EEN</span>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 truncate">Centro de Comando</p>
             </div>
         </div>
 
         <nav class="flex-1 py-6 flex flex-col overflow-y-auto custom-scroll space-y-1">
-            <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Secciones</p>
+            <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 sidebar-text">Gestión Principal</p>
             
             <button onclick="switchTab('master')" id="dtTab-master" class="w-full flex items-center px-6 py-3.5 bg-blue-50/80 text-blue-700 font-bold border-r-4 border-blue-600 transition-colors sidebar-btn group">
                 <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-box text-lg text-center w-5"></i></div>
                 <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Catálogo Maestro</span>
             </button>
-            <button onclick="switchTab('scanner')" id="dtTab-scanner" class="w-full flex items-center px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors sidebar-btn group">
-                <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-qrcode text-lg text-center w-5"></i></div>
-                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Escáner Físico</span>
+            
+            <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mt-6 mb-2 sidebar-text">Supervisión</p>
+
+            <button onclick="switchTab('audit')" id="dtTab-audit" class="w-full flex items-center px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors sidebar-btn group">
+                <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-clipboard-check text-lg text-center w-5"></i></div>
+                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Auditoría</span>
             </button>
             
             <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mt-6 mb-2 sidebar-text">Administración</p>
@@ -211,96 +199,92 @@
         </div>
     </aside>
 
-    <!-- ÁREA PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-slate-50/50">
         
-        <!-- HEADER MÓVIL (Solo visible en pantallas pequeñas) -->
         <header class="md:hidden bg-white border-b border-slate-200 px-4 py-4 flex justify-between items-center z-20 shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200/50">
-                    <i class="fas fa-layer-group text-lg"></i>
+                    <i class="fas fa-server text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Panel EEN</h1>
-                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1">Gestión Maestra</p>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Admin EEN</h1>
+                    <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1">Centro de Comando</p>
                 </div>
             </div>
             <button onclick="openEditModal()" class="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button>
         </header>
 
-        <!-- TOP BAR: Buscador Flotante, Filtros y Botones de Acción Global -->
-        <div class="bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 md:px-6 py-4 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 shrink-0 z-10 shadow-sm" id="globalSearchContainer">
+        <div class="bg-white border-b border-slate-200 px-4 md:px-6 py-2.5 flex flex-col md:flex-row justify-between items-center gap-4 shrink-0 z-40" id="globalSearchContainer">
             
-            <div class="relative w-full xl:w-96 shrink-0">
-                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                <input type="text" id="globalSearch" oninput="debouncedSearch()" placeholder="Buscar producto, SKU o categoría..." class="w-full pl-11 pr-4 py-3 rounded-xl input-modern text-sm font-semibold shadow-inner focus:bg-white bg-slate-50 border-slate-200 transition-all">
+            <div class="relative w-full md:w-96 shrink-0">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="globalSearch" oninput="debouncedSearch()" placeholder="Buscar código, producto o categoría..." class="w-full pl-8 pr-4 py-1.5 rounded-md bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 text-sm font-medium transition-all outline-none shadow-inner">
             </div>
-            
-            <div class="flex flex-wrap items-center justify-start xl:justify-end gap-3 w-full xl:w-auto">
-                
-                <div class="flex items-center gap-2 bg-slate-100/70 p-1.5 rounded-xl border border-slate-200/60 w-full sm:w-auto">
-                    <select id="filterType" onchange="filterTable()" class="flex-1 sm:flex-none bg-white px-3 py-2 rounded-lg border border-slate-200 font-bold text-[11px] md:text-xs shadow-sm outline-none text-slate-700 appearance-none cursor-pointer">
-                        <option value="ALL">📦 Todos</option>
-                        <option value="PIEZA_BASE">Cube Piezas</option>
-                        <option value="KIT_FLEXIBLE">Árbol Web</option>
-                        <option value="KIT_OFICIAL">Cajas Oficiales</option>
-                    </select>
 
-                    <label class="flex-1 sm:flex-none flex items-center justify-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border border-slate-200 font-bold text-[11px] md:text-xs shadow-sm hover:bg-slate-50 transition select-none" id="filterPendingLabel">
-                        <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
-                        <span class="text-slate-700 whitespace-nowrap">Solo Faltantes</span>
-                    </label>
-                </div>
+            <div class="hidden md:flex items-center gap-1.5">
                 
-                <div class="hidden sm:block w-px h-8 bg-slate-200 mx-1"></div>
-
-                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <button onclick="exportPendingMasterToExcel()" id="btnExportPending" class="flex-1 sm:flex-none justify-center bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-2 transition" title="Exportar Faltantes Web">
-                        <i class="fas fa-file-excel text-sm"></i> <span class="whitespace-nowrap">Exportar Faltantes</span>
+                <div class="relative group">
+                    <button class="px-3 py-1.5 hover:bg-slate-100 rounded-md text-sm font-bold text-slate-600 flex items-center gap-2 transition-colors">
+                        <i class="fas fa-filter text-slate-400 text-xs"></i> Vista <i class="fas fa-chevron-down text-[9px] opacity-50"></i>
                     </button>
-                    <button id="btn-mass-qr" onclick="openMassActions()" class="flex-1 sm:flex-none justify-center md:flex bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm items-center gap-2 transition">
-                        <i class="fas fa-qrcode text-sm text-slate-400"></i> <span class="whitespace-nowrap">Imprimir QRs</span>
-                    </button>
-                    <button id="btn-new-product" onclick="openEditModal()" class="flex-1 sm:flex-none justify-center md:flex bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-slate-900/20 items-center gap-2">
-                        <i class="fas fa-plus"></i> <span class="whitespace-nowrap">Crear</span>
-                    </button>
-                    <button id="btn-deploy" onclick="solicitarActualizacionGitHub()" class="flex-1 sm:flex-none justify-center md:flex bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-blue-600/30 items-center gap-2">
-                        <i class="fas fa-rocket"></i> <span class="whitespace-nowrap">Publicar Web</span>
-                    </button>
+                    <div class="absolute right-0 top-full mt-1 hidden group-hover:block bg-white border border-slate-200 shadow-xl rounded-xl w-56 p-2 z-50 transform origin-top-right transition-all">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-2 px-2 pt-1">Filtrar por Tipo</p>
+                        <select id="filterType" onchange="filterTable()" class="w-full bg-slate-50 px-3 py-2 rounded-lg border border-slate-100 font-bold text-xs text-slate-700 outline-none mb-2 cursor-pointer appearance-none">
+                            <option value="ALL">📦 Todos los artículos</option>
+                            <option value="PIEZA_BASE">Cube Piezas Base</option>
+                            <option value="KIT_FLEXIBLE">Árbol Web (Kits)</option>
+                            <option value="KIT_OFICIAL">Cajas Oficiales</option>
+                        </select>
+                        <div class="h-px bg-slate-100 my-1"></div>
+                        <label class="flex items-center gap-2 px-2 py-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors">
+                            <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 cursor-pointer">
+                            <span class="text-xs font-bold text-slate-700">Mostrar solo Faltantes</span>
+                        </label>
+                    </div>
                 </div>
+
+                <div class="relative group">
+                    <button class="px-3 py-1.5 hover:bg-slate-100 rounded-md text-sm font-bold text-slate-600 flex items-center gap-2 transition-colors">
+                        <i class="fas fa-wrench text-slate-400 text-xs"></i> Herramientas <i class="fas fa-chevron-down text-[9px] opacity-50"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 hidden group-hover:block bg-white border border-slate-200 shadow-xl rounded-xl w-52 p-1.5 z-50 transform origin-top-right transition-all">
+                        <button onclick="exportPendingMasterToExcel()" id="btnExportPending" class="w-full text-left px-3 py-2 hover:bg-orange-50 hover:text-orange-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"><i class="fas fa-file-excel w-4 text-center text-orange-500"></i> Exportar Faltantes</button>
+                        <button id="btn-mass-qr" onclick="openMassActions()" class="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"><i class="fas fa-qrcode w-4 text-center text-slate-400"></i> Imprimir QRs (Masivo)</button>
+                        <div class="h-px bg-slate-100 my-1"></div>
+                        <button id="btn-deploy" onclick="solicitarActualizacionGitHub()" class="w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"><i class="fas fa-rocket w-4 text-center text-blue-500"></i> Compilar y Publicar Web</button>
+                    </div>
+                </div>
+
+                <div class="w-px h-5 bg-slate-200 mx-2"></div>
+
+                <button id="btn-new-product" onclick="openEditModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-bold text-sm transition shadow-sm flex items-center gap-2 active:scale-95">
+                    <i class="fas fa-plus text-xs"></i> Nuevo
+                </button>
             </div>
         </div>
 
-        <!-- CONTENEDOR PRINCIPAL SCROLLABLE (Vistas) -->
         <main class="flex-1 overflow-hidden relative w-full">
             
-            <!-- VISTA: CATÁLOGO MASTER Y AGRUPADO -->
             <div id="view-master" class="h-full flex flex-col w-full px-4 md:px-8 py-6 max-w-[1400px] mx-auto fade-in">
                 
-                <!-- BENTO GRID STATS -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 shrink-0">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between relative overflow-hidden">
-                        <div class="absolute -right-4 -bottom-4 opacity-[0.03]"><i class="fas fa-boxes text-8xl"></i></div>
-                        <div class="relative z-10">
-                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center mb-4"><i class="fas fa-cube text-lg"></i></div>
-                            <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1">Total Variantes Web</p>
-                            <p class="text-4xl lg:text-5xl font-black text-slate-800 tracking-tight" id="count-total">0</p>
+               <div class="flex flex-wrap items-center justify-between gap-4 mb-4 shrink-0 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-6">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+                            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total en BD: <span id="count-total" class="text-slate-900 font-black ml-1 text-sm">0</span></span>
+                        </div>
+                        <div class="w-px h-4 bg-slate-200"></div>
+                        <div class="flex items-center gap-2 cursor-pointer group" onclick="document.getElementById('filterPending').click(); document.getElementById('filterPending').dispatchEvent(new Event('change'));">
+                            <div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+                            <span class="text-[11px] font-bold text-orange-600 uppercase tracking-wider group-hover:underline decoration-orange-300 underline-offset-4">Requieren Configuración: <span id="count-pending" class="font-black ml-1 text-sm">0</span></span>
                         </div>
                     </div>
-                    
-                    <div onclick="document.getElementById('filterPending').click()" class="bg-gradient-to-br from-white to-orange-50/50 hover:to-orange-50 transition cursor-pointer p-6 rounded-3xl shadow-sm border border-orange-100 flex flex-col justify-between relative overflow-hidden group">
-                        <div class="absolute -right-4 -bottom-4 opacity-[0.05] text-orange-500 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500"><i class="fas fa-exclamation-triangle text-8xl"></i></div>
-                        <div class="relative z-10">
-                            <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-4"><i class="fas fa-exclamation text-lg"></i></div>
-                            <p class="text-[11px] text-orange-600 font-bold uppercase tracking-wider mb-1">Por Configurar / Heredar</p>
-                            <p class="text-4xl lg:text-5xl font-black text-orange-600 tracking-tight" id="count-pending">0</p>
-                        </div>
+                    <div class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100 hidden sm:block">
+                        <i class="fas fa-info-circle mr-1"></i> Selecciona un producto para ver detalles
                     </div>
                 </div>
 
-                <!-- CONTENEDOR DE TABLAS -->
                 <div class="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative">
-                    <!-- Tabs Internas de la tabla -->
                     <div class="px-4 md:px-6 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 backdrop-blur z-20 sticky top-0 shrink-0">
                         <div class="bg-slate-200/60 p-1 rounded-xl flex gap-1 w-max">
                             <button id="subTab-desglose" onclick="switchMasterView('desglose')" class="px-4 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-white text-blue-600 shadow-sm transition-all flex items-center gap-2"><i class="fas fa-list"></i> <span class="hidden sm:inline">Individual /</span> Web</button>
@@ -309,7 +293,6 @@
                         <button id="btnExportExcel" onclick="exportToExcel()" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm border border-emerald-200"><i class="fas fa-file-excel text-sm"></i> <span class="hidden sm:inline">Exportar Stock</span></button>
                     </div>
 
-                    <!-- Tabla Desglose (COMPACTA Y ACCIONES STICKY) -->
                     <div id="tableContainerDesglose" class="overflow-y-auto overflow-x-auto flex-1 custom-scroll relative">
                         <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px] border-collapse">
                             <thead class="bg-slate-50/90 backdrop-blur sticky top-0 z-30 text-slate-500 text-[10px] uppercase tracking-wider font-bold">
@@ -319,7 +302,6 @@
                                     <th class="px-3 py-3 border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('categoria')">Categoría <i id="sortIcon-categoria" class="fas fa-sort sort-icon ml-1"></i></th>
                                     <th class="px-3 py-3 text-center border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('stock')">Stock Real <i id="sortIcon-stock" class="fas fa-sort sort-icon ml-1"></i></th>
                                     <th class="px-3 py-3 border-b border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors" onclick="handleSort('codigo_sistema_oficial')">Cód. Sistema Oficial <i id="sortIcon-codigo_sistema_oficial" class="fas fa-sort sort-icon ml-1"></i></th>
-                                    <!-- COLUMNA ACCIONES STICKY (Derecha) -->
                                     <th class="px-3 py-3 text-right border-b border-slate-200 bg-slate-50 sticky right-0 z-[30] shadow-[-8px_0_15px_-5px_rgba(0,0,0,0.05)]">Acciones</th>
                                 </tr>
                             </thead>
@@ -327,7 +309,6 @@
                         </table>
                     </div>
 
-                    <!-- Tabla Agrupada -->
                     <div id="tableContainerAgrupado" class="overflow-y-auto overflow-x-auto flex-1 custom-scroll hidden bg-white">
                         <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
                             <thead class="bg-slate-50/90 backdrop-blur sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold">
@@ -343,89 +324,30 @@
                 </div>
             </div>
 
-            <!-- VISTA: ESCÁNER Y BITÁCORA -->
-            <div id="view-scanner" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in overflow-y-auto custom-scroll pb-24 md:pb-8">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-max">
-                    <!-- Columna Izquierda: Cámara y Resultado -->
-                    <div class="lg:col-span-5 flex flex-col gap-6 h-max">
-                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col">
-                            <div class="flex items-center gap-3 mb-5">
-                                <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl"><i class="fas fa-expand"></i></div>
-                                <div>
-                                    <h2 class="font-black text-slate-900 text-lg leading-tight">Lector de Almacén</h2>
-                                    <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Gestión de Piezas Base</p>
-                                </div>
+            <div id="view-audit" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in overflow-y-auto custom-scroll pb-24 md:pb-8">
+                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full min-h-[600px]">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 shrink-0">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shadow-inner border border-indigo-100">
+                                <i class="fas fa-clipboard-list"></i>
                             </div>
-                            
-                            <div id="readerWrapper" class="w-full bg-slate-900 rounded-3xl overflow-hidden aspect-square md:aspect-video flex items-center justify-center relative shadow-inner">
-                                <i class="fas fa-qrcode text-slate-700 text-6xl"></i>
-                                <div id="reader" class="absolute inset-0 w-full h-full object-cover"></div>
-                            </div>
-                            
-                            <div class="mt-5 flex gap-3">
-                                <button id="btnStartScan" onclick="startScanner()" class="bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl font-bold shadow-lg shadow-slate-900/20 transition-all w-full flex items-center justify-center gap-2 text-sm"><i class="fas fa-camera"></i> Abrir Lector</button>
-                                <button id="btnStopScan" onclick="stopScanner()" class="bg-red-50 hover:bg-red-100 text-red-600 py-4 rounded-2xl font-bold transition-all w-full flex items-center justify-center gap-2 hidden text-sm"><i class="fas fa-times"></i> Detener Cámara</button>
+                            <div>
+                                <h2 class="font-black text-slate-900 text-xl leading-tight">Auditoría Global</h2>
+                                <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Registro histórico de movimientos e inventario</p>
                             </div>
                         </div>
-
-                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col relative min-h-[320px] transition-all" id="resultCard">
-                            <div id="scanIdle" class="text-slate-300 flex flex-col items-center justify-center h-full my-12 transition-all">
-                                <div class="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100 shadow-inner" id="scanIdleIconContainer"><i class="fas fa-box-open text-4xl" id="scanIdleIcon"></i></div>
-                                <p class="font-bold text-sm text-slate-400" id="scanIdleText">Esperando lectura de artículo...</p>
-                            </div>
-
-                            <div id="scanResult" class="hidden w-full fade-in flex flex-col">
-                                <div class="flex items-start gap-4 mb-5 border-b border-slate-100 pb-5">
-                                    <img id="scanProductImg" src="" class="w-20 h-20 rounded-2xl object-cover shadow-sm border border-slate-200 cursor-zoom-in" onclick="openImageLightbox(this.src)">
-                                    <div class="flex-1 min-w-0 pt-1">
-                                        <h4 id="scanProductName" class="text-lg font-black text-slate-900 leading-tight mb-2 truncate">Producto</h4>
-                                        <span id="scanProductCode" class="inline-block font-mono text-[10px] text-blue-700 bg-blue-50 px-2 py-1 rounded-md font-bold border border-blue-100"></span>
-                                    </div>
-                                    <div class="text-right shrink-0 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
-                                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Stock Actual</p>
-                                        <p class="text-3xl font-black text-slate-800 leading-none" id="scanProductStock">0</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-6">
-                                    <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-3"><i class="fas fa-layer-group text-blue-500 mr-1"></i> Desglose Detectado:</p>
-                                    <div id="scanVariantsList" class="space-y-2"></div>
-                                </div>
-
-                                <div class="bg-slate-900 rounded-2xl p-4 sm:p-5 mb-5 flex justify-between items-center shadow-lg shadow-slate-900/10">
-                                    <span class="text-sm font-bold text-slate-300 uppercase tracking-wider">Total a mover:</span>
-                                    <span class="text-4xl font-black text-white leading-none"><span id="scanTotalMove">0</span><span class="text-[12px] text-slate-500 ml-1">pz</span></span>
-                                </div>
-                                
-                                <div class="flex gap-3 w-full">
-                                    <button onclick="updateStockFromScan(1)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-4 sm:py-5 rounded-2xl font-black shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-1"><i class="fas fa-arrow-down text-xl"></i> <span class="text-[10px] sm:text-xs uppercase tracking-wider">Ingresar</span></button>
-                                    <button onclick="updateStockFromScan(-1)" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-4 sm:py-5 rounded-2xl font-black shadow-lg shadow-red-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-1"><i class="fas fa-arrow-up text-xl"></i> <span class="text-[10px] sm:text-xs uppercase tracking-wider">Extraer</span></button>
-                                </div>
-                                <input type="hidden" id="scanProductId">
-                            </div>
-                        </div>
+                        <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-full tracking-wider uppercase flex items-center gap-2 shadow-sm">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Sistema en Vivo
+                        </span>
                     </div>
-
-                    <!-- Columna Derecha: Bitácora -->
-                    <div class="lg:col-span-7 bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full lg:max-h-[850px]">
-                        <div class="flex justify-between items-center mb-5 shrink-0">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-slate-50 text-slate-600 flex items-center justify-center border border-slate-100"><i class="fas fa-history"></i></div>
-                                <div>
-                                    <h3 class="font-black text-slate-900 text-lg leading-tight">Registro de Operaciones</h3>
-                                    <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Últimos movimientos</p>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-full tracking-wider uppercase flex items-center gap-2 shadow-sm"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> En Vivo</span>
-                        </div>
+                    
+                    <div class="border border-slate-100 rounded-2xl overflow-hidden flex-1 flex flex-col bg-slate-50/50 relative shadow-inner">
+                        <div class="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-slate-100/50 to-transparent z-10 pointer-events-none"></div>
                         
-                        <div class="border border-slate-100 rounded-2xl overflow-hidden flex-1 flex flex-col bg-slate-50/50 relative">
-                            <!-- Sombra superior interna -->
-                            <div class="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-slate-100/50 to-transparent z-10 pointer-events-none"></div>
-                            
-                            <div class="overflow-y-auto flex-1 custom-scroll p-3 sm:p-4">
-                                <div class="space-y-3" id="bitacoraCards">
-                                    <div class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin text-3xl mb-3"></i><br>Cargando registros...</div>
+                        <div class="overflow-y-auto flex-1 custom-scroll p-4 md:p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5" id="bitacoraCards">
+                                <div class="text-center py-10 text-slate-400 col-span-full font-bold text-sm">
+                                    <i class="fas fa-spinner fa-spin text-3xl mb-3 text-indigo-400"></i><br>Cargando registros...
                                 </div>
                             </div>
                         </div>
@@ -433,40 +355,37 @@
                 </div>
             </div>
 
-            <!-- VISTA: BANDEJA DE IMPORTACIÓN -->
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
-                <!-- Bento Banner Importación -->
                 <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 relative overflow-hidden shadow-sm">
                    <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
-    <input type="file" id="csvSyncKitsPartial" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL', true)">
-    <input type="file" id="csvSyncKitsTotal" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL', false)">
-    <input type="file" id="csvSyncBasePartial" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE', true)">
-    <input type="file" id="csvSyncBaseTotal" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE', false)">
+                        <input type="file" id="csvSyncKitsPartial" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL', true)">
+                        <input type="file" id="csvSyncKitsTotal" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL', false)">
+                        <input type="file" id="csvSyncBasePartial" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE', true)">
+                        <input type="file" id="csvSyncBaseTotal" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE', false)">
 
-    <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
-        <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span>
-    </button>
+                        <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
+                            <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span>
+                        </button>
 
-    <div class="flex flex-1 sm:flex-none gap-1">
-        <button onclick="document.getElementById('csvSyncKitsPartial').click()" class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Solo agrega/actualiza Paquetes">
-            <i class="fas fa-plus"></i> Paquetes (Parcial)
-        </button>
-        <button onclick="document.getElementById('csvSyncKitsTotal').click()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Reemplaza todos los Paquetes(por los del reporte del sistema)">
-            <i class="fas fa-sync"></i> Paquetes (Total)
-        </button>
-    </div>
+                        <div class="flex flex-1 sm:flex-none gap-1">
+                            <button onclick="document.getElementById('csvSyncKitsPartial').click()" class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Solo agrega/actualiza Paquetes">
+                                <i class="fas fa-plus"></i> Paquetes (Parcial)
+                            </button>
+                            <button onclick="document.getElementById('csvSyncKitsTotal').click()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Reemplaza todos los Paquetes">
+                                <i class="fas fa-sync"></i> Paquetes (Total)
+                            </button>
+                        </div>
 
-    <div class="flex flex-1 sm:flex-none gap-1">
-        <button onclick="document.getElementById('csvSyncBasePartial').click()" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Solo agrega/actualiza productos">
-            <i class="fas fa-plus"></i> Producto (Parcial)
-        </button>
-        <button onclick="document.getElementById('csvSyncBaseTotal').click()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Reemplaza todas las productos
-        ">
-            <i class="fas fa-sync"></i> Producto (Total)
-        </button>
-    </div>
-</div>
-</div>
+                        <div class="flex flex-1 sm:flex-none gap-1">
+                            <button onclick="document.getElementById('csvSyncBasePartial').click()" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Solo agrega/actualiza productos">
+                                <i class="fas fa-plus"></i> Producto (Parcial)
+                            </button>
+                            <button onclick="document.getElementById('csvSyncBaseTotal').click()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Reemplaza todas las productos">
+                                <i class="fas fa-sync"></i> Producto (Total)
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                     <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll p-1">
@@ -484,7 +403,6 @@
                 </div>
             </div>
 
-            <!-- VISTA: CAJEROS -->
             <div id="view-cashiers" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
                 <div class="mb-6 shrink-0 bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm">
                     <div class="flex items-center gap-4 mb-6">
@@ -528,17 +446,15 @@
         </main>
     </div>
 
-    <!-- BARRA NAVEGACIÓN MÓVIL (BOTTOM NAV - Solo Mobile) -->
     <nav class="md:hidden glass-nav fixed bottom-0 w-full z-40 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <div class="flex justify-around items-center h-16 px-2">
             <button onclick="switchTab('master')" id="mbTab-master" class="flex flex-col items-center justify-center w-full h-full text-blue-600 transition-colors"><i class="fas fa-layer-group text-xl mb-1 transition-transform -translate-y-1 scale-110"></i><span class="text-[10px] font-bold tracking-wide">Catálogo</span></button>
-            <button onclick="switchTab('scanner')" id="mbTab-scanner" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors"><i class="fas fa-qrcode text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Escáner</span></button>
+            <button onclick="switchTab('audit')" id="mbTab-audit" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors"><i class="fas fa-clipboard-check text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Auditoría</span></button>
             <button onclick="switchTab('import')" id="mbTab-import" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors relative"><i class="fas fa-cloud-download-alt text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Importar</span><span id="mbImportBadge" class="absolute top-2 right-6 bg-red-500 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow hidden">0</span></button>
             <button onclick="switchTab('cashiers')" id="mbTab-cashiers" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors"><i class="fas fa-user-tie text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Cajeros</span></button>
         </div>
     </nav>
 
-    <!-- MODALES Y ELEMENTOS GLOBALES -->
     <div id="bulkActionBar" class="fixed bottom-20 md:bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-4 rounded-full shadow-2xl z-[60] hidden flex items-center gap-5 fade-in border border-slate-700">
         <span class="text-sm font-bold flex items-center gap-2"><span id="bulkCount" class="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-black shadow-inner">0</span> sel.</span>
         <div class="h-5 w-px bg-slate-700"></div>
@@ -546,7 +462,6 @@
         <button onclick="clearBulkSelection()" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition" title="Cancelar"><i class="fas fa-times"></i></button>
     </div>
 
-    <!-- Modal Edición en Lote -->
     <div id="massEditModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300 pb-20 md:pb-4">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
@@ -576,10 +491,8 @@
         </div>
     </div>
 
-    <!-- DATALIST PARA BÚSQUEDA ORDENADA DE CÓDIGOS OFICIALES -->
     <datalist id="codigosFacturacionList"></datalist>
 
-    <!-- Modal Premium Edición Individual -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-2 sm:p-4 opacity-0 transition-opacity duration-300 pb-20 md:pb-4">
         <div class="bg-[#f8fafc] sm:bg-slate-50/95 rounded-[2rem] shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden max-h-[90vh] sm:max-h-[95vh] slide-up border border-slate-100 relative">
             <div class="bg-white px-5 sm:px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0 z-10 sticky top-0">
@@ -638,7 +551,6 @@
                         </div>
                         <div id="fieldCodigo" class="relative">
                             <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Cód. Facturación <span class="text-red-500" id="codRequiredStar">*</span></label>
-                            <!-- Este es el campo conectado a datalist para búsqueda rápida -->
                             <input type="text" id="editCodigo" list="codigosFacturacionList" class="w-full input-modern px-4 py-3 rounded-xl font-mono uppercase text-slate-900 font-black text-sm" placeholder="Busca o escribe el código..." oninput="markError('editCodigo', false)">
                             <p id="editCodigoError" class="text-red-500 text-[10px] font-bold mt-1 hidden">Obligatorio para Piezas Base.</p>
                         </div>
@@ -662,7 +574,6 @@
                             <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                             
                             <ul id="heredarDropdownList" class="absolute z-[80] w-full bg-white border border-slate-200 shadow-xl rounded-xl mt-1 max-h-48 overflow-y-auto hidden custom-scroll divide-y divide-slate-100">
-                                <!-- Opciones inyectadas por JS -->
                             </ul>
                         </div>
                     </div>
@@ -706,7 +617,6 @@
         </div>
     </div>
 
-    <!-- Modal Impresiones (Acciones Masivas) -->
     <div id="massActionsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center"><h2 class="font-black text-slate-900">Imprimir QRs (Masivo)</h2><button onclick="closeModal('massActionsModal')" class="w-8 h-8 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button></div>
@@ -727,7 +637,6 @@
         </div>
     </div>
 
-    <!-- Mini Modal: Seleccionar Paquete para Imprimir QR -->
     <div id="printPackageModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100">
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fas fa-box-open text-lg"></i></div><h2 class="font-black text-slate-900">QR Paquete</h2></div><button onclick="closeModal('printPackageModal')" class="w-8 h-8 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button></div>
@@ -766,7 +675,7 @@
                     <i class="fas fa-exclamation-triangle text-red-500 text-xl mt-0.5 animate-pulse"></i>
                     <div>
                         <h4 class="font-black text-red-700 text-sm">¡Peligro de Archivo Cruzado!</h4>
-                        <p class="text-xs text-red-600 font-medium mt-1" id="previewCrossText">Hemos detectado que X códigos de este archivo ya existen pero están registrados como el tipo contrario. ¿Estás seguro de que subiste el archivo correcto al botón correcto?</p>
+                        <p class="text-xs text-red-600 font-medium mt-1" id="previewCrossText">Hemos detectado que X códigos de este archivo ya existen pero están registrados como el tipo contrario.</p>
                     </div>
                 </div>
 
@@ -800,7 +709,6 @@
         </div>
     </div>
 
-    <!-- Custom Dialog Modal -->
     <div id="customDialogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100 p-6">
             <h3 id="customDialogMsg" class="font-black text-slate-800 text-sm mb-4 whitespace-pre-line text-center"></h3>
@@ -812,14 +720,12 @@
         </div>
     </div>
 
-    <!-- Overlay de Sincronización -->
     <div id="syncOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[300] hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0">
         <i class="fas fa-sync fa-spin text-6xl text-blue-500 mb-6 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"></i>
         <h2 class="text-white font-black text-2xl mb-2 tracking-tight">Sincronizando...</h2>
         <p id="syncStatusText" class="text-blue-200 font-bold text-sm text-center max-w-sm bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700">Analizando archivo</p>
     </div>
 
-    <!-- Toast Notifications -->
     <div id="toast" class="fixed top-6 md:top-auto md:bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.4)] hidden z-[9999] font-bold text-sm flex items-center gap-3 w-[90%] md:w-max transition-all border border-slate-700">
         <div id="toastIconContainer" class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0"><i id="toastIcon" class="fas fa-check text-green-400"></i></div><span id="toastMsg" class="flex-1"></span>
     </div>
@@ -856,16 +762,13 @@
         // ==========================================
         // REGISTRO DE SERVICE WORKER (PWA)
         // ==========================================
-       
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw-admin.js')
-                .then(reg => console.log('SW registrado', reg.scope))
-                .catch(err => console.log('SW error', err));
-        });
-    }
-
-       
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw-admin.js')
+                    .then(reg => console.log('SW registrado', reg.scope))
+                    .catch(err => console.log('SW error', err));
+            });
+        }
 
         let allItems = []; 
         let facturacionCatalog = []; 
@@ -874,12 +777,9 @@
         let currentTab = 'master';
         let currentMasterView = 'desglose'; 
         let subcollectionListener = null;
-        let html5QrcodeScanner = null;
-        let currentScanVariants = []; 
         let heredarOptionsList = []; 
         let isDataInitialized = false;
 
-        // Variables de ordenamiento
         let sortConfig = { key: 'fecha_creacion', desc: true };
         let sortGroupConfig = { key: 'codigo', desc: false };
         let sortImportConfig = { key: 'codigo', desc: false };
@@ -903,18 +803,15 @@
                         return;
                     }
 
-                    // Actualizar en el Sidebar
                     document.getElementById('userRoleName').innerText = userData.nombre || user.email;
                     document.getElementById('userRoleBadge').innerText = userData.rol === 'admin' ? 'ADMINISTRADOR' : 'ALMACÉN';
                     
                     applyRoleRestrictions(userData.rol);
-                    // ¡OJO AQUÍ! Pasamos el rol a la función de inicialización
                     initializeData(userData.rol); 
                     
                     overlay.classList.add('opacity-0');
                     setTimeout(() => overlay.classList.add('hidden'), 300);
                 } catch(e) {
-                    // ESTO ES CLAVE: Imprime el error real en la consola y en pantalla
                     console.error("🚨 ERROR REAL DETECTADO:", e);
                     showLoginError("Error real: " + (e.message || "Ver consola para detalles."));
                     auth.signOut();
@@ -982,7 +879,7 @@
                 document.getElementById('view-master').classList.add('hidden');
                 document.getElementById('view-import').classList.add('hidden');
                 document.getElementById('view-cashiers').classList.add('hidden');
-                switchTab('scanner'); 
+                switchTab('audit'); 
             } else {
                 adminElements.forEach(id => {
                     const el = document.getElementById(id);
@@ -1038,7 +935,6 @@
                 if(currentTab === 'import') renderImportTable();
             }, (error) => console.error("Error al cargar facturación:", error));
 
-            // SOLO EL ADMIN PUEDE LEER CAJEROS. Así evitamos el error de permisos del almacén.
             if (rolUsuario === 'admin') {
                 cashiersRef.onSnapshot((snapshot) => {
                     cashiersList = [];
@@ -1047,11 +943,13 @@
                 }, (error) => console.error("Error al cargar cajeros:", error));
             }
 
-            bitacoraRef.orderBy('fecha', 'desc').limit(20).onSnapshot(snap => {
+            // Bitácora / Auditoría (Vista expandida)
+            bitacoraRef.orderBy('fecha', 'desc').limit(50).onSnapshot(snap => {
                 const container = document.getElementById('bitacoraCards');
                 if(!container) return;
-                if(snap.empty) { container.innerHTML = '<div class="text-center py-10 text-slate-400 font-medium text-sm"><div class="text-4xl mb-3">🕒</div>Aún no hay registros hoy.</div>'; return; }
+                if(snap.empty) { container.innerHTML = '<div class="text-center py-10 text-slate-400 font-medium text-sm col-span-full"><div class="text-4xl mb-3">🕒</div>Aún no hay registros de movimientos en la bitácora.</div>'; return; }
                 container.innerHTML = '';
+                
                 snap.forEach(doc => {
                     const data = doc.data();
                     const fecha = (data.fecha && typeof data.fecha.toDate === 'function') ? data.fecha.toDate() : new Date();
@@ -1062,19 +960,32 @@
                     const signo = isPos ? '+' : '';
                     const icon = isPos ? 'fa-arrow-down' : 'fa-arrow-up';
                     let detalleHtml = '';
-                    if(data.detalle_scan) detalleHtml = `<div class="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-medium leading-relaxed">${data.detalle_scan}</div>`;
+                    if(data.detalle_scan) detalleHtml = `<div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 font-medium leading-relaxed">${data.detalle_scan}</div>`;
 
                     container.innerHTML += `
-                        <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex gap-3 items-start animate-[fadeIn_0.3s_ease-out]">
-                            <div class="w-10 h-10 rounded-xl bg-${color}-50 text-${color}-500 flex items-center justify-center shrink-0"><i class="fas ${icon} text-sm"></i></div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start mb-0.5"><h4 class="font-black text-slate-800 text-xs truncate pr-2">${data.nombre_producto}</h4><span class="font-black text-${color}-600 text-sm shrink-0">${signo}${data.cambio}</span></div>
-                                <div class="flex justify-between items-center"><span class="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">${data.codigo_oficial || '-'}</span><span class="text-[10px] font-bold text-slate-400">${strDia} ${strHora}</span></div>
-                                ${detalleHtml}
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
+                            <div class="flex items-start w-full gap-3 mb-2">
+                                <div class="w-10 h-10 rounded-xl bg-${color}-50 text-${color}-500 flex items-center justify-center shrink-0 border border-${color}-100">
+                                    <i class="fas ${icon} text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0 flex justify-between items-start">
+                                    <div class="pr-2">
+                                        <h4 class="font-black text-slate-800 text-xs md:text-sm truncate">${data.nombre_producto || 'Producto Eliminado'}</h4>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-[9px] font-mono font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">${data.codigo_oficial || '-'}</span>
+                                        </div>
+                                    </div>
+                                    <span class="font-black text-${color}-600 text-lg md:text-xl shrink-0 leading-none">${signo}${data.cambio}</span>
+                                </div>
                             </div>
+                            <div class="flex items-center justify-between w-full mt-2">
+                                <span class="text-[10px] font-bold text-slate-400"><i class="fas fa-clock mr-1"></i> ${strDia} ${strHora}</span>
+                                <span class="text-[10px] font-bold text-indigo-400 bg-indigo-50 px-2 py-0.5 rounded-full"><i class="fas fa-user mr-1"></i> ${data.usuario || 'Sistema'}</span>
+                            </div>
+                            ${detalleHtml}
                         </div>`;
                 });
-            }, (error) => console.error("Error al cargar bitácora:", error));
+            }, (error) => console.error("Error al cargar auditoría:", error));
         }
 
         // ==========================================
@@ -1185,7 +1096,7 @@
             setTimeout(() => { t.classList.add('hidden'); t.classList.remove('scale-in'); }, 3000);
         }
 
-        // ==========================================
+// ==========================================
 // CONEXIÓN A BÓVEDA SERVERLESS (VERCEL)
 // ==========================================
 const URL_VERCEL_IMGBB = 'https://api-proxy-een.vercel.app/api/upload';
@@ -1316,7 +1227,7 @@ window.solicitarActualizacionGitHub = async () => {
         function switchTab(tab) {
             currentTab = tab; 
             clearBulkSelection();
-            const tabs = ['master', 'import', 'scanner', 'cashiers'];
+            const tabs = ['master', 'import', 'audit', 'cashiers'];
             
             tabs.forEach(t => {
                 const dtBtn = document.getElementById(`dtTab-${t}`);
@@ -1345,11 +1256,10 @@ window.solicitarActualizacionGitHub = async () => {
                 }
             });
 
-            if(tab === 'scanner' || tab === 'cashiers') { 
+            if(tab === 'audit' || tab === 'cashiers') { 
                 document.getElementById('globalSearchContainer').classList.add('hidden'); 
             } else {
                 document.getElementById('globalSearchContainer').classList.remove('hidden');
-                stopScanner();
                 document.getElementById('globalSearch').value = '';
                 if(tab === 'master') { filterTable(); renderGroupedTable(); }
                 if(tab === 'import') renderImportTable();
@@ -1402,7 +1312,6 @@ window.solicitarActualizacionGitHub = async () => {
                 sortConfig.desc = false;
             }
             
-            // Actualizar UI de iconos
             document.querySelectorAll('#tableContainerDesglose .sort-icon').forEach(icon => {
                 icon.classList.remove('sort-active', 'fa-sort-up', 'fa-sort-down');
                 icon.classList.add('fa-sort');
@@ -1500,7 +1409,6 @@ window.solicitarActualizacionGitHub = async () => {
                     <td class="px-3 py-3 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider">${p.categoria || 'N/A'}</span></td>
                     <td class="px-3 py-3 text-center border-b border-slate-100"><span class="inline-block bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl font-black ${realStock > 5 ? 'text-blue-600' : 'text-red-500'}" title="Calculado en base a receta o sistema">${realStock}</span></td>
                     <td class="px-3 py-3 border-b border-slate-100"><div class="font-mono text-[11px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-md inline-block border border-slate-100">${codTxt}</div></td>
-                    <!-- CELDA STICKY -->
                     <td class="px-3 py-3 text-right border-b border-slate-100 sticky right-0 ${activeStickyBg} transition-colors shadow-[-8px_0_15px_-5px_rgba(0,0,0,0.05)] z-10 w-[240px]">
                         <div class="flex justify-end items-center gap-1.5 flex-wrap w-max ml-auto opacity-80 group-hover:opacity-100 transition-opacity">
                             <button onclick="toggleActivo('${p.id}', ${isActivo})" class="w-8 h-8 rounded-lg ${eyeBg} transition-all shadow-sm flex items-center justify-center" title="${isActivo ? 'Ocultar de web' : 'Mostrar en web'}"><i class="fas ${eyeIcon} text-xs"></i></button>
@@ -1740,157 +1648,7 @@ window.solicitarActualizacionGitHub = async () => {
             });
         }
 
-        // --- FUNCIONES DE ESCÁNER ---
-        function startScanner() {
-            document.getElementById('btnStartScan').classList.add('hidden'); document.getElementById('btnStopScan').classList.remove('hidden');
-            document.getElementById('scanIdle').classList.add('hidden'); document.getElementById('scanResult').classList.add('hidden');
-            document.getElementById('readerWrapper').scrollIntoView({behavior: 'smooth', block: 'start'});
-
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} },
-                (decodedText) => {
-                    let productId = decodedText; let context = { multiplier: 1, sku: 'BASE', type: 'suelta' };
-                    try {
-                        if (decodedText.startsWith('http')) { const url = new URL(decodedText); productId = url.searchParams.get('id') || url.searchParams.get('add') || decodedText.split('=').pop(); } 
-                        else if (decodedText.startsWith('PKG|')) { const parts = decodedText.split('|'); productId = parts[1]; context.sku = parts[2]; context.multiplier = parseInt(parts[3]) || 1; context.type = 'paquete'; }
-                    } catch(e) {}
-                    const p = allItems.find(x => x.id === productId);
-                    if(p) { html5QrcodeScanner.stop(); showScanResult(p, context); } else { showToast("Código no registrado", "error"); }
-                }, (err) => { }
-            ).catch(err => { showToast("Cámara no disponible.", "error"); stopScanner(); });
-        }
-
-        function stopScanner() {
-            if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { document.getElementById('btnStartScan').classList.remove('hidden'); document.getElementById('btnStopScan').classList.add('hidden'); }).catch(err => console.log(err));
-        }
-
-        async function showScanResult(p, context) {
-            if (p.tipo_item && p.tipo_item !== 'PIEZA_BASE') {
-                showToast("No se pueden escanear Kits para inventario físico.", "error");
-                document.getElementById('scanIdle').classList.remove('hidden');
-                document.getElementById('scanResult').classList.add('hidden');
-                document.getElementById('btnStartScan').classList.remove('hidden'); 
-                document.getElementById('btnStopScan').classList.add('hidden');
-                
-                const idleIconCont = document.getElementById('scanIdleIconContainer');
-                const idleIcon = document.getElementById('scanIdleIcon');
-                const idleText = document.getElementById('scanIdleText');
-                
-                idleIconCont.className = "w-24 h-24 rounded-full bg-red-50 flex items-center justify-center mb-5 border border-red-100 transition-all shadow-inner";
-                idleIcon.className = "fas fa-ban text-4xl text-red-400";
-                idleText.className = "font-bold text-sm text-red-500";
-                idleText.innerText = "Error: Escanea las piezas base.";
-                
-                setTimeout(() => {
-                    idleIconCont.className = "w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100 transition-all shadow-inner";
-                    idleIcon.className = "fas fa-box-open text-4xl text-slate-400";
-                    idleText.className = "font-bold text-sm text-slate-400";
-                    idleText.innerText = "Esperando lectura de artículo...";
-                }, 3500);
-                return;
-            }
-
-            document.getElementById('btnStartScan').classList.remove('hidden'); document.getElementById('btnStopScan').classList.add('hidden');
-            const resCard = document.getElementById('scanResult'); resCard.classList.remove('hidden');
-            document.getElementById('resultCard').scrollIntoView({behavior: 'smooth', block: 'start'});
-            
-            document.getElementById('scanProductName').innerText = p.nombre_flexible;
-            document.getElementById('scanProductCode').innerText = p.codigo_sistema_oficial || 'PIEZA BASE';
-            document.getElementById('scanProductStock').innerText = getCalculatedStock(p.id);
-            document.getElementById('scanProductId').value = p.id; document.getElementById('scanProductImg').src = p.imagen_url || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO';
-            
-            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
-
-            const listContainer = document.getElementById('scanVariantsList');
-            listContainer.innerHTML = '<div class="text-center py-4"><i class="fas fa-circle-notch fa-spin text-blue-400 text-2xl"></i></div>';
-            
-            currentScanVariants = []; 
-            currentScanVariants.push({ id: 'base', label: 'Piezas Sueltas (1pz)', sku: p.codigo_sistema_oficial || 'SUELTA', piezas: 1, qtyDetected: context.type === 'suelta' ? 1 : 0 });
-
-            try {
-                const pkgsSnap = await productsRef.doc(p.id).collection('paquetes').get();
-                pkgsSnap.forEach(doc => {
-                    const pkg = doc.data();
-                    currentScanVariants.push({ id: doc.id, label: `Paquete (${pkg.piezas}pz)`, sku: pkg.sku, piezas: pkg.piezas, qtyDetected: (context.type === 'paquete' && pkg.sku === context.sku) ? 1 : 0 });
-                });
-            } catch(e) {}
-
-            currentScanVariants.sort((a,b) => a.piezas - b.piezas);
-            renderVariantsList();
-        }
-
-        function renderVariantsList() {
-            const listContainer = document.getElementById('scanVariantsList'); listContainer.innerHTML = '';
-            currentScanVariants.forEach((v, index) => {
-                const isDetected = v.qtyDetected > 0; const bgClass = isDetected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-slate-50 border-slate-100';
-                listContainer.innerHTML += `
-                    <div class="flex items-center justify-between p-3.5 rounded-2xl border ${bgClass} transition-colors">
-                        <div class="flex-1 min-w-0 pr-2">
-                            <p class="font-black text-slate-800 text-xs flex items-center gap-1.5 truncate"><i class="fas ${v.piezas === 1 ? 'fa-cube' : 'fa-boxes'} ${isDetected ? 'text-blue-500' : 'text-slate-400'}"></i> ${v.label}</p>
-                            <p class="text-[9px] text-slate-500 font-mono mt-0.5 truncate">${v.sku}</p>
-                        </div>
-                        <div class="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-slate-100">
-                            <button onclick="changeVariantQty(${index}, -1)" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition active:scale-95"><i class="fas fa-minus text-xs"></i></button>
-                            <input type="number" min="0" value="${v.qtyDetected}" id="varInput_${index}" oninput="manualVariantQty(${index}, this.value)" class="w-10 text-center font-black text-slate-900 py-1 border-none bg-transparent text-sm focus:ring-0 outline-none">
-                            <button onclick="changeVariantQty(${index}, 1)" class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition active:scale-95"><i class="fas fa-plus text-xs"></i></button>
-                        </div>
-                    </div>`;
-            });
-            recalculateScanTotal();
-        }
-
-        window.changeVariantQty = (index, delta) => {
-            let newVal = currentScanVariants[index].qtyDetected + delta; if(newVal < 0) newVal = 0;
-            currentScanVariants[index].qtyDetected = newVal; document.getElementById(`varInput_${index}`).value = newVal; recalculateScanTotal();
-            const row = document.getElementById(`varInput_${index}`).parentElement.parentElement;
-            if(newVal > 0) { row.className = "flex items-center justify-between p-3.5 rounded-2xl border bg-blue-50 border-blue-200 shadow-sm transition-colors"; row.querySelector('i.fa-cube, i.fa-boxes').className = `fas ${currentScanVariants[index].piezas === 1 ? 'fa-cube' : 'fa-boxes'} text-blue-500`; } 
-            else { row.className = "flex items-center justify-between p-3.5 rounded-2xl border bg-slate-50 border-slate-100 transition-colors"; row.querySelector('i.fa-cube, i.fa-boxes').className = `fas ${currentScanVariants[index].piezas === 1 ? 'fa-cube' : 'fa-boxes'} text-slate-400`; }
-        };
-        window.manualVariantQty = (index, val) => { let num = parseInt(val) || 0; if(num < 0) num = 0; currentScanVariants[index].qtyDetected = num; recalculateScanTotal(); };
-        function recalculateScanTotal() { let total = 0; currentScanVariants.forEach(v => { total += (v.piezas * v.qtyDetected); }); document.getElementById('scanTotalMove').innerText = total; }
-
-        async function updateStockFromScan(sign) {
-            const id = document.getElementById('scanProductId').value;
-            const p = allItems.find(x => x.id === id); if(!p) return;
-            
-            let totalChangePieces = 0; let detailParts = [];
-            currentScanVariants.forEach(v => { if(v.qtyDetected > 0) { totalChangePieces += (v.piezas * v.qtyDetected); detailParts.push(`${v.qtyDetected} ${v.label}`); } });
-            if(totalChangePieces === 0) return showToast("No hay cantidades para procesar", "error");
-
-            const realChange = sign * totalChangePieces;
-
-            try {
-                const batch = db.batch();
-                const newStock = (p.stock_total_piezas || 0) + realChange;
-                if(newStock < 0) throw new Error("Stock insuficiente para realizar la salida.");
-                
-                batch.update(productsRef.doc(id), { stock_total_piezas: newStock });
-                
-                const newLogRef = bitacoraRef.doc();
-                batch.set(newLogRef, {
-                    producto_id: id,
-                    nombre_producto: p.nombre_flexible,
-                    codigo_oficial: p.codigo_sistema_oficial || 'PIEZA BASE',
-                    stock_anterior: p.stock_total_piezas || 0,
-                    stock_nuevo: newStock,
-                    cambio: realChange,
-                    detalle_scan: detailParts.join(", "), 
-                    fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                    usuario: auth.currentUser ? auth.currentUser.email : 'Almacén Móvil'
-                });
-
-                await batch.commit();
-
-                document.getElementById('scanProductStock').innerText = newStock;
-                showToast(`Stock actualizado exitosamente (+${realChange}pz)`);
-                currentScanVariants.forEach(v => v.qtyDetected = 0);
-                renderVariantsList();
-            } catch (error) { 
-                showToast(error.message || "Error de conexión al guardar", "error"); 
-            }
-        }
-
-        // --- LÓGICA DEL DROPDOWN BUSCADOR (Ordenado Alfabéticamente) ---
+        // --- LÓGICA DEL DROPDOWN BUSCADOR ---
         function updateHeredarOptions(excludeId) {
             heredarOptionsList = allItems.filter(b => b.id !== excludeId && (!b.tipo_item || b.tipo_item === 'PIEZA_BASE'));
             heredarOptionsList.sort((a,b) => String(a.nombre_flexible||'').localeCompare(String(b.nombre_flexible||'')));
@@ -2060,74 +1818,73 @@ window.solicitarActualizacionGitHub = async () => {
         }
 
         async function saveBaseProduct() {
-    clearAllErrors();
-    let hasErrors = false;
+            clearAllErrors();
+            let hasErrors = false;
 
-    const id = document.getElementById('editId').value;
-    const tipo = document.getElementById('editTipo').value;
-    let receta = null;
-    let heredaDe = document.getElementById('editHeredaEmpaques').value || null;
+            const id = document.getElementById('editId').value;
+            const tipo = document.getElementById('editTipo').value;
+            let receta = null;
+            let heredaDe = document.getElementById('editHeredaEmpaques').value || null;
 
-    if (tipo === 'PIEZA_BASE') heredaDe = null;
+            if (tipo === 'PIEZA_BASE') heredaDe = null;
 
-    if (tipo === 'KIT_FLEXIBLE') {
-        receta = {};
-        document.querySelectorAll('.row-receta').forEach(row => {
-            const cId = row.querySelector('.r-select').value;
-            const cQty = parseInt(row.querySelector('.r-qty').value);
-            if(cId && cQty > 0) receta[cId] = cQty;
-        });
-        if(Object.keys(receta).length === 0) {
-            document.getElementById('recetaWrap').classList.add('border-red-500', 'bg-red-50');
-            setTimeout(()=>document.getElementById('recetaWrap').classList.remove('border-red-500', 'bg-red-50'), 2000);
-            return showToast('Los Kits Web necesitan al menos 1 componente en su receta.', 'error');
-        }
-    }
+            if (tipo === 'KIT_FLEXIBLE') {
+                receta = {};
+                document.querySelectorAll('.row-receta').forEach(row => {
+                    const cId = row.querySelector('.r-select').value;
+                    const cQty = parseInt(row.querySelector('.r-qty').value);
+                    if(cId && cQty > 0) receta[cId] = cQty;
+                });
+                if(Object.keys(receta).length === 0) {
+                    document.getElementById('recetaWrap').classList.add('border-red-500', 'bg-red-50');
+                    setTimeout(()=>document.getElementById('recetaWrap').classList.remove('border-red-500', 'bg-red-50'), 2000);
+                    return showToast('Los Kits Web necesitan al menos 1 componente en su receta.', 'error');
+                }
+            }
 
-    const nombreFlexible = document.getElementById('editName').value.trim();
-    const codigoFacturacion = document.getElementById('editCodigo').value.trim();
-    const activo = document.getElementById('editActivo').checked;
+            const nombreFlexible = document.getElementById('editName').value.trim();
+            const codigoFacturacion = document.getElementById('editCodigo').value.trim();
+            const activo = document.getElementById('editActivo').checked;
 
-    if (!nombreFlexible) { markError('editName', true); hasErrors = true; }
-    if (!codigoFacturacion && tipo !== 'KIT_FLEXIBLE') { markError('editCodigo', true); hasErrors = true; }
-    
-    if(hasErrors) return showToast('Por favor, completa los campos requeridos.', 'error');
-
-    const dataToUpdate = {
-        nombre_flexible: nombreFlexible,
-        imagen_url: document.getElementById('editImage').value.trim(),
-        categoria: document.getElementById('editCategory').value.trim(),
-        codigo_sistema_oficial: codigoFacturacion,
-        tipo_item: tipo,
-        receta_desglose: receta,
-        hereda_empaques_de: heredaDe,
-        activo: activo
-    };
-
-    const wasImport = document.getElementById('importOldId').value;
-    if(wasImport) dataToUpdate.id_facturacion = wasImport;
-
-    try {
-        if (id) {
-            await productsRef.doc(id).update(dataToUpdate);
-            showToast('Guardado con éxito');
-        } else {
-            dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
-            dataToUpdate.stock_total_piezas = 0; 
-            const docRef = await productsRef.add(dataToUpdate);
+            if (!nombreFlexible) { markError('editName', true); hasErrors = true; }
+            if (!codigoFacturacion && tipo !== 'KIT_FLEXIBLE') { markError('editCodigo', true); hasErrors = true; }
             
-            if(wasImport) { showToast('¡Importado exitosamente!'); switchTab('master'); } 
-            else { showToast('Producto guardado.'); }
-            openEditModal(docRef.id);
-            return; 
+            if(hasErrors) return showToast('Por favor, completa los campos requeridos.', 'error');
+
+            const dataToUpdate = {
+                nombre_flexible: nombreFlexible,
+                imagen_url: document.getElementById('editImage').value.trim(),
+                categoria: document.getElementById('editCategory').value.trim(),
+                codigo_sistema_oficial: codigoFacturacion,
+                tipo_item: tipo,
+                receta_desglose: receta,
+                hereda_empaques_de: heredaDe,
+                activo: activo
+            };
+
+            const wasImport = document.getElementById('importOldId').value;
+            if(wasImport) dataToUpdate.id_facturacion = wasImport;
+
+            try {
+                if (id) {
+                    await productsRef.doc(id).update(dataToUpdate);
+                    showToast('Guardado con éxito');
+                } else {
+                    dataToUpdate.fecha_creacion = firebase.firestore.FieldValue.serverTimestamp();
+                    dataToUpdate.stock_total_piezas = 0; 
+                    const docRef = await productsRef.add(dataToUpdate);
+                    
+                    if(wasImport) { showToast('¡Importado exitosamente!'); switchTab('master'); } 
+                    else { showToast('Producto guardado.'); }
+                    openEditModal(docRef.id);
+                    return; 
+                }
+                closeModal('editModal');
+            } catch (error) { 
+                console.error("🚨 Error real detectado por Firebase:", error);
+                showToast(error.message || 'Error desconocido al guardar', 'error'); 
+            }
         }
-        closeModal('editModal');
-    } catch (error) { 
-        // AQUÍ ESTÁ EL CAMBIO CLAVE
-        console.error("🚨 Error real detectado por Firebase:", error);
-        showToast(error.message || 'Error desconocido al guardar', 'error'); 
-    }
-}
 
         function importProduct(factId) {
             const fact = facturacionCatalog.find(x => x.id === factId);
@@ -2204,7 +1961,7 @@ window.solicitarActualizacionGitHub = async () => {
             try { await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete(); showToast('Eliminado', 'info'); } catch (error) { showToast('Error al eliminar', 'error'); }
         };
 
-        // --- CAJEROS (USUARIOS POS) BLINDADO ---
+        // --- CAJEROS (USUARIOS POS) ---
         function renderCashiers() {
             const tbody = document.getElementById('cashiersTableBody');
             if(!tbody) return;
@@ -2294,103 +2051,116 @@ window.solicitarActualizacionGitHub = async () => {
             const modal = document.getElementById('massActionsModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
 
-        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl, plantilla = '3x5') {
-    // 1. Aplanar el arreglo (crear una lista con todas las etiquetas a imprimir según la cantidad)
-    let labelsToPrint = [];
-    dataArray.forEach(item => {
-        let qrVal = isVitrina ? baseUrl + item.id : item.id;
-        // Generamos el QR una sola vez por item para optimizar memoria
-        let qr = new QRious({value: qrVal, size: 250, level: 'M'}).toDataURL();
-        
-        for(let i=0; i<qty; i++) {
-            labelsToPrint.push({
-                title: item.title,
-                sub: isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub,
-                qrData: qr
+        function buildPrintHTML(dataArray, qty, isVitrina, baseUrl, plantilla = '3x10') {
+            let labelsToPrint = [];
+            dataArray.forEach(item => {
+                let qrVal = isVitrina ? baseUrl + item.id : item.id;
+                let qr = new QRious({value: qrVal, size: 250, level: 'M'}).toDataURL();
+                
+                for(let i=0; i<qty; i++) {
+                    labelsToPrint.push({
+                        title: item.title,
+                        sub: isVitrina ? 'ESCANEAR PARA COMPRAR' : item.sub,
+                        qrData: qr
+                    });
+                }
             });
+
+            let labelsPerPage = plantilla === '3x10' ? 30 : 15;
+            let gridClass = plantilla === '3x10' ? 'grid-3x10' : 'grid-3x5';
+
+            let html = `<html><head><title>Imprimir QR - EEN</title>
+            <style>
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #fff; }
+                
+                @page { 
+                    size: letter;
+                    margin: 0in !important;
+                }
+
+                .sheet {
+                    width: 8.5in; 
+                    height: 11in;
+                    padding-top: 0.5in;
+                    padding-bottom: 0.5in;
+                    padding-left: 0.19in; 
+                    padding-right: 0.19in;
+                    display: grid;
+                    page-break-after: always;
+                }
+                .sheet:last-child { page-break-after: auto; }
+
+                .grid-3x10 {
+                    grid-template-columns: repeat(3, 2.625in);
+                    grid-template-rows: repeat(10, 1in);
+                    column-gap: 0.125in;
+                    row-gap: 0in; 
+                }
+                .grid-3x10 .label { 
+                    width: 2.625in; height: 1in;
+                    display: flex; align-items: center; padding: 0.08in; overflow: hidden; 
+                }
+                .grid-3x10 img { 
+                    width: 0.8in !important; height: 0.8in !important; 
+                    flex-shrink: 0;
+                    margin-right: 0.1in; object-fit: contain;
+                }
+                .grid-3x10 h4 { 
+                    margin: 0 0 2px 0; font-size: 8pt; line-height: 1.1; font-weight: 800;
+                    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+                }
+                .grid-3x10 p { margin: 0; font-size: 6.5pt; font-weight: bold; }
+
+                .grid-3x5 {
+                    grid-template-columns: repeat(3, 2.625in);
+                    grid-template-rows: repeat(5, 2in);
+                    column-gap: 0.125in;
+                    row-gap: 0in; 
+                }
+                .grid-3x5 .label { 
+                    width: 2.625in; height: 2in;
+                    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+                    padding: 0.1in; text-align: center; overflow: hidden;
+                }
+                .grid-3x5 img { 
+                    width: 1.3in !important; height: 1.3in !important; 
+                    flex-shrink: 0;
+                    margin-bottom: 0.05in; object-fit: contain;
+                }
+                .grid-3x5 h4 { 
+                    margin: 0 0 4px 0; font-size: 10pt; line-height: 1.1; font-weight: 800;
+                    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+                }
+                .grid-3x5 p { margin: 0; font-size: 8pt; color: #475569; font-weight: bold; }
+
+            </style>
+            </head><body>`;
+
+            for (let i = 0; i < labelsToPrint.length; i += labelsPerPage) {
+                let chunk = labelsToPrint.slice(i, i + labelsPerPage);
+                html += `<div class="sheet ${gridClass}">`;
+                
+                chunk.forEach(lbl => {
+                    html += `
+                        <div class="label">
+                            <img src="${lbl.qrData}">
+                            <div>
+                                <h4>${lbl.title}</h4>
+                                <p>${lbl.sub}</p>
+                            </div>
+                        </div>`;
+                });
+
+                for (let j = chunk.length; j < labelsPerPage; j++) {
+                    html += `<div class="label"></div>`;
+                }
+                html += `</div>`;
+            }
+
+            html += '<script>window.onload=function(){ setTimeout(() => { window.print(); }, 500); }<\/script></body></html>';
+            return html;
         }
-    });
-
-    // 2. Configurar medidas según la plantilla elegida
-    let labelsPerPage = plantilla === '3x10' ? 30 : 15;
-    let gridClass = plantilla === '3x10' ? 'grid-3x10' : 'grid-3x5';
-
-    // 3. Construir el HTML con CSS Grid y medidas Físicas (pulgadas)
-    let html = `<html><head><title>Imprimir QR - EEN</title>
-    <style>
-        /* Forzar tamaño carta y quitar márgenes de la impresora */
-        @page { margin: 0; size: letter; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif, Arial; margin: 0; padding: 0; box-sizing: border-box; background: #fff; }
-        
-        .page {
-            width: 8.5in; 
-            height: 11in;
-            /* Margen superior/inferior de 0.5in y lateral de 0.15in (Estándar Avery) */
-            padding: 0.5in 0.15in; 
-            box-sizing: border-box;
-            page-break-after: always; /* Salto de página estricto */
-            display: grid;
-            justify-content: center;
-        }
-        .page:last-child { page-break-after: auto; }
-        
-        /* Borde punteado para guiarte en pantalla, no sale en la impresora */
-        .label { overflow: hidden; box-sizing: border-box; outline: 1px dashed #e2e8f0; }
-        @media print { .label { outline: none !important; } }
-
-        /* --- PLANTILLA 3x10 (Etiquetas pequeñas, ej. Avery 5160) --- */
-        .grid-3x10 { 
-            grid-template-columns: repeat(3, 2.625in); 
-            grid-template-rows: repeat(10, 1in); 
-            gap: 0in 0.125in; 
-        }
-        .grid-3x10 .label { display: flex; align-items: center; padding: 0.05in; }
-        .grid-3x10 img { width: 0.85in; height: 0.85in; margin-right: 0.08in; }
-        .grid-3x10 .text-content { flex: 1; min-width: 0; }
-        .grid-3x10 h4 { margin: 0 0 2px 0; font-size: 8px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-        .grid-3x10 p { margin: 0; font-size: 7px; color: #475569; font-weight: bold; }
-
-        /* --- PLANTILLA 3x5 (Etiquetas medianas) --- */
-        .grid-3x5 { 
-            grid-template-columns: repeat(3, 2.625in); 
-            grid-template-rows: repeat(5, 2in); 
-            gap: 0in 0.125in; 
-        }
-        .grid-3x5 .label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.1in; text-align: center; }
-        .grid-3x5 img { width: 1.25in; height: 1.25in; margin-bottom: 0.05in; }
-        .grid-3x5 h4 { margin: 0 0 4px 0; font-size: 11px; line-height: 1.1; max-height: 24px; overflow: hidden; }
-        .grid-3x5 p { margin: 0; font-size: 9px; color: #475569; font-weight: bold; }
-    </style>
-    </head><body>`;
-
-    // 4. Dividir las etiquetas en "Páginas"
-    for (let i = 0; i < labelsToPrint.length; i += labelsPerPage) {
-        let chunk = labelsToPrint.slice(i, i + labelsPerPage);
-        
-        html += `<div class="page ${gridClass}">`;
-        
-        chunk.forEach(lbl => {
-            html += `
-                <div class="label">
-                    <img src="${lbl.qrData}">
-                    <div class="text-content">
-                        <h4>${lbl.title}</h4>
-                        <p>${lbl.sub}</p>
-                    </div>
-                </div>`;
-        });
-
-        // Rellenar espacios vacíos si la página no se llena (vital para que el Grid no se colapse)
-        for (let j = chunk.length; j < labelsPerPage; j++) {
-            html += `<div class="label empty" style="border:none; outline:none;"></div>`;
-        }
-        
-        html += `</div>`;
-    }
-
-    html += '<script>window.onload=function(){window.print();}<\/script></body></html>';
-    return html;
-}
 
         function getFilteredProductsForPrint() {
             const term = document.getElementById('globalSearch').value.toLowerCase().trim();
@@ -2435,8 +2205,7 @@ window.solicitarActualizacionGitHub = async () => {
                 const qty = await customPrompt(`Se encontraron ${dataArray.length} cajas base.\n¿Cuántas etiquetas POR CAJA imprimir?`, "1"); 
                 if (!qty || qty <= 0) return; 
                 
-                // Usamos '3x10' por defecto para las cajas. Si tus cajas necesitan etiquetas más grandes, cámbialo a '3x5'
-const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
+                const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
             } catch (e) { showToast("Error al obtener los paquetes.", "error"); }
         };
 
@@ -2456,8 +2225,8 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
             
             const dataArray = filtered.map(p => ({ id: p.id, title: p.nombre_flexible, sub: `CÓD: ${p.codigo_sistema_oficial || 'S/N'}` }));
             const isVitrina = printType === 'vitrina';
-const formato = isVitrina ? '3x5' : '3x10';
-const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, isVitrina, baseUrl, formato)); pw.document.close();
+            const formato = isVitrina ? '3x5' : '3x10';
+            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, isVitrina, baseUrl, formato)); pw.document.close();
         };
 
         window.printSingleQR = async (id, printType = 'inventario') => { 
@@ -2478,8 +2247,8 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
             
             const dataArray = [{ id: p.id, title: p.nombre_flexible, sub: printType === 'vitrina' ? 'ESCANEAR PARA COMPRAR' : `CÓD: ${p.codigo_sistema_oficial || 'S/N'} (SUELTA)` }];
             const isVitrina = printType === 'vitrina';
-const formato = isVitrina ? '3x5' : '3x10';
-const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, isVitrina, baseUrl, formato)); pw.document.close();
+            const formato = isVitrina ? '3x5' : '3x10';
+            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, isVitrina, baseUrl, formato)); pw.document.close();
         };
 
         window.openPackagePrintSelector = async (productId) => {
@@ -2525,199 +2294,187 @@ const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray
             
             const qrVal = `PKG|${productId}|${sku}|${piezas}`;
             const dataArray = [{ id: qrVal, title: `${p.nombre_flexible}`, sub: `SKU: ${sku} (${piezas} PZ)` }];
-            // Igual aquí, le pasamos '3x10' al final
-const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
+            const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
         };
 
-        // --- LÓGICA: SINCRONIZAR CSV/EXCEL A PRUEBA DE TONTOS Y AHORRANDO COSTOS ---
-       // Variable global para guardar los datos temporalmente antes de confirmar
-let pendingSyncData = null;
+        // --- LÓGICA DE IMPORTACIÓN CSV/EXCEL ---
+        let pendingSyncData = null;
 
-async function handleCSVUpload(event, tipoAsignado, isPartial) {
-    const file = event.target.files[0];
-    if (!file) return;
+        async function handleCSVUpload(event, tipoAsignado, isPartial) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-    const overlay = document.getElementById('syncOverlay');
-    const statusText = document.getElementById('syncStatusText');
-    
-    overlay.classList.remove('hidden');
-    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-    statusText.innerText = "Analizando y calculando cambios...";
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        try {
-            const data = e.target.result;
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
+            const overlay = document.getElementById('syncOverlay');
+            const statusText = document.getElementById('syncStatusText');
             
-            // 1. ESCÁNER INTELIGENTE PARA SALTAR BASURA
-            const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-            let headerRowIndex = 0;
-            for (let i = 0; i < Math.min(20, rawData.length); i++) {
-                const rowText = rawData[i].join('').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                if (rowText.includes('cod') || rowText.includes('sku') || rowText.includes('clave')) {
-                    headerRowIndex = i; break;
-                }
-            }
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            statusText.innerText = "Analizando y calculando cambios...";
 
-            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: "", blankrows: false });
-
-            const productosAActualizar = [];
-            const idsProcesados = new Set();
-            let alertasCruce = 0; // CONTADOR PARA EL ESCUDO ANTI-CRUCES
-
-            jsonRows.forEach(row => {
-                const cleanRow = {};
-                for (let key in row) {
-                    const cleanKey = String(key).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
-                    cleanRow[cleanKey] = row[key];
-                }
-
-                let codigoRaw = "";
-                for (let key in cleanRow) { if (key.includes('cod') || key.includes('sku') || key.includes('clave')) { codigoRaw = cleanRow[key]; break; } }
-                const descripcion = cleanRow['nombre(prod)'] || cleanRow['nombre'] || cleanRow['descripcion'] || cleanRow['articulo'];
-                
-                let precioRaw = 0;
-                for (let key in cleanRow) { if (key.includes('precio') || key.includes('prec') || key.includes('costo') || key.includes('importe') || key.includes('valor')) { precioRaw = cleanRow[key]; break; } }
-
-                if (codigoRaw && String(codigoRaw).trim() !== "") {
-                    let precioNumerico = parseFloat(String(precioRaw).replace(/[^0-9.-]+/g,"")); 
-                    if (isNaN(precioNumerico)) precioNumerico = 0;
-
-                    const idSeguroFirebase = String(codigoRaw).replace(/\//g, '-').replace(/\\/g, '-');
-                    idsProcesados.add(idSeguroFirebase);
-
-                    const itemExistente = facturacionCatalog.find(f => f.id === idSeguroFirebase);
-                    const descLimpia = String(descripcion || "SIN NOMBRE").trim();
-                    const precioFirebase = itemExistente ? parseFloat(itemExistente.precio || 0) : 0;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = e.target.result;
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
                     
-                    // 🛡️ LÓGICA DEL ESCUDO (Tu idea)
-                    // Si el item ya existía en la BD, y su tipo es DIFERENTE al del botón que presionaste, lanzamos alerta
-                    if (itemExistente && itemExistente.tipo_articulo_sistema && itemExistente.tipo_articulo_sistema !== tipoAsignado) {
-                        alertasCruce++;
+                    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+                    let headerRowIndex = 0;
+                    for (let i = 0; i < Math.min(20, rawData.length); i++) {
+                        const rowText = rawData[i].join('').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        if (rowText.includes('cod') || rowText.includes('sku') || rowText.includes('clave')) {
+                            headerRowIndex = i; break;
+                        }
                     }
 
-                    const hasChanges = !itemExistente || 
-                                       itemExistente.descripcion_oficial !== descLimpia || 
-                                       precioFirebase !== precioNumerico ||
-                                       itemExistente.tipo_articulo_sistema !== tipoAsignado;
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: "", blankrows: false });
 
-                    if (hasChanges) {
-                        productosAActualizar.push({
-                            id: idSeguroFirebase,
-                            datos: { codigo_sistema_oficial: String(codigoRaw), descripcion_oficial: descLimpia, precio: precioNumerico, tipo_articulo_sistema: tipoAsignado }
+                    const productosAActualizar = [];
+                    const idsProcesados = new Set();
+                    let alertasCruce = 0; 
+
+                    jsonRows.forEach(row => {
+                        const cleanRow = {};
+                        for (let key in row) {
+                            const cleanKey = String(key).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+                            cleanRow[cleanKey] = row[key];
+                        }
+
+                        let codigoRaw = "";
+                        for (let key in cleanRow) { if (key.includes('cod') || key.includes('sku') || key.includes('clave')) { codigoRaw = cleanRow[key]; break; } }
+                        const descripcion = cleanRow['nombre(prod)'] || cleanRow['nombre'] || cleanRow['descripcion'] || cleanRow['articulo'];
+                        
+                        let precioRaw = 0;
+                        for (let key in cleanRow) { if (key.includes('precio') || key.includes('prec') || key.includes('costo') || key.includes('importe') || key.includes('valor')) { precioRaw = cleanRow[key]; break; } }
+
+                        if (codigoRaw && String(codigoRaw).trim() !== "") {
+                            let precioNumerico = parseFloat(String(precioRaw).replace(/[^0-9.-]+/g,"")); 
+                            if (isNaN(precioNumerico)) precioNumerico = 0;
+
+                            const idSeguroFirebase = String(codigoRaw).replace(/\//g, '-').replace(/\\/g, '-');
+                            idsProcesados.add(idSeguroFirebase);
+
+                            const itemExistente = facturacionCatalog.find(f => f.id === idSeguroFirebase);
+                            const descLimpia = String(descripcion || "SIN NOMBRE").trim();
+                            const precioFirebase = itemExistente ? parseFloat(itemExistente.precio || 0) : 0;
+                            
+                            if (itemExistente && itemExistente.tipo_articulo_sistema && itemExistente.tipo_articulo_sistema !== tipoAsignado) {
+                                alertasCruce++;
+                            }
+
+                            const hasChanges = !itemExistente || 
+                                               itemExistente.descripcion_oficial !== descLimpia || 
+                                               precioFirebase !== precioNumerico ||
+                                               itemExistente.tipo_articulo_sistema !== tipoAsignado;
+
+                            if (hasChanges) {
+                                productosAActualizar.push({
+                                    id: idSeguroFirebase,
+                                    datos: { codigo_sistema_oficial: String(codigoRaw), descripcion_oficial: descLimpia, precio: precioNumerico, tipo_articulo_sistema: tipoAsignado }
+                                });
+                            }
+                        }
+                    });
+
+                    const idsAEliminar = [];
+                    if (!isPartial) {
+                        facturacionCatalog.forEach(doc => {
+                            if (doc.tipo_articulo_sistema === tipoAsignado && !idsProcesados.has(doc.id)) {
+                                idsAEliminar.push(doc.id);
+                            }
                         });
                     }
-                }
-            });
 
-            const idsAEliminar = [];
-            if (!isPartial) {
-                facturacionCatalog.forEach(doc => {
-                    if (doc.tipo_articulo_sistema === tipoAsignado && !idsProcesados.has(doc.id)) {
-                        idsAEliminar.push(doc.id);
+                    const ahorrados = idsProcesados.size - productosAActualizar.length;
+
+                    pendingSyncData = {
+                        productosAActualizar,
+                        idsAEliminar,
+                        tipoAsignado,
+                        isPartial
+                    };
+
+                    document.getElementById('previewTargetName').innerText = tipoAsignado === 'PIEZA_BASE' ? 'Sincronizar Piezas Base' : 'Sincronizar Paquetes';
+                    document.getElementById('previewCountUpdate').innerText = productosAActualizar.length;
+                    document.getElementById('previewCountDelete').innerText = idsAEliminar.length;
+                    document.getElementById('previewCountSkip').innerText = ahorrados;
+
+                    const warningBox = document.getElementById('previewCrossWarning');
+                    if (alertasCruce > 0) {
+                        document.getElementById('previewCrossText').innerText = `Hemos detectado que ${alertasCruce} códigos de este Excel ya estaban guardados como el tipo contrario. ¿Elegiste el botón correcto?`;
+                        warningBox.classList.remove('hidden');
+                    } else {
+                        warningBox.classList.add('hidden');
                     }
-                });
-            }
 
-            const ahorrados = idsProcesados.size - productosAActualizar.length;
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        const modal = document.getElementById('syncPreviewModal');
+                        modal.classList.remove('hidden');
+                        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+                    }, 300);
 
-            // 2. GUARDAMOS EN STAGING (Memoria temporal)
-            pendingSyncData = {
-                productosAActualizar,
-                idsAEliminar,
-                tipoAsignado,
-                isPartial
+                } catch (error) {
+                    console.error(error);
+                    showToast("Error al procesar el archivo. Revisa la consola.", "error");
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                } finally {
+                    event.target.value = '';
+                }
             };
-
-            // 3. ACTUALIZAMOS EL MODAL VISUAL
-            document.getElementById('previewTargetName').innerText = tipoAsignado === 'PIEZA_BASE' ? 'Sincronizar Piezas Base' : 'Sincronizar Paquetes';
-            document.getElementById('previewCountUpdate').innerText = productosAActualizar.length;
-            document.getElementById('previewCountDelete').innerText = idsAEliminar.length;
-            document.getElementById('previewCountSkip').innerText = ahorrados;
-
-            // Mostrar el escudo si hubo cruce
-            const warningBox = document.getElementById('previewCrossWarning');
-            if (alertasCruce > 0) {
-                document.getElementById('previewCrossText').innerText = `Hemos detectado que ${alertasCruce} códigos de este Excel ya estaban guardados como el tipo contrario. ¿Elegiste el botón correcto?`;
-                warningBox.classList.remove('hidden');
-            } else {
-                warningBox.classList.add('hidden');
-            }
-
-            // Ocultamos el overlay de carga y abrimos el modal de Preview
-            overlay.classList.add('opacity-0');
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                const modal = document.getElementById('syncPreviewModal');
-                modal.classList.remove('hidden');
-                setTimeout(() => modal.classList.remove('opacity-0'), 10);
-            }, 300);
-
-        } catch (error) {
-            console.error(error);
-            showToast("Error al procesar el archivo. Revisa la consola.", "error");
-            overlay.classList.add('opacity-0');
-            setTimeout(() => overlay.classList.add('hidden'), 300);
-        } finally {
-            event.target.value = ''; // Limpiamos el input file
-        }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-// 4. ESTA FUNCIÓN SE EJECUTA SOLO SI EL USUARIO DA CLIC EN "CONFIRMAR"
-async function executeConfirmedSync() {
-    if (!pendingSyncData) return;
-
-    closeModal('syncPreviewModal');
-    const overlay = document.getElementById('syncOverlay');
-    const statusText = document.getElementById('syncStatusText');
-    overlay.classList.remove('hidden');
-    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-    
-    const { productosAActualizar, idsAEliminar } = pendingSyncData;
-    const coleccion = 'catalogo_facturacion';
-    const dividirEnLotes = (arreglo, tamano = 500) => { const lotes = []; for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano)); return lotes; };
-
-    try {
-        // Ejecutar Borrados
-        if (idsAEliminar.length > 0) {
-            statusText.innerText = `Eliminando ${idsAEliminar.length} registros...`;
-            const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
-            for (const lote of lotesBorrado) {
-                const batch = db.batch();
-                lote.forEach(id => batch.delete(db.collection(coleccion).doc(id)));
-                await batch.commit();
-            }
+            reader.readAsArrayBuffer(file);
         }
 
-        // Ejecutar Actualizaciones
-        if (productosAActualizar.length > 0) {
-            statusText.innerText = `Subiendo ${productosAActualizar.length} artículos...`;
-            const lotesSubida = dividirEnLotes(productosAActualizar, 500);
-            for (let i = 0; i < lotesSubida.length; i++) {
-                const batch = db.batch();
-                lotesSubida[i].forEach(producto => {
-                    const docRef = db.collection(coleccion).doc(producto.id);
-                    batch.set(docRef, producto.datos, { merge: true });
-                });
-                await batch.commit();
+        async function executeConfirmedSync() {
+            if (!pendingSyncData) return;
+
+            closeModal('syncPreviewModal');
+            const overlay = document.getElementById('syncOverlay');
+            const statusText = document.getElementById('syncStatusText');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            
+            const { productosAActualizar, idsAEliminar } = pendingSyncData;
+            const coleccion = 'catalogo_facturacion';
+            const dividirEnLotes = (arreglo, tamano = 500) => { const lotes = []; for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano)); return lotes; };
+
+            try {
+                if (idsAEliminar.length > 0) {
+                    statusText.innerText = `Eliminando ${idsAEliminar.length} registros...`;
+                    const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
+                    for (const lote of lotesBorrado) {
+                        const batch = db.batch();
+                        lote.forEach(id => batch.delete(db.collection(coleccion).doc(id)));
+                        await batch.commit();
+                    }
+                }
+
+                if (productosAActualizar.length > 0) {
+                    statusText.innerText = `Subiendo ${productosAActualizar.length} artículos...`;
+                    const lotesSubida = dividirEnLotes(productosAActualizar, 500);
+                    for (let i = 0; i < lotesSubida.length; i++) {
+                        const batch = db.batch();
+                        lotesSubida[i].forEach(producto => {
+                            const docRef = db.collection(coleccion).doc(producto.id);
+                            batch.set(docRef, producto.datos, { merge: true });
+                        });
+                        await batch.commit();
+                    }
+                }
+
+                showToast(`Sincronización aplicada. ${productosAActualizar.length} act/nuevos, ${idsAEliminar.length} borrados.`, 'success');
+            } catch (error) {
+                console.error("Error al escribir en base de datos:", error);
+                showToast("Hubo un error al guardar los datos.", "error");
+            } finally {
+                pendingSyncData = null; 
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         }
-
-        showToast(`Sincronización aplicada. ${productosAActualizar.length} act/nuevos, ${idsAEliminar.length} borrados.`, 'success');
-    } catch (error) {
-        console.error("Error al escribir en base de datos:", error);
-        showToast("Hubo un error al guardar los datos.", "error");
-    } finally {
-        pendingSyncData = null; // Limpiamos la memoria
-        overlay.classList.add('opacity-0');
-        setTimeout(() => overlay.classList.add('hidden'), 300);
-    }
-}
     </script>
 </body>
 </html>
