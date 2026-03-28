@@ -2354,7 +2354,7 @@ window.solicitarActualizacionGitHub = async () => {
             const seleccionados = Array.from(document.querySelectorAll('.cb-audit:checked'));
             if(seleccionados.length === 0) return showToast("Selecciona al menos un ticket para procesar.", "error");
             
-            if(!confirm(`¿Marcar estos ${seleccionados.length} productos como ajustados en CONTPAQi?\n\nEsto archivará el ticket y RESETEARÁ a 0 la Sombra Web de estos productos específicos.`)) return;
+            if(!confirm(`¿Marcar estos ${seleccionados.length} productos como ajustados en CONTPAQi?\n\nEsto archivará el ticket y descontará la Sombra Web tomada al momento del conteo.`)) return;
 
             try {
                 const batch = db.batch();
@@ -2363,26 +2363,29 @@ window.solicitarActualizacionGitHub = async () => {
                     const ticketId = cb.value;
                     const ticketData = auditoriasPendientesList.find(t => t.id_ticket === ticketId);
                     
-                    // 1. Archivar ticket (cambiar estado)
+                    // 1. Archivar ticket
                     const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
                     batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
 
-                    
-                    // 2. Resetear sombra web del producto a 0
+                    // 2. Reseteo Inteligente de la sombra
                     if(ticketData && ticketData.codigo_contpaqi) {
-                        // Sanitizamos la diagonal para encontrar el documento correcto
                         const codigoSeguro = String(ticketData.codigo_contpaqi).replace(/\//g, '_');
+                        const sombraGuardada = ticketData.sombra_al_momento || 0; // Sacamos la foto
                         
                         const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                        
+                        // En lugar de poner cero, le RESTAMOS lo que se había contado.
+                        // Si no hubo ventas en el inter, quedará en 0 exacto.
+                        // Si hubo ventas, quedará solo lo nuevo.
                         batch.set(sombraRef, { 
-                            cantidad_vendida: 0, 
+                            cantidad_vendida: firebase.firestore.FieldValue.increment(-sombraGuardada), 
                             ultima_venta: firebase.firestore.FieldValue.serverTimestamp() 
                         }, { merge: true });
                     }
                 });
 
                 await batch.commit();
-                showToast("¡Ajustes procesados y Sombra Web limpia!");
+                showToast("¡Ajustes procesados y Sombra Web actualizada!");
                 document.getElementById('selectAllAudit').checked = false;
                 
             } catch(error) {
