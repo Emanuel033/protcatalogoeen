@@ -657,9 +657,12 @@
                 if(showInventoryConfig) { document.getElementById('inventoryStatusBadge').classList.remove('hidden'); }
                 if (forceRefresh) showToast("Descargando catálogo actualizado...", "info");
 
-                const response = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
+               const response = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error("No se pudo descargar el catálogo.");
-                const allData = await response.json();
+                
+                // Leemos el JSON original y lo guardamos en allDataRaw
+                let allDataRaw = await response.json();
+                
                 // === NUEVO PARCHE: FUSIONAR Y ELIMINAR DUPLICADOS POR CÓDIGO ===
                 const productosUnicos = {};
 
@@ -690,7 +693,7 @@
                     }
                 });
 
-                // Convertimos el diccionario de vuelta a una lista limpia (sin duplicados)
+                // Convertimos el diccionario de vuelta a la variable final "allData" que usa el resto de tu código
                 const allData = Object.values(productosUnicos);
                 // ======================================================================
 
