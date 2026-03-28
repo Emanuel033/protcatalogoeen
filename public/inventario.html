@@ -461,31 +461,43 @@
         async function levantarAuditoria() {
             if(!productoActual) return;
 
-            // Lo que el usuario marcó en pantalla es su conteo físico real
+            // 1. Lo que el usuario marcó en pantalla es su conteo físico real
             let conteoFisico = parseInt(document.getElementById('scanTotalMove').innerText) || 0;
-            const stockEsperado = parseInt(document.getElementById('scanProductStock').innerText) || 0;
             
-            // Calculamos cuánto sobra o falta
-            const diferencia = conteoFisico - stockEsperado;
-
-            if(diferencia === 0) {
-                return showToast("El conteo físico coincide con el sistema. ¡Todo perfecto!", "info");
-            }
+            // 2. EL CAMBIO CLAVE: El esperado para la auditoría es el de CONTPAQi, no la estimación Web
+            const stockSistema = productoActual.stock_base_json || 0; 
+            
+            // Calculamos cuánto sobra o falta realmente en CONTPAQi
+            const diferencia = conteoFisico - stockSistema;
 
             try {
-                // Guardamos en la colección que el Admin sí está escuchando
-                await db.collection('auditorias_pendientes').add({
+                // 3. EVITAR DUPLICADOS: Buscamos si ya hay un ticket pendiente de este producto
+                const queryPendiente = await db.collection('auditorias_pendientes')
+                    .where('codigo_contpaqi', '==', productoActual.codigo_contpaqi)
+                    .where('estado', '==', 'pendiente')
+                    .get();
+
+                const datosAuditoria = {
                     codigo_contpaqi: productoActual.codigo_contpaqi,
                     nombre_producto: productoActual.nombre_producto,
-                    esperado: stockEsperado,
+                    esperado: stockSistema, // Ahora mandamos el valor puro del sistema
                     conteo_fisico: conteoFisico,
                     ajuste_calculado: diferencia,
                     estado: 'pendiente',
                     fecha: firebase.firestore.FieldValue.serverTimestamp(),
                     usuario: 'Lector Almacén (App)'
-                });
+                };
 
-                showToast("¡Auditoría enviada al Centro de Comando!");
+                if (!queryPendiente.empty) {
+                    // Si ya existe un ticket pendiente, lo ACTUALIZAMOS (sobreescribimos)
+                    const docId = queryPendiente.docs[0].id;
+                    await db.collection('auditorias_pendientes').doc(docId).update(datosAuditoria);
+                    showToast("Auditoría actualizada (ya existía un ticket previo).", "info");
+                } else {
+                    // Si no existe, CREAMOS uno nuevo
+                    await db.collection('auditorias_pendientes').add(datosAuditoria);
+                    showToast("¡Auditoría enviada al Centro de Comando!");
+                }
                 
                 // Reseteamos la pantalla para el siguiente escaneo
                 currentScanVariants.forEach(v => v.qtyDetected = 0);
