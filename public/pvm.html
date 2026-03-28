@@ -660,18 +660,29 @@
                 const response = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error("No se pudo descargar el catálogo.");
                 const allData = await response.json();
-                // === PARCHE: IGUALAR PRECIOS EN PRODUCTOS DUPLICADOS (MISMO CÓDIGO) ===
-                const preciosMaximos = {};
-                // Primero averiguamos cuál es el precio correcto de cada código
+                // === PARCHE: IGUALAR PRECIOS Y STOCK EN PRODUCTOS DUPLICADOS (MISMO CÓDIGO) ===
+                const valoresMaximos = {};
+                
+                // Primero averiguamos cuál es el precio y el stock máximo (correcto) de cada código
                 allData.forEach(p => {
-                    if (!preciosMaximos[p.codigo]) preciosMaximos[p.codigo] = 0;
-                    if (p.precio > preciosMaximos[p.codigo]) preciosMaximos[p.codigo] = p.precio;
+                    if (!valoresMaximos[p.codigo]) {
+                        valoresMaximos[p.codigo] = { precio: 0, stock: 0 };
+                    }
+                    if (p.precio > valoresMaximos[p.codigo].precio) valoresMaximos[p.codigo].precio = p.precio;
+                    if (p.stock > valoresMaximos[p.codigo].stock) valoresMaximos[p.codigo].stock = p.stock;
                 });
                 
-                // Luego le inyectamos ese precio real al gemelo que se haya quedado en 0
+                // Luego sincronizamos ambos valores a todos los gemelos
                 allData.forEach(p => {
-                    if ((p.precio === 0 || !p.precio) && preciosMaximos[p.codigo] > 0) {
-                        p.precio = preciosMaximos[p.codigo];
+                    // Si el precio original es 0, le asignamos el precio real
+                    if ((p.precio === 0 || !p.precio) && valoresMaximos[p.codigo].precio > 0) {
+                        p.precio = valoresMaximos[p.codigo].precio;
+                    }
+                    
+                    // Asignamos el stock máximo a todos los que comparten este mismo código de sistema
+                    // (Así el inventario está unificado desde la raíz)
+                    if (valoresMaximos[p.codigo].stock > 0) {
+                        p.stock = valoresMaximos[p.codigo].stock;
                     }
                 });
                 // ======================================================================
