@@ -660,31 +660,38 @@
                 const response = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error("No se pudo descargar el catálogo.");
                 const allData = await response.json();
-                // === PARCHE: IGUALAR PRECIOS Y STOCK EN PRODUCTOS DUPLICADOS (MISMO CÓDIGO) ===
-                const valoresMaximos = {};
-                
-                // Primero averiguamos cuál es el precio y el stock máximo (correcto) de cada código
-                allData.forEach(p => {
-                    if (!valoresMaximos[p.codigo]) {
-                        valoresMaximos[p.codigo] = { precio: 0, stock: 0 };
+                // === NUEVO PARCHE: FUSIONAR Y ELIMINAR DUPLICADOS POR CÓDIGO ===
+                const productosUnicos = {};
+
+                allDataRaw.forEach(p => {
+                    if (!productosUnicos[p.codigo]) {
+                        // Si es el primer molde/registro que vemos de este código, lo guardamos
+                        productosUnicos[p.codigo] = { ...p };
+                    } else {
+                        // Si ya existe otro molde con el MISMO CÓDIGO, los fusionamos en uno solo
+                        const existente = productosUnicos[p.codigo];
+                        
+                        // 1. Conservamos el precio más alto (por si uno estaba en 0)
+                        if (p.precio > existente.precio) existente.precio = p.precio;
+                        
+                        // 2. Conservamos el stock mayor
+                        if (p.stock > existente.stock) existente.stock = p.stock;
+                        
+                        // 3. Si el primero no tenía imagen, pero este duplicado sí, se la ponemos
+                        if (!existente.imagen && p.imagen) {
+                            existente.imagen = p.imagen;
+                        }
+                        
+                        // 4. Juntamos los tips de empaque (cajas/paquetes) por si un molde traía datos que el otro no
+                        if (p.empaques_tips && p.empaques_tips.length > 0) {
+                            const combinados = new Set([...(existente.empaques_tips || []), ...p.empaques_tips]);
+                            existente.empaques_tips = Array.from(combinados);
+                        }
                     }
-                    if (p.precio > valoresMaximos[p.codigo].precio) valoresMaximos[p.codigo].precio = p.precio;
-                    if (p.stock > valoresMaximos[p.codigo].stock) valoresMaximos[p.codigo].stock = p.stock;
                 });
-                
-                // Luego sincronizamos ambos valores a todos los gemelos
-                allData.forEach(p => {
-                    // Si el precio original es 0, le asignamos el precio real
-                    if ((p.precio === 0 || !p.precio) && valoresMaximos[p.codigo].precio > 0) {
-                        p.precio = valoresMaximos[p.codigo].precio;
-                    }
-                    
-                    // Asignamos el stock máximo a todos los que comparten este mismo código de sistema
-                    // (Así el inventario está unificado desde la raíz)
-                    if (valoresMaximos[p.codigo].stock > 0) {
-                        p.stock = valoresMaximos[p.codigo].stock;
-                    }
-                });
+
+                // Convertimos el diccionario de vuelta a una lista limpia (sin duplicados)
+                const allData = Object.values(productosUnicos);
                 // ======================================================================
 
                let shadowStock = {};
