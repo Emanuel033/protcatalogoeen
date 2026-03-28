@@ -461,17 +461,14 @@
         async function levantarAuditoria() {
             if(!productoActual) return;
 
-            // 1. Lo que el usuario marcó en pantalla es su conteo físico real
             let conteoFisico = parseInt(document.getElementById('scanTotalMove').innerText) || 0;
-            
-            // 2. EL CAMBIO CLAVE: El esperado para la auditoría es el de CONTPAQi, no la estimación Web
             const stockSistema = productoActual.stock_base_json || 0; 
-            
-            // Calculamos cuánto sobra o falta realmente en CONTPAQi
+            const sombraActual = productoActual.sombra_actual || 0; // <-- LA FOTOGRAFÍA
+
+            // El ajuste para CONTPAQi es directo: Físico vs Oficial
             const diferencia = conteoFisico - stockSistema;
 
             try {
-                // 3. EVITAR DUPLICADOS: Buscamos si ya hay un ticket pendiente de este producto
                 const queryPendiente = await db.collection('auditorias_pendientes')
                     .where('codigo_contpaqi', '==', productoActual.codigo_contpaqi)
                     .where('estado', '==', 'pendiente')
@@ -480,26 +477,24 @@
                 const datosAuditoria = {
                     codigo_contpaqi: productoActual.codigo_contpaqi,
                     nombre_producto: productoActual.nombre_producto,
-                    esperado: stockSistema, // Ahora mandamos el valor puro del sistema
+                    esperado: stockSistema,
                     conteo_fisico: conteoFisico,
                     ajuste_calculado: diferencia,
+                    sombra_al_momento: sombraActual, // <-- GUARDAMOS LA FOTO EN EL TICKET
                     estado: 'pendiente',
                     fecha: firebase.firestore.FieldValue.serverTimestamp(),
                     usuario: 'Lector Almacén (App)'
                 };
 
                 if (!queryPendiente.empty) {
-                    // Si ya existe un ticket pendiente, lo ACTUALIZAMOS (sobreescribimos)
                     const docId = queryPendiente.docs[0].id;
                     await db.collection('auditorias_pendientes').doc(docId).update(datosAuditoria);
-                    showToast("Auditoría actualizada (ya existía un ticket previo).", "info");
+                    showToast("Auditoría actualizada con el nuevo conteo.", "info");
                 } else {
-                    // Si no existe, CREAMOS uno nuevo
                     await db.collection('auditorias_pendientes').add(datosAuditoria);
                     showToast("¡Auditoría enviada al Centro de Comando!");
                 }
                 
-                // Reseteamos la pantalla para el siguiente escaneo
                 currentScanVariants.forEach(v => v.qtyDetected = 0);
                 renderVariantsList();
                 document.getElementById('scanIdle').classList.remove('hidden');
@@ -510,7 +505,7 @@
                 showToast("Error de conexión al enviar.", "error");
             }
         }
-
+        
         // ==========================================
         // UTILIDADES UI Y BITÁCORA EN TIEMPO REAL
         // ==========================================
