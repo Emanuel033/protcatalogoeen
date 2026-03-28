@@ -138,83 +138,81 @@
             if(codigo) procesarCodigo(codigo.trim());
         }
 
-        async function procesarCodigo(codigoBuscado) {
-            if(catalogoEnMemoria.length === 0) return showToast("El catálogo aún no carga, espera un segundo.", true);
+       async function procesarCodigo(codigoBuscado) {
+            if(catalogoEnMemoria.length === 0) return showToast("Cargando catálogo...", true);
             showToast("Buscando...");
             document.getElementById('fichaProducto').classList.add('hidden');
             
-            try {
-                // 1. Buscar en memoria (JSON) primero, busca Base o Empaque
-                let prodEncontrado = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
-                
-                // Si no se encuentra como base, buscar si es el SKU de un empaque
-                if (!prodEncontrado) {
-                    for (const p of catalogoEnMemoria) {
-                        if (p.empaques && p.empaques.some(e => String(e.sku).toLowerCase() === codigoBuscado.toLowerCase() || String(e.codigo_barras).toLowerCase() === codigoBuscado.toLowerCase())) {
-                            prodEncontrado = p; break;
+            // 1. Buscamos en el JSON (que ya trae el cruce de productos_master)
+            let prodBase = null;
+            let empaqueDetectado = null;
+
+            // Buscamos si el código escaneado es el código oficial de un producto
+            prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
+
+            // Si no es un código base, buscamos si es el SKU de alguno de los empaques de cualquier producto
+            if (!prodBase) {
+                for (const p of catalogoEnMemoria) {
+                    if (p.empaques && p.empaques.length > 0) {
+                        const foundEmp = p.empaques.find(e => 
+                            String(e.sku).toLowerCase() === codigoBuscado.toLowerCase() || 
+                            String(e.codigo_barras).toLowerCase() === codigoBuscado.toLowerCase()
+                        );
+                        if (foundEmp) {
+                            prodBase = p;
+                            empaqueDetectado = foundEmp;
+                            break;
                         }
                     }
                 }
+            }
 
-                // 2. Si lo encontramos, bajamos la versión FRESCA de Firebase
-                if (prodEncontrado) {
-                    let docReal = null;
+            if (prodBase) {
+                try {
+                    // 2. Traemos la SOMBRA WEB de Firebase (usando el código sanitizado)
+                    // Usamos el código oficial que viene en el JSON
+                    const codigoOficial = prodBase.codigo; 
+                    const codigoSeguro = String(codigoOficial).replace(/\//g, '_');
                     
-                    // CORRECCIÓN PRINCIPAL: Buscamos usando .where() para que la diagonal (/) no rompa el sistema
-                    // NOTA: Si tu colección oficial se llama 'catalogo_facturacion', cámbialo aquí abajo.
-                    const snapshot = await db.collection('catalogo_facturacion').where('codigo_sistema_oficial', '==', prodEncontrado.codigo).get();
-                    
-                    if (!snapshot.empty) {
-                        docReal = snapshot.docs[0];
-                    } else {
-                        // Plan B: Intentar con el ID sanitizado por si Vercel lo guardó con guiones bajos
-                        const idSeguro = String(prodEncontrado.id).replace(/\//g, '_');
-                        const docAlterno = await db.collection('catalogo_facturacion').doc(idSeguro).get();
-                        if (docAlterno.exists) docReal = docAlterno;
+                    let sombraCant = 0;
+                    const sombraDoc = await db.collection('stock_por_fuera').doc(codigoSeguro).get();
+                    if(sombraDoc.exists) {
+                        sombraCant = sombraDoc.data().cantidad_vendida || 0;
                     }
 
-                    if(docReal) {
-                        const data = docReal.data();
-                        
-                        // SANITIZAMOS LA DIAGONAL PARA BUSCAR LA SOMBRA CORRECTA
-                        const codigoSeguro = String(prodEncontrado.codigo).replace(/\//g, '_');
-                        let sombraCant = 0;
-                        const sombraDoc = await db.collection('stock_por_fuera').doc(codigoSeguro).get();
-                        if(sombraDoc.exists) sombraCant = sombraDoc.data().cantidad_vendida || 0;
+                    // 3. Armamos la ficha técnica con los datos del JSON
+                    productoActual = {
+                        id: prodBase.id || codigoSeguro, // Usamos el ID del JSON o el código seguro
+                        codigo_contpaqi: codigoOficial,
+                        nombre_producto: prodBase.nombre,
+                        stock_oficial_snapshot: prodBase.stock || 0, // El stock que traía el JSON al descargar
+                        sombra_web_snapshot: sombraCant
+                    };
 
-                        productoActual = {
-                            id: docReal.id, // Guardamos el ID real con el que lo encontró
-                            codigo_contpaqi: prodEncontrado.codigo,
-                            nombre_producto: data.nombre_flexible || data.descripcion_sistema_oficial || prodEncontrado.nombre,
-                            stock_oficial_snapshot: data.stock_oficial || prodEncontrado.stock || 0,
-                            sombra_web_snapshot: sombraCant
-                        };
+                    // Cargamos los empaques que el JSON dice que existen
+                    empaquesActuales = prodBase.empaques || [];
+                    renderEmpaques();
 
-                        empaquesActuales = data.empaques || prodEncontrado.empaques || [];
-                        renderEmpaques();
+                    // 4. Mostramos en pantalla
+                    document.getElementById('prodNombre').innerText = productoActual.nombre_producto;
+                    document.getElementById('prodCodigo').innerText = productoActual.codigo_contpaqi;
+                    document.getElementById('conteoSueltas').value = '';
+                    document.getElementById('conteoFisicoTotalDisplay').innerText = '0';
+                    document.getElementById('fichaProducto').classList.remove('hidden');
 
-                        document.getElementById('prodNombre').innerText = productoActual.nombre_producto;
-                        document.getElementById('prodCodigo').innerText = productoActual.codigo_contpaqi;
-                        document.getElementById('conteoSueltas').value = '';
-                        document.getElementById('conteoFisicoTotalDisplay').innerText = '0';
-                        document.getElementById('fichaProducto').classList.remove('hidden');
-                        
-                        // Pequeña animación si detectó un paquete específico
-                        if(codigoBuscado !== productoActual.codigo_contpaqi) {
-                            showToast("¡Paquete detectado!");
-                        }
-                    } else {
-                        showToast("Producto en JSON pero no en la Base de Datos en vivo.", true);
+                    if(empaqueDetectado) {
+                        showToast(`Paquete detectado: ${empaqueDetectado.sku}`);
+                        // Opcional: Podríamos ponerle foco al input de ese empaque específico aquí
                     }
-                } else {
-                    showToast("Producto o paquete no encontrado", true);
+
+                } catch (error) {
+                    console.error("Error al leer sombra:", error);
+                    showToast("Error al conectar con la Sombra Web", true);
                 }
-            } catch (error) {
-                console.error(error);
-                showToast("Error de conexión al buscar", true);
+            } else {
+                showToast("Código no reconocido en el catálogo", true);
             }
         }
-
         function renderEmpaques() {
             const container = document.getElementById('contenedorEmpaques');
             container.innerHTML = '';
