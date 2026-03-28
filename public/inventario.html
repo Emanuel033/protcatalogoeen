@@ -229,7 +229,7 @@
 
         // EL CEREBRO DE BÚSQUEDA (JSON + Sombra de Firebase)
         async function procesarCodigo(codigoBuscado) {
-            if(catalogoEnMemoria.length === 0) return showToast("Cargando catálogo...", true);
+            if(catalogoEnMemoria.length === 0) return showToast("Cargando catálogo...", "info");
             document.getElementById('manualCode').value = '';
             
             showToast("Buscando...", "info");
@@ -237,17 +237,24 @@
             let prodBase = null;
             let empaqueDetectado = null;
 
-            // 1. Buscamos en el JSON (Base o Empaque)
+            // 1. Buscamos en el JSON si es un código base oficial
             prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
 
+            // Si no es el código base, buscamos si escaneó el SKU de una caja/paquete
             if (!prodBase) {
                 for (const p of catalogoEnMemoria) {
-                    if (p.empaques && p.empaques.length > 0) {
-                        const foundEmp = p.empaques.find(e => 
+                    // Buscamos en 'paquetes' (o 'empaques' por si acaso)
+                    const arrayPaquetes = p.paquetes || p.empaques || [];
+                    if (arrayPaquetes.length > 0) {
+                        const foundEmp = arrayPaquetes.find(e => 
                             String(e.sku).toLowerCase() === codigoBuscado.toLowerCase() || 
                             String(e.codigo_barras).toLowerCase() === codigoBuscado.toLowerCase()
                         );
-                        if (foundEmp) { prodBase = p; empaqueDetectado = foundEmp; break; }
+                        if (foundEmp) { 
+                            prodBase = p; 
+                            empaqueDetectado = foundEmp; 
+                            break; 
+                        }
                     }
                 }
             }
@@ -259,7 +266,7 @@
                     const codigoSeguro = String(codigoOficial).replace(/\//g, '_');
                     
                     let sombraCantVendida = 0;
-                    const sombraDoc = await db.collection('stock_por_fuera').doc(codigoSeguro).get();
+                    const sombraDoc = await firebase.firestore().collection('stock_por_fuera').doc(codigoSeguro).get();
                     if(sombraDoc.exists) {
                         sombraCantVendida = sombraDoc.data().cantidad_vendida || 0;
                     }
@@ -287,23 +294,27 @@
                     // 4. Armamos la lista interactiva de cajitas y piezas
                     currentScanVariants = []; 
                     
-                    // Variante 1: Sueltas
+                    // Variante 1: Sueltas (Siempre disponible)
                     currentScanVariants.push({ 
                         label: 'Piezas Sueltas (1pz)', sku: codigoOficial, piezas: 1, 
                         qtyDetected: (!empaqueDetectado) ? 1 : 0 
                     });
 
-                    // Variantes Extra: Empaques del JSON
-                    if(prodBase.empaques) {
-                        prodBase.empaques.forEach(pkg => {
-                            currentScanVariants.push({ 
-                                label: `Paquete (${pkg.piezas}pz)`, sku: pkg.sku, piezas: pkg.piezas, 
-                                qtyDetected: (empaqueDetectado && empaqueDetectado.sku === pkg.sku) ? 1 : 0 
-                            });
+                    // Variantes Extra: Empaques/Paquetes del JSON
+                    const arrayPaquetes = prodBase.paquetes || prodBase.empaques || [];
+                    arrayPaquetes.forEach(pkg => {
+                        currentScanVariants.push({ 
+                            label: `Caja/Paquete (${pkg.piezas}pz)`, 
+                            sku: pkg.sku, 
+                            piezas: parseInt(pkg.piezas), 
+                            qtyDetected: (empaqueDetectado && empaqueDetectado.sku === pkg.sku) ? 1 : 0 
                         });
-                    }
+                    });
 
+                    // Ordenamos para que las sueltas queden arriba y las cajas grandes abajo
                     currentScanVariants.sort((a,b) => a.piezas - b.piezas);
+                    
+                    // Pintamos en pantalla
                     renderVariantsList();
 
                 } catch (error) {
@@ -315,7 +326,6 @@
                 mostrarErrorVisual();
             }
         }
-
         // ==========================================
         // UI DE VARIANTES Y BOTONES +/-
         // ==========================================
