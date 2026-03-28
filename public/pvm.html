@@ -1010,24 +1010,33 @@
                 // 2. MAGIA: Sumar al Inventario Sombra por fuera (Batch)
                 const batchSombra = db.batch();
                 articulosLimpios.forEach(art => {
-                    // SI ES KIT, MULTIPLICAMOS Y DESCONTAMOS SUS COMPONENTES
+                    // SI ES KIT, MULTIPLICAMOS Y DESCONTAMOS SUS COMPONENTES (SU RECETA)
                     if (art.tipo_item === 'KIT_OFICIAL' && art.receta && art.receta.length > 0) {
                         art.receta.forEach(ingrediente => {
                             const codigoSeguro = String(ingrediente.codigo_pieza).replace(/\//g, '_');
-                            const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                            batchSombra.set(sombraRef, {
-                                cantidad_vendida: firebase.firestore.FieldValue.increment(ingrediente.cantidad * art.cantidad),
-                                ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true });
+                            // Forzamos que sean números para evitar que Firebase reciba un "NaN" y falle en silencio
+                            const qtyDescontar = Number(ingrediente.cantidad) * Number(art.cantidad);
+                            
+                            if (!isNaN(qtyDescontar) && qtyDescontar > 0) {
+                                const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                                batchSombra.set(sombraRef, {
+                                    cantidad_vendida: firebase.firestore.FieldValue.increment(qtyDescontar),
+                                    ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+                            }
                         });
                     } else {
                         // SI ES PIEZA NORMAL, LA DESCONTAMOS DIRECTO
                         const codigoSeguro = String(art.codigo).replace(/\//g, '_');
-                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                        batchSombra.set(sombraRef, {
-                            cantidad_vendida: firebase.firestore.FieldValue.increment(art.cantidad),
-                            ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true });
+                        const qtyDescontar = Number(art.cantidad);
+                        
+                        if (!isNaN(qtyDescontar) && qtyDescontar > 0) {
+                            const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                            batchSombra.set(sombraRef, {
+                                cantidad_vendida: firebase.firestore.FieldValue.increment(qtyDescontar),
+                                ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        }
                     }
                 });
                 await batchSombra.commit(); // Ejecutamos la suma del inventario sombra
@@ -1287,21 +1296,31 @@
                     if (venta.articulos && venta.articulos.length > 0) {
                         venta.articulos.forEach(art => {
                             if (art.tipo_item === 'KIT_OFICIAL' && art.receta && art.receta.length > 0) {
+                                // A) Devolver piezas a la receta
                                 art.receta.forEach(ingrediente => {
                                     const codigoSeguro = String(ingrediente.codigo_pieza).replace(/\//g, '_');
-                                    const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                                    batch.set(sombraRef, {
-                                        cantidad_vendida: firebase.firestore.FieldValue.increment(-(ingrediente.cantidad * art.cantidad)),
-                                        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                                    }, { merge: true });
+                                    const qtyDevolver = Number(ingrediente.cantidad) * Number(art.cantidad);
+                                    
+                                    if (!isNaN(qtyDevolver) && qtyDevolver > 0) {
+                                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                                        batch.set(sombraRef, {
+                                            cantidad_vendida: firebase.firestore.FieldValue.increment(-qtyDevolver),
+                                            ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                                        }, { merge: true });
+                                    }
                                 });
                             } else {
+                                // Devolver pieza normal
                                 const codigoSeguro = String(art.codigo).replace(/\//g, '_');
-                                const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                                batch.set(sombraRef, {
-                                    cantidad_vendida: firebase.firestore.FieldValue.increment(-art.cantidad),
-                                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                                }, { merge: true });
+                                const qtyDevolver = Number(art.cantidad);
+                                
+                                if (!isNaN(qtyDevolver) && qtyDevolver > 0) {
+                                    const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                                    batch.set(sombraRef, {
+                                        cantidad_vendida: firebase.firestore.FieldValue.increment(-qtyDevolver),
+                                        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                                    }, { merge: true });
+                                }
                             }
                         });
                     }
