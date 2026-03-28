@@ -748,8 +748,8 @@
                     
                     inventoryBadge = `
                         <div class="flex items-center bg-slate-50 border border-slate-200 rounded p-0.5 shrink-0 mt-1">
-                            <span class="text-[8px] md:text-[9px] font-bold text-slate-500 px-1.5 border-r border-slate-200" title="Stock Oficial">Of: ${p.stock_oficial}</span>
-                            <span class="text-[8px] md:text-[9px] font-black ${estClass} px-1.5 py-0.5 rounded shadow-sm ml-0.5" title="Stock Estimado"><i class="fas ${estIcon} mr-1"></i>Est: ${p.stock}</span>
+                            <span class="text-[8px] md:text-[9px] font-bold text-slate-500 px-1.5 border-r border-slate-200" title="Stock Oficial">Stock Oficial: ${p.stock_oficial}</span>
+                            <span class="text-[8px] md:text-[9px] font-black ${estClass} px-1.5 py-0.5 rounded shadow-sm ml-0.5" title="Stock Estimado"><i class="fas ${estIcon} mr-1"></i>Stock Estimado: ${p.stock}</span>
                         </div>
                     `;
                 }
@@ -1214,7 +1214,54 @@
         }
 
         window.reprintTicket = (id) => { const venta = historySales.find(v => String(v.id) === String(id)); if (venta) { showToast("Imprimiendo...", "info"); printTicketHTML(venta); } }
-        window.cancelTicket = (id, folio) => { showPrompt("Cancelar Venta", "Motivo:", async (motivo) => { try { await db.collection('ventas_mostrador').doc(id).update({ estado: 'CANCELADA', motivo_cancelacion: motivo, fecha_cancelacion: firebase.firestore.FieldValue.serverTimestamp() }); showToast(`Ticket cancelado.`); loadHistory(); if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales(); } catch(error) { showToast("Error al cancelar.", "error"); } }); }
+        window.cancelTicket = (id, folio) => { 
+            showPrompt("Cancelar Venta", "Motivo:", async (motivo) => { 
+                try { 
+                    // 1. Buscamos los datos del ticket en la memoria
+                    const venta = historySales.find(v => String(v.id) === String(id));
+                    if (!venta) throw new Error("Ticket no encontrado");
+
+                    // 2. Preparamos un Batch para hacer todo al mismo tiempo
+                    const batch = db.batch();
+
+                    // A) Marcamos el ticket como cancelado
+                    const ventaRef = db.collection('ventas_mostrador').doc(id);
+                    batch.update(ventaRef, { 
+                        estado: 'CANCELADA', 
+                        motivo_cancelacion: motivo, 
+                        fecha_cancelacion: firebase.firestore.FieldValue.serverTimestamp() 
+                    });
+
+                    // B) Devolvemos los artículos al inventario sombra restando lo vendido
+                    if (venta.articulos && venta.articulos.length > 0) {
+                        venta.articulos.forEach(art => {
+                            const codigoSeguro = String(art.codigo).replace(/\//g, '_');
+                            const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                            
+                            // Usamos increment con valor negativo para devolver el stock
+                            batch.set(sombraRef, {
+                                cantidad_vendida: firebase.firestore.FieldValue.increment(-art.cantidad),
+                                ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        });
+                    }
+
+                    // Ejecutamos la base de datos
+                    await batch.commit(); 
+
+                    showToast(`Ticket cancelado y stock restaurado.`); 
+                    loadHistory(); 
+                    if(document.getElementById('view-corte').classList.contains('flex')) loadTodaySales(); 
+                    
+                    // ¡Importante! Actualizamos la pantalla de ventas para que se refleje el stock de inmediato
+                    loadData(false);
+
+                } catch(error) { 
+                    console.error("Error al cancelar:", error);
+                    showToast("Error al cancelar y devolver stock.", "error"); 
+                } 
+            }); 
+        }
 
         const denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50]; let denomCounts = {}; let totalMostradorDelDia = 0;
         
