@@ -3,154 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scanner Inventario - EEN</title>
+    <title>Lector de Inventario - EEN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script> <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        #reader { border: none !important; border-radius: 1.5rem; overflow: hidden; }
+        #reader video { object-fit: cover; }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800 font-sans pb-10">
+<body class="h-screen flex flex-col overflow-hidden relative">
 
     <script src="assets/js/firebase-config.js"></script>
 
-    <header class="bg-slate-900 text-white p-4 shadow-md flex items-center justify-between sticky top-0 z-50">
+    <header class="bg-white border-b border-slate-200 px-4 py-4 flex justify-between items-center z-20 shrink-0 shadow-sm">
         <div class="flex items-center gap-3">
-            <i class="fas fa-boxes text-2xl text-emerald-400"></i>
+            <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+                <i class="fas fa-qrcode text-lg"></i>
+            </div>
             <div>
-                <h1 class="font-black leading-none">Conteo Físico</h1>
-                <p class="text-[10px] text-slate-400 uppercase tracking-widest">Almacén EEN</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Inventario POS</h1>
+                <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1" id="catStatus">Conectando catálogo...</p>
             </div>
         </div>
+        <button onclick="window.location.reload()" class="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center hover:bg-slate-200 transition"><i class="fas fa-sync-alt"></i></button>
     </header>
 
-    <main class="flex-1 p-4 flex flex-col gap-4 max-w-md mx-auto w-full">
-        
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 text-center">
-            <div id="reader" class="w-full rounded-xl overflow-hidden mb-4 bg-slate-100 min-h-[200px] flex items-center justify-center border-2 border-dashed border-slate-300">
-                <p class="text-slate-400 text-sm font-bold"><i class="fas fa-camera text-2xl mb-2 block"></i>Cámara apagada / Lista</p>
-            </div>
-            <div class="flex gap-2">
-                <button id="btnScan" onclick="toggleScanner()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-blue-700 transition flex items-center justify-center gap-2">
-                    <i class="fas fa-qrcode"></i> Escanear
-                </button>
-                <button onclick="buscarManual()" class="flex-1 bg-slate-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-300 transition flex items-center justify-center gap-2">
-                    <i class="fas fa-search"></i> Manual
-                </button>
-            </div>
-        </div>
-
-        <div id="fichaProducto" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500 fade-in">
-            <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1">Producto Identificado</p>
-            <h2 id="prodNombre" class="font-black text-lg leading-tight mb-2">Cargando...</h2>
-            <p class="font-mono text-xs bg-slate-100 inline-block px-2 py-1 rounded text-slate-600 mb-4" id="prodCodigo">---</p>
+    <main class="flex-1 overflow-y-auto custom-scroll p-4 md:p-8 w-full max-w-[1400px] mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-max">
             
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4">
-                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3"><i class="fas fa-layer-group text-blue-500 mr-1"></i> Desglose de Conteo</h3>
-                
-                <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-200">
-                    <div>
-                        <span class="font-bold text-slate-700 block text-sm">Piezas Sueltas</span>
-                        <span class="text-[10px] text-slate-500">Unidades individuales</span>
+            <div class="lg:col-span-5 flex flex-col gap-6 h-max">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl"><i class="fas fa-expand"></i></div>
+                        <div>
+                            <h2 class="font-black text-slate-900 text-lg leading-tight">Lector de Almacén</h2>
+                            <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Gestión Rápida de Stock</p>
+                        </div>
                     </div>
-                    <input type="number" id="conteoSueltas" oninput="recalcularTotalFisico()" class="w-20 text-center font-black text-slate-900 bg-white border-2 border-slate-300 rounded-lg py-2 outline-none focus:border-blue-500 transition-colors" placeholder="0">
+                    
+                    <div id="readerWrapper" class="w-full bg-slate-900 rounded-3xl overflow-hidden aspect-square md:aspect-video flex items-center justify-center relative shadow-inner">
+                        <i class="fas fa-qrcode text-slate-700 text-6xl"></i>
+                        <div id="reader" class="absolute inset-0 w-full h-full object-cover"></div>
+                    </div>
+                    
+                    <div class="mt-5 flex gap-3">
+                        <button id="btnStartScan" onclick="startScanner()" class="bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl font-bold shadow-lg shadow-slate-900/20 transition-all w-full flex items-center justify-center gap-2 text-sm"><i class="fas fa-camera"></i> Activar Lector</button>
+                        <button id="btnStopScan" onclick="stopScanner()" class="bg-red-50 hover:bg-red-100 text-red-600 py-4 rounded-2xl font-bold transition-all w-full flex items-center justify-center gap-2 hidden text-sm"><i class="fas fa-times"></i> Detener Cámara</button>
+                    </div>
+
+                    <div class="mt-4 relative">
+                        <i class="fas fa-keyboard absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="manualCode" placeholder="O escribe el código y presiona Enter..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" onkeypress="if(event.key === 'Enter') procesarCodigo(this.value)">
+                    </div>
                 </div>
 
-                <div id="contenedorEmpaques" class="space-y-3 mb-3">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col relative min-h-[320px] transition-all" id="resultCard">
+                    <div id="scanIdle" class="text-slate-300 flex flex-col items-center justify-center h-full my-12 transition-all">
+                        <div class="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100 shadow-inner" id="scanIdleIconContainer"><i class="fas fa-box-open text-4xl" id="scanIdleIcon"></i></div>
+                        <p class="font-bold text-sm text-slate-400" id="scanIdleText">Esperando lectura de artículo...</p>
                     </div>
 
-                <button onclick="crearNuevoEmpaque()" class="w-full text-xs font-bold text-blue-600 bg-blue-50 py-2 rounded border border-blue-200 hover:bg-blue-100 transition border-dashed">
-                    <i class="fas fa-plus"></i> Añadir Tipo de Empaque
-                </button>
+                    <div id="scanResult" class="hidden w-full fade-in flex flex-col">
+                        <div class="flex items-start gap-4 mb-5 border-b border-slate-100 pb-5">
+                            <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100"><i class="fas fa-cube text-blue-500 text-2xl"></i></div>
+                            <div class="flex-1 min-w-0 pt-1">
+                                <h4 id="scanProductName" class="text-lg font-black text-slate-900 leading-tight mb-2 truncate">Producto</h4>
+                                <span id="scanProductCode" class="inline-block font-mono text-[10px] text-blue-700 bg-blue-50 px-2 py-1 rounded-md font-bold border border-blue-100"></span>
+                            </div>
+                            <div class="text-right shrink-0 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+                                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Stock Web</p>
+                                <p class="text-2xl font-black text-slate-800 leading-none" id="scanProductStock">0</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-3"><i class="fas fa-layer-group text-blue-500 mr-1"></i> Desglose de Cajas/Sueltas:</p>
+                            <div id="scanVariantsList" class="space-y-2"></div>
+                        </div>
+
+                        <div class="bg-slate-900 rounded-2xl p-4 sm:p-5 mb-5 flex justify-between items-center shadow-lg shadow-slate-900/10">
+                            <span class="text-sm font-bold text-slate-300 uppercase tracking-wider">Total a ajustar:</span>
+                            <span class="text-4xl font-black text-white leading-none"><span id="scanTotalMove">0</span><span class="text-[12px] text-slate-500 ml-1">pz</span></span>
+                        </div>
+                        
+                        <div class="flex gap-3 w-full">
+                            <button onclick="updateStockFromScan(1)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-4 sm:py-5 rounded-2xl font-black shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-1"><i class="fas fa-arrow-down text-xl"></i> <span class="text-[10px] sm:text-xs uppercase tracking-wider">Ingresar (+)</span></button>
+                            <button onclick="updateStockFromScan(-1)" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-4 sm:py-5 rounded-2xl font-black shadow-lg shadow-red-500/30 transition-all active:scale-95 flex flex-col items-center justify-center gap-1"><i class="fas fa-arrow-up text-xl"></i> <span class="text-[10px] sm:text-xs uppercase tracking-wider">Extraer (-)</span></button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-4 text-center">
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Total Calculado (Piezas):</label>
-                <div id="conteoFisicoTotalDisplay" class="text-4xl font-black text-blue-700">0</div>
+            <div class="lg:col-span-7 bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full lg:max-h-[850px]">
+                <div class="flex justify-between items-center mb-5 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-slate-50 text-slate-600 flex items-center justify-center border border-slate-100"><i class="fas fa-history"></i></div>
+                        <div>
+                            <h3 class="font-black text-slate-900 text-lg leading-tight">Auditoría / Movimientos</h3>
+                            <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Registro en Vivo</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-full tracking-wider uppercase flex items-center gap-2 shadow-sm"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> En Línea</span>
+                </div>
+                
+                <div class="border border-slate-100 rounded-2xl overflow-hidden flex-1 flex flex-col bg-slate-50/50 relative">
+                    <div class="overflow-y-auto flex-1 custom-scroll p-3 sm:p-4">
+                        <div class="space-y-3" id="bitacoraCards">
+                            <div class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin text-3xl mb-3"></i><br>Cargando registros...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <button onclick="guardarAuditoria()" id="btnGuardar" class="w-full bg-emerald-500 text-white py-4 rounded-xl font-black shadow-lg shadow-emerald-500/30 text-lg flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                <i class="fas fa-save"></i> Guardar Conteo Final
-            </button>
         </div>
-
-        <div id="toast" class="fixed bottom-4 left-4 right-4 bg-slate-800 text-white p-4 rounded-xl shadow-2xl hidden font-bold text-center z-50 transition-opacity duration-300"></div>
-
     </main>
 
-    <style>
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl hidden z-[9999] font-bold text-sm flex items-center gap-3 w-[90%] md:w-max transition-all border border-slate-700">
+        <div id="toastIconContainer" class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0"><i id="toastIcon" class="fas fa-check text-green-400"></i></div><span id="toastMsg" class="flex-1"></span>
+    </div>
 
     <script>
-        let html5QrcodeScanner = null;
-        let isScanning = false;
-        let productoActual = null;
-        let empaquesActuales = [];
+        // ==========================================
+        // VARIABLES GLOBALES Y CEREBRO
+        // ==========================================
+        const db = firebase.firestore();
         let catalogoEnMemoria = [];
+        let html5QrcodeScanner = null;
+        let productoActual = null;
+        let currentScanVariants = []; 
 
-        window.onload = async () => {
+        // 1. CARGAMOS EL JSON MAESTRO (Sin hacer sufrir a Firebase)
+        async function loadJSONCatalog() {
             try {
-                const res = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
-                catalogoEnMemoria = await res.json();
-            } catch(e) {
-                showToast("Aviso: Catálogo local no cargado", true);
-            }
-        };
-
-        function showToast(msg, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.className = `fixed bottom-4 left-4 right-4 p-4 rounded-xl shadow-2xl font-bold text-center z-50 transition-opacity duration-300 ${isError ? 'bg-red-500 text-white' : 'bg-slate-900 text-emerald-400'}`;
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
-        }
-
-        function toggleScanner() {
-            if (isScanning) {
-                html5QrcodeScanner.clear();
-                isScanning = false;
-                document.getElementById('btnScan').innerHTML = '<i class="fas fa-qrcode"></i> Escanear';
-            } else {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-                html5QrcodeScanner.start(
-                    { facingMode: "environment" },
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    onScanSuccess,
-                    (err) => {} // ignorar errores cámara
-                ).catch(e => {
-                    showToast("Error de cámara. Asegúrate de dar permisos.", true);
-                    isScanning = false;
-                });
-                isScanning = true;
-                document.getElementById('btnScan').innerHTML = '<i class="fas fa-stop"></i> Detener';
+                const response = await fetch('catalogo_completo.json');
+                if (!response.ok) throw new Error("JSON no encontrado");
+                catalogoEnMemoria = await response.json();
+                document.getElementById('catStatus').innerHTML = `<i class="fas fa-check-circle text-emerald-500"></i> ${catalogoEnMemoria.length} productos listos`;
+            } catch (error) {
+                console.error("Error al cargar JSON:", error);
+                document.getElementById('catStatus').innerHTML = `<i class="fas fa-exclamation-triangle text-red-500"></i> Error al cargar catálogo`;
+                showToast("No se pudo cargar el catálogo. Verifica que catalogo_completo.json exista.", "error");
             }
         }
 
-        async function onScanSuccess(decodedText) {
-            if(isScanning) toggleScanner();
-            procesarCodigo(decodedText);
+        // Ejecutar al abrir la app
+        window.addEventListener('DOMContentLoaded', () => {
+            loadJSONCatalog();
+            escucharBitacora();
+        });
+
+        // ==========================================
+        // ESCÁNER Y BÚSQUEDA
+        // ==========================================
+        function startScanner() {
+            document.getElementById('btnStartScan').classList.add('hidden'); 
+            document.getElementById('btnStopScan').classList.remove('hidden');
+            document.getElementById('scanIdle').classList.add('hidden'); 
+            document.getElementById('scanResult').classList.add('hidden');
+
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} },
+                (decodedText) => {
+                    html5QrcodeScanner.stop();
+                    document.getElementById('btnStartScan').classList.remove('hidden'); 
+                    document.getElementById('btnStopScan').classList.add('hidden');
+                    procesarCodigo(decodedText);
+                }, 
+                (err) => {}
+            ).catch(err => { 
+                showToast("Cámara no disponible.", "error"); 
+                stopScanner(); 
+            });
         }
 
-        async function buscarManual() {
-            const codigo = prompt("Ingresa el código base, SKU de paquete, o código de barras:");
-            if(codigo) procesarCodigo(codigo.trim());
+        function stopScanner() {
+            if(html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => { 
+                    document.getElementById('btnStartScan').classList.remove('hidden'); 
+                    document.getElementById('btnStopScan').classList.add('hidden'); 
+                }).catch(e => console.log(e));
+            }
         }
 
-       async function procesarCodigo(codigoBuscado) {
+        // EL CEREBRO DE BÚSQUEDA (JSON + Sombra de Firebase)
+        async function procesarCodigo(codigoBuscado) {
             if(catalogoEnMemoria.length === 0) return showToast("Cargando catálogo...", true);
-            showToast("Buscando...");
-            document.getElementById('fichaProducto').classList.add('hidden');
+            document.getElementById('manualCode').value = '';
             
-            // 1. Buscamos en el JSON (que ya trae el cruce de productos_master)
+            showToast("Buscando...", "info");
+            
             let prodBase = null;
             let empaqueDetectado = null;
 
-            // Buscamos si el código escaneado es el código oficial de un producto
+            // 1. Buscamos en el JSON (Base o Empaque)
             prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
 
-            // Si no es un código base, buscamos si es el SKU de alguno de los empaques de cualquier producto
             if (!prodBase) {
                 for (const p of catalogoEnMemoria) {
                     if (p.empaques && p.empaques.length > 0) {
@@ -158,11 +218,7 @@
                             String(e.sku).toLowerCase() === codigoBuscado.toLowerCase() || 
                             String(e.codigo_barras).toLowerCase() === codigoBuscado.toLowerCase()
                         );
-                        if (foundEmp) {
-                            prodBase = p;
-                            empaqueDetectado = foundEmp;
-                            break;
-                        }
+                        if (foundEmp) { prodBase = p; empaqueDetectado = foundEmp; break; }
                     }
                 }
             }
@@ -170,157 +226,268 @@
             if (prodBase) {
                 try {
                     // 2. Traemos la SOMBRA WEB de Firebase (usando el código sanitizado)
-                    // Usamos el código oficial que viene en el JSON
                     const codigoOficial = prodBase.codigo; 
                     const codigoSeguro = String(codigoOficial).replace(/\//g, '_');
                     
-                    let sombraCant = 0;
+                    let sombraCantVendida = 0;
                     const sombraDoc = await db.collection('stock_por_fuera').doc(codigoSeguro).get();
                     if(sombraDoc.exists) {
-                        sombraCant = sombraDoc.data().cantidad_vendida || 0;
+                        sombraCantVendida = sombraDoc.data().cantidad_vendida || 0;
                     }
 
-                    // 3. Armamos la ficha técnica con los datos del JSON
+                    // Stock Real = (Lo que dice el Vercel JSON) - (Lo que se ha vendido/extraído en Firebase)
+                    const stockReal = (prodBase.stock || 0) - sombraCantVendida;
+
+                    // 3. Preparamos los datos para la pantalla
                     productoActual = {
-                        id: prodBase.id || codigoSeguro, // Usamos el ID del JSON o el código seguro
                         codigo_contpaqi: codigoOficial,
                         nombre_producto: prodBase.nombre,
-                        stock_oficial_snapshot: prodBase.stock || 0, // El stock que traía el JSON al descargar
-                        sombra_web_snapshot: sombraCant
+                        stock_base_json: prodBase.stock || 0,
+                        sombra_actual: sombraCantVendida
                     };
 
-                    // Cargamos los empaques que el JSON dice que existen
-                    empaquesActuales = prodBase.empaques || [];
-                    renderEmpaques();
+                    document.getElementById('scanIdle').classList.add('hidden');
+                    document.getElementById('scanResult').classList.remove('hidden');
+                    
+                    document.getElementById('scanProductName').innerText = productoActual.nombre_producto;
+                    document.getElementById('scanProductCode').innerText = productoActual.codigo_contpaqi;
+                    document.getElementById('scanProductStock').innerText = stockReal;
+                    
+                    try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
 
-                    // 4. Mostramos en pantalla
-                    document.getElementById('prodNombre').innerText = productoActual.nombre_producto;
-                    document.getElementById('prodCodigo').innerText = productoActual.codigo_contpaqi;
-                    document.getElementById('conteoSueltas').value = '';
-                    document.getElementById('conteoFisicoTotalDisplay').innerText = '0';
-                    document.getElementById('fichaProducto').classList.remove('hidden');
+                    // 4. Armamos la lista interactiva de cajitas y piezas
+                    currentScanVariants = []; 
+                    
+                    // Variante 1: Sueltas
+                    currentScanVariants.push({ 
+                        label: 'Piezas Sueltas (1pz)', sku: codigoOficial, piezas: 1, 
+                        qtyDetected: (!empaqueDetectado) ? 1 : 0 
+                    });
 
-                    if(empaqueDetectado) {
-                        showToast(`Paquete detectado: ${empaqueDetectado.sku}`);
-                        // Opcional: Podríamos ponerle foco al input de ese empaque específico aquí
+                    // Variantes Extra: Empaques del JSON
+                    if(prodBase.empaques) {
+                        prodBase.empaques.forEach(pkg => {
+                            currentScanVariants.push({ 
+                                label: `Paquete (${pkg.piezas}pz)`, sku: pkg.sku, piezas: pkg.piezas, 
+                                qtyDetected: (empaqueDetectado && empaqueDetectado.sku === pkg.sku) ? 1 : 0 
+                            });
+                        });
                     }
+
+                    currentScanVariants.sort((a,b) => a.piezas - b.piezas);
+                    renderVariantsList();
 
                 } catch (error) {
                     console.error("Error al leer sombra:", error);
-                    showToast("Error al conectar con la Sombra Web", true);
+                    showToast("Error al conectar con el servidor", "error");
                 }
             } else {
-                showToast("Código no reconocido en el catálogo", true);
+                showToast("Código no encontrado en el catálogo", "error");
+                mostrarErrorVisual();
             }
         }
-        function renderEmpaques() {
-            const container = document.getElementById('contenedorEmpaques');
-            container.innerHTML = '';
+
+        // ==========================================
+        // UI DE VARIANTES Y BOTONES +/-
+        // ==========================================
+        function renderVariantsList() {
+            const listContainer = document.getElementById('scanVariantsList'); 
+            listContainer.innerHTML = '';
             
-            empaquesActuales.forEach((emp, index) => {
-                const pzas = emp.cantidad_piezas || emp.cantidad || 0;
-                container.innerHTML += `
-                    <div class="flex justify-between items-center bg-white p-2 border border-slate-200 rounded shadow-sm">
-                        <div class="flex-1">
-                            <span class="font-bold text-slate-700 block text-xs">Paquetes de ${pzas} pzs</span>
-                            <span class="text-[9px] font-mono text-slate-400">${emp.sku || 'S/SKU'}</span>
+            currentScanVariants.forEach((v, index) => {
+                const isDetected = v.qtyDetected > 0; 
+                const bgClass = isDetected ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-slate-50 border-slate-100';
+                
+                listContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-3.5 rounded-2xl border ${bgClass} transition-colors" id="rowVar_${index}">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <p class="font-black text-slate-800 text-xs flex items-center gap-1.5 truncate">
+                                <i class="fas ${v.piezas === 1 ? 'fa-cube' : 'fa-boxes'} ${isDetected ? 'text-blue-500' : 'text-slate-400'}" id="iconVar_${index}"></i> ${v.label}
+                            </p>
+                            <p class="text-[9px] text-slate-500 font-mono mt-0.5 truncate">${v.sku}</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] text-slate-400 font-bold">Cant:</span>
-                            <input type="number" id="conteoEmpaque_${index}" data-piezas="${pzas}" oninput="recalcularTotalFisico()" class="w-16 text-center font-bold text-slate-800 bg-slate-50 border border-slate-300 rounded py-1 outline-none focus:border-blue-500" placeholder="0">
+                        <div class="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-slate-100">
+                            <button onclick="changeVariantQty(${index}, -1)" class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition active:scale-95"><i class="fas fa-minus text-xs"></i></button>
+                            <input type="number" min="0" value="${v.qtyDetected}" id="varInput_${index}" oninput="manualVariantQty(${index}, this.value)" class="w-10 text-center font-black text-slate-900 py-1 border-none bg-transparent text-sm focus:ring-0 outline-none">
+                            <button onclick="changeVariantQty(${index}, 1)" class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition active:scale-95"><i class="fas fa-plus text-xs"></i></button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
+            recalculateScanTotal();
         }
 
-        function recalcularTotalFisico() {
-            let total = 0;
-            // Sumar sueltas
-            const sueltas = parseInt(document.getElementById('conteoSueltas').value) || 0;
-            total += sueltas;
+        window.changeVariantQty = (index, delta) => {
+            let newVal = currentScanVariants[index].qtyDetected + delta; 
+            if(newVal < 0) newVal = 0;
+            currentScanVariants[index].qtyDetected = newVal; 
+            document.getElementById(`varInput_${index}`).value = newVal; 
+            recalculateScanTotal();
+            actualizarEstilosFila(index, newVal);
+        };
 
-            // Sumar empaques (Cajas * Piezas por caja)
-            empaquesActuales.forEach((emp, index) => {
-                const cajas = parseInt(document.getElementById(`conteoEmpaque_${index}`).value) || 0;
-                const pzasPorCaja = emp.cantidad_piezas || emp.cantidad || 0;
-                total += (cajas * pzasPorCaja);
-            });
+        window.manualVariantQty = (index, val) => { 
+            let num = parseInt(val) || 0; if(num < 0) num = 0; 
+            currentScanVariants[index].qtyDetected = num; 
+            recalculateScanTotal(); 
+            actualizarEstilosFila(index, num);
+        };
 
-            document.getElementById('conteoFisicoTotalDisplay').innerText = total;
+        function actualizarEstilosFila(index, qty) {
+            const row = document.getElementById(`rowVar_${index}`);
+            const icon = document.getElementById(`iconVar_${index}`);
+            const esCaja = currentScanVariants[index].piezas > 1;
+            if(qty > 0) { 
+                row.className = "flex items-center justify-between p-3.5 rounded-2xl border bg-blue-50 border-blue-200 shadow-sm transition-colors"; 
+                icon.className = `fas ${esCaja ? 'fa-boxes' : 'fa-cube'} text-blue-500`; 
+            } else { 
+                row.className = "flex items-center justify-between p-3.5 rounded-2xl border bg-slate-50 border-slate-100 transition-colors"; 
+                icon.className = `fas ${esCaja ? 'fa-boxes' : 'fa-cube'} text-slate-400`; 
+            }
         }
 
-        async function crearNuevoEmpaque() {
+        function recalculateScanTotal() { 
+            let total = 0; 
+            currentScanVariants.forEach(v => { total += (v.piezas * v.qtyDetected); }); 
+            document.getElementById('scanTotalMove').innerText = total; 
+        }
+
+        // ==========================================
+        // LA MAGIA: ACTUALIZAR INVENTARIO SOMBRA Y BITÁCORA
+        // ==========================================
+        async function updateStockFromScan(sign) {
             if(!productoActual) return;
-            const pzasStr = prompt(`Crear nuevo empaque para ${productoActual.codigo_contpaqi}\n¿Cuántas piezas contiene el nuevo paquete?`);
-            const pzas = parseInt(pzasStr);
             
-            if(isNaN(pzas) || pzas <= 0) return showToast("Cantidad no válida", true);
+            let totalPiezasMover = parseInt(document.getElementById('scanTotalMove').innerText) || 0;
+            if(totalPiezasMover === 0) return showToast("Ajusta la cantidad primero", "error");
 
-            const nuevoSku = `${productoActual.codigo_contpaqi}-${pzas}`;
-            const nuevoEmpaque = { sku: nuevoSku, cantidad_piezas: pzas, codigo_barras: nuevoSku };
+            let detailParts = [];
+            currentScanVariants.forEach(v => { 
+                if(v.qtyDetected > 0) detailParts.push(`${v.qtyDetected} x ${v.label}`); 
+            });
+
+            const codigoSeguro = String(productoActual.codigo_contpaqi).replace(/\//g, '_');
+            
+            // LÓGICA DE SOMBRA:
+            // Si SIGN = 1 (Ingresar), queremos que haya MÁS stock disponible. 
+            // Como Disponible = Oficial - Vendido, necesitamos que Vendido BAJE.
+            // Por lo tanto: Ajuste = (1) * Total * (-1) = -Total
+            // Si SIGN = -1 (Extraer/Merma), queremos MENOS stock disponible.
+            // Necesitamos que Vendido SUBA. Ajuste = (-1) * Total * (-1) = +Total
+            const ajusteEnCantidadVendida = sign * totalPiezasMover * -1;
 
             try {
-                showToast("Creando paquete...");
-                await db.collection('productos').doc(productoActual.id).update({
-                    empaques: firebase.firestore.FieldValue.arrayUnion(nuevoEmpaque)
+                const batch = db.batch();
+                
+                // 1. Modificar la Sombra Web
+                const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                batch.set(sombraRef, {
+                    cantidad_vendida: firebase.firestore.FieldValue.increment(ajusteEnCantidadVendida),
+                    ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                // 2. Escribir en la Bitácora de Auditoría
+                const newLogRef = db.collection('bitacora').doc();
+                batch.set(newLogRef, {
+                    producto_id: codigoSeguro, // Usamos el código porque no dependemos de un Document ID de Firebase
+                    nombre_producto: productoActual.nombre_producto,
+                    codigo_oficial: productoActual.codigo_contpaqi,
+                    cambio: sign * totalPiezasMover, // Este es el cambio visual para el humano (+ o - piezas)
+                    detalle_scan: detailParts.join(", "), 
+                    fecha: firebase.firestore.FieldValue.serverTimestamp(),
+                    usuario: 'Lector Almacén (App)'
                 });
-                empaquesActuales.push(nuevoEmpaque);
-                renderEmpaques();
-                showToast(`Paquete ${nuevoSku} creado.`);
-            } catch(e) {
-                console.error(e);
-                showToast("Error al guardar paquete", true);
+
+                await batch.commit();
+
+                // Actualizar interfaz visualmente sumando/restando el stock local
+                const currStock = parseInt(document.getElementById('scanProductStock').innerText);
+                document.getElementById('scanProductStock').innerText = currStock + (sign * totalPiezasMover);
+                
+                showToast(`Stock modificado con éxito`);
+                
+                // Resetear contadores de la interfaz
+                currentScanVariants.forEach(v => v.qtyDetected = 0);
+                renderVariantsList();
+
+            } catch (error) { 
+                console.error(error);
+                showToast("Error de conexión al guardar", "error"); 
             }
         }
 
-        async function guardarAuditoria() {
-            const conteoTotal = parseInt(document.getElementById('conteoFisicoTotalDisplay').innerText);
-            if (isNaN(conteoTotal) || conteoTotal < 0) return showToast("El conteo no es válido", true);
-            if (!productoActual) return;
-
-            const btn = document.getElementById('btnGuardar');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-            btn.disabled = true;
-
-            // FOTOGRAFÍA: Lo que CONTPAQi decía MENOS lo que Mostrador ya vendió
-            const esperado = productoActual.stock_oficial_snapshot - productoActual.sombra_web_snapshot;
-            const ajuste = conteoTotal - esperado;
-
-            // Guardamos todo el detalle para la bitácora
-            const detalleConteo = {
-                sueltas: parseInt(document.getElementById('conteoSueltas').value) || 0,
-                empaques: empaquesActuales.map((emp, idx) => ({
-                    sku: emp.sku,
-                    piezas_por_paquete: emp.cantidad_piezas || emp.cantidad || 0,
-                    cantidad_paquetes: parseInt(document.getElementById(`conteoEmpaque_${idx}`).value) || 0
-                }))
-            };
-
-            const ticket = {
-                id_producto: productoActual.id,
-                codigo_contpaqi: productoActual.codigo_contpaqi,
-                nombre_producto: productoActual.nombre_producto,
-                esperado: esperado,
-                conteo_fisico: conteoTotal, // Siempre mandamos el total en PIEZAS a Admin/Contpaqi
-                ajuste_calculado: ajuste,
-                detalle_conteo: detalleConteo,
-                fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                estado: 'pendiente'
-            };
-
-            try {
-                await db.collection('auditorias_pendientes').add(ticket);
-                showToast("¡Inventario guardado!");
-                document.getElementById('fichaProducto').classList.add('hidden');
-                productoActual = null;
-            } catch (error) {
-                console.error(error);
-                showToast("Error al guardar", true);
-            } finally {
-                btn.innerHTML = '<i class="fas fa-save"></i> Guardar Conteo Final';
-                btn.disabled = false;
+        // ==========================================
+        // UTILIDADES UI Y BITÁCORA EN TIEMPO REAL
+        // ==========================================
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            const iconC = document.getElementById('toastIconContainer');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMsg').innerText = msg;
+            
+            if(type === 'error') {
+                iconC.className = "w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center shrink-0";
+                icon.className = "fas fa-exclamation text-red-400";
+            } else if(type === 'info') {
+                iconC.className = "w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0";
+                icon.className = "fas fa-info text-blue-400";
+            } else {
+                iconC.className = "w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0";
+                icon.className = "fas fa-check text-green-400";
             }
+            t.classList.remove('hidden'); t.classList.add('scale-in');
+            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('scale-in'); }, 3000);
+        }
+
+        function mostrarErrorVisual() {
+            document.getElementById('scanIdle').classList.remove('hidden');
+            document.getElementById('scanResult').classList.add('hidden');
+            const idleIconCont = document.getElementById('scanIdleIconContainer');
+            const idleIcon = document.getElementById('scanIdleIcon');
+            const idleText = document.getElementById('scanIdleText');
+            
+            idleIconCont.className = "w-24 h-24 rounded-full bg-red-50 flex items-center justify-center mb-5 border border-red-100 transition-all shadow-inner";
+            idleIcon.className = "fas fa-times text-4xl text-red-400";
+            idleText.className = "font-bold text-sm text-red-500";
+            idleText.innerText = "Producto no encontrado.";
+            
+            setTimeout(() => {
+                idleIconCont.className = "w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100 transition-all shadow-inner";
+                idleIcon.className = "fas fa-box-open text-4xl text-slate-400";
+                idleText.className = "font-bold text-sm text-slate-400";
+                idleText.innerText = "Esperando lectura de artículo...";
+            }, 3000);
+        }
+
+        function escucharBitacora() {
+            db.collection('bitacora').orderBy('fecha', 'desc').limit(15).onSnapshot(snap => {
+                const container = document.getElementById('bitacoraCards');
+                if(!container) return;
+                if(snap.empty) { container.innerHTML = '<div class="text-center py-10 text-slate-400 font-medium text-sm"><div class="text-4xl mb-3">🕒</div>Aún no hay movimientos hoy.</div>'; return; }
+                
+                container.innerHTML = '';
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    const fecha = (data.fecha && typeof data.fecha.toDate === 'function') ? data.fecha.toDate() : new Date();
+                    const strHora = fecha.toLocaleString('es-MX', {hour:'2-digit', minute:'2-digit'});
+                    
+                    const isPos = data.cambio > 0; // Si el cambio visual fue positivo (ingreso)
+                    const color = isPos ? 'emerald' : 'red';
+                    const signo = isPos ? '+' : '';
+                    const icon = isPos ? 'fa-arrow-down' : 'fa-arrow-up';
+                    let detalleHtml = '';
+                    if(data.detalle_scan) detalleHtml = `<div class="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-medium leading-relaxed"><b>Desglose:</b> ${data.detalle_scan}</div>`;
+
+                    container.innerHTML += `
+                        <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex gap-3 items-start animate-[fadeIn_0.3s_ease-out]">
+                            <div class="w-10 h-10 rounded-xl bg-${color}-50 text-${color}-500 flex items-center justify-center shrink-0"><i class="fas ${icon} text-sm"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start mb-0.5"><h4 class="font-black text-slate-800 text-xs truncate pr-2">${data.nombre_producto}</h4><span class="font-black text-${color}-600 text-sm shrink-0">${signo}${data.cambio}</span></div>
+                                <div class="flex justify-between items-center"><span class="text-[9px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">${data.codigo_oficial || '-'}</span><span class="text-[10px] font-bold text-slate-400">${strHora}</span></div>
+                                ${detalleHtml}
+                            </div>
+                        </div>`;
+                });
+            });
         }
     </script>
 </body>
