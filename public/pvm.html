@@ -1485,6 +1485,39 @@
             
             const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(wsData); ws['!cols'] = [ {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, {wch: 28}, {wch: 10}, {wch: 14} ]; XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja"); XLSX.writeFile(wb, `Corte_${fileDate}.xlsx`); showToast("Bitácora exportada.");
         }
+        // --- SISTEMA DE ACTUALIZACIÓN AUTOMÁTICA DEL CATÁLOGO ---
+        let ultimaHoraActualizada = -1; // Para evitar que se actualice 2 veces en el mismo minuto
+
+        function verificarActualizacionAutomatica() {
+            const ahora = new Date();
+            const dia = ahora.getDay(); // 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
+            const hora = ahora.getHours();
+            const minuto = ahora.getMinutes();
+
+            // Solo actuamos si estamos en el minuto 3 (ej. 9:03, 10:03) y no se ha actualizado en esta hora
+            if (minuto === 3 && ultimaHoraActualizada !== hora) {
+                let hacerActualizacion = false;
+
+                // Lunes a Viernes (días 1 a 5): De 9:00 a 18:00
+                if (dia >= 1 && dia <= 5 && hora >= 9 && hora <= 18) {
+                    hacerActualizacion = true;
+                }
+                // Sábados (día 6): De 9:00 a 14:00
+                else if (dia === 6 && hora >= 9 && hora <= 14) {
+                    hacerActualizacion = true;
+                }
+
+                if (hacerActualizacion) {
+                    console.log("Sincronización automática de las " + hora + ":03 ejecutada.");
+                    loadData(true); // Forzamos la descarga del nuevo JSON
+                    ultimaHoraActualizada = hora; // Registramos que ya se actualizó esta hora
+                }
+            }
+        }
+
+        // Revisar el reloj cada 30 segundos (30000 milisegundos)
+        setInterval(verificarActualizacionAutomatica, 30000);
+        // --------------------------------------------------------
 
         window.onload = () => { 
             verificarLogin(); cargarUsuariosPOS(); loadData(); initCorteUI(); precargarImagenesImpresion();
