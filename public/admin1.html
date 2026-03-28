@@ -324,31 +324,33 @@
                 </div>
             </div>
 
-            <div id="view-audit" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
-                <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl border border-indigo-500/30">
-                            <i class="fas fa-clipboard-check"></i>
+            <div id="view-audit" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in gap-6">
+                
+                <div class="flex-1 flex flex-col min-h-0 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    <div class="shrink-0 bg-slate-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl border border-indigo-500/30">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-black text-white text-lg">Auditorías Pendientes</h2>
+                                <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Fotografías de conteo para CONTPAQi</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 class="font-black text-white text-lg">Auditorías Pendientes</h2>
-                            <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Fotografías de conteo para CONTPAQi</p>
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <button onclick="exportarAuditoriasExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
+                                <i class="fas fa-file-excel"></i> Excel CONTPAQi
+                            </button>
+                            <button onclick="procesarAjustesSeleccionados()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
+                                <i class="fas fa-check-double"></i> Marcar Ajustados
+                            </button>
                         </div>
                     </div>
-                    <div class="flex gap-3 w-full sm:w-auto">
-                        <button onclick="exportarAuditoriasExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
-                            <i class="fas fa-file-excel"></i> Excel CONTPAQi
-                        </button>
-                        <button onclick="procesarAjustesSeleccionados()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
-                            <i class="fas fa-check-double"></i> Marcar Ajustados
-                        </button>
+                    
+                    <div class="bg-blue-50/50 p-3 border-b border-blue-100 flex items-center gap-2 text-xs text-blue-800 font-medium shrink-0">
+                        <i class="fas fa-info-circle text-blue-500"></i> Al marcar como ajustados, los tickets se archivan y la Sombra Web se resetea a 0.
                     </div>
-                </div>
-
-                <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                    <div class="bg-blue-50/50 p-3 border-b border-blue-100 flex items-center gap-2 text-xs text-blue-800 font-medium">
-                        <i class="fas fa-info-circle text-blue-500"></i> Al marcar como ajustados, los tickets se archivan y la Sombra Web de esos productos se resetea a 0.
-                    </div>
+                    
                     <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
                         <table class="w-full text-left text-sm whitespace-nowrap min-w-[900px]">
                             <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
@@ -362,11 +364,27 @@
                                     <th class="px-4 py-3 text-center border-b border-slate-200 font-black">Ajuste</th>
                                 </tr>
                             </thead>
-                            <tbody id="auditTableBody" class="divide-y divide-slate-100">
-                                </tbody>
+                            <tbody id="auditTableBody" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
+
+                <div class="flex-1 flex flex-col min-h-0 bg-slate-100/50 rounded-3xl border border-slate-200 overflow-hidden relative p-4">
+                    <div class="flex items-center gap-3 mb-4 shrink-0 px-2">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-600 flex items-center justify-center border border-blue-500/30">
+                            <i class="fas fa-history text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-black text-slate-800 text-lg leading-tight">Historial de Movimientos</h2>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Bitácora en tiempo real (PVM e Inventario)</p>
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto flex-1 custom-scroll pr-2">
+                        <div id="bitacoraCards" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pb-4">
+                            </div>
+                    </div>
+                </div>
+                
             </div>
 
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
@@ -720,6 +738,29 @@
         let sortConfig = { key: 'fecha_creacion', desc: true };
         let sortGroupConfig = { key: 'codigo', desc: false };
         let sortImportConfig = { key: 'codigo', desc: false };
+
+        // Añade esta variable global junto a las demás:
+        let stockPorFueraData = {}; 
+
+        function initializeData(rolUsuario) {
+            if (isDataInitialized) return;
+            isDataInitialized = true;
+
+            inicializarAuditorias();
+
+            // *** NUEVO: LISTENER EN TIEMPO REAL PARA EL STOCK POR FUERA ***
+            db.collection('stock_por_fuera').onSnapshot((snapshot) => {
+                stockPorFueraData = {};
+                snapshot.forEach(doc => {
+                    stockPorFueraData[doc.id] = doc.data().cantidad_vendida || 0;
+                });
+                
+                // Si el usuario hace un ajuste desde PVM o inventario, 
+                // re-pintamos la tabla maestro inmediatamente sin recargar la página
+                if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
+            }, (error) => console.error("Error al cargar stock por fuera:", error));
+
+            // ... (el resto de tu función productsRef.onSnapshot sigue normal) ...
 
         auth.onAuthStateChanged(async (user) => {
             const overlay = document.getElementById('loginOverlay');
@@ -1109,14 +1150,24 @@ window.solicitarActualizacionGitHub = async () => {
     }
 };
 
-        function getCalculatedStock(itemId, visited = new Set()) {
+       function getCalculatedStock(itemId, visited = new Set()) {
             if (visited.has(itemId)) return 0;
             visited.add(itemId);
             
             const item = allItems.find(x => x.id === itemId);
             if (!item) return 0;
 
-            if (item.tipo_item !== 'KIT_FLEXIBLE') return item.stock_total_piezas || 0;
+            // Si es una pieza base, restamos la sombra (ajustes / ventas)
+            if (item.tipo_item !== 'KIT_FLEXIBLE') {
+                let stockBase = item.stock_total_piezas || 0;
+                
+                // Sanitizamos el código igual que en el ticket para cruzarlo con la sombra
+                let safeCode = String(item.codigo_sistema_oficial || '').replace(/\//g, '_');
+                let sombra = stockPorFueraData[safeCode] || 0;
+                
+                return stockBase - sombra;
+            }
+
             if (!item.receta_desglose || Object.keys(item.receta_desglose).length === 0) return 0;
 
             let maxKits = Infinity;
