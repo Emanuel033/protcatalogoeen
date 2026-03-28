@@ -742,26 +742,6 @@
         // Añade esta variable global junto a las demás:
         let stockPorFueraData = {}; 
 
-        function initializeData(rolUsuario) {
-            if (isDataInitialized) return;
-            isDataInitialized = true;
-
-            inicializarAuditorias();
-
-            // *** NUEVO: LISTENER EN TIEMPO REAL PARA EL STOCK POR FUERA ***
-            db.collection('stock_por_fuera').onSnapshot((snapshot) => {
-                stockPorFueraData = {};
-                snapshot.forEach(doc => {
-                    stockPorFueraData[doc.id] = doc.data().cantidad_vendida || 0;
-                });
-                
-                // Si el usuario hace un ajuste desde PVM o inventario, 
-                // re-pintamos la tabla maestro inmediatamente sin recargar la página
-                if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
-            }, (error) => console.error("Error al cargar stock por fuera:", error));
-
-            // ... (el resto de tu función productsRef.onSnapshot sigue normal) ...
-
         auth.onAuthStateChanged(async (user) => {
             const overlay = document.getElementById('loginOverlay');
             if (user) {
@@ -867,10 +847,20 @@
         }
 
         function initializeData(rolUsuario) {
-            if (isDataInitialized) return;
-            isDataInitialized = true;
+    if (isDataInitialized) return;
+    isDataInitialized = true;
 
-            inicializarAuditorias(); // <---- AQUÍ ESTÁ EL ARREGLO DE AUDITORÍA
+    inicializarAuditorias(); // <---- AQUÍ ESTÁ EL ARREGLO DE AUDITORÍA
+
+    // 👇 PEGA SOLO EL LISTENER NUEVO AQUÍ 👇
+    // *** NUEVO: LISTENER EN TIEMPO REAL PARA EL STOCK POR FUERA ***
+    db.collection('stock_por_fuera').onSnapshot((snapshot) => {
+        stockPorFueraData = {};
+        snapshot.forEach(doc => {
+            stockPorFueraData[doc.id] = doc.data().cantidad_vendida || 0;
+        });
+        if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
+    }, (error) => console.error("Error al cargar stock por fuera:", error));
 
             productsRef.onSnapshot((snapshot) => {
                 allItems = []; baseItems = []; let pendingCount = 0;
