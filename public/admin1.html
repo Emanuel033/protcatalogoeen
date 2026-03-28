@@ -325,79 +325,56 @@
             </div>
 
             <div id="view-audit" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
-    <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl border border-indigo-500/30">
-                <i class="fas fa-clipboard-check"></i>
-            </div>
-            <div>
-                <h2 class="font-black text-white text-lg">Auditorías Pendientes</h2>
-                <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Fotografías de conteo para CONTPAQi</p>
-            </div>
-        </div>
-        <div class="flex gap-3 w-full sm:w-auto">
-            <button onclick="exportarAuditoriasExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
-                <i class="fas fa-file-excel"></i> Excel CONTPAQi
-            </button>
-            <button onclick="procesarAjustesSeleccionados()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
-                <i class="fas fa-check-double"></i> Marcar Ajustados
-            </button>
-        </div>
-    </div>
+                <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl border border-indigo-500/30">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-black text-white text-lg">Auditorías Pendientes</h2>
+                            <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Fotografías de conteo para CONTPAQi</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        <button onclick="exportarAuditoriasExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
+                            <i class="fas fa-file-excel"></i> Excel CONTPAQi
+                        </button>
+                        <button onclick="procesarAjustesSeleccionados()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
+                            <i class="fas fa-check-double"></i> Marcar Ajustados
+                        </button>
+                    </div>
+                </div>
 
-    <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-        <div class="bg-blue-50/50 p-3 border-b border-blue-100 flex items-center gap-2 text-xs text-blue-800 font-medium">
-            <i class="fas fa-info-circle text-blue-500"></i> Al marcar como ajustados, los tickets se archivan y la Sombra Web de esos productos se resetea a 0.
-        </div>
-        <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
-            <table class="w-full text-left text-sm whitespace-nowrap min-w-[900px]">
-                <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
-                    <tr>
-                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllAudit" onclick="toggleSelectAllAudit()" class="cb-modern"></th>
-                        <th class="px-4 py-3 border-b border-slate-200">Fecha Fotografía</th>
-                        <th class="px-4 py-3 border-b border-slate-200">Código CONTPAQi</th>
-                        <th class="px-4 py-3 border-b border-slate-200">Producto</th>
-                        <th class="px-4 py-3 text-center border-b border-slate-200 bg-slate-100/50" title="Stock + Sombra">Esperado</th>
-                        <th class="px-4 py-3 text-center border-b border-slate-200 bg-blue-50/50 text-blue-700">Conteo Físico</th>
-                        <th class="px-4 py-3 text-center border-b border-slate-200 font-black">Ajuste</th>
-                    </tr>
-                </thead>
-                <tbody id="auditTableBody" class="divide-y divide-slate-100">
-                    </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                    <div class="bg-blue-50/50 p-3 border-b border-blue-100 flex items-center gap-2 text-xs text-blue-800 font-medium">
+                        <i class="fas fa-info-circle text-blue-500"></i> Al marcar como ajustados, los tickets se archivan y la Sombra Web de esos productos se resetea a 0.
+                    </div>
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
+                        <table class="w-full text-left text-sm whitespace-nowrap min-w-[900px]">
+                            <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
+                                <tr>
+                                    <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllAudit" onclick="toggleSelectAllAudit()" class="cb-modern"></th>
+                                    <th class="px-4 py-3 border-b border-slate-200">Fecha Fotografía</th>
+                                    <th class="px-4 py-3 border-b border-slate-200">Código CONTPAQi</th>
+                                    <th class="px-4 py-3 border-b border-slate-200">Producto</th>
+                                    <th class="px-4 py-3 text-center border-b border-slate-200 bg-slate-100/50" title="Stock + Sombra">Esperado</th>
+                                    <th class="px-4 py-3 text-center border-b border-slate-200 bg-blue-50/50 text-blue-700">Conteo Físico</th>
+                                    <th class="px-4 py-3 text-center border-b border-slate-200 font-black">Ajuste</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTableBody" class="divide-y divide-slate-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
                 <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 relative overflow-hidden shadow-sm">
                    <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
-                        <input type="file" id="csvSyncKitsPartial" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL', true)">
-                        <input type="file" id="csvSyncKitsTotal" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'KIT_OFICIAL', false)">
-                        <input type="file" id="csvSyncBasePartial" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE', true)">
-                        <input type="file" id="csvSyncBaseTotal" accept=".csv, .xlsx" class="hidden" onchange="handleCSVUpload(event, 'PIEZA_BASE', false)">
-
                         <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
                             <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span>
                         </button>
-
-                        <div class="flex flex-1 sm:flex-none gap-1">
-                            <button onclick="document.getElementById('csvSyncKitsPartial').click()" class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Solo agrega/actualiza Paquetes">
-                                <i class="fas fa-plus"></i> Paquetes (Parcial)
-                            </button>
-                            <button onclick="document.getElementById('csvSyncKitsTotal').click()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Reemplaza todos los Paquetes">
-                                <i class="fas fa-sync"></i> Paquetes (Total)
-                            </button>
-                        </div>
-
-                        <div class="flex flex-1 sm:flex-none gap-1">
-                            <button onclick="document.getElementById('csvSyncBasePartial').click()" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Solo agrega/actualiza productos">
-                                <i class="fas fa-plus"></i> Producto (Parcial)
-                            </button>
-                            <button onclick="document.getElementById('csvSyncBaseTotal').click()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl font-bold text-[10px] transition shadow-sm flex flex-col items-center justify-center" title="Reemplaza todas las productos">
-                                <i class="fas fa-sync"></i> Producto (Total)
-                            </button>
-                        </div>
                     </div>
                 </div>
 
@@ -669,60 +646,6 @@
         </div>
     </div>
 
-    <div id="syncPreviewModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[400] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg flex flex-col overflow-hidden slide-up border border-slate-100">
-            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <i class="fas fa-clipboard-check text-lg"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-black text-slate-900 leading-tight">Resumen de Importación</h2>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider" id="previewTargetName">Validación de datos</p>
-                    </div>
-                </div>
-                <button onclick="closeModal('syncPreviewModal')" class="w-8 h-8 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition"><i class="fas fa-times"></i></button>
-            </div>
-            
-            <div class="p-6 space-y-5">
-                <div id="previewCrossWarning" class="hidden bg-red-50 border border-red-200 p-4 rounded-2xl flex items-start gap-3">
-                    <i class="fas fa-exclamation-triangle text-red-500 text-xl mt-0.5 animate-pulse"></i>
-                    <div>
-                        <h4 class="font-black text-red-700 text-sm">¡Peligro de Archivo Cruzado!</h4>
-                        <p class="text-xs text-red-600 font-medium mt-1" id="previewCrossText">Hemos detectado que X códigos de este archivo ya existen pero están registrados como el tipo contrario.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-center">
-                        <i class="fas fa-cloud-upload-alt text-blue-500 text-xl mb-2"></i>
-                        <p class="text-3xl font-black text-slate-800" id="previewCountUpdate">0</p>
-                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-1">Nuevos / Act.</p>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-center">
-                        <i class="fas fa-trash-alt text-red-500 text-xl mb-2"></i>
-                        <p class="text-3xl font-black text-slate-800" id="previewCountDelete">0</p>
-                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-1">A Eliminar</p>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl text-center opacity-70">
-                        <i class="fas fa-check-double text-slate-400 text-xl mb-2"></i>
-                        <p class="text-3xl font-black text-slate-600" id="previewCountSkip">0</p>
-                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-1">Intactos</p>
-                    </div>
-                </div>
-                
-                <p class="text-[11px] text-slate-500 font-medium text-center bg-blue-50/50 p-2 rounded-lg">Aún no se ha guardado nada en la base de datos. Revisa los números y confirma para proceder.</p>
-            </div>
-            
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3">
-                <button onclick="closeModal('syncPreviewModal')" class="flex-1 py-3.5 text-slate-600 font-bold text-sm hover:bg-slate-200 rounded-xl transition">Cancelar</button>
-                <button onclick="executeConfirmedSync()" class="flex-[2] py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black shadow-lg shadow-blue-500/30 text-sm transition-all flex items-center justify-center gap-2">
-                    <i class="fas fa-save"></i> Confirmar y Aplicar
-                </button>
-            </div>
-        </div>
-    </div>
-
     <div id="customDialogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm flex flex-col overflow-hidden slide-up border border-slate-100 p-6">
             <h3 id="customDialogMsg" class="font-black text-slate-800 text-sm mb-4 whitespace-pre-line text-center"></h3>
@@ -905,6 +828,8 @@
         function initializeData(rolUsuario) {
             if (isDataInitialized) return;
             isDataInitialized = true;
+
+            inicializarAuditorias(); // <---- AQUÍ ESTÁ EL ARREGLO DE AUDITORÍA
 
             productsRef.onSnapshot((snapshot) => {
                 allItems = []; baseItems = []; let pendingCount = 0;
@@ -2311,299 +2236,119 @@ window.solicitarActualizacionGitHub = async () => {
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
         };
 
-        // --- LÓGICA DE IMPORTACIÓN CSV/EXCEL ---
-        let pendingSyncData = null;
-
-        async function handleCSVUpload(event, tipoAsignado, isPartial) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const overlay = document.getElementById('syncOverlay');
-            const statusText = document.getElementById('syncStatusText');
-            
-            overlay.classList.remove('hidden');
-            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            statusText.innerText = "Analizando y calculando cambios...";
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = e.target.result;
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-                    let headerRowIndex = 0;
-                    for (let i = 0; i < Math.min(20, rawData.length); i++) {
-                        const rowText = rawData[i].join('').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                        if (rowText.includes('cod') || rowText.includes('sku') || rowText.includes('clave')) {
-                            headerRowIndex = i; break;
-                        }
-                    }
-
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: "", blankrows: false });
-
-                    const productosAActualizar = [];
-                    const idsProcesados = new Set();
-                    let alertasCruce = 0; 
-
-                    jsonRows.forEach(row => {
-                        const cleanRow = {};
-                        for (let key in row) {
-                            const cleanKey = String(key).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
-                            cleanRow[cleanKey] = row[key];
-                        }
-
-                        let codigoRaw = "";
-                        for (let key in cleanRow) { if (key.includes('cod') || key.includes('sku') || key.includes('clave')) { codigoRaw = cleanRow[key]; break; } }
-                        const descripcion = cleanRow['nombre(prod)'] || cleanRow['nombre'] || cleanRow['descripcion'] || cleanRow['articulo'];
-                        
-                        let precioRaw = 0;
-                        for (let key in cleanRow) { if (key.includes('precio') || key.includes('prec') || key.includes('costo') || key.includes('importe') || key.includes('valor')) { precioRaw = cleanRow[key]; break; } }
-
-                        if (codigoRaw && String(codigoRaw).trim() !== "") {
-                            let precioNumerico = parseFloat(String(precioRaw).replace(/[^0-9.-]+/g,"")); 
-                            if (isNaN(precioNumerico)) precioNumerico = 0;
-
-                            const idSeguroFirebase = String(codigoRaw).replace(/\//g, '-').replace(/\\/g, '-');
-                            idsProcesados.add(idSeguroFirebase);
-
-                            const itemExistente = facturacionCatalog.find(f => f.id === idSeguroFirebase);
-                            const descLimpia = String(descripcion || "SIN NOMBRE").trim();
-                            const precioFirebase = itemExistente ? parseFloat(itemExistente.precio || 0) : 0;
-                            
-                            if (itemExistente && itemExistente.tipo_articulo_sistema && itemExistente.tipo_articulo_sistema !== tipoAsignado) {
-                                alertasCruce++;
-                            }
-
-                            const hasChanges = !itemExistente || 
-                                               itemExistente.descripcion_oficial !== descLimpia || 
-                                               precioFirebase !== precioNumerico ||
-                                               itemExistente.tipo_articulo_sistema !== tipoAsignado;
-
-                            if (hasChanges) {
-                                productosAActualizar.push({
-                                    id: idSeguroFirebase,
-                                    datos: { codigo_sistema_oficial: String(codigoRaw), descripcion_oficial: descLimpia, precio: precioNumerico, tipo_articulo_sistema: tipoAsignado }
-                                });
-                            }
-                        }
-                    });
-
-                    const idsAEliminar = [];
-                    if (!isPartial) {
-                        facturacionCatalog.forEach(doc => {
-                            if (doc.tipo_articulo_sistema === tipoAsignado && !idsProcesados.has(doc.id)) {
-                                idsAEliminar.push(doc.id);
-                            }
-                        });
-                    }
-
-                    const ahorrados = idsProcesados.size - productosAActualizar.length;
-
-                    pendingSyncData = {
-                        productosAActualizar,
-                        idsAEliminar,
-                        tipoAsignado,
-                        isPartial
-                    };
-
-                    document.getElementById('previewTargetName').innerText = tipoAsignado === 'PIEZA_BASE' ? 'Sincronizar Piezas Base' : 'Sincronizar Paquetes';
-                    document.getElementById('previewCountUpdate').innerText = productosAActualizar.length;
-                    document.getElementById('previewCountDelete').innerText = idsAEliminar.length;
-                    document.getElementById('previewCountSkip').innerText = ahorrados;
-
-                    const warningBox = document.getElementById('previewCrossWarning');
-                    if (alertasCruce > 0) {
-                        document.getElementById('previewCrossText').innerText = `Hemos detectado que ${alertasCruce} códigos de este Excel ya estaban guardados como el tipo contrario. ¿Elegiste el botón correcto?`;
-                        warningBox.classList.remove('hidden');
-                    } else {
-                        warningBox.classList.add('hidden');
-                    }
-
-                    overlay.classList.add('opacity-0');
-                    setTimeout(() => {
-                        overlay.classList.add('hidden');
-                        const modal = document.getElementById('syncPreviewModal');
-                        modal.classList.remove('hidden');
-                        setTimeout(() => modal.classList.remove('opacity-0'), 10);
-                    }, 300);
-
-                } catch (error) {
-                    console.error(error);
-                    showToast("Error al procesar el archivo. Revisa la consola.", "error");
-                    overlay.classList.add('opacity-0');
-                    setTimeout(() => overlay.classList.add('hidden'), 300);
-                } finally {
-                    event.target.value = '';
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        async function executeConfirmedSync() {
-            if (!pendingSyncData) return;
-
-            closeModal('syncPreviewModal');
-            const overlay = document.getElementById('syncOverlay');
-            const statusText = document.getElementById('syncStatusText');
-            overlay.classList.remove('hidden');
-            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            
-            const { productosAActualizar, idsAEliminar } = pendingSyncData;
-            const coleccion = 'catalogo_facturacion';
-            const dividirEnLotes = (arreglo, tamano = 500) => { const lotes = []; for (let i = 0; i < arreglo.length; i += tamano) lotes.push(arreglo.slice(i, i + tamano)); return lotes; };
-
-            try {
-                if (idsAEliminar.length > 0) {
-                    statusText.innerText = `Eliminando ${idsAEliminar.length} registros...`;
-                    const lotesBorrado = dividirEnLotes(idsAEliminar, 500);
-                    for (const lote of lotesBorrado) {
-                        const batch = db.batch();
-                        lote.forEach(id => batch.delete(db.collection(coleccion).doc(id)));
-                        await batch.commit();
-                    }
-                }
-
-                if (productosAActualizar.length > 0) {
-                    statusText.innerText = `Subiendo ${productosAActualizar.length} artículos...`;
-                    const lotesSubida = dividirEnLotes(productosAActualizar, 500);
-                    for (let i = 0; i < lotesSubida.length; i++) {
-                        const batch = db.batch();
-                        lotesSubida[i].forEach(producto => {
-                            const docRef = db.collection(coleccion).doc(producto.id);
-                            batch.set(docRef, producto.datos, { merge: true });
-                        });
-                        await batch.commit();
-                    }
-                }
-
-                showToast(`Sincronización aplicada. ${productosAActualizar.length} act/nuevos, ${idsAEliminar.length} borrados.`, 'success');
-            } catch (error) {
-                console.error("Error al escribir en base de datos:", error);
-                showToast("Hubo un error al guardar los datos.", "error");
-            } finally {
-                pendingSyncData = null; 
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            }
-        }
         let auditoriasPendientesList = [];
 
-// 1. Escuchar los tickets entrantes en tiempo real
-function inicializarAuditorias() {
-    db.collection('auditorias_pendientes').where('estado', '==', 'pendiente')
-        .onSnapshot((snapshot) => {
-            auditoriasPendientesList = [];
-            const tbody = document.getElementById('auditTableBody');
-            tbody.innerHTML = '';
-            
-            if(snapshot.empty) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">✅</div>No hay conteos pendientes. ¡Todo al día!</td></tr>';
-                return;
-            }
+        // 1. Escuchar los tickets entrantes en tiempo real
+        function inicializarAuditorias() {
+            db.collection('auditorias_pendientes').where('estado', '==', 'pendiente')
+                .onSnapshot((snapshot) => {
+                    auditoriasPendientesList = [];
+                    const tbody = document.getElementById('auditTableBody');
+                    tbody.innerHTML = '';
+                    
+                    if(snapshot.empty) {
+                        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">✅</div>No hay conteos pendientes. ¡Todo al día!</td></tr>';
+                        return;
+                    }
 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                data.id_ticket = doc.id;
-                auditoriasPendientesList.push(data);
-                
-                const fechaStr = data.fecha ? data.fecha.toDate().toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin Fecha';
-                const colorAjuste = data.ajuste_calculado === 0 ? 'text-slate-400' : (data.ajuste_calculado > 0 ? 'text-emerald-500' : 'text-red-500');
-                const signo = data.ajuste_calculado > 0 ? '+' : '';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        data.id_ticket = doc.id;
+                        auditoriasPendientesList.push(data);
+                        
+                        const fechaStr = data.fecha ? data.fecha.toDate().toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin Fecha';
+                        const colorAjuste = data.ajuste_calculado === 0 ? 'text-slate-400' : (data.ajuste_calculado > 0 ? 'text-emerald-500' : 'text-red-500');
+                        const signo = data.ajuste_calculado > 0 ? '+' : '';
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-center"><input type="checkbox" class="cb-audit cb-modern" value="${data.id_ticket}"></td>
-                        <td class="px-4 py-3 text-xs font-bold text-slate-500">${fechaStr}</td>
-                        <td class="px-4 py-3 font-mono font-black text-slate-700 text-xs">${data.codigo_contpaqi}</td>
-                        <td class="px-4 py-3 font-bold text-slate-800">${data.nombre_producto}</td>
-                        <td class="px-4 py-3 text-center font-bold text-slate-500 bg-slate-100/30">${data.esperado}</td>
-                        <td class="px-4 py-3 text-center font-black text-blue-600 bg-blue-50/30">${data.conteo_fisico}</td>
-                        <td class="px-4 py-3 text-center font-black text-lg ${colorAjuste}">${signo}${data.ajuste_calculado}</td>
-                    </tr>
-                `;
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-4 py-3 text-center"><input type="checkbox" class="cb-audit cb-modern" value="${data.id_ticket}"></td>
+                                <td class="px-4 py-3 text-xs font-bold text-slate-500">${fechaStr}</td>
+                                <td class="px-4 py-3 font-mono font-black text-slate-700 text-xs">${data.codigo_contpaqi}</td>
+                                <td class="px-4 py-3 font-bold text-slate-800">${data.nombre_producto}</td>
+                                <td class="px-4 py-3 text-center font-bold text-slate-500 bg-slate-100/30">${data.esperado}</td>
+                                <td class="px-4 py-3 text-center font-black text-blue-600 bg-blue-50/30">${data.conteo_fisico}</td>
+                                <td class="px-4 py-3 text-center font-black text-lg ${colorAjuste}">${signo}${data.ajuste_calculado}</td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        function toggleSelectAllAudit() {
+            const isChecked = document.getElementById('selectAllAudit').checked;
+            document.querySelectorAll('.cb-audit').forEach(cb => cb.checked = isChecked);
+        }
+
+        // 2. Exportar el Excel para CONTPAQi
+        function exportarAuditoriasExcel() {
+            const seleccionadosIds = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
+            const dataAExportar = seleccionadosIds.length > 0 
+                ? auditoriasPendientesList.filter(a => seleccionadosIds.includes(a.id_ticket))
+                : auditoriasPendientesList; // Si no hay seleccionados, exporta todo
+
+            if(dataAExportar.length === 0) return showToast("No hay datos para exportar", "error");
+
+            const excelData = dataAExportar.map(a => {
+                let tipoMov = a.ajuste_calculado === 0 ? 'Sin Cambios' : (a.ajuste_calculado > 0 ? 'Entrada por Sobrante' : 'Salida por Merma');
+                return {
+                    "Código CONTPAQi": a.codigo_contpaqi,
+                    "Producto": a.nombre_producto,
+                    "Físico": a.conteo_fisico,
+                    "Diferencia a Ajustar": a.ajuste_calculado,
+                    "Tipo de Movimiento": tipoMov,
+                    "Fecha de Conteo": a.fecha ? a.fecha.toDate().toLocaleString('es-MX') : ''
+                };
             });
-        });
-}
 
-// Llama a inicializarAuditorias() dentro de tu función initializeData() que ya existe.
+            const worksheet = XLSX.utils.json_to_sheet(excelData); 
+            const workbook = XLSX.utils.book_new(); 
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Ajustes_CONTPAQi");
+            XLSX.writeFile(workbook, `Ajustes_Inventario_${new Date().getTime()}.xlsx`);
+            showToast("Excel para CONTPAQi descargado.");
+        }
 
-function toggleSelectAllAudit() {
-    const isChecked = document.getElementById('selectAllAudit').checked;
-    document.querySelectorAll('.cb-audit').forEach(cb => cb.checked = isChecked);
-}
-
-// 2. Exportar el Excel para CONTPAQi
-function exportarAuditoriasExcel() {
-    const seleccionadosIds = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
-    const dataAExportar = seleccionadosIds.length > 0 
-        ? auditoriasPendientesList.filter(a => seleccionadosIds.includes(a.id_ticket))
-        : auditoriasPendientesList; // Si no hay seleccionados, exporta todo
-
-    if(dataAExportar.length === 0) return showToast("No hay datos para exportar", "error");
-
-    const excelData = dataAExportar.map(a => {
-        let tipoMov = a.ajuste_calculado === 0 ? 'Sin Cambios' : (a.ajuste_calculado > 0 ? 'Entrada por Sobrante' : 'Salida por Merma');
-        return {
-            "Código CONTPAQi": a.codigo_contpaqi,
-            "Producto": a.nombre_producto,
-            "Físico": a.conteo_fisico,
-            "Diferencia a Ajustar": a.ajuste_calculado,
-            "Tipo de Movimiento": tipoMov,
-            "Fecha de Conteo": a.fecha ? a.fecha.toDate().toLocaleString('es-MX') : ''
-        };
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(excelData); 
-    const workbook = XLSX.utils.book_new(); 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Ajustes_CONTPAQi");
-    XLSX.writeFile(workbook, `Ajustes_Inventario_${new Date().getTime()}.xlsx`);
-    showToast("Excel para CONTPAQi descargado.");
-}
-
-// 3. El Reseteo Quirúrgico (La Magia Final)
-async function procesarAjustesSeleccionados() {
-    const seleccionados = Array.from(document.querySelectorAll('.cb-audit:checked'));
-    if(seleccionados.length === 0) return showToast("Selecciona al menos un ticket para procesar.", "error");
-    
-    if(!confirm(`¿Marcar estos ${seleccionados.length} productos como ajustados en CONTPAQi?\n\nEsto archivará el ticket y RESETEARÁ a 0 la Sombra Web de estos productos específicos.`)) return;
-
-    try {
-        const batch = db.batch();
-        
-        seleccionados.forEach(cb => {
-            const ticketId = cb.value;
-            const ticketData = auditoriasPendientesList.find(t => t.id_ticket === ticketId);
+        // 3. El Reseteo Quirúrgico (La Magia Final)
+        async function procesarAjustesSeleccionados() {
+            const seleccionados = Array.from(document.querySelectorAll('.cb-audit:checked'));
+            if(seleccionados.length === 0) return showToast("Selecciona al menos un ticket para procesar.", "error");
             
-            // 1. Archivar ticket (cambiar estado)
-            const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
-            batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
+            if(!confirm(`¿Marcar estos ${seleccionados.length} productos como ajustados en CONTPAQi?\n\nEsto archivará el ticket y RESETEARÁ a 0 la Sombra Web de estos productos específicos.`)) return;
 
-            
-            // 2. Resetear sombra web del producto a 0
-            if(ticketData && ticketData.codigo_contpaqi) {
-                // Sanitizamos la diagonal para encontrar el documento correcto
-                const codigoSeguro = String(ticketData.codigo_contpaqi).replace(/\//g, '_');
+            try {
+                const batch = db.batch();
                 
-                const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                batch.set(sombraRef, { 
-                    cantidad_vendida: 0, 
-                    ultima_venta: firebase.firestore.FieldValue.serverTimestamp() 
-                }, { merge: true });
-            }
-        });
+                seleccionados.forEach(cb => {
+                    const ticketId = cb.value;
+                    const ticketData = auditoriasPendientesList.find(t => t.id_ticket === ticketId);
+                    
+                    // 1. Archivar ticket (cambiar estado)
+                    const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
+                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
 
-        await batch.commit();
-        showToast("¡Ajustes procesados y Sombra Web limpia!");
-        document.getElementById('selectAllAudit').checked = false;
-        
-    } catch(error) {
-        console.error("Error al procesar ajustes:", error);
-        showToast("Error de conexión al procesar.", "error");
-    }
-}
+                    
+                    // 2. Resetear sombra web del producto a 0
+                    if(ticketData && ticketData.codigo_contpaqi) {
+                        // Sanitizamos la diagonal para encontrar el documento correcto
+                        const codigoSeguro = String(ticketData.codigo_contpaqi).replace(/\//g, '_');
+                        
+                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                        batch.set(sombraRef, { 
+                            cantidad_vendida: 0, 
+                            ultima_venta: firebase.firestore.FieldValue.serverTimestamp() 
+                        }, { merge: true });
+                    }
+                });
+
+                await batch.commit();
+                showToast("¡Ajustes procesados y Sombra Web limpia!");
+                document.getElementById('selectAllAudit').checked = false;
+                
+            } catch(error) {
+                console.error("Error al procesar ajustes:", error);
+                showToast("Error de conexión al procesar.", "error");
+            }
+        }
     </script>
 </body>
 </html>
