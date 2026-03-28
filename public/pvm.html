@@ -660,6 +660,21 @@
                 const response = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error("No se pudo descargar el catálogo.");
                 const allData = await response.json();
+                // === PARCHE: IGUALAR PRECIOS EN PRODUCTOS DUPLICADOS (MISMO CÓDIGO) ===
+                const preciosMaximos = {};
+                // Primero averiguamos cuál es el precio correcto de cada código
+                allData.forEach(p => {
+                    if (!preciosMaximos[p.codigo]) preciosMaximos[p.codigo] = 0;
+                    if (p.precio > preciosMaximos[p.codigo]) preciosMaximos[p.codigo] = p.precio;
+                });
+                
+                // Luego le inyectamos ese precio real al gemelo que se haya quedado en 0
+                allData.forEach(p => {
+                    if ((p.precio === 0 || !p.precio) && preciosMaximos[p.codigo] > 0) {
+                        p.precio = preciosMaximos[p.codigo];
+                    }
+                });
+                // ======================================================================
 
                let shadowStock = {};
                 try {
@@ -936,7 +951,11 @@
                 let pOriginal = Number(i.precio_original) || p;
                 return { 
                     codigo: String(i.codigo || 'S/C'), nombre: String(i.nombre || 'Art.'), precio_unitario: p, cantidad: q, subtotal: p * q,
-                    precio_modificado: fueModificado, precio_original: pOriginal, descuento_unitario: fueModificado ? (pOriginal - p) : 0
+                    precio_modificado: fueModificado, precio_original: pOriginal, descuento_unitario: fueModificado ? (pOriginal - p) : 0,
+                    
+                    // 👉 AGREGAMOS ESTO PARA IDENTIFICAR LOS KITS AL VENDER:
+                    tipo_item: i.tipo_item || 'PIEZA_BASE',
+                    receta: i.receta || null
                 };
             });
 
@@ -970,14 +989,25 @@
                 // 2. MAGIA: Sumar al Inventario Sombra por fuera (Batch)
                 const batchSombra = db.batch();
                 articulosLimpios.forEach(art => {
-                    // SANITIZAMOS: Cambiamos cualquier diagonal (/) por un guion bajo (_)
-                    const codigoSeguro = String(art.codigo).replace(/\//g, '_');
-                    
-                    const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                    batchSombra.set(sombraRef, {
-                        cantidad_vendida: firebase.firestore.FieldValue.increment(art.cantidad),
-                        ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
+                    // SI ES KIT, MULTIPLICAMOS Y DESCONTAMOS SUS COMPONENTES
+                    if (art.tipo_item === 'KIT_OFICIAL' && art.receta && art.receta.length > 0) {
+                        art.receta.forEach(ingrediente => {
+                            const codigoSeguro = String(ingrediente.codigo_pieza).replace(/\//g, '_');
+                            const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                            batchSombra.set(sombraRef, {
+                                cantidad_vendida: firebase.firestore.FieldValue.increment(ingrediente.cantidad * art.cantidad),
+                                ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        });
+                    } else {
+                        // SI ES PIEZA NORMAL, LA DESCONTAMOS DIRECTO
+                        const codigoSeguro = String(art.codigo).replace(/\//g, '_');
+                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                        batchSombra.set(sombraRef, {
+                            cantidad_vendida: firebase.firestore.FieldValue.increment(art.cantidad),
+                            ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    }
                 });
                 await batchSombra.commit(); // Ejecutamos la suma del inventario sombra
 
@@ -1235,14 +1265,23 @@
                     // B) Devolvemos los artículos al inventario sombra restando lo vendido
                     if (venta.articulos && venta.articulos.length > 0) {
                         venta.articulos.forEach(art => {
-                            const codigoSeguro = String(art.codigo).replace(/\//g, '_');
-                            const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                            
-                            // Usamos increment con valor negativo para devolver el stock
-                            batch.set(sombraRef, {
-                                cantidad_vendida: firebase.firestore.FieldValue.increment(-art.cantidad),
-                                ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true });
+                            if (art.tipo_item === 'KIT_OFICIAL' && art.receta && art.receta.length > 0) {
+                                art.receta.forEach(ingrediente => {
+                                    const codigoSeguro = String(ingrediente.codigo_pieza).replace(/\//g, '_');
+                                    const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                                    batch.set(sombraRef, {
+                                        cantidad_vendida: firebase.firestore.FieldValue.increment(-(ingrediente.cantidad * art.cantidad)),
+                                        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                                    }, { merge: true });
+                                });
+                            } else {
+                                const codigoSeguro = String(art.codigo).replace(/\//g, '_');
+                                const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                                batch.set(sombraRef, {
+                                    cantidad_vendida: firebase.firestore.FieldValue.increment(-art.cantidad),
+                                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+                            }
                         });
                     }
 
