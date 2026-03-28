@@ -709,7 +709,13 @@
 
                 catalogProducts = allData.filter(p => p.tipo_item === 'PIEZA_BASE' || p.tipo_item === 'KIT_OFICIAL').map(p => {
                     const vendidosPorFuera = shadowStock[p.codigo] || 0;
-                    return { ...p, stock_oficial: p.stock, stock: Math.max(0, p.stock - vendidosPorFuera) };
+                    return { 
+                        ...p, 
+                        // 👇 MAGIA: El PVM usará la descripcion_oficial como si fuera su nombre 👇
+                        nombre: p.descripcion_oficial || p.nombre, 
+                        stock_oficial: p.stock, 
+                        stock: Math.max(0, p.stock - vendidosPorFuera) 
+                    };
                 });
 
                 catalogProducts.forEach(p => {
