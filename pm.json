@@ -492,7 +492,6 @@
     "firebase_data": {
       "id": "-OkkIgWXaxtCgYFUiPd3",
       "nombre_flexible": "ENVASE PLASTICO YOGUITA 1 L C/TAPA",
-      "tipo_item": "PIEZA_BASE",
       "stock_total_piezas": 0,
       "categoria": "PBD",
       "imagen_url": "https://i.ibb.co/gZ0tT0WY/ENVASE-PLASTICO-YOGUITA-1-L-C-TAPA.png",
@@ -502,17 +501,11 @@
         "_nanoseconds": 513000000
       },
       "codigo_sistema_oficial": "EPL-1-CT",
-      "receta_desglose": null
+      "receta_desglose": null,
+      "hereda_empaques_de": "WpAh4VYwLNOQFK00nHfb",
+      "tipo_item": "KIT_OFICIAL"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OKKIGWXAXTCGYFUIPD3-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkkIu61oZ14G2QnBPvy",
