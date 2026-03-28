@@ -179,6 +179,8 @@ async function construirJSON() {
                 id_facturacion: idFacturacionFinal, 
                 codigo: codigoLimpio,
                 nombre: data.nombre_flexible || data.nombre || `[S/N] ${codigoLimpio}`,
+                // 👇 AGREGAR ESTA LÍNEA 👇
+                descripcion_oficial: datosContables.nombre_oficial || data.nombre_flexible || data.nombre || `[S/N] ${codigoLimpio}`,
                 precio: precioFinal,
                 stock: stockReal,
                 imagen: imgUrl,
@@ -205,6 +207,8 @@ async function construirJSON() {
                 id_facturacion: factData.codigo_original,
                 codigo: factData.codigo_original,
                 nombre: nombreOficial,                                
+                // 👇 AGREGAR ESTA LÍNEA 👇
+                descripcion_oficial: nombreOficial,
                 precio: factData.precio || 0,
                 stock: factData.stock_facturacion || 0,
                 imagen: null,
