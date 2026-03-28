@@ -65,9 +65,11 @@
                         <button id="btnStopScan" onclick="stopScanner()" class="bg-red-50 hover:bg-red-100 text-red-600 py-4 rounded-2xl font-bold transition-all w-full flex items-center justify-center gap-2 hidden text-sm"><i class="fas fa-times"></i> Detener Cámara</button>
                     </div>
 
-                    <div class="mt-4 relative">
-                        <i class="fas fa-keyboard absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="manualCode" placeholder="O escribe el código y presiona Enter..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" onkeypress="if(event.key === 'Enter') procesarCodigo(this.value)">
+                   <div class="mt-4 relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="manualCode" list="opcionesProductos" placeholder="Busca por nombre o código..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" onkeypress="if(event.key === 'Enter') procesarCodigo(this.value)" onchange="verificarSeleccion(this.value)">
+                        
+                        <datalist id="opcionesProductos"></datalist>
                     </div>
                 </div>
 
@@ -145,17 +147,44 @@
         let productoActual = null;
         let currentScanVariants = []; 
 
-        // 1. CARGAMOS EL JSON MAESTRO (Sin hacer sufrir a Firebase)
+      
+        // 1. CARGAMOS EL JSON MAESTRO Y LLENAMOS EL BUSCADOR
         async function loadJSONCatalog() {
             try {
                 const response = await fetch('catalogo_completo.json');
                 if (!response.ok) throw new Error("JSON no encontrado");
                 catalogoEnMemoria = await response.json();
-                document.getElementById('catStatus').innerHTML = `<i class="fas fa-check-circle text-emerald-500"></i> ${catalogoEnMemoria.length} productos listos`;
+                
+                const datalist = document.getElementById('opcionesProductos');
+                datalist.innerHTML = ''; // Limpiamos por si acaso
+                let countBase = 0;
+
+                catalogoEnMemoria.forEach(p => {
+                    // Solo agregamos al buscador las piezas base (ignoramos los Kits Web)
+                    if (!p.tipo_item || p.tipo_item === 'PIEZA_BASE') {
+                        const option = document.createElement('option');
+                        option.value = p.codigo; // El valor real que necesita el sistema
+                        option.textContent = p.nombre; // El nombre que lee el humano
+                        datalist.appendChild(option);
+                        countBase++;
+                    }
+                });
+
+                document.getElementById('catStatus').innerHTML = `<i class="fas fa-check-circle text-emerald-500"></i> ${countBase} piezas base listas`;
             } catch (error) {
                 console.error("Error al cargar JSON:", error);
                 document.getElementById('catStatus').innerHTML = `<i class="fas fa-exclamation-triangle text-red-500"></i> Error al cargar catálogo`;
                 showToast("No se pudo cargar el catálogo. Verifica que catalogo_completo.json exista.", "error");
+            }
+        }
+
+        // Función extra para el buscador: si seleccionas un item de la lista desplegable con el mouse/dedo, lo procesa al instante.
+        function verificarSeleccion(valorInput) {
+            // Verificamos si lo que está en el input coincide exactamente con un código válido
+            const existe = catalogoEnMemoria.some(p => String(p.codigo).toLowerCase() === String(valorInput).toLowerCase());
+            if (existe) {
+                procesarCodigo(valorInput);
+                document.getElementById('manualCode').blur(); // Oculta el teclado en móviles
             }
         }
 
