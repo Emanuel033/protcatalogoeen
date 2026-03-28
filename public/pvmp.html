@@ -657,9 +657,45 @@
                 if(showInventoryConfig) { document.getElementById('inventoryStatusBadge').classList.remove('hidden'); }
                 if (forceRefresh) showToast("Descargando catálogo actualizado...", "info");
 
-                const response = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
+               const response = await fetch('/catalogo_completo.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error("No se pudo descargar el catálogo.");
-                const allData = await response.json();
+                
+                // Leemos el JSON original y lo guardamos en allDataRaw
+                let allDataRaw = await response.json();
+                
+                // === NUEVO PARCHE: FUSIONAR Y ELIMINAR DUPLICADOS POR CÓDIGO ===
+                const productosUnicos = {};
+
+                allDataRaw.forEach(p => {
+                    if (!productosUnicos[p.codigo]) {
+                        // Si es el primer molde/registro que vemos de este código, lo guardamos
+                        productosUnicos[p.codigo] = { ...p };
+                    } else {
+                        // Si ya existe otro molde con el MISMO CÓDIGO, los fusionamos en uno solo
+                        const existente = productosUnicos[p.codigo];
+                        
+                        // 1. Conservamos el precio más alto (por si uno estaba en 0)
+                        if (p.precio > existente.precio) existente.precio = p.precio;
+                        
+                        // 2. Conservamos el stock mayor
+                        if (p.stock > existente.stock) existente.stock = p.stock;
+                        
+                        // 3. Si el primero no tenía imagen, pero este duplicado sí, se la ponemos
+                        if (!existente.imagen && p.imagen) {
+                            existente.imagen = p.imagen;
+                        }
+                        
+                        // 4. Juntamos los tips de empaque (cajas/paquetes) por si un molde traía datos que el otro no
+                        if (p.empaques_tips && p.empaques_tips.length > 0) {
+                            const combinados = new Set([...(existente.empaques_tips || []), ...p.empaques_tips]);
+                            existente.empaques_tips = Array.from(combinados);
+                        }
+                    }
+                });
+
+                // Convertimos el diccionario de vuelta a la variable final "allData" que usa el resto de tu código
+                const allData = Object.values(productosUnicos);
+                // ======================================================================
 
                let shadowStock = {};
                 try {
@@ -936,7 +972,11 @@
                 let pOriginal = Number(i.precio_original) || p;
                 return { 
                     codigo: String(i.codigo || 'S/C'), nombre: String(i.nombre || 'Art.'), precio_unitario: p, cantidad: q, subtotal: p * q,
-                    precio_modificado: fueModificado, precio_original: pOriginal, descuento_unitario: fueModificado ? (pOriginal - p) : 0
+                    precio_modificado: fueModificado, precio_original: pOriginal, descuento_unitario: fueModificado ? (pOriginal - p) : 0,
+                    
+                    // 👉 AGREGAMOS ESTO PARA IDENTIFICAR LOS KITS AL VENDER:
+                    tipo_item: i.tipo_item || 'PIEZA_BASE',
+                    receta: i.receta || null
                 };
             });
 
@@ -970,14 +1010,25 @@
                 // 2. MAGIA: Sumar al Inventario Sombra por fuera (Batch)
                 const batchSombra = db.batch();
                 articulosLimpios.forEach(art => {
-                    // SANITIZAMOS: Cambiamos cualquier diagonal (/) por un guion bajo (_)
-                    const codigoSeguro = String(art.codigo).replace(/\//g, '_');
-                    
-                    const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                    batchSombra.set(sombraRef, {
-                        cantidad_vendida: firebase.firestore.FieldValue.increment(art.cantidad),
-                        ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
+                    // SI ES KIT, MULTIPLICAMOS Y DESCONTAMOS SUS COMPONENTES
+                    if (art.tipo_item === 'KIT_OFICIAL' && art.receta && art.receta.length > 0) {
+                        art.receta.forEach(ingrediente => {
+                            const codigoSeguro = String(ingrediente.codigo_pieza).replace(/\//g, '_');
+                            const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                            batchSombra.set(sombraRef, {
+                                cantidad_vendida: firebase.firestore.FieldValue.increment(ingrediente.cantidad * art.cantidad),
+                                ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        });
+                    } else {
+                        // SI ES PIEZA NORMAL, LA DESCONTAMOS DIRECTO
+                        const codigoSeguro = String(art.codigo).replace(/\//g, '_');
+                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                        batchSombra.set(sombraRef, {
+                            cantidad_vendida: firebase.firestore.FieldValue.increment(art.cantidad),
+                            ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    }
                 });
                 await batchSombra.commit(); // Ejecutamos la suma del inventario sombra
 
@@ -1235,14 +1286,23 @@
                     // B) Devolvemos los artículos al inventario sombra restando lo vendido
                     if (venta.articulos && venta.articulos.length > 0) {
                         venta.articulos.forEach(art => {
-                            const codigoSeguro = String(art.codigo).replace(/\//g, '_');
-                            const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                            
-                            // Usamos increment con valor negativo para devolver el stock
-                            batch.set(sombraRef, {
-                                cantidad_vendida: firebase.firestore.FieldValue.increment(-art.cantidad),
-                                ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true });
+                            if (art.tipo_item === 'KIT_OFICIAL' && art.receta && art.receta.length > 0) {
+                                art.receta.forEach(ingrediente => {
+                                    const codigoSeguro = String(ingrediente.codigo_pieza).replace(/\//g, '_');
+                                    const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                                    batch.set(sombraRef, {
+                                        cantidad_vendida: firebase.firestore.FieldValue.increment(-(ingrediente.cantidad * art.cantidad)),
+                                        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                                    }, { merge: true });
+                                });
+                            } else {
+                                const codigoSeguro = String(art.codigo).replace(/\//g, '_');
+                                const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                                batch.set(sombraRef, {
+                                    cantidad_vendida: firebase.firestore.FieldValue.increment(-art.cantidad),
+                                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+                            }
                         });
                     }
 
@@ -1485,6 +1545,39 @@
             
             const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(wsData); ws['!cols'] = [ {wch: 16}, {wch: 32}, {wch: 12}, {wch: 3}, {wch: 16}, {wch: 32}, {wch: 14}, {wch: 3}, {wch: 16}, {wch: 12}, {wch: 12}, {wch: 3}, {wch: 28}, {wch: 10}, {wch: 14} ]; XLSX.utils.book_append_sheet(wb, ws, "Corte de Caja"); XLSX.writeFile(wb, `Corte_${fileDate}.xlsx`); showToast("Bitácora exportada.");
         }
+        // --- SISTEMA DE ACTUALIZACIÓN AUTOMÁTICA DEL CATÁLOGO ---
+        let ultimaHoraActualizada = -1; // Para evitar que se actualice 2 veces en el mismo minuto
+
+        function verificarActualizacionAutomatica() {
+            const ahora = new Date();
+            const dia = ahora.getDay(); // 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
+            const hora = ahora.getHours();
+            const minuto = ahora.getMinutes();
+
+            // Solo actuamos si estamos en el minuto 3 (ej. 9:03, 10:03) y no se ha actualizado en esta hora
+            if (minuto === 3 && ultimaHoraActualizada !== hora) {
+                let hacerActualizacion = false;
+
+                // Lunes a Viernes (días 1 a 5): De 9:00 a 18:00
+                if (dia >= 1 && dia <= 5 && hora >= 9 && hora <= 18) {
+                    hacerActualizacion = true;
+                }
+                // Sábados (día 6): De 9:00 a 14:00
+                else if (dia === 6 && hora >= 9 && hora <= 14) {
+                    hacerActualizacion = true;
+                }
+
+                if (hacerActualizacion) {
+                    console.log("Sincronización automática de las " + hora + ":03 ejecutada.");
+                    loadData(true); // Forzamos la descarga del nuevo JSON
+                    ultimaHoraActualizada = hora; // Registramos que ya se actualizó esta hora
+                }
+            }
+        }
+
+        // Revisar el reloj cada 30 segundos (30000 milisegundos)
+        setInterval(verificarActualizacionAutomatica, 30000);
+        // --------------------------------------------------------
 
         window.onload = () => { 
             verificarLogin(); cargarUsuariosPOS(); loadData(); initCorteUI(); precargarImagenesImpresion();
