@@ -128,59 +128,57 @@
             </div>
         </div>
 
-        <div id="view-cambios" class="hidden max-w-4xl mx-auto h-max fade-in flex-col gap-6">
+        <div id="view-cambios" class="hidden max-w-5xl mx-auto h-max fade-in flex-col gap-6">
             <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
                     <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl"><i class="fas fa-exchange-alt"></i></div>
                     <div>
-                        <h2 class="font-black text-slate-900 text-lg leading-tight">Cambio de Mercancía</h2>
-                        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Devoluciones o errores de mostrador</p>
+                        <h2 class="font-black text-slate-900 text-lg leading-tight">Cambio Múltiple de Mercancía</h2>
+                        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Agrega todo lo que entra y lo que sale</p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100">
-                        <h3 class="text-sm font-black text-emerald-700 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-arrow-down"></i> Producto que ENTRA (Regresa)</h3>
+                    <div class="bg-emerald-50/30 p-4 sm:p-5 rounded-2xl border border-emerald-100 flex flex-col h-full">
+                        <h3 class="text-sm font-black text-emerald-700 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-arrow-down"></i> Productos que ENTRAN</h3>
                         
-                        <div class="relative mb-4">
-                            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="inputEntra" list="opcionesProductos" placeholder="Buscar producto..." class="w-full bg-white border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" onchange="seleccionarProductoTrueque(this.value, 'in')">
-                        </div>
-                        
-                        <div id="cardEntra" class="hidden bg-white p-3 rounded-xl border border-emerald-200 shadow-sm mb-4">
-                            <p id="nombreEntra" class="text-xs font-bold text-slate-800 leading-tight mb-1 truncate"></p>
-                            <p id="codigoEntra" class="text-[10px] font-mono text-emerald-600"></p>
+                        <div class="relative mb-4 flex gap-2">
+                            <div class="relative flex-1">
+                                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="inputBusquedaEntra" list="opcionesProductos" placeholder="Buscar para agregar..." class="w-full bg-white border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                            </div>
+                            <button onclick="agregarListaCambio('in')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 rounded-xl font-bold shadow-sm transition-all"><i class="fas fa-plus"></i></button>
                         </div>
 
-                        <label class="block text-xs font-bold text-slate-600 mb-2">Cantidad (Piezas sueltas):</label>
-                        <input type="number" id="qtyEntra" min="1" value="1" class="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-black text-lg text-slate-800 outline-none focus:border-emerald-500 text-center">
+                        <div class="flex-1 bg-white rounded-xl border border-emerald-100 p-2 overflow-y-auto custom-scroll min-h-[150px] max-h-[250px] space-y-2" id="listaEntranHtml">
+                            <div class="text-center py-6 text-slate-400 text-xs font-bold">Sin productos. <br>Busca y presiona el botón <i class="fas fa-plus"></i></div>
+                        </div>
                     </div>
 
-                    <div class="bg-red-50/50 p-5 rounded-2xl border border-red-100">
-                        <h3 class="text-sm font-black text-red-700 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-arrow-up"></i> Producto que SALE (Se lleva)</h3>
+                    <div class="bg-red-50/30 p-4 sm:p-5 rounded-2xl border border-red-100 flex flex-col h-full">
+                        <h3 class="text-sm font-black text-red-700 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-arrow-up"></i> Productos que SALEN</h3>
                         
-                        <div class="relative mb-4">
-                            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="inputSale" list="opcionesProductos" placeholder="Buscar producto..." class="w-full bg-white border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-red-500 outline-none transition-all" onchange="seleccionarProductoTrueque(this.value, 'out')">
+                        <div class="relative mb-4 flex gap-2">
+                            <div class="relative flex-1">
+                                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="inputBusquedaSale" list="opcionesProductos" placeholder="Buscar para agregar..." class="w-full bg-white border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-red-500 outline-none transition-all">
+                            </div>
+                            <button onclick="agregarListaCambio('out')" class="bg-red-500 hover:bg-red-600 text-white px-4 rounded-xl font-bold shadow-sm transition-all"><i class="fas fa-plus"></i></button>
                         </div>
 
-                        <div id="cardSale" class="hidden bg-white p-3 rounded-xl border border-red-200 shadow-sm mb-4">
-                            <p id="nombreSale" class="text-xs font-bold text-slate-800 leading-tight mb-1 truncate"></p>
-                            <p id="codigoSale" class="text-[10px] font-mono text-red-600"></p>
+                        <div class="flex-1 bg-white rounded-xl border border-red-100 p-2 overflow-y-auto custom-scroll min-h-[150px] max-h-[250px] space-y-2" id="listaSalenHtml">
+                             <div class="text-center py-6 text-slate-400 text-xs font-bold">Sin productos. <br>Busca y presiona el botón <i class="fas fa-plus"></i></div>
                         </div>
-
-                        <label class="block text-xs font-bold text-slate-600 mb-2">Cantidad (Piezas sueltas):</label>
-                        <input type="number" id="qtySale" min="1" value="1" class="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-black text-lg text-slate-800 outline-none focus:border-red-500 text-center">
                     </div>
                 </div>
 
                 <div class="mt-8">
-                    <label class="block text-xs font-bold text-slate-600 mb-2">Motivo del Cambio (Requerido para el Administrador):</label>
-                    <textarea id="motivoCambio" rows="2" placeholder="Ej: Cliente llevó tapa equivocada, se hace cambio directo..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                    <label class="block text-xs font-bold text-slate-600 mb-2">Motivo del Cambio (Obligatorio):</label>
+                    <textarea id="motivoCambio" rows="2" placeholder="Ej: Cliente llevó tapa equivocada, compensa diferencia llevando una botella extra..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                 </div>
 
                 <div class="mt-6 pt-6 border-t border-slate-100">
-                    <button onclick="registrarCambioRapido()" id="btnRegistrarCambio" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-amber-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 text-base"><i class="fas fa-sync-alt"></i> Registrar e Impactar Stock Inmediatamente</button>
+                    <button onclick="registrarCambioRapido()" id="btnRegistrarCambio" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-amber-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 text-base"><i class="fas fa-sync-alt"></i> Registrar Todo e Impactar Stock Inmediatamente</button>
                 </div>
             </div>
             
@@ -202,8 +200,9 @@
         let productoActual = null;
         let currentScanVariants = []; 
         
-        let productoEntraObj = null;
-        let productoSaleObj = null;
+        // Variables para el Carrito de Cambios Múltiples
+        let carritoEntran = [];
+        let carritoSalen = [];
 
         // PESTAÑAS
         function switchTab(tabId) {
@@ -217,11 +216,9 @@
             
             document.getElementById(`tab-btn-${tabId}`).className = "flex-1 md:w-40 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-blue-600 transition-all";
             
-            // Apagar cámara si salimos de auditoría
             if(tabId !== 'auditoria' && html5QrcodeScanner) stopScanner();
         }
 
-        // 1. CARGAMOS EL JSON
         async function loadJSONCatalog() {
             try {
                 const response = await fetch('catalogo_completo.json');
@@ -233,7 +230,6 @@
                 let countItems = 0;
 
                 catalogoEnMemoria.forEach(p => {
-                    // Ahora permitimos Kits Oficiales para los Trueques
                     if (p.tipo_item === 'PIEZA_BASE' || p.tipo_item === 'KIT_OFICIAL') {
                         const option = document.createElement('option');
                         option.value = p.codigo; 
@@ -266,7 +262,7 @@
         });
 
         // ==========================================
-        // MODO A: ESCÁNER Y AUDITORÍA
+        // MODO A: AUDITORÍA FÍSICA
         // ==========================================
         function startScanner() {
             document.getElementById('btnStartScan').classList.add('hidden'); 
@@ -303,10 +299,8 @@
             document.getElementById('manualCode').value = '';
             showToast("Buscando...", "info");
             
-            let prodBase = null;
+            let prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
             let empaqueDetectado = null;
-
-            prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
 
             if (!prodBase) {
                 for (const p of catalogoEnMemoria) {
@@ -329,8 +323,6 @@
                     let sombraCantVendida = 0;
                     const sombraDoc = await firebase.firestore().collection('stock_por_fuera').doc(codigoSeguro).get();
                     if(sombraDoc.exists) sombraCantVendida = sombraDoc.data().cantidad_vendida || 0;
-
-                    const stockReal = (prodBase.stock || 0) - sombraCantVendida;
 
                     productoActual = {
                         codigo_contpaqi: codigoOficial,
@@ -361,7 +353,7 @@
                     currentScanVariants.sort((a,b) => a.piezas - b.piezas);
                     renderVariantsList();
 
-                } catch (error) { showToast("Error al conectar con el servidor", "error"); }
+                } catch (error) { showToast("Error de servidor", "error"); }
             } else {
                 mostrarErrorVisual();
             }
@@ -416,7 +408,7 @@
             let conteoFisico = parseInt(document.getElementById('scanTotalMove').innerText) || 0;
             const stockSistema = productoActual.stock_base_json || 0; 
             const sombraActual = productoActual.sombra_actual || 0; 
-            const diferencia = conteoFisico - stockSistema; // Lo que va a CONTPAQi directo
+            const diferencia = conteoFisico - stockSistema;
 
             try {
                 const queryPendiente = await db.collection('auditorias_pendientes')
@@ -451,6 +443,8 @@
         }
 
         function escucharAuditorias() {
+            // Nota: Si quitamos orderBy('fecha','desc') nos evitamos el index, pero lo dejamos por si ya lo creaste.
+            // Si te sigue dando error de index, simplemente quita el ".orderBy('fecha', 'desc')" de aquí.
             db.collection('auditorias_pendientes').where('estado','==','pendiente').orderBy('fecha', 'desc').onSnapshot(snap => {
                 const container = document.getElementById('auditoriasCards');
                 if(!container) return;
@@ -470,42 +464,91 @@
                             </div>
                         </div>`;
                 });
-            });
+            }, err => console.log("Ojo con el index de firebase:", err));
         }
 
         // ==========================================
-        // MODO B: CAMBIOS RÁPIDOS (TRUEQUE)
+        // MODO B: CAMBIOS MÚLTIPLES (CARRITOS)
         // ==========================================
-        window.seleccionarProductoTrueque = (codigo, tipo) => {
+        window.agregarListaCambio = (tipo) => {
+            const inputId = tipo === 'in' ? 'inputBusquedaEntra' : 'inputBusquedaSale';
+            const codigo = document.getElementById(inputId).value;
+            
             const prod = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === String(codigo).toLowerCase());
-            if(!prod) return;
+            if(!prod) return showToast("Producto no válido o no seleccionado", "error");
 
-            if(tipo === 'in') {
-                productoEntraObj = prod;
-                document.getElementById('cardEntra').classList.remove('hidden');
-                document.getElementById('nombreEntra').innerText = prod.descripcion_oficial || prod.nombre;
-                document.getElementById('codigoEntra').innerText = prod.codigo;
-                document.getElementById('inputEntra').value = '';
-                document.getElementById('inputEntra').blur();
+            const lista = tipo === 'in' ? carritoEntran : carritoSalen;
+            
+            const existente = lista.find(item => item.codigo === prod.codigo);
+            if(existente) {
+                existente.qty++;
             } else {
-                productoSaleObj = prod;
-                document.getElementById('cardSale').classList.remove('hidden');
-                document.getElementById('nombreSale').innerText = prod.descripcion_oficial || prod.nombre;
-                document.getElementById('codigoSale').innerText = prod.codigo;
-                document.getElementById('inputSale').value = '';
-                document.getElementById('inputSale').blur();
+                lista.push({ ...prod, qty: 1 });
             }
+
+            document.getElementById(inputId).value = '';
+            document.getElementById(inputId).blur();
+            renderCarritos();
         };
 
-        async function registrarCambioRapido() {
-            if(!productoEntraObj || !productoSaleObj) {
-                return showToast("Debes seleccionar el producto que entra y el que sale.", "error");
+        window.cambiarCantCarrito = (tipo, codigo, delta) => {
+            const lista = tipo === 'in' ? carritoEntran : carritoSalen;
+            const index = lista.findIndex(item => item.codigo === codigo);
+            if(index > -1) {
+                lista[index].qty += delta;
+                if(lista[index].qty <= 0) lista.splice(index, 1); // Lo borra si llega a cero
             }
-            const qtyIn = parseInt(document.getElementById('qtyEntra').value) || 0;
-            const qtyOut = parseInt(document.getElementById('qtySale').value) || 0;
-            const motivo = document.getElementById('motivoCambio').value.trim();
+            renderCarritos();
+        }
 
-            if(qtyIn <= 0 || qtyOut <= 0) return showToast("Las cantidades deben ser mayores a cero.", "error");
+        function renderCarritos() {
+            // Render ENTRAN (Verdes)
+            const htmlEntran = document.getElementById('listaEntranHtml');
+            if(carritoEntran.length === 0) {
+                htmlEntran.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs font-bold">Sin productos. <br>Busca y presiona el botón <i class="fas fa-plus"></i></div>`;
+            } else {
+                htmlEntran.innerHTML = carritoEntran.map(p => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-50/50 border border-emerald-100">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <p class="text-xs font-bold text-slate-800 truncate">${p.descripcion_oficial || p.nombre}</p>
+                            <p class="text-[9px] font-mono text-emerald-600">${p.codigo}</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white rounded-lg p-1 shadow-sm border border-slate-100 shrink-0">
+                            <button onclick="cambiarCantCarrito('in', '${p.codigo}', -1)" class="w-6 h-6 rounded bg-slate-50 text-slate-600 active:scale-95"><i class="fas fa-minus text-[10px]"></i></button>
+                            <span class="text-xs font-black w-4 text-center">${p.qty}</span>
+                            <button onclick="cambiarCantCarrito('in', '${p.codigo}', 1)" class="w-6 h-6 rounded bg-emerald-50 text-emerald-600 active:scale-95"><i class="fas fa-plus text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Render SALEN (Rojos)
+            const htmlSalen = document.getElementById('listaSalenHtml');
+            if(carritoSalen.length === 0) {
+                htmlSalen.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs font-bold">Sin productos. <br>Busca y presiona el botón <i class="fas fa-plus"></i></div>`;
+            } else {
+                htmlSalen.innerHTML = carritoSalen.map(p => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-red-50/50 border border-red-100">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <p class="text-xs font-bold text-slate-800 truncate">${p.descripcion_oficial || p.nombre}</p>
+                            <p class="text-[9px] font-mono text-red-600">${p.codigo}</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white rounded-lg p-1 shadow-sm border border-slate-100 shrink-0">
+                            <button onclick="cambiarCantCarrito('out', '${p.codigo}', -1)" class="w-6 h-6 rounded bg-slate-50 text-slate-600 active:scale-95"><i class="fas fa-minus text-[10px]"></i></button>
+                            <span class="text-xs font-black w-4 text-center">${p.qty}</span>
+                            <button onclick="cambiarCantCarrito('out', '${p.codigo}', 1)" class="w-6 h-6 rounded bg-red-50 text-red-600 active:scale-95"><i class="fas fa-plus text-[10px]"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function registrarCambioRapido() {
+            if(carritoEntran.length === 0 && carritoSalen.length === 0) {
+                return showToast("Debes agregar al menos un producto que entra o sale.", "error");
+            }
+            
+            const motivo = document.getElementById('motivoCambio').value.trim();
             if(motivo === "") return showToast("Debes escribir un motivo para el administrador.", "error");
 
             const btn = document.getElementById('btnRegistrarCambio');
@@ -515,56 +558,51 @@
             try {
                 const batch = db.batch();
 
-                // 1. PROCESAR ENTRADA (Devolución del cliente). 
-                // Aumenta la disponibilidad web. Bajamos la "cantidad_vendida" del inventario sombra (-1).
-                procesarAjusteSombra(productoEntraObj, qtyIn, -1, batch);
+                // 1. PROCESAR ENTRADAS (Disminuye la sombra, sube stock web)
+                carritoEntran.forEach(prod => procesarAjusteSombra(prod, prod.qty, -1, batch));
 
-                // 2. PROCESAR SALIDA (Se lo lleva el cliente).
-                // Disminuye la disponibilidad web. Subimos la "cantidad_vendida" del inventario sombra (+1).
-                procesarAjusteSombra(productoSaleObj, qtyOut, 1, batch);
+                // 2. PROCESAR SALIDAS (Sube la sombra, baja stock web)
+                carritoSalen.forEach(prod => procesarAjusteSombra(prod, prod.qty, 1, batch));
 
-                // 3. REGISTRAR TICKET PARA EL ADMIN
+                // 3. REGISTRAR TICKET GLOBAL
                 const ticketRef = db.collection('cambios_rapidos').doc();
+                
+                // Limpiamos los arrays para guardar en Firebase sin peso innecesario
+                const resumenEntran = carritoEntran.map(p => ({ codigo: p.codigo, nombre: p.descripcion_oficial || p.nombre, qty: p.qty }));
+                const resumenSalen = carritoSalen.map(p => ({ codigo: p.codigo, nombre: p.descripcion_oficial || p.nombre, qty: p.qty }));
+
                 batch.set(ticketRef, {
-                    entra_codigo: productoEntraObj.codigo,
-                    entra_nombre: productoEntraObj.descripcion_oficial || productoEntraObj.nombre,
-                    entra_qty: qtyIn,
-                    sale_codigo: productoSaleObj.codigo,
-                    sale_nombre: productoSaleObj.descripcion_oficial || productoSaleObj.nombre,
-                    sale_qty: qtyOut,
+                    entran: resumenEntran,
+                    salen: resumenSalen,
                     motivo: motivo,
                     estado: 'pendiente',
                     fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                    usuario: 'Almacén (Trueque)'
+                    usuario: 'Almacén (Multi-Trueque)'
                 });
 
                 await batch.commit();
 
-                // Limpiar Formulario
-                productoEntraObj = null; productoSaleObj = null;
-                document.getElementById('cardEntra').classList.add('hidden');
-                document.getElementById('cardSale').classList.add('hidden');
-                document.getElementById('qtyEntra').value = 1;
-                document.getElementById('qtySale').value = 1;
+                // Limpiar todo
+                carritoEntran = [];
+                carritoSalen = [];
                 document.getElementById('motivoCambio').value = '';
+                renderCarritos();
                 
                 showToast("Cambio registrado y stock actualizado en la Web.", "success");
 
             } catch (error) {
                 console.error("Error en cambio:", error);
-                showToast("Error al registrar el cambio.", "error");
+                showToast("Error al registrar el cambio. Checa las reglas de Firebase.", "error");
             } finally {
-                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Registrar e Impactar Stock Inmediatamente';
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Registrar Todo e Impactar Stock Inmediatamente';
                 btn.disabled = false;
             }
         }
 
         function procesarAjusteSombra(producto, qty, sign, batch) {
-            // Lógica inteligente: Si escanean un KIT (ej. botella con tapa), desglozamos a sus piezas.
             if (producto.tipo_item === 'KIT_OFICIAL' && producto.receta && producto.receta.length > 0) {
                 producto.receta.forEach(ingrediente => {
                     const cod = String(ingrediente.codigo_pieza).replace(/\//g, '_');
-                    // Multiplicamos piezas_del_kit * kits_cambiados * signo
                     const totalImpacto = Number(ingrediente.cantidad) * qty * sign;
                     if (!isNaN(totalImpacto) && totalImpacto !== 0) {
                         const ref = db.collection('stock_por_fuera').doc(cod);
@@ -575,7 +613,6 @@
                     }
                 });
             } else {
-                // Pieza normal
                 const cod = String(producto.codigo).replace(/\//g, '_');
                 const totalImpacto = qty * sign;
                 if (!isNaN(totalImpacto) && totalImpacto !== 0) {
@@ -598,13 +635,13 @@
             const idleIcon = document.getElementById('scanIdleIcon');
             const idleText = document.getElementById('scanIdleText');
             
-            idleIconCont.className = "w-24 h-24 rounded-full bg-red-50 flex items-center justify-center mb-5 border border-red-100 transition-all shadow-inner";
+            idleIconCont.className = "w-24 h-24 rounded-full bg-red-50 flex items-center justify-center mb-5 border border-red-100 shadow-inner";
             idleIcon.className = "fas fa-times text-4xl text-red-400";
             idleText.className = "font-bold text-sm text-red-500";
             idleText.innerText = "Producto no encontrado.";
             
             setTimeout(() => {
-                idleIconCont.className = "w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100 transition-all shadow-inner";
+                idleIconCont.className = "w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100 shadow-inner";
                 idleIcon.className = "fas fa-box-open text-4xl text-slate-400";
                 idleText.className = "font-bold text-sm text-slate-400";
                 idleText.innerText = "Esperando producto a auditar...";
