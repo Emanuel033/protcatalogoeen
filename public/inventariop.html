@@ -543,61 +543,102 @@
             }
         }
 
-        async function registrarCambioRapido() {
-            if(carritoEntran.length === 0 && carritoSalen.length === 0) {
-                return showToast("Debes agregar al menos un producto que entra o sale.", "error");
-            }
+        function desglosarParaTicket(carrito) {
+    let acumulador = {};
+
+    carrito.forEach(prod => {
+        // Verificamos si es paquete y tiene receta
+        if (prod.tipo_item === 'KIT_OFICIAL' && prod.receta && prod.receta.length > 0) {
             
-            const motivo = document.getElementById('motivoCambio').value.trim();
-            if(motivo === "") return showToast("Debes escribir un motivo para el administrador.", "error");
-
-            const btn = document.getElementById('btnRegistrarCambio');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-            btn.disabled = true;
-
-            try {
-                const batch = db.batch();
-
-                // 1. PROCESAR ENTRADAS (Disminuye la sombra, sube stock web)
-                carritoEntran.forEach(prod => procesarAjusteSombra(prod, prod.qty, -1, batch));
-
-                // 2. PROCESAR SALIDAS (Sube la sombra, baja stock web)
-                carritoSalen.forEach(prod => procesarAjusteSombra(prod, prod.qty, 1, batch));
-
-                // 3. REGISTRAR TICKET GLOBAL
-                const ticketRef = db.collection('cambios_rapidos').doc();
+            prod.receta.forEach(ingrediente => {
+                const codigoBase = ingrediente.codigo_pieza;
+                const cantidadDesglosada = ingrediente.cantidad * prod.qty;
                 
-                // Limpiamos los arrays para guardar en Firebase sin peso innecesario
-                const resumenEntran = carritoEntran.map(p => ({ codigo: p.codigo, nombre: p.descripcion_oficial || p.nombre, qty: p.qty }));
-                const resumenSalen = carritoSalen.map(p => ({ codigo: p.codigo, nombre: p.descripcion_oficial || p.nombre, qty: p.qty }));
+                if (!acumulador[codigoBase]) {
+                    // Buscamos el nombre del componente base en el catálogo
+                    let itemCatalogo = catalogoEnMemoria.find(c => c.codigo === codigoBase);
+                    acumulador[codigoBase] = {
+                        codigo: codigoBase,
+                        nombre: itemCatalogo ? (itemCatalogo.descripcion_oficial || itemCatalogo.nombre) : `Componente (${codigoBase})`,
+                        qty: 0
+                    };
+                }
+                // Sumamos la cantidad desglosada
+                acumulador[codigoBase].qty += cantidadDesglosada;
+            });
 
-                batch.set(ticketRef, {
-                    entran: resumenEntran,
-                    salen: resumenSalen,
-                    motivo: motivo,
-                    estado: 'pendiente',
-                    fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                    usuario: 'Almacén (Multi-Trueque)'
-                });
-
-                await batch.commit();
-
-                // Limpiar todo
-                carritoEntran = [];
-                carritoSalen = [];
-                document.getElementById('motivoCambio').value = '';
-                renderCarritos();
-                
-                showToast("Cambio registrado y stock actualizado en la Web.", "success");
-
-            } catch (error) {
-                console.error("Error en cambio:", error);
-                showToast("Error al registrar el cambio. Checa las reglas de Firebase.", "error");
-            } finally {
-                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Registrar Todo e Impactar Stock Inmediatamente';
-                btn.disabled = false;
+        } else {
+            // Es pieza base normal, pasa directo
+            if (!acumulador[prod.codigo]) {
+                acumulador[prod.codigo] = {
+                    codigo: prod.codigo,
+                    nombre: prod.descripcion_oficial || prod.nombre,
+                    qty: 0
+                };
             }
+            acumulador[prod.codigo].qty += prod.qty;
         }
+    });
+
+    // Devolvemos el objeto convertido en arreglo
+    return Object.values(acumulador);
+}
+        
+        async function registrarCambioRapido() {
+    if(carritoEntran.length === 0 && carritoSalen.length === 0) {
+        return showToast("Debes agregar al menos un producto que entra o sale.", "error");
+    }
+    
+    const motivo = document.getElementById('motivoCambio').value.trim();
+    if(motivo === "") return showToast("Debes escribir un motivo para el administrador.", "error");
+
+    const btn = document.getElementById('btnRegistrarCambio');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    btn.disabled = true;
+
+    try {
+        const batch = db.batch();
+
+        // 1. PROCESAR ENTRADAS (Disminuye la sombra, sube stock web)
+        carritoEntran.forEach(prod => procesarAjusteSombra(prod, prod.qty, -1, batch));
+
+        // 2. PROCESAR SALIDAS (Sube la sombra, baja stock web)
+        carritoSalen.forEach(prod => procesarAjusteSombra(prod, prod.qty, 1, batch));
+
+        // 3. REGISTRAR TICKET GLOBAL DESGLOSADO
+        const ticketRef = db.collection('cambios_rapidos').doc();
+        
+        // ¡Aquí aplicamos la magia de la nueva función!
+        const resumenEntran = desglosarParaTicket(carritoEntran);
+        const resumenSalen = desglosarParaTicket(carritoSalen);
+
+        batch.set(ticketRef, {
+            entran: resumenEntran,
+            salen: resumenSalen,
+            motivo: motivo,
+            estado: 'pendiente',
+            fecha: firebase.firestore.FieldValue.serverTimestamp(),
+            usuario: 'Almacén (Multi-Trueque)'
+        });
+
+        await batch.commit();
+
+        // Limpiar todo
+        carritoEntran = [];
+        carritoSalen = [];
+        document.getElementById('motivoCambio').value = '';
+        renderCarritos();
+        
+        showToast("Cambio registrado y stock actualizado en la Web.", "success");
+
+    } catch (error) {
+        console.error("Error en cambio:", error);
+        showToast("Error al registrar el cambio. Checa las reglas de Firebase.", "error");
+    } finally {
+        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Registrar Todo e Impactar Stock Inmediatamente';
+        btn.disabled = false;
+    }
+}
 
         function procesarAjusteSombra(producto, qty, sign, batch) {
             if (producto.tipo_item === 'KIT_OFICIAL' && producto.receta && producto.receta.length > 0) {
