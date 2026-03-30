@@ -359,7 +359,7 @@
                             <table class="w-full text-left text-sm whitespace-nowrap min-w-[900px]">
                                 <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
                                     <tr>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllAudit" onclick="toggleSelectAllRows('.cb-audit', this.checked)" class="cb-modern"></th>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllAudit" onclick="toggleSelectAllRows('.cb-audit', this.checked); renderMerge();" class="cb-modern"></th>
                                         <th class="px-4 py-3 border-b border-slate-200">Fecha</th>
                                         <th class="px-4 py-3 border-b border-slate-200">Código CONTPAQi</th>
                                         <th class="px-4 py-3 border-b border-slate-200">Producto</th>
@@ -387,7 +387,7 @@
                             <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px]">
                                 <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
                                     <tr>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllTrueques" onclick="toggleSelectAllRows('.cb-trueque', this.checked)" class="cb-modern"></th>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllTrueques" onclick="toggleSelectAllRows('.cb-trueque', this.checked); renderMerge();" class="cb-modern"></th>
                                         <th class="px-4 py-3 border-b border-slate-200">Fecha / Motivo</th>
                                         <th class="px-4 py-3 border-b border-slate-200 bg-emerald-50/30 text-emerald-700"><i class="fas fa-arrow-down"></i> Producto que ENTRÓ (Reingreso)</th>
                                         <th class="px-4 py-3 border-b border-slate-200 bg-red-50/30 text-red-700"><i class="fas fa-arrow-up"></i> Producto que SALIÓ (Entrega)</th>
@@ -400,13 +400,25 @@
                     </div>
 
                     <div id="containerAuditMerge" class="h-full flex flex-col fade-in hidden">
-                        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-blue-50/50">
-                            <div class="text-xs text-blue-800 font-bold flex items-center gap-2"><i class="fas fa-magic"></i> Sugerencia de Ajuste en CONTPAQi (Calculando piezas base impactadas)</div>
+                        <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-blue-50/50 gap-3">
+                            <div>
+                                <div class="text-xs text-blue-800 font-bold flex items-center gap-2"><i class="fas fa-magic"></i> Sugerencia de Ajuste en CONTPAQi</div>
+                                <div id="mergeFilterNotice" class="text-[10px] font-bold text-blue-600 mt-1">Calculando usando TODOS los tickets pendientes.</div>
+                            </div>
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                <button onclick="exportarMergeExcel()" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 border border-emerald-200">
+                                    <i class="fas fa-file-excel"></i> Exportar
+                                </button>
+                                <button onclick="procesarMergeSeleccionado()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2">
+                                    <i class="fas fa-check-double"></i> Procesar Relacionados
+                                </button>
+                            </div>
                         </div>
                         <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll bg-slate-50">
-                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
+                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[750px]">
                                 <thead class="bg-white sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
                                     <tr>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200 w-10"><input type="checkbox" id="selectAllMerge" onclick="toggleSelectAllRows('.cb-merge', this.checked)" class="cb-modern"></th>
                                         <th class="px-6 py-3 border-b border-slate-200 w-48">Código Base</th>
                                         <th class="px-6 py-3 border-b border-slate-200">Producto</th>
                                         <th class="px-6 py-3 border-b border-slate-200">Desglose de Origen</th>
@@ -2313,7 +2325,7 @@
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-center border-b border-slate-100"><input type="checkbox" class="cb-audit cb-modern" value="${data.id_ticket}"></td>
+                        <td class="px-4 py-3 text-center border-b border-slate-100"><input type="checkbox" class="cb-audit cb-modern" value="${data.id_ticket}" onchange="renderMerge()"></td>
                         <td class="px-4 py-3 text-xs font-bold text-slate-500 border-b border-slate-100">${fechaStr}</td>
                         <td class="px-4 py-3 font-mono font-black text-slate-700 text-xs border-b border-slate-100">${data.codigo_contpaqi}</td>
                         <td class="px-4 py-3 font-bold text-slate-800 border-b border-slate-100">${data.nombre_producto}</td>
@@ -2354,7 +2366,7 @@
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-center border-b border-slate-100"><input type="checkbox" class="cb-trueque cb-modern" value="${data.id_ticket}"></td>
+                        <td class="px-4 py-3 text-center border-b border-slate-100"><input type="checkbox" class="cb-trueque cb-modern" value="${data.id_ticket}" onchange="renderMerge()"></td>
                         <td class="px-4 py-3 border-b border-slate-100">
                             <div class="text-xs font-bold text-slate-500 mb-1">${fechaStr}</div>
                             <div class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded max-w-[200px] whitespace-normal italic border border-slate-200">"${data.motivo || 'Sin motivo especificado'}"</div>
@@ -2374,7 +2386,6 @@
             if(!itemsArray) return baseItemsMap;
             
             itemsArray.forEach(item => {
-                // Find product by code or ID
                 let prod = allItems.find(p => String(p.codigo_sistema_oficial).toLowerCase() === String(item.codigo).toLowerCase() || p.id === item.codigo || p.codigo === item.codigo);
                 
                 if (prod && prod.tipo_item === 'KIT_OFICIAL' && prod.receta_desglose) {
@@ -2398,8 +2409,28 @@
         function getConsolidadoMerge() {
             let mergeMap = {}; 
 
+            const selectedAuditsScope = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
+            const auditsToUse = selectedAuditsScope.length > 0 ? auditoriasPendientesList.filter(a => selectedAuditsScope.includes(a.id_ticket)) : auditoriasPendientesList;
+
+            const selectedTruequesScope = Array.from(document.querySelectorAll('.cb-trueque:checked')).map(cb => cb.value);
+            const truequesToUse = selectedTruequesScope.length > 0 ? cambiosPendientesList.filter(c => selectedTruequesScope.includes(c.id_ticket)) : cambiosPendientesList;
+
+            const isFiltered = selectedAuditsScope.length > 0 || selectedTruequesScope.length > 0;
+            const noticeEl = document.getElementById('mergeFilterNotice');
+            if(noticeEl) {
+                if(isFiltered) {
+                    noticeEl.innerHTML = `<i class="fas fa-filter"></i> Calculando MERGE solo con ${selectedAuditsScope.length} conteos y ${selectedTruequesScope.length} trueques seleccionados.`;
+                    noticeEl.classList.remove('text-blue-600');
+                    noticeEl.classList.add('text-orange-600');
+                } else {
+                    noticeEl.innerHTML = `Calculando usando TODOS los tickets pendientes.`;
+                    noticeEl.classList.remove('text-orange-600');
+                    noticeEl.classList.add('text-blue-600');
+                }
+            }
+
             // 1. Auditorías
-            auditoriasPendientesList.forEach(a => {
+            auditsToUse.forEach(a => {
                 const code = a.codigo_contpaqi;
                 if(!code) return;
                 if(!mergeMap[code]) mergeMap[code] = { nombre: a.nombre_producto, ajusteNeto: 0, fuentes: [] };
@@ -2408,8 +2439,7 @@
             });
 
             // 2. Trueques
-            cambiosPendientesList.forEach(c => {
-                // Format support for old and new quick swaps structure
+            truequesToUse.forEach(c => {
                 let arrEntran = c.entra_codigo ? [{codigo: c.entra_codigo, nombre: c.entra_nombre, qty: c.entra_qty}] : (c.entran || []);
                 let arrSalen = c.sale_codigo ? [{codigo: c.sale_codigo, nombre: c.sale_nombre, qty: c.sale_qty}] : (c.salen || []);
 
@@ -2439,7 +2469,7 @@
             const mergeData = getConsolidadoMerge();
 
             if(mergeData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">🧮</div>No hay datos para hacer merge.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">🧮</div>No hay datos calculados.</td></tr>';
                 return;
             }
 
@@ -2450,6 +2480,7 @@
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" class="cb-merge cb-modern focus:ring-blue-500" value="${item.codigo}"></td>
                         <td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-200">${item.codigo}</td>
                         <td class="px-6 py-4 font-bold text-slate-800 border-b border-slate-200 whitespace-normal min-w-[200px]">${item.nombre}</td>
                         <td class="px-6 py-4 border-b border-slate-200 bg-slate-50/50">${fuentesHTML}</td>
@@ -2490,6 +2521,33 @@
             showToast("Excel para CONTPAQi descargado.");
         }
 
+        function exportarMergeExcel() {
+            const seleccionados = Array.from(document.querySelectorAll('.cb-merge:checked')).map(cb => cb.value);
+            let mergeData = getConsolidadoMerge();
+
+            if (seleccionados.length > 0) {
+                mergeData = mergeData.filter(m => seleccionados.includes(m.codigo));
+            }
+
+            if(mergeData.length === 0) return showToast("No hay datos para exportar", "error");
+
+            const excelData = mergeData.map(m => {
+                return {
+                    "Código Base": m.codigo,
+                    "Producto": m.nombre,
+                    "Ajuste Final Necesario": m.ajusteNeto,
+                    "Fuentes (Desglose)": m.fuentes.map(f => f.replace(/<[^>]+>/g, '')).join(' | ') 
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            worksheet['!cols'] = [{wch: 25}, {wch: 50}, {wch: 15}, {wch: 80}];
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Merge_CONTPAQi");
+            XLSX.writeFile(workbook, `Sugerencia_Merge_${new Date().getTime()}.xlsx`);
+            showToast("Excel del Merge descargado.");
+        }
+
         async function eliminarTicket(tipo, ticketId) {
             const typeName = tipo === 'auditoria' ? 'Conteo Ciego' : 'Trueque Rápido';
             const extraMsg = tipo === 'trueque' ? '\n\nNOTA: Esto revertirá el impacto en la Sombra Web que causó este trueque.' : '';
@@ -2500,7 +2558,7 @@
                 if (tipo === 'auditoria') {
                     await db.collection('auditorias_pendientes').doc(ticketId).delete();
                 } else if (tipo === 'trueque') {
-                    // Revert Sombra Web exactly as if we processed it successfully, but mark it deleted
+                    // Revertir sombra como si lo procesaramos exitosamente, pero lo matamos.
                     const ticketData = cambiosPendientesList.find(t => t.id_ticket === ticketId);
                     if(ticketData) {
                         const batch = db.batch();
@@ -2576,6 +2634,89 @@
                 document.getElementById('selectAllTrueques').checked = false;
             } catch(error) {
                 showToast("Error al procesar.", "error");
+            }
+        }
+
+        async function procesarMergeSeleccionado() {
+            const seleccionados = Array.from(document.querySelectorAll('.cb-merge:checked')).map(cb => cb.value);
+            if(seleccionados.length === 0) return showToast("Selecciona al menos un producto del merge.", "error");
+
+            if(!(await customConfirm(`¿Procesar los tickets relacionados a estos ${seleccionados.length} productos?\n\nEsto marcará como completados los conteos y trueques asociados y ajustará la Sombra Web.`))) return;
+
+            // Obtener el scope filtrado en caso de que esté usando la vista "filtrada"
+            const selectedAuditsScope = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
+            const auditsToUse = selectedAuditsScope.length > 0 ? auditoriasPendientesList.filter(a => selectedAuditsScope.includes(a.id_ticket)) : auditoriasPendientesList;
+
+            const selectedTruequesScope = Array.from(document.querySelectorAll('.cb-trueque:checked')).map(cb => cb.value);
+            const truequesToUse = selectedTruequesScope.length > 0 ? cambiosPendientesList.filter(c => selectedTruequesScope.includes(c.id_ticket)) : cambiosPendientesList;
+
+            let ticketsToProcess = { audits: new Set(), trueques: new Set() };
+            let warningTruequeExtra = false;
+
+            auditsToUse.forEach(a => {
+                if(seleccionados.includes(a.codigo_contpaqi)) ticketsToProcess.audits.add(a.id_ticket);
+            });
+
+            truequesToUse.forEach(c => {
+                let arrEntran = c.entra_codigo ? [{codigo: c.entra_codigo, qty: c.entra_qty}] : (c.entran || []);
+                let arrSalen = c.sale_codigo ? [{codigo: c.sale_codigo, qty: c.sale_qty}] : (c.salen || []);
+
+                const entranDesglose = breakdownToLineItems(arrEntran);
+                const salenDesglose = breakdownToLineItems(arrSalen);
+
+                const involvedCodes = new Set([...Object.keys(entranDesglose), ...Object.keys(salenDesglose)]);
+
+                let hasSelectedCode = false;
+                let hasUnselectedCode = false;
+
+                involvedCodes.forEach(code => {
+                    if(seleccionados.includes(code)) hasSelectedCode = true;
+                    else hasUnselectedCode = true;
+                });
+
+                if(hasSelectedCode) {
+                    ticketsToProcess.trueques.add(c.id_ticket);
+                    if(hasUnselectedCode) warningTruequeExtra = true;
+                }
+            });
+
+            if(warningTruequeExtra) {
+                if(!(await customConfirm("⚠️ ALERTA: Algunos trueques involucran productos que NO marcaste en la tabla actual. Si continúas, esos trueques se procesarán COMPLETOS (afectando a los productos no marcados también).\n\n¿Estás seguro de continuar?"))) return;
+            }
+
+            try {
+                const batch = db.batch();
+
+                // Procesar Auditorías Encontradas
+                ticketsToProcess.audits.forEach(ticketId => {
+                    const ticketData = auditoriasPendientesList.find(t => t.id_ticket === ticketId);
+                    const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
+                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
+
+                    if(ticketData && ticketData.codigo_contpaqi) {
+                        const codigoSeguro = String(ticketData.codigo_contpaqi).replace(/\//g, '_');
+                        const sombraGuardada = ticketData.sombra_al_momento || 0;
+                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                        batch.set(sombraRef, {
+                            cantidad_vendida: firebase.firestore.FieldValue.increment(-sombraGuardada),
+                            ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    }
+                });
+
+                // Procesar Trueques Encontrados
+                ticketsToProcess.trueques.forEach(ticketId => {
+                    const ticketData = cambiosPendientesList.find(t => t.id_ticket === ticketId);
+                    const ticketRef = db.collection('cambios_rapidos').doc(ticketId);
+                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
+                    if(ticketData) aplicarReversaDeSombra(ticketData, batch);
+                });
+
+                await batch.commit();
+                showToast("¡Tickets relacionados procesados y Sombra Web estabilizada!");
+                document.getElementById('selectAllMerge').checked = false;
+            } catch(error) {
+                showToast("Error al procesar el merge.", "error");
             }
         }
 
