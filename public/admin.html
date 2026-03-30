@@ -162,7 +162,7 @@
 
             <button onclick="switchTab('audit')" id="dtTab-audit" class="w-full flex items-center px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors sidebar-btn group">
                 <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-clipboard-check text-lg text-center w-5"></i></div>
-                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Auditoría</span>
+                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Auditoría y Cambios</span>
             </button>
             
             <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mt-6 mb-2 sidebar-text">Administración</p>
@@ -233,7 +233,7 @@
                             <option value="KIT_OFICIAL">Cajas Oficiales</option>
                         </select>
                         <div class="h-px bg-slate-100 my-1"></div>
-                        <label class="flex items-center gap-2 px-2 py-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors">
+                        <label class="flex items-center gap-2 px-2 py-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors" id="filterPendingLabel">
                             <input type="checkbox" id="filterPending" onchange="filterTable()" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 cursor-pointer">
                             <span class="text-xs font-bold text-slate-700">Mostrar solo Faltantes</span>
                         </label>
@@ -321,51 +321,116 @@
                 </div>
             </div>
 
-            <div id="view-audit" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in gap-6">
+            <div id="view-audit" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in gap-4">
                 
-                <div class="flex-1 flex flex-col min-h-0 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden relative">
-                    <div class="shrink-0 bg-slate-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl border border-indigo-500/30">
-                                <i class="fas fa-clipboard-check"></i>
-                            </div>
-                            <div>
-                                <h2 class="font-black text-white text-lg">Auditorías Pendientes</h2>
-                                <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Fotografías de conteo para CONTPAQi</p>
-                            </div>
+                <div class="shrink-0 bg-slate-900 p-5 rounded-3xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl border border-indigo-500/30">
+                            <i class="fas fa-tasks"></i>
                         </div>
-                        <div class="flex gap-3 w-full sm:w-auto">
-                            <button onclick="exportarAuditoriasExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
-                                <i class="fas fa-file-excel"></i> Excel CONTPAQi
-                            </button>
-                            <button onclick="procesarAjustesSeleccionados()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
-                                <i class="fas fa-check-double"></i> Marcar Ajustados
-                            </button>
+                        <div>
+                            <h2 class="font-black text-white text-lg">Centro de Auditoría</h2>
+                            <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Gestión de Inventario y Trueques</p>
                         </div>
                     </div>
                     
-                    <div class="bg-blue-50/50 p-3 border-b border-blue-100 flex items-center gap-2 text-xs text-blue-800 font-medium shrink-0">
-                        <i class="fas fa-info-circle text-blue-500"></i> Al marcar como ajustados, los tickets se archivan y la Sombra Web se resetea inteligentemente.
-                    </div>
-                    
-                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
-                        <table class="w-full text-left text-sm whitespace-nowrap min-w-[900px]">
-                            <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
-                                <tr>
-                                    <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllAudit" onclick="toggleSelectAllAudit()" class="cb-modern"></th>
-                                    <th class="px-4 py-3 border-b border-slate-200">Fecha Fotografía</th>
-                                    <th class="px-4 py-3 border-b border-slate-200">Código CONTPAQi</th>
-                                    <th class="px-4 py-3 border-b border-slate-200">Producto</th>
-                                    <th class="px-4 py-3 text-center border-b border-slate-200 bg-slate-100/50" title="Stock oficial al momento del conteo">Esperado (Sistema)</th>
-                                    <th class="px-4 py-3 text-center border-b border-slate-200 bg-blue-50/50 text-blue-700">Físico Contado</th>
-                                    <th class="px-4 py-3 text-center border-b border-slate-200 font-black">Ajuste</th>
-                                </tr>
-                            </thead>
-                            <tbody id="auditTableBody" class="divide-y divide-slate-100"></tbody>
-                        </table>
+                    <div class="bg-slate-800 p-1.5 rounded-xl flex gap-1 w-full sm:w-auto border border-slate-700">
+                        <button id="tabAudit-conteos" onclick="switchAuditView('conteos')" class="px-4 py-2 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition-all flex-1 text-center">Auditorías (<span id="count-audits">0</span>)</button>
+                        <button id="tabAudit-trueques" onclick="switchAuditView('trueques')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex-1 text-center">Cambios Rápidos (<span id="count-trueques">0</span>)</button>
+                        <button id="tabAudit-merge" onclick="switchAuditView('merge')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex-1 text-center group"><i class="fas fa-magic text-blue-400 group-hover:animate-pulse"></i> Sugerencia Merge</button>
                     </div>
                 </div>
-                
+
+                <div class="flex-1 flex flex-col min-h-0 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden relative">
+                    
+                    <div id="containerAuditConteos" class="h-full flex flex-col fade-in">
+                        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div class="text-xs text-slate-500 font-bold">Conteos Físicos (Reportes Lector)</div>
+                            <div class="flex gap-2">
+                                <button onclick="exportarAuditoriasExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-2 border border-emerald-200">
+                                    <i class="fas fa-file-excel"></i> Excel CONTPAQi
+                                </button>
+                                <button onclick="procesarAuditoriasSeleccionadas()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-2">
+                                    <i class="fas fa-check-double"></i> Marcar Ajustados
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
+                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[900px]">
+                                <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
+                                    <tr>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllAudit" onclick="toggleSelectAllRows('.cb-audit', this.checked); renderMerge();" class="cb-modern"></th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Fecha</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Código CONTPAQi</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Producto</th>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200 bg-slate-100/50">Esperado</th>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200 bg-blue-50/50 text-blue-700">Contado</th>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200 font-black">Ajuste</th>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200">Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditTableBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="containerAuditTrueques" class="h-full flex flex-col fade-in hidden">
+                        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div class="text-xs text-slate-500 font-bold">Cambios Rápidos (Mostrador)</div>
+                            <div class="flex gap-2">
+                                <button onclick="procesarTruequesSeleccionados()" class="bg-amber-500 hover:bg-amber-400 text-white px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-2">
+                                    <i class="fas fa-check-double"></i> Marcar Procesados
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
+                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px]">
+                                <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
+                                    <tr>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllTrueques" onclick="toggleSelectAllRows('.cb-trueque', this.checked); renderMerge();" class="cb-modern"></th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Fecha / Motivo</th>
+                                        <th class="px-4 py-3 border-b border-slate-200 bg-emerald-50/30 text-emerald-700"><i class="fas fa-arrow-down"></i> Producto que ENTRÓ (Reingreso)</th>
+                                        <th class="px-4 py-3 border-b border-slate-200 bg-red-50/30 text-red-700"><i class="fas fa-arrow-up"></i> Producto que SALIÓ (Entrega)</th>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="truequesTableBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="containerAuditMerge" class="h-full flex flex-col fade-in hidden">
+                        <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-blue-50/50 gap-3">
+                            <div>
+                                <div class="text-xs text-blue-800 font-bold flex items-center gap-2"><i class="fas fa-magic"></i> Sugerencia de Ajuste en CONTPAQi</div>
+                                <div id="mergeFilterNotice" class="text-[10px] font-bold text-blue-600 mt-1">Calculando usando TODOS los tickets pendientes.</div>
+                            </div>
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                <button onclick="exportarMergeExcel()" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 border border-emerald-200">
+                                    <i class="fas fa-file-excel"></i> Exportar
+                                </button>
+                                <button onclick="procesarMergeSeleccionado()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2">
+                                    <i class="fas fa-check-double"></i> Procesar Relacionados
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll bg-slate-50">
+                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[750px]">
+                                <thead class="bg-white sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
+                                    <tr>
+                                        <th class="px-4 py-3 text-center border-b border-slate-200 w-10"><input type="checkbox" id="selectAllMerge" onclick="toggleSelectAllRows('.cb-merge', this.checked)" class="cb-modern"></th>
+                                        <th class="px-6 py-3 border-b border-slate-200 w-48">Código Base</th>
+                                        <th class="px-6 py-3 border-b border-slate-200">Producto</th>
+                                        <th class="px-6 py-3 border-b border-slate-200">Desglose de Origen</th>
+                                        <th class="px-6 py-3 text-center border-b border-slate-200 bg-slate-100 w-40">Ajuste Final Necesario</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mergeTableBody" class="divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
@@ -668,7 +733,7 @@
 
     <script>
         // ==========================================
-        // LOGICA DE INTERFAZ DEL SIDEBAR
+        // LOGICA DE INTERFAZ DEL SIDEBAR Y PWA
         // ==========================================
         let isSidebarCollapsed = false;
         function toggleSidebar() {
@@ -695,9 +760,6 @@
             }
         }
 
-        // ==========================================
-        // REGISTRO DE SERVICE WORKER (PWA)
-        // ==========================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw-admin.js')
@@ -710,8 +772,11 @@
         let facturacionCatalog = []; 
         let baseItems = [];
         let cashiersList = [];
+        let auditoriasPendientesList = [];
+        let cambiosPendientesList = [];
         let currentTab = 'master';
         let currentMasterView = 'desglose'; 
+        let currentAuditView = 'conteos';
         let subcollectionListener = null;
         let heredarOptionsList = []; 
         let isDataInitialized = false;
@@ -734,7 +799,6 @@
                     }
                     
                     const userData = doc.data();
-                    
                     if(userData.activo === false) {
                         auth.signOut();
                         showLoginError("Tu cuenta ha sido desactivada por un administrador.");
@@ -858,6 +922,7 @@
 
                 if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
                 if(currentTab === 'import') renderImportTable(); 
+                if(currentTab === 'audit' && currentAuditView === 'merge') renderMerge(); 
             }, (error) => console.error("Error al cargar productos:", error));
 
             facturacionRef.onSnapshot((snapshot) => {
@@ -891,13 +956,6 @@
                     if(currentTab === 'cashiers') renderCashiers();
                 }, (error) => console.error("Error al cargar cajeros:", error));
             }
-
-            // 🚀 OPTIMIZACIÓN: Bitácora comentada para no gastar lecturas ni estorbar visualmente
-            /*
-            bitacoraRef.orderBy('fecha', 'desc').limit(50).onSnapshot(snap => {
-                // Lógica de renderizado omitida intencionalmente
-            });
-            */
         }
 
         // ==========================================
@@ -1008,9 +1066,6 @@
             setTimeout(() => { t.classList.add('hidden'); t.classList.remove('scale-in'); }, 3000);
         }
 
-        // ==========================================
-        // CONEXIÓN A BÓVEDA SERVERLESS (VERCEL)
-        // ==========================================
         const URL_VERCEL_IMGBB = 'https://api-proxy-een.vercel.app/api/upload';
         const URL_VERCEL_DEPLOY = 'https://api-proxy-een.vercel.app/api/deploy';
 
@@ -2204,47 +2259,239 @@
             const pw = window.open('', '_blank'); pw.document.write(buildPrintHTML(dataArray, qty, false, '', '3x10')); pw.document.close();
         };
 
-        let auditoriasPendientesList = [];
+        // ==========================================
+        // GESTIÓN DE AUDITORÍAS Y CAMBIOS RÁPIDOS
+        // ==========================================
+        
+        function switchAuditView(viewName) {
+            currentAuditView = viewName;
+            const views = ['conteos', 'trueques', 'merge'];
+            views.forEach(v => {
+                const btn = document.getElementById(`tabAudit-${v}`);
+                const container = document.getElementById(`containerAudit${v.charAt(0).toUpperCase() + v.slice(1)}`);
+                
+                if (v === viewName) {
+                    btn.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                    btn.classList.remove('text-slate-400', 'hover:text-white', 'group');
+                    if(container) container.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+                    btn.classList.add('text-slate-400', 'hover:text-white');
+                    if (v === 'merge') btn.classList.add('group');
+                    if(container) container.classList.add('hidden');
+                }
+            });
+            
+            if (viewName === 'conteos') renderAuditorias();
+            if (viewName === 'trueques') renderTrueques();
+            if (viewName === 'merge') renderMerge();
+        }
 
         function inicializarAuditorias() {
+            // Escuchar Conteos Físicos
             db.collection('auditorias_pendientes').where('estado', '==', 'pendiente')
                 .onSnapshot((snapshot) => {
                     auditoriasPendientesList = [];
-                    const tbody = document.getElementById('auditTableBody');
-                    tbody.innerHTML = '';
-                    
-                    if(snapshot.empty) {
-                        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">✅</div>No hay conteos pendientes. ¡Todo al día!</td></tr>';
-                        return;
-                    }
+                    snapshot.forEach(doc => auditoriasPendientesList.push({ id_ticket: doc.id, ...doc.data() }));
+                    document.getElementById('count-audits').innerText = auditoriasPendientesList.length;
+                    if(currentAuditView === 'conteos') renderAuditorias();
+                    if(currentAuditView === 'merge') renderMerge();
+                });
 
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        data.id_ticket = doc.id;
-                        auditoriasPendientesList.push(data);
-                        
-                        const fechaStr = data.fecha ? data.fecha.toDate().toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin Fecha';
-                        const colorAjuste = data.ajuste_calculado === 0 ? 'text-slate-400' : (data.ajuste_calculado > 0 ? 'text-emerald-500' : 'text-red-500');
-                        const signo = data.ajuste_calculado > 0 ? '+' : '';
-
-                        tbody.innerHTML += `
-                            <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-4 py-3 text-center"><input type="checkbox" class="cb-audit cb-modern" value="${data.id_ticket}"></td>
-                                <td class="px-4 py-3 text-xs font-bold text-slate-500">${fechaStr}</td>
-                                <td class="px-4 py-3 font-mono font-black text-slate-700 text-xs">${data.codigo_contpaqi}</td>
-                                <td class="px-4 py-3 font-bold text-slate-800">${data.nombre_producto}</td>
-                                <td class="px-4 py-3 text-center font-bold text-slate-500 bg-slate-100/30">${data.esperado}</td>
-                                <td class="px-4 py-3 text-center font-black text-blue-600 bg-blue-50/30">${data.conteo_fisico}</td>
-                                <td class="px-4 py-3 text-center font-black text-lg ${colorAjuste}">${signo}${data.ajuste_calculado}</td>
-                            </tr>
-                        `;
-                    });
+            // Escuchar Cambios Rápidos (Trueques)
+            db.collection('cambios_rapidos').where('estado', '==', 'pendiente')
+                .onSnapshot((snapshot) => {
+                    cambiosPendientesList = [];
+                    snapshot.forEach(doc => cambiosPendientesList.push({ id_ticket: doc.id, ...doc.data() }));
+                    document.getElementById('count-trueques').innerText = cambiosPendientesList.length;
+                    if(currentAuditView === 'trueques') renderTrueques();
+                    if(currentAuditView === 'merge') renderMerge();
                 });
         }
 
-        function toggleSelectAllAudit() {
-            const isChecked = document.getElementById('selectAllAudit').checked;
-            document.querySelectorAll('.cb-audit').forEach(cb => cb.checked = isChecked);
+        function renderAuditorias() {
+            const tbody = document.getElementById('auditTableBody');
+            tbody.innerHTML = '';
+            
+            if(auditoriasPendientesList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">✅</div>No hay conteos pendientes. ¡Todo al día!</td></tr>';
+                return;
+            }
+
+            auditoriasPendientesList.forEach(data => {
+                const fechaStr = data.fecha ? data.fecha.toDate().toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin Fecha';
+                const colorAjuste = data.ajuste_calculado === 0 ? 'text-slate-400' : (data.ajuste_calculado > 0 ? 'text-emerald-500' : 'text-red-500');
+                const signo = data.ajuste_calculado > 0 ? '+' : '';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 text-center border-b border-slate-100"><input type="checkbox" class="cb-audit cb-modern" value="${data.id_ticket}" onchange="renderMerge()"></td>
+                        <td class="px-4 py-3 text-xs font-bold text-slate-500 border-b border-slate-100">${fechaStr}</td>
+                        <td class="px-4 py-3 font-mono font-black text-slate-700 text-xs border-b border-slate-100">${data.codigo_contpaqi}</td>
+                        <td class="px-4 py-3 font-bold text-slate-800 border-b border-slate-100">${data.nombre_producto}</td>
+                        <td class="px-4 py-3 text-center font-bold text-slate-500 bg-slate-100/30 border-b border-slate-100">${data.esperado}</td>
+                        <td class="px-4 py-3 text-center font-black text-blue-600 bg-blue-50/30 border-b border-slate-100">${data.conteo_fisico}</td>
+                        <td class="px-4 py-3 text-center font-black text-lg ${colorAjuste} border-b border-slate-100">${signo}${data.ajuste_calculado}</td>
+                        <td class="px-4 py-3 text-center border-b border-slate-100">
+                            <button onclick="eliminarTicket('auditoria', '${data.id_ticket}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition shadow-sm border border-red-100"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function formatBreakdownHTML(itemsArray) {
+            if(!itemsArray || itemsArray.length === 0) return '<span class="text-slate-400 italic">Nada</span>';
+            const baseMap = breakdownToLineItems(itemsArray);
+            return Object.entries(baseMap).map(([code, data]) => {
+                return `<div class="text-[10px] font-bold text-slate-700 bg-white border border-slate-200 rounded px-1.5 py-0.5 inline-block m-0.5 shadow-sm truncate max-w-[150px]"><span class="font-black text-slate-900">${data.qty}x</span> ${data.nombre}</div>`;
+            }).join('');
+        }
+
+        function renderTrueques() {
+            const tbody = document.getElementById('truequesTableBody');
+            tbody.innerHTML = '';
+            
+            if(cambiosPendientesList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">✅</div>No hay cambios rápidos pendientes.</td></tr>';
+                return;
+            }
+
+            cambiosPendientesList.forEach(data => {
+                const fechaStr = data.fecha ? data.fecha.toDate().toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin Fecha';
+                
+                // Si viene del lector viejo (1 a 1)
+                let entranHTML = data.entra_codigo ? formatBreakdownHTML([{codigo: data.entra_codigo, nombre: data.entra_nombre, qty: data.entra_qty}]) : formatBreakdownHTML(data.entran);
+                let salenHTML = data.sale_codigo ? formatBreakdownHTML([{codigo: data.sale_codigo, nombre: data.sale_nombre, qty: data.sale_qty}]) : formatBreakdownHTML(data.salen);
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 text-center border-b border-slate-100"><input type="checkbox" class="cb-trueque cb-modern" value="${data.id_ticket}" onchange="renderMerge()"></td>
+                        <td class="px-4 py-3 border-b border-slate-100">
+                            <div class="text-xs font-bold text-slate-500 mb-1">${fechaStr}</div>
+                            <div class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded max-w-[200px] whitespace-normal italic border border-slate-200">"${data.motivo || 'Sin motivo especificado'}"</div>
+                        </td>
+                        <td class="px-4 py-3 border-b border-slate-100 bg-emerald-50/10 min-w-[200px] whitespace-normal">${entranHTML}</td>
+                        <td class="px-4 py-3 border-b border-slate-100 bg-red-50/10 min-w-[200px] whitespace-normal">${salenHTML}</td>
+                        <td class="px-4 py-3 text-center border-b border-slate-100">
+                            <button onclick="eliminarTicket('trueque', '${data.id_ticket}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition shadow-sm border border-red-100" title="Eliminar y Revertir"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function breakdownToLineItems(itemsArray) {
+            let baseItemsMap = {};
+            if(!itemsArray) return baseItemsMap;
+            
+            itemsArray.forEach(item => {
+                let prod = allItems.find(p => String(p.codigo_sistema_oficial).toLowerCase() === String(item.codigo).toLowerCase() || p.id === item.codigo || p.codigo === item.codigo);
+                
+                if (prod && prod.tipo_item === 'KIT_OFICIAL' && prod.receta_desglose) {
+                    Object.entries(prod.receta_desglose).forEach(([compId, qtyReq]) => {
+                        const comp = allItems.find(p => p.id === compId);
+                        const compCode = comp ? comp.codigo_sistema_oficial : compId;
+                        const compName = comp ? comp.nombre_flexible : 'Desconocido';
+                        if (!baseItemsMap[compCode]) baseItemsMap[compCode] = { nombre: compName, qty: 0 };
+                        baseItemsMap[compCode].qty += (qtyReq * item.qty);
+                    });
+                } else {
+                    const code = prod ? (prod.codigo_sistema_oficial || item.codigo) : item.codigo;
+                    const name = prod ? prod.nombre_flexible : item.nombre;
+                    if (!baseItemsMap[code]) baseItemsMap[code] = { nombre: name, qty: 0 };
+                    baseItemsMap[code].qty += item.qty;
+                }
+            });
+            return baseItemsMap;
+        }
+
+        function getConsolidadoMerge() {
+            let mergeMap = {}; 
+
+            const selectedAuditsScope = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
+            const auditsToUse = selectedAuditsScope.length > 0 ? auditoriasPendientesList.filter(a => selectedAuditsScope.includes(a.id_ticket)) : auditoriasPendientesList;
+
+            const selectedTruequesScope = Array.from(document.querySelectorAll('.cb-trueque:checked')).map(cb => cb.value);
+            const truequesToUse = selectedTruequesScope.length > 0 ? cambiosPendientesList.filter(c => selectedTruequesScope.includes(c.id_ticket)) : cambiosPendientesList;
+
+            const isFiltered = selectedAuditsScope.length > 0 || selectedTruequesScope.length > 0;
+            const noticeEl = document.getElementById('mergeFilterNotice');
+            if(noticeEl) {
+                if(isFiltered) {
+                    noticeEl.innerHTML = `<i class="fas fa-filter"></i> Calculando MERGE solo con ${selectedAuditsScope.length} conteos y ${selectedTruequesScope.length} trueques seleccionados.`;
+                    noticeEl.classList.remove('text-blue-600');
+                    noticeEl.classList.add('text-orange-600');
+                } else {
+                    noticeEl.innerHTML = `Calculando usando TODOS los tickets pendientes.`;
+                    noticeEl.classList.remove('text-orange-600');
+                    noticeEl.classList.add('text-blue-600');
+                }
+            }
+
+            // 1. Auditorías
+            auditsToUse.forEach(a => {
+                const code = a.codigo_contpaqi;
+                if(!code) return;
+                if(!mergeMap[code]) mergeMap[code] = { nombre: a.nombre_producto, ajusteNeto: 0, fuentes: [] };
+                mergeMap[code].ajusteNeto += Number(a.ajuste_calculado);
+                mergeMap[code].fuentes.push(`<span class="text-indigo-600 font-bold"><i class="fas fa-clipboard-check mr-1"></i>Conteo Ciego:</span> ${a.ajuste_calculado > 0 ? '+' : ''}${a.ajuste_calculado}`);
+            });
+
+            // 2. Trueques
+            truequesToUse.forEach(c => {
+                let arrEntran = c.entra_codigo ? [{codigo: c.entra_codigo, nombre: c.entra_nombre, qty: c.entra_qty}] : (c.entran || []);
+                let arrSalen = c.sale_codigo ? [{codigo: c.sale_codigo, nombre: c.sale_nombre, qty: c.sale_qty}] : (c.salen || []);
+
+                const entranDesglose = breakdownToLineItems(arrEntran);
+                const salenDesglose = breakdownToLineItems(arrSalen);
+
+                Object.entries(entranDesglose).forEach(([code, data]) => {
+                    if(!mergeMap[code]) mergeMap[code] = { nombre: data.nombre, ajusteNeto: 0, fuentes: [] };
+                    mergeMap[code].ajusteNeto += data.qty; 
+                    mergeMap[code].fuentes.push(`<span class="text-emerald-600 font-bold"><i class="fas fa-arrow-down mr-1"></i>Trueque (Entró):</span> +${data.qty}`);
+                });
+
+                Object.entries(salenDesglose).forEach(([code, data]) => {
+                    if(!mergeMap[code]) mergeMap[code] = { nombre: data.nombre, ajusteNeto: 0, fuentes: [] };
+                    mergeMap[code].ajusteNeto -= data.qty; 
+                    mergeMap[code].fuentes.push(`<span class="text-red-500 font-bold"><i class="fas fa-arrow-up mr-1"></i>Trueque (Salió):</span> -${data.qty}`);
+                });
+            });
+
+            return Object.entries(mergeMap).map(([codigo, data]) => ({ codigo, ...data }));
+        }
+
+        function renderMerge() {
+            const tbody = document.getElementById('mergeTableBody');
+            tbody.innerHTML = '';
+            
+            const mergeData = getConsolidadoMerge();
+
+            if(mergeData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">🧮</div>No hay datos calculados.</td></tr>';
+                return;
+            }
+
+            mergeData.forEach(item => {
+                const colorAjuste = item.ajusteNeto === 0 ? 'text-slate-400' : (item.ajusteNeto > 0 ? 'text-emerald-500' : 'text-red-500');
+                const signo = item.ajusteNeto > 0 ? '+' : '';
+                const fuentesHTML = item.fuentes.map(f => `<div class="text-[10px] bg-white border border-slate-100 rounded px-2 py-0.5 mb-1 w-max shadow-sm">${f}</div>`).join('');
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" class="cb-merge cb-modern focus:ring-blue-500" value="${item.codigo}"></td>
+                        <td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-200">${item.codigo}</td>
+                        <td class="px-6 py-4 font-bold text-slate-800 border-b border-slate-200 whitespace-normal min-w-[200px]">${item.nombre}</td>
+                        <td class="px-6 py-4 border-b border-slate-200 bg-slate-50/50">${fuentesHTML}</td>
+                        <td class="px-6 py-4 text-center font-black text-xl ${colorAjuste} border-b border-slate-200 bg-slate-100 shadow-inner">${signo}${item.ajusteNeto}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function toggleSelectAllRows(selectorClass, isChecked) {
+            document.querySelectorAll(selectorClass).forEach(cb => cb.checked = isChecked);
         }
 
         function exportarAuditoriasExcel() {
@@ -2274,11 +2521,64 @@
             showToast("Excel para CONTPAQi descargado.");
         }
 
-        async function procesarAjustesSeleccionados() {
-            const seleccionados = Array.from(document.querySelectorAll('.cb-audit:checked'));
-            if(seleccionados.length === 0) return showToast("Selecciona al menos un ticket para procesar.", "error");
+        function exportarMergeExcel() {
+            const seleccionados = Array.from(document.querySelectorAll('.cb-merge:checked')).map(cb => cb.value);
+            let mergeData = getConsolidadoMerge();
+
+            if (seleccionados.length > 0) {
+                mergeData = mergeData.filter(m => seleccionados.includes(m.codigo));
+            }
+
+            if(mergeData.length === 0) return showToast("No hay datos para exportar", "error");
+
+            const excelData = mergeData.map(m => {
+                return {
+                    "Código Base": m.codigo,
+                    "Producto": m.nombre,
+                    "Ajuste Final Necesario": m.ajusteNeto,
+                    "Fuentes (Desglose)": m.fuentes.map(f => f.replace(/<[^>]+>/g, '')).join(' | ') 
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            worksheet['!cols'] = [{wch: 25}, {wch: 50}, {wch: 15}, {wch: 80}];
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Merge_CONTPAQi");
+            XLSX.writeFile(workbook, `Sugerencia_Merge_${new Date().getTime()}.xlsx`);
+            showToast("Excel del Merge descargado.");
+        }
+
+        async function eliminarTicket(tipo, ticketId) {
+            const typeName = tipo === 'auditoria' ? 'Conteo Ciego' : 'Trueque Rápido';
+            const extraMsg = tipo === 'trueque' ? '\n\nNOTA: Esto revertirá el impacto en la Sombra Web que causó este trueque.' : '';
             
-            if(!confirm(`¿Marcar estos ${seleccionados.length} productos como ajustados en CONTPAQi?\n\nEsto archivará el ticket y descontará la Sombra Web tomada al momento del conteo.`)) return;
+            if(!(await customConfirm(`¿Eliminar este ticket de ${typeName}?${extraMsg}`))) return;
+
+            try {
+                if (tipo === 'auditoria') {
+                    await db.collection('auditorias_pendientes').doc(ticketId).delete();
+                } else if (tipo === 'trueque') {
+                    // Revertir sombra como si lo procesaramos exitosamente, pero lo matamos.
+                    const ticketData = cambiosPendientesList.find(t => t.id_ticket === ticketId);
+                    if(ticketData) {
+                        const batch = db.batch();
+                        const ticketRef = db.collection('cambios_rapidos').doc(ticketId);
+                        batch.update(ticketRef, { estado: 'eliminado', fecha_eliminado: firebase.firestore.FieldValue.serverTimestamp() });
+                        aplicarReversaDeSombra(ticketData, batch);
+                        await batch.commit();
+                    }
+                }
+                showToast("Ticket eliminado correctamente.", "info");
+            } catch(error) {
+                showToast("Error al eliminar.", "error");
+            }
+        }
+
+        async function procesarAuditoriasSeleccionadas() {
+            const seleccionados = Array.from(document.querySelectorAll('.cb-audit:checked'));
+            if(seleccionados.length === 0) return showToast("Selecciona al menos un conteo.", "error");
+            
+            if(!(await customConfirm(`¿Marcar estos ${seleccionados.length} conteos como ajustados en CONTPAQi?\n\nEsto archivará el ticket y descontará la Sombra Web tomada al momento del conteo.`))) return;
 
             try {
                 const batch = db.batch();
@@ -2295,7 +2595,6 @@
                         const sombraGuardada = ticketData.sombra_al_momento || 0;
                         
                         const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                        
                         batch.set(sombraRef, { 
                             cantidad_vendida: firebase.firestore.FieldValue.increment(-sombraGuardada), 
                             ultima_venta: firebase.firestore.FieldValue.serverTimestamp() 
@@ -2304,13 +2603,150 @@
                 });
 
                 await batch.commit();
-                showToast("¡Ajustes procesados y Sombra Web actualizada!");
+                showToast("¡Conteos procesados y Sombra Web actualizada!");
                 document.getElementById('selectAllAudit').checked = false;
-                
             } catch(error) {
-                console.error("Error al procesar ajustes:", error);
-                showToast("Error de conexión al procesar.", "error");
+                showToast("Error al procesar.", "error");
             }
+        }
+
+        async function procesarTruequesSeleccionados() {
+            const seleccionados = Array.from(document.querySelectorAll('.cb-trueque:checked'));
+            if(seleccionados.length === 0) return showToast("Selecciona al menos un trueque.", "error");
+            
+            if(!(await customConfirm(`¿Marcar estos ${seleccionados.length} trueques como ajustados en CONTPAQi?\n\nEsto asume que ya corregiste el inventario oficial, por lo que la Sombra Web creada por el Lector será revertida.`))) return;
+
+            try {
+                const batch = db.batch();
+                
+                seleccionados.forEach(cb => {
+                    const ticketId = cb.value;
+                    const ticketData = cambiosPendientesList.find(t => t.id_ticket === ticketId);
+                    
+                    const ticketRef = db.collection('cambios_rapidos').doc(ticketId);
+                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
+
+                    if(ticketData) aplicarReversaDeSombra(ticketData, batch);
+                });
+
+                await batch.commit();
+                showToast("¡Trueques procesados y Sombra Web estabilizada!");
+                document.getElementById('selectAllTrueques').checked = false;
+            } catch(error) {
+                showToast("Error al procesar.", "error");
+            }
+        }
+
+        async function procesarMergeSeleccionado() {
+            const seleccionados = Array.from(document.querySelectorAll('.cb-merge:checked')).map(cb => cb.value);
+            if(seleccionados.length === 0) return showToast("Selecciona al menos un producto del merge.", "error");
+
+            if(!(await customConfirm(`¿Procesar los tickets relacionados a estos ${seleccionados.length} productos?\n\nEsto marcará como completados los conteos y trueques asociados y ajustará la Sombra Web.`))) return;
+
+            // Obtener el scope filtrado en caso de que esté usando la vista "filtrada"
+            const selectedAuditsScope = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
+            const auditsToUse = selectedAuditsScope.length > 0 ? auditoriasPendientesList.filter(a => selectedAuditsScope.includes(a.id_ticket)) : auditoriasPendientesList;
+
+            const selectedTruequesScope = Array.from(document.querySelectorAll('.cb-trueque:checked')).map(cb => cb.value);
+            const truequesToUse = selectedTruequesScope.length > 0 ? cambiosPendientesList.filter(c => selectedTruequesScope.includes(c.id_ticket)) : cambiosPendientesList;
+
+            let ticketsToProcess = { audits: new Set(), trueques: new Set() };
+            let warningTruequeExtra = false;
+
+            auditsToUse.forEach(a => {
+                if(seleccionados.includes(a.codigo_contpaqi)) ticketsToProcess.audits.add(a.id_ticket);
+            });
+
+            truequesToUse.forEach(c => {
+                let arrEntran = c.entra_codigo ? [{codigo: c.entra_codigo, qty: c.entra_qty}] : (c.entran || []);
+                let arrSalen = c.sale_codigo ? [{codigo: c.sale_codigo, qty: c.sale_qty}] : (c.salen || []);
+
+                const entranDesglose = breakdownToLineItems(arrEntran);
+                const salenDesglose = breakdownToLineItems(arrSalen);
+
+                const involvedCodes = new Set([...Object.keys(entranDesglose), ...Object.keys(salenDesglose)]);
+
+                let hasSelectedCode = false;
+                let hasUnselectedCode = false;
+
+                involvedCodes.forEach(code => {
+                    if(seleccionados.includes(code)) hasSelectedCode = true;
+                    else hasUnselectedCode = true;
+                });
+
+                if(hasSelectedCode) {
+                    ticketsToProcess.trueques.add(c.id_ticket);
+                    if(hasUnselectedCode) warningTruequeExtra = true;
+                }
+            });
+
+            if(warningTruequeExtra) {
+                if(!(await customConfirm("⚠️ ALERTA: Algunos trueques involucran productos que NO marcaste en la tabla actual. Si continúas, esos trueques se procesarán COMPLETOS (afectando a los productos no marcados también).\n\n¿Estás seguro de continuar?"))) return;
+            }
+
+            try {
+                const batch = db.batch();
+
+                // Procesar Auditorías Encontradas
+                ticketsToProcess.audits.forEach(ticketId => {
+                    const ticketData = auditoriasPendientesList.find(t => t.id_ticket === ticketId);
+                    const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
+                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
+
+                    if(ticketData && ticketData.codigo_contpaqi) {
+                        const codigoSeguro = String(ticketData.codigo_contpaqi).replace(/\//g, '_');
+                        const sombraGuardada = ticketData.sombra_al_momento || 0;
+                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
+                        batch.set(sombraRef, {
+                            cantidad_vendida: firebase.firestore.FieldValue.increment(-sombraGuardada),
+                            ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    }
+                });
+
+                // Procesar Trueques Encontrados
+                ticketsToProcess.trueques.forEach(ticketId => {
+                    const ticketData = cambiosPendientesList.find(t => t.id_ticket === ticketId);
+                    const ticketRef = db.collection('cambios_rapidos').doc(ticketId);
+                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
+                    if(ticketData) aplicarReversaDeSombra(ticketData, batch);
+                });
+
+                await batch.commit();
+                showToast("¡Tickets relacionados procesados y Sombra Web estabilizada!");
+                document.getElementById('selectAllMerge').checked = false;
+            } catch(error) {
+                showToast("Error al procesar el merge.", "error");
+            }
+        }
+
+        // Helper para revertir sombra de trueques (tanto en Eliminar como en Procesar)
+        function aplicarReversaDeSombra(ticketData, batch) {
+            let arrEntran = ticketData.entra_codigo ? [{codigo: ticketData.entra_codigo, qty: ticketData.entra_qty}] : (ticketData.entran || []);
+            let arrSalen = ticketData.sale_codigo ? [{codigo: ticketData.sale_codigo, qty: ticketData.sale_qty}] : (ticketData.salen || []);
+
+            const entranDesglose = breakdownToLineItems(arrEntran);
+            const salenDesglose = breakdownToLineItems(arrSalen);
+
+            // Revertir ENTRADAS (El lector restó Sombra, nosotros sumamos)
+            Object.entries(entranDesglose).forEach(([code, data]) => {
+                const codSeguro = String(code).replace(/\//g, '_');
+                const ref = db.collection('stock_por_fuera').doc(codSeguro);
+                batch.set(ref, {
+                    cantidad_vendida: firebase.firestore.FieldValue.increment(data.qty),
+                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            });
+
+            // Revertir SALIDAS (El lector sumó Sombra, nosotros restamos)
+            Object.entries(salenDesglose).forEach(([code, data]) => {
+                const codSeguro = String(code).replace(/\//g, '_');
+                const ref = db.collection('stock_por_fuera').doc(codSeguro);
+                batch.set(ref, {
+                    cantidad_vendida: firebase.firestore.FieldValue.increment(-data.qty),
+                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            });
         }
     </script>
     
