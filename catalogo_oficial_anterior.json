@@ -36,7 +36,7 @@
     "codigo": "TPN-O-19-H/CP",
     "precio": 43.15,
     "nombre": "TAPA DE PLASTICO NEGRA C/ORIFICIO P/CUBETA DE 19 Y 15 L MUN",
-    "stock": 6167,
+    "stock": 6667,
     "tipo": 1,
     "receta": null
   },
@@ -1727,7 +1727,7 @@
     "codigo": "TPBL-19-M/CP",
     "precio": 27.72,
     "nombre": "TAPA DE PLASTICO BLANCA P/CUBETA DE 15 Y 19 L LISA  MUN",
-    "stock": 11862,
+    "stock": 14862,
     "tipo": 1,
     "receta": null
   },
@@ -2224,7 +2224,7 @@
     "codigo": "BPLAN-1-L/CP",
     "precio": 4.32,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA DE 1 LT. LISA S/TAPA R-28",
-    "stock": 24119,
+    "stock": 31429,
     "tipo": 1,
     "receta": null
   },
@@ -3002,7 +3002,7 @@
     "codigo": "CPN-19-M/CP",
     "precio": 63.2,
     "nombre": "CUBETA DE PLASTICO DE 19 L NEGRA MUNDI S/TAPA",
-    "stock": 8115,
+    "stock": 8615,
     "tipo": 1,
     "receta": null
   },
@@ -4228,7 +4228,7 @@
     "codigo": "CPA-19-M/CP",
     "precio": 64.7,
     "nombre": "CUBETA DE PLASTICO DE 19 L AZUL LTH MUN C/LIT S/TAPA",
-    "stock": 2033,
+    "stock": 2533,
     "tipo": 1,
     "receta": null
   },
@@ -5665,7 +5665,7 @@
     "codigo": "TPA-19-M/CP",
     "precio": 27.72,
     "nombre": "TAPA DE PLASTICO AZUL LTH P/CUBETA DE 15 Y 19 L C/ORIFI MUN",
-    "stock": 2648,
+    "stock": 3148,
     "tipo": 1,
     "receta": null
   },
@@ -6243,6 +6243,14 @@
     "precio": 1.87,
     "nombre": "ENVASE NEVERO BLANCO DE 125 ML CON TAPA",
     "stock": 11987,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CTCNDP20",
+    "precio": 0,
+    "nombre": "CONTENEDOR TERMOFORMADO CND PET 20 19.28X14.16X5.44 CMS",
+    "stock": 280,
     "tipo": 1,
     "receta": null
   },
@@ -7169,7 +7177,7 @@
     "codigo": "CPB-19-M/CP",
     "precio": 63.2,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 19 L MUN S/TAPA",
-    "stock": 23469.64,
+    "stock": 26469.64,
     "tipo": 1,
     "receta": null
   },
