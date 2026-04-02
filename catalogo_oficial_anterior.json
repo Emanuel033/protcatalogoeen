@@ -860,7 +860,7 @@
     "codigo": "TPBO-19-M/CP",
     "precio": 25.2,
     "nombre": "TAPA DE PLASTICO BLANCA C/ORIFICIO PARA 15Y19 L MUN",
-    "stock": 14750,
+    "stock": 15854,
     "tipo": 1,
     "receta": null
   },
@@ -1727,7 +1727,7 @@
     "codigo": "TPBL-19-M/CP",
     "precio": 27.72,
     "nombre": "TAPA DE PLASTICO BLANCA P/CUBETA DE 15 Y 19 L LISA  MUN",
-    "stock": 6718,
+    "stock": 10678,
     "tipo": 1,
     "receta": null
   },
@@ -1751,7 +1751,7 @@
     "codigo": "LE-70/CP",
     "precio": 0.46,
     "nombre": "LAINER ESPUMADO R-70",
-    "stock": 215246,
+    "stock": 220246,
     "tipo": 1,
     "receta": null
   },
@@ -1996,6 +1996,14 @@
     "precio": 2.07,
     "nombre": "CAJITA DE POLIPROPILENO JR TAPA PRECIÓN (3ml)",
     "stock": 2781,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPB355R38",
+    "precio": 0,
+    "nombre": "BOTELLA PET BOSTON CRISTAL 355 ML S/TAPA R38 ASEPTICA",
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -2863,7 +2871,7 @@
     "codigo": "G-NB-20/CP",
     "precio": 2.01,
     "nombre": "GOTERO DE 20 ML CON INSERTO Y TAPA",
-    "stock": 24126,
+    "stock": 30818,
     "tipo": 1,
     "receta": null
   },
@@ -3026,7 +3034,7 @@
     "codigo": "TPPT-RS-2/CP",
     "precio": 20.51,
     "nombre": "TAPON DE PLASTICO PARA TAMBO ROSCA STD 2\"",
-    "stock": 4565,
+    "stock": 4815,
     "tipo": 1,
     "receta": null
   },
@@ -4380,7 +4388,7 @@
     "codigo": "LS-70/CP",
     "precio": 0.91,
     "nombre": "LAINER SENSITIVO IMPORTADO R-70",
-    "stock": 7350,
+    "stock": 8350,
     "tipo": 1,
     "receta": null
   },
@@ -4478,6 +4486,14 @@
     "precio": 4.48,
     "nombre": "CAJITA DE POLIPROPILENO NO. 4 CON TAPA 60 GRS.",
     "stock": 3963,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPC500R38",
+    "precio": 0,
+    "nombre": "BOTELLA PET CUADRADA CRISTAL 500 ML R-38",
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -4680,7 +4696,7 @@
     "codigo": "TFT-R33/CP",
     "precio": 1.8,
     "nombre": "TAPA FLIP TOP R-33",
-    "stock": 14803,
+    "stock": 27303,
     "tipo": 1,
     "receta": null
   },
@@ -5023,7 +5039,7 @@
     "codigo": "EN-2/CP",
     "precio": 9.65,
     "nombre": "ENVASE NEVERO BLANCO DE 2 L C/ TAPA",
-    "stock": 1537,
+    "stock": 2537,
     "tipo": 1,
     "receta": null
   },
@@ -5233,7 +5249,7 @@
     "codigo": "BP-RE-90X120/CP",
     "precio": 0,
     "nombre": "BOLSA DE PLASTICO REC 90X120",
-    "stock": 3191.84,
+    "stock": 3241.84,
     "tipo": 1,
     "receta": null
   },
@@ -6485,7 +6501,7 @@
     "codigo": "CLSF-C26-19-B-U/CT",
     "precio": 131.5,
     "nombre": "CUBETA DE LAMINA BLANCA 19 LTS.C 118 S/FENOL C/TAPA UNI   *",
-    "stock": 5406,
+    "stock": 7326,
     "tipo": 1,
     "receta": null
   },
@@ -6607,7 +6623,7 @@
     "codigo": "TP-R28/CP",
     "precio": 0.69,
     "nombre": "TAPA R-28 BLANCA INVIOLABLE VEDAT",
-    "stock": 77621,
+    "stock": 97621,
     "tipo": 1,
     "receta": null
   },
@@ -6631,7 +6647,7 @@
     "codigo": "BP01-SU-PLATA-70-1/CP",
     "precio": 3.57,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA PLATA 10X15X5 #01",
-    "stock": 1190,
+    "stock": 1690,
     "tipo": 1,
     "receta": null
   },
@@ -7177,7 +7193,7 @@
     "codigo": "CPB-19-M/CP",
     "precio": 63.2,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 19 L MUN S/TAPA",
-    "stock": 18814.64,
+    "stock": 23878.64,
     "tipo": 1,
     "receta": null
   },
@@ -7369,7 +7385,7 @@
     "codigo": "TLSF-BCA-L/CP",
     "precio": 45.29,
     "nombre": "TAPA DE LAMINA BLANCA LISA SIN FENOL",
-    "stock": 95929,
+    "stock": 97849,
     "tipo": 1,
     "receta": null
   },
@@ -7519,6 +7535,22 @@
         "cantidad": 1
       }
     ]
+  },
+  {
+    "codigo": "BPB1R38",
+    "precio": 0,
+    "nombre": "BOTELLA PET BOSTON CRISTAL 1 LT S/TAPA R-38",
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "BPC355R38",
+    "precio": 0,
+    "nombre": "BOTELLA PET CUADRADA CRISTAL 355 ML R-38",
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
   },
   {
     "codigo": "BPQ-1L-AM/CP",
