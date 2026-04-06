@@ -788,7 +788,7 @@
     "codigo": "BPB-500/CP",
     "precio": 4.63,
     "nombre": "BOTELLA PET BOSTON 500 ML R-28 S/TAPA",
-    "stock": 10322,
+    "stock": 10808,
     "tipo": 1,
     "receta": null
   },
@@ -998,7 +998,7 @@
     "codigo": "TPL-19-REC-COL--GB/CP",
     "precio": 23.4,
     "nombre": "TAPA DE PLASTICO REC PARA 19 L LISA GB",
-    "stock": 51,
+    "stock": 85,
     "tipo": 1,
     "receta": null
   },
@@ -2003,7 +2003,7 @@
     "codigo": "BPB355R38",
     "precio": 0,
     "nombre": "BOTELLA PET BOSTON CRISTAL 355 ML S/TAPA R38 ASEPTICA",
-    "stock": 0,
+    "stock": 600,
     "tipo": 1,
     "receta": null
   },
@@ -2125,7 +2125,7 @@
     "codigo": "CLSF-CDA-19-B-E/",
     "precio": 136.5,
     "nombre": "CUBETA DE LAMINA DE 19 L CERRADA S/FENOL BCA  EEE    *",
-    "stock": 8784,
+    "stock": 8766,
     "tipo": 1,
     "receta": null
   },
@@ -2224,7 +2224,7 @@
     "codigo": "GIR-NAT/CP",
     "precio": 9.82,
     "nombre": "GALON INDUSTRIAL REDONDO NATURAL S/TAPA R-38",
-    "stock": 21563,
+    "stock": 21467,
     "tipo": 1,
     "receta": null
   },
@@ -2559,7 +2559,7 @@
     "codigo": "PIN-20-S/CP",
     "precio": 65,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 20 L C/TAPON SAMPSON",
-    "stock": 34,
+    "stock": 74,
     "tipo": 1,
     "receta": null
   },
@@ -2632,7 +2632,7 @@
     "codigo": "EN-500/CP",
     "precio": 4.45,
     "nombre": "ENVASE NEVERO BLANCO DE 500 ML C/TAPA",
-    "stock": 17407,
+    "stock": 17137,
     "tipo": 1,
     "receta": null
   },
@@ -3266,7 +3266,7 @@
     "codigo": "TP-R38-CC/CP",
     "precio": 1.47,
     "nombre": "TAPA R-38 CON CINTILLO",
-    "stock": 20952,
+    "stock": 20856,
     "tipo": 1,
     "receta": null
   },
@@ -4131,7 +4131,7 @@
     "codigo": "TF-STD/CP",
     "precio": 7.8,
     "nombre": "TAPON FLEX STD   (  3004000001 )",
-    "stock": 76154,
+    "stock": 76122,
     "tipo": 1,
     "receta": null
   },
@@ -4493,7 +4493,7 @@
     "codigo": "BPC500R38",
     "precio": 0,
     "nombre": "BOTELLA PET CUADRADA CRISTAL 500 ML R-38",
-    "stock": 0,
+    "stock": 405,
     "tipo": 1,
     "receta": null
   },
@@ -5591,7 +5591,7 @@
     "codigo": "TPO-19-REC-GB/CP",
     "precio": 20,
     "nombre": "TAPA DE PLASTICO REC PARA 19 L C/ORIFICIO GB",
-    "stock": 0,
+    "stock": 36,
     "tipo": 1,
     "receta": null
   },
@@ -6031,7 +6031,7 @@
     "codigo": "CPB-19-REC-GB/CP",
     "precio": 52.52,
     "nombre": "CUBETA DE PLASTICO REC DE 19 L GB S/TAPA",
-    "stock": 3893,
+    "stock": 3863,
     "tipo": 1,
     "receta": null
   },
@@ -7300,6 +7300,14 @@
     "receta": null
   },
   {
+    "codigo": "TPCR38A",
+    "precio": 0,
+    "nombre": "TAPA CON CINTILLO R-38 BLANCA CON LENCUENTA INTEGRADA ASEPTI",
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
     "codigo": "BP10-SU-DORADA-1/CP",
     "precio": 6.45,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA DORADA  22X32X9 #10",
@@ -7548,7 +7556,7 @@
     "codigo": "BPC355R38",
     "precio": 0,
     "nombre": "BOTELLA PET CUADRADA CRISTAL 355 ML R-38",
-    "stock": 0,
+    "stock": 510,
     "tipo": 1,
     "receta": null
   },
@@ -8029,7 +8037,7 @@
     "codigo": "EN-1/CP",
     "precio": 5.93,
     "nombre": "ENVASE NEVERO BLANCO DE 1 L C/TAPA",
-    "stock": 11633.2,
+    "stock": 11433.2,
     "tipo": 1,
     "receta": null
   },
