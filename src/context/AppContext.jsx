@@ -40,6 +40,24 @@ export const AppProvider = ({ children }) => {
   const [cargando, setCargando] = useState(true);
   const [categoriaActiva, setCategoriaActiva] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // ---------------------------------------------------------
+  // ✨ NUEVO: EFECTO PARA LEER LA URL Y AUTO-BUSCAR
+  // ---------------------------------------------------------
+  useEffect(() => {
+    // Leemos la URL actual cuando carga la página
+    const params = new URLSearchParams(window.location.search);
+    const busquedaURL = params.get('q'); // Buscamos si existe "?q=algo"
+
+    if (busquedaURL) {
+      // Si existe, lo guardamos en tu estado global. 
+      // React automáticamente llenará el Navbar y filtrará el ProductGrid.
+      setSearchTerm(busquedaURL);
+    }
+  }, []); // El arreglo vacío [] asegura que esto solo corra una vez al abrir la página
+  // ---------------------------------------------------------
+
+  
   // 1. Al iniciar, intenta recuperar el carrito guardado
   const [carrito, setCarrito] = useState(() => {
     try {
