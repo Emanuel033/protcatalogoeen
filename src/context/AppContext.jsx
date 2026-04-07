@@ -99,11 +99,14 @@ export const AppProvider = ({ children }) => {
         if (!response.ok) throw new Error("Archivo JSON no encontrado");
         
         const allProducts = await response.json();
-        // 🛑 EL FILTRO MÁGICO: 
-        // Le decimos a la web que ignore cualquier producto que sea del "Sistema"
-        const productosParaWeb = allProducts.filter(producto => 
-            producto.category !== 'Sistema (Sin Master)'
-        );
+       // 🛑 EL FILTRO MÁGICO MEJORADO: 
+        const productosParaWeb = allProducts.filter(producto => {
+            // Extraemos la categoría y la convertimos a minúsculas para comparar fácil
+            const categoriaDelProducto = (producto.category || '').toLowerCase();
+            
+            // Retorna 'true' (lo conserva) SOLO si la categoría NO incluye la palabra "sistema"
+            return !categoriaDelProducto.includes('sistema');
+        });
         setProductos(productosParaWeb);
         extraerCategorias(productosParaWeb);
         setCargando(false);
