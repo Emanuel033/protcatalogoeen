@@ -20,6 +20,35 @@ function ProductCard({ product }) {
     agregarAlCarrito(product, parseInt(selectedQty));
   };
 
+  // ✨ NUEVA LÓGICA: Stock Psicológico (1000 y 5000)
+  const obtenerEtiquetaInventario = (stockReal) => {
+    // Convierte a número por si viene como texto en el JSON
+    const stock = Number(stockReal); 
+    
+    if (!stockReal || isNaN(stock)) return null;
+
+    if (stock <= 1000) {
+      return (
+        <span className="text-red-700 font-bold text-[10px] uppercase tracking-wider bg-red-50 px-2 py-1 rounded border border-red-200 flex items-center gap-1 w-max">
+          <i className="fa-solid fa-fire text-red-500"></i> Stock Limitado
+        </span>
+      );
+    }
+    
+    if (stock <= 5000) {
+      return (
+        <span className="text-amber-700 font-bold text-[10px] uppercase tracking-wider bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center gap-1 w-max">
+          <i className="fa-solid fa-circle-half-stroke text-amber-500"></i> Disp. Media
+        </span>
+      );
+    }
+    
+    return null; 
+  };
+
+  // Nota: Asegúrate de que el campo de tu base de datos se llame 'stock', 
+  // si se llama distinto, cambia 'product.stock' por 'product.tu_campo' en las líneas 57 y 103.
+
   return (
     <>
       {/* ── LIGHTBOX ESTILIZADO CON BOTÓN DE AGREGAR ─────────────────── */}
@@ -55,9 +84,14 @@ function ProductCard({ product }) {
 
             {/* Panel inferior (Controles) */}
             <div className="p-5 border-t border-slate-100 bg-white">
-               <div className="flex justify-between items-center mb-4">
+               <div className="flex justify-between items-center mb-2">
                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{product.category}</span>
                  <span className="text-sm font-black text-indigo-600">{packText || minText}</span>
+               </div>
+               
+               {/* ✨ ETIQUETA INYECTADA EN EL LIGHTBOX */}
+               <div className="mb-4">
+                 {obtenerEtiquetaInventario(product.stock)}
                </div>
                
                <div className="flex flex-col sm:flex-row gap-3">
@@ -104,11 +138,16 @@ function ProductCard({ product }) {
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">
             {product.category}
           </span>
-          <h3 className="font-bold text-xs text-slate-900 mb-2 leading-relaxed h-auto">
+          <h3 className="font-bold text-xs text-slate-900 mb-1 leading-relaxed h-auto">
             {product.name}
           </h3>
           
-          <div className="flex justify-between items-end text-[10px] font-bold text-slate-500 mb-2">
+          {/* ✨ ETIQUETA INYECTADA EN LA TARJETA NORMAL */}
+          <div className="mb-2 min-h-[22px]"> 
+             {obtenerEtiquetaInventario(product.stock)}
+          </div>
+          
+          <div className="flex justify-between items-end text-[10px] font-bold text-slate-500 mb-2 mt-auto">
             <span>{minText}</span>
             {packText && <span className="text-indigo-600 font-black">{packText}</span>}
           </div>
@@ -128,7 +167,7 @@ function ProductCard({ product }) {
             <div className="h-8 mb-2"></div>
           )}
 
-          <div className="mt-auto flex gap-2 pt-2">
+          <div className="flex gap-2 pt-2 border-t border-slate-50">
             <button 
               onClick={handleAdd} 
               className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95"
