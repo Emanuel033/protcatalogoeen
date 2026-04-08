@@ -20,13 +20,23 @@ function ProductCard({ product }) {
     agregarAlCarrito(product, parseInt(selectedQty));
   };
 
-  // ✨ NUEVA LÓGICA: Stock Psicológico (1000 y 5000)
+  // ✨ LÓGICA ACTUALIZADA: Semáforo de 4 niveles
   const obtenerEtiquetaInventario = (stockReal) => {
-    // Convierte a número por si viene como texto en el JSON
     const stock = Number(stockReal); 
     
-    if (!stockReal || isNaN(stock)) return null;
+    // Si la base de datos no tiene el campo o es un texto inválido
+    if (stockReal === undefined || stockReal === null || isNaN(stock)) return null;
 
+    // 1. Agotado (0 o menos)
+    if (stock <= 0) {
+      return (
+        <span className="text-slate-500 font-bold text-[10px] uppercase tracking-wider bg-slate-100 px-2 py-1 rounded border border-slate-200 flex items-center gap-1 w-max">
+          <i className="fa-solid fa-ban text-slate-400"></i> Agotado
+        </span>
+      );
+    }
+
+    // 2. Stock Limitado (Rojo)
     if (stock <= 1000) {
       return (
         <span className="text-red-700 font-bold text-[10px] uppercase tracking-wider bg-red-50 px-2 py-1 rounded border border-red-200 flex items-center gap-1 w-max">
@@ -35,6 +45,7 @@ function ProductCard({ product }) {
       );
     }
     
+    // 3. Disponibilidad Media (Amarillo)
     if (stock <= 5000) {
       return (
         <span className="text-amber-700 font-bold text-[10px] uppercase tracking-wider bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center gap-1 w-max">
@@ -43,11 +54,13 @@ function ProductCard({ product }) {
       );
     }
     
-    return null; 
+    // 4. En Stock (Verde - Todo lo que sea mayor a 5000)
+    return (
+      <span className="text-emerald-700 font-bold text-[10px] uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-200 flex items-center gap-1 w-max">
+        <i className="fa-solid fa-check-circle text-emerald-500"></i> En Stock
+      </span>
+    );
   };
-
-  // Nota: Asegúrate de que el campo de tu base de datos se llame 'stock', 
-  // si se llama distinto, cambia 'product.stock' por 'product.tu_campo' en las líneas 57 y 103.
 
   return (
     <>
@@ -110,6 +123,7 @@ function ProductCard({ product }) {
                   <button 
                     onClick={() => { handleAdd(); setZoomOpen(false); }} 
                     className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-2xl font-black text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                    disabled={Number(product.stock) <= 0} // Opcional: deshabilita el botón si no hay stock
                   >
                     <i className="fas fa-shopping-cart"></i> Agregar al Carrito
                   </button>
@@ -170,7 +184,8 @@ function ProductCard({ product }) {
           <div className="flex gap-2 pt-2 border-t border-slate-50">
             <button 
               onClick={handleAdd} 
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95"
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95 disabled:bg-slate-300 disabled:shadow-none"
+              disabled={Number(product.stock) <= 0} // Opcional: deshabilita el botón si no hay stock
             >
               Agregar
             </button>
