@@ -90,8 +90,8 @@ function CrossSelling() {
     // pero empuja todos los "Kits" (prioridad 1) por encima de las "Tapas" (prioridad 2)
     sugerenciasFinales.sort((a, b) => a.prioridad - b.prioridad);
 
-    // ✨ SUBIMOS EL LÍMITE A 6 SUGERENCIAS (o las que gustes)
-    return sugerenciasFinales.slice(0, 9);
+    // ✨ SUBIMOS EL LÍMITE A 18 SUGERENCIAS (o las que gustes)
+    return sugerenciasFinales.slice(0, 18);
   }, [carrito, productos]);
 
 
