@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
+import FiltrosRapidos, { REGLAS_FILTROS } from './FiltrosRapidos'; // ✨ NUEVO IMPORT
 import { useApp } from '../context/AppContext';
 
 function ProductGrid() {
-  const { productos, cargando, categoriaActiva, searchTerm } = useApp();
+  // ✨ AGREGAMOS filtroRapido Y setFiltroRapido AL DESTRUCTURING
+  const { productos, cargando, categoriaActiva, searchTerm, filtroRapido, setFiltroRapido } = useApp();
   
   // --- ESTADOS PARA PAGINACIÓN ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // Cantidad de productos por página (ajústalo si quieres)
+  const itemsPerPage = 12;
 
-  // Si el usuario cambia el filtro o busca algo, regresamos a la página 1
+  // Si el usuario cambia CUALQUIER filtro o busca algo, regresamos a la página 1
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoriaActiva, searchTerm]);
+  }, [categoriaActiva, searchTerm, filtroRapido]);
 
   if (cargando) {
     return (
@@ -26,7 +28,8 @@ function ProductGrid() {
   const termino = (searchTerm || '').toLowerCase().trim();
   const catActiva = (categoriaActiva || 'Todos').toLowerCase().trim();
   
-  let productosFiltrados = (productos || []).filter(p => {
+  // 1. Filtrado Base (Barra de Búsqueda y Categoría Lateral)
+  let productosBase = (productos || []).filter(p => {
     const categoriaProducto = (p.category || '').toLowerCase();
     const nombreProducto = (p.name || '').toLowerCase();
     const codigoProducto = (p.codigo_sistema || '').toLowerCase();
@@ -37,20 +40,29 @@ function ProductGrid() {
     return coincideCategoria && coincideBusqueda;
   });
 
-  productosFiltrados = productosFiltrados.sort((a, b) => {
+  // Guardamos los productos base para mandárselos a las píldoras
+  // (Para que sepan qué píldoras dibujar antes de filtrarse a sí mismas)
+  const productosAntesDePildora = [...productosBase];
+
+  // ✨ 2. FILTRADO RÁPIDO (La magia de las píldoras)
+  if (filtroRapido) {
+    // Buscamos la regla seleccionada en nuestro diccionario
+    const reglaAplicar = REGLAS_FILTROS.find(r => r.id === filtroRapido);
+    
+    if (reglaAplicar) {
+      productosBase = productosBase.filter(p => {
+        const nombreProducto = (p.name || '').toLowerCase();
+        return reglaAplicar.test(nombreProducto);
+      });
+    }
+  }
+
+  // 3. Ordenamiento Alfabético
+  const productosFiltrados = productosBase.sort((a, b) => {
     const nameA = a.name || '';
     const nameB = b.name || '';
     return nameA.localeCompare(nameB);
   });
-
-  if (productosFiltrados.length === 0) {
-    return (
-      <div className="col-span-full text-center py-20 fade-in">
-        <h3 className="text-lg font-bold text-slate-700 mb-1">Sin resultados</h3>
-        <p className="text-sm text-slate-400">No encontramos "{searchTerm}" en esta categoría.</p>
-      </div>
-    );
-  }
 
   // --- LÓGICA DE PAGINACIÓN ---
   const totalPages = Math.ceil(productosFiltrados.length / itemsPerPage);
@@ -58,44 +70,61 @@ function ProductGrid() {
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = productosFiltrados.slice(startIndex, endIndex);
 
-  // Función para cambiar de página y subir el scroll
   const goToPage = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
   };
 
   return (
-    <div className="flex flex-col space-y-6">
-      {/* Grid de Productos */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {currentProducts.map((prod) => (
-          <ProductCard key={prod.id} product={prod} />
-        ))}
-      </div>
+    <div className="flex flex-col space-y-4">
+      
+      {/* ✨ RENDERIZAMOS LAS PÍLDORAS AQUÍ ARRIBA */}
+      <FiltrosRapidos productosMostrados={productosAntesDePildora} />
 
-      {/* Controles de Paginación */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-3 mt-8 pb-8">
-          <button 
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition bg-white shadow-sm"
-          >
-            <i className="fa-solid fa-chevron-left"></i>
-          </button>
-          
-          <span className="text-sm font-bold text-slate-600 px-4">
-            Página {currentPage} de {totalPages}
-          </span>
-
-          <button 
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition bg-white shadow-sm"
-          >
-            <i className="fa-solid fa-chevron-right"></i>
-          </button>
+      {/* Si después de todos los filtros no hay nada */}
+      {productosFiltrados.length === 0 ? (
+        <div className="col-span-full text-center py-20 fade-in">
+          <h3 className="text-lg font-bold text-slate-700 mb-1">Sin resultados</h3>
+          <p className="text-sm text-slate-400">
+            {filtroRapido 
+              ? "Ningún producto cumple con el filtro rápido seleccionado." 
+              : `No encontramos "${searchTerm}" en esta categoría.`}
+          </p>
         </div>
+      ) : (
+        <>
+          {/* Grid de Productos */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-2">
+            {currentProducts.map((prod) => (
+              <ProductCard key={prod.id} product={prod} />
+            ))}
+          </div>
+
+          {/* Controles de Paginación */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-3 mt-8 pb-8">
+              <button 
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition bg-white shadow-sm"
+              >
+                <i className="fa-solid fa-chevron-left"></i>
+              </button>
+              
+              <span className="text-sm font-bold text-slate-600 px-4">
+                Página {currentPage} de {totalPages}
+              </span>
+
+              <button 
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition bg-white shadow-sm"
+              >
+                <i className="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
