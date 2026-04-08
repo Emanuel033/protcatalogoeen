@@ -29,6 +29,75 @@ isSupported().then((supported) => {
   if (supported) analytics = getAnalytics(firebaseApp);
 });
 
+
+// ============================================================================
+// 🧠 MOTOR MATEMÁTICO: CÁLCULO DE STOCK DE KITS EN VIVO
+// ============================================================================
+const calcularStockKits = (productosRaw) => {
+  // 1. Diccionarios rápidos para búsquedas instantáneas
+  const mapaPorCodigo = new Map();
+  const mapaPorId = new Map();
+
+  productosRaw.forEach(p => {
+    if (p.codigo_sistema) mapaPorCodigo.set(p.codigo_sistema, p);
+    if (p.codigo) mapaPorCodigo.set(p.codigo, p);
+    if (p.id) mapaPorId.set(p.id, p);
+  });
+
+  // 2. Procesamos el catálogo
+  return productosRaw.map(producto => {
+    const tipoItem = producto.tipo_item || 'PIEZA_BASE';
+    const receta = producto.receta || producto.receta_desglose;
+
+    // Si es pieza base o no trae receta, se queda con su stock normal
+    if (tipoItem === 'PIEZA_BASE' || !receta) {
+      return producto; 
+    }
+
+    let maxKitsPosibles = Infinity;
+
+    // CASO A: KIT OFICIAL (Arreglo con codigo_pieza)
+    if (tipoItem === 'KIT_OFICIAL' && Array.isArray(receta)) {
+      receta.forEach(ingrediente => {
+        const pieza = mapaPorCodigo.get(ingrediente.codigo_pieza);
+        if (pieza) {
+          const stockPieza = Number(pieza.stock) || 0;
+          const cantNecesaria = Number(ingrediente.cantidad) || 1;
+          const kitsDisponibles = Math.floor(stockPieza / cantNecesaria);
+          
+          if (kitsDisponibles < maxKitsPosibles) maxKitsPosibles = kitsDisponibles;
+        } else {
+          maxKitsPosibles = 0; // Si falta una pieza en la base de datos, el kit no se puede armar
+        }
+      });
+    } 
+    
+    // CASO B: KIT FLEXIBLE (Objeto con IDs de Firebase)
+    else if (tipoItem === 'KIT_FLEXIBLE' && typeof receta === 'object') {
+      Object.entries(receta).forEach(([idPieza, cantNecesaria]) => {
+        const pieza = mapaPorId.get(idPieza);
+        if (pieza) {
+          const stockPieza = Number(pieza.stock) || 0;
+          const kitsDisponibles = Math.floor(stockPieza / Number(cantNecesaria));
+          
+          if (kitsDisponibles < maxKitsPosibles) maxKitsPosibles = kitsDisponibles;
+        } else {
+          maxKitsPosibles = 0;
+        }
+      });
+    }
+
+    if (maxKitsPosibles === Infinity) maxKitsPosibles = 0;
+
+    // Sobreescribimos el stock del kit con el cálculo real
+    return {
+      ...producto,
+      stock: Math.max(0, maxKitsPosibles)
+    };
+  });
+};
+
+
 // ============================================================================
 // CONTEXTO GLOBAL (CEREBRO)
 // ============================================================================
@@ -42,19 +111,16 @@ export const AppProvider = ({ children }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // ---------------------------------------------------------
-  // ✨ NUEVO: EFECTO PARA LEER LA URL Y AUTO-BUSCAR
+  // ✨ EFECTO PARA LEER LA URL Y AUTO-BUSCAR
   // ---------------------------------------------------------
   useEffect(() => {
-    // Leemos la URL actual cuando carga la página
     const params = new URLSearchParams(window.location.search);
-    const busquedaURL = params.get('q'); // Buscamos si existe "?q=algo"
+    const busquedaURL = params.get('q'); 
 
     if (busquedaURL) {
-      // Si existe, lo guardamos en tu estado global. 
-      // React automáticamente llenará el Navbar y filtrará el ProductGrid.
       setSearchTerm(busquedaURL);
     }
-  }, []); // El arreglo vacío [] asegura que esto solo corra una vez al abrir la página
+  }, []); 
   // ---------------------------------------------------------
 
   
@@ -98,15 +164,18 @@ export const AppProvider = ({ children }) => {
         const response = await fetch('/catalogo_completo.json');
         if (!response.ok) throw new Error("Archivo JSON no encontrado");
         
-        const allProducts = await response.json();
-       // 🛑 EL FILTRO MÁGICO MEJORADO: 
-        const productosParaWeb = allProducts.filter(producto => {
-            // Extraemos la categoría y la convertimos a minúsculas para comparar fácil
+        const allProductsRaw = await response.json();
+
+        // 🧠 1. CALCULAR STOCK DE KITS PRIMERO
+        // (Debe hacerse con el JSON completo para que pueda encontrar insumos ocultos)
+        const productosConStockReal = calcularStockKits(allProductsRaw);
+
+        // 🛑 2. EL FILTRO MÁGICO MEJORADO (Ahora filtramos sobre los que ya tienen stock calculado)
+        const productosParaWeb = productosConStockReal.filter(producto => {
             const categoriaDelProducto = (producto.category || '').toLowerCase();
-            
-            // Retorna 'true' (lo conserva) SOLO si la categoría NO incluye la palabra "sistema"
             return !categoriaDelProducto.includes('sistema');
         });
+
         setProductos(productosParaWeb);
         extraerCategorias(productosParaWeb);
         setCargando(false);
@@ -341,7 +410,7 @@ export const AppProvider = ({ children }) => {
       productos, categorias, cargando, categoriaActiva, setCategoriaActiva,
       searchTerm, setSearchTerm,
       carrito, isCartOpen, toggleCart, clearCart, agregarAlCarrito, eliminarProducto, totalPiezas,
-      deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp, sendEmail, // <-- Agrega sendEmail aquí
+      deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp, sendEmail, 
       registrarEvento, esAdmin, setEsAdmin
     }}>
       {children}
