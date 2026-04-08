@@ -4,30 +4,38 @@ import { useApp } from '../context/AppContext';
 function ProductCard({ product }) {
   const { agregarAlCarrito, askProduct } = useApp();
   
-  const basePiezas = product.piezas ? parseInt(product.piezas) : 1;
+  // 1. Detectamos si es de la categoría BOLSAS
+  const isBolsa = (product.category || '').toLowerCase().includes('bolsa');
+  
+  // 2. Definimos las piezas base. Si es bolsa y el mínimo es menor a 100, lo forzamos a 100.
+  let basePiezas = product.piezas ? parseInt(product.piezas) : 1;
+  if (isBolsa && basePiezas < 100) {
+    basePiezas = 100;
+  }
+
   const paquetes = product.paquetes || [];
   const hasPack = paquetes.length > 0;
   
+  // selectedQty ahora iniciará en 100 automáticamente para las bolsas
   const [selectedQty, setSelectedQty] = useState(basePiezas);
   const [zoomOpen, setZoomOpen] = useState(false);
 
+  // 3. El texto mínimo ahora dirá "Min: 100 pzs"
   const minText = `Min: ${basePiezas} pz${basePiezas > 1 ? 's' : ''}`;
   let packText = "";
   if (paquetes.length === 1) packText = "Paquete: " + paquetes[0].piezas + " pzas";
   else if (paquetes.length > 1) packText = "Varias opciones";
+  else if (isBolsa && basePiezas === 100) packText = "Venta por Ciento"; // Agregamos este toque visual
 
   const handleAdd = () => {
     agregarAlCarrito(product, parseInt(selectedQty));
   };
 
-  // ✨ LÓGICA ACTUALIZADA: Semáforo de 4 niveles
   const obtenerEtiquetaInventario = (stockReal) => {
     const stock = Number(stockReal); 
     
-    // Si la base de datos no tiene el campo o es un texto inválido
     if (stockReal === undefined || stockReal === null || isNaN(stock)) return null;
 
-    // 1. Agotado (0 o menos)
     if (stock <= 0) {
       return (
         <span className="text-slate-500 font-bold text-[10px] uppercase tracking-wider bg-slate-100 px-2 py-1 rounded border border-slate-200 flex items-center gap-1 w-max">
@@ -36,7 +44,6 @@ function ProductCard({ product }) {
       );
     }
 
-    // 2. Stock Limitado (Rojo)
     if (stock <= 1000) {
       return (
         <span className="text-red-700 font-bold text-[10px] uppercase tracking-wider bg-red-50 px-2 py-1 rounded border border-red-200 flex items-center gap-1 w-max">
@@ -45,7 +52,6 @@ function ProductCard({ product }) {
       );
     }
     
-    // 3. Disponibilidad Media (Amarillo)
     if (stock <= 5000) {
       return (
         <span className="text-amber-700 font-bold text-[10px] uppercase tracking-wider bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center gap-1 w-max">
@@ -54,7 +60,6 @@ function ProductCard({ product }) {
       );
     }
     
-    // 4. En Stock (Verde - Todo lo que sea mayor a 5000)
     return (
       <span className="text-emerald-700 font-bold text-[10px] uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-200 flex items-center gap-1 w-max">
         <i className="fa-solid fa-check-circle text-emerald-500"></i> En Stock
@@ -102,7 +107,6 @@ function ProductCard({ product }) {
                  <span className="text-sm font-black text-indigo-600">{packText || minText}</span>
                </div>
                
-               {/* ✨ ETIQUETA INYECTADA EN EL LIGHTBOX */}
                <div className="mb-4">
                  {obtenerEtiquetaInventario(product.stock)}
                </div>
@@ -114,7 +118,8 @@ function ProductCard({ product }) {
                       onChange={(e) => setSelectedQty(e.target.value)}
                       className="w-full sm:w-1/3 text-sm border border-indigo-200 rounded-2xl p-3 bg-indigo-50 text-indigo-700 font-bold outline-none cursor-pointer"
                     >
-                      <option value={basePiezas}>Ind. ({basePiezas}pz)</option>
+                      {/* Cambiamos el texto dinámicamente si es bolsa */}
+                      <option value={basePiezas}>{isBolsa ? `Ciento (${basePiezas}pz)` : `Ind. (${basePiezas}pz)`}</option>
                       {paquetes.map((pkg, i) => (
                         <option key={i} value={pkg.piezas}>Paq. ({pkg.piezas}pz)</option>
                       ))}
@@ -123,7 +128,7 @@ function ProductCard({ product }) {
                   <button 
                     onClick={() => { handleAdd(); setZoomOpen(false); }} 
                     className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-2xl font-black text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2"
-                    disabled={Number(product.stock) <= 0} // Opcional: deshabilita el botón si no hay stock
+                    disabled={Number(product.stock) <= 0}
                   >
                     <i className="fas fa-shopping-cart"></i> Agregar al Carrito
                   </button>
@@ -156,7 +161,6 @@ function ProductCard({ product }) {
             {product.name}
           </h3>
           
-          {/* ✨ ETIQUETA INYECTADA EN LA TARJETA NORMAL */}
           <div className="mb-2 min-h-[22px]"> 
              {obtenerEtiquetaInventario(product.stock)}
           </div>
@@ -172,7 +176,8 @@ function ProductCard({ product }) {
               onChange={(e) => setSelectedQty(e.target.value)}
               className="w-full text-xs border border-indigo-200 rounded-lg p-1.5 mb-2 bg-indigo-50 text-indigo-700 font-bold outline-none"
             >
-              <option value={basePiezas}>Individual ({basePiezas} pz)</option>
+              {/* Cambiamos el texto dinámicamente si es bolsa */}
+              <option value={basePiezas}>{isBolsa ? `Ciento (${basePiezas} pz)` : `Individual (${basePiezas} pz)`}</option>
               {paquetes.map((pkg, i) => (
                 <option key={i} value={pkg.piezas}>Paquete ({pkg.piezas} pzas)</option>
               ))}
@@ -185,7 +190,7 @@ function ProductCard({ product }) {
             <button 
               onClick={handleAdd} 
               className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm shadow-md transition active:scale-95 disabled:bg-slate-300 disabled:shadow-none"
-              disabled={Number(product.stock) <= 0} // Opcional: deshabilita el botón si no hay stock
+              disabled={Number(product.stock) <= 0}
             >
               Agregar
             </button>
