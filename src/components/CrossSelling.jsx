@@ -7,91 +7,93 @@ function CrossSelling() {
   const sugerencias = useMemo(() => {
     if (!carrito.length || !productos.length) return [];
 
-    const sugerenciasMap = new Map(); // Usamos Map para evitar sugerir el mismo producto 2 veces
+    const sugerenciasMap = new Map(); 
     const roscasBuscadas = new Set();
     
-    // Diccionarios rápidos para saber qué hay en el carrito
     const idsEnCarrito = new Set(carrito.map(c => c.id));
-    const codigosEnCarrito = new Set(carrito.map(c => c.codigo_sistema).filter(Boolean));
 
-    // 1. ANALIZAMOS EL CARRITO
-    carrito.forEach(itemCarrito => {
+    // ✨ EL TRUCO ESTÁ AQUÍ: Invertimos el carrito para leer el último producto agregado PRIMERO
+    const carritoInvertido = [...carrito].reverse();
+
+    // 1. ANALIZAMOS EL CARRITO (Desde lo más reciente a lo más viejo)
+    carritoInvertido.forEach(itemCarrito => {
       const nombreItem = (itemCarrito.name || '').toLowerCase();
       const codigoItem = itemCarrito.codigo_sistema;
 
-      // Extraemos la rosca si el producto no trae tapa
+      // Extraemos la rosca
       if (nombreItem.includes('s/tapa') || nombreItem.includes('sin tapa')) {
         const matchRosca = nombreItem.match(/(?:r-|rosca\s*)(\d{2,3})/i);
         if (matchRosca) roscasBuscadas.add(matchRosca[1]);
       }
 
-      // 🧠 BÚSQUEDA DE RECETAS (Kit Oficial y Kit Flexible)
+      // BÚSQUEDA DE RECETAS
       productos.forEach(prodCat => {
-        if (idsEnCarrito.has(prodCat.id)) return; // Si ya lo tiene, no lo sugerimos
+        if (idsEnCarrito.has(prodCat.id)) return; 
 
         const tipoItem = prodCat.tipo_item || 'PIEZA_BASE';
         const receta = prodCat.receta || prodCat.receta_desglose;
-
         let esParteDelKit = false;
 
-        // CASO 1: Kit Oficial (Usa arreglo de objetos con 'codigo_pieza')
         if (tipoItem === 'KIT_OFICIAL' && Array.isArray(receta)) {
           esParteDelKit = receta.some(ingrediente => ingrediente.codigo_pieza === codigoItem);
-        } 
-        // CASO 2: Kit Flexible (Usa objeto con el 'id' de firebase)
-        else if (tipoItem === 'KIT_FLEXIBLE' && receta && !Array.isArray(receta) && typeof receta === 'object') {
+        } else if (tipoItem === 'KIT_FLEXIBLE' && receta && !Array.isArray(receta) && typeof receta === 'object') {
           esParteDelKit = !!receta[itemCarrito.id];
         }
 
-        // Si nuestro item pertenece a este Kit, ¡lo sugerimos!
         if (esParteDelKit) {
           if (!sugerenciasMap.has(prodCat.id)) {
             sugerenciasMap.set(prodCat.id, { 
               ...prodCat, 
               tipoSugerencia: '💡 SUGERENCIA DE KIT', 
               color: 'bg-amber-100 text-amber-700 border-amber-200',
-              prioridad: 1 // Los kits salen primero
+              prioridad: 1 
             });
           }
         }
       });
     });
 
-    // 2. BÚSQUEDA SECUNDARIA: TAPAS Y ACCESORIOS SUELTOS
+    // 2. BÚSQUEDA SECUNDARIA: TAPAS Y ACCESORIOS
     if (roscasBuscadas.size > 0) {
       productos.forEach(prodCat => {
         if (idsEnCarrito.has(prodCat.id)) return;
-        if (sugerenciasMap.has(prodCat.id)) return; // Si ya lo sugerimos como kit, saltamos
+        if (sugerenciasMap.has(prodCat.id)) return; 
 
         const nombreProd = (prodCat.name || '').toLowerCase();
         
-        // 🔥 EL FILTRO ANTI-BOTELLAS:
-        // Aseguramos que NO sea un envase, pero que SÍ sea un accesorio
         const esEnvase = /botella|porron|cubeta|envase|tarro|frasco|galon/.test(nombreProd);
         const esAccesorio = /tapa|tapon|sello|liner|valvula|pistola/.test(nombreProd);
 
         if (!esEnvase && esAccesorio) {
+          // Buscamos coincidencia con alguna rosca que necesitemos
           roscasBuscadas.forEach(rosca => {
             const regexTapa = new RegExp(`r-?${rosca}|rosca\\s*${rosca}`, 'i');
             if (regexTapa.test(nombreProd)) {
-              sugerenciasMap.set(prodCat.id, { 
-                ...prodCat, 
-                tipoSugerencia: '🧩 ACCESORIO COMPATIBLE', 
-                color: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-                prioridad: 2 // Salen después de los Kits
-              });
+              if (!sugerenciasMap.has(prodCat.id)) {
+                sugerenciasMap.set(prodCat.id, { 
+                  ...prodCat, 
+                  tipoSugerencia: '🧩 ACCESORIO COMPATIBLE', 
+                  color: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+                  prioridad: 2 
+                });
+              }
             }
           });
         }
       });
     }
 
-    // Convertimos el Map a un Arreglo, lo ordenamos por prioridad y tomamos solo 4
+    // Convertimos a arreglo y ordenamos por prioridad
     const sugerenciasFinales = Array.from(sugerenciasMap.values());
+    
+    // Mantiene el orden en el que fueron encontrados (los más recientes primero),
+    // pero empuja todos los "Kits" (prioridad 1) por encima de las "Tapas" (prioridad 2)
     sugerenciasFinales.sort((a, b) => a.prioridad - b.prioridad);
 
-    return sugerenciasFinales.slice(0, 4);
+    // ✨ SUBIMOS EL LÍMITE A 6 SUGERENCIAS (o las que gustes)
+    return sugerenciasFinales.slice(0, 6);
   }, [carrito, productos]);
+
 
   if (sugerencias.length === 0) return null;
 
