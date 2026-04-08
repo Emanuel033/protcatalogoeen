@@ -109,6 +109,9 @@ export const AppProvider = ({ children }) => {
   const [cargando, setCargando] = useState(true);
   const [categoriaActiva, setCategoriaActiva] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // ✨ NUEVO ESTADO PARA LOS FILTROS RÁPIDOS
+  const [filtroRapido, setFiltroRapido] = useState(null);
 
   // ---------------------------------------------------------
   // ✨ EFECTO PARA LEER LA URL Y AUTO-BUSCAR
@@ -409,6 +412,7 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider value={{ 
       productos, categorias, cargando, categoriaActiva, setCategoriaActiva,
       searchTerm, setSearchTerm,
+      filtroRapido, setFiltroRapido, // ✨ AQUÍ ESTÁ EL ESTADO AÑADIDO
       carrito, isCartOpen, toggleCart, clearCart, agregarAlCarrito, eliminarProducto, totalPiezas,
       deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp, sendEmail, 
       registrarEvento, esAdmin, setEsAdmin
