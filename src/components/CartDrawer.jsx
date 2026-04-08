@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import CrossSelling from './CrossSelling'; // ✨ IMPORTAMOS EL NUEVO MOTOR INTELIGENTE
 
 function CartDrawer() {
   const { 
@@ -36,75 +37,6 @@ function CartDrawer() {
       ocurre 
     });
   };
-
-// ==========================================
-  // LÓGICA COMBINADA DE SUGERENCIAS
-  // ==========================================
-  const sugerencias = useMemo(() => {
-    if (carrito.length === 0 || productos.length === 0) return [];
-
-    const sugerenciasMap = new Map();
-    const idsEnCarrito = carrito.map(item => item.id);
-
-    carrito.forEach(cartItem => {
-      const prodEnCarrito = productos.find(p => p.id === cartItem.id) || cartItem;
-      const tipo = prodEnCarrito.tipo_item || 'PIEZA_BASE'; // Por defecto lo tratamos como pieza
-
-      if (tipo === 'KIT_FLEXIBLE' && prodEnCarrito.receta) {
-        // --- 1. LÓGICA DE RECETA (Kit Flexible) ---
-        
-        // Sugerir componentes sueltos
-        Object.keys(prodEnCarrito.receta).forEach(compId => {
-          if (!idsEnCarrito.includes(compId) && !sugerenciasMap.has(compId)) {
-            const comp = productos.find(p => p.id === compId);
-            if (comp) sugerenciasMap.set(compId, { ...comp, razon_sugerencia: 'Completa tu equipo' });
-          }
-        });
-
-        // Buscar kits padres que contengan este componente
-        const kitsRelacionados = productos.filter(p => p.tipo_item === 'KIT_FLEXIBLE' && p.receta && p.receta[prodEnCarrito.id]);
-        
-        kitsRelacionados.forEach(kit => {
-          if (!idsEnCarrito.includes(kit.id) && !sugerenciasMap.has(kit.id)) {
-            sugerenciasMap.set(kit.id, { ...kit, razon_sugerencia: 'Lleva el kit completo' });
-          }
-          // Sugerir componentes "hermanos" de ese mismo kit
-          Object.keys(kit.receta).forEach(compId => {
-            if (compId !== prodEnCarrito.id && !idsEnCarrito.includes(compId) && !sugerenciasMap.has(compId)) {
-              const hermano = productos.find(p => p.id === compId);
-              if (hermano) sugerenciasMap.set(compId, { ...hermano, razon_sugerencia: 'Comprados juntos' });
-            }
-          });
-        });
-
-      } else {
-        // --- 2. LÓGICA DE CATEGORÍA (Pieza Base o Kit Oficial) ---
-        
-        if (prodEnCarrito.category) {
-          // Filtramos catálogo: Misma categoría, no es el mismo producto, y no está en el carrito
-          const mismaCategoria = productos.filter(p => 
-            p.category === prodEnCarrito.category && 
-            p.id !== prodEnCarrito.id && 
-            !idsEnCarrito.includes(p.id) &&
-            !sugerenciasMap.has(p.id) // Que no haya sido sugerido ya por otro producto
-          );
-          
-          // Mezclamos al azar (shuffle) y tomamos 5
-          const sugerenciasAlAzar = mismaCategoria
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 5);
-
-          sugerenciasAlAzar.forEach(sug => {
-            sugerenciasMap.set(sug.id, { ...sug, razon_sugerencia: 'Podría interesarte' });
-          });
-        }
-      }
-    });
-
-    // Para no romper el diseño, devolvemos un máximo de 5 sugerencias en total
-    // (combinando las de receta y las de categoría si hay varios productos en el carrito)
-    return Array.from(sugerenciasMap.values()).slice(0, 5);
-  }, [carrito, productos]);
 
   return (
     <div className={`fixed inset-0 z-50 ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
@@ -206,31 +138,9 @@ function CartDrawer() {
                 );
               })}
 
-              {/* SECCIÓN DE SUGERENCIAS */}
-              {sugerencias.length > 0 && (
-                <div className="mt-6 mb-2 fade-in">
-                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <i className="fa-solid fa-sparkles text-amber-500"></i> Podría interesarte...
-                  </h3>
-                  <div className="flex overflow-x-auto gap-3 pb-2 snap-x hide-scroll">
-                    {sugerencias.map((sug) => (
-                      <div key={sug.id} className="min-w-[140px] max-w-[140px] bg-white border border-slate-200 rounded-2xl p-2.5 shadow-sm snap-start flex flex-col">
-                        <div className="h-20 w-full bg-slate-50 rounded-xl p-1 mb-2 flex items-center justify-center">
-                          <img src={sug.image || 'https://via.placeholder.com/60'} alt={sug.name} className="h-full object-contain mix-blend-multiply" />
-                        </div>
-                        <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mb-1 truncate">{sug.razon_sugerencia}</p>
-                        <h4 className="text-[11px] font-bold text-slate-700 leading-tight line-clamp-2 mb-2 flex-1">{sug.name}</h4>
-                        <button 
-                          onClick={() => agregarAlCarrito(sug, sug.paquetes?.length > 0 ? parseInt(sug.paquetes[0].piezas) : 1)}
-                          className="w-full bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-1"
-                        >
-                          <i className="fa-solid fa-plus"></i> Agregar
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* ✨ AQUÍ ES DONDE SUCEDE LA MAGIA: LLAMAMOS AL NUEVO COMPONENTE */}
+              <CrossSelling />
+
             </>
           )}
 
