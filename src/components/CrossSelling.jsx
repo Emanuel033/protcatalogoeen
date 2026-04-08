@@ -91,7 +91,7 @@ function CrossSelling() {
     sugerenciasFinales.sort((a, b) => a.prioridad - b.prioridad);
 
     // ✨ SUBIMOS EL LÍMITE A 6 SUGERENCIAS (o las que gustes)
-    return sugerenciasFinales.slice(0, 6);
+    return sugerenciasFinales.slice(0, 9);
   }, [carrito, productos]);
 
 
