@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react'; // ✨ AGREGAMOS useEffect AQUÍ
 import { useApp } from '../context/AppContext';
 
 // 🧠 FUNCIONES AUXILIARES PARA DETECTAR CAPACIDADES INTELIGENTEMENTE
@@ -7,12 +7,13 @@ const vML = (num) => new RegExp(`\\b${num}\\s*(ml|m\\.l\\.|mililitros)\\b`, 'i')
 const vG = (num) => new RegExp(`\\b${num}\\s*(g|gr|grs|gramo|gramos)\\b`, 'i');
 const vKG = (num) => new RegExp(`\\b${num}\\s*(k|kg|kgs|kilo|kilos)\\b`, 'i');
 
-// 📕 DICCIONARIO MAESTRO DE REGLAS (Con Grupos para ordenarlos visualmente)
+// 📕 DICCIONARIO MAESTRO DE REGLAS
 export const REGLAS_FILTROS = [
   // --- GRUPO 1: CAPACIDADES GRANDES (LITROS Y KILOS) ---
   { id: '1000_l', label: '1000 L', grupo: 1, test: (n) => vL('1000').test(n) },
   { id: '200_l', label: '200 L', grupo: 1, test: (n) => vL('200').test(n) },
   { id: '120_l', label: '120 L', grupo: 1, test: (n) => vL('120').test(n) },
+  { id: '100_l', label: '100 L', grupo: 1, test: (n) => vL('100').test(n) },
   { id: '50_l', label: '50 L', grupo: 1, test: (n) => vL('50').test(n) },
   { id: '25_l', label: '25 L', grupo: 1, test: (n) => vL('25').test(n) },
   { id: '20_l', label: '20 L', grupo: 1, test: (n) => vL('20').test(n) },
@@ -122,11 +123,23 @@ function FiltrosRapidos({ productosMostrados }) {
       });
     });
     
-    // ✨ AQUÍ ORDENAMOS POR GRUPOS
     return REGLAS_FILTROS
       .filter(regla => encontrados.has(regla.id))
       .sort((a, b) => a.grupo - b.grupo); 
   }, [productosMostrados]);
+
+  // ✨ EL FIX MÁGICO: Autolimpiar el filtro si cambia la búsqueda
+  useEffect(() => {
+    if (filtroRapido) {
+      // Verificamos si el filtro que está activado en el cerebro aún existe en los botones en pantalla
+      const filtroSigueValido = filtrosDisponibles.some(f => f.id === filtroRapido);
+      
+      // Si el botón ya no está, apagamos el filtro del cerebro
+      if (!filtroSigueValido) {
+        setFiltroRapido(null);
+      }
+    }
+  }, [filtrosDisponibles, filtroRapido, setFiltroRapido]);
 
   if (filtrosDisponibles.length === 0) return null;
 
