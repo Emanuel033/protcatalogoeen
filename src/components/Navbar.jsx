@@ -24,9 +24,13 @@ function Navbar() {
         
         <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex items-center gap-3.5 hover:opacity-90 transition-opacity cursor-pointer">
-            {/* Logo simplificado y elegante */}
-            <div className="bg-indigo-500 text-white rounded-lg font-black h-10 w-10 flex items-center justify-center shadow-inner text-xl">
-              E
+            {/* ✨ TU LOGO REAL AQUÍ */}
+            <div className="h-11 w-11 flex items-center justify-center bg-white rounded-xl shadow-sm p-1 overflow-hidden shrink-0 border border-slate-100">
+              <img 
+                src="/icons/logo-192.png" 
+                alt="Logo La Económica" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="flex flex-col">
               <h1 className="text-[14px] font-bold uppercase tracking-wide text-slate-50 leading-tight">ENVASES LA ECONOMICA DEL NORTE</h1>
