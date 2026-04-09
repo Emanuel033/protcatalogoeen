@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-import FiltrosRapidos, { REGLAS_FILTROS } from './FiltrosRapidos'; // ✨ NUEVO IMPORT
+import FiltrosRapidos, { REGLAS_FILTROS } from './FiltrosRapidos';
 import { useApp } from '../context/AppContext';
 
 function ProductGrid() {
-  // ✨ AGREGAMOS filtroRapido Y setFiltroRapido AL DESTRUCTURING
-  const { productos, cargando, categoriaActiva, searchTerm, filtroRapido, setFiltroRapido } = useApp();
+  const { productos, cargando, categoriaActiva, setCategoriaActiva, searchTerm, setSearchTerm, filtroRapido, setFiltroRapido } = useApp();
   
   // --- ESTADOS PARA PAGINACIÓN ---
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,12 +40,10 @@ function ProductGrid() {
   });
 
   // Guardamos los productos base para mandárselos a las píldoras
-  // (Para que sepan qué píldoras dibujar antes de filtrarse a sí mismas)
   const productosAntesDePildora = [...productosBase];
 
   // ✨ 2. FILTRADO RÁPIDO (La magia de las píldoras)
   if (filtroRapido) {
-    // Buscamos la regla seleccionada en nuestro diccionario
     const reglaAplicar = REGLAS_FILTROS.find(r => r.id === filtroRapido);
     
     if (reglaAplicar) {
@@ -57,8 +54,11 @@ function ProductGrid() {
     }
   }
 
-  // 3. Ordenamiento Alfabético
+  // 3. Ordenamiento (Los más recientes primero, luego alfabético)
+  // Como tu JSON no tiene fecha, usaremos el ID original de Firebase
+  // Si no tienes el ID, usamos el orden en el que vienen en el JSON (invirtiéndolo)
   const productosFiltrados = productosBase.sort((a, b) => {
+    // Si quisieras solo alfabético:
     const nameA = a.name || '';
     const nameB = b.name || '';
     return nameA.localeCompare(nameB);
@@ -83,13 +83,30 @@ function ProductGrid() {
 
       {/* Si después de todos los filtros no hay nada */}
       {productosFiltrados.length === 0 ? (
-        <div className="col-span-full text-center py-20 fade-in">
-          <h3 className="text-lg font-bold text-slate-700 mb-1">Sin resultados</h3>
-          <p className="text-sm text-slate-400">
+        <div className="col-span-full flex flex-col items-center justify-center py-20 px-4 fade-in">
+          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-5">
+            <i className="fa-solid fa-magnifying-glass-minus text-3xl text-slate-300"></i>
+          </div>
+          <h3 className="text-xl font-black text-slate-700 mb-2 text-center">
+            ¡Ups! No encontramos resultados
+          </h3>
+          <p className="text-sm text-slate-500 max-w-md text-center mb-8">
             {filtroRapido 
               ? "Ningún producto cumple con el filtro rápido seleccionado." 
-              : `No encontramos "${searchTerm}" en esta categoría.`}
+              : `No hay productos en "${categoriaActiva}" que coincidan con tu búsqueda.`}
           </p>
+          
+          {/* ✨ BOTÓN SALVAVIDAS: Resetea todo desde aquí */}
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setFiltroRapido(null);
+              setCategoriaActiva('Todos');
+            }}
+            className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-6 py-3 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2"
+          >
+            <i className="fa-solid fa-eraser"></i> Limpiar todos los filtros
+          </button>
         </div>
       ) : (
         <>
