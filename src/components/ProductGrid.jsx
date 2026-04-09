@@ -54,11 +54,8 @@ function ProductGrid() {
     }
   }
 
-  // 3. Ordenamiento (Los más recientes primero, luego alfabético)
-  // Como tu JSON no tiene fecha, usaremos el ID original de Firebase
-  // Si no tienes el ID, usamos el orden en el que vienen en el JSON (invirtiéndolo)
+  // 3. Ordenamiento Alfabético
   const productosFiltrados = productosBase.sort((a, b) => {
-    // Si quisieras solo alfabético:
     const nameA = a.name || '';
     const nameB = b.name || '';
     return nameA.localeCompare(nameB);
