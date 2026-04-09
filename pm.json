@@ -4479,6 +4479,27 @@
     ]
   },
   {
+    "id": "P2onr4hS2qKkXn5HzipL",
+    "firebase_data": {
+      "id": "P2onr4hS2qKkXn5HzipL",
+      "nombre_flexible": "BOTELLA PET BOSTON CRISTAL 1 LT S/TAPA R-38",
+      "imagen_url": "https://i.ibb.co/23Dx0JkK/e4309ed061c6.png",
+      "categoria": "PET",
+      "codigo_sistema_oficial": "BPB1R38",
+      "tipo_item": "PIEZA_BASE",
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "activo": true,
+      "id_facturacion": "8tViOpha58dSSvpPo5Cp",
+      "stock_total_piezas": 0,
+      "fecha_creacion": {
+        "_seconds": 1775694547,
+        "_nanoseconds": 898000000
+      }
+    },
+    "paquetes": []
+  },
+  {
     "id": "Pgn6UUTcG4NmtWk81vYU",
     "firebase_data": {
       "id": "Pgn6UUTcG4NmtWk81vYU",
@@ -5187,6 +5208,27 @@
     ]
   },
   {
+    "id": "dUv31MVI1kvGnQBCId1w",
+    "firebase_data": {
+      "id": "dUv31MVI1kvGnQBCId1w",
+      "nombre_flexible": "TAPA CON CINTILLO R-38 BLANCA CON LENGÜENTA INTEGRADA ASEPTI",
+      "imagen_url": "https://i.ibb.co/cSrwYNYW/03207fa481a1.png",
+      "categoria": "TAPAS",
+      "codigo_sistema_oficial": "TPCR38A",
+      "tipo_item": "PIEZA_BASE",
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "activo": true,
+      "id_facturacion": "A2tNx2OK29ZizHiZTYZ7",
+      "stock_total_piezas": 0,
+      "fecha_creacion": {
+        "_seconds": 1775694583,
+        "_nanoseconds": 453000000
+      }
+    },
+    "paquetes": []
+  },
+  {
     "id": "e4zfAGKa1qTNzXIpldU1",
     "firebase_data": {
       "id": "e4zfAGKa1qTNzXIpldU1",
@@ -5482,6 +5524,48 @@
         }
       }
     ]
+  },
+  {
+    "id": "hjZEg9ptNr2nX4ow6U4J",
+    "firebase_data": {
+      "id": "hjZEg9ptNr2nX4ow6U4J",
+      "nombre_flexible": "BOTELLA PET CUADRADA CRISTAL 355 ML R-38",
+      "imagen_url": "https://i.ibb.co/wN8Pkg5L/f2a9793ae95e.png",
+      "categoria": "PET",
+      "codigo_sistema_oficial": "BPC355R38",
+      "tipo_item": "PIEZA_BASE",
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "activo": true,
+      "id_facturacion": "zdcn3Ve2RajEfR5UCU2Q",
+      "stock_total_piezas": 0,
+      "fecha_creacion": {
+        "_seconds": 1775694653,
+        "_nanoseconds": 178000000
+      }
+    },
+    "paquetes": []
+  },
+  {
+    "id": "iLlXPJGTgwPhERPMsHfD",
+    "firebase_data": {
+      "id": "iLlXPJGTgwPhERPMsHfD",
+      "nombre_flexible": "BOTELLA PET BOSTON CRISTAL 355 ML S/TAPA R38 ASEPTICA",
+      "imagen_url": "https://i.ibb.co/q3Fw6CpH/6a5d29b73d88.png",
+      "categoria": "PET",
+      "codigo_sistema_oficial": "BPB355R38",
+      "tipo_item": "PIEZA_BASE",
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "activo": true,
+      "id_facturacion": "3dcv15rn63NYO94Ka3Ib",
+      "stock_total_piezas": 0,
+      "fecha_creacion": {
+        "_seconds": 1775694521,
+        "_nanoseconds": 285000000
+      }
+    },
+    "paquetes": []
   },
   {
     "id": "iuaI1sqrIVs2yw7o2LIx",
@@ -18360,6 +18444,27 @@
         "es_default": true
       }
     ]
+  },
+  {
+    "id": "rlZdZyOKqm2YbF1cbBw1",
+    "firebase_data": {
+      "id": "rlZdZyOKqm2YbF1cbBw1",
+      "nombre_flexible": "BOTELLA PET CUADRADA CRISTAL 500 ML R-38",
+      "imagen_url": "https://i.ibb.co/n8Lb5fj2/22f53e76234c.png",
+      "categoria": "pet",
+      "codigo_sistema_oficial": "BPC500R38",
+      "tipo_item": "PIEZA_BASE",
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "activo": true,
+      "id_facturacion": "6tlVALktUgpXs0VnPuI3",
+      "stock_total_piezas": 0,
+      "fecha_creacion": {
+        "_seconds": 1775694487,
+        "_nanoseconds": 975000000
+      }
+    },
+    "paquetes": []
   },
   {
     "id": "txDKakkatlQVbL6b64FB",
