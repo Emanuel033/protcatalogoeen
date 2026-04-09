@@ -113,6 +113,13 @@ export const AppProvider = ({ children }) => {
   // ✨ NUEVO ESTADO PARA LOS FILTROS RÁPIDOS
   const [filtroRapido, setFiltroRapido] = useState(null);
 
+  // ✨ NUEVA FUNCIÓN: Cambia la categoría y limpia la basura anterior
+  const seleccionarCategoria = (nuevaCategoria) => {
+    setCategoriaActiva(nuevaCategoria);
+    setSearchTerm('');      // Borra el texto del buscador
+    setFiltroRapido(null);  // Quita la píldora seleccionada
+  };
+
   // ---------------------------------------------------------
   // ✨ EFECTO PARA LEER LA URL Y AUTO-BUSCAR
   // ---------------------------------------------------------
@@ -413,6 +420,7 @@ export const AppProvider = ({ children }) => {
       productos, categorias, cargando, categoriaActiva, setCategoriaActiva,
       searchTerm, setSearchTerm,
       filtroRapido, setFiltroRapido, // ✨ AQUÍ ESTÁ EL ESTADO AÑADIDO
+      seleccionarCategoria, // ✨ PASAMOS LA NUEVA FUNCIÓN AQUÍ
       carrito, isCartOpen, toggleCart, clearCart, agregarAlCarrito, eliminarProducto, totalPiezas,
       deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp, sendEmail, 
       registrarEvento, esAdmin, setEsAdmin
