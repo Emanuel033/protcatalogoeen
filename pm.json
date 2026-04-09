@@ -4784,7 +4784,6 @@
       "id": "TGsVBkhjHYjzZyFLAUiI",
       "nombre_flexible": "FUNDA PARA BOTELLA PET PIRAMIDE DE 30 ML",
       "imagen_url": "https://i.ibb.co/Zz6mXBzp/FUNDA-PARA-BOTELLA-PET-PIRAMIDE.jpg",
-      "categoria": "OTROS",
       "codigo_sistema_oficial": "BPPC-30-FUN/CP",
       "tipo_item": "PIEZA_BASE",
       "receta_desglose": null,
@@ -4795,7 +4794,8 @@
       "fecha_creacion": {
         "_seconds": 1773519058,
         "_nanoseconds": 840000000
-      }
+      },
+      "categoria": "PET"
     },
     "paquetes": []
   },
