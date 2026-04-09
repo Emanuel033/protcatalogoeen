@@ -2,9 +2,9 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 
 function CategoriesBar() {
-  const { categorias, categoriaActiva, setCategoriaActiva } = useApp();
+  // ✨ CAMBIO AQUÍ: Traemos 'seleccionarCategoria' en lugar de 'setCategoriaActiva'
+  const { categorias, categoriaActiva, seleccionarCategoria } = useApp();
 
-  // Tu función original de íconos convertida a React
   const getCategoryIcon = (cat) => {
     const c = cat.toLowerCase();
     if(c.includes('bolsa')) return <i className="fa-solid fa-bag-shopping mr-1.5 opacity-80"></i>;
@@ -29,7 +29,8 @@ function CategoriesBar() {
             return (
               <button 
                 key={idx}
-                onClick={() => setCategoriaActiva(cat)}
+                // ✨ CAMBIO AQUÍ: Usamos la función que limpia todo
+                onClick={() => seleccionarCategoria(cat)}
                 className={`shrink-0 px-5 py-2 flex items-center rounded-full text-sm font-bold border transition whitespace-nowrap ${
                   isActive 
                     ? 'bg-indigo-600 text-white shadow-md border-indigo-600' 
