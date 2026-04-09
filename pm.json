@@ -18451,7 +18451,6 @@
       "id": "rlZdZyOKqm2YbF1cbBw1",
       "nombre_flexible": "BOTELLA PET CUADRADA CRISTAL 500 ML R-38",
       "imagen_url": "https://i.ibb.co/n8Lb5fj2/22f53e76234c.png",
-      "categoria": "pet",
       "codigo_sistema_oficial": "BPC500R38",
       "tipo_item": "PIEZA_BASE",
       "receta_desglose": null,
@@ -18462,7 +18461,8 @@
       "fecha_creacion": {
         "_seconds": 1775694487,
         "_nanoseconds": 975000000
-      }
+      },
+      "categoria": "PET"
     },
     "paquetes": []
   },
