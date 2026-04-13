@@ -661,7 +661,7 @@
                 const badgeUrgente = v.urgente ? `<span class="bg-gradient-to-r from-red-500 to-red-600 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase ml-1 shadow-sm"><i class="fas fa-fire-alt"></i> Urg.</span>` : '';
                 
                 // MAGIA INYECTADA: ALERTA DE COBRO EN LA LISTA
-                const badgeCobro = v.requiere_cobro ? `<span class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded text-[7px] font-black uppercase ml-1 shadow-sm" title="Saldo Pendiente"><i class="fas fa-dollar-sign"></i> Cobrar $${Number(v.saldo_pendiente).toLocaleString('es-MX', {minimumFractionDigits: 2})}</span>` : '';
+                const badgeCobro = v.requiere_cobro ? `<span class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded text-[7px] font-black uppercase ml-1 shadow-sm" title="Saldo Pendiente"><i class="fas fa-dollar-sign"></i> Revisar Edo Cta $${Number(v.saldo_pendiente).toLocaleString('es-MX', {minimumFractionDigits: 2})}</span>` : '';
 
                 const muestraFolio = v.folio_pedido || v.folio_factura || 'S/F';
                 const isFletera = v.tipo_envio.includes('fletera');
@@ -800,7 +800,7 @@
                 <div class="mt-2 bg-red-50 border border-red-200 p-2.5 rounded-lg flex justify-between items-center shadow-sm">
                     <div class="flex items-center gap-2">
                         <div class="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center animate-pulse"><i class="fas fa-hand-holding-usd text-xs"></i></div>
-                        <span class="text-[10px] font-black text-red-700 uppercase tracking-wide">¡Requiere Cobro en Entrega!</span>
+                        <span class="text-[10px] font-black text-red-700 uppercase tracking-wide">¡Requiere revisar edo cta!</span>
                     </div>
                     <span class="text-sm font-black text-red-800">$${Number(viajeSeleccionado.saldo_pendiente).toLocaleString('es-MX', {minimumFractionDigits: 2})}</span>
                 </div>` : '';
