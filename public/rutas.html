@@ -1431,15 +1431,23 @@
             try {
                 let finalClientId = currentClientId;
                 
+                // 1. Buscar cliente por código (si no se autocompletó)
                 if (!finalClientId && codigo) {
-                    const found = clientesDB.find(c => c.codigo.toUpperCase() === codigo.toUpperCase());
+                    const found = clientesDB.find(c => (c.codigo || '').toUpperCase() === codigo.toUpperCase());
                     if (found) finalClientId = found.id;
                 }
 
-                if (!finalClientId && codigo && nombre) {
+                // 2. Buscar cliente por nombre (Fallback si el código falló o no existe)
+                if (!finalClientId && nombre) {
+                    const found = clientesDB.find(c => (c.nombre || '').toUpperCase() === nombre.toUpperCase());
+                    if (found) finalClientId = found.id;
+                }
+
+                // 3. Crear cliente si definitivamente no existe
+                if (!finalClientId && nombre) {
                     const newClientRef = db.collection('clientes_logistica').doc();
                     finalClientId = newClientRef.id;
-                    await newClientRef.set({ codigo: codigo, nombre: nombre, telefono: tel || '', documentacion: docs, direcciones: [] });
+                    await newClientRef.set({ codigo: codigo || 'S/C', nombre: nombre, telefono: tel || '', documentacion: docs, direcciones: [] });
                     direccionesClienteActual = [];
                 } else if (finalClientId) {
                     await db.collection('clientes_logistica').doc(finalClientId).set({ nombre: nombre, telefono: tel || '', documentacion: docs }, { merge: true });
@@ -1466,9 +1474,13 @@
                     let willUpdateCatalog = false;
 
                     if (selectorVal === "NUEVO") {
-                        dirsUpdate.push(datosDir);
-                        willUpdateCatalog = true;
-                        showToast("Nueva dirección agregada al cliente", "info");
+                        // Evitar duplicar sucursales si alguien escribe el mismo alias
+                        const dirExiste = dirsUpdate.some(d => (d.alias || '').toUpperCase() === alias.toUpperCase());
+                        if (!dirExiste) {
+                            dirsUpdate.push(datosDir);
+                            willUpdateCatalog = true;
+                            showToast("Nueva dirección agregada al cliente", "info");
+                        }
                     } else if (selectorVal !== "" && selectorVal !== "EDICION") {
                         dirsUpdate[selectorVal] = datosDir;
                         willUpdateCatalog = true;
@@ -1480,9 +1492,13 @@
                     }
                 } 
                 else if (tipo !== 'bodega_cliente' && selectorVal === "NUEVO") {
-                    const nuevaFletera = { nombre: alias, direccion: dir, telefono: destTel, horario: horario, link_maps: maps, coordenadas: {lat, lng} };
-                    await db.collection('catalogo_fleteras').add(nuevaFletera);
-                    showToast("Fletera agregada al catálogo global", "info");
+                    // Evitar duplicar fleteras si ya existe una con ese nombre exacto
+                    const fleteraExiste = fleterasDB.find(f => (f.nombre || '').toUpperCase() === alias.toUpperCase());
+                    if (!fleteraExiste) {
+                        const nuevaFletera = { nombre: alias, direccion: dir, telefono: destTel, horario: horario, link_maps: maps, coordenadas: {lat, lng} };
+                        await db.collection('catalogo_fleteras').add(nuevaFletera);
+                        showToast("Fletera agregada al catálogo global", "info");
+                    }
                 }
 
                 cerrarFormulario();
@@ -2046,8 +2062,9 @@
             } catch(e) { showToast("Error al exportar. Comprueba que el navegador permita descargas.", "error"); }
         };
 
+
         // ==========================================
-        // 🔥 CEREBRO AUTO-MASTICADOR N8N
+        // 🔥 CEREBRO AUTO-MASTICADOR N8N (CORREGIDO)
         // ==========================================
         async function procesarPedidosCrudos(viajesCrudos) {
             const batch = db.batch();
@@ -2056,48 +2073,93 @@
             for (let p of viajesCrudos) {
                 if (p.origen === 'Contpaqi' && p.procesado_por_web === false) {
                     let updates = { procesado_por_web: true };
+                    
+                    // 1. LIMPIEZA Y DETERMINAR TIPO DE ENVÍO
+                    let isFletera = (p.tipo_envio === 'FLETERA') || (p.detalles_entrega && p.detalles_entrega.toLowerCase().includes('fletera'));
                     let dirLimpia = (p.direccion || '').trim().toLowerCase();
+                    let aliasLimpio = (p.detalles_entrega || '').trim();
+                    let codigoCliente = (p.cliente_codigo || '').trim().toUpperCase();
+                    let nombreCliente = (p.cliente_nombre || '').trim().toUpperCase();
 
-                    // Buscamos si el cliente ya existe en tu catálogo
-                    let clienteMatch = clientesDB.find(c => c.codigo === p.cliente_codigo);
+                    // 2. BUSCAR O CREAR CLIENTE (El dueño del pedido siempre debe existir)
+                    let clienteMatch = null;
+                    if (codigoCliente) {
+                        clienteMatch = clientesDB.find(c => (c.codigo || '').toUpperCase() === codigoCliente);
+                    }
+                    if (!clienteMatch && nombreCliente) {
+                        clienteMatch = clientesDB.find(c => (c.nombre || '').toUpperCase() === nombreCliente);
+                    }
 
                     if (!clienteMatch) {
-                        // NO EXISTE: Creamos el cliente nuevo
+                        // NO EXISTE CLIENTE: Lo creamos
                         const newClientRef = db.collection('clientes_logistica').doc();
-                        await newClientRef.set({
-                            codigo: p.cliente_codigo,
+                        let nuevoCliente = {
+                            codigo: p.cliente_codigo || 'S/C',
                             nombre: p.cliente_nombre,
                             telefono: p.telefono_contacto || '',
-                            direcciones: [{
-                                alias: p.detalles_entrega || 'Dirección Matriz',
-                                direccion: p.direccion,
-                                coordenadas: {lat: 25.689804, lng: -100.312066}
-                            }]
-                        });
-                        updates.destino_alias = p.detalles_entrega || 'Dirección Matriz';
-                        updates.coordenadas = {lat: 25.689804, lng: -100.312066};
-                    } else {
-                        // SÍ EXISTE: Buscamos si la dirección ya la habías guardado antes
-                        let dirExistente = clienteMatch.direcciones.find(d => d.direccion.trim().toLowerCase() === dirLimpia);
+                            documentacion: p.documentacion || { factura: true },
+                            direcciones: []
+                        };
                         
-                        if (dirExistente) {
-                            // LA BODEGA YA EXISTE: Le inyectamos los mapas y datos que tú guardaste
-                            updates.destino_alias = dirExistente.alias || p.detalles_entrega;
-                            updates.coordenadas = dirExistente.coordenadas;
-                            if(dirExistente.link_maps) updates.link_maps = dirExistente.link_maps;
-                            if(dirExistente.telefono) updates.destino_telefono = dirExistente.telefono;
-                            if(dirExistente.horario) updates.destino_horario = dirExistente.horario;
-                        } else {
-                            // LA BODEGA ES NUEVA: Se la agregamos al cliente
-                            let nuevasDirs = [...clienteMatch.direcciones];
-                            nuevasDirs.push({
-                                alias: p.detalles_entrega || 'Nueva Bodega',
+                        // Si NO es fletera, guardamos su dirección como matriz
+                        if (!isFletera) {
+                            nuevoCliente.direcciones.push({
+                                alias: aliasLimpio || 'Dirección Matriz',
                                 direccion: p.direccion,
                                 coordenadas: {lat: 25.689804, lng: -100.312066}
                             });
+                        }
+                        
+                        await newClientRef.set(nuevoCliente);
+                        clienteMatch = { id: newClientRef.id, direcciones: nuevoCliente.direcciones }; 
+                    }
+
+                    // 3. ASIGNAR DESTINO (Bodega del cliente o Fletera Global)
+                    if (isFletera) {
+                        // ES FLETERA: Buscar en catálogo global por nombre
+                        let fleteraMatch = fleterasDB.find(f => (f.nombre || '').toUpperCase() === aliasLimpio.toUpperCase());
+                        
+                        if (fleteraMatch) {
+                            updates.destino_alias = fleteraMatch.nombre;
+                            updates.coordenadas = fleteraMatch.coordenadas || {lat: 25.689804, lng: -100.312066};
+                            if(fleteraMatch.link_maps) updates.link_maps = fleteraMatch.link_maps;
+                            if(fleteraMatch.telefono) updates.destino_telefono = fleteraMatch.telefono;
+                        } else {
+                            // Crear nueva fletera
+                            let nuevaFletera = {
+                                nombre: aliasLimpio || 'Fletera Nueva',
+                                direccion: p.direccion || 'Dirección pendiente',
+                                coordenadas: {lat: 25.689804, lng: -100.312066}
+                            };
+                            await db.collection('catalogo_fleteras').add(nuevaFletera);
+                            updates.destino_alias = nuevaFletera.nombre;
+                            updates.coordenadas = nuevaFletera.coordenadas;
+                        }
+                    } else {
+                        // ES REPARTO LOCAL (BODEGA): Buscar en las direcciones del cliente
+                        let dirExistente = clienteMatch.direcciones.find(d => 
+                            (d.direccion || '').trim().toLowerCase() === dirLimpia || 
+                            ((d.alias || '').trim().toUpperCase() === aliasLimpio.toUpperCase() && aliasLimpio !== '')
+                        );
+                        
+                        if (dirExistente) {
+                            updates.destino_alias = dirExistente.alias || aliasLimpio;
+                            updates.coordenadas = dirExistente.coordenadas;
+                            if(dirExistente.link_maps) updates.link_maps = dirExistente.link_maps;
+                            if(dirExistente.telefono) updates.destino_telefono = dirExistente.telefono;
+                        } else {
+                            // Nueva sucursal para este cliente
+                            let nuevasDirs = [...(clienteMatch.direcciones || [])];
+                            let nuevaDir = {
+                                alias: aliasLimpio || 'Nueva Sucursal',
+                                direccion: p.direccion || 'Sin dirección',
+                                coordenadas: {lat: 25.689804, lng: -100.312066}
+                            };
+                            nuevasDirs.push(nuevaDir);
                             await db.collection('clientes_logistica').doc(clienteMatch.id).update({ direcciones: nuevasDirs });
-                            updates.destino_alias = p.detalles_entrega || 'Nueva Bodega';
-                            updates.coordenadas = {lat: 25.689804, lng: -100.312066};
+                            
+                            updates.destino_alias = nuevaDir.alias;
+                            updates.coordenadas = nuevaDir.coordenadas;
                         }
                     }
 
@@ -2109,10 +2171,9 @@
 
             if (operaciones > 0) {
                 await batch.commit();
-                console.log(`Logística: ${operaciones} pedidos nuevos masticados y auto-asignados.`);
+                console.log(`Logística: ${operaciones} pedidos procesados y catalogados inteligentemente.`);
             }
         }
-
         function cargarDatosMaestros() {
             db.collection('flota').onSnapshot(snap => { 
                 flotaDB = []; snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() })); 
