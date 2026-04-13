@@ -501,7 +501,8 @@
 
                     documentacion: p.documentacion || { factura: true, certificados: false, orden_compra: false, qr_acceso: false, envio_ciego: false },
                     direccion: p.direccion || '',
-                    destino_alias: p.destino_alias || '',
+                    // 🔥 CORRECCIÓN: Rescatamos "Otra Bodega" (detalles_entrega) para que sea el Alias
+                    destino_alias: p.destino_alias || p.detalles_entrega || '',
                     destino_telefono: p.destino_telefono || '',
                     destino_horario: p.destino_horario || '',
                     coordenadas: coordsLimpia,
@@ -583,7 +584,10 @@
                 v.id.toLowerCase().includes(termino) || 
                 (v.folio_pedido && v.folio_pedido.toLowerCase().includes(termino)) || 
                 (v.folio_factura && v.folio_factura.toLowerCase().includes(termino)) || 
-                (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino))
+                (v.cliente_codigo && v.cliente_codigo.toLowerCase().includes(termino)) ||
+                // 🔥 CORRECCIÓN: Agregar alias y dirección al buscador
+                (v.destino_alias && v.destino_alias.toLowerCase().includes(termino)) ||
+                (v.direccion && v.direccion.toLowerCase().includes(termino))
             );
             
             if(filtrados.length === 0) {
