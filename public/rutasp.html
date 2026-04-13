@@ -662,7 +662,8 @@
                 
                 // MAGIA INYECTADA: ALERTA DE COBRO EN LA LISTA
                 const badgeCobro = v.requiere_cobro ? `<span class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded text-[7px] font-black uppercase ml-1 shadow-sm" title="Saldo Pendiente"><i class="fas fa-dollar-sign"></i> Revisar Edo Cta $${Number(v.saldo_pendiente).toLocaleString('es-MX', {minimumFractionDigits: 2})}</span>` : '';
-
+                // 🔥 NUEVO: ALERTA DE ORIGEN CONTPAQI
+                const badgeOrigen = (v.origen && v.origen.toLowerCase() === 'contpaqi') ? `<span class="bg-slate-800 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase ml-1 shadow-sm" title="Importado automáticamente del ERP"><i class="fas fa-server"></i> ERP</span>` : '';
                 const muestraFolio = v.folio_pedido || v.folio_factura || 'S/F';
                 const isFletera = v.tipo_envio.includes('fletera');
                 const badgeFletera = isFletera ? `<i class="fas fa-truck-loading text-purple-400 mr-1" title="Fletera"></i>` : '';
