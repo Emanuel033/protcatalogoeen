@@ -1473,16 +1473,48 @@
                     const datosDir = { alias: alias, direccion: dir, telefono: destTel, horario: horario, link_maps: maps, coordenadas: {lat, lng} };
                     let willUpdateCatalog = false;
 
+                    // Limpiamos la dirección que acabas de escribir en el formulario
+                    let dirIngresadaNorm = dir.replace(/[^a-z0-9]/g, '').toLowerCase();
+
                     if (selectorVal === "NUEVO") {
-                        // Evitar duplicar sucursales si alguien escribe el mismo alias
-                        const dirExiste = dirsUpdate.some(d => (d.alias || '').toUpperCase() === alias.toUpperCase());
-                        if (!dirExiste) {
+                        // 1. Validar si físicamente ya existía para no duplicarla
+                        const dirExistente = dirsUpdate.find(d => (d.direccion || '').replace(/[^a-z0-9]/g, '').toLowerCase() === dirIngresadaNorm);
+                        
+                        if (!dirExistente) {
+                            // 2. Validar que el alias no esté tomado (Si ya hay una "FISCAL", esta será "FISCAL 2")
+                            let aliasFinal = alias;
+                            let contador = 1;
+                            let aliasTomados = dirsUpdate.map(d => (d.alias||'').toUpperCase());
+                            
+                            while(aliasTomados.includes(aliasFinal.toUpperCase())) {
+                                contador++;
+                                aliasFinal = `${alias} ${contador}`;
+                            }
+                            datosDir.alias = aliasFinal;
                             dirsUpdate.push(datosDir);
                             willUpdateCatalog = true;
-                            showToast("Nueva dirección agregada al cliente", "info");
+                            showToast("Nueva dirección guardada en el cliente", "info");
+                        } else {
+                            showToast("Esta dirección ya estaba registrada, usamos el mapa existente.", "info");
                         }
                     } else if (selectorVal !== "" && selectorVal !== "EDICION") {
-                        dirsUpdate[selectorVal] = datosDir;
+                        // AQUÍ ESTÁS EDITANDO UNA QUE SELECCIONASTE DEL DROPDOWN
+                        let dirOriginalNorm = (dirsUpdate[selectorVal].direccion || '').replace(/[^a-z0-9]/g, '').toLowerCase();
+                        
+                        // Extracción de números (CP, Número Exterior)
+                        let numViejo = dirOriginalNorm.replace(/[^0-9]/g, '');
+                        let numNuevo = dirIngresadaNorm.replace(/[^0-9]/g, '');
+
+                        // PROTECCIÓN ANTI-SOBREESCRITURA:
+                        // Si los números cambiaron por completo, es obvio que es otra bodega.
+                        if (numViejo !== '' && numNuevo !== '' && numViejo !== numNuevo && !dirIngresadaNorm.includes(dirOriginalNorm.substring(0,10))) {
+                            datosDir.alias = alias + " (Nueva)";
+                            dirsUpdate.push(datosDir); // La empujamos como nueva
+                            showToast("Dirección muy diferente. Se guardó como NUEVA para proteger la original.", "info");
+                        } else {
+                            // Es una edición normal (moviste el pin del mapa, agregaste 'Esquina con X')
+                            dirsUpdate[selectorVal] = datosDir;
+                        }
                         willUpdateCatalog = true;
                     }
 
@@ -1490,7 +1522,7 @@
                         await db.collection('clientes_logistica').doc(finalClientId).update({ direcciones: dirsUpdate });
                         direccionesClienteActual = dirsUpdate;
                     }
-                } 
+                }
                 else if (tipo !== 'bodega_cliente' && selectorVal === "NUEVO") {
                     // Evitar duplicar fleteras si ya existe una con ese nombre exacto
                     const fleteraExiste = fleterasDB.find(f => (f.nombre || '').toUpperCase() === alias.toUpperCase());
@@ -2136,22 +2168,39 @@
                             updates.coordenadas = nuevaFletera.coordenadas;
                         }
                     } else {
-                        // ES REPARTO LOCAL (BODEGA): Buscar en las direcciones del cliente
-                        let dirExistente = clienteMatch.direcciones.find(d => 
-                            (d.direccion || '').trim().toLowerCase() === dirLimpia || 
-                            ((d.alias || '').trim().toUpperCase() === aliasLimpio.toUpperCase() && aliasLimpio !== '')
-                        );
+                        // ES REPARTO LOCAL (BODEGA)
+                        let dirLimpiaNorm = dirLimpia.replace(/[^a-z0-9]/g, ''); // Quitamos espacios y signos
+                        
+                        // 1. Buscar si la dirección física ya existe por SIMILITUD DE TEXTO
+                        let dirExistente = clienteMatch.direcciones.find(d => {
+                            let guardadaNorm = (d.direccion || '').replace(/[^a-z0-9]/g, '').toLowerCase();
+                            // Es match si son exactamente iguales limpias, o si una está contenida en la otra (ej. faltó el CP)
+                            return guardadaNorm === dirLimpiaNorm || 
+                                   (guardadaNorm.length > 10 && dirLimpiaNorm.includes(guardadaNorm)) || 
+                                   (dirLimpiaNorm.length > 10 && guardadaNorm.includes(dirLimpiaNorm));
+                        });
                         
                         if (dirExistente) {
+                            // Ya existía físicamente, usamos su alias y su pin del mapa
                             updates.destino_alias = dirExistente.alias || aliasLimpio;
                             updates.coordenadas = dirExistente.coordenadas;
                             if(dirExistente.link_maps) updates.link_maps = dirExistente.link_maps;
                             if(dirExistente.telefono) updates.destino_telefono = dirExistente.telefono;
                         } else {
-                            // Nueva sucursal para este cliente
+                            // 2. ES NUEVA FÍSICAMENTE. Proteger el Alias para no repetir (Ej. BODEGA 2)
+                            let aliasFinal = aliasLimpio || 'Nueva Sucursal';
+                            let contador = 1;
+                            let aliasTomados = (clienteMatch.direcciones || []).map(d => (d.alias||'').toUpperCase());
+                            
+                            while(aliasTomados.includes(aliasFinal.toUpperCase())) {
+                                contador++;
+                                aliasFinal = `${aliasLimpio || 'Sucursal'} ${contador}`; // BODEGA 2, BODEGA 3...
+                            }
+
+                            // La guardamos en el catálogo del cliente
                             let nuevasDirs = [...(clienteMatch.direcciones || [])];
                             let nuevaDir = {
-                                alias: aliasLimpio || 'Nueva Sucursal',
+                                alias: aliasFinal,
                                 direccion: p.direccion || 'Sin dirección',
                                 coordenadas: {lat: 25.689804, lng: -100.312066}
                             };
