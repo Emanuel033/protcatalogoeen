@@ -971,6 +971,23 @@
     ]
   },
   {
+    "codigo": "BPC355R38-CT",
+    "precio": 5.35,
+    "nombre": "BOTELLA PET CUADRADA CRISTAL 355 ML R-38 C/TAPA",
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPC355R38",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPCR38A",
+        "cantidad": 1
+      }
+    ]
+  },
+  {
     "codigo": "BPB-60-BCA/CP",
     "precio": 2.5,
     "nombre": "BOTELLA PET BOSTON 60 ML R-20 BLANCA S/TAPA",
@@ -2059,7 +2076,7 @@
     "codigo": "EPL-1/CP",
     "precio": 2.63,
     "nombre": "ENVASE PLASTICO LECHERO DE 1 L S/TAPA",
-    "stock": 248234.995,
+    "stock": 248209.995,
     "tipo": 1,
     "receta": null
   },
@@ -2672,7 +2689,7 @@
     "codigo": "VP-450-R89/CP",
     "precio": 6.45,
     "nombre": "VITROLERO PET CILINDRICO DE 450 G R-89 S/TAPA",
-    "stock": 4820,
+    "stock": 4790,
     "tipo": 1,
     "receta": null
   },
@@ -2783,7 +2800,7 @@
     "codigo": "CPB-1/CP",
     "precio": 11.16,
     "nombre": "CUBETA DE PLASTICO DE 1 L BCA C/TAPA",
-    "stock": 2280,
+    "stock": 2279,
     "tipo": 1,
     "receta": null
   },
@@ -2962,7 +2979,7 @@
     "codigo": "EPL-GAL/CP",
     "precio": 5.89,
     "nombre": "ENVASE PLASTICO LECHERO DE GALON S/TAPA",
-    "stock": 95696,
+    "stock": 95694,
     "tipo": 1,
     "receta": null
   },
@@ -3652,7 +3669,7 @@
     "codigo": "PIN-50-P/CP",
     "precio": 186,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 50 L C/TAPON NEG E10C3000JD18",
-    "stock": 1999,
+    "stock": 1996,
     "tipo": 1,
     "receta": null
   },
@@ -3780,7 +3797,7 @@
     "codigo": "CPB-19-U/CP",
     "precio": 77.81,
     "nombre": "CUBETA DE PLASTICO 19 L BLANCA UNI SIN TAPA",
-    "stock": 1818,
+    "stock": 1817,
     "tipo": 1,
     "receta": null
   },
@@ -4967,7 +4984,7 @@
     "codigo": "TP-EL/CP",
     "precio": 0.45,
     "nombre": "TAPA PORTOLA PARA ENVASE LECHERO",
-    "stock": 102250,
+    "stock": 102208,
     "tipo": 1,
     "receta": null
   },
@@ -5355,7 +5372,7 @@
     "codigo": "BPB-60/CP",
     "precio": 2.01,
     "nombre": "BOTELLA PET BOSTON 60 ML CRISTAL .R-20 S/TAPA",
-    "stock": 8467,
+    "stock": 8437,
     "tipo": 1,
     "receta": null
   },
@@ -7145,7 +7162,7 @@
     "codigo": "TP-R89-COL/CP",
     "precio": 2.3,
     "nombre": "TAPA R-89",
-    "stock": 3894,
+    "stock": 3891,
     "tipo": 1,
     "receta": null
   },
@@ -7547,7 +7564,7 @@
   {
     "codigo": "BPC355R38",
     "precio": 0,
-    "nombre": "BOTELLA PET CUADRADA CRISTAL 355 ML R-38",
+    "nombre": "BOTELLA PET CUADRADA CRISTAL 355 ML R-38 S/TAPA",
     "stock": 510,
     "tipo": 1,
     "receta": null
@@ -7680,7 +7697,7 @@
     "codigo": "AD-R20/410-C-BCO/CP",
     "precio": 3.63,
     "nombre": "ATOMIZADOR DE DEDO R-20/410 BLANCO CON CAPUCHA",
-    "stock": 152407,
+    "stock": 152377,
     "tipo": 1,
     "receta": null
   },
@@ -7816,7 +7833,7 @@
     "codigo": "PING-20-S/CP",
     "precio": 78.58,
     "nombre": "PORRON INDUSTRIAL NEGRO DE 20 L C/TAPON SAMPSON",
-    "stock": 420,
+    "stock": 1920,
     "tipo": 1,
     "receta": null
   },
