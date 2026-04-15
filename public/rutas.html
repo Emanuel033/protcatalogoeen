@@ -2098,131 +2098,149 @@
         // ==========================================
         // 🔥 CEREBRO AUTO-MASTICADOR N8N (CORREGIDO)
         // ==========================================
-        async function procesarPedidosCrudos(viajesCrudos) {
-            const batch = db.batch();
-            let operaciones = 0;
+        // Asegúrate de poner esta función justito arriba de procesarPedidosCrudos si no la tenías
+function similitudTextos(a, b) {
+    a = (a || '').toLowerCase().trim(); b = (b || '').toLowerCase().trim();
+    if (a === b) return 100;
+    if (a.includes(b) || b.includes(a)) return 85; 
+    let matrix = [];
+    for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+    for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) == a.charAt(j - 1)) { matrix[i][j] = matrix[i - 1][j - 1]; } 
+            else { matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)); }
+        }
+    }
+    let distance = matrix[b.length][a.length];
+    let maxLen = Math.max(a.length, b.length);
+    return ((maxLen - distance) / maxLen) * 100;
+}
 
-            for (let p of viajesCrudos) {
-                if (p.origen === 'Contpaqi' && p.procesado_por_web === false) {
-                    let updates = { procesado_por_web: true };
+// 🔥 EL CEREBRO AUTO-MASTICADOR (AHORA CON INTELIGENCIA ARTIFICIAL)
+async function procesarPedidosCrudos(viajesCrudos) {
+    const batch = db.batch();
+    let operaciones = 0;
+
+    for (let p of viajesCrudos) {
+        if (p.origen === 'Contpaqi' && p.procesado_por_web === false) {
+            let updates = { procesado_por_web: true };
+            
+            // 1. LIMPIEZA
+            let isFletera = (p.tipo_envio === 'FLETERA') || (p.detalles_entrega && p.detalles_entrega.toLowerCase().includes('fletera'));
+            let dirLimpia = (p.direccion || '').trim();
+            let aliasLimpio = (p.detalles_entrega || '').trim();
+            let codigoCliente = (p.cliente_codigo || '').trim().toUpperCase();
+            let nombreCliente = (p.cliente_nombre || '').trim().toUpperCase();
+
+            // 2. BUSCAR O CREAR CLIENTE (Por código exacto o similitud de nombre)
+            let clienteMatch = null;
+            if (codigoCliente) {
+                clienteMatch = clientesDB.find(c => (c.codigo || '').toUpperCase() === codigoCliente);
+            }
+            if (!clienteMatch && nombreCliente) {
+                // Si no hay código, busca un nombre que se parezca al menos un 80%
+                let mejorPuntajeCliente = 0;
+                clientesDB.forEach(c => {
+                    let score = similitudTextos(c.nombre, nombreCliente);
+                    if (score > mejorPuntajeCliente) { mejorPuntajeCliente = score; clienteMatch = c; }
+                });
+                if (mejorPuntajeCliente < 80) clienteMatch = null; 
+            }
+
+            if (!clienteMatch) {
+                // NO EXISTE CLIENTE: Lo creamos
+                const newClientRef = db.collection('clientes_logistica').doc();
+                let nuevoCliente = {
+                    codigo: p.cliente_codigo || 'S/C', nombre: p.cliente_nombre, telefono: p.telefono_contacto || '',
+                    documentacion: p.documentacion || { factura: true }, direcciones: []
+                };
+                if (!isFletera) {
+                    nuevoCliente.direcciones.push({
+                        alias: aliasLimpio || 'Dirección Matriz', direccion: p.direccion,
+                        coordenadas: {lat: 25.689804, lng: -100.312066}
+                    });
+                }
+                await newClientRef.set(nuevoCliente);
+                clienteMatch = { id: newClientRef.id, direcciones: nuevoCliente.direcciones }; 
+            }
+
+            // 3. ASIGNAR DESTINO INTELIGENTE
+            if (isFletera) {
+                // ES FLETERA: Buscar la que más se parezca (Fuzzy Match > 65%)
+                let fleteraMatch = null;
+                let mejorPuntajeFletera = 0;
+                fleterasDB.forEach(f => {
+                    let score = similitudTextos(f.nombre, aliasLimpio);
+                    if (score > mejorPuntajeFletera) { mejorPuntajeFletera = score; fleteraMatch = f; }
+                });
+                
+                if (fleteraMatch && mejorPuntajeFletera > 65) {
+                    // Encontró una fletera muy parecida (Ej. TRATAMEX vs TEAMMEX)
+                    updates.destino_alias = fleteraMatch.nombre;
+                    updates.coordenadas = fleteraMatch.coordenadas || {lat: 25.689804, lng: -100.312066};
+                    if(fleteraMatch.link_maps) updates.link_maps = fleteraMatch.link_maps;
+                    if(fleteraMatch.telefono) updates.destino_telefono = fleteraMatch.telefono;
+                } else {
+                    // De plano es una fletera nueva, la creamos
+                    let nuevaFletera = {
+                        nombre: aliasLimpio || 'Fletera Nueva', direccion: p.direccion || 'Dirección pendiente',
+                        coordenadas: {lat: 25.689804, lng: -100.312066}
+                    };
+                    await db.collection('catalogo_fleteras').add(nuevaFletera);
+                    updates.destino_alias = nuevaFletera.nombre; updates.coordenadas = nuevaFletera.coordenadas;
+                }
+            } else {
+                // ES REPARTO LOCAL (BODEGA DEL CLIENTE)
+                let dirExistente = null;
+                
+                if (clienteMatch.direcciones.length === 1) {
+                    // TRUCO MAESTRO: Si el cliente solo tiene 1 dirección guardada con nosotros, 
+                    // le asignamos ESA dirección automáticamente sin importar qué diga CONTPAQi.
+                    dirExistente = clienteMatch.direcciones[0];
+                } else if (clienteMatch.direcciones.length > 1) {
+                    // Si tiene varias sucursales, buscamos la que más se parezca al texto de CONTPAQi
+                    let mejorPuntajeDir = 0;
+                    clienteMatch.direcciones.forEach(d => {
+                        let score = similitudTextos(d.direccion, dirLimpia);
+                        if (score > mejorPuntajeDir) { mejorPuntajeDir = score; dirExistente = d; }
+                    });
+                    if (mejorPuntajeDir < 60) dirExistente = null; // Si no se parece en nada, la consideramos nueva
+                }
+                
+                if (dirExistente) {
+                    // Ya existía físicamente, usamos su alias y SU PIN EXACTO DEL MAPA
+                    updates.destino_alias = dirExistente.alias || aliasLimpio;
+                    updates.coordenadas = dirExistente.coordenadas;
+                    if(dirExistente.link_maps) updates.link_maps = dirExistente.link_maps;
+                    if(dirExistente.telefono) updates.destino_telefono = dirExistente.telefono;
+                } else {
+                    // Es una sucursal totalmente nueva
+                    let aliasFinal = aliasLimpio || 'Nueva Sucursal';
+                    let contador = 1;
+                    let aliasTomados = (clienteMatch.direcciones || []).map(d => (d.alias||'').toUpperCase());
+                    while(aliasTomados.includes(aliasFinal.toUpperCase())) { contador++; aliasFinal = `${aliasLimpio || 'Sucursal'} ${contador}`; }
+
+                    let nuevasDirs = [...(clienteMatch.direcciones || [])];
+                    let nuevaDir = { alias: aliasFinal, direccion: p.direccion || 'Sin dirección', coordenadas: {lat: 25.689804, lng: -100.312066} };
+                    nuevasDirs.push(nuevaDir);
+                    await db.collection('clientes_logistica').doc(clienteMatch.id).update({ direcciones: nuevasDirs });
                     
-                    // 1. LIMPIEZA Y DETERMINAR TIPO DE ENVÍO
-                    let isFletera = (p.tipo_envio === 'FLETERA') || (p.detalles_entrega && p.detalles_entrega.toLowerCase().includes('fletera'));
-                    let dirLimpia = (p.direccion || '').trim().toLowerCase();
-                    let aliasLimpio = (p.detalles_entrega || '').trim();
-                    let codigoCliente = (p.cliente_codigo || '').trim().toUpperCase();
-                    let nombreCliente = (p.cliente_nombre || '').trim().toUpperCase();
-
-                    // 2. BUSCAR O CREAR CLIENTE (El dueño del pedido siempre debe existir)
-                    let clienteMatch = null;
-                    if (codigoCliente) {
-                        clienteMatch = clientesDB.find(c => (c.codigo || '').toUpperCase() === codigoCliente);
-                    }
-                    if (!clienteMatch && nombreCliente) {
-                        clienteMatch = clientesDB.find(c => (c.nombre || '').toUpperCase() === nombreCliente);
-                    }
-
-                    if (!clienteMatch) {
-                        // NO EXISTE CLIENTE: Lo creamos
-                        const newClientRef = db.collection('clientes_logistica').doc();
-                        let nuevoCliente = {
-                            codigo: p.cliente_codigo || 'S/C',
-                            nombre: p.cliente_nombre,
-                            telefono: p.telefono_contacto || '',
-                            documentacion: p.documentacion || { factura: true },
-                            direcciones: []
-                        };
-                        
-                        // Si NO es fletera, guardamos su dirección como matriz
-                        if (!isFletera) {
-                            nuevoCliente.direcciones.push({
-                                alias: aliasLimpio || 'Dirección Matriz',
-                                direccion: p.direccion,
-                                coordenadas: {lat: 25.689804, lng: -100.312066}
-                            });
-                        }
-                        
-                        await newClientRef.set(nuevoCliente);
-                        clienteMatch = { id: newClientRef.id, direcciones: nuevoCliente.direcciones }; 
-                    }
-
-                    // 3. ASIGNAR DESTINO (Bodega del cliente o Fletera Global)
-                    if (isFletera) {
-                        // ES FLETERA: Buscar en catálogo global por nombre
-                        let fleteraMatch = fleterasDB.find(f => (f.nombre || '').toUpperCase() === aliasLimpio.toUpperCase());
-                        
-                        if (fleteraMatch) {
-                            updates.destino_alias = fleteraMatch.nombre;
-                            updates.coordenadas = fleteraMatch.coordenadas || {lat: 25.689804, lng: -100.312066};
-                            if(fleteraMatch.link_maps) updates.link_maps = fleteraMatch.link_maps;
-                            if(fleteraMatch.telefono) updates.destino_telefono = fleteraMatch.telefono;
-                        } else {
-                            // Crear nueva fletera
-                            let nuevaFletera = {
-                                nombre: aliasLimpio || 'Fletera Nueva',
-                                direccion: p.direccion || 'Dirección pendiente',
-                                coordenadas: {lat: 25.689804, lng: -100.312066}
-                            };
-                            await db.collection('catalogo_fleteras').add(nuevaFletera);
-                            updates.destino_alias = nuevaFletera.nombre;
-                            updates.coordenadas = nuevaFletera.coordenadas;
-                        }
-                    } else {
-                        // ES REPARTO LOCAL (BODEGA)
-                        let dirLimpiaNorm = dirLimpia.replace(/[^a-z0-9]/g, ''); // Quitamos espacios y signos
-                        
-                        // 1. Buscar si la dirección física ya existe por SIMILITUD DE TEXTO
-                        let dirExistente = clienteMatch.direcciones.find(d => {
-                            let guardadaNorm = (d.direccion || '').replace(/[^a-z0-9]/g, '').toLowerCase();
-                            // Es match si son exactamente iguales limpias, o si una está contenida en la otra (ej. faltó el CP)
-                            return guardadaNorm === dirLimpiaNorm || 
-                                   (guardadaNorm.length > 10 && dirLimpiaNorm.includes(guardadaNorm)) || 
-                                   (dirLimpiaNorm.length > 10 && guardadaNorm.includes(dirLimpiaNorm));
-                        });
-                        
-                        if (dirExistente) {
-                            // Ya existía físicamente, usamos su alias y su pin del mapa
-                            updates.destino_alias = dirExistente.alias || aliasLimpio;
-                            updates.coordenadas = dirExistente.coordenadas;
-                            if(dirExistente.link_maps) updates.link_maps = dirExistente.link_maps;
-                            if(dirExistente.telefono) updates.destino_telefono = dirExistente.telefono;
-                        } else {
-                            // 2. ES NUEVA FÍSICAMENTE. Proteger el Alias para no repetir (Ej. BODEGA 2)
-                            let aliasFinal = aliasLimpio || 'Nueva Sucursal';
-                            let contador = 1;
-                            let aliasTomados = (clienteMatch.direcciones || []).map(d => (d.alias||'').toUpperCase());
-                            
-                            while(aliasTomados.includes(aliasFinal.toUpperCase())) {
-                                contador++;
-                                aliasFinal = `${aliasLimpio || 'Sucursal'} ${contador}`; // BODEGA 2, BODEGA 3...
-                            }
-
-                            // La guardamos en el catálogo del cliente
-                            let nuevasDirs = [...(clienteMatch.direcciones || [])];
-                            let nuevaDir = {
-                                alias: aliasFinal,
-                                direccion: p.direccion || 'Sin dirección',
-                                coordenadas: {lat: 25.689804, lng: -100.312066}
-                            };
-                            nuevasDirs.push(nuevaDir);
-                            await db.collection('clientes_logistica').doc(clienteMatch.id).update({ direcciones: nuevasDirs });
-                            
-                            updates.destino_alias = nuevaDir.alias;
-                            updates.coordenadas = nuevaDir.coordenadas;
-                        }
-                    }
-
-                    // Actualizamos el pedido en Firebase
-                    batch.update(db.collection('rutas_logistica').doc(p.id), updates);
-                    operaciones++;
+                    updates.destino_alias = nuevaDir.alias; updates.coordenadas = nuevaDir.coordenadas;
                 }
             }
 
-            if (operaciones > 0) {
-                await batch.commit();
-                console.log(`Logística: ${operaciones} pedidos procesados y catalogados inteligentemente.`);
-            }
+            // Actualizamos el pedido en Firebase ya "masticado"
+            batch.update(db.collection('rutas_logistica').doc(p.id), updates);
+            operaciones++;
         }
+    }
+
+    if (operaciones > 0) {
+        await batch.commit();
+        console.log(`Logística: ${operaciones} pedidos de ERP procesados inteligentemente.`);
+    }
+}
         function cargarDatosMaestros() {
             db.collection('flota').onSnapshot(snap => { 
                 flotaDB = []; snap.forEach(doc => flotaDB.push({ id: doc.id, ...doc.data() })); 
