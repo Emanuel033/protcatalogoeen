@@ -2060,47 +2060,88 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                doc.setFontSize(16);
-                doc.text("Base de Conocimiento de Empaques y Presentaciones", 105, 20, { align: "center" });
-                doc.setFontSize(10);
-                doc.text("Usa esta información exclusivamente para indicar las cantidades que incluye cada paquete o caja.", 105, 28, { align: "center" });
-                doc.text("NUNCA menciones precios.", 105, 33, { align: "center" });
+                // 1. ENCABEZADO Y REGLAS GLOBALES ESTRICTAS PARA LA IA
+                doc.setFontSize(14);
+                doc.text("Base de Conocimiento y Reglas Comerciales (IA)", 105, 15, { align: "center" });
                 
-                let y = 45;
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'bold');
+                doc.text("INSTRUCCIONES Y REGLAS DE NEGOCIO ESTRICTAS (MEMORIZAR):", 15, 25);
+                doc.setFont(undefined, 'normal');
+                doc.text("• PRECIOS: NUNCA menciones precios. Solo cantidades, empaques y sugerencias.", 15, 30);
+                doc.text("• BOLSAS: Se venden ÚNICAMENTE en múltiplos de 100 piezas.", 15, 35);
+                doc.text("• TAMBOS DE LAMINA Y TÓTEMS: Venta EXCLUSIVA bajo pedido con 50% de anticipo.", 15, 40);
+                doc.text("• KITS Y RECETAS: Si el cliente busca un kit, sugiérelo. Si busca un producto que", 15, 45);
+                doc.text("  pertenece a un kit, sugiere los demás componentes (cross-selling).", 15, 50);
+                doc.text("• DEMÁS PRODUCTOS: Venta suelta (desde 1 pieza) o por paquete cerrado.", 15, 55);
+                
+                doc.setLineWidth(0.5);
+                doc.line(15, 58, 195, 58);
+                
+                let y = 65;
 
                 catalogo.forEach(item => {
-                    // Evitamos escribir piezas base puras si no tienen empaques definidos
-                    if (!item.paquetes && !item.empaques_tips) return;
+                    // ¡Importante! Quitamos el "if (!item.paquetes && !item.empaques_tips) return;" 
+                    // para asegurarnos de que TODO el catálogo se imprima en el PDF.
 
                     if (y > 270) { doc.addPage(); y = 20; }
                     
-                    let piezasStr = "Venta por pieza suelta";
+                    const nameLower = String(item.nombre || item.nombre_flexible || item.name || '').toLowerCase();
+                    const catLower = String(item.category || item.categoria || '').toLowerCase();
                     
-                    // Priorizamos el arreglo completo de paquetes si existe
-                    if (item.paquetes && item.paquetes.length > 0) {
+                    let piezasStr = "Venta desde 1 pieza (suelta) o por paquete/caja.";
+                    
+                    // 2. APLICAR REGLAS ESPECÍFICAS POR TIPO DE PRODUCTO
+                    if (nameLower.includes('bolsa') || catLower.includes('bolsa')) {
+                        piezasStr = "Venta ÚNICA en múltiplos de 100 piezas.";
+                    } else if (nameLower.includes('tambo de lámina') || nameLower.includes('totem') || nameLower.includes('tótem')) {
+                        piezasStr = "Se vende ÚNICAMENTE POR PEDIDO (Requiere 50% de anticipo).";
+                    } else if (item.paquetes && item.paquetes.length > 0) {
                         const empaques = item.paquetes.map(p => p.piezas).sort((a,b) => a - b);
-                        piezasStr = `Paquetes de: ${empaques.join(', ')} piezas`;
-                    } 
-                    // Si no, usamos el atajo empaques_tips
-                    else if (item.empaques_tips && item.empaques_tips.length > 0) {
-                        piezasStr = `Paquetes de: ${item.empaques_tips.sort((a,b) => a - b).join(', ')} piezas`;
+                        piezasStr = `Venta desde 1 pz o en paquetes cerrados de: ${empaques.join(', ')} piezas.`;
+                    } else if (item.empaques_tips && item.empaques_tips.length > 0) {
+                        piezasStr = `Venta desde 1 pz o en paquetes cerrados de: ${item.empaques_tips.sort((a,b) => a - b).join(', ')} piezas.`;
                     }
 
-                    // Strict rule: Sin precios
                     doc.setFont(undefined, 'bold');
-                    doc.text(`Producto: ${item.nombre || item.name}`, 15, y);
-                    y += 6;
+                    doc.text(`Producto: ${item.nombre || item.nombre_flexible || item.name}`, 15, y);
+                    y += 5;
+                    
                     doc.setFont(undefined, 'normal');
-                    doc.text(`Categoría: ${item.category || 'General'}`, 15, y);
-                    y += 6;
-                    doc.text(`Presentación de venta: ${piezasStr}`, 15, y);
-                    y += 6;
-                    doc.text(`Código interno: ${item.codigo || 'S/N'}`, 15, y);
-                    y += 10;
+                    doc.text(`Categoría: ${item.category || item.categoria || 'General'} | Código: ${item.codigo || item.codigo_sistema_oficial || 'S/N'}`, 15, y);
+                    y += 5;
+                    
+                    doc.text(`Condiciones de venta: ${piezasStr}`, 15, y);
+                    y += 5;
+
+                    // 3. LÓGICA DE KITS, RECETAS Y CROSS-SELLING
+                    if (item.tipo_item === 'KIT_FLEXIBLE' || item.tipo_item === 'KIT_OFICIAL') {
+                        doc.setFont(undefined, 'italic');
+                        doc.text(`* Este producto es un KIT. Puedes sugerir la venta del kit completo o sus piezas individuales.`, 15, y);
+                        y += 5;
+                        
+                        if (item.receta_desglose) {
+                            let recetaArr = [];
+                            for (const [compId, qty] of Object.entries(item.receta_desglose)) {
+                                // Buscar el nombre del componente en el mismo catálogo
+                                const comp = catalogo.find(c => c.id === compId || c.codigo === compId || c.codigo_sistema_oficial === compId);
+                                const compName = comp ? (comp.nombre || comp.nombre_flexible || comp.name) : compId;
+                                recetaArr.push(`${qty}x ${compName}`);
+                            }
+                            if (recetaArr.length > 0) {
+                                const recetaText = doc.splitTextToSize(`Incluye (Receta): ${recetaArr.join(', ')}`, 180);
+                                doc.text(recetaText, 15, y);
+                                y += (recetaText.length * 5);
+                            }
+                        }
+                        doc.setFont(undefined, 'normal');
+                    }
+
+                    y += 4; // Espaciado extra entre productos
                 });
 
-                doc.save(`Conocimiento_Empaques_IA_${new Date().toISOString().split('T')[0]}.pdf`);
-                showToast("PDF para WhatsApp generado exitosamente");
+                doc.save(`Base_Conocimiento_IA_${new Date().toISOString().split('T')[0]}.pdf`);
+                showToast("PDF para IA generado exitosamente");
                 
             } catch (error) {
                 console.error(error);
