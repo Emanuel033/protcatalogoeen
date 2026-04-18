@@ -2068,22 +2068,18 @@
                 doc.setFont(undefined, 'bold');
                 doc.text("INSTRUCCIONES Y REGLAS DE NEGOCIO ESTRICTAS (MEMORIZAR):", 15, 25);
                 doc.setFont(undefined, 'normal');
-                doc.text("• PRECIOS: NUNCA menciones precios. Solo cantidades, empaques y sugerencias.", 15, 30);
+                // Se mantiene tu regla estricta de no mostrar precios
+                doc.text("• PRECIOS: NUNCA menciones precios. Solo cantidades y empaques.", 15, 30);
                 doc.text("• BOLSAS: Se venden ÚNICAMENTE en múltiplos de 100 piezas.", 15, 35);
                 doc.text("• TAMBOS DE LAMINA Y TÓTEMS: Venta EXCLUSIVA bajo pedido con 50% de anticipo.", 15, 40);
-                doc.text("• KITS Y RECETAS: Si el cliente busca un kit, sugiérelo. Si busca un producto que", 15, 45);
-                doc.text("  pertenece a un kit, sugiere los demás componentes (cross-selling).", 15, 50);
-                doc.text("• DEMÁS PRODUCTOS: Venta suelta (desde 1 pieza) o por paquete cerrado.", 15, 55);
+                doc.text("• DEMÁS PRODUCTOS: Venta suelta (desde 1 pieza) o por paquete cerrado.", 15, 45);
                 
                 doc.setLineWidth(0.5);
-                doc.line(15, 58, 195, 58);
+                doc.line(15, 48, 195, 48);
                 
-                let y = 65;
+                let y = 55;
 
                 catalogo.forEach(item => {
-                    // ¡Importante! Quitamos el "if (!item.paquetes && !item.empaques_tips) return;" 
-                    // para asegurarnos de que TODO el catálogo se imprima en el PDF.
-
                     if (y > 270) { doc.addPage(); y = 20; }
                     
                     const nameLower = String(item.nombre || item.nombre_flexible || item.name || '').toLowerCase();
@@ -2094,7 +2090,7 @@
                     // 2. APLICAR REGLAS ESPECÍFICAS POR TIPO DE PRODUCTO
                     if (nameLower.includes('bolsa') || catLower.includes('bolsa')) {
                         piezasStr = "Venta ÚNICA en múltiplos de 100 piezas.";
-                    } else if (nameLower.includes('tambo de lámina') || nameLower.includes('totem') || nameLower.includes('tótem')) {
+                    } else if (nameLower.includes('tambo de lamina') || nameLower.includes('totem') || nameLower.includes('tótem')) {
                         piezasStr = "Se vende ÚNICAMENTE POR PEDIDO (Requiere 50% de anticipo).";
                     } else if (item.paquetes && item.paquetes.length > 0) {
                         const empaques = item.paquetes.map(p => p.piezas).sort((a,b) => a - b);
@@ -2112,44 +2108,7 @@
                     y += 5;
                     
                     doc.text(`Condiciones de venta: ${piezasStr}`, 15, y);
-                    y += 5;
-
-                    // 3. LÓGICA DE KITS, RECETAS Y CROSS-SELLING
-                    if (item.tipo_item === 'KIT_FLEXIBLE' || item.tipo_item === 'KIT_OFICIAL') {
-                        doc.setFont(undefined, 'bold');
-                        doc.setTextColor(0, 51, 102); // Un azul oscuro para resaltar a la IA
-                        doc.text(`[ESTE PRODUCTO ES UN KIT - COMPUESTO POR VARIAS PIEZAS]`, 15, y);
-                        y += 5;
-                        
-                        doc.setFont(undefined, 'normal');
-                        doc.setTextColor(0, 0, 0);
-                        doc.text(`Instrucción para IA: Puedes sugerir el kit completo o sus componentes por separado.`, 15, y);
-                        y += 5;
-                        doc.text(`A continuación la receta (desglose) de este kit:`, 15, y);
-                        y += 5;
-                        
-                        if (item.receta_desglose && Object.keys(item.receta_desglose).length > 0) {
-                            for (const [compId, qty] of Object.entries(item.receta_desglose)) {
-                                // Buscar el componente en el catálogo usando el ID
-                                const comp = catalogo.find(c => c.id === compId || c.codigo === compId || c.codigo_sistema_oficial === compId);
-                                
-                                const compName = comp ? (comp.nombre_flexible || comp.nombre || comp.name) : "Componente Base";
-                                const compCode = comp ? (comp.codigo_sistema_oficial || comp.codigo || comp.id) : compId;
-
-                                // Le damos la línea exacta con el Código para que la IA lo use como referencia cruzada
-                                const linea = `- ${qty} pieza(s) de: "${compName}" (Buscar en catálogo con CÓDIGO: ${compCode})`;
-                                
-                                const recetaText = doc.splitTextToSize(linea, 180);
-                                doc.text(recetaText, 20, y);
-                                y += (recetaText.length * 5);
-                            }
-                        } else {
-                            doc.text(`- (Receta pendiente de configurar en el sistema)`, 20, y);
-                            y += 5;
-                        }
-                    }
-
-                    y += 4; // Espaciado extra entre productos para separar bloques
+                    y += 9; // Espaciado extra entre productos
                 });
 
                 doc.save(`Base_Conocimiento_IA_${new Date().toISOString().split('T')[0]}.pdf`);
