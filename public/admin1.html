@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Centro de Comando - Auditoría EEN</title>
+    <title>Centro de Comando - Admin EEN</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -11,6 +11,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <meta name="theme-color" content="#f8fafc">
     <link rel="icon" type="image/png" href="./icons/admin-192.png" />
     <link rel="apple-touch-icon" href="./icons/admin-192.png" />
@@ -158,13 +160,6 @@
                 <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Catálogo Maestro</span>
             </button>
             
-            <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mt-6 mb-2 sidebar-text">Supervisión</p>
-
-            <button onclick="switchTab('audit')" id="dtTab-audit" class="w-full flex items-center px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors sidebar-btn group">
-                <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-clipboard-check text-lg text-center w-5"></i></div>
-                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Auditoría y Cambios</span>
-            </button>
-            
             <p class="px-6 text-[10px] font-black text-slate-400 uppercase tracking-wider mt-6 mb-2 sidebar-text">Administración</p>
             
             <button onclick="switchTab('import')" id="dtTab-import" class="w-full flex items-center justify-between px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors relative sidebar-btn group">
@@ -173,10 +168,6 @@
                     <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Importaciones</span>
                 </div>
                 <span id="dtImportBadge" class="sidebar-text bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow hidden">0</span>
-            </button>
-            <button onclick="switchTab('cashiers')" id="dtTab-cashiers" class="w-full flex items-center px-6 py-3.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 font-bold border-r-4 border-transparent transition-colors sidebar-btn group">
-                <div class="shrink-0 mr-3 sidebar-icon-container"><i class="fas fa-user-tie text-lg text-center w-5"></i></div>
-                <span class="text-sm sidebar-text whitespace-nowrap overflow-hidden">Accesos POS</span>
             </button>
         </nav>
 
@@ -249,6 +240,10 @@
                         <button id="btn-mass-qr" onclick="openMassActions()" class="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"><i class="fas fa-qrcode w-4 text-center text-slate-400"></i> Imprimir QRs (Masivo)</button>
                         <div class="h-px bg-slate-100 my-1"></div>
                         <button id="btn-deploy" onclick="solicitarActualizacionGitHub()" class="w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"><i class="fas fa-rocket w-4 text-center text-blue-500"></i> Compilar y Publicar Web</button>
+                        
+                        <div class="h-px bg-slate-100 my-1"></div>
+                        <button onclick="generarCSVMeta()" class="w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"><i class="fab fa-facebook w-4 text-center text-blue-600"></i> Descargar CSV Meta</button>
+                        <button onclick="generarPDFWhatsApp()" class="w-full text-left px-3 py-2 hover:bg-green-50 hover:text-green-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"><i class="fab fa-whatsapp w-4 text-center text-green-500"></i> Descargar PDF para IA</button>
                     </div>
                 </div>
 
@@ -321,121 +316,9 @@
                 </div>
             </div>
 
-            <div id="view-audit" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in gap-4">
-                
-                <div class="shrink-0 bg-slate-900 p-5 rounded-3xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl border border-indigo-500/30">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div>
-                            <h2 class="font-black text-white text-lg">Centro de Auditoría</h2>
-                            <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Gestión de Inventario y Trueques</p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-800 p-1.5 rounded-xl flex gap-1 w-full sm:w-auto border border-slate-700">
-                        <button id="tabAudit-conteos" onclick="switchAuditView('conteos')" class="px-4 py-2 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition-all flex-1 text-center">Auditorías (<span id="count-audits">0</span>)</button>
-                        <button id="tabAudit-trueques" onclick="switchAuditView('trueques')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex-1 text-center">Cambios Rápidos (<span id="count-trueques">0</span>)</button>
-                        <button id="tabAudit-merge" onclick="switchAuditView('merge')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all flex-1 text-center group"><i class="fas fa-magic text-blue-400 group-hover:animate-pulse"></i> Sugerencia Merge</button>
-                    </div>
-                </div>
-
-                <div class="flex-1 flex flex-col min-h-0 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden relative">
-                    
-                    <div id="containerAuditConteos" class="h-full flex flex-col fade-in">
-                        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <div class="text-xs text-slate-500 font-bold">Conteos Físicos (Reportes Lector)</div>
-                            <div class="flex gap-2">
-                                <button onclick="exportarAuditoriasExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-2 border border-emerald-200">
-                                    <i class="fas fa-file-excel"></i> Excel CONTPAQi
-                                </button>
-                                <button onclick="procesarAuditoriasSeleccionadas()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-2">
-                                    <i class="fas fa-check-double"></i> Marcar Ajustados
-                                </button>
-                            </div>
-                        </div>
-                        <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
-                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[900px]">
-                                <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
-                                    <tr>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllAudit" onclick="toggleSelectAllRows('.cb-audit', this.checked); renderMerge();" class="cb-modern"></th>
-                                        <th class="px-4 py-3 border-b border-slate-200">Fecha</th>
-                                        <th class="px-4 py-3 border-b border-slate-200">Código CONTPAQi</th>
-                                        <th class="px-4 py-3 border-b border-slate-200">Producto</th>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200 bg-slate-100/50">Esperado</th>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200 bg-blue-50/50 text-blue-700">Contado</th>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200 font-black">Ajuste</th>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200">Eliminar</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="auditTableBody" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="containerAuditTrueques" class="h-full flex flex-col fade-in hidden">
-                        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <div class="text-xs text-slate-500 font-bold">Cambios Rápidos (Mostrador)</div>
-                            <div class="flex gap-2">
-                                <button onclick="procesarTruequesSeleccionados()" class="bg-amber-500 hover:bg-amber-400 text-white px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-2">
-                                    <i class="fas fa-check-double"></i> Marcar Procesados
-                                </button>
-                            </div>
-                        </div>
-                        <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll">
-                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px]">
-                                <thead class="bg-slate-50 sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
-                                    <tr>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" id="selectAllTrueques" onclick="toggleSelectAllRows('.cb-trueque', this.checked); renderMerge();" class="cb-modern"></th>
-                                        <th class="px-4 py-3 border-b border-slate-200">Fecha / Motivo</th>
-                                        <th class="px-4 py-3 border-b border-slate-200 bg-emerald-50/30 text-emerald-700"><i class="fas fa-arrow-down"></i> Producto que ENTRÓ (Reingreso)</th>
-                                        <th class="px-4 py-3 border-b border-slate-200 bg-red-50/30 text-red-700"><i class="fas fa-arrow-up"></i> Producto que SALIÓ (Entrega)</th>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="truequesTableBody" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="containerAuditMerge" class="h-full flex flex-col fade-in hidden">
-                        <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-blue-50/50 gap-3">
-                            <div>
-                                <div class="text-xs text-blue-800 font-bold flex items-center gap-2"><i class="fas fa-magic"></i> Sugerencia de Ajuste en CONTPAQi</div>
-                                <div id="mergeFilterNotice" class="text-[10px] font-bold text-blue-600 mt-1">Calculando usando TODOS los tickets pendientes.</div>
-                            </div>
-                            <div class="flex gap-2 w-full sm:w-auto">
-                                <button onclick="exportarMergeExcel()" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 border border-emerald-200">
-                                    <i class="fas fa-file-excel"></i> Exportar
-                                </button>
-                                <button onclick="procesarMergeSeleccionado()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2">
-                                    <i class="fas fa-check-double"></i> Procesar Relacionados
-                                </button>
-                            </div>
-                        </div>
-                        <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll bg-slate-50">
-                            <table class="w-full text-left text-sm whitespace-nowrap min-w-[750px]">
-                                <thead class="bg-white sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold shadow-sm">
-                                    <tr>
-                                        <th class="px-4 py-3 text-center border-b border-slate-200 w-10"><input type="checkbox" id="selectAllMerge" onclick="toggleSelectAllRows('.cb-merge', this.checked)" class="cb-modern"></th>
-                                        <th class="px-6 py-3 border-b border-slate-200 w-48">Código Base</th>
-                                        <th class="px-6 py-3 border-b border-slate-200">Producto</th>
-                                        <th class="px-6 py-3 border-b border-slate-200">Desglose de Origen</th>
-                                        <th class="px-6 py-3 text-center border-b border-slate-200 bg-slate-100 w-40">Ajuste Final Necesario</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="mergeTableBody" class="divide-y divide-slate-200"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
             <div id="view-import" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
                 <div class="mb-5 shrink-0 bg-slate-900 rounded-2xl p-4 md:p-5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 relative overflow-hidden shadow-sm">
-                   <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
+                    <div class="flex flex-wrap sm:flex-nowrap gap-2.5 z-10 w-full xl:w-auto mt-2 xl:mt-0">
                         <button onclick="exportImportToExcel()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-green-400 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 border border-slate-700" title="Exportar tabla de pendientes a Excel">
                             <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span>
                         </button>
@@ -457,46 +340,6 @@
                     </div>
                 </div>
             </div>
-
-            <div id="view-cashiers" class="h-full flex flex-col w-full p-4 md:p-8 max-w-[1400px] mx-auto hidden fade-in">
-                <div class="mb-6 shrink-0 bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl"><i class="fas fa-user-plus"></i></div>
-                        <div>
-                            <h2 class="font-black text-slate-900 text-xl leading-tight mb-1">Registro de Cajeros</h2>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Accesos para terminal de Punto de Venta (POS)</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex flex-col md:flex-row gap-5 items-end bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                        <div class="flex-1 w-full relative">
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre del Cajero <span class="text-red-500">*</span></label>
-                            <input type="text" id="newCashierName" class="w-full input-modern px-5 py-3.5 rounded-xl font-bold text-slate-900 text-sm" placeholder="Ej. Juan Pérez" oninput="markError('newCashierName', false)">
-                        </div>
-                        <div class="w-full md:w-56 relative">
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">PIN Secreto (4+ dígitos) <span class="text-red-500">*</span></label>
-                            <input type="password" id="newCashierPin" class="w-full input-modern px-5 py-3.5 rounded-xl font-mono text-center text-slate-900 text-sm font-black tracking-widest" placeholder="****" oninput="markError('newCashierPin', false)">
-                        </div>
-                        <button onclick="addCashier()" class="w-full md:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3.5 rounded-xl font-black text-sm transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 md:h-[50px]"><i class="fas fa-check"></i> Registrar</button>
-                    </div>
-                </div>
-
-                <div class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scroll p-1">
-                        <table class="w-full text-left text-sm whitespace-nowrap min-w-[500px]">
-                            <thead class="bg-slate-50/90 backdrop-blur sticky top-0 z-10 text-slate-500 text-[10px] uppercase tracking-wider font-bold">
-                                <tr>
-                                    <th class="px-6 py-4 border-b border-slate-200">Nombre Autorizado</th>
-                                    <th class="px-6 py-4 border-b border-slate-200">PIN Asignado</th>
-                                    <th class="px-6 py-4 text-center border-b border-slate-200">Estado en POS</th>
-                                    <th class="px-6 py-4 text-right border-b border-slate-200">Ajustes</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cashiersTableBody" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
             
         </main>
     </div>
@@ -504,9 +347,7 @@
     <nav class="md:hidden glass-nav fixed bottom-0 w-full z-40 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <div class="flex justify-around items-center h-16 px-2">
             <button onclick="switchTab('master')" id="mbTab-master" class="flex flex-col items-center justify-center w-full h-full text-blue-600 transition-colors"><i class="fas fa-layer-group text-xl mb-1 transition-transform -translate-y-1 scale-110"></i><span class="text-[10px] font-bold tracking-wide">Catálogo</span></button>
-            <button onclick="switchTab('audit')" id="mbTab-audit" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors"><i class="fas fa-clipboard-check text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Auditoría</span></button>
             <button onclick="switchTab('import')" id="mbTab-import" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors relative"><i class="fas fa-cloud-download-alt text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Importar</span><span id="mbImportBadge" class="absolute top-2 right-6 bg-red-500 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow hidden">0</span></button>
-            <button onclick="switchTab('cashiers')" id="mbTab-cashiers" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors"><i class="fas fa-user-tie text-xl mb-1 transition-transform"></i><span class="text-[10px] font-bold tracking-wide">Cajeros</span></button>
         </div>
     </nav>
 
@@ -771,12 +612,8 @@
         let allItems = []; 
         let facturacionCatalog = []; 
         let baseItems = [];
-        let cashiersList = [];
-        let auditoriasPendientesList = [];
-        let cambiosPendientesList = [];
         let currentTab = 'master';
         let currentMasterView = 'desglose'; 
-        let currentAuditView = 'conteos';
         let subcollectionListener = null;
         let heredarOptionsList = []; 
         let isDataInitialized = false;
@@ -868,8 +705,8 @@
 
         function applyRoleRestrictions(rol) {
             const adminElements = [
-                'dtTab-master', 'dtTab-import', 'dtTab-cashiers',
-                'mbTab-master', 'mbTab-import', 'mbTab-cashiers',
+                'dtTab-master', 'dtTab-import',
+                'mbTab-master', 'mbTab-import',
                 'btn-new-product', 'btn-mass-qr'
             ];
             
@@ -880,8 +717,6 @@
                 });
                 document.getElementById('view-master').classList.add('hidden');
                 document.getElementById('view-import').classList.add('hidden');
-                document.getElementById('view-cashiers').classList.add('hidden');
-                switchTab('audit'); 
             } else {
                 adminElements.forEach(id => {
                     const el = document.getElementById(id);
@@ -893,8 +728,6 @@
         function initializeData(rolUsuario) {
             if (isDataInitialized) return;
             isDataInitialized = true;
-
-            inicializarAuditorias();
 
             // Sombra en tiempo real
             db.collection('stock_por_fuera').onSnapshot((snapshot) => {
@@ -922,7 +755,6 @@
 
                 if(currentTab === 'master') { filterTable(); renderGroupedTable(); }
                 if(currentTab === 'import') renderImportTable(); 
-                if(currentTab === 'audit' && currentAuditView === 'merge') renderMerge(); 
             }, (error) => console.error("Error al cargar productos:", error));
 
             facturacionRef.onSnapshot((snapshot) => {
@@ -948,14 +780,6 @@
                 if(currentTab === 'master') renderGroupedTable();
                 if(currentTab === 'import') renderImportTable();
             }, (error) => console.error("Error al cargar facturación:", error));
-
-            if (rolUsuario === 'admin') {
-                cashiersRef.onSnapshot((snapshot) => {
-                    cashiersList = [];
-                    snapshot.forEach(doc => { cashiersList.push({ id: doc.id, ...doc.data() }); });
-                    if(currentTab === 'cashiers') renderCashiers();
-                }, (error) => console.error("Error al cargar cajeros:", error));
-            }
         }
 
         // ==========================================
@@ -976,7 +800,7 @@
         }
 
         function clearAllErrors() {
-            ['editName', 'editCodigo', 'newCashierName', 'newCashierPin'].forEach(id => markError(id, false));
+            ['editName', 'editCodigo'].forEach(id => markError(id, false));
         }
 
         function customConfirm(msg) {
@@ -1199,7 +1023,7 @@
         function switchTab(tab) {
             currentTab = tab; 
             clearBulkSelection();
-            const tabs = ['master', 'import', 'audit', 'cashiers'];
+            const tabs = ['master', 'import'];
             
             tabs.forEach(t => {
                 const dtBtn = document.getElementById(`dtTab-${t}`);
@@ -1228,15 +1052,10 @@
                 }
             });
 
-            if(tab === 'audit' || tab === 'cashiers') { 
-                document.getElementById('globalSearchContainer').classList.add('hidden'); 
-            } else {
-                document.getElementById('globalSearchContainer').classList.remove('hidden');
-                document.getElementById('globalSearch').value = '';
-                if(tab === 'master') { filterTable(); renderGroupedTable(); }
-                if(tab === 'import') renderImportTable();
-            }
-            if(tab === 'cashiers') renderCashiers();
+            document.getElementById('globalSearchContainer').classList.remove('hidden');
+            document.getElementById('globalSearch').value = '';
+            if(tab === 'master') { filterTable(); renderGroupedTable(); }
+            if(tab === 'import') renderImportTable();
         }
 
         function switchMasterView(viewType) {
@@ -1925,90 +1744,6 @@
             try { await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete(); showToast('Eliminado', 'info'); } catch (error) { showToast('Error al eliminar', 'error'); }
         };
 
-        function renderCashiers() {
-            const tbody = document.getElementById('cashiersTableBody');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-            
-            const sorted = [...cashiersList].sort((a,b) => String(a.nombre || '').localeCompare(String(b.nombre || '')));
-
-            if(sorted.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold"><div class="text-4xl mb-3">👤</div>No hay cajeros registrados aún.</td></tr>';
-                return;
-            }
-
-            sorted.forEach(c => {
-                const isActivo = c.activo !== false;
-                const statusBadge = isActivo 
-                    ? '<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-md text-[10px] font-black tracking-wide"><i class="fas fa-check-circle mr-1"></i> ACTIVO</span>' 
-                    : '<span class="bg-red-100 text-red-700 px-3 py-1 rounded-md text-[10px] font-black tracking-wide"><i class="fas fa-ban mr-1"></i> INACTIVO</span>';
-                
-                const toggleIcon = isActivo ? 'fa-toggle-on text-emerald-500' : 'fa-toggle-off text-slate-400';
-                
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4 border-b border-slate-100 font-bold text-slate-800 text-sm">${String(c.nombre || 'Sin Nombre')}</td>
-                        <td class="px-6 py-4 border-b border-slate-100"><span class="bg-slate-100 text-slate-600 font-mono font-black px-3 py-1.5 rounded-lg text-xs tracking-widest">${String(c.pin || '----')}</span></td>
-                        <td class="px-6 py-4 border-b border-slate-100 text-center">${statusBadge}</td>
-                        <td class="px-6 py-4 border-b border-slate-100 text-right">
-                            <div class="flex justify-end items-center gap-2">
-                                <button onclick="toggleCashierStatus('${c.id}', ${isActivo})" class="w-9 h-9 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 shadow-sm flex items-center justify-center transition active:scale-95" title="${isActivo ? 'Dar de baja' : 'Dar de alta'}"><i class="fas ${toggleIcon} text-lg"></i></button>
-                                <button onclick="deleteCashier('${c.id}')" class="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 border border-red-100 shadow-sm flex items-center justify-center transition active:scale-95" title="Eliminar"><i class="fas fa-trash-alt text-sm"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        window.addCashier = async () => {
-            clearAllErrors();
-            let hasErrors = false;
-
-            const nameInput = document.getElementById('newCashierName');
-            const pinInput = document.getElementById('newCashierPin');
-            const name = nameInput.value.trim();
-            const pin = pinInput.value.trim();
-            
-            if(!name) { markError('newCashierName', true); hasErrors = true; }
-            if(!pin || pin.length < 4) { markError('newCashierPin', true); hasErrors = true; }
-
-            if(hasErrors) return showToast('Completa correctamente los campos', 'error');
-
-            try {
-                await cashiersRef.add({
-                    nombre: name,
-                    pin: pin,
-                    activo: true,
-                    fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                showToast('Cajero registrado con éxito');
-                nameInput.value = '';
-                pinInput.value = '';
-            } catch(e) {
-                showToast('Error al registrar cajero', 'error');
-            }
-        };
-
-        window.toggleCashierStatus = async (id, currentStatus) => {
-            try {
-                await cashiersRef.doc(id).update({ activo: !currentStatus });
-                showToast(currentStatus ? 'Cajero desactivado' : 'Cajero activado', 'info');
-            } catch(e) {
-                showToast('Error al actualizar estado', 'error');
-            }
-        };
-
-        window.deleteCashier = async (id) => {
-            if(!(await customConfirm('¿Estás seguro de eliminar permanentemente a este cajero?'))) return;
-            try {
-                await cashiersRef.doc(id).delete();
-                showToast('Cajero eliminado correctamente', 'info');
-            } catch(e) {
-                showToast('Error al eliminar', 'error');
-            }
-        };
-
         function openMassActions() {
             const modal = document.getElementById('massActionsModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
@@ -2260,494 +1995,121 @@
         };
 
         // ==========================================
-        // GESTIÓN DE AUDITORÍAS Y CAMBIOS RÁPIDOS
+        // EXPORTACIONES OPTIMIZADAS (LEE catalogo_completo.json)
         // ==========================================
-        
-        function switchAuditView(viewName) {
-            currentAuditView = viewName;
-            const views = ['conteos', 'trueques', 'merge'];
-            views.forEach(v => {
-                const btn = document.getElementById(`tabAudit-${v}`);
-                const container = document.getElementById(`containerAudit${v.charAt(0).toUpperCase() + v.slice(1)}`);
+
+        async function fetchCatalogoCompleto() {
+            try {
+                // Ajusta esta ruta si tu JSON se guarda en otra carpeta (ej. './datos/catalogo_completo.json')
+                const response = await fetch('./catalogo_completo.json');
+                if (!response.ok) throw new Error('No se pudo encontrar el archivo JSON');
+                return await response.json();
+            } catch (error) {
+                console.error("Error al cargar el catálogo compilado:", error);
+                showToast("Error al leer catalogo_completo.json. ¿Ya se compiló la web?", "error");
+                return null;
+            }
+        }
+
+        window.generarCSVMeta = async () => {
+            showToast("Leyendo JSON para Facebook...", "info");
+            const catalogo = await fetchCatalogoCompleto();
+            if (!catalogo) return;
+            
+            let csvContent = "id,title,description,availability,condition,price,link,image_link,brand\n";
+
+            catalogo.forEach(item => {
+                const id = item.codigo || item.id;
+                const title = `"${(item.nombre || 'Producto').replace(/"/g, '""')}"`;
+                const description = item.descripcion_oficial ? `"${item.descripcion_oficial.replace(/"/g, '""')}"` : title;
+                const availability = item.stock > 0 ? "in stock" : "out of stock";
+                const condition = "new";
                 
-                if (v === viewName) {
-                    btn.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
-                    btn.classList.remove('text-slate-400', 'hover:text-white', 'group');
-                    if(container) container.classList.remove('hidden');
-                } else {
-                    btn.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
-                    btn.classList.add('text-slate-400', 'hover:text-white');
-                    if (v === 'merge') btn.classList.add('group');
-                    if(container) container.classList.add('hidden');
-                }
-            });
-            
-            if (viewName === 'conteos') renderAuditorias();
-            if (viewName === 'trueques') renderTrueques();
-            if (viewName === 'merge') renderMerge();
-        }
-
-        function inicializarAuditorias() {
-            // Escuchar Conteos Físicos
-            db.collection('auditorias_pendientes').where('estado', '==', 'pendiente')
-                .onSnapshot((snapshot) => {
-                    auditoriasPendientesList = [];
-                    snapshot.forEach(doc => auditoriasPendientesList.push({ id_ticket: doc.id, ...doc.data() }));
-                    document.getElementById('count-audits').innerText = auditoriasPendientesList.length;
-                    if(currentAuditView === 'conteos') renderAuditorias();
-                    if(currentAuditView === 'merge') renderMerge();
-                });
-
-            // Escuchar Cambios Rápidos (Trueques)
-            db.collection('cambios_rapidos').where('estado', '==', 'pendiente')
-                .onSnapshot((snapshot) => {
-                    cambiosPendientesList = [];
-                    snapshot.forEach(doc => cambiosPendientesList.push({ id_ticket: doc.id, ...doc.data() }));
-                    document.getElementById('count-trueques').innerText = cambiosPendientesList.length;
-                    if(currentAuditView === 'trueques') renderTrueques();
-                    if(currentAuditView === 'merge') renderMerge();
-                });
-        }
-
-        function renderAuditorias() {
-            const tbody = document.getElementById('auditTableBody');
-            tbody.innerHTML = '';
-            
-            if(auditoriasPendientesList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">✅</div>No hay conteos pendientes. ¡Todo al día!</td></tr>';
-                return;
-            }
-
-            auditoriasPendientesList.forEach(data => {
-                const fechaStr = data.fecha ? data.fecha.toDate().toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin Fecha';
-                const colorAjuste = data.ajuste_calculado === 0 ? 'text-slate-400' : (data.ajuste_calculado > 0 ? 'text-emerald-500' : 'text-red-500');
-                const signo = data.ajuste_calculado > 0 ? '+' : '';
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-center border-b border-slate-100"><input type="checkbox" class="cb-audit cb-modern" value="${data.id_ticket}" onchange="renderMerge()"></td>
-                        <td class="px-4 py-3 text-xs font-bold text-slate-500 border-b border-slate-100">${fechaStr}</td>
-                        <td class="px-4 py-3 font-mono font-black text-slate-700 text-xs border-b border-slate-100">${data.codigo_contpaqi}</td>
-                        <td class="px-4 py-3 font-bold text-slate-800 border-b border-slate-100">${data.nombre_producto}</td>
-                        <td class="px-4 py-3 text-center font-bold text-slate-500 bg-slate-100/30 border-b border-slate-100">${data.esperado}</td>
-                        <td class="px-4 py-3 text-center font-black text-blue-600 bg-blue-50/30 border-b border-slate-100">${data.conteo_fisico}</td>
-                        <td class="px-4 py-3 text-center font-black text-lg ${colorAjuste} border-b border-slate-100">${signo}${data.ajuste_calculado}</td>
-                        <td class="px-4 py-3 text-center border-b border-slate-100">
-                            <button onclick="eliminarTicket('auditoria', '${data.id_ticket}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition shadow-sm border border-red-100"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function formatBreakdownHTML(itemsArray) {
-            if(!itemsArray || itemsArray.length === 0) return '<span class="text-slate-400 italic">Nada</span>';
-            const baseMap = breakdownToLineItems(itemsArray);
-            return Object.entries(baseMap).map(([code, data]) => {
-                return `<div class="text-[10px] font-bold text-slate-700 bg-white border border-slate-200 rounded px-1.5 py-0.5 inline-block m-0.5 shadow-sm truncate max-w-[150px]"><span class="font-black text-slate-900">${data.qty}x</span> ${data.nombre}</div>`;
-            }).join('');
-        }
-
-        function renderTrueques() {
-            const tbody = document.getElementById('truequesTableBody');
-            tbody.innerHTML = '';
-            
-            if(cambiosPendientesList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">✅</div>No hay cambios rápidos pendientes.</td></tr>';
-                return;
-            }
-
-            cambiosPendientesList.forEach(data => {
-                const fechaStr = data.fecha ? data.fecha.toDate().toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin Fecha';
+                // Formateamos el precio exacto del JSON con MXN para Meta
+                const precioRedondeado = parseFloat(item.precio || 0).toFixed(2);
+                const price = `${precioRedondeado} MXN`; 
                 
-                // Si viene del lector viejo (1 a 1)
-                let entranHTML = data.entra_codigo ? formatBreakdownHTML([{codigo: data.entra_codigo, nombre: data.entra_nombre, qty: data.entra_qty}]) : formatBreakdownHTML(data.entran);
-                let salenHTML = data.sale_codigo ? formatBreakdownHTML([{codigo: data.sale_codigo, nombre: data.sale_nombre, qty: data.sale_qty}]) : formatBreakdownHTML(data.salen);
+                const link = `https://productoseen.web.app?q=${encodeURIComponent(String(item.category || '').toLowerCase())}`;
+                const image_link = item.imagen || item.image || "https://dummyimage.com/600x600/fff/000.jpg&text=No+Image";
+                const brand = "Envases La Economica del Norte";
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-center border-b border-slate-100"><input type="checkbox" class="cb-trueque cb-modern" value="${data.id_ticket}" onchange="renderMerge()"></td>
-                        <td class="px-4 py-3 border-b border-slate-100">
-                            <div class="text-xs font-bold text-slate-500 mb-1">${fechaStr}</div>
-                            <div class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded max-w-[200px] whitespace-normal italic border border-slate-200">"${data.motivo || 'Sin motivo especificado'}"</div>
-                        </td>
-                        <td class="px-4 py-3 border-b border-slate-100 bg-emerald-50/10 min-w-[200px] whitespace-normal">${entranHTML}</td>
-                        <td class="px-4 py-3 border-b border-slate-100 bg-red-50/10 min-w-[200px] whitespace-normal">${salenHTML}</td>
-                        <td class="px-4 py-3 text-center border-b border-slate-100">
-                            <button onclick="eliminarTicket('trueque', '${data.id_ticket}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition shadow-sm border border-red-100" title="Eliminar y Revertir"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function breakdownToLineItems(itemsArray) {
-            let baseItemsMap = {};
-            if(!itemsArray) return baseItemsMap;
-            
-            itemsArray.forEach(item => {
-                let prod = allItems.find(p => String(p.codigo_sistema_oficial).toLowerCase() === String(item.codigo).toLowerCase() || p.id === item.codigo || p.codigo === item.codigo);
-                
-                if (prod && prod.tipo_item === 'KIT_OFICIAL' && prod.receta_desglose) {
-                    Object.entries(prod.receta_desglose).forEach(([compId, qtyReq]) => {
-                        const comp = allItems.find(p => p.id === compId);
-                        const compCode = comp ? comp.codigo_sistema_oficial : compId;
-                        const compName = comp ? comp.nombre_flexible : 'Desconocido';
-                        if (!baseItemsMap[compCode]) baseItemsMap[compCode] = { nombre: compName, qty: 0 };
-                        baseItemsMap[compCode].qty += (qtyReq * item.qty);
-                    });
-                } else {
-                    const code = prod ? (prod.codigo_sistema_oficial || item.codigo) : item.codigo;
-                    const name = prod ? prod.nombre_flexible : item.nombre;
-                    if (!baseItemsMap[code]) baseItemsMap[code] = { nombre: name, qty: 0 };
-                    baseItemsMap[code].qty += item.qty;
-                }
-            });
-            return baseItemsMap;
-        }
-
-        function getConsolidadoMerge() {
-            let mergeMap = {}; 
-
-            const selectedAuditsScope = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
-            const auditsToUse = selectedAuditsScope.length > 0 ? auditoriasPendientesList.filter(a => selectedAuditsScope.includes(a.id_ticket)) : auditoriasPendientesList;
-
-            const selectedTruequesScope = Array.from(document.querySelectorAll('.cb-trueque:checked')).map(cb => cb.value);
-            const truequesToUse = selectedTruequesScope.length > 0 ? cambiosPendientesList.filter(c => selectedTruequesScope.includes(c.id_ticket)) : cambiosPendientesList;
-
-            const isFiltered = selectedAuditsScope.length > 0 || selectedTruequesScope.length > 0;
-            const noticeEl = document.getElementById('mergeFilterNotice');
-            if(noticeEl) {
-                if(isFiltered) {
-                    noticeEl.innerHTML = `<i class="fas fa-filter"></i> Calculando MERGE solo con ${selectedAuditsScope.length} conteos y ${selectedTruequesScope.length} trueques seleccionados.`;
-                    noticeEl.classList.remove('text-blue-600');
-                    noticeEl.classList.add('text-orange-600');
-                } else {
-                    noticeEl.innerHTML = `Calculando usando TODOS los tickets pendientes.`;
-                    noticeEl.classList.remove('text-orange-600');
-                    noticeEl.classList.add('text-blue-600');
-                }
-            }
-
-            // 1. Auditorías
-            auditsToUse.forEach(a => {
-                const code = a.codigo_contpaqi;
-                if(!code) return;
-                if(!mergeMap[code]) mergeMap[code] = { nombre: a.nombre_producto, ajusteNeto: 0, fuentes: [] };
-                mergeMap[code].ajusteNeto += Number(a.ajuste_calculado);
-                mergeMap[code].fuentes.push(`<span class="text-indigo-600 font-bold"><i class="fas fa-clipboard-check mr-1"></i>Conteo Ciego:</span> ${a.ajuste_calculado > 0 ? '+' : ''}${a.ajuste_calculado}`);
+                csvContent += `${id},${title},${description},${availability},${condition},${price},${link},${image_link},${brand}\n`;
             });
 
-            // 2. Trueques
-            truequesToUse.forEach(c => {
-                let arrEntran = c.entra_codigo ? [{codigo: c.entra_codigo, nombre: c.entra_nombre, qty: c.entra_qty}] : (c.entran || []);
-                let arrSalen = c.sale_codigo ? [{codigo: c.sale_codigo, nombre: c.sale_nombre, qty: c.sale_qty}] : (c.salen || []);
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const linkTag = document.createElement("a");
+            linkTag.setAttribute("href", url);
+            linkTag.setAttribute("download", `Catalogo_Facebook_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(linkTag);
+            linkTag.click();
+            document.body.removeChild(linkTag);
+            showToast("CSV para Facebook descargado");
+        };
 
-                const entranDesglose = breakdownToLineItems(arrEntran);
-                const salenDesglose = breakdownToLineItems(arrSalen);
-
-                Object.entries(entranDesglose).forEach(([code, data]) => {
-                    if(!mergeMap[code]) mergeMap[code] = { nombre: data.nombre, ajusteNeto: 0, fuentes: [] };
-                    mergeMap[code].ajusteNeto += data.qty; 
-                    mergeMap[code].fuentes.push(`<span class="text-emerald-600 font-bold"><i class="fas fa-arrow-down mr-1"></i>Trueque (Entró):</span> +${data.qty}`);
-                });
-
-                Object.entries(salenDesglose).forEach(([code, data]) => {
-                    if(!mergeMap[code]) mergeMap[code] = { nombre: data.nombre, ajusteNeto: 0, fuentes: [] };
-                    mergeMap[code].ajusteNeto -= data.qty; 
-                    mergeMap[code].fuentes.push(`<span class="text-red-500 font-bold"><i class="fas fa-arrow-up mr-1"></i>Trueque (Salió):</span> -${data.qty}`);
-                });
-            });
-
-            return Object.entries(mergeMap).map(([codigo, data]) => ({ codigo, ...data }));
-        }
-
-        function renderMerge() {
-            const tbody = document.getElementById('mergeTableBody');
-            tbody.innerHTML = '';
-            
-            const mergeData = getConsolidadoMerge();
-
-            if(mergeData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold"><div class="text-4xl mb-3">🧮</div>No hay datos calculados.</td></tr>';
-                return;
-            }
-
-            mergeData.forEach(item => {
-                const colorAjuste = item.ajusteNeto === 0 ? 'text-slate-400' : (item.ajusteNeto > 0 ? 'text-emerald-500' : 'text-red-500');
-                const signo = item.ajusteNeto > 0 ? '+' : '';
-                const fuentesHTML = item.fuentes.map(f => `<div class="text-[10px] bg-white border border-slate-100 rounded px-2 py-0.5 mb-1 w-max shadow-sm">${f}</div>`).join('');
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 text-center border-b border-slate-200"><input type="checkbox" class="cb-merge cb-modern focus:ring-blue-500" value="${item.codigo}"></td>
-                        <td class="px-6 py-4 font-mono font-black text-slate-700 text-xs border-b border-slate-200">${item.codigo}</td>
-                        <td class="px-6 py-4 font-bold text-slate-800 border-b border-slate-200 whitespace-normal min-w-[200px]">${item.nombre}</td>
-                        <td class="px-6 py-4 border-b border-slate-200 bg-slate-50/50">${fuentesHTML}</td>
-                        <td class="px-6 py-4 text-center font-black text-xl ${colorAjuste} border-b border-slate-200 bg-slate-100 shadow-inner">${signo}${item.ajusteNeto}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        function toggleSelectAllRows(selectorClass, isChecked) {
-            document.querySelectorAll(selectorClass).forEach(cb => cb.checked = isChecked);
-        }
-
-        function exportarAuditoriasExcel() {
-            const seleccionadosIds = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
-            const dataAExportar = seleccionadosIds.length > 0 
-                ? auditoriasPendientesList.filter(a => seleccionadosIds.includes(a.id_ticket))
-                : auditoriasPendientesList; 
-
-            if(dataAExportar.length === 0) return showToast("No hay datos para exportar", "error");
-
-            const excelData = dataAExportar.map(a => {
-                let tipoMov = a.ajuste_calculado === 0 ? 'Sin Cambios' : (a.ajuste_calculado > 0 ? 'Entrada por Sobrante' : 'Salida por Merma');
-                return {
-                    "Código CONTPAQi": a.codigo_contpaqi,
-                    "Producto": a.nombre_producto,
-                    "Físico": a.conteo_fisico,
-                    "Diferencia a Ajustar": a.ajuste_calculado,
-                    "Tipo de Movimiento": tipoMov,
-                    "Fecha de Conteo": a.fecha ? a.fecha.toDate().toLocaleString('es-MX') : ''
-                };
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(excelData); 
-            const workbook = XLSX.utils.book_new(); 
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Ajustes_CONTPAQi");
-            XLSX.writeFile(workbook, `Ajustes_Inventario_${new Date().getTime()}.xlsx`);
-            showToast("Excel para CONTPAQi descargado.");
-        }
-
-        function exportarMergeExcel() {
-            const seleccionados = Array.from(document.querySelectorAll('.cb-merge:checked')).map(cb => cb.value);
-            let mergeData = getConsolidadoMerge();
-
-            if (seleccionados.length > 0) {
-                mergeData = mergeData.filter(m => seleccionados.includes(m.codigo));
-            }
-
-            if(mergeData.length === 0) return showToast("No hay datos para exportar", "error");
-
-            const excelData = mergeData.map(m => {
-                return {
-                    "Código Base": m.codigo,
-                    "Producto": m.nombre,
-                    "Ajuste Final Necesario": m.ajusteNeto,
-                    "Fuentes (Desglose)": m.fuentes.map(f => f.replace(/<[^>]+>/g, '')).join(' | ') 
-                };
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(excelData);
-            worksheet['!cols'] = [{wch: 25}, {wch: 50}, {wch: 15}, {wch: 80}];
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Merge_CONTPAQi");
-            XLSX.writeFile(workbook, `Sugerencia_Merge_${new Date().getTime()}.xlsx`);
-            showToast("Excel del Merge descargado.");
-        }
-
-        async function eliminarTicket(tipo, ticketId) {
-            const typeName = tipo === 'auditoria' ? 'Conteo Ciego' : 'Trueque Rápido';
-            const extraMsg = tipo === 'trueque' ? '\n\nNOTA: Esto revertirá el impacto en la Sombra Web que causó este trueque.' : '';
-            
-            if(!(await customConfirm(`¿Eliminar este ticket de ${typeName}?${extraMsg}`))) return;
+        window.generarPDFWhatsApp = async () => {
+            const overlay = document.getElementById('syncOverlay');
+            document.getElementById('syncStatusText').innerText = "Maquetando PDF para IA...";
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
 
             try {
-                if (tipo === 'auditoria') {
-                    await db.collection('auditorias_pendientes').doc(ticketId).delete();
-                } else if (tipo === 'trueque') {
-                    // Revertir sombra como si lo procesaramos exitosamente, pero lo matamos.
-                    const ticketData = cambiosPendientesList.find(t => t.id_ticket === ticketId);
-                    if(ticketData) {
-                        const batch = db.batch();
-                        const ticketRef = db.collection('cambios_rapidos').doc(ticketId);
-                        batch.update(ticketRef, { estado: 'eliminado', fecha_eliminado: firebase.firestore.FieldValue.serverTimestamp() });
-                        aplicarReversaDeSombra(ticketData, batch);
-                        await batch.commit();
-                    }
-                }
-                showToast("Ticket eliminado correctamente.", "info");
-            } catch(error) {
-                showToast("Error al eliminar.", "error");
-            }
-        }
+                const catalogo = await fetchCatalogoCompleto();
+                if (!catalogo) throw new Error('Sin datos JSON');
 
-        async function procesarAuditoriasSeleccionadas() {
-            const seleccionados = Array.from(document.querySelectorAll('.cb-audit:checked'));
-            if(seleccionados.length === 0) return showToast("Selecciona al menos un conteo.", "error");
-            
-            if(!(await customConfirm(`¿Marcar estos ${seleccionados.length} conteos como ajustados en CONTPAQi?\n\nEsto archivará el ticket y descontará la Sombra Web tomada al momento del conteo.`))) return;
-
-            try {
-                const batch = db.batch();
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
                 
-                seleccionados.forEach(cb => {
-                    const ticketId = cb.value;
-                    const ticketData = auditoriasPendientesList.find(t => t.id_ticket === ticketId);
+                doc.setFontSize(16);
+                doc.text("Base de Conocimiento de Empaques y Presentaciones", 105, 20, { align: "center" });
+                doc.setFontSize(10);
+                doc.text("Usa esta información exclusivamente para indicar las cantidades que incluye cada paquete o caja.", 105, 28, { align: "center" });
+                doc.text("NUNCA menciones precios.", 105, 33, { align: "center" });
+                
+                let y = 45;
+
+                catalogo.forEach(item => {
+                    // Evitamos escribir piezas base puras si no tienen empaques definidos
+                    if (!item.paquetes && !item.empaques_tips) return;
+
+                    if (y > 270) { doc.addPage(); y = 20; }
                     
-                    const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
-                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
-
-                    if(ticketData && ticketData.codigo_contpaqi) {
-                        const codigoSeguro = String(ticketData.codigo_contpaqi).replace(/\//g, '_');
-                        const sombraGuardada = ticketData.sombra_al_momento || 0;
-                        
-                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                        batch.set(sombraRef, { 
-                            cantidad_vendida: firebase.firestore.FieldValue.increment(-sombraGuardada), 
-                            ultima_venta: firebase.firestore.FieldValue.serverTimestamp() 
-                        }, { merge: true });
-                    }
-                });
-
-                await batch.commit();
-                showToast("¡Conteos procesados y Sombra Web actualizada!");
-                document.getElementById('selectAllAudit').checked = false;
-            } catch(error) {
-                showToast("Error al procesar.", "error");
-            }
-        }
-
-        async function procesarTruequesSeleccionados() {
-            const seleccionados = Array.from(document.querySelectorAll('.cb-trueque:checked'));
-            if(seleccionados.length === 0) return showToast("Selecciona al menos un trueque.", "error");
-            
-            if(!(await customConfirm(`¿Marcar estos ${seleccionados.length} trueques como ajustados en CONTPAQi?\n\nEsto asume que ya corregiste el inventario oficial, por lo que la Sombra Web creada por el Lector será revertida.`))) return;
-
-            try {
-                const batch = db.batch();
-                
-                seleccionados.forEach(cb => {
-                    const ticketId = cb.value;
-                    const ticketData = cambiosPendientesList.find(t => t.id_ticket === ticketId);
+                    let piezasStr = "Venta por pieza suelta";
                     
-                    const ticketRef = db.collection('cambios_rapidos').doc(ticketId);
-                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
-
-                    if(ticketData) aplicarReversaDeSombra(ticketData, batch);
-                });
-
-                await batch.commit();
-                showToast("¡Trueques procesados y Sombra Web estabilizada!");
-                document.getElementById('selectAllTrueques').checked = false;
-            } catch(error) {
-                showToast("Error al procesar.", "error");
-            }
-        }
-
-        async function procesarMergeSeleccionado() {
-            const seleccionados = Array.from(document.querySelectorAll('.cb-merge:checked')).map(cb => cb.value);
-            if(seleccionados.length === 0) return showToast("Selecciona al menos un producto del merge.", "error");
-
-            if(!(await customConfirm(`¿Procesar los tickets relacionados a estos ${seleccionados.length} productos?\n\nEsto marcará como completados los conteos y trueques asociados y ajustará la Sombra Web.`))) return;
-
-            // Obtener el scope filtrado en caso de que esté usando la vista "filtrada"
-            const selectedAuditsScope = Array.from(document.querySelectorAll('.cb-audit:checked')).map(cb => cb.value);
-            const auditsToUse = selectedAuditsScope.length > 0 ? auditoriasPendientesList.filter(a => selectedAuditsScope.includes(a.id_ticket)) : auditoriasPendientesList;
-
-            const selectedTruequesScope = Array.from(document.querySelectorAll('.cb-trueque:checked')).map(cb => cb.value);
-            const truequesToUse = selectedTruequesScope.length > 0 ? cambiosPendientesList.filter(c => selectedTruequesScope.includes(c.id_ticket)) : cambiosPendientesList;
-
-            let ticketsToProcess = { audits: new Set(), trueques: new Set() };
-            let warningTruequeExtra = false;
-
-            auditsToUse.forEach(a => {
-                if(seleccionados.includes(a.codigo_contpaqi)) ticketsToProcess.audits.add(a.id_ticket);
-            });
-
-            truequesToUse.forEach(c => {
-                let arrEntran = c.entra_codigo ? [{codigo: c.entra_codigo, qty: c.entra_qty}] : (c.entran || []);
-                let arrSalen = c.sale_codigo ? [{codigo: c.sale_codigo, qty: c.sale_qty}] : (c.salen || []);
-
-                const entranDesglose = breakdownToLineItems(arrEntran);
-                const salenDesglose = breakdownToLineItems(arrSalen);
-
-                const involvedCodes = new Set([...Object.keys(entranDesglose), ...Object.keys(salenDesglose)]);
-
-                let hasSelectedCode = false;
-                let hasUnselectedCode = false;
-
-                involvedCodes.forEach(code => {
-                    if(seleccionados.includes(code)) hasSelectedCode = true;
-                    else hasUnselectedCode = true;
-                });
-
-                if(hasSelectedCode) {
-                    ticketsToProcess.trueques.add(c.id_ticket);
-                    if(hasUnselectedCode) warningTruequeExtra = true;
-                }
-            });
-
-            if(warningTruequeExtra) {
-                if(!(await customConfirm("⚠️ ALERTA: Algunos trueques involucran productos que NO marcaste en la tabla actual. Si continúas, esos trueques se procesarán COMPLETOS (afectando a los productos no marcados también).\n\n¿Estás seguro de continuar?"))) return;
-            }
-
-            try {
-                const batch = db.batch();
-
-                // Procesar Auditorías Encontradas
-                ticketsToProcess.audits.forEach(ticketId => {
-                    const ticketData = auditoriasPendientesList.find(t => t.id_ticket === ticketId);
-                    const ticketRef = db.collection('auditorias_pendientes').doc(ticketId);
-                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
-
-                    if(ticketData && ticketData.codigo_contpaqi) {
-                        const codigoSeguro = String(ticketData.codigo_contpaqi).replace(/\//g, '_');
-                        const sombraGuardada = ticketData.sombra_al_momento || 0;
-                        const sombraRef = db.collection('stock_por_fuera').doc(codigoSeguro);
-                        batch.set(sombraRef, {
-                            cantidad_vendida: firebase.firestore.FieldValue.increment(-sombraGuardada),
-                            ultima_venta: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true });
+                    // Priorizamos el arreglo completo de paquetes si existe
+                    if (item.paquetes && item.paquetes.length > 0) {
+                        const empaques = item.paquetes.map(p => p.piezas).sort((a,b) => a - b);
+                        piezasStr = `Paquetes de: ${empaques.join(', ')} piezas`;
+                    } 
+                    // Si no, usamos el atajo empaques_tips
+                    else if (item.empaques_tips && item.empaques_tips.length > 0) {
+                        piezasStr = `Paquetes de: ${item.empaques_tips.sort((a,b) => a - b).join(', ')} piezas`;
                     }
+
+                    // Strict rule: Sin precios
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`Producto: ${item.nombre || item.name}`, 15, y);
+                    y += 6;
+                    doc.setFont(undefined, 'normal');
+                    doc.text(`Categoría: ${item.category || 'General'}`, 15, y);
+                    y += 6;
+                    doc.text(`Presentación de venta: ${piezasStr}`, 15, y);
+                    y += 6;
+                    doc.text(`Código interno: ${item.codigo || 'S/N'}`, 15, y);
+                    y += 10;
                 });
 
-                // Procesar Trueques Encontrados
-                ticketsToProcess.trueques.forEach(ticketId => {
-                    const ticketData = cambiosPendientesList.find(t => t.id_ticket === ticketId);
-                    const ticketRef = db.collection('cambios_rapidos').doc(ticketId);
-                    batch.update(ticketRef, { estado: 'procesado', fecha_procesado: firebase.firestore.FieldValue.serverTimestamp() });
-                    if(ticketData) aplicarReversaDeSombra(ticketData, batch);
-                });
-
-                await batch.commit();
-                showToast("¡Tickets relacionados procesados y Sombra Web estabilizada!");
-                document.getElementById('selectAllMerge').checked = false;
-            } catch(error) {
-                showToast("Error al procesar el merge.", "error");
+                doc.save(`Conocimiento_Empaques_IA_${new Date().toISOString().split('T')[0]}.pdf`);
+                showToast("PDF para WhatsApp generado exitosamente");
+                
+            } catch (error) {
+                console.error(error);
+                showToast("Error al generar el PDF", "error");
+            } finally {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
             }
-        }
-
-        // Helper para revertir sombra de trueques (tanto en Eliminar como en Procesar)
-        function aplicarReversaDeSombra(ticketData, batch) {
-            let arrEntran = ticketData.entra_codigo ? [{codigo: ticketData.entra_codigo, qty: ticketData.entra_qty}] : (ticketData.entran || []);
-            let arrSalen = ticketData.sale_codigo ? [{codigo: ticketData.sale_codigo, qty: ticketData.sale_qty}] : (ticketData.salen || []);
-
-            const entranDesglose = breakdownToLineItems(arrEntran);
-            const salenDesglose = breakdownToLineItems(arrSalen);
-
-            // Revertir ENTRADAS (El lector restó Sombra, nosotros sumamos)
-            Object.entries(entranDesglose).forEach(([code, data]) => {
-                const codSeguro = String(code).replace(/\//g, '_');
-                const ref = db.collection('stock_por_fuera').doc(codSeguro);
-                batch.set(ref, {
-                    cantidad_vendida: firebase.firestore.FieldValue.increment(data.qty),
-                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            });
-
-            // Revertir SALIDAS (El lector sumó Sombra, nosotros restamos)
-            Object.entries(salenDesglose).forEach(([code, data]) => {
-                const codSeguro = String(code).replace(/\//g, '_');
-                const ref = db.collection('stock_por_fuera').doc(codSeguro);
-                batch.set(ref, {
-                    cantidad_vendida: firebase.firestore.FieldValue.increment(-data.qty),
-                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            });
-        }
+        };
     </script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
