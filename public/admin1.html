@@ -2116,28 +2116,40 @@
 
                     // 3. LÓGICA DE KITS, RECETAS Y CROSS-SELLING
                     if (item.tipo_item === 'KIT_FLEXIBLE' || item.tipo_item === 'KIT_OFICIAL') {
-                        doc.setFont(undefined, 'italic');
-                        doc.text(`* Este producto es un KIT. Puedes sugerir la venta del kit completo o sus piezas individuales.`, 15, y);
+                        doc.setFont(undefined, 'bold');
+                        doc.setTextColor(0, 51, 102); // Un azul oscuro para resaltar a la IA
+                        doc.text(`[ESTE PRODUCTO ES UN KIT - COMPUESTO POR VARIAS PIEZAS]`, 15, y);
                         y += 5;
                         
-                        if (item.receta_desglose) {
-                            let recetaArr = [];
+                        doc.setFont(undefined, 'normal');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Instrucción para IA: Puedes sugerir el kit completo o sus componentes por separado.`, 15, y);
+                        y += 5;
+                        doc.text(`A continuación la receta (desglose) de este kit:`, 15, y);
+                        y += 5;
+                        
+                        if (item.receta_desglose && Object.keys(item.receta_desglose).length > 0) {
                             for (const [compId, qty] of Object.entries(item.receta_desglose)) {
-                                // Buscar el nombre del componente en el mismo catálogo
+                                // Buscar el componente en el catálogo usando el ID
                                 const comp = catalogo.find(c => c.id === compId || c.codigo === compId || c.codigo_sistema_oficial === compId);
-                                const compName = comp ? (comp.nombre || comp.nombre_flexible || comp.name) : compId;
-                                recetaArr.push(`${qty}x ${compName}`);
-                            }
-                            if (recetaArr.length > 0) {
-                                const recetaText = doc.splitTextToSize(`Incluye (Receta): ${recetaArr.join(', ')}`, 180);
-                                doc.text(recetaText, 15, y);
+                                
+                                const compName = comp ? (comp.nombre_flexible || comp.nombre || comp.name) : "Componente Base";
+                                const compCode = comp ? (comp.codigo_sistema_oficial || comp.codigo || comp.id) : compId;
+
+                                // Le damos la línea exacta con el Código para que la IA lo use como referencia cruzada
+                                const linea = `- ${qty} pieza(s) de: "${compName}" (Buscar en catálogo con CÓDIGO: ${compCode})`;
+                                
+                                const recetaText = doc.splitTextToSize(linea, 180);
+                                doc.text(recetaText, 20, y);
                                 y += (recetaText.length * 5);
                             }
+                        } else {
+                            doc.text(`- (Receta pendiente de configurar en el sistema)`, 20, y);
+                            y += 5;
                         }
-                        doc.setFont(undefined, 'normal');
                     }
 
-                    y += 4; // Espaciado extra entre productos
+                    y += 4; // Espaciado extra entre productos para separar bloques
                 });
 
                 doc.save(`Base_Conocimiento_IA_${new Date().toISOString().split('T')[0]}.pdf`);
