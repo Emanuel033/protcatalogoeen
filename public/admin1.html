@@ -2015,22 +2015,56 @@
             showToast("Leyendo JSON para Facebook...", "info");
             const catalogo = await fetchCatalogoCompleto();
             if (!catalogo) return;
-            
+
+            // 🛠️ Función recursiva para calcular stock al vuelo basado en la receta
+            const calcularStockAlVuelo = (itemId, visited = new Set()) => {
+                if (visited.has(itemId)) return 0; 
+                visited.add(itemId);
+
+                const item = catalogo.find(x => x.id === itemId || x.codigo === itemId || x.codigo_sistema_oficial === itemId);
+                if (!item) return 0;
+
+                if (item.tipo_item !== 'KIT_FLEXIBLE' && item.tipo_item !== 'KIT_OFICIAL') {
+                    return parseFloat(item.stock || item.stock_total_piezas || 0);
+                }
+
+                if (!item.receta_desglose || Object.keys(item.receta_desglose).length === 0) return 0;
+
+                let maxKits = Infinity;
+                
+                for (const [compId, requiredQty] of Object.entries(item.receta_desglose)) {
+                    if (requiredQty <= 0) continue;
+                    
+                    const compStock = calcularStockAlVuelo(compId, visited);
+                    const possibleKits = Math.floor(compStock / requiredQty);
+                    
+                    if (possibleKits < maxKits) maxKits = possibleKits;
+                }
+                
+                return maxKits === Infinity ? 0 : maxKits;
+            };
+
             let csvContent = "id,title,description,availability,condition,price,link,image_link,brand\n";
 
             catalogo.forEach(item => {
+                // 1. FILTRO: Excluir los que digan "Sin Master" (o variante)
+                const stringData = JSON.stringify(item).toLowerCase();
+                if (stringData.includes('sin master')) return; // Brincamos este producto y no se va a Facebook
+
                 const id = item.codigo || item.id;
-                const title = `"${(item.nombre || 'Producto').replace(/"/g, '""')}"`;
+                const title = `"${(item.nombre || item.nombre_flexible || 'Producto').replace(/"/g, '""')}"`;
                 const description = item.descripcion_oficial ? `"${item.descripcion_oficial.replace(/"/g, '""')}"` : title;
-                const availability = item.stock > 0 ? "in stock" : "out of stock";
+                
+                // Calculamos el stock real al vuelo
+                const stockReal = calcularStockAlVuelo(item.id || item.codigo);
+                const availability = stockReal > 0 ? "in stock" : "out of stock";
                 const condition = "new";
                 
-                // Formateamos el precio exacto del JSON con MXN para Meta
-                const precioRedondeado = parseFloat(item.precio || 0).toFixed(2);
-                const price = `${precioRedondeado} MXN`; 
+                // 2. OCULTAR PRECIOS: Se envía 0.00 MXN para cumplir con Meta sin revelar tus costos
+                const price = "0.00 MXN"; 
                 
-                const link = `https://productoseen.web.app?q=${encodeURIComponent(String(item.category || '').toLowerCase())}`;
-                const image_link = item.imagen || item.image || "https://dummyimage.com/600x600/fff/000.jpg&text=No+Image";
+                const link = `https://productoseen.web.app?q=${encodeURIComponent(String(item.category || item.categoria || '').toLowerCase())}`;
+                const image_link = item.imagen || item.imagen_url || item.image || "https://dummyimage.com/600x600/fff/000.jpg&text=No+Image";
                 const brand = "Envases La Economica del Norte";
 
                 csvContent += `${id},${title},${description},${availability},${condition},${price},${link},${image_link},${brand}\n`;
@@ -2044,7 +2078,7 @@
             document.body.appendChild(linkTag);
             linkTag.click();
             document.body.removeChild(linkTag);
-            showToast("CSV para Facebook descargado");
+            showToast("CSV para Facebook descargado (Sin precios y filtrado)");
         };
 
         window.generarPDFWhatsApp = async () => {
