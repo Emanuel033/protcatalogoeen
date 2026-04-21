@@ -13,7 +13,7 @@ function ProductCard({ product }) {
   let basePiezas = product.piezas ? parseInt(product.piezas) : 1;
   if (isBolsa && basePiezas < 100) basePiezas = 100;
 
-  const paquetes = product.paquetes || [];
+  const paquetes = product.empaques || [];
   const hasPack = paquetes.length > 0;
   
   const [selectedQty, setSelectedQty] = useState(basePiezas);
