@@ -5979,11 +5979,13 @@
     },
     "paquetes": [
       {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P10-1PZ",
-        "es_default": true
+        "id": "7gaW5jr4Q8moaGDvZRB3",
+        "piezas": 252,
+        "sku": "BLSF-TTP-500-GZ/CP-252PZ",
+        "fecha_creacion": {
+          "_seconds": 1776794983,
+          "_nanoseconds": 423000000
+        }
       }
     ]
   },
