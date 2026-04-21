@@ -13,7 +13,24 @@ function ProductCard({ product }) {
   let basePiezas = product.piezas ? parseInt(product.piezas) : 1;
   if (isBolsa && basePiezas < 100) basePiezas = 100;
 
-  const paquetes = product.empaques || [];
+  // 🔥 EL NORMALIZADOR DE PAQUETES (A prueba de deformaciones en la BD)
+  let paquetesArray = [];
+
+  if (product.paquetes) {
+    // Si la BD lo deformó a objeto { "0": {...} }, lo forzamos a volver a ser arreglo
+    paquetesArray = Array.isArray(product.paquetes) 
+      ? product.paquetes 
+      : Object.values(product.paquetes);
+  } else if (product.empaques_tips) {
+    // Si falta "paquetes", rescatamos los números de "empaques_tips" y los reconstruimos
+    const tips = Array.isArray(product.empaques_tips) 
+      ? product.empaques_tips 
+      : Object.values(product.empaques_tips);
+    paquetesArray = tips.map(qty => ({ piezas: parseInt(qty) }));
+  }
+
+  // Filtramos la basura y nos aseguramos de que el paquete sí tenga la propiedad "piezas"
+  const paquetes = paquetesArray.filter(p => p && p.piezas);
   const hasPack = paquetes.length > 0;
   
   const [selectedQty, setSelectedQty] = useState(basePiezas);
