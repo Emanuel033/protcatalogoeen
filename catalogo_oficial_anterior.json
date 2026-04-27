@@ -336,7 +336,7 @@
     "codigo": "BLSF-TTP-4-GZ/CP",
     "precio": 27.34,
     "nombre": "BOTE DE LAMINA DE 4 L TTP S/FENOL 610X802",
-    "stock": 78,
+    "stock": 54,
     "tipo": 1,
     "receta": null
   },
@@ -722,7 +722,7 @@
     "codigo": "TPL-1-R89-BCO/CP",
     "precio": 8.87,
     "nombre": "TARRO DE POLIETILENO BCO DE 1 KG S/TAPA R-89",
-    "stock": 22859,
+    "stock": 22844,
     "tipo": 1,
     "receta": null
   },
@@ -1744,7 +1744,7 @@
     "codigo": "TPBL-19-M/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO BLANCA P/CUBETA DE 15 Y 19 L LISA  MUN",
-    "stock": 10057,
+    "stock": 9897,
     "tipo": 1,
     "receta": null
   },
@@ -2060,7 +2060,7 @@
     "codigo": "BPA-500-ST/CP",
     "precio": 2.65,
     "nombre": "BOTELLA PET P/AGUA DE 500 ML S/TAPA",
-    "stock": 17737,
+    "stock": 17337,
     "tipo": 1,
     "receta": null
   },
@@ -2241,7 +2241,7 @@
     "codigo": "GIR-NAT/CP",
     "precio": 12.02,
     "nombre": "GALON INDUSTRIAL REDONDO NATURAL S/TAPA R-38",
-    "stock": 22336,
+    "stock": 22240,
     "tipo": 1,
     "receta": null
   },
@@ -2249,7 +2249,7 @@
     "codigo": "BPLAN-1-L/CP",
     "precio": 4.36,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA DE 1 LT. LISA S/TAPA R-28",
-    "stock": 23212,
+    "stock": 23182,
     "tipo": 1,
     "receta": null
   },
@@ -2649,7 +2649,7 @@
     "codigo": "EN-500/CP",
     "precio": 4.45,
     "nombre": "ENVASE NEVERO BLANCO DE 500 ML C/TAPA",
-    "stock": 9357,
+    "stock": 9297,
     "tipo": 1,
     "receta": null
   },
@@ -3035,7 +3035,7 @@
     "codigo": "TPB-4-GDL/CP",
     "precio": 12.29,
     "nombre": "TAPA DE PLASTICO BLANCA PARA 4 L GDL",
-    "stock": 9796,
+    "stock": 9746,
     "tipo": 1,
     "receta": null
   },
@@ -3283,7 +3283,7 @@
     "codigo": "TP-R38-CC/CP",
     "precio": 1.47,
     "nombre": "TAPA R-38 CON CINTILLO",
-    "stock": 11042,
+    "stock": 10946,
     "tipo": 1,
     "receta": null
   },
@@ -4140,7 +4140,7 @@
     "codigo": "TF-STD/CP",
     "precio": 7.8,
     "nombre": "TAPON FLEX STD   (  3004000001 )",
-    "stock": 66812,
+    "stock": 66802,
     "tipo": 1,
     "receta": null
   },
@@ -4199,6 +4199,23 @@
     "stock": 182,
     "tipo": 1,
     "receta": null
+  },
+  {
+    "codigo": "BPCB355-CT",
+    "precio": 0,
+    "nombre": "BOTELLA PET CRISTAL BOSTON 355 ML CON TAPA",
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPB355R38",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPCR38A",
+        "cantidad": 1
+      }
+    ]
   },
   {
     "codigo": "BP70-FUELLE-VERMATE-500/CP",
@@ -4368,6 +4385,23 @@
     "stock": 0,
     "tipo": 1,
     "receta": null
+  },
+  {
+    "codigo": "BPCB-1-CT",
+    "precio": 0,
+    "nombre": "BOTELLA PET CRISTAL BOSTON 1 L R-38 C/TAPA",
+    "stock": 0,
+    "tipo": 2,
+    "receta": [
+      {
+        "codigo_pieza": "BPB1R38",
+        "cantidad": 1
+      },
+      {
+        "codigo_pieza": "TPCR38A",
+        "cantidad": 1
+      }
+    ]
   },
   {
     "codigo": "BLSF-TTP-1A/CP",
@@ -4552,7 +4586,7 @@
     "codigo": "LFA-28/CP",
     "precio": 0.2,
     "nombre": "LAINER FOIL DE ALUMINIO UNIVERSAL R-28",
-    "stock": 47368,
+    "stock": 47367,
     "tipo": 1,
     "receta": null
   },
@@ -6000,7 +6034,7 @@
     "codigo": "TPL-2-R110-BCO/CP",
     "precio": 15.33,
     "nombre": "TARRO DE POLIETILENO BCO DE 2 KG S/TAPA R-110",
-    "stock": 9152,
+    "stock": 9147,
     "tipo": 1,
     "receta": null
   },
@@ -6040,7 +6074,7 @@
     "codigo": "CPB-19-REC-GB/CP",
     "precio": 52.52,
     "nombre": "CUBETA DE PLASTICO REC DE 19 L GB S/TAPA",
-    "stock": 3616,
+    "stock": 3606,
     "tipo": 1,
     "receta": null
   },
@@ -6218,7 +6252,7 @@
     "codigo": "BPLA-250-L/CP",
     "precio": 1.95,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA LISA DE 250 ML S/TAPA",
-    "stock": 5490,
+    "stock": 5460,
     "tipo": 1,
     "receta": null
   },
@@ -6267,7 +6301,7 @@
     "codigo": "EN-125/CP",
     "precio": 1.87,
     "nombre": "ENVASE NEVERO BLANCO DE 125 ML CON TAPA",
-    "stock": 6842,
+    "stock": 6782,
     "tipo": 1,
     "receta": null
   },
@@ -6316,7 +6350,7 @@
     "codigo": "BPL-125/CP",
     "precio": 3.01,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA 125 ML LISA S/TAPA R-24",
-    "stock": 1211,
+    "stock": 1181,
     "tipo": 1,
     "receta": null
   },
@@ -6616,7 +6650,7 @@
     "codigo": "EN-250/CP",
     "precio": 2,
     "nombre": "ENVASE NEVERO BLANCO 250 ML C/TAPA",
-    "stock": 18670,
+    "stock": 18610,
     "tipo": 1,
     "receta": null
   },
@@ -6632,7 +6666,7 @@
     "codigo": "TP-R28/CP",
     "precio": 0.69,
     "nombre": "TAPA R-28 BLANCA INVIOLABLE VEDAT",
-    "stock": 87511,
+    "stock": 87111,
     "tipo": 1,
     "receta": null
   },
@@ -6785,7 +6819,7 @@
     "codigo": "TP-R110/CP",
     "precio": 3,
     "nombre": "TAPA R-110",
-    "stock": 109704,
+    "stock": 109699,
     "tipo": 1,
     "receta": null
   },
@@ -6965,7 +6999,7 @@
     "codigo": "T-R28-B-L/CP",
     "precio": 0.66,
     "nombre": "TAPA R-28 CON LAINER",
-    "stock": 60007,
+    "stock": 59947,
     "tipo": 1,
     "receta": null
   },
@@ -7129,7 +7163,7 @@
     "codigo": "LFA-38/CP",
     "precio": 0.33,
     "nombre": "LAINER FOIL DE ALUMINIO UNIVERSAL R-38",
-    "stock": 45658,
+    "stock": 45657,
     "tipo": 1,
     "receta": null
   },
@@ -7137,7 +7171,7 @@
     "codigo": "TP-R24/CP",
     "precio": 0.54,
     "nombre": "TAPA R-24",
-    "stock": 17304,
+    "stock": 17274,
     "tipo": 1,
     "receta": null
   },
@@ -7162,7 +7196,7 @@
     "codigo": "TP-R89-COL/CP",
     "precio": 2.65,
     "nombre": "TAPA R-89",
-    "stock": 13401,
+    "stock": 13386,
     "tipo": 1,
     "receta": null
   },
@@ -7202,7 +7236,7 @@
     "codigo": "CPB-19-M/CP",
     "precio": 74.38,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 19 L MUN S/TAPA",
-    "stock": 26821.64,
+    "stock": 26661.64,
     "tipo": 1,
     "receta": null
   },
@@ -7210,7 +7244,7 @@
     "codigo": "CPB-4-GDL/CP",
     "precio": 20.65,
     "nombre": "CUBETA DE PLASTICO DE 4 L BLANCA GDL S/TAPA",
-    "stock": 31788,
+    "stock": 31738,
     "tipo": 1,
     "receta": null
   },
@@ -8046,7 +8080,7 @@
     "codigo": "EN-1/CP",
     "precio": 5.93,
     "nombre": "ENVASE NEVERO BLANCO DE 1 L C/TAPA",
-    "stock": 6567.2,
+    "stock": 6547.2,
     "tipo": 1,
     "receta": null
   },
