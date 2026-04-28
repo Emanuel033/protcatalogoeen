@@ -17,9 +17,10 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         #reader { border: none !important; border-radius: 1rem; overflow: hidden; }
         #reader video { object-fit: cover; }
-        /* Ocultar flechas de input number */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .mic-active { animation: pulse-red 1.5s infinite; color: #ef4444 !important; }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
@@ -103,7 +104,14 @@
                 paquete: "Paquete",
                 caja: "Caja",
                 btnNuevoEmpaque: "Añadir empaque no registrado",
-                promptPiezas: "¿Cuántas piezas tiene este nuevo paquete/caja?"
+                promptPiezas: "¿Cuántas piezas tiene este nuevo paquete/caja?",
+                codigoNuevo: "Código no registrado. Agregado para registro temporal.",
+                desconocido: "Desconocido / Sin Registro",
+                pz_abrev: "pz",
+                txtNuevoPaquete: "Nuevo Paquete ({pz}pz) ✨",
+                escuchando: "Habla ahora... di la cantidad",
+                noEntendido: "No pude entender el número",
+                microNoSoportado: "Dictado no soportado en este dispositivo"
             },
             fr: {
                 titulo: "Inventaire Continu",
@@ -121,7 +129,14 @@
                 paquete: "Paquet",
                 caja: "Boîte",
                 btnNuevoEmpaque: "Ajouter un paquet non enregistré",
-                promptPiezas: "Combien de pièces contient ce nouveau paquet/boîte ?"
+                promptPiezas: "Combien de pièces contient ce nouveau paquet/boîte ?",
+                codigoNuevo: "Code non enregistré. Ajouté temporairement.",
+                desconocido: "Inconnu / Non enregistré",
+                pz_abrev: "pc",
+                txtNuevoPaquete: "Nouveau Paquet ({pz}pc) ✨",
+                escuchando: "Parlez maintenant... dites la quantité",
+                noEntendido: "Je n'ai pas compris le nombre",
+                microNoSoportado: "Dictée non prise en charge sur cet appareil"
             }
         };
 
@@ -204,7 +219,7 @@
         }
 
         function verificarSeleccion(valor) {
-            if(catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === String(valor).toLowerCase())) {
+            if(valor.trim() !== '') {
                 agregarALista(valor);
             }
         }
@@ -213,11 +228,13 @@
         // AGREGAR A LA LISTA
         // ==========================================
         function agregarALista(codigoBuscado) {
+            codigoBuscado = codigoBuscado.trim();
             if(!codigoBuscado) return;
             const input = document.getElementById('manualCode');
             input.value = ''; input.blur();
 
             let prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
+            
             if (!prodBase) {
                 for (const p of catalogoEnMemoria) {
                     const empaques = p.paquetes || p.empaques || [];
@@ -227,7 +244,18 @@
                 }
             }
 
-            if (!prodBase) return showToast("Producto no encontrado en la base de datos.", "error");
+            if (!prodBase) {
+                const t = diccionarios[currentLang];
+                showToast(t.codigoNuevo, "info");
+                
+                prodBase = {
+                    codigo: codigoBuscado,
+                    nombre: `[❓] ${t.desconocido} (${codigoBuscado})`,
+                    descripcion_oficial: "Paquete o Producto no registrado en sistema",
+                    stock: 0, 
+                    empaques: [] 
+                };
+            }
 
             if (listaConteo.find(item => item.codigo === prodBase.codigo)) {
                 document.getElementById(`row_${prodBase.codigo}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -239,22 +267,16 @@
             let variantes = [];
             const empaques = prodBase.paquetes || prodBase.empaques || [];
             
-            variantes.push({ id: 'sueltas', sku: null, pz: 1, contadas: 0, isFantasma: false, label_es: diccionarios.es.sueltas, label_fr: diccionarios.fr.sueltas });
+            // YA NO GUARDAMOS label_es Y label_fr AQUÍ. SOLO LOS DATOS CRUDOS.
+            variantes.push({ id: 'sueltas', sku: null, pz: 1, contadas: 0, isFantasma: false });
             
             empaques.forEach((emp, index) => {
-                const piezas = parseInt(emp.piezas);
-                // Si tiene SKU lo mostramos, si no solo ponemos las piezas
-                const baseLabelEs = emp.sku ? `${emp.sku} (${piezas}pz)` : `${piezas >= 500 ? diccionarios.es.caja : diccionarios.es.paquete} (${piezas}pz)`;
-                const baseLabelFr = emp.sku ? `${emp.sku} (${piezas}pc)` : `${piezas >= 500 ? diccionarios.fr.caja : diccionarios.fr.paquete} (${piezas}pc)`;
-                
                 variantes.push({ 
                     id: `emp_${index}`, 
                     sku: emp.sku || null,
-                    pz: piezas, 
+                    pz: parseInt(emp.piezas), 
                     contadas: 0, 
-                    isFantasma: false,
-                    label_es: baseLabelEs, 
-                    label_fr: baseLabelFr 
+                    isFantasma: false
                 });
             });
 
@@ -265,15 +287,13 @@
                 nombre: prodBase.descripcion_oficial || prodBase.nombre,
                 stockSistema: parseFloat(prodBase.stock || 0),
                 variantes: variantes,
-                totalFisico: 0
+                totalFisico: 0,
+                es_desconocido: prodBase.stock === 0 && prodBase.nombre.includes('[❓]')
             });
 
             renderLista();
         }
 
-        // ==========================================
-        // AÑADIR EMPAQUE NO REGISTRADO (FANTASMA)
-        // ==========================================
         window.agregarEmpaqueNuevo = (codigo) => {
             const prod = listaConteo.find(p => p.codigo === codigo);
             if(!prod) return;
@@ -289,14 +309,59 @@
                 sku: null,
                 pz: pz,
                 contadas: 0,
-                isFantasma: true,
-                label_es: `Nuevo Paquete (${pz}pz) ✨`,
-                label_fr: `Nouveau Paquet (${pz}pc) ✨`
+                isFantasma: true
             });
             
-            // Reordenar para que el nuevo paquete quede en el lugar correcto por tamaño
             prod.variantes.sort((a,b) => b.pz - a.pz);
             renderLista();
+        };
+
+        // ==========================================
+        // DICTADO DE VOZ
+        // ==========================================
+        window.iniciarDictado = (codigoProd, varId, btnElement) => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const t = diccionarios[currentLang];
+
+            if (!SpeechRecognition) {
+                return showToast(t.microNoSoportado, "error");
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = currentLang === 'es' ? 'es-MX' : 'fr-FR';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            const icon = btnElement.querySelector('i');
+            icon.classList.add('mic-active');
+            showToast(t.escuchando, "info");
+
+            recognition.onresult = (event) => {
+                icon.classList.remove('mic-active');
+                const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                
+                // Extrae el primer número que encuentre en lo que dijiste
+                const numeroEncontrado = transcript.match(/\d+/);
+                
+                if (numeroEncontrado) {
+                    const num = parseInt(numeroEncontrado[0], 10);
+                    manualCant(codigoProd, varId, num);
+                    showToast(`+ ${num}`, "success");
+                } else {
+                    showToast(t.noEntendido, "error");
+                }
+            };
+
+            recognition.onerror = (event) => {
+                icon.classList.remove('mic-active');
+                showToast("Microphone error: " + event.error, "error");
+            };
+
+            recognition.onend = () => {
+                icon.classList.remove('mic-active');
+            };
+
+            recognition.start();
         };
 
         // ==========================================
@@ -316,10 +381,11 @@
             empty.classList.add('hidden');
             container.innerHTML = '';
 
-            listaConteo.forEach((item, indexItem) => {
+            listaConteo.forEach((item) => {
                 const diferencia = item.totalFisico - item.stockSistema;
                 let badgeHtml = '';
                 let borderColor = 'border-slate-700';
+                let nombreClass = item.es_desconocido ? 'text-amber-400' : 'text-white';
 
                 if (diferencia > 0) {
                     badgeHtml = `<span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-up"></i> ${t.entrada} (+${diferencia})</span>`;
@@ -331,17 +397,29 @@
                     badgeHtml = `<span class="bg-slate-700 text-slate-300 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-check"></i> ${t.ok}</span>`;
                 }
 
-                let variantesHtml = item.variantes.map((v, indexVar) => {
-                    const label = currentLang === 'es' ? v.label_es : v.label_fr;
-                    // Resaltar un poco si es el paquete "fantasma" que acaban de añadir
+                let variantesHtml = item.variantes.map((v) => {
+                    // AQUÍ SE CALCULA LA ETIQUETA EN VIVO DEPENDIENDO DEL IDIOMA
+                    let label = '';
+                    if (v.id === 'sueltas') {
+                        label = t.sueltas;
+                    } else if (v.isFantasma) {
+                        label = t.txtNuevoPaquete.replace('{pz}', v.pz);
+                    } else {
+                        label = v.sku ? `${v.sku} (${v.pz}${t.pz_abrev})` : `${v.pz >= 500 ? t.caja : t.paquete} (${v.pz}${t.pz_abrev})`;
+                    }
+
                     const textClass = v.isFantasma ? 'text-amber-400' : 'text-slate-400';
+
                     return `
                     <div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
                         <span class="text-xs font-bold ${textClass} flex-1">${label}</span>
-                        <div class="flex items-center gap-2 bg-slate-900 rounded-xl p-1 border border-slate-700">
-                            <button onclick="cambiarCant('${item.codigo}', '${v.id}', -1)" class="w-10 h-10 rounded-lg bg-slate-800 text-slate-300 active:bg-slate-700 text-lg"><i class="fas fa-minus"></i></button>
-                            <input type="number" min="0" value="${v.contadas}" oninput="manualCant('${item.codigo}', '${v.id}', this.value)" class="w-12 text-center font-black text-white bg-transparent outline-none text-lg">
-                            <button onclick="cambiarCant('${item.codigo}', '${v.id}', 1)" class="w-10 h-10 rounded-lg bg-blue-600 text-white active:bg-blue-500 text-lg"><i class="fas fa-plus"></i></button>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="iniciarDictado('${item.codigo}', '${v.id}', this)" class="w-10 h-10 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition text-lg border border-slate-700"><i class="fas fa-microphone"></i></button>
+                            <div class="flex items-center gap-2 bg-slate-900 rounded-xl p-1 border border-slate-700">
+                                <button onclick="cambiarCant('${item.codigo}', '${v.id}', -1)" class="w-10 h-10 rounded-lg bg-slate-800 text-slate-300 active:bg-slate-700 text-lg"><i class="fas fa-minus"></i></button>
+                                <input type="number" min="0" value="${v.contadas}" oninput="manualCant('${item.codigo}', '${v.id}', this.value)" class="w-12 text-center font-black text-white bg-transparent outline-none text-lg">
+                                <button onclick="cambiarCant('${item.codigo}', '${v.id}', 1)" class="w-10 h-10 rounded-lg bg-blue-600 text-white active:bg-blue-500 text-lg"><i class="fas fa-plus"></i></button>
+                            </div>
                         </div>
                     </div>`;
                 }).join('');
@@ -350,7 +428,7 @@
                 <div id="row_${item.codigo}" class="bg-slate-800 p-4 rounded-3xl border ${borderColor} transition-colors shadow-lg">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex-1 pr-4">
-                            <h3 class="font-black text-lg text-white leading-tight">${item.nombre}</h3>
+                            <h3 class="font-black text-lg ${nombreClass} leading-tight">${item.nombre}</h3>
                             <p class="font-mono text-xs text-blue-400 mt-1">${item.codigo}</p>
                         </div>
                         <button onclick="eliminarDeLista('${item.codigo}')" class="text-slate-500 hover:text-red-400 p-2"><i class="fas fa-trash"></i></button>
@@ -361,22 +439,22 @@
                     </div>
                     
                     <button onclick="agregarEmpaqueNuevo('${item.codigo}')" class="w-full text-center text-[10px] text-blue-400 font-bold py-2.5 mb-4 hover:bg-slate-700 rounded-xl border border-dashed border-slate-600 transition-colors uppercase tracking-wider">
-                        <i class="fas fa-plus mr-1"></i> ${t.btnNuevoEmpaque}
+                        <i class="fas fa-plus mr-1"></i> <span data-i18n="btnNuevoEmpaque">${t.btnNuevoEmpaque}</span>
                     </button>
 
                     <div class="grid grid-cols-2 gap-3 mb-2">
                         <div class="bg-slate-900 rounded-2xl p-3 border border-slate-700 text-center">
-                            <p class="text-[10px] font-bold text-slate-500 tracking-widest">${t.stockSistema}</p>
+                            <p class="text-[10px] font-bold text-slate-500 tracking-widest uppercase" data-i18n="stockSistema">${t.stockSistema}</p>
                             <p class="text-2xl font-black text-slate-300">${item.stockSistema}</p>
                         </div>
                         <div class="bg-blue-900/30 rounded-2xl p-3 border border-blue-900/50 text-center relative overflow-hidden">
-                            <p class="text-[10px] font-bold text-blue-400 tracking-widest">${t.totalFisico}</p>
+                            <p class="text-[10px] font-bold text-blue-400 tracking-widest uppercase" data-i18n="totalFisico">${t.totalFisico}</p>
                             <p class="text-3xl font-black text-white" id="totFisico_${item.codigo}">${item.totalFisico}</p>
                         </div>
                     </div>
 
                     <div class="flex justify-between items-center px-2 mt-3" id="ajusteBadge_${item.codigo}">
-                        <span class="text-[10px] font-bold text-slate-500 tracking-widest">${t.ajuste}:</span>
+                        <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase" data-i18n="ajuste">${t.ajuste}:</span>
                         ${badgeHtml}
                     </div>
                 </div>`;
@@ -412,13 +490,13 @@
             
             if (dif > 0) {
                 card.className = "bg-slate-800 p-4 rounded-3xl border border-emerald-500/50 transition-colors shadow-lg";
-                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest">${t.ajuste}:</span><span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-up"></i> ${t.entrada} (+${dif})</span>`;
+                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">${t.ajuste}:</span><span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-up"></i> ${t.entrada} (+${dif})</span>`;
             } else if (dif < 0) {
                 card.className = "bg-slate-800 p-4 rounded-3xl border border-red-500/50 transition-colors shadow-lg";
-                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest">${t.ajuste}:</span><span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-down"></i> ${t.salida} (${dif})</span>`;
+                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">${t.ajuste}:</span><span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-down"></i> ${t.salida} (${dif})</span>`;
             } else {
                 card.className = "bg-slate-800 p-4 rounded-3xl border border-slate-700 transition-colors shadow-lg";
-                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest">${t.ajuste}:</span><span class="bg-slate-700 text-slate-300 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-check"></i> ${t.ok}</span>`;
+                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">${t.ajuste}:</span><span class="bg-slate-700 text-slate-300 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-check"></i> ${t.ok}</span>`;
             }
         }
 
@@ -444,7 +522,6 @@
                 listaConteo.forEach(item => {
                     const docRef = db.collection('auditorias_pendientes').doc(); 
                     
-                    // Preparamos el desglose para que se pueda aplanar fácil en Excel
                     const desgloseFormateado = item.variantes.map(v => {
                         let nombreColumna = '';
                         if (v.id === 'sueltas') nombreColumna = 'Piezas Sueltas';
@@ -456,7 +533,7 @@
                             sku: v.sku || 'N/A',
                             piezas_por_empaque: v.pz,
                             cantidad_contada: v.contadas,
-                            nombre_columna: nombreColumna // Este es el que usarás como título en Excel
+                            nombre_columna: nombreColumna 
                         };
                     });
 
@@ -469,7 +546,7 @@
                         estado: 'pendiente',
                         fecha: firebase.firestore.FieldValue.serverTimestamp(),
                         usuario: 'Tablet Almacén (Lista Continua)',
-                        desglose: desgloseFormateado // Se guarda con la info directa para tus columnas
+                        desglose: desgloseFormateado
                     });
                 });
 
