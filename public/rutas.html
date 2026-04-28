@@ -1342,11 +1342,41 @@
 
             adjustFormByShippingType();
             
-            document.getElementById('form-destino-alias').value = viajeSeleccionado.destino_alias || '';
-            document.getElementById('form-direccion').value = viajeSeleccionado.direccion || '';
-            document.getElementById('form-destino-telefono').value = viajeSeleccionado.destino_telefono || '';
-            document.getElementById('form-destino-horario').value = viajeSeleccionado.destino_horario || '';
-            document.getElementById('form-link-maps').value = viajeSeleccionado.link_maps || '';
+            // 🔥 NUEVO: Magia para auto-seleccionar la bodega o fletera en el dropdown
+            let indexASeleccionar = "EDICION";
+            const selectDestino = document.getElementById('form-destino-selector');
+
+            if (viajeSeleccionado.tipo_envio === 'bodega_cliente') {
+                const foundIndex = direccionesClienteActual.findIndex(d => 
+                    (d.alias === viajeSeleccionado.destino_alias && viajeSeleccionado.destino_alias) || 
+                    (d.direccion === viajeSeleccionado.direccion && viajeSeleccionado.direccion)
+                );
+                if (foundIndex !== -1) indexASeleccionar = foundIndex.toString();
+            } else {
+                const foundIndex = fleterasDB.findIndex(f => 
+                    (f.nombre === viajeSeleccionado.destino_alias && viajeSeleccionado.destino_alias) || 
+                    (f.direccion === viajeSeleccionado.direccion && viajeSeleccionado.direccion)
+                );
+                if (foundIndex !== -1) indexASeleccionar = foundIndex.toString();
+            }
+
+            if (indexASeleccionar !== "EDICION") {
+                selectDestino.value = indexASeleccionar;
+                // Llenamos los inputs con los datos de la orden actual (por si se movió el pin)
+                document.getElementById('form-destino-alias').value = viajeSeleccionado.destino_alias || '';
+                document.getElementById('form-direccion').value = viajeSeleccionado.direccion || '';
+                document.getElementById('form-destino-telefono').value = viajeSeleccionado.destino_telefono || '';
+                document.getElementById('form-destino-horario').value = viajeSeleccionado.destino_horario || '';
+                document.getElementById('form-link-maps').value = viajeSeleccionado.link_maps || '';
+            } else {
+                selectDestino.innerHTML = '<option value="EDICION">--- Datos guardados en la orden ---</option>' + selectDestino.innerHTML;
+                selectDestino.value = "EDICION";
+                document.getElementById('form-destino-alias').value = viajeSeleccionado.destino_alias || '';
+                document.getElementById('form-direccion').value = viajeSeleccionado.direccion || '';
+                document.getElementById('form-destino-telefono').value = viajeSeleccionado.destino_telefono || '';
+                document.getElementById('form-destino-horario').value = viajeSeleccionado.destino_horario || '';
+                document.getElementById('form-link-maps').value = viajeSeleccionado.link_maps || '';
+            }
             
             const lat = viajeSeleccionado.coordenadas?.lat || 25.689804;
             const lng = viajeSeleccionado.coordenadas?.lng || -100.312066;
