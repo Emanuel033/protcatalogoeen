@@ -72,7 +72,7 @@
                 <p class="font-bold text-lg" data-i18n="listaVacia">La lista está vacía.</p>
                 <p class="text-sm mt-1" data-i18n="listaVaciaSub">Busca o escanea un producto para comenzar.</p>
             </div>
-            </div>
+        </div>
 
         <datalist id="opcionesProductos"></datalist>
     </main>
@@ -101,7 +101,9 @@
                 ok: "CORRECTO",
                 sueltas: "Sueltas (1pz)",
                 paquete: "Paquete",
-                caja: "Caja"
+                caja: "Caja",
+                btnNuevoEmpaque: "Añadir empaque no registrado",
+                promptPiezas: "¿Cuántas piezas tiene este nuevo paquete/caja?"
             },
             fr: {
                 titulo: "Inventaire Continu",
@@ -117,7 +119,9 @@
                 ok: "CORRECT",
                 sueltas: "À l'unité (1pc)",
                 paquete: "Paquet",
-                caja: "Boîte"
+                caja: "Boîte",
+                btnNuevoEmpaque: "Ajouter un paquet non enregistré",
+                promptPiezas: "Combien de pièces contient ce nouveau paquet/boîte ?"
             }
         };
 
@@ -128,7 +132,7 @@
             document.getElementById('langFlag').innerText = currentLang === 'es' ? '🇲🇽' : '🇫🇷';
             document.getElementById('langText').innerText = currentLang === 'es' ? 'ES' : 'FR';
             aplicarTextos();
-            renderLista(); // Re-renderizar la lista para traducir etiquetas internas
+            renderLista(); 
         }
 
         function aplicarTextos() {
@@ -147,7 +151,7 @@
         // VARIABLES GLOBALES Y CATÁLOGO
         // ==========================================
         let catalogoEnMemoria = [];
-        let listaConteo = []; // Arreglo que guarda lo que estamos contando
+        let listaConteo = []; 
         let html5QrcodeScanner = null;
 
         async function loadJSONCatalog() {
@@ -213,7 +217,6 @@
             const input = document.getElementById('manualCode');
             input.value = ''; input.blur();
 
-            // Buscar en catálogo o por código de barras de empaque
             let prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
             if (!prodBase) {
                 for (const p of catalogoEnMemoria) {
@@ -224,9 +227,8 @@
                 }
             }
 
-            if (!prodBase) return showToast("Producto no encontrado", "error");
+            if (!prodBase) return showToast("Producto no encontrado en la base de datos.", "error");
 
-            // Si ya está en la lista, scrolear hacia él
             if (listaConteo.find(item => item.codigo === prodBase.codigo)) {
                 document.getElementById(`row_${prodBase.codigo}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
                 document.getElementById(`row_${prodBase.codigo}`).classList.add('ring-2', 'ring-blue-500');
@@ -234,22 +236,28 @@
                 return;
             }
 
-            // Preparar las variantes de empaque para este producto
             let variantes = [];
             const empaques = prodBase.paquetes || prodBase.empaques || [];
             
-            // Siempre agregamos la opción de piezas sueltas
-            variantes.push({ id: 'sueltas', pz: 1, contadas: 0, label_es: diccionarios.es.sueltas, label_fr: diccionarios.fr.sueltas });
+            variantes.push({ id: 'sueltas', sku: null, pz: 1, contadas: 0, isFantasma: false, label_es: diccionarios.es.sueltas, label_fr: diccionarios.fr.sueltas });
             
-            // Agregamos los empaques dinámicos
             empaques.forEach((emp, index) => {
                 const piezas = parseInt(emp.piezas);
-                const labelEs = `${piezas >= 500 ? diccionarios.es.caja : diccionarios.es.paquete} (${piezas}pz)`;
-                const labelFr = `${piezas >= 500 ? diccionarios.fr.caja : diccionarios.fr.paquete} (${piezas}pc)`;
-                variantes.push({ id: `emp_${index}`, pz: piezas, contadas: 0, label_es: labelEs, label_fr: labelFr });
+                // Si tiene SKU lo mostramos, si no solo ponemos las piezas
+                const baseLabelEs = emp.sku ? `${emp.sku} (${piezas}pz)` : `${piezas >= 500 ? diccionarios.es.caja : diccionarios.es.paquete} (${piezas}pz)`;
+                const baseLabelFr = emp.sku ? `${emp.sku} (${piezas}pc)` : `${piezas >= 500 ? diccionarios.fr.caja : diccionarios.fr.paquete} (${piezas}pc)`;
+                
+                variantes.push({ 
+                    id: `emp_${index}`, 
+                    sku: emp.sku || null,
+                    pz: piezas, 
+                    contadas: 0, 
+                    isFantasma: false,
+                    label_es: baseLabelEs, 
+                    label_fr: baseLabelFr 
+                });
             });
 
-            // Ordenamos de mayor a menor piezas para que se vea ordenado en la tarjeta
             variantes.sort((a,b) => b.pz - a.pz);
 
             listaConteo.unshift({
@@ -262,6 +270,34 @@
 
             renderLista();
         }
+
+        // ==========================================
+        // AÑADIR EMPAQUE NO REGISTRADO (FANTASMA)
+        // ==========================================
+        window.agregarEmpaqueNuevo = (codigo) => {
+            const prod = listaConteo.find(p => p.codigo === codigo);
+            if(!prod) return;
+            
+            const pzInput = prompt(diccionarios[currentLang].promptPiezas, "12");
+            if(pzInput === null) return; 
+            
+            const pz = parseInt(pzInput);
+            if(isNaN(pz) || pz <= 1) return showToast("Debes ingresar un número mayor a 1", "error");
+
+            prod.variantes.push({
+                id: 'fantasma_' + Date.now(),
+                sku: null,
+                pz: pz,
+                contadas: 0,
+                isFantasma: true,
+                label_es: `Nuevo Paquete (${pz}pz) ✨`,
+                label_fr: `Nouveau Paquet (${pz}pc) ✨`
+            });
+            
+            // Reordenar para que el nuevo paquete quede en el lugar correcto por tamaño
+            prod.variantes.sort((a,b) => b.pz - a.pz);
+            renderLista();
+        };
 
         // ==========================================
         // RENDERIZAR INTERFAZ Y CÁLCULOS
@@ -281,7 +317,6 @@
             container.innerHTML = '';
 
             listaConteo.forEach((item, indexItem) => {
-                // Calcular Ajuste y Colores
                 const diferencia = item.totalFisico - item.stockSistema;
                 let badgeHtml = '';
                 let borderColor = 'border-slate-700';
@@ -296,12 +331,13 @@
                     badgeHtml = `<span class="bg-slate-700 text-slate-300 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-check"></i> ${t.ok}</span>`;
                 }
 
-                // Generar renglones de empaque dinámicos
                 let variantesHtml = item.variantes.map((v, indexVar) => {
                     const label = currentLang === 'es' ? v.label_es : v.label_fr;
+                    // Resaltar un poco si es el paquete "fantasma" que acaban de añadir
+                    const textClass = v.isFantasma ? 'text-amber-400' : 'text-slate-400';
                     return `
                     <div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
-                        <span class="text-xs font-bold text-slate-400 flex-1">${label}</span>
+                        <span class="text-xs font-bold ${textClass} flex-1">${label}</span>
                         <div class="flex items-center gap-2 bg-slate-900 rounded-xl p-1 border border-slate-700">
                             <button onclick="cambiarCant('${item.codigo}', '${v.id}', -1)" class="w-10 h-10 rounded-lg bg-slate-800 text-slate-300 active:bg-slate-700 text-lg"><i class="fas fa-minus"></i></button>
                             <input type="number" min="0" value="${v.contadas}" oninput="manualCant('${item.codigo}', '${v.id}', this.value)" class="w-12 text-center font-black text-white bg-transparent outline-none text-lg">
@@ -320,9 +356,13 @@
                         <button onclick="eliminarDeLista('${item.codigo}')" class="text-slate-500 hover:text-red-400 p-2"><i class="fas fa-trash"></i></button>
                     </div>
 
-                    <div class="bg-slate-900/50 rounded-2xl p-3 mb-4">
+                    <div class="bg-slate-900/50 rounded-2xl p-3 mb-2">
                         ${variantesHtml}
                     </div>
+                    
+                    <button onclick="agregarEmpaqueNuevo('${item.codigo}')" class="w-full text-center text-[10px] text-blue-400 font-bold py-2.5 mb-4 hover:bg-slate-700 rounded-xl border border-dashed border-slate-600 transition-colors uppercase tracking-wider">
+                        <i class="fas fa-plus mr-1"></i> ${t.btnNuevoEmpaque}
+                    </button>
 
                     <div class="grid grid-cols-2 gap-3 mb-2">
                         <div class="bg-slate-900 rounded-2xl p-3 border border-slate-700 text-center">
@@ -361,14 +401,10 @@
         };
 
         function recalcularTotalProducto(prod) {
-            // Multiplicamos piezas x cantidad contada en cada variante
             prod.totalFisico = prod.variantes.reduce((sum, v) => sum + (v.pz * v.contadas), 0);
             
-            // En lugar de re-renderizar toda la lista (lo que quita el foco del teclado en la tablet),
-            // actualizamos el DOM de esa tarjeta específica:
             document.getElementById(`totFisico_${prod.codigo}`).innerText = prod.totalFisico;
             
-            // Actualizar Badge
             const t = diccionarios[currentLang];
             const dif = prod.totalFisico - prod.stockSistema;
             const card = document.getElementById(`row_${prod.codigo}`);
@@ -406,7 +442,24 @@
                 const batch = db.batch();
                 
                 listaConteo.forEach(item => {
-                    const docRef = db.collection('auditorias_pendientes').doc(); // Crear ID único para cada renglón
+                    const docRef = db.collection('auditorias_pendientes').doc(); 
+                    
+                    // Preparamos el desglose para que se pueda aplanar fácil en Excel
+                    const desgloseFormateado = item.variantes.map(v => {
+                        let nombreColumna = '';
+                        if (v.id === 'sueltas') nombreColumna = 'Piezas Sueltas';
+                        else if (v.isFantasma) nombreColumna = `Paquete Nuevo (${v.pz}pz)`;
+                        else nombreColumna = v.sku ? `${v.sku} (${v.pz}pz)` : `Empaque (${v.pz}pz)`;
+
+                        return {
+                            tipo: v.id === 'sueltas' ? 'sueltas' : (v.isFantasma ? 'nuevo' : 'registrado'),
+                            sku: v.sku || 'N/A',
+                            piezas_por_empaque: v.pz,
+                            cantidad_contada: v.contadas,
+                            nombre_columna: nombreColumna // Este es el que usarás como título en Excel
+                        };
+                    });
+
                     batch.set(docRef, {
                         codigo_contpaqi: item.codigo,
                         nombre_producto: item.nombre,
@@ -416,8 +469,7 @@
                         estado: 'pendiente',
                         fecha: firebase.firestore.FieldValue.serverTimestamp(),
                         usuario: 'Tablet Almacén (Lista Continua)',
-                        // Guardamos el desglose de lo que contaron por si hay dudas en administración
-                        desglose: item.variantes.map(v => ({ empaque: v.pz, contadas: v.contadas }))
+                        desglose: desgloseFormateado // Se guarda con la info directa para tus columnas
                     });
                 });
 
@@ -441,7 +493,13 @@
             const icon = document.getElementById('toastIcon');
             document.getElementById('toastMsg').innerText = msg;
             
-            icon.className = type === 'error' ? "fas fa-exclamation-circle text-red-400 text-lg" : "fas fa-check-circle text-emerald-400 text-lg";
+            if (type === 'error') {
+                icon.className = "fas fa-exclamation-circle text-red-400 text-lg";
+            } else if (type === 'info') {
+                icon.className = "fas fa-info-circle text-amber-400 text-lg";
+            } else {
+                icon.className = "fas fa-check-circle text-emerald-400 text-lg";
+            }
             
             t.classList.remove('hidden'); t.classList.add('flex');
             setTimeout(() => { t.classList.add('hidden'); t.classList.remove('flex'); }, 3000);
