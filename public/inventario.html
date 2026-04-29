@@ -45,7 +45,8 @@
         /* Formas dinámicas */
         .forma-circulo { width: 34px; height: 34px; border-radius: 50%; }
         .forma-cuadrado { width: 34px; height: 34px; border-radius: 6px; }
-        .forma-rectangulo { width: 68px; height: 34px; border-radius: 6px; }
+        .forma-rectangulo-h { width: 68px; height: 34px; border-radius: 6px; }
+        .forma-rectangulo-v { width: 34px; height: 68px; border-radius: 6px; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
@@ -140,9 +141,10 @@
                 <div id="zonaVisual" class="hidden flex flex-col gap-2">
                     
                     <div class="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700 mb-1">
-                        <button onclick="setFormaVisual('circulo')" id="btnFormaCirculo" class="flex-1 py-2 rounded-lg bg-blue-600 text-white font-bold text-[10px] uppercase transition"><i class="fas fa-circle mr-1"></i> Círculo</button>
-                        <button onclick="setFormaVisual('cuadrado')" id="btnFormaCuadrado" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition"><i class="fas fa-square mr-1"></i> Cuadrado</button>
-                        <button onclick="setFormaVisual('rectangulo')" id="btnFormaRectangulo" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition"><span class="font-black mr-1 text-sm leading-none">▬</span> Rectángulo</button>
+                        <button onclick="setFormaVisual('circulo')" id="btnFormaCirculo" class="flex-1 py-2 rounded-lg bg-blue-600 text-white font-bold text-[10px] uppercase transition" title="Círculo"><i class="fas fa-circle"></i></button>
+                        <button onclick="setFormaVisual('cuadrado')" id="btnFormaCuadrado" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition" title="Cuadrado"><i class="fas fa-square"></i></button>
+                        <button onclick="setFormaVisual('rectangulo-h')" id="btnFormaRectH" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition" title="Rectángulo Horizontal"><span class="font-black text-sm leading-none">▬</span></button>
+                        <button onclick="setFormaVisual('rectangulo-v')" id="btnFormaRectV" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition" title="Rectángulo Vertical"><span class="font-black text-sm leading-none">▮</span></button>
                     </div>
 
                     <div class="flex gap-2">
@@ -284,7 +286,7 @@
         let calcTarget = { codigo: null, varId: null };
         let currentCalcMode = 'bloque';
         let idPiezaLienzo = 0;
-        let formaVisualActual = 'circulo'; // circulo, cuadrado, rectangulo
+        let formaVisualActual = 'circulo'; // circulo, cuadrado, rectangulo-h, rectangulo-v
         let catalogoEnMemoria = [];
         let listaConteo = [];
         let html5QrcodeScanner = null;
@@ -487,28 +489,23 @@
             calcularEnVivo();
         };
 
-        // Cambiador de formas (Circulo, Cuadrado, Rectangulo)
+        // Nuevo Cambiador de formas (4 opciones independientes)
         window.setFormaVisual = (forma) => {
             formaVisualActual = forma;
             const btnC = document.getElementById('btnFormaCirculo');
             const btnQ = document.getElementById('btnFormaCuadrado');
-            const btnR = document.getElementById('btnFormaRectangulo');
+            const btnRH = document.getElementById('btnFormaRectH');
+            const btnRV = document.getElementById('btnFormaRectV');
 
-            [btnC, btnQ, btnR].forEach(b => {
+            [btnC, btnQ, btnRH, btnRV].forEach(b => {
                 b.classList.remove('bg-blue-600', 'text-white');
                 b.classList.add('text-slate-400');
             });
 
             if(forma === 'circulo') { btnC.classList.add('bg-blue-600', 'text-white'); btnC.classList.remove('text-slate-400'); }
             else if(forma === 'cuadrado') { btnQ.classList.add('bg-blue-600', 'text-white'); btnQ.classList.remove('text-slate-400'); }
-            else if(forma === 'rectangulo') { btnR.classList.add('bg-blue-600', 'text-white'); btnR.classList.remove('text-slate-400'); }
-
-            // Actualizar piezas existentes en el lienzo para que todas sean de la misma forma
-            const piezas = document.querySelectorAll('.pieza-lienzo');
-            piezas.forEach(p => {
-                p.classList.remove('forma-circulo', 'forma-cuadrado', 'forma-rectangulo');
-                p.classList.add('forma-' + forma);
-            });
+            else if(forma === 'rectangulo-h') { btnRH.classList.add('bg-blue-600', 'text-white'); btnRH.classList.remove('text-slate-400'); }
+            else if(forma === 'rectangulo-v') { btnRV.classList.add('bg-blue-600', 'text-white'); btnRV.classList.remove('text-slate-400'); }
         };
 
         window.ajustarTarimas = (delta) => {
@@ -526,7 +523,7 @@
             const lienzo = document.getElementById('lienzoEstiba');
             const pieza = document.createElement('div');
             
-            // Asigna la base y la forma seleccionada actualmente
+            // Asigna la forma seleccionada actualmente
             pieza.className = `pieza-lienzo forma-${formaVisualActual}`;
             pieza.innerText = idPiezaLienzo;
             
