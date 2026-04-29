@@ -228,7 +228,7 @@
         // AGREGAR A LA LISTA
         // ==========================================
         function agregarALista(codigoBuscado) {
-            codigoBuscado = codigoBuscado.trim();
+            codigoBuscado = String(codigoBuscado).trim();
             if(!codigoBuscado) return;
             const input = document.getElementById('manualCode');
             input.value = ''; input.blur();
@@ -257,7 +257,8 @@
                 };
             }
 
-            if (listaConteo.find(item => item.codigo === prodBase.codigo)) {
+            // AQUI ESTABA EL ERROR: Forzamos la comparación siempre como String
+            if (listaConteo.find(item => String(item.codigo) === String(prodBase.codigo))) {
                 document.getElementById(`row_${prodBase.codigo}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
                 document.getElementById(`row_${prodBase.codigo}`).classList.add('ring-2', 'ring-blue-500');
                 setTimeout(() => document.getElementById(`row_${prodBase.codigo}`).classList.remove('ring-2', 'ring-blue-500'), 1500);
@@ -267,7 +268,6 @@
             let variantes = [];
             const empaques = prodBase.paquetes || prodBase.empaques || [];
             
-            // YA NO GUARDAMOS label_es Y label_fr AQUÍ. SOLO LOS DATOS CRUDOS.
             variantes.push({ id: 'sueltas', sku: null, pz: 1, contadas: 0, isFantasma: false });
             
             empaques.forEach((emp, index) => {
@@ -283,7 +283,7 @@
             variantes.sort((a,b) => b.pz - a.pz);
 
             listaConteo.unshift({
-                codigo: prodBase.codigo,
+                codigo: String(prodBase.codigo), // Forzamos texto
                 nombre: prodBase.descripcion_oficial || prodBase.nombre,
                 stockSistema: parseFloat(prodBase.stock || 0),
                 variantes: variantes,
@@ -294,12 +294,17 @@
             renderLista();
         }
 
+        // ==========================================
+        // AÑADIR EMPAQUE NO REGISTRADO (FANTASMA)
+        // ==========================================
         window.agregarEmpaqueNuevo = (codigo) => {
-            const prod = listaConteo.find(p => p.codigo === codigo);
+            // AQUI ESTABA EL ERROR: Aseguramos que la comparacion sea estricta como texto
+            const prod = listaConteo.find(p => String(p.codigo) === String(codigo));
+            
             if(!prod) return;
             
             const pzInput = prompt(diccionarios[currentLang].promptPiezas, "12");
-            if(pzInput === null) return; 
+            if(pzInput === null || pzInput.trim() === "") return; 
             
             const pz = parseInt(pzInput);
             if(isNaN(pz) || pz <= 1) return showToast("Debes ingresar un número mayor a 1", "error");
@@ -340,7 +345,6 @@
                 icon.classList.remove('mic-active');
                 const transcript = event.results[0][0].transcript.toLowerCase().trim();
                 
-                // Extrae el primer número que encuentre en lo que dijiste
                 const numeroEncontrado = transcript.match(/\d+/);
                 
                 if (numeroEncontrado) {
@@ -354,7 +358,7 @@
 
             recognition.onerror = (event) => {
                 icon.classList.remove('mic-active');
-                showToast("Microphone error: " + event.error, "error");
+                showToast("Error micrófono: " + event.error, "error");
             };
 
             recognition.onend = () => {
@@ -398,7 +402,6 @@
                 }
 
                 let variantesHtml = item.variantes.map((v) => {
-                    // AQUÍ SE CALCULA LA ETIQUETA EN VIVO DEPENDIENDO DEL IDIOMA
                     let label = '';
                     if (v.id === 'sueltas') {
                         label = t.sueltas;
@@ -462,16 +465,20 @@
         }
 
         window.cambiarCant = (codigoProd, varId, delta) => {
-            const prod = listaConteo.find(p => p.codigo === codigoProd);
-            const variante = prod.variantes.find(v => v.id === varId);
+            const prod = listaConteo.find(p => String(p.codigo) === String(codigoProd));
+            if(!prod) return;
+            const variante = prod.variantes.find(v => String(v.id) === String(varId));
+            if(!variante) return;
             variante.contadas += delta;
             if(variante.contadas < 0) variante.contadas = 0;
             recalcularTotalProducto(prod);
         };
 
         window.manualCant = (codigoProd, varId, val) => {
-            const prod = listaConteo.find(p => p.codigo === codigoProd);
-            const variante = prod.variantes.find(v => v.id === varId);
+            const prod = listaConteo.find(p => String(p.codigo) === String(codigoProd));
+            if(!prod) return;
+            const variante = prod.variantes.find(v => String(v.id) === String(varId));
+            if(!variante) return;
             let num = parseInt(val) || 0;
             if(num < 0) num = 0;
             variante.contadas = num;
@@ -501,7 +508,8 @@
         }
 
         window.eliminarDeLista = (codigo) => {
-            listaConteo = listaConteo.filter(p => p.codigo !== codigo);
+            // AQUI ESTABA EL ERROR: Forzamos la comparación como String
+            listaConteo = listaConteo.filter(p => String(p.codigo) !== String(codigo));
             renderLista();
         };
 
