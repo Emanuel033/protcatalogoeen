@@ -21,6 +21,7 @@
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .mic-active { animation: pulse-red 1.5s infinite; color: #ef4444 !important; }
         @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .tab-btn { transition: all 0.2s ease; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
@@ -79,14 +80,22 @@
         <datalist id="opcionesProductos"></datalist>
     </main>
 
-    <div id="calcModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden">
-            <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-                <h3 class="font-black text-lg text-white" data-i18n="tituloCalc">Cálculo de Estiba</h3>
+    <div id="calcModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-2 md:p-4 overflow-y-auto">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden my-auto">
+            
+            <div class="p-4 md:p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                <h3 class="font-black text-lg text-white" data-i18n="tituloCalc">Calculadora de Estiba</h3>
                 <button onclick="cerrarCalculadora()" class="text-slate-400 hover:text-white w-10 h-10 rounded-full bg-slate-700/50 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 space-y-5">
-                <div class="grid grid-cols-3 gap-3 text-center">
+            
+            <div class="p-4 md:p-5 space-y-4">
+                <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700 overflow-x-auto custom-scroll">
+                    <button id="tabBloque" onclick="setCalcMode('bloque')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg bg-blue-600 text-white font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoBloque">Bloque</button>
+                    <button id="tabCama" onclick="setCalcMode('cama')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoCama">Cama Fija</button>
+                    <button id="tabVisual" onclick="setCalcMode('visual')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoVisual">Gráfico</button>
+                </div>
+
+                <div id="zonaBloque" class="grid grid-cols-2 gap-3 text-center">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcFrente">Frente</label>
                         <input type="number" id="calcFrente" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
@@ -95,28 +104,67 @@
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcFondo">Fondo</label>
                         <input type="number" id="calcFondo" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
                     </div>
+                </div>
+
+                <div id="zonaCama" class="hidden grid grid-cols-2 gap-3 text-center">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcNiveles">Niveles</label>
-                        <input type="number" id="calcNiveles" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcPzCama">Pz por Cama</label>
+                        <input type="number" id="calcPzCama" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcTarimas">Tarimas (Fondo)</label>
+                        <input type="number" id="calcTarimas" value="1" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-purple-400">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcAjuste">Ajuste (+/-)</label>
-                    <input type="number" id="calcAjuste" value="0" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
+
+                <div id="zonaVisual" class="hidden flex flex-col gap-3">
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Columnas (X)</label>
+                            <input type="number" id="gridCols" value="4" class="w-full bg-slate-900 border border-slate-700 text-white p-2 rounded-xl text-center font-black focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Filas (Y)</label>
+                            <input type="number" id="gridFilas" value="4" class="w-full bg-slate-900 border border-slate-700 text-white p-2 rounded-xl text-center font-black focus:border-blue-500 outline-none">
+                        </div>
+                    </div>
+                    <button onclick="generarGridVisual()" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 rounded-lg transition" data-i18n="btnDibujar">Dibujar Base</button>
+                    
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 flex flex-col items-center">
+                        <p class="text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-widest text-center" data-i18n="txtTocaHueco">Toca para marcar huecos</p>
+                        <div id="gridContenedor" class="grid gap-1.5 justify-center overflow-x-auto p-2">
+                            </div>
+                    </div>
                 </div>
-                <div class="bg-blue-600/20 border border-blue-500/30 p-4 rounded-2xl text-center">
-                    <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Estimado</p>
-                    <p class="text-3xl font-black text-white" id="calcResultado">0</p>
+
+                <div class="grid grid-cols-2 gap-3 text-center border-t border-slate-700 pt-4 mt-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcNiveles">Niveles (Capas)</label>
+                        <input type="number" id="calcNiveles" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-blue-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcAjuste">Ajuste (+/-)</label>
+                        <input type="number" id="calcAjuste" value="0" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-emerald-400">
+                    </div>
+                </div>
+
+                <div class="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6">
+                    <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Total Estimado</p>
+                    <p class="text-4xl font-black text-white" id="calcResultado">0</p>
                 </div>
             </div>
-            <div class="p-6 bg-slate-900/50 flex gap-3">
-                <button onclick="cerrarCalculadora()" class="flex-1 py-4 bg-slate-700 text-slate-300 font-bold rounded-2xl" data-i18n="btnCerrar">Cerrar</button>
-                <button onclick="aplicarCalculo()" class="flex-[2] py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20" data-i18n="btnAplicar">Aplicar</button>
+
+            <div class="p-4 bg-slate-900/50 flex gap-3">
+                <button onclick="cerrarCalculadora()" class="flex-1 py-3 md:py-4 bg-slate-700 text-slate-300 font-bold rounded-2xl text-sm" data-i18n="btnCerrar">Cancelar</button>
+                <button onclick="aplicarCalculo()" class="flex-[2] py-3 md:py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20 text-sm" data-i18n="btnAplicar">Sumar</button>
             </div>
         </div>
     </div>
 
     <script>
+        // ==========================================
+        // SISTEMA BILINGÜE Y DICCIONARIOS
+        // ==========================================
         const diccionarios = {
             es: {
                 titulo: "Inventario Continuo",
@@ -142,13 +190,20 @@
                 escuchando: "Escuchando...",
                 noEntendido: "No entendí",
                 microNoSoportado: "No soportado",
-                tituloCalc: "Calculadora de Bloque",
+                tituloCalc: "Calculadora de Estiba",
+                modoBloque: "Bloque",
+                modoCama: "Cama Fija",
+                modoVisual: "Gráfico",
                 calcFrente: "Frente",
                 calcFondo: "Fondo",
-                calcNiveles: "Niveles",
-                calcAjuste: "Ajuste",
-                btnAplicar: "Sumar",
-                btnCerrar: "Cerrar"
+                calcPzCama: "Pz por Cama",
+                calcTarimas: "Tarimas",
+                calcNiveles: "Niveles (Alto)",
+                calcAjuste: "Ajuste (+/-)",
+                btnDibujar: "Dibujar Base",
+                txtTocaHueco: "Toca para marcar huecos",
+                btnAplicar: "Sumar al Conteo",
+                btnCerrar: "Cancelar"
             },
             fr: {
                 titulo: "Inventaire Continu",
@@ -174,11 +229,18 @@
                 escuchando: "J'écoute...",
                 noEntendido: "Pas compris",
                 microNoSoportado: "Pas supporté",
-                tituloCalc: "Calculateur",
+                tituloCalc: "Calculateur de Bloc",
+                modoBloque: "Bloc",
+                modoCama: "Lit Fixe",
+                modoVisual: "Graphique",
                 calcFrente: "Face",
                 calcFondo: "Fond",
+                calcPzCama: "Pz par lit",
+                calcTarimas: "Palettes",
                 calcNiveles: "Niveaux",
-                calcAjuste: "Ajuste",
+                calcAjuste: "Ajuste (+/-)",
+                btnDibujar: "Dessiner Base",
+                txtTocaHueco: "Touchez pour marquer les creux",
                 btnAplicar: "Ajouter",
                 btnCerrar: "Fermer"
             }
@@ -186,21 +248,18 @@
 
         let currentLang = 'es';
         let calcTarget = { codigo: null, varId: null };
+        let currentCalcMode = 'bloque';
+        let gridActivos = 0; // Para el modo visual
         let catalogoEnMemoria = [];
         let listaConteo = [];
         let html5QrcodeScanner = null;
 
-        // ==========================================
-        // CARGA Y FILTRADO ESTRICTO DE PIEZA_BASE
-        // ==========================================
         async function loadJSONCatalog() {
             try {
                 const response = await fetch('catalogo_completo.json');
                 if (!response.ok) throw new Error("JSON no encontrado");
                 
                 const rawData = await response.json();
-                
-                // FILTRO MAESTRO: Solo dejamos piezas base en memoria
                 catalogoEnMemoria = rawData.filter(p => p.tipo_item === 'PIEZA_BASE');
                 
                 const datalist = document.getElementById('opcionesProductos');
@@ -267,7 +326,6 @@
             if(!codigoBuscado) return;
             document.getElementById('manualCode').value = '';
 
-            // Solo buscará en piezas base porque el catálogo ya está filtrado
             let prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
             
             if (!prodBase) {
@@ -279,10 +337,7 @@
                 }
             }
 
-            if (!prodBase) {
-                showToast(diccionarios[currentLang].codigoNuevo, "info");
-                return; // Ya no permitimos agregar items que no sean piezas base existentes
-            }
+            if (!prodBase) return showToast(diccionarios[currentLang].codigoNuevo, "info");
 
             if (listaConteo.find(item => String(item.codigo) === String(prodBase.codigo))) {
                 const row = document.getElementById(`row_${prodBase.codigo}`);
@@ -337,24 +392,113 @@
             renderLista();
         };
 
+        // ==========================================
+        // CALCULADORA MULTIMODO Y VISUAL
+        // ==========================================
         window.abrirCalculadora = (codigo, varId) => {
             calcTarget = { codigo, varId };
-            ['calcFrente', 'calcFondo', 'calcNiveles'].forEach(id => document.getElementById(id).value = "");
+            
+            ['calcFrente', 'calcFondo', 'calcPzCama', 'calcNiveles', 'gridCols', 'gridFilas'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = (id === 'gridCols' || id === 'gridFilas') ? 4 : "";
+            });
+            document.getElementById('calcTarimas').value = "1";
             document.getElementById('calcAjuste').value = "0";
             document.getElementById('calcResultado').innerText = "0";
+            document.getElementById('gridContenedor').innerHTML = '';
+            gridActivos = 0;
+            
+            setCalcMode('bloque');
             document.getElementById('calcModal').classList.remove('hidden');
         };
 
         window.cerrarCalculadora = () => document.getElementById('calcModal').classList.add('hidden');
 
-        ['calcFrente', 'calcFondo', 'calcNiveles', 'calcAjuste'].forEach(id => {
-            document.getElementById(id).addEventListener('input', () => {
+        window.setCalcMode = (mode) => {
+            currentCalcMode = mode;
+            const tBloque = document.getElementById('tabBloque');
+            const tCama = document.getElementById('tabCama');
+            const tVisual = document.getElementById('tabVisual');
+            const zBloque = document.getElementById('zonaBloque');
+            const zCama = document.getElementById('zonaCama');
+            const zVisual = document.getElementById('zonaVisual');
+
+            // Limpiar estilos
+            [tBloque, tCama, tVisual].forEach(t => t.className = "tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider bg-transparent");
+            [zBloque, zCama, zVisual].forEach(z => { z.classList.add('hidden'); z.classList.remove('grid', 'flex'); });
+
+            // Activar seleccionado
+            if (mode === 'bloque') {
+                tBloque.classList.add('bg-blue-600', 'text-white');
+                tBloque.classList.remove('text-slate-400');
+                zBloque.classList.remove('hidden'); zBloque.classList.add('grid');
+            } else if (mode === 'cama') {
+                tCama.classList.add('bg-blue-600', 'text-white');
+                tCama.classList.remove('text-slate-400');
+                zCama.classList.remove('hidden'); zCama.classList.add('grid');
+            } else if (mode === 'visual') {
+                tVisual.classList.add('bg-blue-600', 'text-white');
+                tVisual.classList.remove('text-slate-400');
+                zVisual.classList.remove('hidden'); zVisual.classList.add('flex');
+                if(gridActivos === 0) generarGridVisual(); // Genera un grid default si está vacío
+            }
+            calcularEnVivo();
+        };
+
+        window.generarGridVisual = () => {
+            const cols = parseInt(document.getElementById('gridCols').value) || 1;
+            const filas = parseInt(document.getElementById('gridFilas').value) || 1;
+            const cont = document.getElementById('gridContenedor');
+            
+            if (cols > 20 || filas > 20) return showToast("Máximo 20x20", "error");
+
+            cont.innerHTML = '';
+            cont.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+            gridActivos = cols * filas;
+
+            for(let i=0; i < (cols * filas); i++) {
+                const btn = document.createElement('button');
+                // Botones redondos simulando envases/porrones
+                btn.className = 'w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-500 shadow-sm transition-colors border border-blue-600';
+                btn.onclick = function() {
+                    if(this.classList.contains('bg-blue-500')) {
+                        this.className = 'w-6 h-6 md:w-8 md:h-8 rounded-full bg-slate-700 shadow-inner transition-colors border border-slate-800 opacity-40';
+                        gridActivos--;
+                    } else {
+                        this.className = 'w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-500 shadow-sm transition-colors border border-blue-600';
+                        gridActivos++;
+                    }
+                    calcularEnVivo();
+                };
+                cont.appendChild(btn);
+            }
+            calcularEnVivo();
+        };
+
+        function calcularEnVivo() {
+            const n = parseInt(document.getElementById('calcNiveles').value) || 0;
+            const a = parseInt(document.getElementById('calcAjuste').value) || 0;
+            let subtotal = 0;
+
+            if (currentCalcMode === 'bloque') {
                 const f = parseInt(document.getElementById('calcFrente').value) || 0;
                 const d = parseInt(document.getElementById('calcFondo').value) || 0;
-                const n = parseInt(document.getElementById('calcNiveles').value) || 0;
-                const a = parseInt(document.getElementById('calcAjuste').value) || 0;
-                document.getElementById('calcResultado').innerText = Math.max(0, (f * d * n) + a);
-            });
+                subtotal = (f * d * n);
+            } else if (currentCalcMode === 'cama') {
+                const pz = parseInt(document.getElementById('calcPzCama').value) || 0;
+                const tarimas = parseInt(document.getElementById('calcTarimas').value) || 1; 
+                subtotal = (pz * n * tarimas);
+            } else if (currentCalcMode === 'visual') {
+                subtotal = (gridActivos * n);
+            }
+
+            document.getElementById('calcResultado').innerText = Math.max(0, subtotal + a);
+        }
+
+        // Asignar listeners a TODOS los inputs
+        ['calcFrente', 'calcFondo', 'calcPzCama', 'calcTarimas', 'calcNiveles', 'calcAjuste'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', calcularEnVivo);
         });
 
         window.aplicarCalculo = () => {
@@ -371,6 +515,9 @@
             cerrarCalculadora();
         };
 
+        // ==========================================
+        // DICTADO Y LISTA (Se mantienen igual)
+        // ==========================================
         window.iniciarDictado = (codigoProd, varId, btnElement) => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return showToast("No soportado", "error");
@@ -488,7 +635,7 @@
             prod.totalFisico = prod.variantes.reduce((sum, v) => sum + (v.pz * v.contadas), 0);
             const txtTotal = document.getElementById(`totFisico_${prod.codigo}`);
             if(txtTotal) txtTotal.innerText = prod.totalFisico;
-            renderLista(); // Re-renderizamos para actualizar badges y colores
+            renderLista();
         }
 
         window.eliminarDeLista = (codigoStr) => {
