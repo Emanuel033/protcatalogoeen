@@ -12,7 +12,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: contain; }
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         #reader { border: none !important; border-radius: 1rem; overflow: hidden; }
@@ -22,6 +22,31 @@
         .mic-active { animation: pulse-red 1.5s infinite; color: #ef4444 !important; }
         @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .tab-btn { transition: all 0.2s ease; }
+        
+        /* Base de la pieza en el lienzo */
+        .pieza-lienzo {
+            position: absolute;
+            background-color: #3b82f6;
+            border: 2px solid #60a5fa;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: grab;
+            user-select: none;
+            touch-action: none; /* Previene scroll al arrastrar */
+            transition: border-radius 0.2s ease, width 0.2s ease, height 0.2s ease;
+        }
+        .pieza-lienzo:active { cursor: grabbing; opacity: 0.9; transform: scale(1.05); }
+
+        /* Formas dinámicas */
+        .forma-circulo { width: 34px; height: 34px; border-radius: 50%; }
+        .forma-cuadrado { width: 34px; height: 34px; border-radius: 6px; }
+        .forma-rectangulo-h { width: 68px; height: 34px; border-radius: 6px; }
+        .forma-rectangulo-v { width: 34px; height: 68px; border-radius: 6px; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
@@ -92,7 +117,7 @@
                 <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700 overflow-x-auto custom-scroll">
                     <button id="tabBloque" onclick="setCalcMode('bloque')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg bg-blue-600 text-white font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoBloque">Bloque</button>
                     <button id="tabCama" onclick="setCalcMode('cama')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoCama">Cama Fija</button>
-                    <button id="tabVisual" onclick="setCalcMode('visual')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoVisual">Gráfico</button>
+                    <button id="tabVisual" onclick="setCalcMode('visual')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoVisual">Gráfico Libre</button>
                 </div>
 
                 <div id="zonaBloque" class="grid grid-cols-2 gap-3 text-center">
@@ -106,34 +131,45 @@
                     </div>
                 </div>
 
-                <div id="zonaCama" class="hidden grid grid-cols-2 gap-3 text-center">
+                <div id="zonaCama" class="hidden grid grid-cols-1 gap-3 text-center">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcPzCama">Pz por Cama</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcPzCama">Pz por Cama (Patrón)</label>
                         <input type="number" id="calcPzCama" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcTarimas">Tarimas (Fondo)</label>
-                        <input type="number" id="calcTarimas" value="1" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-purple-400">
                     </div>
                 </div>
 
-                <div id="zonaVisual" class="hidden flex flex-col gap-3">
-                    <div class="grid grid-cols-2 gap-3 text-center">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Columnas (X)</label>
-                            <input type="number" id="gridCols" value="4" class="w-full bg-slate-900 border border-slate-700 text-white p-2 rounded-xl text-center font-black focus:border-blue-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Filas (Y)</label>
-                            <input type="number" id="gridFilas" value="4" class="w-full bg-slate-900 border border-slate-700 text-white p-2 rounded-xl text-center font-black focus:border-blue-500 outline-none">
-                        </div>
-                    </div>
-                    <button onclick="generarGridVisual()" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 rounded-lg transition" data-i18n="btnDibujar">Dibujar Base</button>
+                <div id="zonaVisual" class="hidden flex flex-col gap-2">
                     
-                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 flex flex-col items-center">
-                        <p class="text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-widest text-center" data-i18n="txtTocaHueco">Toca para marcar huecos</p>
-                        <div id="gridContenedor" class="grid gap-1.5 justify-center overflow-x-auto p-2">
+                    <div class="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700 mb-1">
+                        <button onclick="setFormaVisual('circulo')" id="btnFormaCirculo" class="flex-1 py-2 rounded-lg bg-blue-600 text-white font-bold text-[10px] uppercase transition" title="Círculo"><i class="fas fa-circle"></i></button>
+                        <button onclick="setFormaVisual('cuadrado')" id="btnFormaCuadrado" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition" title="Cuadrado"><i class="fas fa-square"></i></button>
+                        <button onclick="setFormaVisual('rectangulo-h')" id="btnFormaRectH" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition" title="Rectángulo Horizontal"><span class="font-black text-sm leading-none">▬</span></button>
+                        <button onclick="setFormaVisual('rectangulo-v')" id="btnFormaRectV" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition" title="Rectángulo Vertical"><span class="font-black text-sm leading-none">▮</span></button>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="agregarPiezaLienzo()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black py-2.5 rounded-xl text-[11px] uppercase tracking-wider transition shadow-lg shadow-amber-500/20 flex justify-center items-center gap-2">
+                            <i class="fas fa-plus-circle"></i> <span data-i18n="btnAddPieza">Añadir Envase</span>
+                        </button>
+                        <button onclick="limpiarLienzo()" class="w-12 bg-slate-700 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-slate-900 p-2 rounded-2xl border border-slate-700 relative">
+                        <p class="absolute top-2 left-0 right-0 text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center pointer-events-none z-0" data-i18n="instruccionVisual">Arrastra los envases<br>Doble toque para eliminar</p>
+                        
+                        <div id="lienzoEstiba" class="w-full h-44 border-2 border-dashed border-slate-600 rounded-xl relative overflow-hidden z-10 bg-slate-900/50 touch-none">
                             </div>
+                    </div>
+                </div>
+
+                <div id="zonaTarimasFondo" class="hidden text-center mt-2 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
+                    <label class="block text-[10px] font-bold text-purple-400 uppercase mb-2" data-i18n="calcTarimas">Tarimas Hacia Atrás (Fondo)</label>
+                    <div class="flex items-center justify-center gap-3">
+                        <button onclick="ajustarTarimas(-1)" class="w-10 h-10 rounded-lg bg-slate-700 text-white"><i class="fas fa-minus"></i></button>
+                        <input type="number" id="calcTarimas" value="1" class="w-16 bg-slate-900 border border-slate-700 text-white p-2 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-purple-400" oninput="calcularEnVivo()">
+                        <button onclick="ajustarTarimas(1)" class="w-10 h-10 rounded-lg bg-slate-700 text-white"><i class="fas fa-plus"></i></button>
                     </div>
                 </div>
 
@@ -148,15 +184,15 @@
                     </div>
                 </div>
 
-                <div class="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6">
+                <div class="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6 shadow-inner">
                     <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Total Estimado</p>
                     <p class="text-4xl font-black text-white" id="calcResultado">0</p>
                 </div>
             </div>
 
             <div class="p-4 bg-slate-900/50 flex gap-3">
-                <button onclick="cerrarCalculadora()" class="flex-1 py-3 md:py-4 bg-slate-700 text-slate-300 font-bold rounded-2xl text-sm" data-i18n="btnCerrar">Cancelar</button>
-                <button onclick="aplicarCalculo()" class="flex-[2] py-3 md:py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20 text-sm" data-i18n="btnAplicar">Sumar</button>
+                <button onclick="cerrarCalculadora()" class="flex-1 py-3 md:py-4 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-2xl text-sm transition" data-i18n="btnCerrar">Cancelar</button>
+                <button onclick="aplicarCalculo()" class="flex-[2] py-3 md:py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20 text-sm transition" data-i18n="btnAplicar">Sumar</button>
             </div>
         </div>
     </div>
@@ -192,16 +228,16 @@
                 microNoSoportado: "No soportado",
                 tituloCalc: "Calculadora de Estiba",
                 modoBloque: "Bloque",
-                modoCama: "Cama Fija",
-                modoVisual: "Gráfico",
+                modoCama: "Cama Numérica",
+                modoVisual: "Lienzo Libre",
                 calcFrente: "Frente",
                 calcFondo: "Fondo",
                 calcPzCama: "Pz por Cama",
-                calcTarimas: "Tarimas",
-                calcNiveles: "Niveles (Alto)",
+                calcTarimas: "Tarimas Hacia Atrás (Fondo)",
+                calcNiveles: "Niveles (Capas)",
                 calcAjuste: "Ajuste (+/-)",
-                btnDibujar: "Dibujar Base",
-                txtTocaHueco: "Toca para marcar huecos",
+                btnAddPieza: "Añadir Envase",
+                instruccionVisual: "Arrastra los envases<br>Doble toque para eliminar",
                 btnAplicar: "Sumar al Conteo",
                 btnCerrar: "Cancelar"
             },
@@ -209,7 +245,7 @@
                 titulo: "Inventaire Continu",
                 buscarPlaceholder: "Rechercher...",
                 listaVacia: "La liste est vide.",
-                listaVaciaSub: "Seules las piezas base son permitidas.",
+                listaVaciaSub: "Seules las pièces base sont permises.",
                 btnGuardar: "Enregistrer",
                 stockSistema: "STOCK SYSTÈME",
                 totalFisico: "TOTAL PHYSIQUE",
@@ -232,24 +268,25 @@
                 tituloCalc: "Calculateur de Bloc",
                 modoBloque: "Bloc",
                 modoCama: "Lit Fixe",
-                modoVisual: "Graphique",
+                modoVisual: "Toile Libre",
                 calcFrente: "Face",
                 calcFondo: "Fond",
                 calcPzCama: "Pz par lit",
-                calcTarimas: "Palettes",
+                calcTarimas: "Palettes (Fond)",
                 calcNiveles: "Niveaux",
                 calcAjuste: "Ajuste (+/-)",
-                btnDibujar: "Dessiner Base",
-                txtTocaHueco: "Touchez pour marquer les creux",
+                btnAddPieza: "Ajouter Pièce",
+                instruccionVisual: "Faites glisser les conteneurs<br>Double tap pour supprimer",
                 btnAplicar: "Ajouter",
-                btnCerrar: "Fermer"
+                btnCerrar: "Annuler"
             }
         };
 
         let currentLang = 'es';
         let calcTarget = { codigo: null, varId: null };
         let currentCalcMode = 'bloque';
-        let gridActivos = 0; // Para el modo visual
+        let idPiezaLienzo = 0;
+        let formaVisualActual = 'circulo'; // circulo, cuadrado, rectangulo-h, rectangulo-v
         let catalogoEnMemoria = [];
         let listaConteo = [];
         let html5QrcodeScanner = null;
@@ -393,20 +430,23 @@
         };
 
         // ==========================================
-        // CALCULADORA MULTIMODO Y VISUAL
+        // CALCULADORA Y LIENZO DRAG & DROP
         // ==========================================
         window.abrirCalculadora = (codigo, varId) => {
             calcTarget = { codigo, varId };
             
-            ['calcFrente', 'calcFondo', 'calcPzCama', 'calcNiveles', 'gridCols', 'gridFilas'].forEach(id => {
+            // Reset inputs
+            ['calcFrente', 'calcFondo', 'calcPzCama', 'calcNiveles'].forEach(id => {
                 const el = document.getElementById(id);
-                if(el) el.value = (id === 'gridCols' || id === 'gridFilas') ? 4 : "";
+                if(el) el.value = "";
             });
             document.getElementById('calcTarimas').value = "1";
             document.getElementById('calcAjuste').value = "0";
             document.getElementById('calcResultado').innerText = "0";
-            document.getElementById('gridContenedor').innerHTML = '';
-            gridActivos = 0;
+            
+            // Reset lienzo visual
+            limpiarLienzo();
+            setFormaVisual('circulo'); // Default a circulo
             
             setCalcMode('bloque');
             document.getElementById('calcModal').classList.remove('hidden');
@@ -422,12 +462,15 @@
             const zBloque = document.getElementById('zonaBloque');
             const zCama = document.getElementById('zonaCama');
             const zVisual = document.getElementById('zonaVisual');
+            const zTarimas = document.getElementById('zonaTarimasFondo');
 
-            // Limpiar estilos
             [tBloque, tCama, tVisual].forEach(t => t.className = "tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider bg-transparent");
-            [zBloque, zCama, zVisual].forEach(z => { z.classList.add('hidden'); z.classList.remove('grid', 'flex'); });
+            
+            [zBloque, zCama, zVisual, zTarimas].forEach(z => { 
+                z.classList.add('hidden'); 
+                z.classList.remove('grid', 'flex'); 
+            });
 
-            // Activar seleccionado
             if (mode === 'bloque') {
                 tBloque.classList.add('bg-blue-600', 'text-white');
                 tBloque.classList.remove('text-slate-400');
@@ -436,44 +479,143 @@
                 tCama.classList.add('bg-blue-600', 'text-white');
                 tCama.classList.remove('text-slate-400');
                 zCama.classList.remove('hidden'); zCama.classList.add('grid');
+                zTarimas.classList.remove('hidden');
             } else if (mode === 'visual') {
                 tVisual.classList.add('bg-blue-600', 'text-white');
                 tVisual.classList.remove('text-slate-400');
                 zVisual.classList.remove('hidden'); zVisual.classList.add('flex');
-                if(gridActivos === 0) generarGridVisual(); // Genera un grid default si está vacío
+                zTarimas.classList.remove('hidden');
             }
             calcularEnVivo();
         };
 
-        window.generarGridVisual = () => {
-            const cols = parseInt(document.getElementById('gridCols').value) || 1;
-            const filas = parseInt(document.getElementById('gridFilas').value) || 1;
-            const cont = document.getElementById('gridContenedor');
+        // Nuevo Cambiador de formas (4 opciones independientes)
+        window.setFormaVisual = (forma) => {
+            formaVisualActual = forma;
+            const btnC = document.getElementById('btnFormaCirculo');
+            const btnQ = document.getElementById('btnFormaCuadrado');
+            const btnRH = document.getElementById('btnFormaRectH');
+            const btnRV = document.getElementById('btnFormaRectV');
+
+            [btnC, btnQ, btnRH, btnRV].forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white');
+                b.classList.add('text-slate-400');
+            });
+
+            if(forma === 'circulo') { btnC.classList.add('bg-blue-600', 'text-white'); btnC.classList.remove('text-slate-400'); }
+            else if(forma === 'cuadrado') { btnQ.classList.add('bg-blue-600', 'text-white'); btnQ.classList.remove('text-slate-400'); }
+            else if(forma === 'rectangulo-h') { btnRH.classList.add('bg-blue-600', 'text-white'); btnRH.classList.remove('text-slate-400'); }
+            else if(forma === 'rectangulo-v') { btnRV.classList.add('bg-blue-600', 'text-white'); btnRV.classList.remove('text-slate-400'); }
+        };
+
+        window.ajustarTarimas = (delta) => {
+            const input = document.getElementById('calcTarimas');
+            let val = parseInt(input.value) || 1;
+            val += delta;
+            if (val < 1) val = 1;
+            input.value = val;
+            calcularEnVivo();
+        };
+
+        // Lógica del Lienzo Drag & Drop
+        window.agregarPiezaLienzo = () => {
+            idPiezaLienzo++;
+            const lienzo = document.getElementById('lienzoEstiba');
+            const pieza = document.createElement('div');
             
-            if (cols > 20 || filas > 20) return showToast("Máximo 20x20", "error");
+            // Asigna la forma seleccionada actualmente
+            pieza.className = `pieza-lienzo forma-${formaVisualActual}`;
+            pieza.innerText = idPiezaLienzo;
+            
+            // Spawnea un poco aleatorio en el centro
+            const offset = Math.floor(Math.random() * 20) - 10;
+            pieza.style.left = `calc(50% - 16px + ${offset}px)`;
+            pieza.style.top = `calc(50% - 16px + ${offset}px)`;
 
-            cont.innerHTML = '';
-            cont.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
-            gridActivos = cols * filas;
-
-            for(let i=0; i < (cols * filas); i++) {
-                const btn = document.createElement('button');
-                // Botones redondos simulando envases/porrones
-                btn.className = 'w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-500 shadow-sm transition-colors border border-blue-600';
-                btn.onclick = function() {
-                    if(this.classList.contains('bg-blue-500')) {
-                        this.className = 'w-6 h-6 md:w-8 md:h-8 rounded-full bg-slate-700 shadow-inner transition-colors border border-slate-800 opacity-40';
-                        gridActivos--;
-                    } else {
-                        this.className = 'w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-500 shadow-sm transition-colors border border-blue-600';
-                        gridActivos++;
-                    }
-                    calcularEnVivo();
-                };
-                cont.appendChild(btn);
-            }
+            hacerArrastrable(pieza);
+            lienzo.appendChild(pieza);
             calcularEnVivo();
         };
+
+        window.limpiarLienzo = () => {
+            document.getElementById('lienzoEstiba').innerHTML = '';
+            idPiezaLienzo = 0;
+            calcularEnVivo();
+        };
+
+        function hacerArrastrable(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            elmnt.onmousedown = (e) => {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = cerrarArrastre;
+                document.onmousemove = arrastrarMouse;
+            };
+
+            elmnt.addEventListener('touchstart', (e) => {
+                e.preventDefault(); 
+                pos3 = e.touches[0].clientX;
+                pos4 = e.touches[0].clientY;
+                document.addEventListener('touchend', cerrarArrastre, {passive: false});
+                document.addEventListener('touchmove', arrastrarTouch, {passive: false});
+            }, {passive: false});
+
+            function arrastrarMouse(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                aplicarPosicion();
+            }
+
+            function arrastrarTouch(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.touches[0].clientX;
+                pos2 = pos4 - e.touches[0].clientY;
+                pos3 = e.touches[0].clientX;
+                pos4 = e.touches[0].clientY;
+                aplicarPosicion();
+            }
+
+            function aplicarPosicion() {
+                const lienzo = document.getElementById('lienzoEstiba');
+                let newTop = elmnt.offsetTop - pos2;
+                let newLeft = elmnt.offsetLeft - pos1;
+                
+                if (newTop < 0) newTop = 0;
+                if (newLeft < 0) newLeft = 0;
+                if (newTop > lienzo.clientHeight - elmnt.clientHeight) newTop = lienzo.clientHeight - elmnt.clientHeight;
+                if (newLeft > lienzo.clientWidth - elmnt.clientWidth) newLeft = lienzo.clientWidth - elmnt.clientWidth;
+
+                elmnt.style.top = newTop + "px";
+                elmnt.style.left = newLeft + "px";
+            }
+
+            function cerrarArrastre() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                document.removeEventListener('touchend', cerrarArrastre);
+                document.removeEventListener('touchmove', arrastrarTouch);
+            }
+
+            // Eliminar pieza
+            let ultimoTap = 0;
+            elmnt.addEventListener('touchend', function(e) {
+                let tiempoActual = new Date().getTime();
+                let tiempoTap = tiempoActual - ultimoTap;
+                if (tiempoTap < 300 && tiempoTap > 0) {
+                    elmnt.remove();
+                    calcularEnVivo();
+                }
+                ultimoTap = tiempoActual;
+            });
+            elmnt.ondblclick = () => { elmnt.remove(); calcularEnVivo(); };
+        }
 
         function calcularEnVivo() {
             const n = parseInt(document.getElementById('calcNiveles').value) || 0;
@@ -489,13 +631,14 @@
                 const tarimas = parseInt(document.getElementById('calcTarimas').value) || 1; 
                 subtotal = (pz * n * tarimas);
             } else if (currentCalcMode === 'visual') {
-                subtotal = (gridActivos * n);
+                const pzEnLienzo = document.querySelectorAll('.pieza-lienzo').length;
+                const tarimas = parseInt(document.getElementById('calcTarimas').value) || 1;
+                subtotal = (pzEnLienzo * n * tarimas);
             }
 
             document.getElementById('calcResultado').innerText = Math.max(0, subtotal + a);
         }
 
-        // Asignar listeners a TODOS los inputs
         ['calcFrente', 'calcFondo', 'calcPzCama', 'calcTarimas', 'calcNiveles', 'calcAjuste'].forEach(id => {
             const el = document.getElementById(id);
             if(el) el.addEventListener('input', calcularEnVivo);
@@ -516,7 +659,7 @@
         };
 
         // ==========================================
-        // DICTADO Y LISTA (Se mantienen igual)
+        // DICTADO DE VOZ Y RENDERIZADO
         // ==========================================
         window.iniciarDictado = (codigoProd, varId, btnElement) => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
