@@ -12,7 +12,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: contain; }
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         #reader { border: none !important; border-radius: 1rem; overflow: hidden; }
@@ -22,6 +22,27 @@
         .mic-active { animation: pulse-red 1.5s infinite; color: #ef4444 !important; }
         @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .tab-btn { transition: all 0.2s ease; }
+        
+        /* Efecto de las piezas en el lienzo */
+        .pieza-lienzo {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background-color: #3b82f6;
+            border: 2px solid #60a5fa;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: grab;
+            user-select: none;
+            touch-action: none; /* Previene scroll al arrastrar */
+        }
+        .pieza-lienzo:active { cursor: grabbing; opacity: 0.9; transform: scale(1.05); }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
@@ -80,18 +101,19 @@
         <datalist id="opcionesProductos"></datalist>
     </main>
 
-    <div id="calcModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden">
+    <div id="calcModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-2 md:p-4 overflow-y-auto">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden my-auto">
             
-            <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+            <div class="p-4 md:p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
                 <h3 class="font-black text-lg text-white" data-i18n="tituloCalc">Calculadora de Estiba</h3>
                 <button onclick="cerrarCalculadora()" class="text-slate-400 hover:text-white w-10 h-10 rounded-full bg-slate-700/50 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="p-5 space-y-4">
-                <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700">
-                    <button id="tabBloque" onclick="setCalcMode('bloque')" class="tab-btn flex-1 py-2.5 rounded-lg bg-blue-600 text-white font-black text-xs uppercase tracking-wider" data-i18n="modoBloque">Bloque (LxA)</button>
-                    <button id="tabCama" onclick="setCalcMode('cama')" class="tab-btn flex-1 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-xs uppercase tracking-wider" data-i18n="modoCama">Cama Fija</button>
+            <div class="p-4 md:p-5 space-y-4">
+                <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700 overflow-x-auto custom-scroll">
+                    <button id="tabBloque" onclick="setCalcMode('bloque')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg bg-blue-600 text-white font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoBloque">Bloque</button>
+                    <button id="tabCama" onclick="setCalcMode('cama')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoCama">Cama Fija</button>
+                    <button id="tabVisual" onclick="setCalcMode('visual')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoVisual">Gráfico Libre</button>
                 </div>
 
                 <div id="zonaBloque" class="grid grid-cols-2 gap-3 text-center">
@@ -105,14 +127,37 @@
                     </div>
                 </div>
 
-                <div id="zonaCama" class="hidden grid grid-cols-2 gap-3 text-center">
+                <div id="zonaCama" class="hidden grid grid-cols-1 gap-3 text-center">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcPzCama">Pz por Cama</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcPzCama">Pz por Cama (Patrón)</label>
                         <input type="number" id="calcPzCama" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-amber-400">
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcTarimas">Tarimas (Fondo)</label>
-                        <input type="number" id="calcTarimas" value="1" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-purple-400">
+                </div>
+
+                <div id="zonaVisual" class="hidden flex flex-col gap-2">
+                    <div class="flex gap-2">
+                        <button onclick="agregarPiezaLienzo()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black py-2.5 rounded-xl text-[11px] uppercase tracking-wider transition shadow-lg shadow-amber-500/20 flex justify-center items-center gap-2">
+                            <i class="fas fa-plus-circle"></i> <span data-i18n="btnAddPieza">Añadir Envase</span>
+                        </button>
+                        <button onclick="limpiarLienzo()" class="w-12 bg-slate-700 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-slate-900 p-2 rounded-2xl border border-slate-700 relative">
+                        <p class="absolute top-2 left-0 right-0 text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center pointer-events-none z-0" data-i18n="instruccionVisual">Arrastra los envases<br>Doble toque para eliminar</p>
+                        
+                        <div id="lienzoEstiba" class="w-full h-40 border-2 border-dashed border-slate-600 rounded-xl relative overflow-hidden z-10 bg-slate-900/50 touch-none">
+                            </div>
+                    </div>
+                </div>
+
+                <div id="zonaTarimasFondo" class="hidden text-center mt-2 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
+                    <label class="block text-[10px] font-bold text-purple-400 uppercase mb-2" data-i18n="calcTarimas">Tarimas Hacia Atrás (Fondo)</label>
+                    <div class="flex items-center justify-center gap-3">
+                        <button onclick="ajustarTarimas(-1)" class="w-10 h-10 rounded-lg bg-slate-700 text-white"><i class="fas fa-minus"></i></button>
+                        <input type="number" id="calcTarimas" value="1" class="w-16 bg-slate-900 border border-slate-700 text-white p-2 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-purple-400" oninput="calcularEnVivo()">
+                        <button onclick="ajustarTarimas(1)" class="w-10 h-10 rounded-lg bg-slate-700 text-white"><i class="fas fa-plus"></i></button>
                     </div>
                 </div>
 
@@ -127,15 +172,15 @@
                     </div>
                 </div>
 
-                <div class="bg-blue-600/20 border border-blue-500/30 p-4 rounded-2xl text-center mt-2">
-                    <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Estimado</p>
+                <div class="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6 shadow-inner">
+                    <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Total Estimado</p>
                     <p class="text-4xl font-black text-white" id="calcResultado">0</p>
                 </div>
             </div>
 
-            <div class="p-6 bg-slate-900/50 flex gap-3">
-                <button onclick="cerrarCalculadora()" class="flex-1 py-4 bg-slate-700 text-slate-300 font-bold rounded-2xl" data-i18n="btnCerrar">Cerrar</button>
-                <button onclick="aplicarCalculo()" class="flex-[2] py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20" data-i18n="btnAplicar">Sumar</button>
+            <div class="p-4 bg-slate-900/50 flex gap-3">
+                <button onclick="cerrarCalculadora()" class="flex-1 py-3 md:py-4 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-2xl text-sm transition" data-i18n="btnCerrar">Cancelar</button>
+                <button onclick="aplicarCalculo()" class="flex-[2] py-3 md:py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20 text-sm transition" data-i18n="btnAplicar">Sumar</button>
             </div>
         </div>
     </div>
@@ -170,14 +215,17 @@
                 noEntendido: "No entendí",
                 microNoSoportado: "No soportado",
                 tituloCalc: "Calculadora de Estiba",
-                modoBloque: "Bloque (LxA)",
-                modoCama: "Cama Fija",
+                modoBloque: "Bloque",
+                modoCama: "Cama Numérica",
+                modoVisual: "Lienzo Libre",
                 calcFrente: "Frente",
                 calcFondo: "Fondo",
                 calcPzCama: "Pz por Cama",
-                calcTarimas: "Tarimas (Fondo)",
-                calcNiveles: "Niveles (Alto)",
+                calcTarimas: "Tarimas Hacia Atrás (Fondo)",
+                calcNiveles: "Niveles (Capas)",
                 calcAjuste: "Ajuste (+/-)",
+                btnAddPieza: "Añadir Envase",
+                instruccionVisual: "Arrastra los envases<br>Doble toque para eliminar",
                 btnAplicar: "Sumar al Conteo",
                 btnCerrar: "Cancelar"
             },
@@ -185,7 +233,7 @@
                 titulo: "Inventaire Continu",
                 buscarPlaceholder: "Rechercher...",
                 listaVacia: "La liste est vide.",
-                listaVaciaSub: "Seules las piezas base son permitidas.",
+                listaVaciaSub: "Seules las pièces base sont permises.",
                 btnGuardar: "Enregistrer",
                 stockSistema: "STOCK SYSTÈME",
                 totalFisico: "TOTAL PHYSIQUE",
@@ -206,22 +254,26 @@
                 noEntendido: "Pas compris",
                 microNoSoportado: "Pas supporté",
                 tituloCalc: "Calculateur de Bloc",
-                modoBloque: "Bloc (LxL)",
+                modoBloque: "Bloc",
                 modoCama: "Lit Fixe",
+                modoVisual: "Toile Libre",
                 calcFrente: "Face",
                 calcFondo: "Fond",
                 calcPzCama: "Pz par lit",
                 calcTarimas: "Palettes (Fond)",
                 calcNiveles: "Niveaux",
                 calcAjuste: "Ajuste (+/-)",
+                btnAddPieza: "Ajouter Pièce",
+                instruccionVisual: "Faites glisser les conteneurs<br>Double tap pour supprimer",
                 btnAplicar: "Ajouter",
-                btnCerrar: "Fermer"
+                btnCerrar: "Annuler"
             }
         };
 
         let currentLang = 'es';
         let calcTarget = { codigo: null, varId: null };
         let currentCalcMode = 'bloque';
+        let idPiezaLienzo = 0; // ID autoincremental para las piezas gráficas
         let catalogoEnMemoria = [];
         let listaConteo = [];
         let html5QrcodeScanner = null;
@@ -365,15 +417,22 @@
         };
 
         // ==========================================
-        // CALCULADORA MULTIMODO Y EN VIVO
+        // CALCULADORA Y LIENZO DRAG & DROP
         // ==========================================
         window.abrirCalculadora = (codigo, varId) => {
             calcTarget = { codigo, varId };
             
-            ['calcFrente', 'calcFondo', 'calcPzCama', 'calcNiveles'].forEach(id => document.getElementById(id).value = "");
-            document.getElementById('calcTarimas').value = "1"; // Default es 1 tarima
+            // Reset inputs
+            ['calcFrente', 'calcFondo', 'calcPzCama', 'calcNiveles'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = "";
+            });
+            document.getElementById('calcTarimas').value = "1";
             document.getElementById('calcAjuste').value = "0";
             document.getElementById('calcResultado').innerText = "0";
+            
+            // Reset lienzo visual
+            limpiarLienzo();
             
             setCalcMode('bloque');
             document.getElementById('calcModal').classList.remove('hidden');
@@ -383,28 +442,152 @@
 
         window.setCalcMode = (mode) => {
             currentCalcMode = mode;
-            const tabBloque = document.getElementById('tabBloque');
-            const tabCama = document.getElementById('tabCama');
-            const zonaBloque = document.getElementById('zonaBloque');
-            const zonaCama = document.getElementById('zonaCama');
+            const tBloque = document.getElementById('tabBloque');
+            const tCama = document.getElementById('tabCama');
+            const tVisual = document.getElementById('tabVisual');
+            const zBloque = document.getElementById('zonaBloque');
+            const zCama = document.getElementById('zonaCama');
+            const zVisual = document.getElementById('zonaVisual');
+            const zTarimas = document.getElementById('zonaTarimasFondo');
 
+            // Limpiar estilos tabs
+            [tBloque, tCama, tVisual].forEach(t => t.className = "tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider bg-transparent");
+            
+            // Ocultar zonas
+            [zBloque, zCama, zVisual, zTarimas].forEach(z => { 
+                z.classList.add('hidden'); 
+                z.classList.remove('grid', 'flex'); 
+            });
+
+            // Activar modo seleccionado
             if (mode === 'bloque') {
-                tabBloque.className = "tab-btn flex-1 py-2.5 rounded-lg bg-blue-600 text-white font-black text-xs uppercase tracking-wider";
-                tabCama.className = "tab-btn flex-1 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-xs uppercase tracking-wider bg-transparent";
-                zonaBloque.classList.remove('hidden');
-                zonaBloque.classList.add('grid');
-                zonaCama.classList.add('hidden');
-                zonaCama.classList.remove('grid');
-            } else {
-                tabCama.className = "tab-btn flex-1 py-2.5 rounded-lg bg-blue-600 text-white font-black text-xs uppercase tracking-wider";
-                tabBloque.className = "tab-btn flex-1 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-xs uppercase tracking-wider bg-transparent";
-                zonaCama.classList.remove('hidden');
-                zonaCama.classList.add('grid');
-                zonaBloque.classList.add('hidden');
-                zonaBloque.classList.remove('grid');
+                tBloque.classList.add('bg-blue-600', 'text-white');
+                tBloque.classList.remove('text-slate-400');
+                zBloque.classList.remove('hidden'); zBloque.classList.add('grid');
+            } else if (mode === 'cama') {
+                tCama.classList.add('bg-blue-600', 'text-white');
+                tCama.classList.remove('text-slate-400');
+                zCama.classList.remove('hidden'); zCama.classList.add('grid');
+                zTarimas.classList.remove('hidden'); // Las tarimas de fondo aplican a la cama
+            } else if (mode === 'visual') {
+                tVisual.classList.add('bg-blue-600', 'text-white');
+                tVisual.classList.remove('text-slate-400');
+                zVisual.classList.remove('hidden'); zVisual.classList.add('flex');
+                zTarimas.classList.remove('hidden'); // Las tarimas de fondo aplican al lienzo visual
             }
             calcularEnVivo();
         };
+
+        window.ajustarTarimas = (delta) => {
+            const input = document.getElementById('calcTarimas');
+            let val = parseInt(input.value) || 1;
+            val += delta;
+            if (val < 1) val = 1;
+            input.value = val;
+            calcularEnVivo();
+        };
+
+        // Lógica del Lienzo Drag & Drop
+        window.agregarPiezaLienzo = () => {
+            idPiezaLienzo++;
+            const lienzo = document.getElementById('lienzoEstiba');
+            const pieza = document.createElement('div');
+            pieza.className = 'pieza-lienzo';
+            pieza.innerText = idPiezaLienzo;
+            
+            // Spawnea un poco aleatorio en el centro para que no se encimen perfecto
+            const offset = Math.floor(Math.random() * 20) - 10;
+            pieza.style.left = `calc(50% - 16px + ${offset}px)`;
+            pieza.style.top = `calc(50% - 16px + ${offset}px)`;
+
+            hacerArrastrable(pieza);
+            lienzo.appendChild(pieza);
+            calcularEnVivo();
+        };
+
+        window.limpiarLienzo = () => {
+            document.getElementById('lienzoEstiba').innerHTML = '';
+            idPiezaLienzo = 0;
+            calcularEnVivo();
+        };
+
+        function hacerArrastrable(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            // Eventos para mouse
+            elmnt.onmousedown = (e) => {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = cerrarArrastre;
+                document.onmousemove = arrastrarMouse;
+            };
+
+            // Eventos para touch (Tablets/Celulares)
+            elmnt.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Evita scroll de pantalla
+                pos3 = e.touches[0].clientX;
+                pos4 = e.touches[0].clientY;
+                document.addEventListener('touchend', cerrarArrastre, {passive: false});
+                document.addEventListener('touchmove', arrastrarTouch, {passive: false});
+            }, {passive: false});
+
+            function arrastrarMouse(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                aplicarPosicion();
+            }
+
+            function arrastrarTouch(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.touches[0].clientX;
+                pos2 = pos4 - e.touches[0].clientY;
+                pos3 = e.touches[0].clientX;
+                pos4 = e.touches[0].clientY;
+                aplicarPosicion();
+            }
+
+            function aplicarPosicion() {
+                // Limitamos que no se salga del contenedor padre
+                const lienzo = document.getElementById('lienzoEstiba');
+                let newTop = elmnt.offsetTop - pos2;
+                let newLeft = elmnt.offsetLeft - pos1;
+                
+                // Limites
+                if (newTop < 0) newTop = 0;
+                if (newLeft < 0) newLeft = 0;
+                if (newTop > lienzo.clientHeight - elmnt.clientHeight) newTop = lienzo.clientHeight - elmnt.clientHeight;
+                if (newLeft > lienzo.clientWidth - elmnt.clientWidth) newLeft = lienzo.clientWidth - elmnt.clientWidth;
+
+                elmnt.style.top = newTop + "px";
+                elmnt.style.left = newLeft + "px";
+            }
+
+            function cerrarArrastre() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                document.removeEventListener('touchend', cerrarArrastre);
+                document.removeEventListener('touchmove', arrastrarTouch);
+            }
+
+            // Eliminar pieza con doble click o doble tap
+            let ultimoTap = 0;
+            elmnt.addEventListener('touchend', function(e) {
+                let tiempoActual = new Date().getTime();
+                let tiempoTap = tiempoActual - ultimoTap;
+                if (tiempoTap < 300 && tiempoTap > 0) { // Doble tap detectado
+                    elmnt.remove();
+                    calcularEnVivo();
+                }
+                ultimoTap = tiempoActual;
+            });
+            elmnt.ondblclick = () => { elmnt.remove(); calcularEnVivo(); };
+        }
 
         function calcularEnVivo() {
             const n = parseInt(document.getElementById('calcNiveles').value) || 0;
@@ -415,18 +598,24 @@
                 const f = parseInt(document.getElementById('calcFrente').value) || 0;
                 const d = parseInt(document.getElementById('calcFondo').value) || 0;
                 subtotal = (f * d * n);
-            } else {
+            } else if (currentCalcMode === 'cama') {
                 const pz = parseInt(document.getElementById('calcPzCama').value) || 0;
-                const tarimas = parseInt(document.getElementById('calcTarimas').value) || 1; // Aquí entra la columna de fondo
+                const tarimas = parseInt(document.getElementById('calcTarimas').value) || 1; 
                 subtotal = (pz * n * tarimas);
+            } else if (currentCalcMode === 'visual') {
+                // Cuenta cuántas piezas de UI arrastrables existen en el lienzo
+                const pzEnLienzo = document.querySelectorAll('.pieza-lienzo').length;
+                const tarimas = parseInt(document.getElementById('calcTarimas').value) || 1;
+                subtotal = (pzEnLienzo * n * tarimas);
             }
 
             document.getElementById('calcResultado').innerText = Math.max(0, subtotal + a);
         }
 
-        // Asignar listeners a TODOS los inputs de la calculadora
-        ['calcFrente', 'calcFondo', 'calcPzCama', 'calcTarimas', 'calcNiveles', 'calcAjuste'].forEach(id => {
-            document.getElementById(id).addEventListener('input', calcularEnVivo);
+        // Asignar listeners a los inputs tradicionales
+        ['calcFrente', 'calcFondo', 'calcPzCama', 'calcNiveles', 'calcAjuste'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', calcularEnVivo);
         });
 
         window.aplicarCalculo = () => {
@@ -444,7 +633,7 @@
         };
 
         // ==========================================
-        // DICTADO DE VOZ
+        // DICTADO DE VOZ Y RENDERIZADO
         // ==========================================
         window.iniciarDictado = (codigoProd, varId, btnElement) => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -462,9 +651,6 @@
             recognition.start();
         };
 
-        // ==========================================
-        // RENDER DE LISTA
-        // ==========================================
         function renderLista() {
             const container = document.getElementById('listaInventario');
             const empty = document.getElementById('emptyState');
