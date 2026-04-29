@@ -3,221 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lector de Inventario - EEN</title>
+    <title>Auditoría Continua - EEN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; -webkit-tap-highlight-color: transparent; }
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        #reader { border: none !important; border-radius: 1.5rem; overflow: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        #reader { border: none !important; border-radius: 1rem; overflow: hidden; }
         #reader video { object-fit: cover; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .mic-active { animation: pulse-red 1.5s infinite; color: #ef4444 !important; }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
 
     <script src="assets/js/firebase-config.js"></script>
 
-    <header class="bg-white border-b border-slate-200 px-4 py-4 flex flex-col md:flex-row md:justify-between items-center z-20 shrink-0 shadow-sm gap-4">
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-4 flex flex-col md:flex-row md:justify-between items-center z-20 shrink-0 gap-4">
         <div class="flex items-center gap-3 w-full md:w-auto">
-            <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-200 shrink-0">
-                <i class="fas fa-boxes text-lg"></i>
+            <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-900/50 shrink-0">
+                <i class="fas fa-clipboard-list text-xl"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Almacén EEN</h1>
-                <p class="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1" id="catStatus">Conectando catálogo...</p>
+                <h1 class="text-xl font-black tracking-tight leading-none" data-i18n="titulo">Inventario Continuo</h1>
+                <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1" id="catStatus">Cargando catálogo...</p>
             </div>
         </div>
         
-        <div class="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
-            <button onclick="switchTab('auditoria')" id="tab-btn-auditoria" class="flex-1 md:w-40 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-blue-600 transition-all">Auditoría</button>
-            <button onclick="switchTab('cambios')" id="tab-btn-cambios" class="flex-1 md:w-40 py-2 text-sm font-bold rounded-lg text-slate-500 hover:text-slate-700 transition-all">Cambios (Trueque)</button>
+        <div class="flex gap-3 w-full md:w-auto flex-wrap">
+            <button onclick="toggleLang()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2">
+                <span id="langFlag">🇲🇽</span> <span id="langText">ES</span>
+            </button>
+            <button onclick="descargarCSVLocal()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold shadow-lg shadow-blue-900/20 transition-all flex items-center gap-2">
+                <i class="fas fa-file-excel"></i> <span>CSV</span>
+            </button>
+            <button onclick="enviarAuditoriaLote()" class="flex-1 md:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition-all">
+                <i class="fas fa-cloud-upload-alt mr-2"></i><span data-i18n="btnGuardar">Guardar Nube</span>
+            </button>
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto custom-scroll p-4 md:p-8 w-full max-w-[1400px] mx-auto relative">
+    <main class="flex-1 overflow-y-auto custom-scroll p-4 max-w-5xl mx-auto w-full flex flex-col gap-6 relative">
         
-        <div id="view-auditoria" class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-max fade-in">
-            <div class="lg:col-span-5 flex flex-col gap-6 h-max">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col">
-                    <div class="flex items-center gap-3 mb-5">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl"><i class="fas fa-clipboard-check"></i></div>
-                        <div>
-                            <h2 class="font-black text-slate-900 text-lg leading-tight">Conteo Físico</h2>
-                            <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Reporte de Inventario</p>
-                        </div>
-                    </div>
-                    
-                    <div id="readerWrapper" class="w-full bg-slate-900 rounded-3xl overflow-hidden aspect-square md:aspect-video flex items-center justify-center relative shadow-inner">
-                        <i class="fas fa-qrcode text-slate-700 text-6xl"></i>
-                        <div id="reader" class="absolute inset-0 w-full h-full object-cover"></div>
-                    </div>
-                    
-                    <div class="mt-5 flex gap-3">
-                        <button id="btnStartScan" onclick="startScanner()" class="bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl font-bold shadow-lg shadow-slate-900/20 transition-all w-full flex items-center justify-center gap-2 text-sm"><i class="fas fa-camera"></i> Activar Lector</button>
-                        <button id="btnStopScan" onclick="stopScanner()" class="bg-red-50 hover:bg-red-100 text-red-600 py-4 rounded-2xl font-bold transition-all w-full flex items-center justify-center gap-2 hidden text-sm"><i class="fas fa-times"></i> Detener Cámara</button>
-                    </div>
-
-                   <div class="mt-4 relative">
-                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="manualCode" list="opcionesProductos" placeholder="Busca por nombre o código..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all" onkeypress="if(event.key === 'Enter') procesarCodigo(this.value)" onchange="verificarSeleccion(this.value, 'auditoria')">
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col relative min-h-[320px] transition-all" id="resultCard">
-                    <div id="scanIdle" class="text-slate-300 flex flex-col items-center justify-center h-full my-12 transition-all">
-                        <div class="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100 shadow-inner" id="scanIdleIconContainer"><i class="fas fa-box-open text-4xl" id="scanIdleIcon"></i></div>
-                        <p class="font-bold text-sm text-slate-400" id="scanIdleText">Esperando producto a auditar...</p>
-                    </div>
-
-                    <div id="scanResult" class="hidden w-full fade-in flex flex-col">
-                        <div class="flex items-start gap-4 mb-5 border-b border-slate-100 pb-5">
-                            <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100"><i class="fas fa-cube text-blue-500 text-2xl"></i></div>
-                            <div class="flex-1 min-w-0 pt-1">
-                                <h4 id="scanProductName" class="text-lg font-black text-slate-900 leading-tight mb-2 truncate">Producto</h4>
-                                <span id="scanProductCode" class="inline-block font-mono text-[10px] text-blue-700 bg-blue-50 px-2 py-1 rounded-md font-bold border border-blue-100"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <p class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-3"><i class="fas fa-layer-group text-blue-500 mr-1"></i> Desglose de Cajas/Sueltas en estante:</p>
-                            <div id="scanVariantsList" class="space-y-2"></div>
-                        </div>
-
-                        <div class="bg-slate-900 rounded-2xl p-4 sm:p-5 mb-5 flex justify-between items-center shadow-lg shadow-slate-900/10">
-                            <span class="text-sm font-bold text-emerald-400 uppercase tracking-wider"><i class="fas fa-clipboard-check mr-1"></i> Total Físico:</span>
-                            <span class="text-4xl font-black text-white leading-none"><span id="scanTotalMove">0</span><span class="text-[12px] text-slate-500 ml-1">pz</span></span>
-                        </div>
-                        
-                        <div class="mt-2 w-full">
-                            <button onclick="levantarAuditoria()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-black shadow-lg shadow-indigo-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"><i class="fas fa-paper-plane"></i> Enviar Reporte a Administración</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-7 bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full lg:max-h-[850px]">
-                <div class="flex justify-between items-center mb-5 shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-slate-50 text-slate-600 flex items-center justify-center border border-slate-100"><i class="fas fa-history"></i></div>
-                        <div>
-                            <h3 class="font-black text-slate-900 text-lg leading-tight">Auditorías Pendientes</h3>
-                            <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">En espera de autorización</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="border border-slate-100 rounded-2xl overflow-hidden flex-1 flex flex-col bg-slate-50/50 relative">
-                    <div class="overflow-y-auto flex-1 custom-scroll p-3 sm:p-4">
-                        <div class="space-y-3" id="auditoriasCards">
-                            <div class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin text-3xl mb-3"></i><br>Cargando registros...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-cambios" class="hidden max-w-5xl mx-auto h-max fade-in flex-col gap-6">
-            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200">
-                <div class="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl"><i class="fas fa-exchange-alt"></i></div>
-                    <div>
-                        <h2 class="font-black text-slate-900 text-lg leading-tight">Cambio Múltiple de Mercancía</h2>
-                        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Agrega todo lo que entra y lo que sale</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-emerald-50/30 p-4 sm:p-5 rounded-2xl border border-emerald-100 flex flex-col h-full">
-                        <h3 class="text-sm font-black text-emerald-700 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-arrow-down"></i> Productos que ENTRAN</h3>
-                        
-                        <div class="relative mb-4 flex gap-2">
-                            <div class="relative flex-1">
-                                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="inputBusquedaEntra" list="opcionesProductos" placeholder="Buscar para agregar..." class="w-full bg-white border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                            </div>
-                            <button onclick="agregarListaCambio('in')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 rounded-xl font-bold shadow-sm transition-all"><i class="fas fa-plus"></i></button>
-                        </div>
-
-                        <div class="flex-1 bg-white rounded-xl border border-emerald-100 p-2 overflow-y-auto custom-scroll min-h-[150px] max-h-[250px] space-y-2" id="listaEntranHtml">
-                            <div class="text-center py-6 text-slate-400 text-xs font-bold">Sin productos. <br>Busca y presiona el botón <i class="fas fa-plus"></i></div>
-                        </div>
-                    </div>
-
-                    <div class="bg-red-50/30 p-4 sm:p-5 rounded-2xl border border-red-100 flex flex-col h-full">
-                        <h3 class="text-sm font-black text-red-700 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-arrow-up"></i> Productos que SALEN</h3>
-                        
-                        <div class="relative mb-4 flex gap-2">
-                            <div class="relative flex-1">
-                                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="inputBusquedaSale" list="opcionesProductos" placeholder="Buscar para agregar..." class="w-full bg-white border border-slate-200 text-slate-800 text-sm font-bold rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-red-500 outline-none transition-all">
-                            </div>
-                            <button onclick="agregarListaCambio('out')" class="bg-red-500 hover:bg-red-600 text-white px-4 rounded-xl font-bold shadow-sm transition-all"><i class="fas fa-plus"></i></button>
-                        </div>
-
-                        <div class="flex-1 bg-white rounded-xl border border-red-100 p-2 overflow-y-auto custom-scroll min-h-[150px] max-h-[250px] space-y-2" id="listaSalenHtml">
-                             <div class="text-center py-6 text-slate-400 text-xs font-bold">Sin productos. <br>Busca y presiona el botón <i class="fas fa-plus"></i></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-8">
-                    <label class="block text-xs font-bold text-slate-600 mb-2">Motivo del Cambio (Obligatorio):</label>
-                    <textarea id="motivoCambio" rows="2" placeholder="Ej: Cliente llevó tapa equivocada, compensa diferencia llevando una botella extra..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                </div>
-
-                <div class="mt-6 pt-6 border-t border-slate-100">
-                    <button onclick="registrarCambioRapido()" id="btnRegistrarCambio" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-amber-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 text-base"><i class="fas fa-sync-alt"></i> Registrar Todo e Impactar Stock Inmediatamente</button>
+        <div class="bg-slate-800 p-5 rounded-3xl border border-slate-700 flex flex-col gap-4 shrink-0">
+            <div class="flex gap-2">
+                <button id="btnStartScan" onclick="startScanner()" class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shrink-0">
+                    <i class="fas fa-camera text-xl"></i>
+                </button>
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="manualCode" list="opcionesProductos" data-i18n-placeholder="buscarPlaceholder" placeholder="Buscar código o nombre..." class="w-full h-full bg-slate-900 border border-slate-700 text-white text-base font-bold rounded-2xl py-4 pl-12 pr-4 focus:border-blue-500 outline-none transition-all" onkeypress="if(event.key === 'Enter') agregarALista(this.value)" onchange="verificarSeleccion(this.value)">
                 </div>
             </div>
             
-            <datalist id="opcionesProductos"></datalist>
+            <div id="readerWrapper" class="hidden w-full bg-slate-900 rounded-2xl overflow-hidden aspect-video relative border border-slate-700">
+                <div id="reader" class="absolute inset-0 w-full h-full"></div>
+                <button onclick="stopScanner()" class="absolute top-2 right-2 bg-red-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg z-10"><i class="fas fa-times"></i></button>
+            </div>
         </div>
 
+        <div id="emptyState" class="text-center py-12 text-slate-500 flex flex-col items-center">
+            <i class="fas fa-boxes text-6xl mb-4 text-slate-700"></i>
+            <p class="font-bold text-lg" data-i18n="listaVacia">La lista está vacía.</p>
+            <p class="text-sm mt-1" data-i18n="listaVaciaSub">Busca o escanea un producto para comenzar.</p>
+        </div>
+
+        <div id="listaInventario" class="flex flex-col gap-4 pb-20"></div>
+
+        <datalist id="opcionesProductos"></datalist>
     </main>
 
-    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl hidden z-[9999] font-bold text-sm flex items-center gap-3 w-[90%] md:w-max transition-all border border-slate-700">
-        <div id="toastIconContainer" class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0"><i id="toastIcon" class="fas fa-check text-green-400"></i></div><span id="toastMsg" class="flex-1"></span>
+    <div id="calcModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-[scaleIn_0.2s_ease-out]">
+            <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                <h3 class="font-black text-lg text-white" data-i18n="tituloCalc">Cálculo de Estiba</h3>
+                <button onclick="cerrarCalculadora()" class="text-slate-400 hover:text-white w-10 h-10 rounded-full bg-slate-700/50 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcFrente">Frente</label>
+                        <input type="number" id="calcFrente" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcFondo">Fondo</label>
+                        <input type="number" id="calcFondo" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcNiveles">Niveles</label>
+                        <input type="number" id="calcNiveles" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcAjuste">Ajuste (Huecos - / Extras +)</label>
+                    <input type="number" id="calcAjuste" value="0" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
+                </div>
+                <div class="bg-blue-600/20 border border-blue-500/30 p-4 rounded-2xl text-center">
+                    <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Estimado</p>
+                    <p class="text-3xl font-black text-white" id="calcResultado">0</p>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-900/50 flex gap-3">
+                <button onclick="cerrarCalculadora()" class="flex-1 py-4 bg-slate-700 text-slate-300 font-bold rounded-2xl" data-i18n="btnCerrar">Cerrar</button>
+                <button onclick="aplicarCalculo()" class="flex-[2] py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20" data-i18n="btnAplicar">Sumar al Conteo</button>
+            </div>
+        </div>
     </div>
 
     <script>
         // ==========================================
-        // VARIABLES GLOBALES
+        // SISTEMA BILINGÜE
+        // ==========================================
+        const diccionarios = {
+            es: {
+                titulo: "Inventario Continuo",
+                buscarPlaceholder: "Buscar código o nombre...",
+                listaVacia: "La lista está vacía.",
+                listaVaciaSub: "Busca o escanea un producto para comenzar.",
+                btnGuardar: "Guardar Nube",
+                stockSistema: "STOCK SISTEMA",
+                totalFisico: "TOTAL FÍSICO",
+                ajuste: "AJUSTE",
+                entrada: "ENTRADA",
+                salida: "SALIDA",
+                ok: "CORRECTO",
+                sueltas: "Sueltas (1pz)",
+                paquete: "Paquete",
+                caja: "Caja",
+                btnNuevoEmpaque: "Añadir empaque no registrado",
+                promptPiezas: "¿Cuántas piezas tiene este nuevo paquete/caja?",
+                codigoNuevo: "Código no registrado. Agregado para registro temporal.",
+                desconocido: "Desconocido / Sin Registro",
+                pz_abrev: "pz",
+                txtNuevoPaquete: "Nuevo Paquete ({pz}pz) ✨",
+                escuchando: "Habla ahora... di la cantidad",
+                noEntendido: "No pude entender el número",
+                microNoSoportado: "Dictado no soportado",
+                tituloCalc: "Calculadora de Bloque",
+                calcFrente: "Frente",
+                calcFondo: "Fondo",
+                calcNiveles: "Niveles",
+                calcAjuste: "Ajuste (+/-)",
+                btnAplicar: "Sumar al Conteo",
+                btnCerrar: "Cerrar"
+            },
+            fr: {
+                titulo: "Inventaire Continu",
+                buscarPlaceholder: "Rechercher code ou nom...",
+                listaVacia: "La liste est vide.",
+                listaVaciaSub: "Scannez ou recherchez un produit pour commencer.",
+                btnGuardar: "Tout Enregistrer",
+                stockSistema: "STOCK SYSTÈME",
+                totalFisico: "TOTAL PHYSIQUE",
+                ajuste: "AJUSTEMENT",
+                entrada: "ENTRÉE",
+                salida: "SORTIE",
+                ok: "CORRECT",
+                sueltas: "À l'unité (1pc)",
+                paquete: "Paquet",
+                caja: "Boîte",
+                btnNuevoEmpaque: "Ajouter un paquet non enregistré",
+                promptPiezas: "Combien de pièces ?",
+                codigoNuevo: "Code non enregistré. Ajouté temporairement.",
+                desconocido: "Inconnu / Non enregistré",
+                pz_abrev: "pc",
+                txtNuevoPaquete: "Nouveau Paquet ({pz}pc) ✨",
+                escuchando: "Parlez maintenant...",
+                noEntendido: "Je n'ai pas compris",
+                microNoSoportado: "Non pris en charge",
+                tituloCalc: "Calculateur de Bloc",
+                calcFrente: "Face",
+                calcFondo: "Fond",
+                calcNiveles: "Niveaux",
+                calcAjuste: "Ajuste (+/-)",
+                btnAplicar: "Ajouter au compte",
+                btnCerrar: "Fermer"
+            }
+        };
+
+        let currentLang = 'es';
+        let calcTarget = { codigo: null, varId: null };
+
+        function toggleLang() {
+            currentLang = currentLang === 'es' ? 'fr' : 'es';
+            document.getElementById('langFlag').innerText = currentLang === 'es' ? '🇲🇽' : '🇫🇷';
+            document.getElementById('langText').innerText = currentLang === 'es' ? 'ES' : 'FR';
+            aplicarTextos();
+            renderLista(); 
+        }
+
+        function aplicarTextos() {
+            const t = diccionarios[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(t[key]) el.innerText = t[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if(t[key]) el.placeholder = t[key];
+            });
+        }
+
+        // ==========================================
+        // VARIABLES GLOBALES Y CATÁLOGO
         // ==========================================
         let catalogoEnMemoria = [];
+        let listaConteo = []; 
         let html5QrcodeScanner = null;
-        let productoActual = null;
-        let currentScanVariants = []; 
-        
-        // Variables para el Carrito de Cambios Múltiples
-        let carritoEntran = [];
-        let carritoSalen = [];
-
-        // PESTAÑAS
-        function switchTab(tabId) {
-            document.getElementById('view-auditoria').classList.add('hidden');
-            document.getElementById('view-cambios').classList.add('hidden');
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
-            document.getElementById(`view-${tabId}`).classList.add('flex');
-
-            document.getElementById('tab-btn-auditoria').className = "flex-1 md:w-40 py-2 text-sm font-bold rounded-lg text-slate-500 hover:text-slate-700 transition-all";
-            document.getElementById('tab-btn-cambios').className = "flex-1 md:w-40 py-2 text-sm font-bold rounded-lg text-slate-500 hover:text-slate-700 transition-all";
-            
-            document.getElementById(`tab-btn-${tabId}`).className = "flex-1 md:w-40 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-blue-600 transition-all";
-            
-            if(tabId !== 'auditoria' && html5QrcodeScanner) stopScanner();
-        }
 
         async function loadJSONCatalog() {
             try {
@@ -238,476 +238,411 @@
                         countItems++;
                     }
                 });
-
-                document.getElementById('catStatus').innerHTML = `<i class="fas fa-check-circle text-emerald-500"></i> ${countItems} artículos listos`;
+                document.getElementById('catStatus').innerHTML = `<i class="fas fa-check-circle text-emerald-400"></i> ${countItems} items`;
             } catch (error) {
-                document.getElementById('catStatus').innerHTML = `<i class="fas fa-exclamation-triangle text-red-500"></i> Error al cargar catálogo`;
-                showToast("No se pudo cargar el catálogo.", "error");
+                document.getElementById('catStatus').innerHTML = `<i class="fas fa-exclamation-triangle text-red-400"></i> Error Catálogo`;
             }
         }
 
-        function verificarSeleccion(valorInput, origin) {
-            const prod = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === String(valorInput).toLowerCase());
-            if (prod) {
-                if (origin === 'auditoria') {
-                    procesarCodigo(valorInput);
-                    document.getElementById('manualCode').blur();
-                }
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            loadJSONCatalog();
-            escucharAuditorias();
-        });
-
-        // ==========================================
-        // MODO A: AUDITORÍA FÍSICA
-        // ==========================================
         function startScanner() {
-            document.getElementById('btnStartScan').classList.add('hidden'); 
-            document.getElementById('btnStopScan').classList.remove('hidden');
-            document.getElementById('scanIdle').classList.add('hidden'); 
-            document.getElementById('scanResult').classList.add('hidden');
-
+            const wrapper = document.getElementById('readerWrapper');
+            wrapper.classList.remove('hidden');
             html5QrcodeScanner = new Html5Qrcode("reader");
             html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} },
                 (decodedText) => {
-                    html5QrcodeScanner.stop();
-                    document.getElementById('btnStartScan').classList.remove('hidden'); 
-                    document.getElementById('btnStopScan').classList.add('hidden');
-                    procesarCodigo(decodedText);
+                    stopScanner();
+                    agregarALista(decodedText);
                 }, 
                 (err) => {}
-            ).catch(err => { 
-                showToast("Cámara no disponible.", "error"); 
-                stopScanner(); 
-            });
+            ).catch(err => { showToast("Cámara no disponible", "error"); stopScanner(); });
         }
 
         function stopScanner() {
             if(html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => { 
-                    document.getElementById('btnStartScan').classList.remove('hidden'); 
-                    document.getElementById('btnStopScan').classList.add('hidden'); 
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('readerWrapper').classList.add('hidden');
                 }).catch(e => console.log(e));
             }
         }
 
-        async function procesarCodigo(codigoBuscado) {
-            if(catalogoEnMemoria.length === 0) return;
-            document.getElementById('manualCode').value = '';
-            showToast("Buscando...", "info");
-            
-            let prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
-            let empaqueDetectado = null;
+        function verificarSeleccion(valor) {
+            if(valor.trim() !== '') {
+                agregarALista(valor);
+            }
+        }
 
+        function agregarALista(codigoBuscado) {
+            codigoBuscado = String(codigoBuscado).trim();
+            if(!codigoBuscado) return;
+            const input = document.getElementById('manualCode');
+            input.value = ''; input.blur();
+
+            let prodBase = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === codigoBuscado.toLowerCase());
+            
             if (!prodBase) {
                 for (const p of catalogoEnMemoria) {
-                    const arrayPaquetes = p.paquetes || p.empaques || [];
-                    if (arrayPaquetes.length > 0) {
-                        const foundEmp = arrayPaquetes.find(e => 
-                            String(e.sku).toLowerCase() === codigoBuscado.toLowerCase() || 
-                            String(e.codigo_barras).toLowerCase() === codigoBuscado.toLowerCase()
-                        );
-                        if (foundEmp) { prodBase = p; empaqueDetectado = foundEmp; break; }
+                    const empaques = p.paquetes || p.empaques || [];
+                    if (empaques.some(e => String(e.sku).toLowerCase() === codigoBuscado.toLowerCase() || String(e.codigo_barras).toLowerCase() === codigoBuscado.toLowerCase())) {
+                        prodBase = p; break;
                     }
                 }
             }
 
-            if (prodBase) {
-                try {
-                    const codigoOficial = prodBase.codigo; 
-                    const codigoSeguro = String(codigoOficial).replace(/\//g, '_');
-                    
-                    let sombraCantVendida = 0;
-                    const sombraDoc = await firebase.firestore().collection('stock_por_fuera').doc(codigoSeguro).get();
-                    if(sombraDoc.exists) sombraCantVendida = sombraDoc.data().cantidad_vendida || 0;
-
-                    productoActual = {
-                        codigo_contpaqi: codigoOficial,
-                        nombre_producto: prodBase.descripcion_oficial || prodBase.nombre,
-                        stock_base_json: prodBase.stock || 0,
-                        sombra_actual: sombraCantVendida
-                    };
-
-                    document.getElementById('scanIdle').classList.add('hidden');
-                    document.getElementById('scanResult').classList.remove('hidden');
-                    
-                    document.getElementById('scanProductName').innerText = productoActual.nombre_producto;
-                    document.getElementById('scanProductCode').innerText = productoActual.codigo_contpaqi;
-                    
-                    try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
-
-                    currentScanVariants = []; 
-                    currentScanVariants.push({ label: 'Piezas Sueltas (1pz)', sku: codigoOficial, piezas: 1, qtyDetected: (!empaqueDetectado) ? 1 : 0 });
-
-                    const arrayPaquetes = prodBase.paquetes || prodBase.empaques || [];
-                    arrayPaquetes.forEach(pkg => {
-                        currentScanVariants.push({ 
-                            label: `Caja/Paquete (${pkg.piezas}pz)`, sku: pkg.sku, piezas: parseInt(pkg.piezas), 
-                            qtyDetected: (empaqueDetectado && empaqueDetectado.sku === pkg.sku) ? 1 : 0 
-                        });
-                    });
-
-                    currentScanVariants.sort((a,b) => a.piezas - b.piezas);
-                    renderVariantsList();
-
-                } catch (error) { showToast("Error de servidor", "error"); }
-            } else {
-                mostrarErrorVisual();
-            }
-        }
-
-        function renderVariantsList() {
-            const listContainer = document.getElementById('scanVariantsList'); 
-            listContainer.innerHTML = '';
-            currentScanVariants.forEach((v, index) => {
-                const isDetected = v.qtyDetected > 0; 
-                const bgClass = isDetected ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-100';
-                
-                listContainer.innerHTML += `
-                    <div class="flex items-center justify-between p-3.5 rounded-2xl border ${bgClass} transition-colors" id="rowVar_${index}">
-                        <div class="flex-1 min-w-0 pr-2">
-                            <p class="font-black text-slate-800 text-xs flex items-center gap-1.5 truncate">
-                                <i class="fas ${v.piezas === 1 ? 'fa-cube' : 'fa-boxes'} ${isDetected ? 'text-blue-500' : 'text-slate-400'}" id="iconVar_${index}"></i> ${v.label}
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-1 bg-white rounded-xl p-1 shadow-sm border border-slate-100">
-                            <button onclick="changeVariantQty(${index}, -1)" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-600 transition active:scale-95"><i class="fas fa-minus"></i></button>
-                            <input type="number" min="0" value="${v.qtyDetected}" id="varInput_${index}" oninput="manualVariantQty(${index}, this.value)" class="w-10 text-center font-black text-slate-900 py-1 border-none bg-transparent text-sm outline-none">
-                            <button onclick="changeVariantQty(${index}, 1)" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 transition active:scale-95"><i class="fas fa-plus"></i></button>
-                        </div>
-                    </div>`;
-            });
-            recalculateScanTotal();
-        }
-
-        window.changeVariantQty = (index, delta) => {
-            let newVal = currentScanVariants[index].qtyDetected + delta; 
-            if(newVal < 0) newVal = 0;
-            currentScanVariants[index].qtyDetected = newVal; 
-            document.getElementById(`varInput_${index}`).value = newVal; 
-            recalculateScanTotal();
-        };
-
-        window.manualVariantQty = (index, val) => { 
-            let num = parseInt(val) || 0; if(num < 0) num = 0; 
-            currentScanVariants[index].qtyDetected = num; 
-            recalculateScanTotal(); 
-        };
-
-        function recalculateScanTotal() { 
-            let total = 0; 
-            currentScanVariants.forEach(v => { total += (v.piezas * v.qtyDetected); }); 
-            document.getElementById('scanTotalMove').innerText = total; 
-        }
-
-        async function levantarAuditoria() {
-            if(!productoActual) return;
-            let conteoFisico = parseInt(document.getElementById('scanTotalMove').innerText) || 0;
-            const stockSistema = productoActual.stock_base_json || 0; 
-            const sombraActual = productoActual.sombra_actual || 0; 
-            const diferencia = conteoFisico - stockSistema;
-
-            try {
-                const queryPendiente = await db.collection('auditorias_pendientes')
-                    .where('codigo_contpaqi', '==', productoActual.codigo_contpaqi)
-                    .where('estado', '==', 'pendiente').get();
-
-                const datosAuditoria = {
-                    codigo_contpaqi: productoActual.codigo_contpaqi,
-                    nombre_producto: productoActual.nombre_producto,
-                    esperado: stockSistema,
-                    conteo_fisico: conteoFisico,
-                    ajuste_calculado: diferencia,
-                    sombra_al_momento: sombraActual, 
-                    estado: 'pendiente',
-                    fecha: firebase.firestore.FieldValue.serverTimestamp(),
-                    usuario: 'Lector Almacén (App)'
+            if (!prodBase) {
+                const t = diccionarios[currentLang];
+                showToast(t.codigoNuevo, "info");
+                prodBase = {
+                    codigo: codigoBuscado,
+                    nombre: `[❓] ${t.desconocido} (${codigoBuscado})`,
+                    descripcion_oficial: "No registrado",
+                    stock: 0, 
+                    empaques: [] 
                 };
+            }
 
-                if (!queryPendiente.empty) {
-                    await db.collection('auditorias_pendientes').doc(queryPendiente.docs[0].id).update(datosAuditoria);
-                    showToast("Auditoría actualizada con el nuevo conteo.", "info");
-                } else {
-                    await db.collection('auditorias_pendientes').add(datosAuditoria);
-                    showToast("¡Reporte enviado a Administración!");
+            if (listaConteo.find(item => String(item.codigo) === String(prodBase.codigo))) {
+                const row = document.getElementById(`row_${prodBase.codigo}`);
+                if (row) {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    row.classList.add('ring-2', 'ring-blue-500');
+                    setTimeout(() => row.classList.remove('ring-2', 'ring-blue-500'), 1500);
                 }
-                
-                document.getElementById('scanIdle').classList.remove('hidden');
-                document.getElementById('scanResult').classList.add('hidden');
-                productoActual = null;
+                return;
+            }
 
-            } catch(error) { showToast("Error al enviar reporte.", "error"); }
-        }
-
-        function escucharAuditorias() {
-            // Nota: Si quitamos orderBy('fecha','desc') nos evitamos el index, pero lo dejamos por si ya lo creaste.
-            // Si te sigue dando error de index, simplemente quita el ".orderBy('fecha', 'desc')" de aquí.
-            db.collection('auditorias_pendientes').where('estado','==','pendiente').orderBy('fecha', 'desc').onSnapshot(snap => {
-                const container = document.getElementById('auditoriasCards');
-                if(!container) return;
-                if(snap.empty) { container.innerHTML = '<div class="text-center py-10 text-slate-400 font-medium text-sm">No hay auditorías pendientes.</div>'; return; }
-                
-                container.innerHTML = '';
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    const fecha = data.fecha ? data.fecha.toDate().toLocaleString('es-MX', {hour:'2-digit', minute:'2-digit'}) : '';
-                    container.innerHTML += `
-                        <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex gap-3 items-start animate-[fadeIn_0.3s_ease-out]">
-                            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0"><i class="fas fa-clock"></i></div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="font-black text-slate-800 text-xs truncate mb-1">${data.nombre_producto}</h4>
-                                <div class="flex justify-between items-center"><span class="text-[9px] font-mono text-slate-500">${data.codigo_contpaqi}</span><span class="text-[9px] font-bold text-slate-400">${fecha}</span></div>
-                                <div class="mt-2 text-[10px] text-slate-600">Contó: <b class="text-indigo-600">${data.conteo_fisico}pz</b></div>
-                            </div>
-                        </div>`;
+            let variantes = [];
+            const empaques = prodBase.paquetes || prodBase.empaques || [];
+            variantes.push({ id: 'sueltas', sku: null, pz: 1, contadas: 0, isFantasma: false });
+            
+            empaques.forEach((emp, index) => {
+                variantes.push({ 
+                    id: `emp_${index}`, 
+                    sku: emp.sku || null,
+                    pz: parseInt(emp.piezas), 
+                    contadas: 0, 
+                    isFantasma: false
                 });
-            }, err => console.log("Ojo con el index de firebase:", err));
-        }
-
-        // ==========================================
-        // MODO B: CAMBIOS MÚLTIPLES (CARRITOS)
-        // ==========================================
-        window.agregarListaCambio = (tipo) => {
-            const inputId = tipo === 'in' ? 'inputBusquedaEntra' : 'inputBusquedaSale';
-            const codigo = document.getElementById(inputId).value;
-            
-            const prod = catalogoEnMemoria.find(p => String(p.codigo).toLowerCase() === String(codigo).toLowerCase());
-            if(!prod) return showToast("Producto no válido o no seleccionado", "error");
-
-            const lista = tipo === 'in' ? carritoEntran : carritoSalen;
-            
-            const existente = lista.find(item => item.codigo === prod.codigo);
-            if(existente) {
-                existente.qty++;
-            } else {
-                lista.push({ ...prod, qty: 1 });
-            }
-
-            document.getElementById(inputId).value = '';
-            document.getElementById(inputId).blur();
-            renderCarritos();
-        };
-
-        window.cambiarCantCarrito = (tipo, codigo, delta) => {
-            const lista = tipo === 'in' ? carritoEntran : carritoSalen;
-            const index = lista.findIndex(item => item.codigo === codigo);
-            if(index > -1) {
-                lista[index].qty += delta;
-                if(lista[index].qty <= 0) lista.splice(index, 1); // Lo borra si llega a cero
-            }
-            renderCarritos();
-        }
-
-        function renderCarritos() {
-            // Render ENTRAN (Verdes)
-            const htmlEntran = document.getElementById('listaEntranHtml');
-            if(carritoEntran.length === 0) {
-                htmlEntran.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs font-bold">Sin productos. <br>Busca y presiona el botón <i class="fas fa-plus"></i></div>`;
-            } else {
-                htmlEntran.innerHTML = carritoEntran.map(p => `
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-50/50 border border-emerald-100">
-                        <div class="flex-1 min-w-0 pr-2">
-                            <p class="text-xs font-bold text-slate-800 truncate">${p.descripcion_oficial || p.nombre}</p>
-                            <p class="text-[9px] font-mono text-emerald-600">${p.codigo}</p>
-                        </div>
-                        <div class="flex items-center gap-2 bg-white rounded-lg p-1 shadow-sm border border-slate-100 shrink-0">
-                            <button onclick="cambiarCantCarrito('in', '${p.codigo}', -1)" class="w-6 h-6 rounded bg-slate-50 text-slate-600 active:scale-95"><i class="fas fa-minus text-[10px]"></i></button>
-                            <span class="text-xs font-black w-4 text-center">${p.qty}</span>
-                            <button onclick="cambiarCantCarrito('in', '${p.codigo}', 1)" class="w-6 h-6 rounded bg-emerald-50 text-emerald-600 active:scale-95"><i class="fas fa-plus text-[10px]"></i></button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Render SALEN (Rojos)
-            const htmlSalen = document.getElementById('listaSalenHtml');
-            if(carritoSalen.length === 0) {
-                htmlSalen.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs font-bold">Sin productos. <br>Busca y presiona el botón <i class="fas fa-plus"></i></div>`;
-            } else {
-                htmlSalen.innerHTML = carritoSalen.map(p => `
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-red-50/50 border border-red-100">
-                        <div class="flex-1 min-w-0 pr-2">
-                            <p class="text-xs font-bold text-slate-800 truncate">${p.descripcion_oficial || p.nombre}</p>
-                            <p class="text-[9px] font-mono text-red-600">${p.codigo}</p>
-                        </div>
-                        <div class="flex items-center gap-2 bg-white rounded-lg p-1 shadow-sm border border-slate-100 shrink-0">
-                            <button onclick="cambiarCantCarrito('out', '${p.codigo}', -1)" class="w-6 h-6 rounded bg-slate-50 text-slate-600 active:scale-95"><i class="fas fa-minus text-[10px]"></i></button>
-                            <span class="text-xs font-black w-4 text-center">${p.qty}</span>
-                            <button onclick="cambiarCantCarrito('out', '${p.codigo}', 1)" class="w-6 h-6 rounded bg-red-50 text-red-600 active:scale-95"><i class="fas fa-plus text-[10px]"></i></button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function desglosarParaTicket(carrito) {
-    let acumulador = {};
-
-    carrito.forEach(prod => {
-        // Verificamos si es paquete y tiene receta
-        if (prod.tipo_item === 'KIT_OFICIAL' && prod.receta && prod.receta.length > 0) {
-            
-            prod.receta.forEach(ingrediente => {
-                const codigoBase = ingrediente.codigo_pieza;
-                const cantidadDesglosada = ingrediente.cantidad * prod.qty;
-                
-                if (!acumulador[codigoBase]) {
-                    // Buscamos el nombre del componente base en el catálogo
-                    let itemCatalogo = catalogoEnMemoria.find(c => c.codigo === codigoBase);
-                    acumulador[codigoBase] = {
-                        codigo: codigoBase,
-                        nombre: itemCatalogo ? (itemCatalogo.descripcion_oficial || itemCatalogo.nombre) : `Componente (${codigoBase})`,
-                        qty: 0
-                    };
-                }
-                // Sumamos la cantidad desglosada
-                acumulador[codigoBase].qty += cantidadDesglosada;
             });
 
-        } else {
-            // Es pieza base normal, pasa directo
-            if (!acumulador[prod.codigo]) {
-                acumulador[prod.codigo] = {
-                    codigo: prod.codigo,
-                    nombre: prod.descripcion_oficial || prod.nombre,
-                    qty: 0
-                };
-            }
-            acumulador[prod.codigo].qty += prod.qty;
+            variantes.sort((a,b) => b.pz - a.pz);
+
+            listaConteo.unshift({
+                codigo: String(prodBase.codigo),
+                nombre: prodBase.descripcion_oficial || prodBase.nombre,
+                stockSistema: parseFloat(prodBase.stock || 0),
+                variantes: variantes,
+                totalFisico: 0,
+                es_desconocido: prodBase.stock === 0 && prodBase.nombre.includes('[❓]')
+            });
+
+            renderLista();
         }
-    });
 
-    // Devolvemos el objeto convertido en arreglo
-    return Object.values(acumulador);
-}
-        
-        async function registrarCambioRapido() {
-    if(carritoEntran.length === 0 && carritoSalen.length === 0) {
-        return showToast("Debes agregar al menos un producto que entra o sale.", "error");
-    }
-    
-    const motivo = document.getElementById('motivoCambio').value.trim();
-    if(motivo === "") return showToast("Debes escribir un motivo para el administrador.", "error");
+        window.agregarEmpaqueNuevo = (codigoStr) => {
+            const prod = listaConteo.find(p => String(p.codigo) === String(codigoStr));
+            if(!prod) return;
+            
+            let pzInput = prompt(diccionarios[currentLang].promptPiezas, "12");
+            if(pzInput === null) return;
+            pzInput = pzInput.trim();
+            if(pzInput === "") return;
+            
+            const pz = parseInt(pzInput, 10);
+            if(isNaN(pz) || pz <= 1) return showToast("Ingresa un número válido mayor a 1", "error");
 
-    const btn = document.getElementById('btnRegistrarCambio');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-    btn.disabled = true;
+            prod.variantes.push({
+                id: 'fantasma_' + Date.now(),
+                sku: null,
+                pz: pz,
+                contadas: 0,
+                isFantasma: true
+            });
+            
+            prod.variantes.sort((a,b) => b.pz - a.pz);
+            renderLista();
+        };
 
-    try {
-        const batch = db.batch();
+        // ==========================================
+        // CALCULADORA DE ESTIBAS
+        // ==========================================
+        window.abrirCalculadora = (codigo, varId) => {
+            calcTarget = { codigo, varId };
+            document.getElementById('calcFrente').value = "";
+            document.getElementById('calcFondo').value = "";
+            document.getElementById('calcNiveles').value = "";
+            document.getElementById('calcAjuste').value = "0";
+            document.getElementById('calcResultado').innerText = "0";
+            document.getElementById('calcModal').classList.remove('hidden');
+        };
 
-        // 1. PROCESAR ENTRADAS (Disminuye la sombra, sube stock web)
-        carritoEntran.forEach(prod => procesarAjusteSombra(prod, prod.qty, -1, batch));
+        window.cerrarCalculadora = () => {
+            document.getElementById('calcModal').classList.add('hidden');
+        };
 
-        // 2. PROCESAR SALIDAS (Sube la sombra, baja stock web)
-        carritoSalen.forEach(prod => procesarAjusteSombra(prod, prod.qty, 1, batch));
-
-        // 3. REGISTRAR TICKET GLOBAL DESGLOSADO
-        const ticketRef = db.collection('cambios_rapidos').doc();
-        
-        // ¡Aquí aplicamos la magia de la nueva función!
-        const resumenEntran = desglosarParaTicket(carritoEntran);
-        const resumenSalen = desglosarParaTicket(carritoSalen);
-
-        batch.set(ticketRef, {
-            entran: resumenEntran,
-            salen: resumenSalen,
-            motivo: motivo,
-            estado: 'pendiente',
-            fecha: firebase.firestore.FieldValue.serverTimestamp(),
-            usuario: 'Almacén (Multi-Trueque)'
+        // Escuchar cambios en los inputs para calcular tiempo real
+        ['calcFrente', 'calcFondo', 'calcNiveles', 'calcAjuste'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                const f = parseInt(document.getElementById('calcFrente').value) || 0;
+                const d = parseInt(document.getElementById('calcFondo').value) || 0;
+                const n = parseInt(document.getElementById('calcNiveles').value) || 0;
+                const a = parseInt(document.getElementById('calcAjuste').value) || 0;
+                const res = (f * d * n) + a;
+                document.getElementById('calcResultado').innerText = res > 0 ? res : 0;
+            });
         });
 
-        await batch.commit();
-
-        // Limpiar todo
-        carritoEntran = [];
-        carritoSalen = [];
-        document.getElementById('motivoCambio').value = '';
-        renderCarritos();
-        
-        showToast("Cambio registrado y stock actualizado en la Web.", "success");
-
-    } catch (error) {
-        console.error("Error en cambio:", error);
-        showToast("Error al registrar el cambio. Checa las reglas de Firebase.", "error");
-    } finally {
-        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Registrar Todo e Impactar Stock Inmediatamente';
-        btn.disabled = false;
-    }
-}
-
-        function procesarAjusteSombra(producto, qty, sign, batch) {
-            if (producto.tipo_item === 'KIT_OFICIAL' && producto.receta && producto.receta.length > 0) {
-                producto.receta.forEach(ingrediente => {
-                    const cod = String(ingrediente.codigo_pieza).replace(/\//g, '_');
-                    const totalImpacto = Number(ingrediente.cantidad) * qty * sign;
-                    if (!isNaN(totalImpacto) && totalImpacto !== 0) {
-                        const ref = db.collection('stock_por_fuera').doc(cod);
-                        batch.set(ref, {
-                            cantidad_vendida: firebase.firestore.FieldValue.increment(totalImpacto),
-                            ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true });
-                    }
-                });
-            } else {
-                const cod = String(producto.codigo).replace(/\//g, '_');
-                const totalImpacto = qty * sign;
-                if (!isNaN(totalImpacto) && totalImpacto !== 0) {
-                    const ref = db.collection('stock_por_fuera').doc(cod);
-                    batch.set(ref, {
-                        cantidad_vendida: firebase.firestore.FieldValue.increment(totalImpacto),
-                        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
+        window.aplicarCalculo = () => {
+            const total = parseInt(document.getElementById('calcResultado').innerText) || 0;
+            if(total <= 0) return cerrarCalculadora();
+            
+            const prod = listaConteo.find(p => String(p.codigo) === String(calcTarget.codigo));
+            if(prod) {
+                const variante = prod.variantes.find(v => String(v.id) === String(calcTarget.varId));
+                if(variante) {
+                    // Sumamos al conteo actual por si ya tenían algo contado antes
+                    variante.contadas += total;
+                    recalcularTotalProducto(prod);
+                    renderLista();
                 }
+            }
+            cerrarCalculadora();
+        };
+
+        // ==========================================
+        // DICTADO DE VOZ
+        // ==========================================
+        window.iniciarDictado = (codigoProd, varId, btnElement) => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const t = diccionarios[currentLang];
+            if (!SpeechRecognition) return showToast(t.microNoSoportado, "error");
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = currentLang === 'es' ? 'es-MX' : 'fr-FR';
+            const icon = btnElement.querySelector('i');
+            icon.classList.add('mic-active');
+            showToast(t.escuchando, "info");
+
+            recognition.onresult = (event) => {
+                icon.classList.remove('mic-active');
+                const transcript = event.results[0][0].transcript;
+                const numeroEncontrado = transcript.match(/\d+/);
+                if (numeroEncontrado) {
+                    const num = parseInt(numeroEncontrado[0], 10);
+                    manualCant(codigoProd, varId, num);
+                    showToast(`+ ${num}`, "success");
+                    renderLista();
+                } else {
+                    showToast(t.noEntendido, "error");
+                }
+            };
+            recognition.onend = () => icon.classList.remove('mic-active');
+            recognition.onerror = () => icon.classList.remove('mic-active');
+            recognition.start();
+        };
+
+        // ==========================================
+        // RENDERIZAR INTERFAZ Y CÁLCULOS
+        // ==========================================
+        function renderLista() {
+            const container = document.getElementById('listaInventario');
+            const empty = document.getElementById('emptyState');
+            const t = diccionarios[currentLang];
+
+            if (listaConteo.length === 0) {
+                empty.classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
+            
+            empty.classList.add('hidden');
+            let htmlChunks = [];
+
+            listaConteo.forEach((item) => {
+                const diferencia = item.totalFisico - item.stockSistema;
+                let badgeHtml = '';
+                let borderColor = 'border-slate-700';
+                let nombreClass = item.es_desconocido ? 'text-amber-400' : 'text-white';
+                const safeCod = String(item.codigo).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                if (diferencia > 0) {
+                    badgeHtml = `<span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-up"></i> ${t.entrada} (+${diferencia})</span>`;
+                    borderColor = 'border-emerald-500/50';
+                } else if (diferencia < 0) {
+                    badgeHtml = `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-down"></i> ${t.salida} (${diferencia})</span>`;
+                    borderColor = 'border-red-500/50';
+                } else {
+                    badgeHtml = `<span class="bg-slate-700 text-slate-300 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-check"></i> ${t.ok}</span>`;
+                }
+
+                let variantesHtml = item.variantes.map((v) => {
+                    const safeVarId = String(v.id).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    let label = v.id === 'sueltas' ? t.sueltas : (v.isFantasma ? t.txtNuevoPaquete.replace('{pz}', v.pz) : (v.sku ? `${v.sku} (${v.pz}${t.pz_abrev})` : `${v.pz >= 500 ? t.caja : t.paquete} (${v.pz}${t.pz_abrev})`));
+                    const textClass = v.isFantasma ? 'text-amber-400' : 'text-slate-400';
+
+                    return `
+                    <div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+                        <span class="text-xs font-bold ${textClass} flex-1 truncate pr-2">${label}</span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="abrirCalculadora('${safeCod}', '${safeVarId}')" class="w-9 h-9 rounded-lg bg-slate-800 text-blue-400 hover:text-white border border-slate-700"><i class="fas fa-calculator text-sm"></i></button>
+                            <button onclick="iniciarDictado('${safeCod}', '${safeVarId}', this)" class="w-9 h-9 rounded-lg bg-slate-800 text-slate-400 border border-slate-700"><i class="fas fa-microphone text-sm"></i></button>
+                            <div class="flex items-center gap-1 bg-slate-900 rounded-xl p-1 border border-slate-700">
+                                <button onclick="cambiarCant('${safeCod}', '${safeVarId}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 text-lg"><i class="fas fa-minus text-xs"></i></button>
+                                <input type="number" min="0" value="${v.contadas}" oninput="manualCant('${safeCod}', '${safeVarId}', this.value)" onfocus="this.select()" class="w-10 text-center font-black text-white bg-transparent outline-none text-base">
+                                <button onclick="cambiarCant('${safeCod}', '${safeVarId}', 1)" class="w-8 h-8 rounded-lg bg-blue-600 text-white text-lg"><i class="fas fa-plus text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                htmlChunks.push(`
+                <div id="row_${item.codigo}" class="bg-slate-800 p-4 rounded-3xl border ${borderColor} transition-colors shadow-lg">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1 pr-4">
+                            <h3 class="font-black text-lg ${nombreClass} leading-tight">${item.nombre}</h3>
+                            <p class="font-mono text-xs text-blue-400 mt-1">${item.codigo}</p>
+                        </div>
+                        <button onclick="eliminarDeLista('${safeCod}')" class="text-slate-500 hover:text-red-400 p-2"><i class="fas fa-trash"></i></button>
+                    </div>
+
+                    <div class="bg-slate-900/50 rounded-2xl p-3 mb-2">
+                        ${variantesHtml}
+                    </div>
+                    
+                    <button onclick="agregarEmpaqueNuevo('${safeCod}')" class="w-full text-center text-[10px] text-blue-400 font-bold py-2.5 mb-4 hover:bg-slate-700 rounded-xl border border-dashed border-slate-600 transition-colors uppercase tracking-wider">
+                        <i class="fas fa-plus mr-1"></i> <span data-i18n="btnNuevoEmpaque">${t.btnNuevoEmpaque}</span>
+                    </button>
+
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <div class="bg-slate-900 rounded-2xl p-3 border border-slate-700 text-center">
+                            <p class="text-[10px] font-bold text-slate-500 tracking-widest uppercase" data-i18n="stockSistema">${t.stockSistema}</p>
+                            <p class="text-2xl font-black text-slate-300">${item.stockSistema}</p>
+                        </div>
+                        <div class="bg-blue-900/30 rounded-2xl p-3 border border-blue-900/50 text-center relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-blue-400 tracking-widest uppercase" data-i18n="totalFisico">${t.totalFisico}</p>
+                            <p class="text-3xl font-black text-white" id="totFisico_${item.codigo}">${item.totalFisico}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center px-2 mt-3" id="ajusteBadge_${item.codigo}">
+                        <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase" data-i18n="ajuste">${t.ajuste}:</span>
+                        ${badgeHtml}
+                    </div>
+                </div>`);
+            });
+            
+            container.innerHTML = htmlChunks.join('');
+        }
+
+        window.cambiarCant = (codigoProd, varId, delta) => {
+            const prod = listaConteo.find(p => String(p.codigo) === String(codigoProd));
+            if(!prod) return;
+            const variante = prod.variantes.find(v => String(v.id) === String(varId));
+            if(!variante) return;
+            variante.contadas += delta;
+            if(variante.contadas < 0) variante.contadas = 0;
+            recalcularTotalProducto(prod);
+        };
+
+        window.manualCant = (codigoProd, varId, val) => {
+            const prod = listaConteo.find(p => String(p.codigo) === String(codigoProd));
+            if(!prod) return;
+            const variante = prod.variantes.find(v => String(v.id) === String(varId));
+            if(!variante) return;
+            let num = parseInt(val, 10);
+            if(isNaN(num) || num < 0) num = 0;
+            variante.contadas = num;
+            recalcularTotalProducto(prod);
+        };
+
+        function recalcularTotalProducto(prod) {
+            prod.totalFisico = prod.variantes.reduce((sum, v) => sum + (v.pz * v.contadas), 0);
+            const txtTotal = document.getElementById(`totFisico_${prod.codigo}`);
+            if(txtTotal) txtTotal.innerText = prod.totalFisico;
+            const t = diccionarios[currentLang];
+            const dif = prod.totalFisico - prod.stockSistema;
+            const card = document.getElementById(`row_${prod.codigo}`);
+            const badgeCont = document.getElementById(`ajusteBadge_${prod.codigo}`);
+            if(!card || !badgeCont) return;
+            if (dif > 0) {
+                card.className = "bg-slate-800 p-4 rounded-3xl border border-emerald-500/50 transition-colors shadow-lg";
+                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">${t.ajuste}:</span><span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-up"></i> ${t.entrada} (+${dif})</span>`;
+            } else if (dif < 0) {
+                card.className = "bg-slate-800 p-4 rounded-3xl border border-red-500/50 transition-colors shadow-lg";
+                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">${t.ajuste}:</span><span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-arrow-down"></i> ${t.salida} (${dif})</span>`;
+            } else {
+                card.className = "bg-slate-800 p-4 rounded-3xl border border-slate-700 transition-colors shadow-lg";
+                badgeCont.innerHTML = `<span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">${t.ajuste}:</span><span class="bg-slate-700 text-slate-300 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-check"></i> ${t.ok}</span>`;
             }
         }
 
-        // ==========================================
-        // UI BÁSICA
-        // ==========================================
-        function mostrarErrorVisual() {
-            document.getElementById('scanIdle').classList.remove('hidden');
-            document.getElementById('scanResult').classList.add('hidden');
-            const idleIconCont = document.getElementById('scanIdleIconContainer');
-            const idleIcon = document.getElementById('scanIdleIcon');
-            const idleText = document.getElementById('scanIdleText');
-            
-            idleIconCont.className = "w-24 h-24 rounded-full bg-red-50 flex items-center justify-center mb-5 border border-red-100 shadow-inner";
-            idleIcon.className = "fas fa-times text-4xl text-red-400";
-            idleText.className = "font-bold text-sm text-red-500";
-            idleText.innerText = "Producto no encontrado.";
-            
-            setTimeout(() => {
-                idleIconCont.className = "w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-100 shadow-inner";
-                idleIcon.className = "fas fa-box-open text-4xl text-slate-400";
-                idleText.className = "font-bold text-sm text-slate-400";
-                idleText.innerText = "Esperando producto a auditar...";
-            }, 3000);
+        window.eliminarDeLista = (codigoStr) => {
+            listaConteo = listaConteo.filter(p => String(p.codigo) !== String(codigoStr));
+            renderLista();
+        };
+
+        window.descargarCSVLocal = () => {
+            if(listaConteo.length === 0) return showToast(diccionarios[currentLang].listaVacia, "error");
+            let csv = "\uFEFFCodigo,Producto,Stock Sistema,Total Fisico,Ajuste,Detalle Conteos\n";
+            listaConteo.forEach(item => {
+                const dif = item.totalFisico - item.stockSistema;
+                let desgloseStr = item.variantes.filter(v => v.contadas > 0).map(v => `${v.id === 'sueltas' ? 'Sueltas' : (v.sku || 'Paquete')}(${v.pz}pz): ${v.contadas}`).join(" | ");
+                csv += `"${item.codigo}","${item.nombre.replace(/"/g, '""')}",${item.stockSistema},${item.totalFisico},${dif},"${desgloseStr || 'Sin conteo'}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `Inventario_EEN_${new Date().getTime()}.csv`);
+            link.click();
+            showToast("Excel descargado");
+        };
+
+        async function enviarAuditoriaLote() {
+            if(listaConteo.length === 0) return showToast(diccionarios[currentLang].listaVacia, "error");
+            const btn = event.currentTarget;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            try {
+                const batch = db.batch();
+                listaConteo.forEach(item => {
+                    const docRef = db.collection('auditorias_pendientes').doc();
+                    batch.set(docRef, {
+                        codigo_contpaqi: item.codigo,
+                        nombre_producto: item.nombre,
+                        esperado: item.stockSistema,
+                        conteo_fisico: item.totalFisico,
+                        ajuste_calculado: item.totalFisico - item.stockSistema,
+                        estado: 'pendiente',
+                        fecha: firebase.firestore.FieldValue.serverTimestamp(),
+                        usuario: 'Tablet Almacén',
+                        desglose: item.variantes.map(v => ({ label: v.id === 'sueltas' ? 'Sueltas' : (v.sku || `Empaque ${v.pz}`), piezas: v.pz, contadas: v.contadas }))
+                    });
+                });
+                await batch.commit();
+                showToast("¡Enviado a la nube!");
+                listaConteo = [];
+                renderLista();
+            } catch(error) {
+                showToast("Error de conexión. Usa CSV.", "error");
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
         }
 
         function showToast(msg, type = 'success') {
             const t = document.getElementById('toast');
-            const iconC = document.getElementById('toastIconContainer');
             const icon = document.getElementById('toastIcon');
             document.getElementById('toastMsg').innerText = msg;
-            
-            if(type === 'error') {
-                iconC.className = "w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center shrink-0";
-                icon.className = "fas fa-exclamation text-red-400";
-            } else if(type === 'info') {
-                iconC.className = "w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0";
-                icon.className = "fas fa-info text-blue-400";
-            } else {
-                iconC.className = "w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0";
-                icon.className = "fas fa-check text-green-400";
-            }
-            t.classList.remove('hidden'); t.classList.add('scale-in');
-            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('scale-in'); }, 3000);
+            icon.className = type === 'error' ? "fas fa-exclamation-circle text-red-400 text-lg" : (type === 'info' ? "fas fa-info-circle text-amber-400 text-lg" : "fas fa-check-circle text-emerald-400 text-lg");
+            t.classList.remove('hidden'); t.classList.add('flex');
+            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('flex'); }, 3000);
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            aplicarTextos();
+            loadJSONCatalog();
+        });
     </script>
 </body>
 </html>
