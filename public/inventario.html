@@ -21,7 +21,6 @@
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .mic-active { animation: pulse-red 1.5s infinite; color: #ef4444 !important; }
         @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        /* Transiciones para la calculadora */
         .tab-btn { transition: all 0.2s ease; }
     </style>
 </head>
@@ -106,9 +105,15 @@
                     </div>
                 </div>
 
-                <div id="zonaCama" class="hidden text-center">
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcPzCama">Piezas por Cama (Patrón)</label>
-                    <input type="number" id="calcPzCama" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none">
+                <div id="zonaCama" class="hidden grid grid-cols-2 gap-3 text-center">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcPzCama">Pz por Cama</label>
+                        <input type="number" id="calcPzCama" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcTarimas">Tarimas (Fondo)</label>
+                        <input type="number" id="calcTarimas" value="1" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl focus:border-blue-500 outline-none text-purple-400">
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3 text-center border-t border-slate-700 pt-4 mt-2">
@@ -169,7 +174,8 @@
                 modoCama: "Cama Fija",
                 calcFrente: "Frente",
                 calcFondo: "Fondo",
-                calcPzCama: "Piezas por Cama (Patrón)",
+                calcPzCama: "Pz por Cama",
+                calcTarimas: "Tarimas (Fondo)",
                 calcNiveles: "Niveles (Alto)",
                 calcAjuste: "Ajuste (+/-)",
                 btnAplicar: "Sumar al Conteo",
@@ -204,7 +210,8 @@
                 modoCama: "Lit Fixe",
                 calcFrente: "Face",
                 calcFondo: "Fond",
-                calcPzCama: "Pièces par lit",
+                calcPzCama: "Pz par lit",
+                calcTarimas: "Palettes (Fond)",
                 calcNiveles: "Niveaux",
                 calcAjuste: "Ajuste (+/-)",
                 btnAplicar: "Ajouter",
@@ -214,14 +221,11 @@
 
         let currentLang = 'es';
         let calcTarget = { codigo: null, varId: null };
-        let currentCalcMode = 'bloque'; // 'bloque' o 'cama'
+        let currentCalcMode = 'bloque';
         let catalogoEnMemoria = [];
         let listaConteo = [];
         let html5QrcodeScanner = null;
 
-        // ==========================================
-        // CARGA Y FILTRADO ESTRICTO DE PIEZA_BASE
-        // ==========================================
         async function loadJSONCatalog() {
             try {
                 const response = await fetch('catalogo_completo.json');
@@ -361,19 +365,17 @@
         };
 
         // ==========================================
-        // CALCULADORA MULTIMODO
+        // CALCULADORA MULTIMODO Y EN VIVO
         // ==========================================
         window.abrirCalculadora = (codigo, varId) => {
             calcTarget = { codigo, varId };
             
-            // Reiniciar campos
             ['calcFrente', 'calcFondo', 'calcPzCama', 'calcNiveles'].forEach(id => document.getElementById(id).value = "");
+            document.getElementById('calcTarimas').value = "1"; // Default es 1 tarima
             document.getElementById('calcAjuste').value = "0";
             document.getElementById('calcResultado').innerText = "0";
             
-            // Forzar modo bloque por defecto al abrir
             setCalcMode('bloque');
-            
             document.getElementById('calcModal').classList.remove('hidden');
         };
 
@@ -390,12 +392,16 @@
                 tabBloque.className = "tab-btn flex-1 py-2.5 rounded-lg bg-blue-600 text-white font-black text-xs uppercase tracking-wider";
                 tabCama.className = "tab-btn flex-1 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-xs uppercase tracking-wider bg-transparent";
                 zonaBloque.classList.remove('hidden');
+                zonaBloque.classList.add('grid');
                 zonaCama.classList.add('hidden');
+                zonaCama.classList.remove('grid');
             } else {
                 tabCama.className = "tab-btn flex-1 py-2.5 rounded-lg bg-blue-600 text-white font-black text-xs uppercase tracking-wider";
                 tabBloque.className = "tab-btn flex-1 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-xs uppercase tracking-wider bg-transparent";
                 zonaCama.classList.remove('hidden');
+                zonaCama.classList.add('grid');
                 zonaBloque.classList.add('hidden');
+                zonaBloque.classList.remove('grid');
             }
             calcularEnVivo();
         };
@@ -411,14 +417,15 @@
                 subtotal = (f * d * n);
             } else {
                 const pz = parseInt(document.getElementById('calcPzCama').value) || 0;
-                subtotal = (pz * n);
+                const tarimas = parseInt(document.getElementById('calcTarimas').value) || 1; // Aquí entra la columna de fondo
+                subtotal = (pz * n * tarimas);
             }
 
             document.getElementById('calcResultado').innerText = Math.max(0, subtotal + a);
         }
 
-        // Asignar listeners a los inputs
-        ['calcFrente', 'calcFondo', 'calcPzCama', 'calcNiveles', 'calcAjuste'].forEach(id => {
+        // Asignar listeners a TODOS los inputs de la calculadora
+        ['calcFrente', 'calcFondo', 'calcPzCama', 'calcTarimas', 'calcNiveles', 'calcAjuste'].forEach(id => {
             document.getElementById(id).addEventListener('input', calcularEnVivo);
         });
 
