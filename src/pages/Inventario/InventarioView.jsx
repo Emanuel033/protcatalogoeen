@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import EscanerManual from './components/EscanerManual';
 import ListaConteo from './components/ListaConteo'; // Importamos las tarjetas
+import ModalCalculadora from './components/ModalCalculadora';
 
 const InventarioView = () => {
   const [idioma, setIdioma] = useState('es');
   const [catalogoBase, setCatalogoBase] = useState([]);
   const [estadoCatalogo, setEstadoCatalogo] = useState('Cargando base...');
   const [listaConteo, setListaConteo] = useState([]);
+  const [calcActiva, setCalcActiva] = useState({ isOpen: false, codigo: null, varId: null, nombre: '' });
 
   useEffect(() => {
     const cargarCatalogo = async () => {
@@ -106,7 +108,10 @@ const InventarioView = () => {
   };
 
   // Funciones vacías por ahora, las llenamos en el siguiente sprint veloz
-  const abrirCalculadora = (codigo, varId) => alert(`Calculadora para ${codigo} en construcción`);
+  const abrirCalculadora = (codigo, varId) => {
+  const prod = listaConteo.find(p => p.codigo === codigo);
+  setCalcActiva({ isOpen: true, codigo, varId, nombre: prod?.nombre || '' });
+};
   const iniciarDictado = (codigo, varId, btn, letra) => alert(`Dictado [${letra}] en construcción`);
 
   return (
@@ -148,6 +153,12 @@ const InventarioView = () => {
           onAbrirCalculadora={abrirCalculadora}
           onIniciarDictado={iniciarDictado}
         />
+        <ModalCalculadora 
+  isOpen={calcActiva.isOpen}
+  tituloTarget={calcActiva.nombre}
+  onClose={() => setCalcActiva({ ...calcActiva, isOpen: false })}
+  onAplicar={(totalCalculado) => cambiarCant(calcActiva.codigo, calcActiva.varId, totalCalculado)}
+/>
       </main>
     </div>
   );
