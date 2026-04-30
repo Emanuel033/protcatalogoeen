@@ -259,7 +259,8 @@
         "_nanoseconds": 898000000
       },
       "codigo_sistema_oficial": "BPLAN-1-L/CP",
-      "receta_desglose": null
+      "receta_desglose": null,
+      "hereda_empaques_de": null
     },
     "paquetes": [
       {
@@ -268,6 +269,15 @@
         "piezas": "170",
         "sku": "-OK_PNO5YIKGHCWGQ13H-170PZ",
         "es_default": true
+      },
+      {
+        "id": "oBvPCgo2u3V2ShSTI2lG",
+        "piezas": 180,
+        "sku": "BPLAN-1-L/CP-180PZ",
+        "fecha_creacion": {
+          "_seconds": 1777509173,
+          "_nanoseconds": 990000000
+        }
       }
     ]
   },
@@ -5142,6 +5152,15 @@
         "piezas": "170",
         "sku": "-OK_PNO5YIKGHCWGQ13H-170PZ",
         "es_default": true
+      },
+      {
+        "id": "oBvPCgo2u3V2ShSTI2lG",
+        "piezas": 180,
+        "sku": "BPLAN-1-L/CP-180PZ",
+        "fecha_creacion": {
+          "_seconds": 1777509173,
+          "_nanoseconds": 990000000
+        }
       }
     ]
   },
