@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EscanerManual from './components/EscanerManual';
 import ListaConteo from './components/ListaConteo'; // Importamos las tarjetas
 import ModalCalculadora from './components/ModalCalculadora';
+import useDictadoVoz from './hooks/useDictadoVoz'; // <-- NUEVO
 
 const InventarioView = () => {
   const [idioma, setIdioma] = useState('es');
@@ -9,7 +10,16 @@ const InventarioView = () => {
   const [estadoCatalogo, setEstadoCatalogo] = useState('Cargando base...');
   const [listaConteo, setListaConteo] = useState([]);
   const [calcActiva, setCalcActiva] = useState({ isOpen: false, codigo: null, varId: null, nombre: '' });
+  // LA MAGIA DE LA VOZ:
+   // Cuando el dictado termina y detecta un número, llama a esta función automáticamente
+   const manejarResultadoVoz = (codigo, varId, cantidad, letra) => {
+     manualCant(codigo, varId, cantidad); // Usamos tu función existente para inyectar la cantidad
+     // Aquí podríamos meter un Toast bonito después en lugar de un alert
+     // alert(`Se registraron ${cantidad} piezas en el índice [ ${letra} ]`); 
+   };
 
+   // Inyectamos el Hook pasándole el idioma actual y la función de callback
+   const { iniciarDictado, estaEscuchando } = useDictadoVoz(idioma, manejarResultadoVoz);
   useEffect(() => {
     const cargarCatalogo = async () => {
       try {
@@ -151,7 +161,7 @@ const InventarioView = () => {
           onEliminar={eliminarDeLista}
           onAgregarEmpaque={agregarEmpaqueNuevo}
           onAbrirCalculadora={abrirCalculadora}
-          onIniciarDictado={iniciarDictado}
+          onIniciarDictado={(codigo, varId, btn, letra) => iniciarDictado(codigo, varId, letra)}
         />
         <ModalCalculadora 
   isOpen={calcActiva.isOpen}
@@ -159,6 +169,7 @@ const InventarioView = () => {
   onClose={() => setCalcActiva({ ...calcActiva, isOpen: false })}
   onAplicar={(totalCalculado) => cambiarCant(calcActiva.codigo, calcActiva.varId, totalCalculado)}
 />
+
       </main>
     </div>
   );
