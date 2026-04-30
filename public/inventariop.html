@@ -105,6 +105,12 @@
         <datalist id="opcionesProductos"></datalist>
     </main>
 
+    <!-- Contenedor para notificaciones flotantes -->
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-xl shadow-2xl border border-slate-700 z-[200] hidden items-center gap-2 font-bold text-sm">
+        <span id="toastMsg"></span>
+    </div>
+
+    <!-- MODAL CALCULADORA MULTIMODO -->
     <div id="calcModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-2 md:p-4 overflow-y-auto">
         <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden my-auto">
             
@@ -114,12 +120,14 @@
             </div>
             
             <div class="p-4 md:p-5 space-y-4">
+                <!-- Tabs -->
                 <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700 overflow-x-auto custom-scroll">
                     <button id="tabBloque" onclick="setCalcMode('bloque')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg bg-blue-600 text-white font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoBloque">Bloque</button>
                     <button id="tabCama" onclick="setCalcMode('cama')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoCama">Cama Fija</button>
                     <button id="tabVisual" onclick="setCalcMode('visual')" class="tab-btn flex-1 min-w-[80px] py-2.5 rounded-lg text-slate-400 hover:text-slate-200 font-black text-[10px] md:text-xs uppercase tracking-wider" data-i18n="modoVisual">Gráfico Libre</button>
                 </div>
 
+                <!-- Zona Dinámica: Modo Bloque -->
                 <div id="zonaBloque" class="grid grid-cols-2 gap-3 text-center">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcFrente">Frente</label>
@@ -131,6 +139,7 @@
                     </div>
                 </div>
 
+                <!-- Zona Dinámica: Modo Cama Fija Numérica -->
                 <div id="zonaCama" class="hidden grid grid-cols-1 gap-3 text-center">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcPzCama">Pz por Cama (Patrón)</label>
@@ -138,8 +147,10 @@
                     </div>
                 </div>
 
+                <!-- Zona Dinámica: Modo Visual (Lienzo Drag & Drop con Formas) -->
                 <div id="zonaVisual" class="hidden flex flex-col gap-2">
                     
+                    <!-- Selector de Formas Modificado -->
                     <div class="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700 mb-1">
                         <button onclick="setFormaVisual('circulo')" id="btnFormaCirculo" class="flex-1 py-2 rounded-lg bg-blue-600 text-white font-bold text-[10px] uppercase transition" title="Círculo"><i class="fas fa-circle"></i></button>
                         <button onclick="setFormaVisual('cuadrado')" id="btnFormaCuadrado" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase transition" title="Cuadrado"><i class="fas fa-square"></i></button>
@@ -159,11 +170,14 @@
                     <div class="bg-slate-900 p-2 rounded-2xl border border-slate-700 relative">
                         <p class="absolute top-2 left-0 right-0 text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center pointer-events-none z-0" data-i18n="instruccionVisual">Arrastra los envases<br>Doble toque para eliminar</p>
                         
+                        <!-- EL LIENZO DONDE VIVEN LAS PIEZAS -->
                         <div id="lienzoEstiba" class="w-full h-44 border-2 border-dashed border-slate-600 rounded-xl relative overflow-hidden z-10 bg-slate-900/50 touch-none">
-                            </div>
+                            <!-- Las piezas se inyectan aquí -->
+                        </div>
                     </div>
                 </div>
 
+                <!-- ZONA DE PROFUNDIDAD (Tarimas hacia atrás) -->
                 <div id="zonaTarimasFondo" class="hidden text-center mt-2 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
                     <label class="block text-[10px] font-bold text-purple-400 uppercase mb-2" data-i18n="calcTarimas">Tarimas Hacia Atrás (Fondo)</label>
                     <div class="flex items-center justify-center gap-3">
@@ -173,6 +187,7 @@
                     </div>
                 </div>
 
+                <!-- Zona Constante de Niveles y Ajuste -->
                 <div class="grid grid-cols-2 gap-3 text-center border-t border-slate-700 pt-4 mt-2">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="calcNiveles">Niveles (Capas)</label>
@@ -184,6 +199,7 @@
                     </div>
                 </div>
 
+                <!-- TOTAL -->
                 <div class="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6 shadow-inner">
                     <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Total Estimado</p>
                     <p class="text-4xl font-black text-white" id="calcResultado">0</p>
@@ -489,7 +505,6 @@
             calcularEnVivo();
         };
 
-        // Nuevo Cambiador de formas (4 opciones independientes)
         window.setFormaVisual = (forma) => {
             formaVisualActual = forma;
             const btnC = document.getElementById('btnFormaCirculo');
@@ -517,17 +532,14 @@
             calcularEnVivo();
         };
 
-        // Lógica del Lienzo Drag & Drop
         window.agregarPiezaLienzo = () => {
             idPiezaLienzo++;
             const lienzo = document.getElementById('lienzoEstiba');
             const pieza = document.createElement('div');
             
-            // Asigna la forma seleccionada actualmente
             pieza.className = `pieza-lienzo forma-${formaVisualActual}`;
             pieza.innerText = idPiezaLienzo;
             
-            // Spawnea un poco aleatorio en el centro
             const offset = Math.floor(Math.random() * 20) - 10;
             pieza.style.left = `calc(50% - 16px + ${offset}px)`;
             pieza.style.top = `calc(50% - 16px + ${offset}px)`;
@@ -603,7 +615,6 @@
                 document.removeEventListener('touchmove', arrastrarTouch);
             }
 
-            // Eliminar pieza
             let ultimoTap = 0;
             elmnt.addEventListener('touchend', function(e) {
                 let tiempoActual = new Date().getTime();
@@ -661,12 +672,18 @@
         // ==========================================
         // DICTADO DE VOZ Y RENDERIZADO
         // ==========================================
-        window.iniciarDictado = (codigoProd, varId, btnElement) => {
+        
+        // MODIFICACIÓN 3: La función de dictado ahora recibe y muestra la letra (Index Alfabético)
+        window.iniciarDictado = (codigoProd, varId, btnElement, letterIndex) => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return showToast("No soportado", "error");
             const recognition = new SpeechRecognition();
             recognition.lang = currentLang === 'es' ? 'es-MX' : 'fr-FR';
             btnElement.querySelector('i').classList.add('mic-active');
+            
+            // Damos el feedback visual de qué letra estamos afectando
+            showToast(`🎤 Escuchando cantidad para el índice [ ${letterIndex} ]...`, 'info');
+
             recognition.onresult = (e) => {
                 const transcript = e.results[0][0].transcript;
                 const n = transcript.match(/\d+/);
@@ -706,15 +723,21 @@
                     badgeHtml = `<span class="bg-slate-700 text-slate-300 px-2 py-1 rounded text-[10px] font-black tracking-wider"><i class="fas fa-check"></i> ${t.ok}</span>`;
                 }
 
-                let variantesHtml = item.variantes.map((v) => {
+                // MODIFICACIÓN 1 y 2: Generamos la letra (A, B, C...) y la inyectamos visualmente
+                let variantesHtml = item.variantes.map((v, index) => {
+                    const letterIndex = String.fromCharCode(65 + index); // 65 es 'A' en ASCII
                     const safeVarId = String(v.id).replace(/'/g, "\\'").replace(/"/g, '&quot;');
                     let label = v.id === 'sueltas' ? t.sueltas : (v.isFantasma ? t.txtNuevoPaquete.replace('{pz}', v.pz) : (v.sku ? `${v.sku} (${v.pz}${t.pz_abrev})` : `${v.pz >= 500 ? t.caja : t.paquete} (${v.pz}${t.pz_abrev})`));
+                    
                     return `
                     <div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
-                        <span class="text-xs font-bold ${v.isFantasma ? 'text-amber-400' : 'text-slate-400'} flex-1 truncate pr-2">${label}</span>
+                        <div class="flex items-center gap-2 flex-1 pr-2 truncate">
+                            <span class="bg-slate-700 text-blue-400 font-black text-[10px] px-2 py-0.5 rounded border border-slate-600 shadow-sm">[ ${letterIndex} ]</span>
+                            <span class="text-xs font-bold ${v.isFantasma ? 'text-amber-400' : 'text-slate-400'} truncate">${label}</span>
+                        </div>
                         <div class="flex items-center gap-1 shrink-0">
                             <button onclick="abrirCalculadora('${safeCod}', '${safeVarId}')" class="w-9 h-9 rounded-lg bg-slate-800 text-blue-400 border border-slate-700"><i class="fas fa-calculator text-sm"></i></button>
-                            <button onclick="iniciarDictado('${safeCod}', '${safeVarId}', this)" class="w-9 h-9 rounded-lg bg-slate-800 text-slate-400 border border-slate-700"><i class="fas fa-microphone text-sm"></i></button>
+                            <button onclick="iniciarDictado('${safeCod}', '${safeVarId}', this, '${letterIndex}')" class="w-9 h-9 rounded-lg bg-slate-800 text-slate-400 border border-slate-700"><i class="fas fa-microphone text-sm"></i></button>
                             <div class="flex items-center gap-1 bg-slate-900 rounded-xl p-1 border border-slate-700">
                                 <button onclick="cambiarCant('${safeCod}', '${safeVarId}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300"><i class="fas fa-minus text-xs"></i></button>
                                 <input type="number" min="0" value="${v.contadas}" oninput="manualCant('${safeCod}', '${safeVarId}', this.value)" onfocus="this.select()" class="w-10 text-center font-black text-white bg-transparent outline-none">
