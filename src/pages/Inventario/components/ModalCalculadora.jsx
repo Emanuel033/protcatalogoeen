@@ -37,9 +37,12 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
     if (onMover) onMover(pieza.id, pos.x, pos.y);
   };
 
+  // NUEVAS PROPORCIONES (1.5:1 agregadas)
   let shapeClasses = "w-[34px] h-[34px] rounded-full"; 
   if (pieza.forma === 'cuadrado') shapeClasses = "w-[34px] h-[34px] rounded-[6px]";
-  else if (pieza.forma === 'rectangulo-h') shapeClasses = "w-[68px] h-[34px] rounded-[6px]";
+  else if (pieza.forma === 'caja-h') shapeClasses = "w-[51px] h-[34px] rounded-[6px]"; // Proporción 1.5 (Gordita)
+  else if (pieza.forma === 'caja-v') shapeClasses = "w-[34px] h-[51px] rounded-[6px]";
+  else if (pieza.forma === 'rectangulo-h') shapeClasses = "w-[68px] h-[34px] rounded-[6px]"; // Proporción 2.0 (Larga)
   else if (pieza.forma === 'rectangulo-v') shapeClasses = "w-[34px] h-[68px] rounded-[6px]";
 
   return (
@@ -70,11 +73,12 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
   const [fondo, setFondo] = useState('');
   const [pzCama, setPzCama] = useState('');
   
+  // Nuevo interruptor para Estiba Cruzada (180 grados)
+  const [estibaCruzada, setEstibaCruzada] = useState(false);
+
   const [formaVisual, setFormaVisual] = useState('circulo');
   const [piezasVisuales, setPiezasVisuales] = useState([]);
   const [idPiezaLienzo, setIdPiezaLienzo] = useState(0);
-
-  // NUEVO: Estado para rastrear las cajas eliminadas (huecos) en 3D
   const [huecos3D, setHuecos3D] = useState([]);
 
   useEffect(() => {
@@ -82,7 +86,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
       setNiveles(''); setAjuste(0); setTarimas(1);
       setFrente(''); setFondo(''); setPzCama('');
       setPiezasVisuales([]); setIdPiezaLienzo(0); setHuecos3D([]);
-      setModo('bloque'); setModoOrigen('bloque');
+      setModo('bloque'); setModoOrigen('bloque'); setEstibaCruzada(false);
     }
   }, [isOpen]);
 
@@ -93,22 +97,14 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
   const t = parseInt(tarimas) || 1;
   const a = parseInt(ajuste) || 0;
 
-  if (modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) {
-    subtotal = (parseInt(frente) || 0) * (parseInt(fondo) || 0) * n;
-  }
-  else if (modo === 'cama' || (modo === '3d' && modoOrigen === 'cama')) {
-    subtotal = (parseInt(pzCama) || 0) * n * t;
-  }
-  else if (modo === 'visual' || (modo === '3d' && modoOrigen === 'visual')) {
-    subtotal = piezasVisuales.length * n * t;
-  }
+  if (modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) subtotal = (parseInt(frente) || 0) * (parseInt(fondo) || 0) * n;
+  else if (modo === 'cama' || (modo === '3d' && modoOrigen === 'cama')) subtotal = (parseInt(pzCama) || 0) * n * t;
+  else if (modo === 'visual' || (modo === '3d' && modoOrigen === 'visual')) subtotal = piezasVisuales.length * n * t;
   
-  // EL TOTAL AHORA RESTA LOS HUECOS DEL 3D AUTOMÁTICAMENTE
   const totalCalculado = Math.max(0, subtotal + a - huecos3D.length);
 
   const cambiarPestana = (nuevoModo) => {
     if (nuevoModo !== '3d') setModoOrigen(nuevoModo);
-    // Limpiamos los huecos si cambias de forma de estiba para no arrastrar errores
     if (nuevoModo !== modo) setHuecos3D([]); 
     setModo(nuevoModo);
   };
@@ -116,28 +112,13 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
   const agregarPiezaVisual = () => {
     setIdPiezaLienzo(prev => prev + 1);
     const offset = Math.floor(Math.random() * 20) - 10;
-    const nuevaPieza = {
-      id: Date.now(), 
-      forma: formaVisual,
-      numero: idPiezaLienzo + 1,
-      x: 150 + offset, 
-      y: 60 + offset
-    };
+    const nuevaPieza = { id: Date.now(), forma: formaVisual, numero: idPiezaLienzo + 1, x: 150 + offset, y: 60 + offset };
     setPiezasVisuales([...piezasVisuales, nuevaPieza]);
   };
 
   const eliminarPiezaVisual = (id) => setPiezasVisuales(prev => prev.filter(p => p.id !== id));
-  
-  const moverPiezaVisual = (id, newX, newY) => {
-    setPiezasVisuales(prev => prev.map(p => p.id === id ? { ...p, x: newX, y: newY } : p));
-  };
-
-  // Función para inyectar al motor 3D
-  const toggleHueco = (idCaja) => {
-    setHuecos3D(prev => 
-      prev.includes(idCaja) ? prev.filter(h => h !== idCaja) : [...prev, idCaja]
-    );
-  };
+  const moverPiezaVisual = (id, newX, newY) => setPiezasVisuales(prev => prev.map(p => p.id === id ? { ...p, x: newX, y: newY } : p));
+  const toggleHueco = (idCaja) => setHuecos3D(prev => prev.includes(idCaja) ? prev.filter(h => h !== idCaja) : [...prev, idCaja]);
 
   return (
     <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] flex items-center justify-center p-2 md:p-4 overflow-y-auto">
@@ -148,9 +129,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
             <h3 className="font-black text-lg text-white">Calculadora de Estiba</h3>
             <p className="text-xs text-blue-400 font-bold truncate max-w-[200px]">{tituloTarget}</p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white w-10 h-10 rounded-full bg-slate-700/50 flex items-center justify-center">
-            <i className="fas fa-times"></i>
-          </button>
+          <button onClick={onClose} className="text-slate-400 hover:text-white w-10 h-10 rounded-full bg-slate-700/50 flex items-center justify-center"><i className="fas fa-times"></i></button>
         </div>
         
         <div className="p-4 md:p-5 space-y-4">
@@ -163,50 +142,36 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
 
           {(modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) && (
             <div className="grid grid-cols-2 gap-3 text-center">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Frente</label>
-                <input type="number" value={frente} onChange={e => setFrente(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Fondo</label>
-                <input type="number" value={fondo} onChange={e => setFondo(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-              </div>
+              <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Frente</label><input type="number" value={frente} onChange={e => setFrente(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" /></div>
+              <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Fondo</label><input type="number" value={fondo} onChange={e => setFondo(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" /></div>
             </div>
           )}
 
           {(modo === 'cama' || (modo === '3d' && modoOrigen === 'cama')) && (
             <div className="grid grid-cols-1 gap-3 text-center">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Pz por Cama (Patrón)</label>
-                <input type="number" value={pzCama} onChange={e => setPzCama(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-amber-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-              </div>
+              <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Pz por Cama (Patrón)</label><input type="number" value={pzCama} onChange={e => setPzCama(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-amber-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" /></div>
             </div>
           )}
 
           {modo === 'visual' && (
             <div className="flex flex-col gap-2">
-              <div className="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700 mb-1">
-                  <button onClick={() => setFormaVisual('circulo')} className={`flex-1 py-2 rounded-lg font-bold text-[10px] uppercase transition ${formaVisual === 'circulo' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`} title="Círculo"><i className="fas fa-circle"></i></button>
-                  <button onClick={() => setFormaVisual('cuadrado')} className={`flex-1 py-2 rounded-lg font-bold text-[10px] uppercase transition ${formaVisual === 'cuadrado' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`} title="Cuadrado"><i className="fas fa-square"></i></button>
-                  <button onClick={() => setFormaVisual('rectangulo-h')} className={`flex-1 py-2 rounded-lg font-bold text-[10px] uppercase transition ${formaVisual === 'rectangulo-h' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`} title="Rectángulo Horizontal"><span className="font-black text-sm leading-none">▬</span></button>
-                  <button onClick={() => setFormaVisual('rectangulo-v')} className={`flex-1 py-2 rounded-lg font-bold text-[10px] uppercase transition ${formaVisual === 'rectangulo-v' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`} title="Rectángulo Vertical"><span className="font-black text-sm leading-none">▮</span></button>
+              <div className="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700 mb-1 overflow-x-auto custom-scroll">
+                  <button onClick={() => setFormaVisual('circulo')} className={`px-3 py-2 rounded-lg font-bold text-[10px] transition ${formaVisual === 'circulo' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}><i className="fas fa-circle"></i></button>
+                  <button onClick={() => setFormaVisual('cuadrado')} className={`px-3 py-2 rounded-lg font-bold text-[10px] transition ${formaVisual === 'cuadrado' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}><i className="fas fa-square"></i></button>
+                  <button onClick={() => setFormaVisual('caja-h')} className={`flex-1 px-2 py-2 rounded-lg font-bold text-[10px] uppercase transition ${formaVisual === 'caja-h' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Caja ▬</button>
+                  <button onClick={() => setFormaVisual('caja-v')} className={`flex-1 px-2 py-2 rounded-lg font-bold text-[10px] uppercase transition ${formaVisual === 'caja-v' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Caja ▮</button>
+                  <button onClick={() => setFormaVisual('rectangulo-h')} className={`px-3 py-2 rounded-lg font-bold text-[10px] transition ${formaVisual === 'rectangulo-h' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}><span className="font-black text-sm leading-none">▬</span></button>
               </div>
 
               <div className="flex gap-2">
-                <button onClick={agregarPiezaVisual} className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black py-2.5 rounded-xl text-[11px] uppercase tracking-wider transition shadow-lg shadow-amber-500/20 flex justify-center items-center gap-2">
-                  <i className="fas fa-plus-circle"></i> Añadir Envase
-                </button>
-                <button onClick={() => { setPiezasVisuales([]); setIdPiezaLienzo(0); }} className="w-12 bg-slate-700 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition">
-                  <i className="fas fa-trash"></i>
-                </button>
+                <button onClick={agregarPiezaVisual} className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-black py-2.5 rounded-xl text-[11px] uppercase tracking-wider transition shadow-lg flex justify-center items-center gap-2"><i className="fas fa-plus-circle"></i> Añadir</button>
+                <button onClick={() => { setPiezasVisuales([]); setIdPiezaLienzo(0); }} className="w-12 bg-slate-700 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition"><i className="fas fa-trash"></i></button>
               </div>
               
               <div className="bg-slate-900 p-2 rounded-2xl border border-slate-700 relative">
                 <p className="absolute top-2 left-0 right-0 text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center pointer-events-none z-0">Arrastra los envases<br/>Doble toque para eliminar</p>
                 <div className="w-full h-44 border-2 border-dashed border-slate-600 rounded-xl relative overflow-hidden z-10 bg-slate-900/50 touch-none">
-                   {piezasVisuales.map(p => (
-                      <PiezaArrastrable key={p.id} pieza={p} onEliminar={eliminarPiezaVisual} onMover={moverPiezaVisual} />
-                   ))}
+                   {piezasVisuales.map(p => <PiezaArrastrable key={p.id} pieza={p} onEliminar={eliminarPiezaVisual} onMover={moverPiezaVisual} />)}
                 </div>
               </div>
             </div>
@@ -216,22 +181,25 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
             <div className="w-full h-64 border border-purple-900/50 bg-slate-900 rounded-xl overflow-hidden relative shadow-inner mt-2">
                <Estiba3D 
                   modoOrigen={modoOrigen}
-                  frente={frente} 
-                  fondo={fondo} 
-                  niveles={niveles}
-                  pzCama={pzCama}
-                  tarimas={tarimas}
-                  piezasVisuales={piezasVisuales}
-                  huecos3D={huecos3D}         // PASAMOS LOS HUECOS
-                  onToggleHueco={toggleHueco} // PASAMOS LA FUNCIÓN
+                  frente={frente} fondo={fondo} niveles={niveles} pzCama={pzCama} tarimas={tarimas}
+                  piezasVisuales={piezasVisuales} huecos3D={huecos3D} onToggleHueco={toggleHueco}
+                  estibaCruzada={estibaCruzada} // LE DECIMOS AL MOTOR 3D SI DEBE CRUZAR LAS CAPAS
                />
-               <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">
-                 Toca un empaque para eliminarlo (hueco)
-               </p>
+               <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">Toca un empaque para eliminarlo (hueco)</p>
             </div>
           )}
 
-          {/* Tarimas solo para Cama, Visual o 3D (cuando viene de Cama o Visual) */}
+          {/* CHECKBOX ESTIBA CRUZADA */}
+          {(modo === '3d' && ['visual', 'cama', 'bloque'].includes(modoOrigen)) && (
+             <div className="flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-pointer" onClick={() => setEstibaCruzada(!estibaCruzada)}>
+               <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${estibaCruzada ? 'bg-purple-500' : 'bg-slate-900 border border-slate-600'}`}>
+                 {estibaCruzada && <i className="fas fa-check text-white text-xs"></i>}
+               </div>
+               <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Estiba Cruzada (Rotar 180° por capa)</span>
+             </div>
+          )}
+
+          {/* Tarimas */}
           {['cama', 'visual'].includes(modo) || (modo === '3d' && ['cama', 'visual'].includes(modoOrigen)) ? (
             <div className="text-center mt-2 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
               <label className="block text-[10px] font-bold text-purple-400 uppercase mb-2">Tarimas Hacia Atrás (Fondo)</label>
@@ -244,22 +212,13 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
           ) : null}
 
           <div className="grid grid-cols-2 gap-3 text-center border-t border-slate-700 pt-4 mt-2">
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Niveles (Capas)</label>
-              <input type="number" value={niveles} onChange={e => setNiveles(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-blue-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Ajuste (+/-)</label>
-              <input type="number" value={ajuste} onChange={e => setAjuste(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-emerald-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-            </div>
+            <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Niveles (Capas)</label><input type="number" value={niveles} onChange={e => setNiveles(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-blue-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" /></div>
+            <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Ajuste (+/-)</label><input type="number" value={ajuste} onChange={e => setAjuste(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-emerald-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" /></div>
           </div>
 
           <div className="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6 shadow-inner">
             <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Total Estimado</p>
-            <p className="text-4xl font-black text-white">
-              {totalCalculado}
-              {huecos3D.length > 0 && <span className="text-sm text-red-400 ml-2">(-{huecos3D.length} huecos)</span>}
-            </p>
+            <p className="text-4xl font-black text-white">{totalCalculado}{huecos3D.length > 0 && <span className="text-sm text-red-400 ml-2">(-{huecos3D.length})</span>}</p>
           </div>
 
         </div>

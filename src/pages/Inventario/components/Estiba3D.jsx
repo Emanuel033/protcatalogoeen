@@ -2,7 +2,7 @@ import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Box, Grid, Cylinder } from '@react-three/drei';
 
-const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasVisuales, huecos3D, onToggleHueco }) => {
+const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasVisuales, huecos3D, onToggleHueco, estibaCruzada }) => {
   const cajas = [];
   const boxSize = 1;
   const gap = 0.05;
@@ -10,66 +10,77 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
   const n = Math.max(1, parseInt(niveles) || 1);
   const t = Math.max(1, parseInt(tarimas) || 1);
 
-  // Función auxiliar para renderizar con material "fantasma" si es un hueco
   const renderMaterial = (forma, isHueco) => {
-    if (isHueco) {
-      // Caja transparente roja que representa el hueco (puedes volver a tocarla para restaurar)
-      return <meshStandardMaterial color="#ef4444" transparent opacity={0.3} depthWrite={false} />;
-    }
-    
+    if (isHueco) return <meshStandardMaterial color="#ef4444" transparent opacity={0.3} depthWrite={false} />;
     if (forma === 'circulo') return <meshStandardMaterial color="#f59e0b" roughness={0.3} metalness={0.2} />;
     if (forma === 'cama') return <meshStandardMaterial color="#8b5cf6" roughness={0.2} metalness={0.1} />;
     if (forma === 'bloque') return <meshStandardMaterial color="#10b981" roughness={0.2} metalness={0.1} />;
-    
-    // Por defecto: Caja azul estándar (cuadrado y rectángulos)
     return <meshStandardMaterial color="#3b82f6" roughness={0.2} metalness={0.1} />;
   };
 
   // ==========================================
-  // ESCENARIO 1: AFINACIÓN MILIMÉTRICA DEL LIENZO
+  // ESCENARIO 1: LIENZO (CON ESTIBA CRUZADA)
   // ==========================================
   if (modoOrigen === 'visual' && piezasVisuales && piezasVisuales.length > 0) {
-    const scale = 34; // Exactamente el ancho de tu círculo/cuadrado en CSS
-    const offsetX = 5; // Centro del lienzo en X (aprox 170px / 34)
-    const offsetZ = 2.5; // Centro del lienzo en Y (aprox 85px / 34)
+    const scale = 34; 
+    const offsetX = 5; 
+    const offsetZ = 2.5; 
+
+    // Primero, encontramos el CENTRO del dibujo que hiciste para poder rotarlo sobre su propio eje
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    piezasVisuales.forEach(p => {
+      const wPx = p.forma.includes('-h') ? (p.forma === 'rectangulo-h' ? 68 : 51) : 34;
+      const dPx = p.forma.includes('-v') ? (p.forma === 'rectangulo-v' ? 68 : 51) : 34;
+      const cx = p.x + (wPx / 2);
+      const cy = p.y + (dPx / 2);
+      const base3Dx = (cx / scale) - offsetX;
+      const base3Dz = (cy / scale) - offsetZ;
+      if (base3Dx < minX) minX = base3Dx;
+      if (base3Dx > maxX) maxX = base3Dx;
+      if (base3Dz < minZ) minZ = base3Dz;
+      if (base3Dz > maxZ) maxZ = base3Dz;
+    });
+
+    const centroEstibaX = (minX + maxX) / 2;
+    const centroEstibaZ = (minZ + maxZ) / 2;
 
     for (let tarima = 0; tarima < t; tarima++) {
       for (let y = 0; y < n; y++) {
+        // ¿Es un nivel impar y activaste el checkbox? ¡Rotamos la capa entera!
+        const debeRotar = estibaCruzada && (y % 2 !== 0);
+
         piezasVisuales.forEach((p, index) => {
+          // Extraemos proporciones dinámicamente de tu CSS a medidas 3D
+          const wPx = p.forma.includes('-h') ? (p.forma === 'rectangulo-h' ? 68 : 51) : 34;
+          const dPx = p.forma.includes('-v') ? (p.forma === 'rectangulo-v' ? 68 : 51) : 34;
           
-          // Calculamos el centro exacto de la figura CSS para mapearlo a 3D
-          const isRectH = p.forma === 'rectangulo-h';
-          const isRectV = p.forma === 'rectangulo-v';
-          const wPx = isRectH ? 68 : 34;
-          const dPx = isRectV ? 68 : 34;
+          const ancho3D = wPx / scale; // Ejem: 51/34 = 1.5 de ancho
+          const fondo3D = dPx / scale; // Ejem: 68/34 = 2.0 de fondo
           
           const cx = p.x + (wPx / 2);
           const cy = p.y + (dPx / 2);
 
-          const x3D = (cx / scale) - offsetX;
-          const z3D = (cy / scale) - offsetZ + (tarima * 3); // 3 unidades de separación entre tarimas
+          let x3D = (cx / scale) - offsetX;
+          let z3D = (cy / scale) - offsetZ;
+
+          // Magia de rotación de 180° (invierte las coordenadas basado en el centro)
+          if (debeRotar) {
+            x3D = centroEstibaX - (x3D - centroEstibaX);
+            z3D = centroEstibaZ - (z3D - centroEstibaZ);
+          }
+
+          // Agregamos el offset de la tarima (hacia atrás)
+          z3D += (tarima * 3); 
           const posY = y * (boxSize + gap) + 0.5;
           const key = `lienzo-${tarima}-${y}-${index}`;
           const isHueco = huecos3D.includes(key);
 
-          const propsInteractivos = {
-            key: key,
-            position: [x3D, posY, z3D],
-            onClick: (e) => { e.stopPropagation(); onToggleHueco(key); }
-          };
+          const props = { key: key, position: [x3D, posY, z3D], onClick: (e) => { e.stopPropagation(); onToggleHueco(key); } };
 
           if (p.forma === 'circulo') {
-            cajas.push(
-              <Cylinder {...propsInteractivos} args={[0.5, 0.5, 1, 32]}>
-                {renderMaterial('circulo', isHueco)}
-              </Cylinder>
-            );
+            cajas.push(<Cylinder {...props} args={[0.5, 0.5, 1, 32]}>{renderMaterial('circulo', isHueco)}</Cylinder>);
           } else {
-            cajas.push(
-              <Box {...propsInteractivos} args={[isRectH ? 2 : 1, 1, isRectV ? 2 : 1]}>
-                {renderMaterial('caja', isHueco)}
-              </Box>
-            );
+            cajas.push(<Box {...props} args={[ancho3D, 1, fondo3D]}>{renderMaterial('caja', isHueco)}</Box>);
           }
         });
       }
@@ -89,16 +100,11 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
           const col = i % cols;
           const row = Math.floor(i / cols);
           const offsetZ = (Math.ceil(pz/cols) * (boxSize + gap)) / 2 - (boxSize / 2);
-          
           const key = `cama-${tarima}-${y}-${i}`;
           const isHueco = huecos3D.includes(key);
 
           cajas.push(
-            <Box 
-              key={key} 
-              position={[col * (boxSize + gap) - offsetX, y * (boxSize+gap) + 0.5, row * (boxSize + gap) - offsetZ + (tarima * 4)]}
-              onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}
-            >
+            <Box key={key} position={[col * (boxSize + gap) - offsetX, y * (boxSize+gap) + 0.5, row * (boxSize + gap) - offsetZ + (tarima * 4)]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>
               {renderMaterial('cama', isHueco)}
             </Box>
           );
@@ -116,17 +122,21 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
     const offsetZ = (d * (boxSize + gap)) / 2 - (boxSize / 2);
 
     for (let y = 0; y < n; y++) {
-      for (let x = 0; x < f; x++) {
-        for (let z = 0; z < d; z++) {
+      // Rotar bloque entero para alternar
+      const debeRotar = estibaCruzada && (y % 2 !== 0);
+      const iterF = debeRotar ? d : f;
+      const iterD = debeRotar ? f : d;
+      
+      const offX = (iterF * (boxSize + gap)) / 2 - (boxSize / 2);
+      const offZ = (iterD * (boxSize + gap)) / 2 - (boxSize / 2);
+
+      for (let x = 0; x < iterF; x++) {
+        for (let z = 0; z < iterD; z++) {
           const key = `bloque-${x}-${y}-${z}`;
           const isHueco = huecos3D.includes(key);
 
           cajas.push(
-            <Box 
-              key={key} 
-              position={[x * (boxSize + gap) - offsetX, y * (boxSize + gap) + 0.5, z * (boxSize + gap) - offsetZ]}
-              onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}
-            >
+            <Box key={key} position={[x * (boxSize + gap) - offX, y * (boxSize + gap) + 0.5, z * (boxSize + gap) - offZ]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>
               {renderMaterial('bloque', isHueco)}
             </Box>
           );
@@ -140,9 +150,7 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
       <pointLight position={[-10, -10, -10]} intensity={0.5} />
-      
       {cajas}
-      
       <OrbitControls makeDefault maxPolarAngle={Math.PI / 2 - 0.1} />
       <Grid position={[0, 0, 0]} args={[40, 40]} cellColor="#475569" sectionColor="#1e293b" fadeDistance={20} />
     </Canvas>
