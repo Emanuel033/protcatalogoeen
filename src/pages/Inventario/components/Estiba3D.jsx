@@ -64,7 +64,6 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
 
     for (let tarima = 0; tarima < t; tarima++) {
       for (let y = 0; y < n; y++) {
-        // LÓGICA DE ESTIBA CRUZADA RESTAURADA
         const debeRotarCapa = estibaCruzada && (y % 2 !== 0);
         const posY = y * (boxHeight + gap) + 0.5;
 
@@ -81,14 +80,16 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
           let x3D = ((p.x + (wPx/2)) - centerX) / scale;
           let z3D = ((p.y + (dPx/2)) - centerY) / scale;
 
-          // ROTACIÓN DE 180 GRADOS EN POSICIÓN Y DIMENSIONES
+          // CORRECCIÓN MATEMÁTICA: ROTACIÓN 180° PURA
           if (debeRotarCapa) { 
             x3D = -x3D; 
             z3D = -z3D; 
           }
           
-          const finalW = debeRotarCapa ? d3D : w3D;
-          const finalD = debeRotarCapa ? w3D : d3D;
+          // En 180° NO se intercambian el ancho y la profundidad. 
+          // Una caja vertical sigue siendo vertical.
+          const finalW = w3D;
+          const finalD = d3D;
 
           const key = `lienzo-${tarima}-${y}-${idx}`;
           const isHueco = huecos3D.includes(key);
@@ -113,10 +114,17 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
         const posY = y * (1 + gap) + 0.5;
         config.forEach((c, i) => {
           const key = `sys-${tarima}-${y}-${i}`;
-          const w = (c.r !== debeRotar) ? 1.5 : 1; 
-          const d = (c.r !== debeRotar) ? 1 : 1.5;
-          let px = debeRotar ? -c.x : c.x;
-          let pz = debeRotar ? -c.z : c.z;
+          // Corrección aplicada también a los patrones predefinidos
+          const w = c.r ? 1 : 1.5; 
+          const d = c.r ? 1.5 : 1;
+          let px = c.x;
+          let pz = c.z;
+          
+          if (debeRotar) {
+            px = -px;
+            pz = -pz;
+          }
+
           cajas.push(<Box key={key} position={[px, posY, pz + (tarima * 4)]} args={[w, 1, d]} onClick={(e)=>{e.stopPropagation(); onToggleHueco(key);}}>{renderMaterial(huecos3D.includes(key), "#8b5cf6")}</Box>);
         });
       }
