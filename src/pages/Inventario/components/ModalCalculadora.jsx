@@ -2,42 +2,63 @@ import React, { useState, useEffect } from 'react';
 import Estiba3D from './Estiba3D';
 
 // ==========================================
-// SUB-COMPONENTE: PIEZA ARRASTRABLE (FLUIDEZ EXTREMA)
+// SUB-COMPONENTE: PIEZA ARRASTRABLE (BLINDADO)
 // ==========================================
 const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
-  // Usamos estado local para que el arrastre no sature la memoria
   const [pos, setPos] = useState({ x: pieza.x, y: pieza.y });
   const [isDragging, setIsDragging] = useState(false);
-  const [lastTap, setLastTap] = useState(0);
+  
+  // El "Cerebro Local" de la pieza. Nunca pierde su valor entre renders.
+  const dragRef = React.useRef({
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    currentX: pieza.x,
+    currentY: pieza.y,
+    lastTap: 0
+  });
 
-  // Si el padre borra piezas o resetea, actualizamos visualmente
+  // Si el padre borra o resetea, forzamos la posición
   useEffect(() => {
-    setPos({ x: pieza.x, y: pieza.y });
+    if (!dragRef.current.isDragging) {
+      setPos({ x: pieza.x, y: pieza.y });
+      dragRef.current.currentX = pieza.x;
+      dragRef.current.currentY = pieza.y;
+    }
   }, [pieza.x, pieza.y]);
 
   const handlePointerDown = (e) => {
-    const now = Date.now();
-    if (now - lastTap < 300) { onEliminar(pieza.id); return; }
-    setLastTap(now);
-    setIsDragging(true);
     e.target.setPointerCapture(e.pointerId);
-    e.target.dataset.startX = e.clientX - pos.x;
-    e.target.dataset.startY = e.clientY - pos.y;
+    
+    const now = Date.now();
+    if (now - dragRef.current.lastTap < 300) { onEliminar(pieza.id); return; }
+    dragRef.current.lastTap = now;
+
+    dragRef.current.isDragging = true;
+    setIsDragging(true);
+
+    dragRef.current.startX = e.clientX - dragRef.current.currentX;
+    dragRef.current.startY = e.clientY - dragRef.current.currentY;
   };
 
   const handlePointerMove = (e) => {
-    if (!isDragging) return;
-    setPos({
-      x: e.clientX - parseFloat(e.target.dataset.startX),
-      y: e.clientY - parseFloat(e.target.dataset.startY)
-    });
+    if (!dragRef.current.isDragging) return;
+    const newX = e.clientX - dragRef.current.startX;
+    const newY = e.clientY - dragRef.current.startY;
+    
+    dragRef.current.currentX = newX;
+    dragRef.current.currentY = newY;
+    setPos({ x: newX, y: newY }); // Actualiza lo visual
   };
 
   const handlePointerUp = (e) => {
+    if (!dragRef.current.isDragging) return;
+    dragRef.current.isDragging = false;
     setIsDragging(false);
     e.target.releasePointerCapture(e.pointerId);
-    // ¡Solo guarda la coordenada final al soltar la pieza!
-    if (onMover) onMover(pieza.id, pos.x, pos.y);
+    
+    // Le pasamos la coordenada blindada al padre
+    onMover(pieza.id, dragRef.current.currentX, dragRef.current.currentY);
   };
 
   let shapeClasses = "border-2 border-blue-400 bg-blue-600";
@@ -55,12 +76,17 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
 
   return (
     <div
+      draggable={false} // Evita el arrastre nativo del navegador
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      className={`absolute flex items-center justify-center text-white text-[10px] font-bold shadow-md touch-none select-none transition-transform ${isDragging ? 'z-50 scale-105 opacity-90 cursor-grabbing' : 'cursor-grab'} ${shapeClasses}`}
-      style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, left: 0, top: 0 }}
+      onPointerCancel={handlePointerUp} // Atrapa si un gesto del sistema interrumpe el toque
+      className={`absolute flex items-center justify-center text-white text-[10px] font-bold shadow-md select-none transition-transform ${isDragging ? 'z-50 scale-105 opacity-90 cursor-grabbing' : 'cursor-grab'} ${shapeClasses}`}
+      style={{ 
+        transform: `translate(${pos.x}px, ${pos.y}px)`, 
+        left: 0, top: 0, 
+        touchAction: 'none' // Desactiva gestos de zoom/scroll en este elemento
+      }}
     >
       {pieza.forma === 'circulo' ? '' : pieza.numero}
     </div>
