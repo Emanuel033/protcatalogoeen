@@ -4,7 +4,7 @@ import Estiba3D from './Estiba3D';
 // ==========================================
 // SUB-COMPONENTE: PIEZA ARRASTRABLE
 // ==========================================
-const PiezaArrastrable = ({ pieza, onEliminar }) => {
+const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
   const [pos, setPos] = useState({ x: pieza.x, y: pieza.y });
   const [isDragging, setIsDragging] = useState(false);
   const [lastTap, setLastTap] = useState(0);
@@ -34,6 +34,8 @@ const PiezaArrastrable = ({ pieza, onEliminar }) => {
   const handlePointerUp = (e) => {
     setIsDragging(false);
     e.target.releasePointerCapture(e.pointerId);
+    // ¡LA MAGIA AQUÍ! Al soltar la pieza, le pasamos las coordenadas exactas al Padre
+    if (onMover) onMover(pieza.id, pos.x, pos.y);
   };
 
   let shapeClasses = "w-[34px] h-[34px] rounded-full"; 
@@ -60,6 +62,7 @@ const PiezaArrastrable = ({ pieza, onEliminar }) => {
 // ==========================================
 const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
   const [modo, setModo] = useState('bloque'); 
+  const [modoOrigen, setModoOrigen] = useState('bloque'); // Memoria para el 3D
   
   const [niveles, setNiveles] = useState('');
   const [ajuste, setAjuste] = useState(0);
@@ -76,32 +79,35 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
     if (isOpen) {
       setNiveles(''); setAjuste(0); setTarimas(1);
       setFrente(''); setFondo(''); setPzCama('');
-      setPiezasVisuales([]); setIdPiezaLienzo(0); setModo('bloque');
+      setPiezasVisuales([]); setIdPiezaLienzo(0); 
+      setModo('bloque'); setModoOrigen('bloque');
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  // ==========================================
-  // CORRECCIÓN MATEMÁTICA AQUÍ
-  // ==========================================
   let subtotal = 0;
   const n = parseInt(niveles) || 0;
   const t = parseInt(tarimas) || 1;
   const a = parseInt(ajuste) || 0;
 
-  // Ahora el 3D usa la misma fórmula y las mismas variables que el bloque normal
-  if (modo === 'bloque' || modo === '3d') {
+  if (modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) {
     subtotal = (parseInt(frente) || 0) * (parseInt(fondo) || 0) * n;
   }
-  else if (modo === 'cama') {
+  else if (modo === 'cama' || (modo === '3d' && modoOrigen === 'cama')) {
     subtotal = (parseInt(pzCama) || 0) * n * t;
   }
-  else if (modo === 'visual') {
+  else if (modo === 'visual' || (modo === '3d' && modoOrigen === 'visual')) {
     subtotal = piezasVisuales.length * n * t;
   }
   
   const totalCalculado = Math.max(0, subtotal + a);
+
+  // Función para cambiar pestañas y memorizar origen
+  const cambiarPestana = (nuevoModo) => {
+    if (nuevoModo !== '3d') setModoOrigen(nuevoModo);
+    setModo(nuevoModo);
+  };
 
   const agregarPiezaVisual = () => {
     setIdPiezaLienzo(prev => prev + 1);
@@ -110,14 +116,17 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
       id: Date.now(), 
       forma: formaVisual,
       numero: idPiezaLienzo + 1,
-      x: 150 + offset,
+      x: 150 + offset, // Nacen en el centro
       y: 60 + offset
     };
     setPiezasVisuales([...piezasVisuales, nuevaPieza]);
   };
 
-  const eliminarPiezaVisual = (id) => {
-    setPiezasVisuales(prev => prev.filter(p => p.id !== id));
+  const eliminarPiezaVisual = (id) => setPiezasVisuales(prev => prev.filter(p => p.id !== id));
+  
+  // Guardamos la ubicación final en el cerebro de la app
+  const moverPiezaVisual = (id, newX, newY) => {
+    setPiezasVisuales(prev => prev.map(p => p.id === id ? { ...p, x: newX, y: newY } : p));
   };
 
   return (
@@ -136,14 +145,13 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
         
         <div className="p-4 md:p-5 space-y-4">
           <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-700 overflow-x-auto custom-scroll">
-            <button onClick={() => setModo('bloque')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'bloque' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Bloque</button>
-            <button onClick={() => setModo('cama')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'cama' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Cama</button>
-            <button onClick={() => setModo('visual')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'visual' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Lienzo</button>
-            <button onClick={() => setModo('3d')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition shadow-[0_0_10px_rgba(168,85,247,0.4)] ${modo === '3d' ? 'bg-purple-600 text-white' : 'text-purple-400 hover:text-purple-300 border border-purple-900/50'}`}><i className="fas fa-cube mr-1"></i>3D</button>
+            <button onClick={() => cambiarPestana('bloque')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'bloque' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Bloque</button>
+            <button onClick={() => cambiarPestana('cama')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'cama' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Cama</button>
+            <button onClick={() => cambiarPestana('visual')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'visual' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Lienzo</button>
+            <button onClick={() => cambiarPestana('3d')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition shadow-[0_0_10px_rgba(168,85,247,0.4)] ${modo === '3d' ? 'bg-purple-600 text-white' : 'text-purple-400 hover:text-purple-300 border border-purple-900/50'}`}><i className="fas fa-cube mr-1"></i>3D</button>
           </div>
 
-          {/* CORRECCIÓN INTERFAZ AQUÍ: El 3D ahora usa los campos de Frente y Fondo */}
-          {(modo === 'bloque' || modo === '3d') && (
+          {(modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) && (
             <div className="grid grid-cols-2 gap-3 text-center">
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Frente</label>
@@ -156,7 +164,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
             </div>
           )}
 
-          {modo === 'cama' && (
+          {(modo === 'cama' || (modo === '3d' && modoOrigen === 'cama')) && (
             <div className="grid grid-cols-1 gap-3 text-center">
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Pz por Cama (Patrón)</label>
@@ -187,7 +195,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
                 <p className="absolute top-2 left-0 right-0 text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center pointer-events-none z-0">Arrastra los envases<br/>Doble toque para eliminar</p>
                 <div className="w-full h-44 border-2 border-dashed border-slate-600 rounded-xl relative overflow-hidden z-10 bg-slate-900/50 touch-none">
                    {piezasVisuales.map(p => (
-                      <PiezaArrastrable key={p.id} pieza={p} onEliminar={eliminarPiezaVisual} />
+                      <PiezaArrastrable key={p.id} pieza={p} onEliminar={eliminarPiezaVisual} onMover={moverPiezaVisual} />
                    ))}
                 </div>
               </div>
@@ -196,13 +204,15 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
 
           {modo === '3d' && (
             <div className="w-full h-56 border border-purple-900/50 bg-slate-900 rounded-xl overflow-hidden relative shadow-inner mt-2">
+               {/* AQUÍ LE PASAMOS LA MEMORIA AL MOTOR 3D */}
                <Estiba3D 
+                  modoOrigen={modoOrigen}
                   frente={frente} 
                   fondo={fondo} 
                   niveles={niveles}
-                  pzCama={pzCama}                  {/* NUEVO */}
-                  tarimas={tarimas}                {/* NUEVO */}
-                  piezasVisuales={piezasVisuales}  {/* NUEVO: ¡La conexión del lienzo! */}
+                  pzCama={pzCama}
+                  tarimas={tarimas}
+                  piezasVisuales={piezasVisuales}
                />
                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">
                  Arrastra para rotar • Pellizca para zoom
@@ -210,8 +220,8 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
             </div>
           )}
 
-          {/* CORRECCIÓN INTERFAZ: Tarimas ya solo aparece en Cama y Visual. Bloque y 3D no lo usan. */}
-          {['cama', 'visual'].includes(modo) && (
+          {/* Tarimas solo para Cama, Visual o 3D (cuando viene de Cama o Visual) */}
+          {['cama', 'visual'].includes(modo) || (modo === '3d' && ['cama', 'visual'].includes(modoOrigen)) ? (
             <div className="text-center mt-2 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
               <label className="block text-[10px] font-bold text-purple-400 uppercase mb-2">Tarimas Hacia Atrás (Fondo)</label>
               <div className="flex items-center justify-center gap-3">
@@ -220,7 +230,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
                 <button onClick={() => setTarimas(tarimas + 1)} className="w-10 h-10 rounded-lg bg-slate-700 text-white"><i className="fas fa-plus"></i></button>
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="grid grid-cols-2 gap-3 text-center border-t border-slate-700 pt-4 mt-2">
             <div>

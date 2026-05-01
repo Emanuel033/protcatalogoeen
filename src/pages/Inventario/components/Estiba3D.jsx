@@ -2,34 +2,28 @@ import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Box, Grid, Cylinder } from '@react-three/drei';
 
-const Estiba3D = ({ frente, fondo, niveles, pzCama, tarimas, piezasVisuales }) => {
+const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasVisuales }) => {
   const cajas = [];
-  const boxSize = 1; // Tamaño base en el mundo 3D
-  const gap = 0.05;  // Espaciado entre envases
+  const boxSize = 1;
+  const gap = 0.05;
 
   const n = Math.max(1, parseInt(niveles) || 1);
   const t = Math.max(1, parseInt(tarimas) || 1);
 
-  // ==========================================
-  // ESCENARIO 1: DEL LIENZO 2D AL MUNDO 3D
-  // ==========================================
-  if (piezasVisuales && piezasVisuales.length > 0) {
-    // Factor de conversión: ~30 píxeles de tu pantalla = 1 unidad 3D
-    const scale = 30; 
-    const offsetX = 150 / scale; // Centro aproximado del lienzo
-    const offsetZ = 60 / scale;
+  // ESCENARIO 1: VIENE DEL LIENZO
+  if (modoOrigen === 'visual' && piezasVisuales && piezasVisuales.length > 0) {
+    const scale = 25; 
+    const offsetX = 150 / scale;
+    const offsetZ = 88 / scale;
 
     for (let tarima = 0; tarima < t; tarima++) {
       for (let y = 0; y < n; y++) {
         piezasVisuales.forEach((p, index) => {
-          // Convertimos pixeles a coordenadas X y Z
           const x3D = (p.x / scale) - offsetX;
-          const z3D = (p.y / scale) - offsetZ + (tarima * 4); // 4 unidades de separación entre tarimas
-          
+          const z3D = (p.y / scale) - offsetZ + (tarima * 4);
           const key = `lienzo-${tarima}-${y}-${index}`;
           const posY = y * (boxSize + gap) + 0.5;
 
-          // Si dibujaste un círculo en el lienzo, renderizamos un Cilindro naranja
           if (p.forma === 'circulo') {
             cajas.push(
               <Cylinder key={key} position={[x3D, posY, z3D]} args={[0.5, 0.5, 1, 32]}>
@@ -37,7 +31,6 @@ const Estiba3D = ({ frente, fondo, niveles, pzCama, tarimas, piezasVisuales }) =
               </Cylinder>
             );
           } else {
-            // Si es cuadrado/rectángulo, renderizamos Cajas azules
             const isRectH = p.forma === 'rectangulo-h';
             const isRectV = p.forma === 'rectangulo-v';
             cajas.push(
@@ -50,12 +43,9 @@ const Estiba3D = ({ frente, fondo, niveles, pzCama, tarimas, piezasVisuales }) =
       }
     }
   } 
-  // ==========================================
-  // ESCENARIO 2: CAMA NUMÉRICA
-  // ==========================================
-  else if (parseInt(pzCama) > 0) {
+  // ESCENARIO 2: VIENE DE CAMA NUMÉRICA
+  else if (modoOrigen === 'cama' && parseInt(pzCama) > 0) {
     const pz = parseInt(pzCama);
-    // Calculamos una cuadrícula aproximada para que se vea ordenado
     const cols = Math.ceil(Math.sqrt(pz));
     const offsetX = (cols * (boxSize + gap)) / 2 - (boxSize / 2);
 
@@ -68,7 +58,6 @@ const Estiba3D = ({ frente, fondo, niveles, pzCama, tarimas, piezasVisuales }) =
           
           cajas.push(
             <Box key={`cama-${tarima}-${y}-${i}`} position={[col * (boxSize + gap) - offsetX, y * (boxSize+gap) + 0.5, row * (boxSize + gap) - offsetZ + (tarima * 4)]}>
-              {/* Color morado para diferenciar las Camas */}
               <meshStandardMaterial color="#8b5cf6" roughness={0.2} metalness={0.1} />
             </Box>
           );
@@ -76,9 +65,7 @@ const Estiba3D = ({ frente, fondo, niveles, pzCama, tarimas, piezasVisuales }) =
       }
     }
   } 
-  // ==========================================
-  // ESCENARIO 3: BLOQUE BÁSICO (Por defecto)
-  // ==========================================
+  // ESCENARIO 3: VIENE DE BLOQUE
   else {
     const f = Math.max(1, parseInt(frente) || 1);
     const d = Math.max(1, parseInt(fondo) || 1);
@@ -100,17 +87,11 @@ const Estiba3D = ({ frente, fondo, niveles, pzCama, tarimas, piezasVisuales }) =
 
   return (
     <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
-      {/* Luces de almacén */}
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
       <pointLight position={[-10, -10, -10]} intensity={0.5} />
-      
       {cajas}
-      
-      {/* Controles táctiles/mouse */}
       <OrbitControls makeDefault />
-      
-      {/* Piso del almacén */}
       <Grid position={[0, 0, 0]} args={[40, 40]} cellColor="#475569" sectionColor="#1e293b" fadeDistance={20} />
     </Canvas>
   );
