@@ -34,7 +34,6 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
   const handlePointerUp = (e) => {
     setIsDragging(false);
     e.target.releasePointerCapture(e.pointerId);
-    // ¡LA MAGIA AQUÍ! Al soltar la pieza, le pasamos las coordenadas exactas al Padre
     if (onMover) onMover(pieza.id, pos.x, pos.y);
   };
 
@@ -62,7 +61,7 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
 // ==========================================
 const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
   const [modo, setModo] = useState('bloque'); 
-  const [modoOrigen, setModoOrigen] = useState('bloque'); // Memoria para el 3D
+  const [modoOrigen, setModoOrigen] = useState('bloque'); 
   
   const [niveles, setNiveles] = useState('');
   const [ajuste, setAjuste] = useState(0);
@@ -75,11 +74,14 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
   const [piezasVisuales, setPiezasVisuales] = useState([]);
   const [idPiezaLienzo, setIdPiezaLienzo] = useState(0);
 
+  // NUEVO: Estado para rastrear las cajas eliminadas (huecos) en 3D
+  const [huecos3D, setHuecos3D] = useState([]);
+
   useEffect(() => {
     if (isOpen) {
       setNiveles(''); setAjuste(0); setTarimas(1);
       setFrente(''); setFondo(''); setPzCama('');
-      setPiezasVisuales([]); setIdPiezaLienzo(0); 
+      setPiezasVisuales([]); setIdPiezaLienzo(0); setHuecos3D([]);
       setModo('bloque'); setModoOrigen('bloque');
     }
   }, [isOpen]);
@@ -101,11 +103,13 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
     subtotal = piezasVisuales.length * n * t;
   }
   
-  const totalCalculado = Math.max(0, subtotal + a);
+  // EL TOTAL AHORA RESTA LOS HUECOS DEL 3D AUTOMÁTICAMENTE
+  const totalCalculado = Math.max(0, subtotal + a - huecos3D.length);
 
-  // Función para cambiar pestañas y memorizar origen
   const cambiarPestana = (nuevoModo) => {
     if (nuevoModo !== '3d') setModoOrigen(nuevoModo);
+    // Limpiamos los huecos si cambias de forma de estiba para no arrastrar errores
+    if (nuevoModo !== modo) setHuecos3D([]); 
     setModo(nuevoModo);
   };
 
@@ -116,7 +120,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
       id: Date.now(), 
       forma: formaVisual,
       numero: idPiezaLienzo + 1,
-      x: 150 + offset, // Nacen en el centro
+      x: 150 + offset, 
       y: 60 + offset
     };
     setPiezasVisuales([...piezasVisuales, nuevaPieza]);
@@ -124,9 +128,15 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
 
   const eliminarPiezaVisual = (id) => setPiezasVisuales(prev => prev.filter(p => p.id !== id));
   
-  // Guardamos la ubicación final en el cerebro de la app
   const moverPiezaVisual = (id, newX, newY) => {
     setPiezasVisuales(prev => prev.map(p => p.id === id ? { ...p, x: newX, y: newY } : p));
+  };
+
+  // Función para inyectar al motor 3D
+  const toggleHueco = (idCaja) => {
+    setHuecos3D(prev => 
+      prev.includes(idCaja) ? prev.filter(h => h !== idCaja) : [...prev, idCaja]
+    );
   };
 
   return (
@@ -203,8 +213,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
           )}
 
           {modo === '3d' && (
-            <div className="w-full h-56 border border-purple-900/50 bg-slate-900 rounded-xl overflow-hidden relative shadow-inner mt-2">
-               {/* AQUÍ LE PASAMOS LA MEMORIA AL MOTOR 3D */}
+            <div className="w-full h-64 border border-purple-900/50 bg-slate-900 rounded-xl overflow-hidden relative shadow-inner mt-2">
                <Estiba3D 
                   modoOrigen={modoOrigen}
                   frente={frente} 
@@ -213,9 +222,11 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
                   pzCama={pzCama}
                   tarimas={tarimas}
                   piezasVisuales={piezasVisuales}
+                  huecos3D={huecos3D}         // PASAMOS LOS HUECOS
+                  onToggleHueco={toggleHueco} // PASAMOS LA FUNCIÓN
                />
                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">
-                 Arrastra para rotar • Pellizca para zoom
+                 Toca un empaque para eliminarlo (hueco)
                </p>
             </div>
           )}
@@ -245,7 +256,10 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
 
           <div className="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6 shadow-inner">
             <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Total Estimado</p>
-            <p className="text-4xl font-black text-white">{totalCalculado}</p>
+            <p className="text-4xl font-black text-white">
+              {totalCalculado}
+              {huecos3D.length > 0 && <span className="text-sm text-red-400 ml-2">(-{huecos3D.length} huecos)</span>}
+            </p>
           </div>
 
         </div>
