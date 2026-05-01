@@ -19,7 +19,7 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
   };
 
   // ==========================================
-  // ESCENARIO 1: LIENZO (IGUAL)
+  // ESCENARIO 1: LIENZO
   // ==========================================
   if (modoOrigen === 'visual' && piezasVisuales && piezasVisuales.length > 0) {
     const scale = 34; const offsetX = 5; const offsetZ = 2.5; 
@@ -67,27 +67,24 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
   else if (modoOrigen === 'cama' && parseInt(pzCama) > 0) {
     const pz = parseInt(pzCama);
 
-    // FUNCIÓN GENERADORA DE PATRONES MATEMÁTICOS
     const obtenerConfiguracionCama = (pz, pIndex) => {
-      // 3 PIEZAS: [0] Romano (|||), [1] Pi (2 vert, 1 horiz)
       if (pz === 3) {
         const patrones = [
-          [ { pos: [-bW-gap, 0], rot: false }, { pos: [0, 0], rot: false }, { pos: [bW+gap, 0], rot: false } ], // Romano |||
-          [ { pos: [-bW/2-gap/2, bD/2], rot: false }, { pos: [bW/2+gap/2, bD/2], rot: false }, { pos: [0, -bW/2-gap], rot: true } ] // Forma de Pi
+          [ { pos: [-bW-gap, 0], rot: false }, { pos: [0, 0], rot: false }, { pos: [bW+gap, 0], rot: false } ], 
+          [ { pos: [-bW/2-gap/2, bD/2], rot: false }, { pos: [bW/2+gap/2, bD/2], rot: false }, { pos: [0, -bW/2-gap], rot: true } ] 
         ];
         return patrones[pIndex % patrones.length];
       }
-      // 4 PIEZAS: [0] Romano (||||), [1] Cuadrícula 2x2, [2] Molino Hueco, [3] 2 Horiz + 2 Vert
       else if (pz === 4) {
         const patrones = [
           [ { pos: [-1.5*(bW+gap), 0], rot: false }, { pos: [-0.5*(bW+gap), 0], rot: false }, { pos: [0.5*(bW+gap), 0], rot: false }, { pos: [1.5*(bW+gap), 0], rot: false } ],
           [ { pos: [-0.5*bW-gap, -0.5*bD-gap], rot: false }, { pos: [0.5*bW+gap, -0.5*bD-gap], rot: false }, { pos: [-0.5*bW-gap, 0.5*bD+gap], rot: false }, { pos: [0.5*bW+gap, 0.5*bD+gap], rot: false } ],
-          [ { pos: [0, -bD/2-bW/2-gap], rot: true }, { pos: [bW/2+bD/2+gap, 0], rot: false }, { pos: [0, bD/2+bW/2+gap], rot: true }, { pos: [-bW/2-bD/2-gap, 0], rot: false } ], // El Molino con hueco
-          [ { pos: [-bW/2-gap, -bD/2-gap, rot: false], rot: false}, { pos: [bW/2+gap, -bD/2-gap], rot: false }, { pos: [0, bW/2+gap], rot: true }, { pos: [0, bW/2+bD+gap*2], rot: true } ] // 2V + 2H
+          [ { pos: [0, -bD/2-bW/2-gap], rot: true }, { pos: [bW/2+bD/2+gap, 0], rot: false }, { pos: [0, bD/2+bW/2+gap], rot: true }, { pos: [-bW/2-bD/2-gap, 0], rot: false } ], 
+          // EL DEDAZO ESTABA AQUÍ ABAJO. ¡Ya está corregido el corchete!
+          [ { pos: [-bW/2-gap, -bD/2-gap], rot: false}, { pos: [bW/2+gap, -bD/2-gap], rot: false }, { pos: [0, bW/2+gap], rot: true }, { pos: [0, bW/2+bD+gap*2], rot: true } ] 
         ];
         return patrones[pIndex % patrones.length];
       }
-      // 5 PIEZAS: [0] Romano, [1] 3V + 2H, [2] 2V + 3H
       else if (pz === 5) {
         const patrones = [
           [ { pos: [-2*(bW+gap), 0], rot: false }, { pos: [-bW-gap, 0], rot: false }, { pos: [0, 0], rot: false }, { pos: [bW+gap, 0], rot: false }, { pos: [2*(bW+gap), 0], rot: false } ],
@@ -96,7 +93,7 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
         ];
         return patrones[pIndex % patrones.length];
       }
-      return null; // Si no hay patrón matemático diseñado, regresará null y usará cuadrícula genérica
+      return null; 
     };
 
     const config = obtenerConfiguracionCama(pz, patronIndex);
@@ -107,18 +104,16 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
         const posY = y * (bH + gap) + (bH / 2);
         
         if (config) {
-          // DIBUJAR PATRÓN MATEMÁTICO
           config.forEach((c, i) => {
             const key = `cama-${tarima}-${y}-${i}`;
             const isHueco = huecos3D.includes(key);
             const w = (c.rot !== debeRotar) ? bD : bW;
             const d = (c.rot !== debeRotar) ? bW : bD;
             let px = debeRotar ? -c.pos[0] : c.pos[0];
-            let pz_coord = debeRotar ? -c.pos[1] : c.pos[1];
+            let pz_coord = debeRotar ? -c.pos[1] : c.pos[1]; // Cambié c.pos[2] a c.pos[1] porque el array pos solo tiene [x, z]
             cajas.push(<Box key={key} position={[px, posY, pz_coord + (tarima * 3)]} args={[w, bH, d]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial('cama', isHueco)}</Box>);
           });
         } else {
-          // DIBUJAR CUADRÍCULA GENÉRICA DE RESPALDO (Ej: 10 piezas)
           const cols = Math.ceil(Math.sqrt(pz));
           const offsetX = (cols * (bW + gap)) / 2 - (bW / 2);
           const offsetZ = (Math.ceil(pz/cols) * (bD + gap)) / 2 - (bD / 2);
@@ -159,7 +154,7 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
   }
 
   return (
-    <Canvas camera= {{ position: [0, 8, 10], fov: 45 }}>
+    <Canvas camera={{ position: [0, 8, 10], fov: 45 }}>
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
       <pointLight position={[-10, -10, -10]} intensity={0.5} />
