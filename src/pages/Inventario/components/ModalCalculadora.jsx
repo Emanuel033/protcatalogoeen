@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Estiba3D from './Estiba3D';
 
-// ==========================================
-// SUB-COMPONENTE: PIEZA ARRASTRABLE
-// ==========================================
+// ... (El componente PiezaArrastrable se queda exactamente igual) ...
 const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
   const [pos, setPos] = useState({ x: pieza.x, y: pieza.y });
   const [isDragging, setIsDragging] = useState(false);
@@ -11,12 +9,8 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
 
   const handlePointerDown = (e) => {
     const now = Date.now();
-    if (now - lastTap < 300) {
-      onEliminar(pieza.id);
-      return;
-    }
+    if (now - lastTap < 300) { onEliminar(pieza.id); return; }
     setLastTap(now);
-
     setIsDragging(true);
     e.target.setPointerCapture(e.pointerId);
     e.target.dataset.startX = e.clientX - pos.x;
@@ -25,10 +19,7 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
 
   const handlePointerMove = (e) => {
     if (!isDragging) return;
-    setPos({
-      x: e.clientX - parseFloat(e.target.dataset.startX),
-      y: e.clientY - parseFloat(e.target.dataset.startY)
-    });
+    setPos({ x: e.clientX - parseFloat(e.target.dataset.startX), y: e.clientY - parseFloat(e.target.dataset.startY) });
   };
 
   const handlePointerUp = (e) => {
@@ -37,12 +28,11 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
     if (onMover) onMover(pieza.id, pos.x, pos.y);
   };
 
-  // NUEVAS PROPORCIONES (1.5:1 agregadas)
   let shapeClasses = "w-[34px] h-[34px] rounded-full"; 
   if (pieza.forma === 'cuadrado') shapeClasses = "w-[34px] h-[34px] rounded-[6px]";
-  else if (pieza.forma === 'caja-h') shapeClasses = "w-[51px] h-[34px] rounded-[6px]"; // Proporción 1.5 (Gordita)
+  else if (pieza.forma === 'caja-h') shapeClasses = "w-[51px] h-[34px] rounded-[6px]"; 
   else if (pieza.forma === 'caja-v') shapeClasses = "w-[34px] h-[51px] rounded-[6px]";
-  else if (pieza.forma === 'rectangulo-h') shapeClasses = "w-[68px] h-[34px] rounded-[6px]"; // Proporción 2.0 (Larga)
+  else if (pieza.forma === 'rectangulo-h') shapeClasses = "w-[68px] h-[34px] rounded-[6px]"; 
   else if (pieza.forma === 'rectangulo-v') shapeClasses = "w-[34px] h-[68px] rounded-[6px]";
 
   return (
@@ -51,7 +41,7 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      className={`absolute bg-blue-600 border-2 border-blue-400 flex items-center justify-center text-white text-[12px] font-bold shadow-[0_4px_6px_-1px_rgba(0,0,0,0.5)] touch-none select-none transition-transform ${isDragging ? 'z-50 scale-110 opacity-90 cursor-grabbing' : 'cursor-grab'} ${shapeClasses}`}
+      className={`absolute bg-blue-600 border-2 border-blue-400 flex items-center justify-center text-white text-[12px] font-bold shadow-lg touch-none select-none transition-transform ${isDragging ? 'z-50 scale-110 opacity-90 cursor-grabbing' : 'cursor-grab'} ${shapeClasses}`}
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, left: 0, top: 0 }}
     >
       {pieza.numero}
@@ -59,10 +49,7 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
   );
 };
 
-// ==========================================
-// MODAL PRINCIPAL
-// ==========================================
-const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
+const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem, varIdItem }) => {
   const [modo, setModo] = useState('bloque'); 
   const [modoOrigen, setModoOrigen] = useState('bloque'); 
   
@@ -72,23 +59,31 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
   const [frente, setFrente] = useState('');
   const [fondo, setFondo] = useState('');
   const [pzCama, setPzCama] = useState('');
-  
-  // Nuevo interruptor para Estiba Cruzada (180 grados)
   const [estibaCruzada, setEstibaCruzada] = useState(false);
-
-  const [formaVisual, setFormaVisual] = useState('circulo');
+  const [formaVisual, setFormaVisual] = useState('cuadrado');
   const [piezasVisuales, setPiezasVisuales] = useState([]);
   const [idPiezaLienzo, setIdPiezaLienzo] = useState(0);
   const [huecos3D, setHuecos3D] = useState([]);
 
+  // NUEVO: Estado de la Proporción Tridimensional del Empaque
+  // Formato: [ancho, alto, profundidad]
+  const [dimsEmpaque, setDimsEmpaque] = useState([1, 1, 1]); 
+
   useEffect(() => {
     if (isOpen) {
-      setNiveles(''); setAjuste(0); setTarimas(1);
-      setFrente(''); setFondo(''); setPzCama('');
-      setPiezasVisuales([]); setIdPiezaLienzo(0); setHuecos3D([]);
-      setModo('bloque'); setModoOrigen('bloque'); setEstibaCruzada(false);
+      setNiveles(''); setAjuste(0); setTarimas(1); setFrente(''); setFondo(''); setPzCama('');
+      setPiezasVisuales([]); setIdPiezaLienzo(0); setHuecos3D([]); setModo('bloque'); setModoOrigen('bloque'); setEstibaCruzada(false);
+      
+      // LA MEMORIA: Buscamos si ya le habías asignado una forma a este paquete antes
+      const memKey = `een_forma_${codigoItem}_${varIdItem}`;
+      const savedDims = localStorage.getItem(memKey);
+      if (savedDims) {
+        setDimsEmpaque(JSON.parse(savedDims));
+      } else {
+        setDimsEmpaque([1, 1, 1]); // Cubo por defecto
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, codigoItem, varIdItem]);
 
   if (!isOpen) return null;
 
@@ -100,7 +95,6 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
   if (modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) subtotal = (parseInt(frente) || 0) * (parseInt(fondo) || 0) * n;
   else if (modo === 'cama' || (modo === '3d' && modoOrigen === 'cama')) subtotal = (parseInt(pzCama) || 0) * n * t;
   else if (modo === 'visual' || (modo === '3d' && modoOrigen === 'visual')) subtotal = piezasVisuales.length * n * t;
-  
   const totalCalculado = Math.max(0, subtotal + a - huecos3D.length);
 
   const cambiarPestana = (nuevoModo) => {
@@ -109,11 +103,16 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
     setModo(nuevoModo);
   };
 
+  // Guardar la dimensión elegida en la memoria de la tablet
+  const cambiarDimensionEmpaque = (dims) => {
+    setDimsEmpaque(dims);
+    localStorage.setItem(`een_forma_${codigoItem}_${varIdItem}`, JSON.stringify(dims));
+  };
+
   const agregarPiezaVisual = () => {
     setIdPiezaLienzo(prev => prev + 1);
     const offset = Math.floor(Math.random() * 20) - 10;
-    const nuevaPieza = { id: Date.now(), forma: formaVisual, numero: idPiezaLienzo + 1, x: 150 + offset, y: 60 + offset };
-    setPiezasVisuales([...piezasVisuales, nuevaPieza]);
+    setPiezasVisuales([...piezasVisuales, { id: Date.now(), forma: formaVisual, numero: idPiezaLienzo + 1, x: 150 + offset, y: 60 + offset }]);
   };
 
   const eliminarPiezaVisual = (id) => setPiezasVisuales(prev => prev.filter(p => p.id !== id));
@@ -126,13 +125,26 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
         
         <div className="p-4 md:p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
           <div>
-            <h3 className="font-black text-lg text-white">Calculadora de Estiba</h3>
+            <h3 className="font-black text-lg text-white">Estiba 3D Inteligente</h3>
             <p className="text-xs text-blue-400 font-bold truncate max-w-[200px]">{tituloTarget}</p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white w-10 h-10 rounded-full bg-slate-700/50 flex items-center justify-center"><i className="fas fa-times"></i></button>
         </div>
         
         <div className="p-4 md:p-5 space-y-4">
+          
+          {/* NUEVO SELECTOR DE PROPORCIÓN DEL EMPAQUE */}
+          <div className="bg-slate-900 p-2 rounded-xl border border-slate-700 flex flex-col gap-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase px-1">Dimensiones Reales del Empaque</span>
+            <div className="flex gap-1 overflow-x-auto custom-scroll pb-1">
+              <button onClick={() => cambiarDimensionEmpaque([1, 1, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[0]===1 && dimsEmpaque[1]===1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Cubo</button>
+              <button onClick={() => cambiarDimensionEmpaque([1.5, 1, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[0]===1.5 && dimsEmpaque[1]===1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Estándar</button>
+              <button onClick={() => cambiarDimensionEmpaque([2, 1, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[0]===2 && dimsEmpaque[1]===1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Larga</button>
+              <button onClick={() => cambiarDimensionEmpaque([1.5, 0.5, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[1]===0.5 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Plana (Pizza)</button>
+              <button onClick={() => cambiarDimensionEmpaque([1, 2, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[1]===2 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Alta</button>
+            </div>
+          </div>
+
           <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-700 overflow-x-auto custom-scroll">
             <button onClick={() => cambiarPestana('bloque')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'bloque' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Bloque</button>
             <button onClick={() => cambiarPestana('cama')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'cama' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>Cama</button>
@@ -140,6 +152,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
             <button onClick={() => cambiarPestana('3d')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition shadow-[0_0_10px_rgba(168,85,247,0.4)] ${modo === '3d' ? 'bg-purple-600 text-white' : 'text-purple-400 hover:text-purple-300 border border-purple-900/50'}`}><i className="fas fa-cube mr-1"></i>3D</button>
           </div>
 
+          {/* ... (Todo el resto del HTML de los inputs se queda exactamente igual) ... */}
           {(modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) && (
             <div className="grid grid-cols-2 gap-3 text-center">
               <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Frente</label><input type="number" value={frente} onChange={e => setFrente(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" /></div>
@@ -183,13 +196,13 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
                   modoOrigen={modoOrigen}
                   frente={frente} fondo={fondo} niveles={niveles} pzCama={pzCama} tarimas={tarimas}
                   piezasVisuales={piezasVisuales} huecos3D={huecos3D} onToggleHueco={toggleHueco}
-                  estibaCruzada={estibaCruzada} // LE DECIMOS AL MOTOR 3D SI DEBE CRUZAR LAS CAPAS
+                  estibaCruzada={estibaCruzada}
+                  dimsEmpaque={dimsEmpaque} // LE PASAMOS LA DIMENSIÓN ELEGIDA AL MOTOR 3D
                />
                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">Toca un empaque para eliminarlo (hueco)</p>
             </div>
           )}
 
-          {/* CHECKBOX ESTIBA CRUZADA */}
           {(modo === '3d' && ['visual', 'cama', 'bloque'].includes(modoOrigen)) && (
              <div className="flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-pointer" onClick={() => setEstibaCruzada(!estibaCruzada)}>
                <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${estibaCruzada ? 'bg-purple-500' : 'bg-slate-900 border border-slate-600'}`}>

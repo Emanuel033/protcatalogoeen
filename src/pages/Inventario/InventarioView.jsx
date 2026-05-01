@@ -119,11 +119,13 @@ const InventarioView = () => {
       </main>
 
       <ModalCalculadora 
-        isOpen={calcActiva.isOpen}
-        tituloTarget={calcActiva.nombre}
-        onClose={() => setCalcActiva(prev => ({ ...prev, isOpen: false }))}
-        onAplicar={(total) => cambiarCant(calcActiva.codigo, calcActiva.varId, total)}
-      />
+  isOpen={calcActiva.isOpen}
+  tituloTarget={calcActiva.nombre}
+  codigoItem={calcActiva.codigo} // <-- ESTO
+  varIdItem={calcActiva.varId}   // <-- Y ESTO
+  onClose={() => setCalcActiva(prev => ({ ...prev, isOpen: false }))}
+  onAplicar={(total) => cambiarCant(calcActiva.codigo, calcActiva.varId, total)}
+/>
     </div>
   );
 };
