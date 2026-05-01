@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Estiba3D from './Estiba3D';
 
 // ==========================================
 // SUB-COMPONENTE: PIEZA ARRASTRABLE (DRAG & DROP)
@@ -198,10 +199,15 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
           )}
 
           {modo === '3d' && (
-            <div className="w-full h-44 border border-purple-900/50 bg-purple-900/10 rounded-xl flex flex-col items-center justify-center text-center p-4">
-              <i className="fas fa-cube text-4xl text-purple-500 mb-2 animate-bounce"></i>
-              <p className="text-purple-400 font-bold text-sm">Motor 3D en construcción</p>
-              <p className="text-xs text-slate-500 mt-1">Aquí conectaremos tu visor.</p>
+            <div className="w-full h-64 border border-purple-900/50 bg-slate-900 rounded-xl overflow-hidden relative shadow-inner">
+               <Estiba3D 
+                  frente={frente} 
+                  fondo={fondo} 
+                  niveles={niveles} 
+               />
+               <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">
+                 Arrastra para rotar • Pellizca para zoom
+               </p>
             </div>
           )}
 
