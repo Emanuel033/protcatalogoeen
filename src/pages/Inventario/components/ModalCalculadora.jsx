@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Estiba3D from './Estiba3D';
 
 // ==========================================
-// SUB-COMPONENTE: PIEZA ARRASTRABLE 
+// SUB-COMPONENTE: PIEZA ARRASTRABLE (FLUIDEZ EXTREMA)
 // ==========================================
 const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
+  // Usamos estado local para que el arrastre no sature la memoria
+  const [pos, setPos] = useState({ x: pieza.x, y: pieza.y });
   const [isDragging, setIsDragging] = useState(false);
   const [lastTap, setLastTap] = useState(0);
-  const dragRef = React.useRef({ startX: 0, startY: 0 });
+
+  // Si el padre borra piezas o resetea, actualizamos visualmente
+  useEffect(() => {
+    setPos({ x: pieza.x, y: pieza.y });
+  }, [pieza.x, pieza.y]);
 
   const handlePointerDown = (e) => {
     const now = Date.now();
@@ -15,20 +21,23 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
     setLastTap(now);
     setIsDragging(true);
     e.target.setPointerCapture(e.pointerId);
-    dragRef.current.startX = e.clientX - pieza.x;
-    dragRef.current.startY = e.clientY - pieza.y;
+    e.target.dataset.startX = e.clientX - pos.x;
+    e.target.dataset.startY = e.clientY - pos.y;
   };
 
   const handlePointerMove = (e) => {
     if (!isDragging) return;
-    const newX = e.clientX - dragRef.current.startX;
-    const newY = e.clientY - dragRef.current.startY;
-    onMover(pieza.id, newX, newY); 
+    setPos({
+      x: e.clientX - parseFloat(e.target.dataset.startX),
+      y: e.clientY - parseFloat(e.target.dataset.startY)
+    });
   };
 
   const handlePointerUp = (e) => {
     setIsDragging(false);
     e.target.releasePointerCapture(e.pointerId);
+    // ¡Solo guarda la coordenada final al soltar la pieza!
+    if (onMover) onMover(pieza.id, pos.x, pos.y);
   };
 
   let shapeClasses = "border-2 border-blue-400 bg-blue-600";
@@ -51,7 +60,7 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       className={`absolute flex items-center justify-center text-white text-[10px] font-bold shadow-md touch-none select-none transition-transform ${isDragging ? 'z-50 scale-105 opacity-90 cursor-grabbing' : 'cursor-grab'} ${shapeClasses}`}
-      style={{ transform: `translate(${pieza.x}px, ${pieza.y}px)`, left: 0, top: 0 }}
+      style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, left: 0, top: 0 }}
     >
       {pieza.forma === 'circulo' ? '' : pieza.numero}
     </div>
@@ -78,7 +87,6 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
   const [idPiezaLienzo, setIdPiezaLienzo] = useState(0);
   const [dimsEmpaque, setDimsEmpaque] = useState([1, 1, 1]); 
 
-  // NUEVO: Estados para los patrones personalizados
   const [patronIndex, setPatronIndex] = useState(0);
   const [patronesCustom, setPatronesCustom] = useState([]);
 
@@ -94,7 +102,6 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
     }
   }, [isOpen, codigoItem, varIdItem]);
 
-  // Cargar las plantillas custom cuando pones piezas en Cama
   useEffect(() => {
     if (pzCama > 0) {
       const saved = localStorage.getItem(`een_patrones_${pzCama}`);
@@ -117,13 +124,12 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
   else if (modo === 'visual' || (modo === '3d' && modoOrigen === 'visual')) subtotal = piezasVisuales.length * n * t;
   const totalCalculado = Math.max(0, subtotal + a - huecos3D.length);
 
-  // LA MAGIA DE GUARDAR TU PLANTILLA
   const guardarPlantilla = () => {
     if (piezasVisuales.length === 0) return;
     const numPz = piezasVisuales.length;
     const key = `een_patrones_${numPz}`;
     const guardados = JSON.parse(localStorage.getItem(key) || '[]');
-    guardados.push(piezasVisuales); // Guardamos tu dibujo exacto
+    guardados.push(piezasVisuales);
     localStorage.setItem(key, JSON.stringify(guardados));
     alert(`¡Plantilla de ${numPz} empaques guardada en la tablet!\n\nAhora ve a "Cama", pon ${numPz} piezas y usa el botón "Alternar" para usar tu dibujo.`);
   };
@@ -163,7 +169,6 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
 
               <div className="flex gap-2">
                 <button onClick={() => { setIdPiezaLienzo(prev => prev + 1); setPiezasVisuales([...piezasVisuales, { id: Date.now(), forma: formaVisual, numero: idPiezaLienzo + 1, x: 150, y: 60 }]); }} className="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-[11px] uppercase transition shadow-lg flex items-center justify-center gap-2"><i className="fas fa-plus"></i> Añadir</button>
-                {/* BOTÓN MÁGICO PARA GUARDAR PATRÓN */}
                 <button onClick={guardarPlantilla} className="flex-[2] bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-2.5 rounded-xl text-[11px] uppercase transition shadow-lg flex items-center justify-center gap-2"><i className="fas fa-save"></i> Guardar</button>
                 <button onClick={() => { setPiezasVisuales([]); setIdPiezaLienzo(0); }} className="w-12 bg-slate-700 hover:bg-red-600 text-white rounded-xl transition"><i className="fas fa-trash"></i></button>
               </div>
@@ -199,13 +204,12 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
                <Estiba3D 
                   modoOrigen={modoOrigen} frente={frente} fondo={fondo} niveles={niveles} pzCama={pzCama} tarimas={tarimas} 
                   piezasVisuales={piezasVisuales} huecos3D={huecos3D} onToggleHueco={id => setHuecos3D(huecos3D.includes(id) ? huecos3D.filter(h => h !== id) : [...huecos3D, id])} 
-                  estibaCruzada={estibaCruzada} patronIndex={patronIndex} patronesCustom={patronesCustom} 
+                  estibaCruzada={estibaCruzada} patronIndex={patronIndex} patronesCustom={patronesCustom} dimsEmpaque={dimsEmpaque}
                />
                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none">Toca para marcar huecos • Doble dedo para rotar</p>
             </div>
           )}
 
-          {/* ... (El resto del código inferior se mantiene igual: Niveles, Ajuste, Amarre de Seguridad, Botones de Guardar) ... */}
           {(modo === '3d' && parseInt(niveles) > 1) && (
              <div className="flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-pointer" onClick={() => setEstibaCruzada(!estibaCruzada)}>
                <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${estibaCruzada ? 'bg-purple-500' : 'bg-slate-900 border border-slate-600'}`}>{estibaCruzada && <i className="fas fa-check text-white text-xs"></i>}</div>
@@ -216,6 +220,16 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
             <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Niveles (Capas)</label><input type="number" value={niveles} onChange={e => setNiveles(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-blue-400 p-3 rounded-xl text-center font-black text-xl outline-none" /></div>
             <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Ajuste Manual</label><input type="number" value={ajuste} onChange={e => setAjuste(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-emerald-400 p-3 rounded-xl text-center font-black text-xl outline-none" /></div>
           </div>
+
+          <div className="bg-slate-900 p-2 rounded-xl border border-slate-700 flex flex-col gap-2 mt-2">
+            <span className="text-[10px] font-bold text-slate-500 uppercase px-1">Forma del Empaque (Opcional)</span>
+            <div className="flex gap-1 overflow-x-auto custom-scroll pb-1">
+              {[ [1,1,1,'Cubo'], [1.5,1,1,'Estandar'], [2,1,1,'Larga'], [1.5,0.6,1,'Plana'], [1,1.8,1,'Alta'] ].map(d => (
+                <button key={d[3]} onClick={() => { setDimsEmpaque([d[0], d[1], d[2]]); localStorage.setItem(`een_forma_${codigoItem}_${varIdItem}`, JSON.stringify([d[0], d[1], d[2]])); }} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[0]===d[0] && dimsEmpaque[1]===d[1] ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>{d[3]}</button>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6 shadow-inner">
             <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Total Fisico</p>
             <p className="text-4xl font-black text-white">{totalCalculado}{huecos3D.length > 0 && <span className="text-sm text-red-400 ml-2">(-{huecos3D.length})</span>}</p>
