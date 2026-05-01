@@ -199,7 +199,10 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget }) => {
                <Estiba3D 
                   frente={frente} 
                   fondo={fondo} 
-                  niveles={niveles} 
+                  niveles={niveles}
+                  pzCama={pzCama}                  {/* NUEVO */}
+                  tarimas={tarimas}                {/* NUEVO */}
+                  piezasVisuales={piezasVisuales}  {/* NUEVO: ¡La conexión del lienzo! */}
                />
                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">
                  Arrastra para rotar • Pellizca para zoom
