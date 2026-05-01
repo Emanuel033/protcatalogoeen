@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Estiba3D from './Estiba3D';
 
-// ... (El componente PiezaArrastrable se queda exactamente igual) ...
 const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
   const [pos, setPos] = useState({ x: pieza.x, y: pieza.y });
   const [isDragging, setIsDragging] = useState(false);
@@ -59,31 +58,33 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
   const [frente, setFrente] = useState('');
   const [fondo, setFondo] = useState('');
   const [pzCama, setPzCama] = useState('');
+  
+  // NUEVO: Estado para el índice del patrón logístico
+  const [patronIndex, setPatronIndex] = useState(0);
+
   const [estibaCruzada, setEstibaCruzada] = useState(false);
   const [formaVisual, setFormaVisual] = useState('cuadrado');
   const [piezasVisuales, setPiezasVisuales] = useState([]);
   const [idPiezaLienzo, setIdPiezaLienzo] = useState(0);
   const [huecos3D, setHuecos3D] = useState([]);
-
-  // NUEVO: Estado de la Proporción Tridimensional del Empaque
-  // Formato: [ancho, alto, profundidad]
   const [dimsEmpaque, setDimsEmpaque] = useState([1, 1, 1]); 
 
   useEffect(() => {
     if (isOpen) {
       setNiveles(''); setAjuste(0); setTarimas(1); setFrente(''); setFondo(''); setPzCama('');
-      setPiezasVisuales([]); setIdPiezaLienzo(0); setHuecos3D([]); setModo('bloque'); setModoOrigen('bloque'); setEstibaCruzada(false);
+      setPiezasVisuales([]); setIdPiezaLienzo(0); setHuecos3D([]); setModo('bloque'); setModoOrigen('bloque'); setEstibaCruzada(false); setPatronIndex(0);
       
-      // LA MEMORIA: Buscamos si ya le habías asignado una forma a este paquete antes
       const memKey = `een_forma_${codigoItem}_${varIdItem}`;
       const savedDims = localStorage.getItem(memKey);
-      if (savedDims) {
-        setDimsEmpaque(JSON.parse(savedDims));
-      } else {
-        setDimsEmpaque([1, 1, 1]); // Cubo por defecto
-      }
+      if (savedDims) setDimsEmpaque(JSON.parse(savedDims));
+      else setDimsEmpaque([1, 1, 1]);
     }
   }, [isOpen, codigoItem, varIdItem]);
+
+  // Si el usuario cambia las piezas por cama, reiniciamos el patrón al por defecto (0)
+  useEffect(() => {
+    setPatronIndex(0);
+  }, [pzCama]);
 
   if (!isOpen) return null;
 
@@ -103,7 +104,6 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
     setModo(nuevoModo);
   };
 
-  // Guardar la dimensión elegida en la memoria de la tablet
   const cambiarDimensionEmpaque = (dims) => {
     setDimsEmpaque(dims);
     localStorage.setItem(`een_forma_${codigoItem}_${varIdItem}`, JSON.stringify(dims));
@@ -133,14 +133,13 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
         
         <div className="p-4 md:p-5 space-y-4">
           
-          {/* NUEVO SELECTOR DE PROPORCIÓN DEL EMPAQUE */}
           <div className="bg-slate-900 p-2 rounded-xl border border-slate-700 flex flex-col gap-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase px-1">Dimensiones Reales del Empaque</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase px-1">Proporción del Empaque (Memoria Activa)</span>
             <div className="flex gap-1 overflow-x-auto custom-scroll pb-1">
               <button onClick={() => cambiarDimensionEmpaque([1, 1, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[0]===1 && dimsEmpaque[1]===1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Cubo</button>
               <button onClick={() => cambiarDimensionEmpaque([1.5, 1, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[0]===1.5 && dimsEmpaque[1]===1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Estándar</button>
               <button onClick={() => cambiarDimensionEmpaque([2, 1, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[0]===2 && dimsEmpaque[1]===1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Larga</button>
-              <button onClick={() => cambiarDimensionEmpaque([1.5, 0.5, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[1]===0.5 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Plana (Pizza)</button>
+              <button onClick={() => cambiarDimensionEmpaque([1.5, 0.5, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[1]===0.5 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Plana</button>
               <button onClick={() => cambiarDimensionEmpaque([1, 2, 1])} className={`px-3 py-1.5 rounded text-[10px] font-black uppercase transition ${dimsEmpaque[1]===2 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>Alta</button>
             </div>
           </div>
@@ -152,7 +151,6 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
             <button onClick={() => cambiarPestana('3d')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition shadow-[0_0_10px_rgba(168,85,247,0.4)] ${modo === '3d' ? 'bg-purple-600 text-white' : 'text-purple-400 hover:text-purple-300 border border-purple-900/50'}`}><i className="fas fa-cube mr-1"></i>3D</button>
           </div>
 
-          {/* ... (Todo el resto del HTML de los inputs se queda exactamente igual) ... */}
           {(modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) && (
             <div className="grid grid-cols-2 gap-3 text-center">
               <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Frente</label><input type="number" value={frente} onChange={e => setFrente(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" /></div>
@@ -161,8 +159,17 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
           )}
 
           {(modo === 'cama' || (modo === '3d' && modoOrigen === 'cama')) && (
-            <div className="grid grid-cols-1 gap-3 text-center">
-              <div><label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Pz por Cama (Patrón)</label><input type="number" value={pzCama} onChange={e => setPzCama(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-amber-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" /></div>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Pz por Cama</label>
+                <input type="number" value={pzCama} onChange={e => setPzCama(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-amber-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
+              </div>
+              <div className="flex flex-col">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">Patrón 3D</label>
+                <button onClick={() => setPatronIndex(prev => prev + 1)} className="w-full flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-400 p-3 rounded-xl font-bold text-xs outline-none transition flex items-center justify-center gap-2">
+                  <i className="fas fa-sync-alt"></i> Cambiar
+                </button>
+              </div>
             </div>
           )}
 
@@ -196,8 +203,8 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
                   modoOrigen={modoOrigen}
                   frente={frente} fondo={fondo} niveles={niveles} pzCama={pzCama} tarimas={tarimas}
                   piezasVisuales={piezasVisuales} huecos3D={huecos3D} onToggleHueco={toggleHueco}
-                  estibaCruzada={estibaCruzada}
-                  dimsEmpaque={dimsEmpaque} // LE PASAMOS LA DIMENSIÓN ELEGIDA AL MOTOR 3D
+                  estibaCruzada={estibaCruzada} dimsEmpaque={dimsEmpaque} 
+                  patronIndex={patronIndex} // MANDAMOS EL PATRÓN ELEGIDO
                />
                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">Toca un empaque para eliminarlo (hueco)</p>
             </div>
@@ -212,7 +219,6 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, codigoItem
              </div>
           )}
 
-          {/* Tarimas */}
           {['cama', 'visual'].includes(modo) || (modo === '3d' && ['cama', 'visual'].includes(modoOrigen)) ? (
             <div className="text-center mt-2 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
               <label className="block text-[10px] font-bold text-purple-400 uppercase mb-2">Tarimas Hacia Atrás (Fondo)</label>

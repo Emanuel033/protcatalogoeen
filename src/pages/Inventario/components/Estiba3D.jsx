@@ -2,10 +2,8 @@ import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Box, Grid, Cylinder } from '@react-three/drei';
 
-const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasVisuales, huecos3D, onToggleHueco, estibaCruzada, dimsEmpaque }) => {
+const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasVisuales, huecos3D, onToggleHueco, estibaCruzada, dimsEmpaque, patronIndex }) => {
   const cajas = [];
-  
-  // Extraemos las proporciones elegidas por el usuario
   const [bW, bH, bD] = dimsEmpaque || [1, 1, 1];
   const gap = 0.05;
 
@@ -21,23 +19,18 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
   };
 
   // ==========================================
-  // ESCENARIO 1: LIENZO (CON PROPORCIONES ELEGIDAS)
+  // ESCENARIO 1: LIENZO (IGUAL)
   // ==========================================
   if (modoOrigen === 'visual' && piezasVisuales && piezasVisuales.length > 0) {
-    const scale = 34; 
-    const offsetX = 5; 
-    const offsetZ = 2.5; 
-
+    const scale = 34; const offsetX = 5; const offsetZ = 2.5; 
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
     piezasVisuales.forEach(p => {
       const wPx = p.forma.includes('-h') ? (p.forma === 'rectangulo-h' ? 68 : 51) : 34;
       const dPx = p.forma.includes('-v') ? (p.forma === 'rectangulo-v' ? 68 : 51) : 34;
       const base3Dx = ((p.x + (wPx / 2)) / scale) - offsetX;
       const base3Dz = ((p.y + (dPx / 2)) / scale) - offsetZ;
-      if (base3Dx < minX) minX = base3Dx;
-      if (base3Dx > maxX) maxX = base3Dx;
-      if (base3Dz < minZ) minZ = base3Dz;
-      if (base3Dz > maxZ) maxZ = base3Dz;
+      if (base3Dx < minX) minX = base3Dx; if (base3Dx > maxX) maxX = base3Dx;
+      if (base3Dz < minZ) minZ = base3Dz; if (base3Dz > maxZ) maxZ = base3Dz;
     });
 
     const centroEstibaX = (minX + maxX) / 2;
@@ -50,106 +43,94 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
         piezasVisuales.forEach((p, index) => {
           const wPx = p.forma.includes('-h') ? (p.forma === 'rectangulo-h' ? 68 : 51) : 34;
           const dPx = p.forma.includes('-v') ? (p.forma === 'rectangulo-v' ? 68 : 51) : 34;
-          
-          // La magia aquí: Multiplicamos el ancho visual por la proporción real del empaque elegido
           const ancho3D = (wPx / scale) * (bW / Math.max(bW, bD)); 
           const fondo3D = (dPx / scale) * (bD / Math.max(bW, bD));
           
           let x3D = ((p.x + (wPx / 2)) / scale) - offsetX;
           let z3D = ((p.y + (dPx / 2)) / scale) - offsetZ;
 
-          if (debeRotar) {
-            x3D = centroEstibaX - (x3D - centroEstibaX);
-            z3D = centroEstibaZ - (z3D - centroEstibaZ);
-          }
-
+          if (debeRotar) { x3D = centroEstibaX - (x3D - centroEstibaX); z3D = centroEstibaZ - (z3D - centroEstibaZ); }
           z3D += (tarima * 3); 
-          const posY = y * (bH + gap) + (bH / 2); // Usamos la altura real 'bH'
+          const posY = y * (bH + gap) + (bH / 2);
           const key = `lienzo-${tarima}-${y}-${index}`;
           const isHueco = huecos3D.includes(key);
 
-          const props = { key: key, position: [x3D, posY, z3D], onClick: (e) => { e.stopPropagation(); onToggleHueco(key); } };
-
-          if (p.forma === 'circulo') {
-            cajas.push(<Cylinder {...props} args={[0.5, 0.5, bH, 32]}>{renderMaterial('circulo', isHueco)}</Cylinder>);
-          } else {
-            cajas.push(<Box {...props} args={[ancho3D, bH, fondo3D]}>{renderMaterial('caja', isHueco)}</Box>);
-          }
+          if (p.forma === 'circulo') cajas.push(<Cylinder key={key} position={[x3D, posY, z3D]} args={[0.5, 0.5, bH, 32]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial('circulo', isHueco)}</Cylinder>);
+          else cajas.push(<Box key={key} position={[x3D, posY, z3D]} args={[ancho3D, bH, fondo3D]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial('caja', isHueco)}</Box>);
         });
       }
     }
   } 
   // ==========================================
-  // ESCENARIO 2: CAMA NUMÉRICA CON PATRONES INTELIGENTES
+  // ESCENARIO 2: CAMA NUMÉRICA MULTI-PATRÓN
   // ==========================================
   else if (modoOrigen === 'cama' && parseInt(pzCama) > 0) {
     const pz = parseInt(pzCama);
+
+    // FUNCIÓN GENERADORA DE PATRONES MATEMÁTICOS
+    const obtenerConfiguracionCama = (pz, pIndex) => {
+      // 3 PIEZAS: [0] Romano (|||), [1] Pi (2 vert, 1 horiz)
+      if (pz === 3) {
+        const patrones = [
+          [ { pos: [-bW-gap, 0], rot: false }, { pos: [0, 0], rot: false }, { pos: [bW+gap, 0], rot: false } ], // Romano |||
+          [ { pos: [-bW/2-gap/2, bD/2], rot: false }, { pos: [bW/2+gap/2, bD/2], rot: false }, { pos: [0, -bW/2-gap], rot: true } ] // Forma de Pi
+        ];
+        return patrones[pIndex % patrones.length];
+      }
+      // 4 PIEZAS: [0] Romano (||||), [1] Cuadrícula 2x2, [2] Molino Hueco, [3] 2 Horiz + 2 Vert
+      else if (pz === 4) {
+        const patrones = [
+          [ { pos: [-1.5*(bW+gap), 0], rot: false }, { pos: [-0.5*(bW+gap), 0], rot: false }, { pos: [0.5*(bW+gap), 0], rot: false }, { pos: [1.5*(bW+gap), 0], rot: false } ],
+          [ { pos: [-0.5*bW-gap, -0.5*bD-gap], rot: false }, { pos: [0.5*bW+gap, -0.5*bD-gap], rot: false }, { pos: [-0.5*bW-gap, 0.5*bD+gap], rot: false }, { pos: [0.5*bW+gap, 0.5*bD+gap], rot: false } ],
+          [ { pos: [0, -bD/2-bW/2-gap], rot: true }, { pos: [bW/2+bD/2+gap, 0], rot: false }, { pos: [0, bD/2+bW/2+gap], rot: true }, { pos: [-bW/2-bD/2-gap, 0], rot: false } ], // El Molino con hueco
+          [ { pos: [-bW/2-gap, -bD/2-gap, rot: false], rot: false}, { pos: [bW/2+gap, -bD/2-gap], rot: false }, { pos: [0, bW/2+gap], rot: true }, { pos: [0, bW/2+bD+gap*2], rot: true } ] // 2V + 2H
+        ];
+        return patrones[pIndex % patrones.length];
+      }
+      // 5 PIEZAS: [0] Romano, [1] 3V + 2H, [2] 2V + 3H
+      else if (pz === 5) {
+        const patrones = [
+          [ { pos: [-2*(bW+gap), 0], rot: false }, { pos: [-bW-gap, 0], rot: false }, { pos: [0, 0], rot: false }, { pos: [bW+gap, 0], rot: false }, { pos: [2*(bW+gap), 0], rot: false } ],
+          [ { pos: [-bW-gap, -bW/2-gap], rot: false }, { pos: [0, -bW/2-gap], rot: false }, { pos: [bW+gap, -bW/2-gap], rot: false }, { pos: [-bD/2-gap, bD/2+gap], rot: true }, { pos: [bD/2+gap, bD/2+gap], rot: true } ],
+          [ { pos: [-bD/2-gap, -bD/2-gap], rot: true }, { pos: [bD/2+gap, -bD/2-gap], rot: true }, { pos: [-bW-gap, bW/2+gap], rot: false }, { pos: [0, bW/2+gap], rot: false }, { pos: [bW+gap, bW/2+gap], rot: false } ]
+        ];
+        return patrones[pIndex % patrones.length];
+      }
+      return null; // Si no hay patrón matemático diseñado, regresará null y usará cuadrícula genérica
+    };
+
+    const config = obtenerConfiguracionCama(pz, patronIndex);
 
     for (let tarima = 0; tarima < t; tarima++) {
       for (let y = 0; y < n; y++) {
         const debeRotar = estibaCruzada && (y % 2 !== 0);
         const posY = y * (bH + gap) + (bH / 2);
         
-        // --- PATRÓN INTELIGENTE: 3 PIEZAS (2 vertical, 1 horizontal) ---
-        if (pz === 3) {
-          const configs = [
-            { pos: [-0.55 * bW, posY, 0], rot: false }, // Izquierda
-            { pos: [ 0.55 * bW, posY, 0], rot: false }, // Derecha
-            { pos: [ 0, posY, 1.1 * bD], rot: true }    // Abajo acostada
-          ];
-          configs.forEach((c, i) => {
+        if (config) {
+          // DIBUJAR PATRÓN MATEMÁTICO
+          config.forEach((c, i) => {
             const key = `cama-${tarima}-${y}-${i}`;
             const isHueco = huecos3D.includes(key);
             const w = (c.rot !== debeRotar) ? bD : bW;
             const d = (c.rot !== debeRotar) ? bW : bD;
             let px = debeRotar ? -c.pos[0] : c.pos[0];
-            let pz = debeRotar ? -c.pos[2] : c.pos[2];
-            cajas.push(<Box key={key} position={[px, posY, pz + (tarima * 3)]} args={[w, bH, d]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial('cama', isHueco)}</Box>);
+            let pz_coord = debeRotar ? -c.pos[1] : c.pos[1];
+            cajas.push(<Box key={key} position={[px, posY, pz_coord + (tarima * 3)]} args={[w, bH, d]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial('cama', isHueco)}</Box>);
           });
-        }
-        // --- PATRÓN INTELIGENTE: 5 PIEZAS (3 vertical arriba, 2 horizontal abajo) ---
-        else if (pz === 5) {
-          const configs = [
-            { pos: [-1.1 * bW, posY, -0.6 * bD], rot: false }, // Arriba Izq
-            { pos: [ 0, posY, -0.6 * bD], rot: false },        // Arriba Centro
-            { pos: [ 1.1 * bW, posY, -0.6 * bD], rot: false }, // Arriba Der
-            { pos: [-0.6 * bW, posY, 0.6 * bD], rot: true },   // Abajo Izq
-            { pos: [ 0.6 * bW, posY, 0.6 * bD], rot: true }    // Abajo Der
-          ];
-          configs.forEach((c, i) => {
-            const key = `cama-${tarima}-${y}-${i}`;
-            const isHueco = huecos3D.includes(key);
-            const w = (c.rot !== debeRotar) ? bD : bW;
-            const d = (c.rot !== debeRotar) ? bW : bD;
-            let px = debeRotar ? -c.pos[0] : c.pos[0];
-            let pz = debeRotar ? -c.pos[2] : c.pos[2];
-            cajas.push(<Box key={key} position={[px, posY, pz + (tarima * 3)]} args={[w, bH, d]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial('cama', isHueco)}</Box>);
-          });
-        }
-        // --- PATRÓN POR DEFECTO (Cuadrícula Genérica) ---
-        else {
+        } else {
+          // DIBUJAR CUADRÍCULA GENÉRICA DE RESPALDO (Ej: 10 piezas)
           const cols = Math.ceil(Math.sqrt(pz));
           const offsetX = (cols * (bW + gap)) / 2 - (bW / 2);
           const offsetZ = (Math.ceil(pz/cols) * (bD + gap)) / 2 - (bD / 2);
 
           for (let i = 0; i < pz; i++) {
-            const col = i % cols;
-            const row = Math.floor(i / cols);
+            const col = i % cols; const row = Math.floor(i / cols);
             const key = `cama-${tarima}-${y}-${i}`;
             const isHueco = huecos3D.includes(key);
-            
-            const w = debeRotar ? bD : bW;
-            const d = debeRotar ? bW : bD;
-            let px = col * (w + gap) - offsetX;
-            let pz = row * (d + gap) - offsetZ;
-
-            if (debeRotar) { px = -px; pz = -pz; }
-
-            cajas.push(
-              <Box key={key} position={[px, posY, pz + (tarima * 3)]} args={[w, bH, d]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>
-                {renderMaterial('cama', isHueco)}
-              </Box>
-            );
+            const w = debeRotar ? bD : bW; const d = debeRotar ? bW : bD;
+            let px = col * (w + gap) - offsetX; let pz_coord = row * (d + gap) - offsetZ;
+            if (debeRotar) { px = -px; pz_coord = -pz_coord; }
+            cajas.push(<Box key={key} position={[px, posY, pz_coord + (tarima * 3)]} args={[w, bH, d]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial('cama', isHueco)}</Box>);
           }
         }
       }
@@ -159,36 +140,26 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
   // ESCENARIO 3: BLOQUE BÁSICO
   // ==========================================
   else {
-    const f = Math.max(1, parseInt(frente) || 1);
-    const d = Math.max(1, parseInt(fondo) || 1);
-
+    const f = Math.max(1, parseInt(frente) || 1); const d = Math.max(1, parseInt(fondo) || 1);
     for (let y = 0; y < n; y++) {
       const debeRotar = estibaCruzada && (y % 2 !== 0);
-      const iterF = debeRotar ? d : f;
-      const iterD = debeRotar ? f : d;
-      const offX = (iterF * (bW + gap)) / 2 - (bW / 2);
-      const offZ = (iterD * (bD + gap)) / 2 - (bD / 2);
+      const iterF = debeRotar ? d : f; const iterD = debeRotar ? f : d;
+      const offX = (iterF * (bW + gap)) / 2 - (bW / 2); const offZ = (iterD * (bD + gap)) / 2 - (bD / 2);
       const posY = y * (bH + gap) + (bH / 2);
 
       for (let x = 0; x < iterF; x++) {
         for (let z = 0; z < iterD; z++) {
           const key = `bloque-${x}-${y}-${z}`;
           const isHueco = huecos3D.includes(key);
-          const currentW = debeRotar ? bD : bW;
-          const currentD = debeRotar ? bW : bD;
-
-          cajas.push(
-            <Box key={key} position={[x * (currentW + gap) - offX, posY, z * (currentD + gap) - offZ]} args={[currentW, bH, currentD]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>
-              {renderMaterial('bloque', isHueco)}
-            </Box>
-          );
+          const currentW = debeRotar ? bD : bW; const currentD = debeRotar ? bW : bD;
+          cajas.push(<Box key={key} position={[x * (currentW + gap) - offX, posY, z * (currentD + gap) - offZ]} args={[currentW, bH, currentD]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial('bloque', isHueco)}</Box>);
         }
       }
     }
   }
 
   return (
-    <Canvas camera={{ position: [0, 6, 8], fov: 50 }}>
+    <Canvas camera={{ position: [0, 8, 10], fov: 45 }}>
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
       <pointLight position={[-10, -10, -10]} intensity={0.5} />
