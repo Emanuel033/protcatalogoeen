@@ -12348,9 +12348,28 @@
       "tipo_item": "KIT_OFICIAL",
       "codigo_sistema_oficial": "EPL-1-CT",
       "receta_desglose": null,
-      "hereda_empaques_de": "p427"
+      "hereda_empaques_de": "KoJUw1aEOnxdIrBy4fbI"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "eRIEpo8EY06avP0ne4I1",
+        "piezas": 192,
+        "sku": "EPL-1/CP-192PZ",
+        "fecha_creacion": {
+          "_seconds": 1772909174,
+          "_nanoseconds": 210000000
+        }
+      },
+      {
+        "id": "q6zQqG8RFOCgtyD5FHBd",
+        "piezas": 200,
+        "sku": "EPL-1/CP-200PZ",
+        "fecha_creacion": {
+          "_seconds": 1772909178,
+          "_nanoseconds": 499000000
+        }
+      }
+    ]
   },
   {
     "id": "p428",
@@ -12368,7 +12387,7 @@
       "tipo_item": "KIT_OFICIAL",
       "codigo_sistema_oficial": "EPL-250-CT",
       "receta_desglose": null,
-      "hereda_empaques_de": "p429"
+      "hereda_empaques_de": "lYbmujjw2Y7uhMReOrWy"
     },
     "paquetes": []
   },
@@ -12415,9 +12434,19 @@
       "tipo_item": "KIT_OFICIAL",
       "codigo_sistema_oficial": "EPL-500-CT",
       "receta_desglose": null,
-      "hereda_empaques_de": "p431"
+      "hereda_empaques_de": "He6sc7ORtxUFEUETQmbu"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "ZV3E8s8whMgT9zWC9zIF",
+        "piezas": 200,
+        "sku": "EPL-500/CP-200PZ",
+        "fecha_creacion": {
+          "_seconds": 1772909162,
+          "_nanoseconds": 490000000
+        }
+      }
+    ]
   },
   {
     "id": "p432",
@@ -12435,9 +12464,19 @@
       "tipo_item": "KIT_OFICIAL",
       "codigo_sistema_oficial": "EPL-GAL-CT",
       "receta_desglose": null,
-      "hereda_empaques_de": "p433"
+      "hereda_empaques_de": "h4H0n7NhKrl0ugtgDSLz"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "EC9nfT0n1oIftVm7OR2p",
+        "piezas": 48,
+        "sku": "EPL-GAL/CP-48PZ",
+        "fecha_creacion": {
+          "_seconds": 1772909154,
+          "_nanoseconds": 362000000
+        }
+      }
+    ]
   },
   {
     "id": "p434",
@@ -12455,9 +12494,19 @@
       "tipo_item": "KIT_OFICIAL",
       "codigo_sistema_oficial": "EPL-1/2-GAL-CT",
       "receta_desglose": null,
-      "hereda_empaques_de": "p435"
+      "hereda_empaques_de": "fa7iP5gnqu68i8hPRrMy"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "QslQTxewLdyQ9PF0mAzc",
+        "piezas": 108,
+        "sku": "EPL-1/2-GAL/CP-108PZ",
+        "fecha_creacion": {
+          "_seconds": 1772909249,
+          "_nanoseconds": 57000000
+        }
+      }
+    ]
   },
   {
     "id": "p436",
