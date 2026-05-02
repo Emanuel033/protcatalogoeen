@@ -1,56 +1,81 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 
-const EscanerManual = ({ onAgregarProducto, catalogoBase }) => {
-  const [inputValue, setInputValue] = useState('');
-  const timeoutRef = useRef(null);
+const EscanerManual = ({ catalogoBase, onAgregarProducto }) => {
+  const [busqueda, setBusqueda] = useState('');
+  const [escuchandoBuscador, setEscuchandoBuscador] = useState(false);
 
-  const manejarCambio = (e) => {
-    const valor = e.target.value;
-    setInputValue(valor);
+  // MOTOR JARVIS (Reconocimiento de voz nativo)
+  const iniciarJarvisBuscador = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Tu navegador o tablet no soporta comandos de voz nativos.");
+      return;
+    }
 
-    // Limpiamos el timeout anterior
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-MX'; // Español México
+    recognition.interimResults = false;
+    
+    recognition.onstart = () => setEscuchandoBuscador(true);
+    
+    recognition.onresult = (event) => {
+      // Capturamos lo que escuchó y le quitamos el punto final
+      const comando = event.results[0][0].transcript.replace('.', '');
+      setBusqueda(comando); 
+      
+      // OPCIONAL: Si quieres que al terminar de hablar agregue el producto automáticamente, 
+      // descomenta las siguientes dos líneas:
+      // onAgregarProducto(comando);
+      // setBusqueda('');
+    };
 
-    if (valor.trim() !== '') {
-      // Configuramos un pequeño retraso (debounce)
-      // Si el usuario deja de escribir por medio segundo, buscamos en automático.
-      // (Ideal para pistolas lectoras que escriben todo de golpe en 10ms)
-      timeoutRef.current = setTimeout(() => {
-        onAgregarProducto(valor);
-        setInputValue(''); // Limpiamos la barra al encontrar algo
-      }, 500); 
+    recognition.onerror = () => setEscuchandoBuscador(false);
+    recognition.onend = () => setEscuchandoBuscador(false);
+    recognition.start();
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (busqueda.trim()) {
+      onAgregarProducto(busqueda);
+      setBusqueda('');
     }
   };
 
   return (
-    <div className="flex gap-2">
-      <button 
-        className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shrink-0"
-        title="Escáner QR (Próximamente)"
-      >
-        <i className="fas fa-camera text-xl"></i>
-      </button>
-
-      <div className="relative flex-1">
-        <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+    <form onSubmit={handleSubmit} className="flex gap-3 w-full">
+      
+      {/* BARRA DE BÚSQUEDA (Sin restricciones, ocupa todo el espacio) */}
+      <div className="flex-1 flex items-center bg-slate-900 rounded-xl px-4 py-1 border border-slate-700 focus-within:border-blue-500 transition-colors shadow-inner">
+        <i className="fas fa-search text-slate-500 mr-3"></i>
         <input 
           type="text" 
-          value={inputValue}
-          onChange={manejarCambio}
-          placeholder="Buscar código o nombre..." 
-          className="w-full h-full bg-slate-900 border border-slate-700 text-white text-base font-bold rounded-2xl py-4 pl-12 pr-4 focus:border-blue-500 outline-none transition-all" 
-          list="opcionesProductos"
+          placeholder="Buscar SKU, código o nombre..." 
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          className="w-full bg-transparent text-white py-3 outline-none font-medium text-sm md:text-base" 
         />
-        
-        <datalist id="opcionesProductos">
-          {catalogoBase.map((producto, index) => (
-            <option key={index} value={producto.codigo}>
-              {producto.descripcion_oficial || producto.nombre}
-            </option>
-          ))}
-        </datalist>
       </div>
-    </div>
+
+      {/* BOTÓN JARVIS */}
+      <button 
+        type="button"
+        onClick={iniciarJarvisBuscador}
+        className={`w-14 shrink-0 rounded-xl flex items-center justify-center transition-all ${escuchandoBuscador ? 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse text-white' : 'bg-slate-700 border border-slate-600 text-slate-300 hover:text-white hover:bg-slate-600'}`}
+        title="Dictar búsqueda"
+      >
+        <i className={`fas ${escuchandoBuscador ? 'fa-microphone-slash' : 'fa-microphone'} text-lg`}></i>
+      </button>
+
+      {/* BOTÓN AGREGAR */}
+      <button 
+        type="submit"
+        className="px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black uppercase text-[11px] tracking-wider transition shadow-lg shrink-0"
+      >
+        Agregar
+      </button>
+
+    </form>
   );
 };
 

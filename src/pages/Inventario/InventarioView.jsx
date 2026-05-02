@@ -10,6 +10,9 @@ const InventarioView = () => {
   const [estadoCatalogo, setEstadoCatalogo] = useState('Cargando...');
   const [listaConteo, setListaConteo] = useState([]);
   const [calcActiva, setCalcActiva] = useState({ isOpen: false, codigo: null, varId: null, nombre: '' });
+  
+  // ESTADO PARA EL LIGHTBOX (IMAGEN GIGANTE)
+  const [imagenAmpliada, setImagenAmpliada] = useState(null);
 
   // 1. Carga de Catálogo
   useEffect(() => {
@@ -23,7 +26,7 @@ const InventarioView = () => {
       .catch(() => setEstadoCatalogo('Error de carga'));
   }, []);
 
-  // 2. Lógica de Cantidades (Memoizada para evitar re-renders lentos)
+  // 2. Lógica de Cantidades (Memoizada)
   const manualCant = useCallback((codigo, varId, valor) => {
     const pz = parseInt(valor, 10) || 0;
     setListaConteo(prev => prev.map(prod => {
@@ -47,30 +50,42 @@ const InventarioView = () => {
     manualCant(codigo, varId, cantidad);
   });
 
-  // 4. Agregar Producto (Cumpliendo reglas de negocio)
+  // 4. Agregar Producto (Con Normalizador de Empaques e Imagen)
   const agregarProductoALista = (codigoBuscado) => {
     const cod = String(codigoBuscado).trim().toLowerCase();
     let prod = catalogoBase.find(p => String(p.codigo).toLowerCase() === cod);
     
     if (!prod) {
-      // Búsqueda en empaques/SKUs
-      prod = catalogoBase.find(p => (p.paquetes || p.empaques || []).some(e => 
-        String(e.sku).toLowerCase() === cod || String(e.codigo_barras).toLowerCase() === cod
-      ));
+      // Normalizamos temporalmente para búsqueda profunda de SKUs
+      prod = catalogoBase.find(p => {
+        let pkgs = [];
+        if (p.paquetes) pkgs = Array.isArray(p.paquetes) ? p.paquetes : Object.values(p.paquetes);
+        return pkgs.some(e => String(e.sku).toLowerCase() === cod || String(e.codigo_barras).toLowerCase() === cod);
+      });
     }
 
     if (prod && !listaConteo.find(i => i.codigo === String(prod.codigo))) {
-      const empaques = prod.paquetes || prod.empaques || [];
-      // Aplicamos definición: piezas = items por paquete/bolsa
+      
+      // LÓGICA BLINDADA PARA LEER LOS EMPAQUES DEL JSON
+      let paquetesArray = [];
+      if (prod.paquetes && Object.keys(prod.paquetes).length > 0) {
+        paquetesArray = Array.isArray(prod.paquetes) ? prod.paquetes : Object.values(prod.paquetes);
+      } else if (prod.empaques_tips && Object.keys(prod.empaques_tips).length > 0) {
+        const tips = Array.isArray(prod.empaques_tips) ? prod.empaques_tips : Object.values(prod.empaques_tips);
+        paquetesArray = tips.map(qty => ({ piezas: parseInt(qty) }));
+      }
+      const empaquesLimpios = paquetesArray.filter(p => p && p.piezas);
+
       const variantes = [
         { id: 'sueltas', pz: 1, contadas: 0 },
-        ...empaques.map((e, i) => ({ id: `emp_${i}`, pz: parseInt(e.piezas), contadas: 0 }))
+        ...empaquesLimpios.map((e, i) => ({ id: `emp_${i}`, pz: parseInt(e.piezas), contadas: 0 }))
       ].sort((a, b) => b.pz - a.pz);
 
       setListaConteo(prev => [{
         codigo: String(prod.codigo),
         nombre: prod.descripcion_oficial || prod.nombre,
         stockSistema: parseFloat(prod.stock || 0),
+        imagen: prod.image || prod.imagen || null, // <-- AQUÍ ASEGURAMOS LA FOTO
         variantes,
         totalFisico: 0
       }, ...prev]);
@@ -79,6 +94,8 @@ const InventarioView = () => {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-slate-900 text-slate-50">
+      
+      {/* HEADER */}
       <header className="bg-slate-900 border-b border-slate-800 px-4 py-4 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/50">
@@ -94,6 +111,7 @@ const InventarioView = () => {
         </button>
       </header>
 
+      {/* CUERPO PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full flex flex-col gap-6 custom-scroll">
         <div className="bg-slate-800 p-5 rounded-3xl border border-slate-700 shadow-lg">
            <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} />
@@ -115,17 +133,49 @@ const InventarioView = () => {
             setCalcActiva({ isOpen: true, codigo, varId, nombre: p?.nombre });
           }}
           onIniciarDictado={(codigo, varId, btn, letra) => iniciarDictado(codigo, varId, letra)}
+          onZoomImagen={(img) => setImagenAmpliada(img)} // <-- ESTO CONECTA LA LISTA CON EL MODAL
         />
       </main>
 
+      {/* MODAL CALCULADORA ESTIBA 3D */}
       <ModalCalculadora 
-  isOpen={calcActiva.isOpen}
-  tituloTarget={calcActiva.nombre}
-  codigoItem={calcActiva.codigo} // <-- ESTO
-  varIdItem={calcActiva.varId}   // <-- Y ESTO
-  onClose={() => setCalcActiva(prev => ({ ...prev, isOpen: false }))}
-  onAplicar={(total) => cambiarCant(calcActiva.codigo, calcActiva.varId, total)}
-/>
+        isOpen={calcActiva.isOpen}
+        tituloTarget={calcActiva.nombre}
+        codigoItem={calcActiva.codigo} 
+        varIdItem={calcActiva.varId}   
+        onClose={() => setCalcActiva(prev => ({ ...prev, isOpen: false }))}
+        onAplicar={(total) => cambiarCant(calcActiva.codigo, calcActiva.varId, total)}
+      />
+
+      {/* 👇 AQUÍ ESTÁ EL FAMOSO MODAL LIGHTBOX BIEN ACOMODADO 👇 */}
+      {imagenAmpliada && (
+        <div 
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 touch-none" 
+          onClick={() => setImagenAmpliada(null)}
+        >
+          <div className="relative max-w-md w-full flex flex-col items-center animate-fade-in" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setImagenAmpliada(null)} 
+              className="absolute -top-12 right-0 w-10 h-10 bg-slate-800 border border-slate-700 rounded-full text-white shadow-lg flex items-center justify-center hover:bg-slate-700 transition"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+            <div className="bg-white p-2 rounded-2xl shadow-2xl w-full flex justify-center">
+                <img 
+                  src={imagenAmpliada} 
+                  alt="Verificación visual" 
+                  className="w-full max-h-[70vh] object-contain rounded-xl mix-blend-multiply"
+                  onError={(e) => e.target.src = 'https://dummyimage.com/300x300/e2e8f0/0f172a&text=Sin+Imagen'}
+                />
+            </div>
+            <p className="text-slate-400 font-bold text-[10px] mt-4 uppercase tracking-widest bg-slate-800 px-5 py-2.5 rounded-full border border-slate-700 cursor-pointer shadow-lg active:scale-95 transition" onClick={() => setImagenAmpliada(null)}>
+              Cerrar verificación
+            </p>
+          </div>
+        </div>
+      )}
+      {/* 👆 FIN DEL MODAL LIGHTBOX 👆 */}
+
     </div>
   );
 };
