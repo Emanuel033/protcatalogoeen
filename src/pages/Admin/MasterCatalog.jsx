@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { db } from '../../firebase.js'; // Ajusta tu ruta
 
 export default function MasterCatalog({ searchTerm }) {
     const [viewMode, setViewMode] = useState('desglose');
+    const [productos, setProductos] = useState([]);
+    const [cargando, setCargando] = useState(true);
+
+    // Conectamos a Firebase
+    useEffect(() => {
+        const unsubscribe = db.collection('catalogo_maestro').onSnapshot(snap => {
+            const data = [];
+            snap.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+            setProductos(data);
+            setCargando(false);
+        });
+        return () => unsubscribe();
+    }, []);
 
     return (
         <div className="h-full flex flex-col px-8 py-6 max-w-[1400px] mx-auto animate-fade-in">
@@ -37,13 +51,28 @@ export default function MasterCatalog({ searchTerm }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {/* Aquí iterarás sobre los datos mapeados desde tu backend */}
-                            <tr>
-                                <td colSpan="5" className="text-center py-8 text-slate-400">
-                                    Cargando inventario...
-                                </td>
-                            </tr>
-                        </tbody>
+            {cargando ? (
+                <tr>
+                    <td colSpan="5" className="text-center py-8 text-slate-400">
+                        Cargando inventario desde Firebase...
+                    </td>
+                </tr>
+            ) : (
+                productos.map(prod => (
+                    <tr key={prod.id} className="hover:bg-slate-50 border-b border-slate-100">
+                        <td className="px-3 py-3 text-slate-800 font-medium">{prod.nombre_flexible || prod.descripcion_oficial}</td>
+                        <td className="px-3 py-3 text-slate-600">{prod.categoria || 'Sin categoría'}</td>
+                        <td className="px-3 py-3 text-slate-600 font-mono">
+                            {prod.piezas ? `${prod.piezas} pz/paq` : 'N/A'}
+                        </td>
+                        <td className="px-3 py-3 font-bold text-slate-900">{prod.stock || 0}</td>
+                        <td className="px-3 py-3 text-right">
+                            <button className="text-blue-500 hover:text-blue-700 p-2">Editar</button>
+                        </td>
+                    </tr>
+                ))
+            )}
+        </tbody>
                     </table>
                 </div>
             </div>
