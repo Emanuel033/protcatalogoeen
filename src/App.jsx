@@ -8,8 +8,11 @@ import InventarioView from './pages/Inventario/InventarioView';
 import RutasView from './pages/Rutas/RutasView';
 import { LogisticaProvider } from './pages/Rutas/context/LogisticaContext';
 
-// 1. Importamos el componente del Admin (Ajusta la ruta según dónde lo guardaste)
+// Importamos el componente del Admin
 import AdminLayout from './pages/Admin/AdminLayout'; 
+
+// Corrección: Importamos ChoferView con su nombre correcto
+import ChoferView from './pages/Chofer/ChoferView';
 
 function App() {
   return (
@@ -27,8 +30,11 @@ function App() {
           } 
         />
 
-        {/* 2. Agregamos la ruta para la nueva vista de Administración */}
+        {/* Agregamos la ruta para la nueva vista de Administración */}
         <Route path="/admin" element={<AdminLayout />} />
+        
+        {/* Agregamos la ruta para el Chofer */}
+        <Route path="/chofer" element={<ChoferView />} />
         
       </Routes>
     </Router>

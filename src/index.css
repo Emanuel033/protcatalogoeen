@@ -50,3 +50,25 @@
 
 .sort-icon { opacity: 0.3; transition: opacity 0.2s; }
 .sort-active { opacity: 1; color: #3b82f6; }
+
+/* Estilos para el módulo del Chofer (index.css) */
+body { overscroll-behavior-y: none; }
+.hide-scroll::-webkit-scrollbar { display: none; }
+
+.card-entrega { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.card-entrega:active { transform: scale(0.98); }
+
+.foto-preview { 
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cbd5e1"><path d="M12 4L12 20M4 12L20 12" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round"/></svg>'); 
+    background-size: 30px; 
+    background-repeat: no-repeat; 
+    background-position: center; 
+    transition: all 0.3s ease; 
+}
+.foto-preview.has-image { background-image: none; }
+
+@keyframes pulse-red { 
+    0%, 100% { background-color: #ef4444; } 
+    50% { background-color: #dc2626; } 
+}
+.badge-urgente { animation: pulse-red 2s infinite; }
