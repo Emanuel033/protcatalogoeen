@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
+//import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
 // Importamos directamente de la carpeta context que está al mismo nivel
 import { useLogistica } from './context/LogisticaContext';
 import SidebarDispatcher from './components/SidebarDispatcher';

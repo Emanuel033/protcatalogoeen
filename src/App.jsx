@@ -4,10 +4,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Catalogo from './pages/Catalogo/Catalogo';
 import InventarioView from './pages/Inventario/InventarioView';
 
-// 1. Importamos la Vista
+// Importamos la Vista de Rutas y su Provider
 import RutasView from './pages/Rutas/RutasView';
-// 2. Importamos el Provider específico de ese módulo
 import { LogisticaProvider } from './pages/Rutas/context/LogisticaContext';
+
+// 1. Importamos el componente del Admin (Ajusta la ruta según dónde lo guardaste)
+import AdminLayout from './pages/Admin/AdminLayout'; 
 
 function App() {
   return (
@@ -16,7 +18,6 @@ function App() {
         <Route path="/" element={<Catalogo />} />
         <Route path="/auditoria" element={<InventarioView />} />
         
-        {/* 3. Envolvemos SOLO esta vista con su Provider y corregimos el typo */}
         <Route 
           path="/rutas" 
           element={
@@ -25,6 +26,10 @@ function App() {
             </LogisticaProvider>
           } 
         />
+
+        {/* 2. Agregamos la ruta para la nueva vista de Administración */}
+        <Route path="/admin" element={<AdminLayout />} />
+        
       </Routes>
     </Router>
   );
