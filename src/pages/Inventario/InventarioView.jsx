@@ -163,7 +163,7 @@ const InventarioView = () => {
       {/* CUERPO PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full flex flex-col gap-6 custom-scroll">
         <div className="bg-slate-800 p-5 rounded-3xl border border-slate-700 shadow-lg">
-           <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} />
+           <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} idioma={idioma} />
         </div>
 
         <ListaConteo 
@@ -194,6 +194,7 @@ const InventarioView = () => {
         varIdItem={calcActiva.varId}   
         onClose={() => setCalcActiva(prev => ({ ...prev, isOpen: false }))}
         onAplicar={(total) => cambiarCant(calcActiva.codigo, calcActiva.varId, total)}
+        idioma={idioma}
       />
 
       {/* 👇 AQUÍ ESTÁ EL FAMOSO MODAL LIGHTBOX BIEN ACOMODADO 👇 */}
