@@ -92,6 +92,43 @@ const InventarioView = () => {
     }
   };
 
+  const descargarCSV = () => {
+  if (listaConteo.length === 0) {
+    alert(idioma === 'es' ? "La lista está vacía" : "La liste est vide");
+    return;
+  }
+
+  // 1. Cabeceras del Excel
+  let csv = "\uFEFF"; // BOM para que Excel lea bien los acentos
+  csv += "Codigo,Producto,Stock Sistema,Total Fisico,Ajuste,Detalle Conteos\n";
+
+  // 2. Recorrer la lista que tienes en pantalla
+  listaConteo.forEach(item => {
+    const ajuste = item.totalFisico - item.stockSistema;
+    
+    // Crear el detalle (ej: "100pz: 2 | 1pz: 5")
+    const detalle = item.variantes
+      .filter(v => v.contadas > 0)
+      .map(v => `${v.pz}${idioma === 'es' ? 'pz' : 'pc'}: ${v.contadas}`)
+      .join(" | ");
+
+    // Limpiar comas del nombre para no romper el CSV
+    const nombreLimpio = item.nombre.replace(/,/g, "");
+
+    csv += `${item.codigo},${nombreLimpio},${item.stockSistema},${item.totalFisico},${ajuste},"${detalle}"\n`;
+  });
+
+  // 3. Crear el archivo y descargar
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `Inventario_EEN_${new Date().getTime()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-slate-900 text-slate-50">
       
@@ -101,14 +138,26 @@ const InventarioView = () => {
           <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/50">
             <i className={`fas ${estaEscuchando ? 'fa-microphone animate-pulse text-red-400' : 'fa-clipboard-list text-white'}`}></i>
           </div>
+          
           <div>
             <h1 className="text-xl font-black">{idioma === 'es' ? 'Inventario' : 'Inventaire'}</h1>
             <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{estadoCatalogo}</p>
           </div>
         </div>
-        <button onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} className="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl font-bold">
-          {idioma === 'es' ? '🇲🇽 ES' : '🇫🇷 FR'}
-        </button>
+        <button 
+    onClick={descargarCSV} 
+    className="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2"
+  >
+    <i className="fas fa-file-excel text-emerald-400"></i>
+    <span>CSV</span>
+  </button>
+
+  <button 
+    onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} 
+    className="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl font-bold"
+  >
+    {idioma === 'es' ? '🇲🇽 ES' : '🇫🇷 FR'}
+  </button>
       </header>
 
       {/* CUERPO PRINCIPAL */}
