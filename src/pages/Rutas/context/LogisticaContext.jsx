@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-// Subimos 3 niveles: context -> Rutas -> pages -> src (donde está firebase.js)
 import { db } from '../../../firebase'; 
 
 const LogisticaContext = createContext();
@@ -34,7 +33,6 @@ export const LogisticaProvider = ({ children }) => {
 
   // El cerebro auto-masticador migrado a React
   const procesarPedidosCrudos = async (viajesCrudos, clientesActuales, fleterasActuales) => {
-    // Usamos variables locales para no depender del estado asíncrono en el bucle
     for (let p of viajesCrudos) {
         let updates = { procesado_por_web: true };
         let isFletera = (p.tipo_envio === 'FLETERA') || (p.detalles_entrega && p.detalles_entrega.toLowerCase().includes('fletera'));
@@ -55,11 +53,9 @@ export const LogisticaProvider = ({ children }) => {
         }
 
         if (!clienteMatch) {
-            // Lógica de creación de cliente nuevo...
             updates.destino_alias = aliasLimpio || 'Dirección Matriz';
             updates.coordenadas = {lat: 25.689804, lng: -100.312066};
         } else {
-            // Lógica de asignación de bodegas o fleteras basada en tu HTML...
             updates.destino_alias = aliasLimpio;
             updates.coordenadas = clienteMatch.direcciones?.[0]?.coordenadas || {lat: 25.689804, lng: -100.312066};
         }
@@ -91,9 +87,14 @@ export const LogisticaProvider = ({ children }) => {
       
       snapshot.forEach(doc => {
         const data = doc.data();
-        if (['pendiente', 'camino', 'fallido'].includes(data.estado)) {
+        
+        // ==========================================
+        // AQUÍ AGREGAMOS 'entregado' PARA QUE LOS TOME EN CUENTA
+        // ==========================================
+        if (['pendiente', 'camino', 'fallido', 'entregado'].includes(data.estado)) {
             activos.push({ id: doc.id, ...data });
         }
+
         if (data.origen === 'Contpaqi' && data.procesado_por_web === false) {
             crudos.push({ id: doc.id, ...data });
         }

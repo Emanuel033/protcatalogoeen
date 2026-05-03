@@ -1,75 +1,112 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Componente auxiliar para ajustar el zoom cuando cambian los puntos
-const AutoFocusMapa = ({ puntos }) => {
+// Ícono Planta
+const PlantaIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/10397/10397223.png',
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -40],
+});
+
+// Ícono Pedidos (Normal)
+const PedidoIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+});
+
+// Ícono Pedido Seleccionado (Más grande y llamativo)
+const PedidoSeleccionadoIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png',
+  iconSize: [45, 45],
+  iconAnchor: [22.5, 45],
+  popupAnchor: [0, -45],
+  className: 'drop-shadow-xl animate-bounce'
+});
+
+// Componente para auto-centrar el mapa según el pedido seleccionado
+const MapController = ({ pedidoSeleccionado, sidebarAbierto }) => {
   const map = useMap();
+  
+  // Arregla el problema del área gris al colapsar el sidebar
   useEffect(() => {
-    if (puntos && puntos.length > 0) {
-      // Calculamos los límites de la ruta para hacer un "fitBounds"
-      const bounds = puntos.map(p => [p.lat, p.lng]);
-      map.fitBounds(bounds, { padding: [50, 50] });
+    setTimeout(() => { map.invalidateSize(); }, 300);
+  }, [sidebarAbierto, map]);
+
+  useEffect(() => {
+    if (pedidoSeleccionado?.coordenadas?.lat) {
+      map.flyTo([pedidoSeleccionado.coordenadas.lat, pedidoSeleccionado.coordenadas.lng], 14, { duration: 1.5 });
     }
-  }, [puntos, map]);
+  }, [pedidoSeleccionado, map]);
+  
   return null;
 };
 
-const MapaLogistico = ({ pedidoSeleccionado }) => {
-  const [rutaOSRM, setRutaOSRM] = useState([]);
-
-  // Simulamos la llamada a tu API de OSRM cuando seleccionas un pedido
-  useEffect(() => {
-    if (pedidoSeleccionado && pedidoSeleccionado.paradas) {
-      // Aquí harías tu fetch() a la URL de OSRM que ya tienes armada en tu Vanilla JS
-      // fetch(`http://router.project-osrm.org/route/v1/driving/...`)
-      
-      // Mock de coordenadas devueltas por OSRM
-      const coordenadasMock = [
-        [25.6866, -100.3161], // MTY Centro
-        [25.7000, -100.3000], // Punto B
-        [25.7200, -100.2800]  // Punto C
-      ];
-      setRutaOSRM(coordenadasMock);
-    } else {
-      setRutaOSRM([]);
-    }
-  }, [pedidoSeleccionado]);
+const MapaLogistico = ({ pedidos = [], pedidoSeleccionado, setViajeSeleccionado, sidebarAbierto }) => {
+  const PLANTA_COORDS = [25.6866, -100.3161]; 
 
   return (
-    <div className="h-full w-full rounded-lg overflow-hidden shadow-inner border border-gray-200 z-0">
+    <div className="w-full h-full bg-slate-200 z-0 relative">
       <MapContainer 
-        center={[25.6866, -100.3161]} // Coordenadas por defecto (Monterrey)
-        zoom={12} 
-        style={{ height: '100%', width: '100%' }}
+        center={PLANTA_COORDS} 
+        zoom={11} 
+        style={{ width: '100%', height: '100%' }}
+        zoomControl={false} // Lo desactivamos aquí para posicionarlo manualmente
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+        <ZoomControl position="topright" /> {/* Botones de zoom arriba a la derecha */}
         
-        {/* Dibujamos la línea de la ruta */}
-        {rutaOSRM.length > 0 && (
-          <Polyline 
-            positions={rutaOSRM} 
-            color="#2563eb" // blue-600 de Tailwind
-            weight={5} 
-            opacity={0.8} 
-          />
-        )}
+        <MapController pedidoSeleccionado={pedidoSeleccionado} sidebarAbierto={sidebarAbierto} />
 
-        {/* Marcadores de cada parada */}
-        {pedidoSeleccionado?.paradas?.map((parada, index) => (
-          <Marker key={parada.id} position={[parada.lat, parada.lng]}>
-            <Popup>
-              <strong>Parada {index + 1}</strong><br/>
-              {parada.direccion}
-            </Popup>
-          </Marker>
-        ))}
+        {/* PIN DE PLANTA EEN */}
+        <Marker position={PLANTA_COORDS} icon={PlantaIcon}>
+          <Popup className="font-sans">
+            <div className="text-center font-black text-slate-800">
+              <i className="fas fa-industry text-blue-600 mb-1 text-lg"></i>
+              <p className="m-0 text-xs uppercase tracking-wider">Planta EEN</p>
+            </div>
+          </Popup>
+        </Marker>
 
-        {/* Ajusta la cámara automáticamente */}
-        <AutoFocusMapa puntos={pedidoSeleccionado?.paradas} />
+        {/* PINES DE LOS PEDIDOS FILTRADOS */}
+        {pedidos.map(pedido => {
+          if (!pedido.coordenadas?.lat || !pedido.coordenadas?.lng) return null;
+          
+          const isSelected = pedidoSeleccionado?.id === pedido.id;
+          
+          return (
+            <Marker 
+              key={pedido.id} 
+              position={[pedido.coordenadas.lat, pedido.coordenadas.lng]} 
+              icon={isSelected ? PedidoSeleccionadoIcon : PedidoIcon}
+              eventHandlers={{
+                click: () => {
+                  if (setViajeSeleccionado) setViajeSeleccionado(pedido);
+                },
+              }}
+            >
+              <Popup>
+                <div className="font-sans min-w-[150px]">
+                  <p className="font-black text-xs text-slate-800 m-0 mb-1 truncate max-w-[200px]">
+                    {pedido.cliente_nombre}
+                  </p>
+                  <p className="text-[10px] text-slate-500 m-0 leading-tight">
+                    {pedido.direccion}
+                  </p>
+                  <div className="mt-2 text-center">
+                    <span className="bg-slate-800 text-white text-[9px] font-bold px-2 py-1 rounded">
+                      {pedido.folio_pedido || 'S/F'}
+                    </span>
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
