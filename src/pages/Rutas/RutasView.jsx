@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-//import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
-// Importamos directamente de la carpeta context que está al mismo nivel
-import { useLogistica } from './context/LogisticaContext';
-import SidebarDispatcher from './components/SidebarDispatcher';
+import { useLogistica } from '../../context/LogisticaContext'; // Ajusta la ruta si es necesario
+import SidebarDispatcher from './SidebarDispatcher';
+import DetalleDrawer from './DetalleDrawer';
+import MapaLogistico from './MapaLogistico';
 
 const RutasView = () => {
   const { pedidos } = useLogistica();
   const [filtro, setFiltro] = useState('activos');
   const [viajeSeleccionado, setViajeSeleccionado] = useState(null);
-  
-  // Coordenadas Planta EEN Monterrey
-  const centerPosition = [25.689804, -100.312066];
 
   const pedidosFiltrados = pedidos.filter(p => {
     if (filtro === 'todos') return true;
@@ -23,7 +20,7 @@ const RutasView = () => {
   return (
     <div className="relative h-screen w-full bg-slate-100 overflow-hidden flex font-sans">
       
-      {/* Panel Lateral */}
+      {/* Panel Lateral Izquierdo */}
       <SidebarDispatcher 
         pedidosFiltrados={pedidosFiltrados} 
         filtro={filtro}
@@ -32,35 +29,19 @@ const RutasView = () => {
         setViajeSeleccionado={setViajeSeleccionado}
       />
 
-      {/* Mapa */}
-      <div className="absolute inset-0 z-0">
-        <MapContainer center={centerPosition} zoom={13} zoomControl={false} className="h-full w-full">
-          <TileLayer 
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" 
-          />
-          <ZoomControl position="bottomright" />
-          
-          {/* Marcador Planta EEN */}
-          <Marker position={centerPosition}>
-            <Popup><div className="font-bold">Planta EEN</div></Popup>
-          </Marker>
+      {/* Panel Lateral Derecho (Detalles) */}
+      <DetalleDrawer 
+        pedidoSeleccionado={viajeSeleccionado}
+        onClose={() => setViajeSeleccionado(null)}
+      />
 
-          {/* Marcadores de Pedidos */}
-          {pedidosFiltrados.map(p => (
-            p.coordenadas && p.coordenadas.lat ? (
-              <Marker 
-                key={p.id} 
-                position={[p.coordenadas.lat, p.coordenadas.lng]}
-                eventHandlers={{ click: () => setViajeSeleccionado(p) }}
-              >
-                <Popup>
-                  <div className="font-bold text-slate-800">{p.cliente_nombre}</div>
-                  <div className="text-[10px] text-slate-500">{p.destino_alias || 'Destino'}</div>
-                </Popup>
-              </Marker>
-            ) : null
-          ))}
-        </MapContainer>
+      {/* Mapa Principal */}
+      <div className="absolute inset-0 z-0">
+        <MapaLogistico 
+          pedidosFiltrados={pedidosFiltrados}
+          pedidoSeleccionado={viajeSeleccionado}
+          onSelectPedido={setViajeSeleccionado}
+        />
       </div>
 
     </div>
