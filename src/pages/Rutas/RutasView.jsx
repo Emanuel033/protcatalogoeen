@@ -49,10 +49,10 @@ const RutasView = () => {
   });
   
   return (
-    <div className="relative h-screen w-full bg-slate-100 overflow-hidden flex font-sans">
+    <div className="relative h-screen w-full  overflow-hidden flex font-sans">
       
       {/* SIDEBAR CON LÓGICA DE CIERRE */}
-      <div className={`transition-all duration-300 ease-in-out h-full z-20 ${sidebarAbierto ? 'w-[350px] lg:w-[380px]' : 'w-0 -translate-x-full'}`}>
+      <div className={`absolute left-0 top-0 h-full z-20 transition-all duration-500 ease-in-out ${sidebarAbierto ? 'w-[350px] lg:w-[380px]' : 'w-0 -translate-x-full'}`}>
           <SidebarDispatcher 
             pedidosFiltrados={pedidosFiltrados} 
             filtro={filtro}
@@ -72,7 +72,7 @@ const RutasView = () => {
       {!sidebarAbierto && (
           <button 
             onClick={() => setSidebarAbierto(true)}
-            className="absolute top-4 left-4 z-30 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-slate-600 hover:text-blue-600 transition-all border border-slate-200"
+            className="absolute top-4 left-4 z-30 w-12 h-12 bg-white/80 backdrop-blur-md shadow-lg rounded-full flex items-center justify-center text-slate-600 hover:text-blue-600 transition-all border border-white"
           >
             <i className="fas fa-bars"></i>
           </button>
@@ -84,7 +84,7 @@ const RutasView = () => {
         onEdit={(pedido) => { setOrdenAEditar(pedido); setModalOrdenAbierto(true); }}
       />
 
-      <div className="flex-1 h-full z-0 relative">
+      <div className="absolute inset-0 z-0">
         <MapaLogistico 
             pedidos={pedidosFiltrados} 
             pedidoSeleccionado={viajeSeleccionado} 

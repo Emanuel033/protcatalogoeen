@@ -35,7 +35,7 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
       <div className="flex justify-between items-start mb-2">
         <div className="flex gap-1.5 items-center">
             {esFallido && <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
-            {esPendiente && <span className={`${isActive ? 'bg-black text-white-800' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
+            {esPendiente && <span className={`${isActive ? 'bg-slate-800 text-white' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
             {esRampa && <span className="bg-indigo-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-dolly"></i> En Rampa</span>}
             {esEnRuta && <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-truck-fast"></i> En Ruta</span>}
             {esEntregado && <span className="bg-emerald-500 text-black px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-check-double"></i> Entregado</span>}

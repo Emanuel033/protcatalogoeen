@@ -43,7 +43,7 @@ const SidebarDispatcher = ({
       return Object.values(grupos).map((grupo, index) => {
         if (grupo.length > 1) {
           return (
-            <div key={`grupo-${index}`} className="border-[1.5px] border-dashed border-blue-400/50 bg-blue-50/30 rounded-2xl p-2 pb-2 mb-3 pt-8 relative shadow-sm">
+            <div key={`grupo-${index}`} className="border-[1.5px] border-dashed border-white/30 bg-white/5 backdrop-blur-sm rounded-2xl p-2 pb-2 mb-3 pt-8 relative">
               <div className="absolute top-2 left-3 text-[9px] font-black text-blue-800 flex items-center gap-1.5 uppercase tracking-wide">
                 <i className="fas fa-map-marker-alt"></i> {grupo.length} pedidos al mismo destino
               </div>
@@ -77,7 +77,7 @@ const SidebarDispatcher = ({
 
   return (
     // CONTENEDOR PRINCIPAL: Cristal blanco/claro
-    <div className="w-full h-full bg-white/5 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] flex flex-col border-r border-white/10 overflow-hidden rounded-r-3xl">
+    <div className="w-full h-full bg-white/10 backdrop-blur-xl shadow-2xl flex flex-col border-r border-white/20 overflow-hidden rounded-r-3xl">
       
       <div className="p-4 border-b border-white/10 shrink-0 relative z-20 bg-transparent">
         <div className="flex justify-between items-start mb-3">
@@ -97,7 +97,7 @@ const SidebarDispatcher = ({
         <div className="flex gap-2 items-center mb-4">
           <div className="relative flex-1">
             <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" placeholder="Buscar cliente, folio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/60 border border-white/50 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-medium text-slate-800 placeholder-slate-400 shadow-sm backdrop-blur-sm" />
+            <input type="text" placeholder="Buscar cliente, folio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/20 border border-white/30 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-medium text-slate-800 placeholder-slate-400 shadow-sm backdrop-blur-sm" />
           </div>
           <button onClick={onOpenAdmin} className="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition shadow-md shrink-0"><i className="fas fa-cog"></i></button>
           <button onClick={onOpenBitacora} className="w-9 h-9 rounded-xl bg-indigo-50/80 backdrop-blur-sm text-indigo-700 border border-indigo-200 flex items-center justify-center hover:bg-indigo-100 transition shadow-sm shrink-0"><i className="fas fa-book"></i></button>
