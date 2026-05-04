@@ -279,7 +279,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-slate-900/02 z-[35] transition-opacity lg:hidden" onClick={onClose}></div>
+      <div className="fixed inset-0 bg-slate-900/2 z-[35] transition-opacity lg:hidden" onClick={onClose}></div>
 
       {alerta && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[60] bg-indigo-600 text-white px-6 py-2 rounded-full shadow-2xl font-black text-xs flex items-center gap-2 animate-bounce">
