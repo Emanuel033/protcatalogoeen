@@ -15,13 +15,10 @@ const SidebarDispatcher = ({
   onToggleSidebar 
 }) => {
 
-  // Lógica para agrupar pedidos visualmente si van al mismo destino (Solo en "pendiente")
   const contenidoSidebar = useMemo(() => {
     if (pedidosFiltrados.length === 0) return [];
 
-   // Antes: if (filtro === 'pendiente') {
-if (filtro === 'pendiente' || filtro === 'activos') {
-      // Agrupamos por dirección
+    if (filtro === 'pendiente' || filtro === 'activos') {
       const grupos = {};
       pedidosFiltrados.forEach(p => {
         const key = p.direccion || `sin_direccion_${p.id}`;
@@ -30,7 +27,6 @@ if (filtro === 'pendiente' || filtro === 'activos') {
       });
 
       return Object.values(grupos).map((grupo, index) => {
-        // Si hay más de un pedido al mismo destino, los encerramos en el recuadro punteado
         if (grupo.length > 1) {
           return (
             <div key={`grupo-${index}`} className="border-[1.5px] border-dashed border-indigo-400 bg-indigo-50/20 rounded-2xl p-2 pb-2 mb-3 pt-8 relative shadow-sm">
@@ -39,40 +35,25 @@ if (filtro === 'pendiente' || filtro === 'activos') {
               </div>
               <div className="space-y-2">
                 {grupo.map(pedido => (
-                  <PedidoCard 
-                    key={pedido.id} 
-                    pedido={pedido} 
-                    isActive={viajeSeleccionado?.id === pedido.id} 
-                    onClick={() => setViajeSeleccionado(pedido)} 
-                  />
+                  <PedidoCard key={pedido.id} pedido={pedido} isActive={viajeSeleccionado?.id === pedido.id} onClick={() => setViajeSeleccionado(pedido)} />
                 ))}
               </div>
             </div>
           );
         } else {
-          // Si va solo, se renderiza normal
           const pedido = grupo[0];
           return (
             <div key={pedido.id} className="mb-3">
-              <PedidoCard 
-                pedido={pedido} 
-                isActive={viajeSeleccionado?.id === pedido.id} 
-                onClick={() => setViajeSeleccionado(pedido)} 
-              />
+              <PedidoCard pedido={pedido} isActive={viajeSeleccionado?.id === pedido.id} onClick={() => setViajeSeleccionado(pedido)} />
             </div>
           );
         }
       });
     }
 
-    // Para los demás filtros (En Curso, Rampa, etc.), renderizamos normal sin agrupar
     return pedidosFiltrados.map(pedido => (
       <div key={pedido.id} className="mb-3">
-        <PedidoCard 
-          pedido={pedido} 
-          isActive={viajeSeleccionado?.id === pedido.id} 
-          onClick={() => setViajeSeleccionado(pedido)} 
-        />
+        <PedidoCard pedido={pedido} isActive={viajeSeleccionado?.id === pedido.id} onClick={() => setViajeSeleccionado(pedido)} />
       </div>
     ));
   }, [pedidosFiltrados, filtro, viajeSeleccionado, setViajeSeleccionado]);
@@ -106,12 +87,14 @@ if (filtro === 'pendiente' || filtro === 'activos') {
           <button onClick={onOpenForm} className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition shadow-md shadow-blue-500/30 shrink-0"><i className="fas fa-plus"></i></button>
         </div>
 
+      
+        {/* BOTONES DE FILTRO CON ÍCONOS Y CRISTAL ESMERILADO AZUL */}
         <div className="flex gap-1 overflow-x-auto custom-scroll pb-1">
-           <button onClick={() => setFiltro('activos')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${filtro === 'activos' ? 'bg-slate-800 text-white shadow-md' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}>En Curso</button>
-           <button onClick={() => setFiltro('pendiente')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${filtro === 'pendiente' ? 'bg-slate-800 text-white shadow-md' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}>Por Asignar</button>
-           <button onClick={() => setFiltro('rampa')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${filtro === 'rampa' ? 'bg-slate-800 text-white shadow-md' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}>En Rampa</button>
-           <button onClick={() => setFiltro('entregado')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${filtro === 'entregado' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}>Entregados</button>
-           <button onClick={() => setFiltro('fallido')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${filtro === 'fallido' ? 'bg-red-500 text-white shadow-md shadow-red-500/20' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}>Fallas</button>
+           <button onClick={() => setFiltro('activos')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'activos' ? 'bg-blue-600/80 backdrop-blur-md border border-blue-400/50 text-white shadow-md shadow-blue-500/30' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-truck-moving text-[10px]"></i> En Curso</button>
+           <button onClick={() => setFiltro('pendiente')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'pendiente' ? 'bg-blue-600/80 backdrop-blur-md border border-blue-400/50 text-white shadow-md shadow-blue-500/30' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-clock text-[10px]"></i> Por Asignar</button>
+           <button onClick={() => setFiltro('rampa')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'rampa' ? 'bg-blue-600/80 backdrop-blur-md border border-blue-400/50 text-white shadow-md shadow-blue-500/30' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-dolly text-[10px]"></i> En Rampa</button>
+           <button onClick={() => setFiltro('entregado')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'entregado' ? 'bg-emerald-600/80 backdrop-blur-md border border-emerald-500/50 text-white shadow-md shadow-emerald-500/20' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-check-double text-[10px]"></i> Entregados</button>
+           <button onClick={() => setFiltro('fallido')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'fallido' ? 'bg-red-500/80 backdrop-blur-md border border-red-400/50 text-white shadow-md shadow-red-500/20' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-exclamation-triangle text-[10px]"></i> Fallas</button>
         </div>
       </div>
 
