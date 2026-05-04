@@ -29,9 +29,9 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
 
   return (
     <div 
-      onClick={onClick}
-      className={`relative p-4 rounded-2xl transition-all duration-300 cursor-pointer border ${fondoTarjeta}`}
-    >
+  onClick={onClick}
+  className={`relative p-4 rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 bg-transparent backdrop-blur-xl shadow-xl ${fondoTarjeta}`}
+>
       <div className="flex justify-between items-start mb-2">
         <div className="flex gap-1.5 items-center">
             {esFallido && <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
