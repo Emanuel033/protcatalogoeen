@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react'; // <-- Importamos useRef
 import PedidoCard from './PedidoCard'; 
 
 const SidebarDispatcher = ({ 
@@ -15,10 +15,32 @@ const SidebarDispatcher = ({
   onToggleSidebar 
 }) => {
 
+  const sidebarContainerRef = useRef(null); // <-- REF PARA EL CONTENEDOR PRINCIPAL
+
+  // LÓGICA DE AUTO-CENTRADO (AQUÍ ESTÁ LA MAGIA)
+  useEffect(() => {
+    // Si hay un viaje seleccionado y el contenedor de la sidebar existe
+    if (viajeSeleccionado && sidebarContainerRef.current) {
+        // Buscamos el elemento DOM exacto de la tarjeta seleccionada (usando un ID dinámico)
+        const selectedCardElement = sidebarContainerRef.current.querySelector(`#pedido-card-${viajeSeleccionado.id}`);
+        
+        if (selectedCardElement) {
+            // Hacemos el scroll suave y centrado
+            selectedCardElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center', // Lo centra verticalmente en el scroll
+                inline: 'nearest' 
+            });
+        }
+    }
+  }, [viajeSeleccionado]); // Se ejecuta cada que cambia el pedido seleccionado
+
+
   const contenidoSidebar = useMemo(() => {
     if (pedidosFiltrados.length === 0) return [];
 
-    if (filtro === 'pendiente' || filtro === 'activos') {
+    // Lógica de agrupado para Pendientes
+    if (filtro === 'pendiente') {
       const grupos = {};
       pedidosFiltrados.forEach(p => {
         const key = p.direccion || `sin_direccion_${p.id}`;
@@ -35,7 +57,10 @@ const SidebarDispatcher = ({
               </div>
               <div className="space-y-2">
                 {grupo.map(pedido => (
-                  <PedidoCard key={pedido.id} pedido={pedido} isActive={viajeSeleccionado?.id === pedido.id} onClick={() => setViajeSeleccionado(pedido)} />
+                  // Le agregamos un ID único a cada tarjeta para que el scroll lo encuentre
+                  <div key={pedido.id} id={`pedido-card-${pedido.id}`}>
+                      <PedidoCard pedido={pedido} isActive={viajeSeleccionado?.id === pedido.id} onClick={() => setViajeSeleccionado(pedido)} />
+                  </div>
                 ))}
               </div>
             </div>
@@ -43,7 +68,8 @@ const SidebarDispatcher = ({
         } else {
           const pedido = grupo[0];
           return (
-            <div key={pedido.id} className="mb-3">
+            // ID único para auto-centrado
+            <div key={pedido.id} id={`pedido-card-${pedido.id}`} className="mb-3">
               <PedidoCard pedido={pedido} isActive={viajeSeleccionado?.id === pedido.id} onClick={() => setViajeSeleccionado(pedido)} />
             </div>
           );
@@ -51,8 +77,10 @@ const SidebarDispatcher = ({
       });
     }
 
+    // Listado normal para los demás filtros
     return pedidosFiltrados.map(pedido => (
-      <div key={pedido.id} className="mb-3">
+      // ID único para auto-centrado
+      <div key={pedido.id} id={`pedido-card-${pedido.id}`} className="mb-3">
         <PedidoCard pedido={pedido} isActive={viajeSeleccionado?.id === pedido.id} onClick={() => setViajeSeleccionado(pedido)} />
       </div>
     ));
@@ -60,7 +88,7 @@ const SidebarDispatcher = ({
 
 
   return (
-    <div className="w-full h-full bg-white/85 backdrop-blur-xl flex flex-col border-r border-white/50 shadow-2xl overflow-hidden">
+    <div className="w-full h-full bg-white/60 backdrop-blur-xl flex flex-col border-r border-white/50 shadow-2xl overflow-hidden rounded-r-3xl">
       
       <div className="p-4 border-b border-slate-200/50 shrink-0 relative z-20 bg-white/40">
         <div className="flex justify-between items-start mb-3">
@@ -87,18 +115,19 @@ const SidebarDispatcher = ({
           <button onClick={onOpenForm} className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition shadow-md shadow-blue-500/30 shrink-0"><i className="fas fa-plus"></i></button>
         </div>
 
-      
-        {/* BOTONES DE FILTRO CON ÍCONOS Y CRISTAL ESMERILADO AZUL */}
+        {/* BOTONES DE FILTRO CON CRISTAL ESMERILADO Y "EN RUTA" RESTAURADO */}
         <div className="flex gap-1 overflow-x-auto custom-scroll pb-1">
-           <button onClick={() => setFiltro('activos')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'activos' ? 'bg-blue-600/80 backdrop-blur-md border border-blue-400/50 text-white shadow-md shadow-blue-500/30' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-truck-moving text-[10px]"></i> En Curso</button>
-           <button onClick={() => setFiltro('pendiente')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'pendiente' ? 'bg-blue-600/80 backdrop-blur-md border border-blue-400/50 text-white shadow-md shadow-blue-500/30' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-clock text-[10px]"></i> Por Asignar</button>
-           <button onClick={() => setFiltro('rampa')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'rampa' ? 'bg-blue-600/80 backdrop-blur-md border border-blue-400/50 text-white shadow-md shadow-blue-500/30' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-dolly text-[10px]"></i> En Rampa</button>
-           <button onClick={() => setFiltro('entregado')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'entregado' ? 'bg-emerald-600/80 backdrop-blur-md border border-emerald-500/50 text-white shadow-md shadow-emerald-500/20' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-check-double text-[10px]"></i> Entregados</button>
-           <button onClick={() => setFiltro('fallido')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'fallido' ? 'bg-red-500/80 backdrop-blur-md border border-red-400/50 text-white shadow-md shadow-red-500/20' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white'}`}><i className="fas fa-exclamation-triangle text-[10px]"></i> Fallas</button>
+           {/* 'activos' ahora dice "En Ruta" y tiene el icono de camión en movimiento */}
+           <button onClick={() => setFiltro('activos')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'activos' ? 'bg-blue-600/50 backdrop-blur-md border border-blue-400/40 text-white shadow-md shadow-blue-500/20' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white/80'}`}><i className="fas fa-truck-moving text-[10px]"></i> En Ruta</button>
+           <button onClick={() => setFiltro('pendiente')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'pendiente' ? 'bg-white/90 backdrop-blur-md border border-slate-300 text-slate-800 shadow-sm' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white/80'}`}><i className="fas fa-clock text-[10px]"></i> Por Asignar</button>
+           <button onClick={() => setFiltro('rampa')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'rampa' ? 'bg-white/90 backdrop-blur-md border border-slate-300 text-slate-800 shadow-sm' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white/80'}`}><i className="fas fa-dolly text-[10px]"></i> En Rampa</button>
+           <button onClick={() => setFiltro('entregado')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'entregado' ? 'bg-emerald-600/50 backdrop-blur-md border border-emerald-400/40 text-white shadow-md shadow-emerald-500/10' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white/80'}`}><i className="fas fa-check-double text-[10px]"></i> Entregados</button>
+           <button onClick={() => setFiltro('fallido')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'fallido' ? 'bg-red-500/50 backdrop-blur-md border border-red-400/40 text-white shadow-md shadow-red-500/10' : 'bg-white/60 text-slate-600 border border-slate-200/50 hover:bg-white/80'}`}><i className="fas fa-exclamation-triangle text-[10px]"></i> Fallas</button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 custom-scroll">
+      {/* AGREGAMOS LA REF AQUÍ */}
+      <div ref={sidebarContainerRef} className="flex-1 overflow-y-auto p-3 custom-scroll space-y-3">
         {contenidoSidebar}
         
         {pedidosFiltrados.length === 0 && (
