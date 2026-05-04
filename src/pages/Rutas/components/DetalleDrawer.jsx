@@ -279,7 +279,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-slate-900/2 z-[35] transition-opacity lg:hidden" onClick={onClose}></div>
+      <div className="fixed inset-0 bg-slate-900/10 z-[35] transition-opacity lg:hidden" onClick={onClose}></div>
 
       {alerta && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[60] bg-indigo-600 text-white px-6 py-2 rounded-full shadow-2xl font-black text-xs flex items-center gap-2 animate-bounce">
@@ -290,7 +290,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/60 backdrop-blur-2xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/50 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
     
       {/* HEADER CON EFECTO CRISTAL AZUL */}
-        <div className="bg-blue-600/60 backdrop-blur-2xl border-b border-blue-400/50 p-4 shrink-0 relative shadow-lg shadow-blue-500/20">
+        <div className="bg-blue-600/90 backdrop-blur-2xl border-b border-blue-400/50 p-4 shrink-0 relative shadow-lg shadow-blue-500/20">
           <button onClick={onClose} className="absolute top-4 right-4 text-blue-200 hover:text-white transition bg-white/10 w-7 h-7 rounded-full flex items-center justify-center"><i className="fas fa-times text-xs"></i></button>
           
           <div className="flex justify-between items-start mb-1 pr-8">
