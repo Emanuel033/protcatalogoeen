@@ -132,9 +132,150 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       return <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[9px] font-black border border-amber-200">POR ASIGNAR</span>;
   };
 
-  const handleOptimizar = async () => { /* ... (Igual que antes) ... */ };
-  const handleEliminar = async () => { /* ... (Igual que antes) ... */ };
-  const cambiarEstadoLogistico = async (accion, masivo = false) => { /* ... (Igual que antes) ... */ };
+  const handleOptimizar = async () => {
+     setAlerta("Calculando la mejor ruta...");
+     const PLANTA = { lat: 25.6866, lng: -100.3161 };
+
+     const calcularDistancia = (coord1, coord2) => {
+         if (!coord1 || !coord2 || isNaN(coord1.lat) || isNaN(coord2.lat)) return 9999;
+         const R = 6371; 
+         const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
+         const dLon = (coord2.lng - coord1.lng) * Math.PI / 180;
+         const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                   Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
+                   Math.sin(dLon/2) * Math.sin(dLon/2);
+         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+         return R * c;
+     };
+
+     const destinos = paradasRuta.filter(p => p.tipo === 'destino');
+     if (destinos.length <= 1) {
+         setAlerta("No hay suficientes paradas para optimizar.");
+         setTimeout(() => setAlerta(null), 2000);
+         return;
+     }
+
+     let urgentes = destinos.filter(p => p.data?.urgente);
+     let normales = destinos.filter(p => !p.data?.urgente);
+
+     const ordenarVecinoMasCercano = (nodos, puntoPartida) => {
+         let noVisitados = [...nodos];
+         let rutaOrdenada = [];
+         let actual = puntoPartida;
+
+         while (noVisitados.length > 0) {
+             let indiceMasCercano = 0;
+             let distanciaMinima = Infinity;
+             for (let i = 0; i < noVisitados.length; i++) {
+                 let dist = calcularDistancia(actual, noVisitados[i].data.coordenadas);
+                 if (dist < distanciaMinima) {
+                     distanciaMinima = dist;
+                     indiceMasCercano = i;
+                 }
+             }
+             let siguienteNodo = noVisitados.splice(indiceMasCercano, 1)[0];
+             rutaOrdenada.push(siguienteNodo);
+             actual = siguienteNodo.data.coordenadas;
+         }
+         return rutaOrdenada;
+     };
+
+     let rutaFinalUrgentes = ordenarVecinoMasCercano(urgentes, PLANTA);
+     let ultimoPunto = rutaFinalUrgentes.length > 0 ? rutaFinalUrgentes[rutaFinalUrgentes.length - 1].data.coordenadas : PLANTA;
+     let rutaFinalNormales = ordenarVecinoMasCercano(normales, ultimoPunto);
+     const destinosOrdenados = [...rutaFinalUrgentes, ...rutaFinalNormales];
+
+     try {
+         for (let i = 0; i < destinosOrdenados.length; i++) {
+             const parada = destinosOrdenados[i];
+             await updateDoc(doc(db, 'rutas_logistica', parada.id), {
+                 orden_ruta: i + 1, 
+                 fecha_actualizacion: serverTimestamp()
+             });
+         }
+         setParadasRuta([
+             { id: 'planta', nombre: 'Planta EEN (Salida)', tipo: 'origen' },
+             ...destinosOrdenados,
+             { id: 'planta_retorno', nombre: 'Retorno a Base', tipo: 'retorno' }
+         ]);
+         setAlerta("¡Ruta optimizada con éxito!");
+     } catch (error) {
+         console.error(error);
+         setAlerta("Error al guardar la optimización.");
+     }
+     setTimeout(() => setAlerta(null), 3000);
+  };
+
+  const handleEliminar = async () => {
+    if (window.confirm("¿Estás seguro de eliminar esta orden? Esta acción no se puede deshacer.")) {
+        try {
+            await deleteDoc(doc(db, 'rutas_logistica', pedidoSeleccionado.id));
+            onClose();
+        } catch (e) { console.error(e); setAlerta("Error al eliminar el pedido."); }
+    }
+  };
+
+  const cambiarEstadoLogistico = async (accion, masivo = false) => {
+    try {
+        let payload = { fecha_actualizacion: serverTimestamp() };
+        
+        if (accion === 'rampa') {
+            if (!vehiculoId) return setAlerta("Falta seleccionar el vehículo");
+            if (!choferId) return setAlerta("Falta seleccionar el operador");
+            
+            payload.estado = 'camino';
+            payload.fecha_salida = null; 
+            payload.vehiculo_asignado = vehiculoId;
+            payload.chofer_asignado = choferId;
+
+            const idsAProcesar = masivo ? [pedidoSeleccionado.id, ...pedidosMismoDestino.map(p => p.id)] : [pedidoSeleccionado.id];
+            for (const id of idsAProcesar) { await updateDoc(doc(db, 'rutas_logistica', id), payload); }
+            return onClose();
+        } 
+        else if (accion === 'actualizar_asignacion') {
+            if (!vehiculoId || !choferId) return setAlerta("Falta seleccionar unidad u operador");
+            payload.vehiculo_asignado = vehiculoId;
+            payload.chofer_asignado = choferId;
+            setModoEdicionAsignacion(false); 
+        }
+        else if (accion === 'salida') {
+            const loteId = `LOTE-${Date.now()}-${vehiculoId.substring(0,4).toUpperCase()}`;
+            payload.estado = 'camino';
+            payload.fecha_salida = serverTimestamp(); 
+            payload.lote_id = loteId; 
+
+            const companerosEnRampa = pedidos.filter(p => 
+                p.vehiculo_asignado === vehiculoId && 
+                p.chofer_asignado === choferId &&
+                p.estado === 'camino' && !p.fecha_salida
+            );
+
+            for (const p of companerosEnRampa) { 
+                await updateDoc(doc(db, 'rutas_logistica', p.id), payload); 
+            }
+            return onClose();
+        } 
+        else if (accion === 'entregado') {
+            payload.estado = 'entregado';
+            payload.fecha_entrega = serverTimestamp();
+        } else if (accion === 'fallido') {
+            payload.estado = 'fallido';
+        } else if (accion === 'reasignar') {
+            payload.estado = 'pendiente';
+            payload.vehiculo_asignado = null;
+            payload.chofer_asignado = null;
+            payload.fecha_salida = null;
+            payload.motivo_falla = null; 
+            payload.lote_id = null;
+        }
+
+        if (accion !== 'salida') {
+            await updateDoc(doc(db, 'rutas_logistica', pedidoSeleccionado.id), payload);
+        }
+        
+        if(accion === 'entregado' || accion === 'reasignar') onClose(); 
+    } catch (e) { console.error(e); setAlerta("Error al actualizar estado."); }
+  };
 
   return (
     <>
