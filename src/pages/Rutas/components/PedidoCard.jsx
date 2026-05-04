@@ -10,19 +10,19 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
   const esRampa = pedido.estado === 'camino' && !pedido.fecha_salida;
   const esEnRuta = pedido.estado === 'camino' && pedido.fecha_salida;
 
-  // Validaciones para insignias
   const esContpaqi = pedido.origen?.toLowerCase() === 'contpaqi';
   const saldo = parseFloat(pedido.saldo_pendiente || 0);
   const requiereCobro = pedido.requiere_cobro || saldo > 0;
 
+  // ESTILOS IGUALADOS AL TEMA CRISTAL CLARO / AZUL REY
   const fondoTarjeta = isActive 
-    ? 'bg-blue-600/80 backdrop-blur-xl border-blue-400 shadow-lg shadow-blue-500/30 scale-[1.02] z-10' 
-    : 'bg-white/60 backdrop-blur-md border-white/80 shadow-sm hover:shadow-md hover:bg-white/80';
+    ? 'bg-blue-800/60 backdrop-blur-xl border-blue-400 shadow-lg shadow-blue-900/20 scale-[1.02] z-10' 
+    : 'bg-white/40 backdrop-blur-md border-white/50 shadow-sm hover:shadow-md hover:bg-white/60';
     
   const textoPrincipal = isActive ? 'text-white' : 'text-slate-800';
-  const textoSecundario = isActive ? 'text-blue-100' : 'text-slate-500';
-  const textoFolio = isActive ? 'text-blue-200' : 'text-slate-400';
-  const iconoRojo = isActive ? 'text-white/80' : 'text-red-500';
+  const textoSecundario = isActive ? 'text-blue-100' : 'text-slate-600';
+  const textoFolio = isActive ? 'text-blue-200' : 'text-slate-500';
+  const iconoRojo = isActive ? 'text-red-300' : 'text-red-500';
 
   const nombreChofer = choferes.find(c => c.id === pedido.chofer_asignado)?.nombre || 'Chofer';
   const nombreVehiculo = flota.find(f => f.id === pedido.vehiculo_asignado)?.nombre || 'Unidad';
@@ -30,15 +30,15 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className={`relative p-4 rounded-2xl transition-all duration-300 cursor-pointer border-2 ${fondoTarjeta}`}
+      className={`relative p-4 rounded-2xl transition-all duration-300 cursor-pointer border ${fondoTarjeta}`}
     >
       <div className="flex justify-between items-start mb-2">
         <div className="flex gap-1.5 items-center">
-            {esFallido && <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
-            {esPendiente && <span className={`${isActive ? 'bg-white text-blue-800' : 'bg-amber-100 text-amber-700'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
-            {esRampa && <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-dolly"></i> En Rampa</span>}
-            {esEnRuta && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-truck-fast"></i> En Ruta</span>}
-            {esEntregado && <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-check-double"></i> Entregado</span>}
+            {esFallido && <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
+            {esPendiente && <span className={`${isActive ? 'bg-white text-blue-800' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
+            {esRampa && <span className="bg-indigo-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-dolly"></i> En Rampa</span>}
+            {esEnRuta && <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-truck-fast"></i> En Ruta</span>}
+            {esEntregado && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-check-double"></i> Entregado</span>}
         </div>
         <span className={`text-[10px] font-mono font-bold ${textoFolio}`}>{pedido.folio_pedido || 'S/N'}</span>
       </div>
@@ -48,8 +48,8 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
           {pedido.cliente_nombre}
         </h4>
         {esContpaqi && <span className="bg-slate-700 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm">CONTPAQI</span>}
-        {requiereCobro && <span className="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm"><i className="fas fa-exclamation-circle"></i> Adeudo</span>}
-        {pedido.urgente && <span className="bg-red-500 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm"><i className="fas fa-fire-alt"></i> Urgente</span>}
+        {requiereCobro && <span className="bg-red-500 text-white border border-red-400 px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm"><i className="fas fa-exclamation-circle"></i> Adeudo</span>}
+        {pedido.urgente && <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm"><i className="fas fa-fire-alt"></i> Urgente</span>}
       </div>
       
       <p className={`text-[10px] font-medium leading-snug flex items-start gap-1 transition-colors ${textoSecundario}`}>
@@ -58,11 +58,11 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
       </p>
 
       {(pedido.vehiculo_asignado && !esPendiente) && (
-        <div className={`mt-3 pt-2 border-t flex justify-between items-center text-[9px] font-bold ${isActive ? 'border-blue-500 text-blue-100' : 'border-slate-200 text-slate-500'}`}>
-          <span className={`${isActive ? 'bg-blue-700/50' : 'bg-slate-100'} px-1.5 py-0.5 rounded flex items-center gap-1`}>
+        <div className={`mt-3 pt-2 border-t flex justify-between items-center text-[9px] font-bold ${isActive ? 'border-blue-400/50 text-blue-100' : 'border-white/50 text-slate-600'}`}>
+          <span className={`${isActive ? 'bg-blue-900/40' : 'bg-white/50'} px-1.5 py-0.5 rounded flex items-center gap-1 backdrop-blur-sm border ${isActive ? 'border-blue-400/30' : 'border-white'}`}>
             <i className={`fas fa-truck ${isActive ? 'text-blue-300' : 'text-slate-400'}`}></i> {nombreVehiculo}
           </span>
-          <span className={`${isActive ? 'text-white' : 'text-blue-600'} flex items-center gap-1`}>
+          <span className={`${isActive ? 'text-white' : 'text-blue-700'} flex items-center gap-1`}>
             <i className="fas fa-user-circle"></i> {nombreChofer}
           </span>
         </div>

@@ -44,7 +44,7 @@ const RutasView = () => {
     if (filtro === 'todos') return true;
     if (filtro === 'activos') return p.estado === 'pendiente' || p.estado === 'camino';
     if (filtro === 'rampa') return p.estado === 'camino' && !p.fecha_salida;
-    if (filtro === 'camino') return p.estado === 'camino' && p.fecha_salida;
+    if (filtro === 'ruta') return p.estado === 'camino' && p.fecha_salida;
     return p.estado === filtro;
   });
   

@@ -20,7 +20,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
   const [distanciaRuta, setDistanciaRuta] = useState('0.0');
   const [tiempoRuta, setTiempoRuta] = useState('0');
 
-  // Estados para los acordeones
   const [seccionInfo, setSeccionInfo] = useState(true);
   const [seccionTrayecto, setSeccionTrayecto] = useState(true);
 
@@ -30,7 +29,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       setChoferId(pedidoSeleccionado.chofer_asignado || '');
       setAlerta(null);
       setModoEdicionAsignacion(false); 
-      
       setSeccionInfo(true);
       setSeccionTrayecto(pedidoSeleccionado.estado !== 'pendiente');
       
@@ -111,7 +109,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
   const esFallido = pedidoSeleccionado.estado === 'fallido';
   const esEntregado = pedidoSeleccionado.estado === 'entregado';
 
-  // Validaciones
   const esContpaqi = pedidoSeleccionado.origen?.toLowerCase() === 'contpaqi';
   const saldo = parseFloat(pedidoSeleccionado.saldo_pendiente || 0);
   const requiereCobro = pedidoSeleccionado.requiere_cobro || saldo > 0;
@@ -124,16 +121,158 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
   const tipoEnvio = getTipoEnvio();
 
   const getBadgeEstado = () => {
-      if (esFallido) return <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-[9px] font-black border border-red-200"><i className="fas fa-exclamation-triangle"></i> PROBLEMA</span>;
-      if (esEnRuta) return <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[9px] font-black border border-blue-200"><i className="fas fa-truck-fast"></i> EN RUTA</span>;
-      if (esRampa) return <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-[9px] font-black border border-indigo-200"><i className="fas fa-dolly"></i> EN RAMPA</span>;
-      if (esEntregado) return <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[9px] font-black border border-emerald-200"><i className="fas fa-check-double"></i> ENTREGADO</span>;
-      return <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[9px] font-black border border-amber-200">POR ASIGNAR</span>;
+      if (esFallido) return <span className="bg-red-500 text-white px-2 py-1 rounded text-[9px] font-black border border-red-400"><i className="fas fa-exclamation-triangle"></i> PROBLEMA</span>;
+      if (esEnRuta) return <span className="bg-blue-500 text-white px-2 py-1 rounded text-[9px] font-black border border-blue-400"><i className="fas fa-truck-fast"></i> EN RUTA</span>;
+      if (esRampa) return <span className="bg-indigo-500 text-white px-2 py-1 rounded text-[9px] font-black border border-indigo-400"><i className="fas fa-dolly"></i> EN RAMPA</span>;
+      if (esEntregado) return <span className="bg-emerald-500 text-white px-2 py-1 rounded text-[9px] font-black border border-emerald-400"><i className="fas fa-check-double"></i> ENTREGADO</span>;
+      return <span className="bg-slate-800 text-white px-2 py-1 rounded text-[9px] font-black border border-slate-700">POR ASIGNAR</span>;
   };
 
-  const handleOptimizar = async () => { /* ... lógica de optimización ... */ };
-  const handleEliminar = async () => { /* ... lógica de eliminación ... */ };
-  const cambiarEstadoLogistico = async (accion, masivo = false) => { /* ... lógica de Firebase ... */ };
+  // FUNCIONES RESTAURADAS COMPLETAS PARA QUE FUNCIONEN LOS BOTONES
+  const handleOptimizar = async () => {
+     setAlerta("Calculando la mejor ruta...");
+     const PLANTA = { lat: 25.6866, lng: -100.3161 };
+
+     const calcularDistancia = (coord1, coord2) => {
+         if (!coord1 || !coord2 || isNaN(coord1.lat) || isNaN(coord2.lat)) return 9999;
+         const R = 6371; 
+         const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
+         const dLon = (coord2.lng - coord1.lng) * Math.PI / 180;
+         const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                   Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
+                   Math.sin(dLon/2) * Math.sin(dLon/2);
+         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+         return R * c;
+     };
+
+     const destinos = paradasRuta.filter(p => p.tipo === 'destino');
+     if (destinos.length <= 1) {
+         setAlerta("No hay suficientes paradas para optimizar.");
+         setTimeout(() => setAlerta(null), 2000);
+         return;
+     }
+
+     let urgentes = destinos.filter(p => p.data?.urgente);
+     let normales = destinos.filter(p => !p.data?.urgente);
+
+     const ordenarVecinoMasCercano = (nodos, puntoPartida) => {
+         let noVisitados = [...nodos];
+         let rutaOrdenada = [];
+         let actual = puntoPartida;
+
+         while (noVisitados.length > 0) {
+             let indiceMasCercano = 0;
+             let distanciaMinima = Infinity;
+             for (let i = 0; i < noVisitados.length; i++) {
+                 let dist = calcularDistancia(actual, noVisitados[i].data.coordenadas);
+                 if (dist < distanciaMinima) {
+                     distanciaMinima = dist;
+                     indiceMasCercano = i;
+                 }
+             }
+             let siguienteNodo = noVisitados.splice(indiceMasCercano, 1)[0];
+             rutaOrdenada.push(siguienteNodo);
+             actual = siguienteNodo.data.coordenadas;
+         }
+         return rutaOrdenada;
+     };
+
+     let rutaFinalUrgentes = ordenarVecinoMasCercano(urgentes, PLANTA);
+     let ultimoPunto = rutaFinalUrgentes.length > 0 ? rutaFinalUrgentes[rutaFinalUrgentes.length - 1].data.coordenadas : PLANTA;
+     let rutaFinalNormales = ordenarVecinoMasCercano(normales, ultimoPunto);
+     const destinosOrdenados = [...rutaFinalUrgentes, ...rutaFinalNormales];
+
+     try {
+         for (let i = 0; i < destinosOrdenados.length; i++) {
+             const parada = destinosOrdenados[i];
+             await updateDoc(doc(db, 'rutas_logistica', parada.id), {
+                 orden_ruta: i + 1, 
+                 fecha_actualizacion: serverTimestamp()
+             });
+         }
+         setParadasRuta([
+             { id: 'planta', nombre: 'Planta EEN (Salida)', tipo: 'origen' },
+             ...destinosOrdenados,
+             { id: 'planta_retorno', nombre: 'Retorno a Base', tipo: 'retorno' }
+         ]);
+         setAlerta("¡Ruta optimizada con éxito!");
+     } catch (error) {
+         console.error(error);
+         setAlerta("Error al guardar la optimización.");
+     }
+     setTimeout(() => setAlerta(null), 3000);
+  };
+
+  const handleEliminar = async () => {
+    if (window.confirm("¿Estás seguro de eliminar esta orden? Esta acción no se puede deshacer.")) {
+        try {
+            await deleteDoc(doc(db, 'rutas_logistica', pedidoSeleccionado.id));
+            onClose();
+        } catch (e) { console.error(e); setAlerta("Error al eliminar el pedido."); }
+    }
+  };
+
+  const cambiarEstadoLogistico = async (accion, masivo = false) => {
+    try {
+        let payload = { fecha_actualizacion: serverTimestamp() };
+        
+        if (accion === 'rampa') {
+            if (!vehiculoId) return setAlerta("Falta seleccionar el vehículo");
+            if (!choferId) return setAlerta("Falta seleccionar el operador");
+            
+            payload.estado = 'camino';
+            payload.fecha_salida = null; 
+            payload.vehiculo_asignado = vehiculoId;
+            payload.chofer_asignado = choferId;
+
+            const idsAProcesar = masivo ? [pedidoSeleccionado.id, ...pedidosMismoDestino.map(p => p.id)] : [pedidoSeleccionado.id];
+            for (const id of idsAProcesar) { await updateDoc(doc(db, 'rutas_logistica', id), payload); }
+            return onClose();
+        } 
+        else if (accion === 'actualizar_asignacion') {
+            if (!vehiculoId || !choferId) return setAlerta("Falta seleccionar unidad u operador");
+            payload.vehiculo_asignado = vehiculoId;
+            payload.chofer_asignado = choferId;
+            setModoEdicionAsignacion(false); 
+        }
+        else if (accion === 'salida') {
+            const loteId = `LOTE-${Date.now()}-${vehiculoId.substring(0,4).toUpperCase()}`;
+            payload.estado = 'camino';
+            payload.fecha_salida = serverTimestamp(); 
+            payload.lote_id = loteId; 
+
+            const companerosEnRampa = pedidos.filter(p => 
+                p.vehiculo_asignado === vehiculoId && 
+                p.chofer_asignado === choferId &&
+                p.estado === 'camino' && !p.fecha_salida
+            );
+
+            for (const p of companerosEnRampa) { 
+                await updateDoc(doc(db, 'rutas_logistica', p.id), payload); 
+            }
+            return onClose();
+        } 
+        else if (accion === 'entregado') {
+            payload.estado = 'entregado';
+            payload.fecha_entrega = serverTimestamp();
+        } else if (accion === 'fallido') {
+            payload.estado = 'fallido';
+        } else if (accion === 'reasignar') {
+            payload.estado = 'pendiente';
+            payload.vehiculo_asignado = null;
+            payload.chofer_asignado = null;
+            payload.fecha_salida = null;
+            payload.motivo_falla = null; 
+            payload.lote_id = null;
+        }
+
+        if (accion !== 'salida') {
+            await updateDoc(doc(db, 'rutas_logistica', pedidoSeleccionado.id), payload);
+        }
+        
+        if(accion === 'entregado' || accion === 'reasignar') onClose(); 
+    } catch (e) { console.error(e); setAlerta("Error al actualizar estado."); }
+  };
 
   return (
     <>
@@ -148,7 +287,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       {/* FONDO MAESTRO DEL DRAWER (CRISTAL ESMERILADO BLANCO) */}
       <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/60 backdrop-blur-xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/40 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
         
-        {/* HEADER CON EFECTO CRISTAL AZUL REY (Más oscuro y legible) bg-blue-800/50 */}
+        {/* HEADER CON EFECTO CRISTAL AZUL REY */}
         <div className="bg-blue-800/50 backdrop-blur-xl border-b border-blue-400/40 p-4 shrink-0 relative shadow-lg shadow-blue-900/20 z-10">
           <button onClick={onClose} className="absolute top-4 right-4 text-blue-100 hover:text-white transition bg-white/10 w-7 h-7 rounded-full flex items-center justify-center border border-white/20"><i className="fas fa-times text-xs"></i></button>
           
@@ -172,7 +311,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
           </div>
         </div>
 
-        {/* BODY - NUEVA CLASE min-h-0 PARA ARREGLAR EL OVERFLOW */}
         <div className="p-3 overflow-y-auto custom-scroll flex-1 min-h-0 space-y-3 pb-6 relative z-0">
           
           {/* ACORDEÓN: INFO DE ENTREGA (LOOK CRISTAL ESMERILADO BLANCO) */}
@@ -200,14 +338,14 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                     </div>
                 </div>
 
-                {/* AVISO DE COBRANZA RECONSTRUIDO (LOOK CRISTAL ROJO) */}
+                {/* AVISO DE COBRANZA - ALTA VISIBILIDAD */}
                 {requiereCobro && (
-                  <div className="bg-red-500/30 backdrop-blur-sm border border-red-400/50 rounded-xl p-3 mb-3 flex justify-between items-center shadow-md">
+                  <div className="bg-red-500/80 backdrop-blur-md border border-red-400 rounded-xl p-3 mb-3 flex justify-between items-center shadow-md">
                      <div className="flex items-start gap-2">
-                        <i className="fas fa-exclamation-triangle text-red-100 mt-0.5"></i>
+                        <i className="fas fa-exclamation-triangle text-white mt-0.5"></i>
                         <div>
                            <p className="text-[10px] font-black text-white uppercase tracking-wide drop-shadow-sm">Aviso de Cobranza</p>
-                           <p className="text-[9px] font-medium text-red-50 leading-snug">Adeudo reportado de CONTPAQi</p>
+                           <p className="text-[9px] font-medium text-red-100 leading-snug">Adeudo reportado de CONTPAQi</p>
                         </div>
                      </div>
                      <span className="text-sm font-black text-white shadow-sm">${saldo.toFixed(2)}</span>
@@ -274,7 +412,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
               </div>
           )}
 
-          {/* INFO ASIGNACIÓN ACTUAL (Para Rampa y En Ruta) (NUEVO LOOK CRISTAL ESMERILADO) */}
+          {/* INFO ASIGNACIÓN ACTUAL (Para Rampa y En Ruta) */}
           {(esRampa || esEnRuta) && !modoEdicionAsignacion && (
              <div className="bg-white/30 backdrop-blur-sm border border-white/40 rounded-xl p-3 shadow-sm flex justify-between items-center shrink-0">
                  <div>
@@ -345,6 +483,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                 
                 {esPendiente ? (
                     <>
+                        {/* BOTÓN PRE-ASIGNAR CON LOGICA RESTAURADA Y ALTA VISIBILIDAD */}
                         <button onClick={() => cambiarEstadoLogistico('rampa')} disabled={!!errorEmpalme} className={`w-full font-black py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-xs ${errorEmpalme ? 'bg-black/20 text-white/50 border border-white/20 cursor-not-allowed' : 'bg-white/90 text-blue-800 hover:bg-white active:scale-95 border border-white'}`}>
                             <i className="fas fa-link"></i> Pre-Asignar
                         </button>
@@ -357,15 +496,12 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
              </div>
           )}
 
-          {/* CONFIRMAR SALIDA (LOOK CRISTAL ESMERILADO EMERALD) */}
+          {/* CONFIRMAR SALIDA (ALTA VISIBILIDAD) */}
           {esRampa && !modoEdicionAsignacion && (
-             <div className="bg-emerald-600/40 backdrop-blur-md border border-emerald-400/60 rounded-2xl p-4 shadow-md mt-2 relative overflow-hidden">
-                 {/* Destello de fondo */}
-                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-emerald-300/30 rounded-full blur-3xl"></div>
-                 
+             <div className="bg-emerald-500/90 backdrop-blur-md border border-emerald-400 rounded-2xl p-4 shadow-md mt-2 relative overflow-hidden">
                  <h4 className="text-[11px] font-black text-white flex items-center gap-1.5 mb-2 relative z-10 drop-shadow-md"><i className="fas fa-truck-fast text-emerald-200"></i> CONFIRMAR SALIDA</h4>
                  <p className="text-[10px] text-emerald-50 mb-3 leading-snug relative z-10 font-medium drop-shadow-sm">Presiona aquí cuando arranque para registrar la hora exacta de salida y crear el Lote de Viaje.</p>
-                 <button onClick={() => cambiarEstadoLogistico('salida')} className="w-full bg-white/95 backdrop-blur-sm hover:bg-white text-emerald-800 font-black py-3 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 text-xs relative z-10 border border-white">
+                 <button onClick={() => cambiarEstadoLogistico('salida')} className="w-full bg-white text-emerald-800 hover:bg-emerald-50 font-black py-3 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 text-xs relative z-10 border border-white">
                     <i className="fas fa-play"></i> Iniciar Ruta Ahora
                 </button>
              </div>

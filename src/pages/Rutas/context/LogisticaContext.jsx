@@ -100,9 +100,13 @@ export const LogisticaProvider = ({ children }) => {
         }
       });
 
-      // Ordenar como en tu HTML
+      // Ordenar: Fallas primero, luego Pendientes, luego lo que está en movimiento, y al final Entregados
       activos.sort((a,b) => { 
         const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 }; 
+        // Si ambos están en 'camino', poner primero los que ya salieron (En Ruta)
+        if (a.estado === 'camino' && b.estado === 'camino') {
+            return (b.fecha_salida ? 1 : 0) - (a.fecha_salida ? 1 : 0);
+        }
         return (ord[a.estado] || 5) - (ord[b.estado] || 5); 
       });
 
