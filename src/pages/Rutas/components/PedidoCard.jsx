@@ -21,7 +21,7 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
     
   const textoPrincipal = isActive ? 'text-black' : 'text-slate-800';
   const textoSecundario = isActive ? 'text-black-100' : 'text-slate-600';
-  const textoFolio = isActive ? 'text-blue-200' : 'text-slate-500';
+  const textoFolio = isActive ? 'text-grey-200' : 'text-slate-500';
   const iconoRojo = isActive ? 'text-red-300' : 'text-red-500';
 
   const nombreChofer = choferes.find(c => c.id === pedido.chofer_asignado)?.nombre || 'Chofer';
@@ -35,10 +35,10 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
       <div className="flex justify-between items-start mb-2">
         <div className="flex gap-1.5 items-center">
             {esFallido && <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
-            {esPendiente && <span className={`${isActive ? 'bg-black text-blue-800' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
+            {esPendiente && <span className={`${isActive ? 'bg-black text-grey-800' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
             {esRampa && <span className="bg-indigo-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-dolly"></i> En Rampa</span>}
             {esEnRuta && <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-truck-fast"></i> En Ruta</span>}
-            {esEntregado && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-check-double"></i> Entregado</span>}
+            {esEntregado && <span className="bg-emerald-500 text-black px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-check-double"></i> Entregado</span>}
         </div>
         <span className={`text-[10px] font-mono font-bold ${textoFolio}`}>{pedido.folio_pedido || 'S/N'}</span>
       </div>
@@ -62,7 +62,7 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
           <span className={`${isActive ? 'bg-blue-900/40' : 'bg-white/50'} px-1.5 py-0.5 rounded flex items-center gap-1 backdrop-blur-sm border ${isActive ? 'border-blue-400/30' : 'border-white'}`}>
             <i className={`fas fa-truck ${isActive ? 'text-blue-300' : 'text-slate-400'}`}></i> {nombreVehiculo}
           </span>
-          <span className={`${isActive ? 'text-white' : 'text-blue-700'} flex items-center gap-1`}>
+          <span className={`${isActive ? 'text-black' : 'text-blue-700'} flex items-center gap-1`}>
             <i className="fas fa-user-circle"></i> {nombreChofer}
           </span>
         </div>
