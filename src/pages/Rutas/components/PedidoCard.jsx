@@ -19,8 +19,8 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
     ? 'bg-blue-500/10 backdrop-blur-2xl border-blue-400/60 shadow-xl shadow-blue-500/20 scale-[1.02] z-10' 
     : 'bg-transparent backdrop-blur-xl border-white/20 shadow-sm hover:border-white/40 hover:bg-white/5';
     
-  const textoPrincipal = isActive ? 'text-white' : 'text-slate-800';
-  const textoSecundario = isActive ? 'text-blue-100' : 'text-slate-600';
+  const textoPrincipal = isActive ? 'text-black' : 'text-slate-800';
+  const textoSecundario = isActive ? 'text-black-100' : 'text-slate-600';
   const textoFolio = isActive ? 'text-blue-200' : 'text-slate-500';
   const iconoRojo = isActive ? 'text-red-300' : 'text-red-500';
 
@@ -35,7 +35,7 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
       <div className="flex justify-between items-start mb-2">
         <div className="flex gap-1.5 items-center">
             {esFallido && <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
-            {esPendiente && <span className={`${isActive ? 'bg-white text-blue-800' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
+            {esPendiente && <span className={`${isActive ? 'bg-black text-blue-800' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
             {esRampa && <span className="bg-indigo-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-dolly"></i> En Rampa</span>}
             {esEnRuta && <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-truck-fast"></i> En Ruta</span>}
             {esEntregado && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-check-double"></i> Entregado</span>}
