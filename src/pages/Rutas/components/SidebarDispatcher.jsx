@@ -77,7 +77,7 @@ const SidebarDispatcher = ({
 
   return (
     // CONTENEDOR PRINCIPAL: Cristal blanco/claro
-    <div className="w-full h-full bg-white/60 backdrop-blur-2xl flex flex-col border-r border-white/50 shadow-2xl overflow-hidden rounded-r-3xl">
+    <div className="w-full h-full bg-white/40 backdrop-blur-2xl flex flex-col border-r border-white/50 shadow-2xl overflow-hidden rounded-r-3xl">
       
       <div className="p-4 border-b border-white/40 shrink-0 relative z-20 bg-white/30">
         <div className="flex justify-between items-start mb-3">

@@ -285,7 +285,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       )}
 
       {/* FONDO MAESTRO DEL DRAWER (CRISTAL ESMERILADO BLANCO) */}
-      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/60 backdrop-blur-xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/40 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
+      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/40 backdrop-blur-xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/40 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
         
         {/* HEADER CON EFECTO CRISTAL AZUL REY */}
         <div className="bg-blue-800/50 backdrop-blur-xl border-b border-blue-400/40 p-4 shrink-0 relative shadow-lg shadow-blue-900/20 z-10">
