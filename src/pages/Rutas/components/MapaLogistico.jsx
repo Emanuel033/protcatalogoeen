@@ -3,38 +3,84 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from 'rea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Ícono Planta
-const PlantaIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/10397/10397223.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-  popupAnchor: [0, -40],
+// 1. FUNCIÓN CREADORA DE PINES DINÁMICOS
+const getPinDinamico = (estado, isSelected) => {
+  let colorHex = '#475569'; // slate-600 (Pendiente por defecto)
+  let iconClass = 'fa-box';
+  let extraClasses = '';
+
+  if (estado === 'camino' || estado === 'rampa') { 
+      colorHex = '#3b82f6'; // blue-500
+      iconClass = 'fa-truck-fast'; 
+  } else if (estado === 'entregado') { 
+      colorHex = '#10b981'; // emerald-500
+      iconClass = 'fa-check'; 
+  } else if (estado === 'fallido') { 
+      colorHex = '#ef4444'; // red-500
+      iconClass = 'fa-exclamation-triangle'; 
+      extraClasses = 'animate-pulse'; 
+  }
+
+  const size = isSelected ? 45 : 32;
+  const iconSize = isSelected ? 'text-lg' : 'text-xs';
+  const shadow = isSelected ? 'shadow-[0_10px_20px_rgba(0,0,0,0.5)]' : 'shadow-md';
+  const border = isSelected ? 'border-4' : 'border-2';
+  
+  const html = `
+    <div class="relative flex flex-col items-center justify-center ${extraClasses}" style="width: ${size}px; height: ${size + 10}px;">
+      <div class="flex items-center justify-center w-full h-full rounded-full text-white ${shadow} ${border} border-white z-10 transition-all duration-300" style="background-color: ${colorHex};">
+        <i class="fas ${iconClass} ${iconSize}"></i>
+      </div>
+      <div class="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent z-0 -mt-1" style="border-top-color: ${colorHex};"></div>
+    </div>
+  `;
+
+  return L.divIcon({
+    className: 'bg-transparent border-none', // Quitamos estilos por defecto de Leaflet
+    html: html,
+    iconSize: [size, size + 10],
+    iconAnchor: [size / 2, size + 10],
+    popupAnchor: [0, -(size + 10)]
+  });
+};
+
+const PlantaIcon = L.divIcon({
+  className: 'bg-transparent border-none',
+  html: `
+    <div class="relative flex flex-col items-center justify-center" style="width: 45px; height: 55px;">
+      <div class="flex items-center justify-center w-full h-full rounded-2xl text-white shadow-xl border-2 border-white z-10 bg-slate-900">
+        <i class="fas fa-industry text-lg"></i>
+      </div>
+      <div class="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[10px] border-l-transparent border-r-transparent z-0 -mt-1" style="border-top-color: #0f172a;"></div>
+    </div>
+  `,
+  iconSize: [45, 55],
+  iconAnchor: [22.5, 55],
+  popupAnchor: [0, -55]
 });
 
-// Ícono Pedidos (Normal)
-const PedidoIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
 
-// Ícono Pedido Seleccionado (Más grande y llamativo)
-const PedidoSeleccionadoIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png',
-  iconSize: [45, 45],
-  iconAnchor: [22.5, 45],
-  popupAnchor: [0, -45],
-  className: 'drop-shadow-xl animate-bounce'
-});
-
-// Componente para auto-centrar el mapa según el pedido seleccionado
+// Busca esta función dentro de MapaLogistico.jsx y sustitúyela
 const MapController = ({ pedidoSeleccionado, sidebarAbierto }) => {
   const map = useMap();
   
-  // Arregla el problema del área gris al colapsar el sidebar
+  // ARREGLO DEFINITIVO DEL ESPACIO GRIS
   useEffect(() => {
-    setTimeout(() => { map.invalidateSize(); }, 300);
+    // Forzamos al mapa a actualizarse continuamente mientras dura la animación CSS (300ms)
+    const interval = setInterval(() => {
+      map.invalidateSize();
+    }, 30); // Se actualiza cada 30ms
+
+    // Limpiamos el intervalo después de que la animación termina seguro
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      map.invalidateSize();
+    }, 350); 
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [sidebarAbierto, map]);
 
   useEffect(() => {
@@ -51,57 +97,35 @@ const MapaLogistico = ({ pedidos = [], pedidoSeleccionado, setViajeSeleccionado,
 
   return (
     <div className="w-full h-full bg-slate-200 z-0 relative">
-      <MapContainer 
-        center={PLANTA_COORDS} 
-        zoom={11} 
-        style={{ width: '100%', height: '100%' }}
-        zoomControl={false} // Lo desactivamos aquí para posicionarlo manualmente
-      >
+      <MapContainer center={PLANTA_COORDS} zoom={11} style={{ width: '100%', height: '100%' }} zoomControl={false} >
         <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-        <ZoomControl position="topright" /> {/* Botones de zoom arriba a la derecha */}
-        
+        <ZoomControl position="topright" />
         <MapController pedidoSeleccionado={pedidoSeleccionado} sidebarAbierto={sidebarAbierto} />
 
-        {/* PIN DE PLANTA EEN */}
+        {/* PIN DE LA PLANTA (Ahora dinámico también) */}
         <Marker position={PLANTA_COORDS} icon={PlantaIcon}>
           <Popup className="font-sans">
-            <div className="text-center font-black text-slate-800">
-              <i className="fas fa-industry text-blue-600 mb-1 text-lg"></i>
-              <p className="m-0 text-xs uppercase tracking-wider">Planta EEN</p>
-            </div>
+            <div className="text-center font-black text-slate-800"><i className="fas fa-industry text-blue-600 mb-1 text-lg"></i><p className="m-0 text-xs uppercase tracking-wider">Planta EEN</p></div>
           </Popup>
         </Marker>
 
-        {/* PINES DE LOS PEDIDOS FILTRADOS */}
+        {/* PINES DINÁMICOS DE LOS PEDIDOS */}
         {pedidos.map(pedido => {
           if (!pedido.coordenadas?.lat || !pedido.coordenadas?.lng) return null;
-          
           const isSelected = pedidoSeleccionado?.id === pedido.id;
           
           return (
             <Marker 
               key={pedido.id} 
               position={[pedido.coordenadas.lat, pedido.coordenadas.lng]} 
-              icon={isSelected ? PedidoSeleccionadoIcon : PedidoIcon}
-              eventHandlers={{
-                click: () => {
-                  if (setViajeSeleccionado) setViajeSeleccionado(pedido);
-                },
-              }}
+              icon={getPinDinamico(pedido.estado, isSelected)}
+              eventHandlers={{ click: () => { if (setViajeSeleccionado) setViajeSeleccionado(pedido); } }}
             >
               <Popup>
                 <div className="font-sans min-w-[150px]">
-                  <p className="font-black text-xs text-slate-800 m-0 mb-1 truncate max-w-[200px]">
-                    {pedido.cliente_nombre}
-                  </p>
-                  <p className="text-[10px] text-slate-500 m-0 leading-tight">
-                    {pedido.direccion}
-                  </p>
-                  <div className="mt-2 text-center">
-                    <span className="bg-slate-800 text-white text-[9px] font-bold px-2 py-1 rounded">
-                      {pedido.folio_pedido || 'S/F'}
-                    </span>
-                  </div>
+                  <p className="font-black text-xs text-slate-800 m-0 mb-1 truncate max-w-[200px]">{pedido.cliente_nombre}</p>
+                  <p className="text-[10px] text-slate-500 m-0 leading-tight">{pedido.direccion}</p>
+                  <div className="mt-2 text-center"><span className="bg-slate-800 text-white text-[9px] font-bold px-2 py-1 rounded">{pedido.folio_pedido || 'S/F'}</span></div>
                 </div>
               </Popup>
             </Marker>

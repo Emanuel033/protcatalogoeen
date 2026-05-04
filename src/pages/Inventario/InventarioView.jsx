@@ -14,6 +14,9 @@ const InventarioView = () => {
   // ESTADO PARA EL LIGHTBOX (IMAGEN GIGANTE)
   const [imagenAmpliada, setImagenAmpliada] = useState(null);
 
+useEffect(() => {
+  document.title = "Inventario | La Económica del Norte";
+}, []);
   // 1. Carga de Catálogo
   useEffect(() => {
     fetch('/catalogo_completo.json')
@@ -25,6 +28,8 @@ const InventarioView = () => {
       })
       .catch(() => setEstadoCatalogo('Error de carga'));
   }, []);
+  
+  
 
   // 2. Lógica de Cantidades (Memoizada)
   const manualCant = useCallback((codigo, varId, valor) => {

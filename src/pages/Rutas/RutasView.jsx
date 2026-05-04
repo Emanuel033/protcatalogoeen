@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // <-- AQUÍ AGREGAMOS useEffect
 import { useLogistica } from './context/LogisticaContext';
 import SidebarDispatcher from './components/SidebarDispatcher';
 import DetalleDrawer from './components/DetalleDrawer';
@@ -12,16 +12,24 @@ const RutasView = () => {
   
   const [filtro, setFiltro] = useState('activos');
   const [viajeSeleccionado, setViajeSeleccionado] = useState(null);
-  const [sidebarAbierto, setSidebarAbierto] = useState(true); // <-- ESTADO PARA COLAPSAR
-  const [busqueda, setBusqueda] = useState(''); // <-- ESTADO PARA EL BUSCADOR
+  const [sidebarAbierto, setSidebarAbierto] = useState(true); 
+  const [busqueda, setBusqueda] = useState(''); 
 
   const [modalOrdenAbierto, setModalOrdenAbierto] = useState(false);
   const [modalAdminAbierto, setModalAdminAbierto] = useState(false);
   const [modalBitacoraAbierto, setModalBitacoraAbierto] = useState(false);
   const [ordenAEditar, setOrdenAEditar] = useState(null);
 
+  // ==========================================
+  // AQUÍ ESTÁ EL USE EFFECT QUE CAMBIA LA PESTAÑA
+  // ==========================================
+  useEffect(() => {
+    document.title = "Logística y Rutas | La Económica del Norte";
+  }, []);
+  // ==========================================
+
   const listaPedidos = Array.isArray(pedidos) ? pedidos : [];
-  
+
   // FILTRADO COMBINADO (Estado + Buscador)
   const pedidosFiltrados = listaPedidos.filter(p => {
     // Primero filtramos por búsqueda (Nombre o Folios)
@@ -29,7 +37,7 @@ const RutasView = () => {
         p.cliente_nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
         p.folio_pedido?.toLowerCase().includes(busqueda.toLowerCase()) ||
         p.folio_factura?.toLowerCase().includes(busqueda.toLowerCase());
-
+        
     if (!matchesBusqueda) return false;
 
     // Luego filtramos por la pestaña activa
@@ -39,7 +47,7 @@ const RutasView = () => {
     if (filtro === 'camino') return p.estado === 'camino' && p.fecha_salida;
     return p.estado === filtro;
   });
-
+  
   return (
     <div className="relative h-screen w-full bg-slate-100 overflow-hidden flex font-sans">
       
@@ -56,7 +64,7 @@ const RutasView = () => {
             onOpenForm={() => { setOrdenAEditar(null); setModalOrdenAbierto(true); }} 
             onOpenAdmin={() => setModalAdminAbierto(true)} 
             onOpenBitacora={() => setModalBitacoraAbierto(true)}
-            onToggleSidebar={() => setSidebarAbierto(false)} // <-- FUNCIÓN PARA CERRAR
+            onToggleSidebar={() => setSidebarAbierto(false)} 
           />
       </div>
 
@@ -81,6 +89,7 @@ const RutasView = () => {
             pedidos={pedidosFiltrados} 
             pedidoSeleccionado={viajeSeleccionado} 
             setViajeSeleccionado={setViajeSeleccionado} 
+            sidebarAbierto={sidebarAbierto}
         />
       </div>
 

@@ -15,7 +15,9 @@ export default function ChoferView() {
     const [activeModal, setActiveModal] = useState('login'); // 'login', 'entrega', 'falla', 'docs', 'qr', null
     const [viajeSeleccionado, setViajeSeleccionado] = useState(null);
     const [qrData, setQrData] = useState({ src: '', nombre: '' });
-
+useEffect(() => {
+  document.title = "Chofer | La Económica del Norte";
+}, []);
     // Detector de conexión (Offline Sync UI)
     useEffect(() => {
         const handleOnline = () => setIsOffline(false);
