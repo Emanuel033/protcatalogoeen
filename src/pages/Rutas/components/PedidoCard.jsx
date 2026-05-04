@@ -16,8 +16,8 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
 
   // ESTILOS IGUALADOS AL TEMA CRISTAL CLARO / AZUL REY
   const fondoTarjeta = isActive 
-    ? 'bg-blue-800/60 backdrop-blur-xl border-blue-400 shadow-lg shadow-blue-900/20 scale-[1.02] z-10' 
-    : 'bg-white/40 backdrop-blur-md border-white/50 shadow-sm hover:shadow-md hover:bg-white/60';
+    ? 'bg-blue-500/10 backdrop-blur-2xl border-blue-400/60 shadow-xl shadow-blue-500/20 scale-[1.02] z-10' 
+    : 'bg-transparent backdrop-blur-xl border-white/20 shadow-sm hover:border-white/40 hover:bg-white/5';
     
   const textoPrincipal = isActive ? 'text-white' : 'text-slate-800';
   const textoSecundario = isActive ? 'text-blue-100' : 'text-slate-600';
@@ -29,9 +29,9 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
 
   return (
     <div 
-  onClick={onClick}
-  className={`relative p-4 rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 bg-transparent backdrop-blur-xl shadow-xl ${fondoTarjeta}`}
->
+      onClick={onClick}
+      className={`relative p-4 rounded-2xl transition-all duration-300 cursor-pointer border ${fondoTarjeta}`}
+    >
       <div className="flex justify-between items-start mb-2">
         <div className="flex gap-1.5 items-center">
             {esFallido && <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
