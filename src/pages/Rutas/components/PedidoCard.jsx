@@ -14,15 +14,16 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
   const saldo = parseFloat(pedido.saldo_pendiente || 0);
   const requiereCobro = pedido.requiere_cobro || saldo > 0;
 
-  // ESTILOS IGUALADOS AL TEMA CRISTAL CLARO / AZUL REY
+  // --- SOLO CAMBIOS VISUALES (CRISTAL) ---
   const fondoTarjeta = isActive 
-    ? 'bg-blue-500/10 backdrop-blur-2xl border-blue-400/60 shadow-xl shadow-blue-500/20 scale-[1.02] z-10' 
-    : 'bg-transparent backdrop-blur-xl border-white/20 shadow-sm hover:border-white/40 hover:bg-white/5';
+    ? 'bg-blue-600/20 backdrop-blur-2xl border-blue-400/50 shadow-[0_15px_30px_rgba(30,144,255,0.2)] scale-[1.02] z-10' 
+    : 'bg-white/5 backdrop-blur-md border-white/10 shadow-sm hover:bg-white/10 hover:border-white/30';
     
-  const textoPrincipal = isActive ? 'text-black' : 'text-slate-800';
-  const textoSecundario = isActive ? 'text-black-100' : 'text-slate-600';
-  const textoFolio = isActive ? 'text-grey-200' : 'text-slate-500';
-  const iconoRojo = isActive ? 'text-red-300' : 'text-red-500';
+  // Ajuste de colores para legibilidad sobre cristal (Colores de tu prompt anterior)
+  const textoPrincipal = isActive ? 'text-[#001A3D]' : 'text-[#1A202C]';
+  const textoSecundario = isActive ? 'text-[#003366]' : 'text-slate-600';
+  const textoFolio = isActive ? 'text-blue-800/40' : 'text-slate-400';
+  const iconoRojo = isActive ? 'text-red-600' : 'text-red-500';
 
   const nombreChofer = choferes.find(c => c.id === pedido.chofer_asignado)?.nombre || 'Chofer';
   const nombreVehiculo = flota.find(f => f.id === pedido.vehiculo_asignado)?.nombre || 'Unidad';
@@ -30,39 +31,45 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className={`relative p-4 rounded-2xl transition-all duration-300 cursor-pointer border ${fondoTarjeta}`}
+      className={`relative p-4 rounded-3xl transition-all duration-500 cursor-pointer border ${fondoTarjeta}`}
     >
+      {/* Badge lateral sutil para indicar estado visualmente */}
+      <div className={`absolute left-0 top-1/4 bottom-1/4 w-1 rounded-r-full opacity-50 ${
+        esFallido ? 'bg-red-500' : esEntregado ? 'bg-emerald-500' : esEnRuta ? 'bg-blue-500' : 'bg-slate-400'
+      }`} />
+
       <div className="flex justify-between items-start mb-2">
         <div className="flex gap-1.5 items-center">
-            {esFallido && <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
-            {esPendiente && <span className={`${isActive ? 'bg-slate-800 text-white' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
-            {esRampa && <span className="bg-indigo-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-dolly"></i> En Rampa</span>}
-            {esEnRuta && <span className="bg-blue-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-truck-fast"></i> En Ruta</span>}
-            {esEntregado && <span className="bg-emerald-500 text-black px-2 py-0.5 rounded text-[9px] font-black uppercase"><i className="fas fa-check-double"></i> Entregado</span>}
+            {/* Mantengo tus condicionales de iconos y textos originales */}
+            {esFallido && <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black uppercase"><i className="fas fa-exclamation-triangle"></i> Problema</span>}
+            {esPendiente && <span className={`${isActive ? 'bg-slate-900 text-white' : 'bg-slate-800 text-white'} px-2 py-0.5 rounded-full text-[9px] font-black uppercase transition-colors`}><i className="fas fa-clock"></i> Por Asignar</span>}
+            {esRampa && <span className="bg-indigo-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black uppercase"><i className="fas fa-dolly"></i> En Rampa</span>}
+            {esEnRuta && <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[9px] font-black uppercase"><i className="fas fa-truck-fast"></i> En Ruta</span>}
+            {esEntregado && <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black uppercase"><i className="fas fa-check-double"></i> Entregado</span>}
         </div>
-        <span className={`text-[10px] font-mono font-bold ${textoFolio}`}>{pedido.folio_pedido || 'S/N'}</span>
+        <span className={`text-[10px] font-mono font-bold tracking-tighter ${textoFolio}`}>{pedido.folio_pedido || 'S/N'}</span>
       </div>
 
       <div className="flex flex-wrap gap-1.5 items-center mb-1 pr-2">
-        <h4 className={`font-black text-sm leading-tight truncate transition-colors ${textoPrincipal}`}>
+        <h4 className={`font-black text-[15px] leading-tight truncate transition-colors drop-shadow-sm ${textoPrincipal}`}>
           {pedido.cliente_nombre}
         </h4>
-        {esContpaqi && <span className="bg-slate-700 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm">CONTPAQI</span>}
-        {requiereCobro && <span className="bg-red-500 text-white border border-red-400 px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm"><i className="fas fa-exclamation-circle"></i> Adeudo</span>}
-        {pedido.urgente && <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm"><i className="fas fa-fire-alt"></i> Urgente</span>}
+        {esContpaqi && <span className="bg-slate-700/80 backdrop-blur-sm text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm">CONTPAQI</span>}
+        {requiereCobro && <span className="bg-red-500 text-white border border-red-400/50 px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm"><i className="fas fa-exclamation-circle"></i> Adeudo</span>}
+        {pedido.urgente && <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-[7px] font-black uppercase shadow-sm animate-pulse"><i className="fas fa-fire-alt"></i> Urgente</span>}
       </div>
       
-      <p className={`text-[10px] font-medium leading-snug flex items-start gap-1 transition-colors ${textoSecundario}`}>
+      <p className={`text-[11px] font-bold leading-snug flex items-start gap-1 transition-colors ${textoSecundario}`}>
         <i className={`fas fa-map-marker-alt mt-0.5 shrink-0 ${iconoRojo}`}></i> 
-        <span className="truncate">{pedido.direccion}</span>
+        <span className="line-clamp-2 italic">{pedido.direccion}</span>
       </p>
 
       {(pedido.vehiculo_asignado && !esPendiente) && (
-        <div className={`mt-3 pt-2 border-t flex justify-between items-center text-[9px] font-bold ${isActive ? 'border-blue-400/50 text-blue-100' : 'border-white/50 text-slate-600'}`}>
-          <span className={`${isActive ? 'bg-blue-900/40' : 'bg-white/50'} px-1.5 py-0.5 rounded flex items-center gap-1 backdrop-blur-sm border ${isActive ? 'border-blue-400/30' : 'border-white'}`}>
-            <i className={`fas fa-truck ${isActive ? 'text-blue-300' : 'text-slate-400'}`}></i> {nombreVehiculo}
+        <div className={`mt-3 pt-2 border-t flex justify-between items-center text-[9px] font-black ${isActive ? 'border-blue-400/30 text-blue-900' : 'border-white/10 text-slate-500'}`}>
+          <span className={`${isActive ? 'bg-blue-900/10' : 'bg-white/20'} px-2 py-0.5 rounded-full flex items-center gap-1 backdrop-blur-sm border ${isActive ? 'border-blue-400/20' : 'border-white/10'}`}>
+            <i className={`fas fa-truck ${isActive ? 'text-blue-700' : 'text-slate-400'}`}></i> {nombreVehiculo}
           </span>
-          <span className={`${isActive ? 'text-black' : 'text-blue-700'} flex items-center gap-1`}>
+          <span className={`${isActive ? 'text-blue-900' : 'text-blue-700/70'} flex items-center gap-1`}>
             <i className="fas fa-user-circle"></i> {nombreChofer}
           </span>
         </div>
