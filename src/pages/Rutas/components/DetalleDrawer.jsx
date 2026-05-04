@@ -287,10 +287,10 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
         </div>
       )}
 
-      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/80 backdrop-blur-2xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/50 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
+      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/60 backdrop-blur-2xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/50 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
     
       {/* HEADER CON EFECTO CRISTAL AZUL */}
-        <div className="bg-blue-600/80 backdrop-blur-2xl border-b border-blue-400/50 p-4 shrink-0 relative shadow-lg shadow-blue-500/20">
+        <div className="bg-blue-600/40 backdrop-blur-2xl border-b border-blue-400/50 p-4 shrink-0 relative shadow-lg shadow-blue-500/20">
           <button onClick={onClose} className="absolute top-4 right-4 text-blue-200 hover:text-white transition bg-white/10 w-7 h-7 rounded-full flex items-center justify-center"><i className="fas fa-times text-xs"></i></button>
           
           <div className="flex justify-between items-start mb-1 pr-8">
@@ -438,7 +438,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
           {/* ASIGNACIÓN DE UNIDAD CON EFECTO CRISTAL AZUL Y CANDADO */}
           {(esPendiente || modoEdicionAsignacion) && (
-             <div className="bg-blue-600/80 backdrop-blur-2xl rounded-2xl p-4 shadow-xl shadow-blue-500/20 text-white border border-blue-400/50 relative shrink-0 mt-3">
+             <div className="bg-blue-700/40 backdrop-blur-xl rounded-2xl p-4 shadow-xl shadow-blue-900/10 text-white border border-blue-400/40 relative shrink-0 mt-3">
                 
                 {modoEdicionAsignacion && (
                     <button onClick={() => { setModoEdicionAsignacion(false); setVehiculoId(pedidoSeleccionado.vehiculo_asignado); setChoferId(pedidoSeleccionado.chofer_asignado); }} className="absolute top-3 right-3 text-blue-200 hover:text-white bg-white/10 rounded-full w-6 h-6 flex items-center justify-center transition">
