@@ -1,6 +1,10 @@
 import React from 'react';
+import { useLogistica } from '../context/LogisticaContext'; // <-- Importamos el contexto
 
 const PedidoCard = ({ pedido, isActive, onClick }) => {
+  // Extraemos los catálogos para mapear los nombres
+  const { flota, choferes } = useLogistica(); 
+
   const esPendiente = pedido.estado === 'pendiente';
   const esFallido = pedido.estado === 'fallido';
   const esEntregado = pedido.estado === 'entregado';
@@ -16,6 +20,10 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
   const textoSecundario = isActive ? 'text-blue-100' : 'text-slate-500';
   const textoFolio = isActive ? 'text-blue-200' : 'text-slate-400';
   const iconoRojo = isActive ? 'text-white/80' : 'text-red-500';
+
+  // Buscamos los nombres (si están asignados)
+  const nombreChofer = choferes.find(c => c.id === pedido.chofer_asignado)?.nombre || 'Chofer';
+  const nombreVehiculo = flota.find(f => f.id === pedido.vehiculo_asignado)?.nombre || 'Unidad';
 
   return (
     <div 
@@ -42,6 +50,18 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
         <i className={`fas fa-map-marker-alt mt-0.5 shrink-0 ${iconoRojo}`}></i> 
         <span className="truncate">{pedido.direccion}</span>
       </p>
+
+      {/* AQUÍ RESCATAMOS EL FOOTER DE ASIGNACIÓN */}
+      {(pedido.vehiculo_asignado && !esPendiente) && (
+        <div className={`mt-3 pt-2 border-t flex justify-between items-center text-[9px] font-bold ${isActive ? 'border-blue-500 text-blue-100' : 'border-slate-200 text-slate-500'}`}>
+          <span className={`${isActive ? 'bg-blue-700/50' : 'bg-slate-100'} px-1.5 py-0.5 rounded flex items-center gap-1`}>
+            <i className={`fas fa-truck ${isActive ? 'text-blue-300' : 'text-slate-400'}`}></i> {nombreVehiculo}
+          </span>
+          <span className={`${isActive ? 'text-white' : 'text-blue-600'} flex items-center gap-1`}>
+            <i className="fas fa-user-circle"></i> {nombreChofer}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

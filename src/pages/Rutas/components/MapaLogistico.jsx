@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
+import React, { useEffect, useState } from 'react'; // <-- Agregamos useState
+import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl, Polyline } from 'react-leaflet'; // <-- Importamos Polyline
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -36,7 +36,7 @@ const getPinDinamico = (estado, isSelected) => {
   `;
 
   return L.divIcon({
-    className: 'bg-transparent border-none', // Quitamos estilos por defecto de Leaflet
+    className: 'bg-transparent border-none',
     html: html,
     iconSize: [size, size + 10],
     iconAnchor: [size / 2, size + 10],
@@ -59,33 +59,18 @@ const PlantaIcon = L.divIcon({
   popupAnchor: [0, -55]
 });
 
-
-// Busca esta función dentro de MapaLogistico.jsx y sustitúyela
 const MapController = ({ pedidoSeleccionado, sidebarAbierto }) => {
   const map = useMap();
   
-  // ARREGLO DEFINITIVO DEL ESPACIO GRIS
   useEffect(() => {
-    // Forzamos al mapa a actualizarse continuamente mientras dura la animación CSS (300ms)
-    const interval = setInterval(() => {
-      map.invalidateSize();
-    }, 30); // Se actualiza cada 30ms
-
-    // Limpiamos el intervalo después de que la animación termina seguro
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      map.invalidateSize();
-    }, 350); 
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
+    const interval = setInterval(() => { map.invalidateSize(); }, 30); 
+    const timeout = setTimeout(() => { clearInterval(interval); map.invalidateSize(); }, 350); 
+    return () => { clearInterval(interval); clearTimeout(timeout); };
   }, [sidebarAbierto, map]);
 
   useEffect(() => {
     if (pedidoSeleccionado?.coordenadas?.lat) {
-      map.flyTo([pedidoSeleccionado.coordenadas.lat, pedidoSeleccionado.coordenadas.lng], 14, { duration: 1.5 });
+      map.flyTo([pedidoSeleccionado.coordenadas.lat, pedidoSeleccionado.coordenadas.lng], 13, { duration: 1.5 });
     }
   }, [pedidoSeleccionado, map]);
   
@@ -94,6 +79,66 @@ const MapController = ({ pedidoSeleccionado, sidebarAbierto }) => {
 
 const MapaLogistico = ({ pedidos = [], pedidoSeleccionado, setViajeSeleccionado, sidebarAbierto }) => {
   const PLANTA_COORDS = [25.6866, -100.3161]; 
+  const [rutaOSRM, setRutaOSRM] = useState([]); // <-- Estado para guardar la polilínea
+
+// EFECTO PARA TRAZAR LA RUTA CON OSRM CUANDO SELECCIONAS UN PEDIDO EN RUTA
+  useEffect(() => {
+    const fetchRuta = async () => {
+      if (!pedidoSeleccionado || !pedidoSeleccionado.vehiculo_asignado) {
+        setRutaOSRM([]);
+        return;
+      }
+
+      let pedidosAgrupados = [];
+      const esRampaActual = pedidoSeleccionado.estado === 'camino' && !pedidoSeleccionado.fecha_salida;
+
+      // Misma lógica de limpieza que en el Drawer
+      if (esRampaActual) {
+          pedidosAgrupados = pedidos.filter(p => 
+              p.vehiculo_asignado === pedidoSeleccionado.vehiculo_asignado && 
+              p.chofer_asignado === pedidoSeleccionado.chofer_asignado && // <-- AGREGA ESTO AQUÍ
+              p.estado === 'camino' && !p.fecha_salida &&
+              p.coordenadas?.lat && p.coordenadas?.lng
+          );
+      }else if (pedidoSeleccionado.lote_id) {
+          pedidosAgrupados = pedidos.filter(p => 
+              p.lote_id === pedidoSeleccionado.lote_id &&
+              p.coordenadas?.lat && p.coordenadas?.lng
+          );
+      }
+
+      if (pedidosAgrupados.length === 0) return;
+
+      // Ordenar para que el trazo tenga sentido lógico (si ya fueron optimizados)
+      pedidosAgrupados.sort((a,b) => (a.orden_ruta || 99) - (b.orden_ruta || 99));
+
+      const coordsParaOSRM = [];
+      coordsParaOSRM.push(`${PLANTA_COORDS[1]},${PLANTA_COORDS[0]}`); // Inicio
+      
+      pedidosAgrupados.forEach(p => {
+        coordsParaOSRM.push(`${p.coordenadas.lng},${p.coordenadas.lat}`); // Paradas
+      });
+      
+      coordsParaOSRM.push(`${PLANTA_COORDS[1]},${PLANTA_COORDS[0]}`); // Fin
+
+      const coordsString = coordsParaOSRM.join(';');
+
+      try {
+        const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`);
+        const data = await response.json();
+        
+        if (data.routes && data.routes.length > 0) {
+           const leafletCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+           setRutaOSRM(leafletCoords);
+        }
+      } catch (error) {
+        console.error("Error al trazar ruta con OSRM:", error);
+        setRutaOSRM([]);
+      }
+    };
+
+    fetchRuta();
+  }, [pedidoSeleccionado, pedidos]);
 
   return (
     <div className="w-full h-full bg-slate-200 z-0 relative">
@@ -102,7 +147,20 @@ const MapaLogistico = ({ pedidos = [], pedidoSeleccionado, setViajeSeleccionado,
         <ZoomControl position="topright" />
         <MapController pedidoSeleccionado={pedidoSeleccionado} sidebarAbierto={sidebarAbierto} />
 
-        {/* PIN DE LA PLANTA (Ahora dinámico también) */}
+        {/* LÍNEA DE RUTA OSRM */}
+        {rutaOSRM.length > 0 && (
+          <Polyline 
+            positions={rutaOSRM} 
+            color="#3b82f6" 
+            weight={5} 
+            opacity={0.8} 
+            dashArray="10, 15" // Línea punteada
+            lineCap="round" 
+            lineJoin="round" 
+          />
+        )}
+
+        {/* PIN DE LA PLANTA */}
         <Marker position={PLANTA_COORDS} icon={PlantaIcon}>
           <Popup className="font-sans">
             <div className="text-center font-black text-slate-800"><i className="fas fa-industry text-blue-600 mb-1 text-lg"></i><p className="m-0 text-xs uppercase tracking-wider">Planta EEN</p></div>
