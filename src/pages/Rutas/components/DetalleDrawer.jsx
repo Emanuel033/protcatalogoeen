@@ -285,15 +285,15 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       )}
 
       {/* FONDO MAESTRO DEL DRAWER (CRISTAL ESMERILADO BLANCO) */}
-      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/40 backdrop-blur-xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/40 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
+      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[85vh] lg:h-[calc(100vh-2rem)] bg-white/95 sm:bg-white/40 backdrop-blur-2xl lg:rounded-3xl rounded-t-3xl shadow-2xl z-[40] flex flex-col overflow-hidden border border-white/40 transform-gpu transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
         
         {/* HEADER CON EFECTO CRISTAL AZUL REY */}
-        <div className="bg-blue-800/50 backdrop-blur-xl border-b border-blue-400/40 p-4 shrink-0 relative shadow-lg shadow-blue-900/20 z-10">
-          <button onClick={onClose} className="absolute top-4 right-4 text-blue-100 hover:text-white transition bg-white/10 w-7 h-7 rounded-full flex items-center justify-center border border-white/20"><i className="fas fa-times text-xs"></i></button>
+        <div className="bg-blue-800/90 sm:bg-blue-800/60 backdrop-blur-xl border-b border-blue-400/40 p-5 shrink-0 relative z-10">
+          <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 w-8 h-8 rounded-full flex items-center justify-center border border-white/20"><i className="fas fa-times text-xs"></i></button>
           
           <div className="flex justify-between items-start mb-1 pr-8">
             <div className="flex gap-1.5 items-center">
-              {pedidoSeleccionado.folio_pedido && (<span className="text-[9px] font-mono font-bold text-blue-900 bg-white/90 px-1.5 py-0.5 rounded border border-white/50 shadow-sm">PED: {pedidoSeleccionado.folio_pedido}</span>)}
+              {pedidoSeleccionado.folio_pedido && (<span className="text-[10px] font-black text-blue-900 bg-white px-2 py-0.5 rounded shadow-sm uppercase">PED: {pedidoSeleccionado.folio_pedido}</span>)}
               <button onClick={() => onEdit(pedidoSeleccionado)} className="text-amber-100 hover:text-white bg-amber-500/30 px-1.5 py-0.5 rounded text-[9px] font-bold transition flex items-center gap-1 ml-1 cursor-pointer border border-amber-400/40"><i className="fas fa-edit"></i> Editar</button>
               <button onClick={handleEliminar} className="text-red-100 hover:text-white bg-red-500/30 px-1.5 py-0.5 rounded text-[9px] font-bold transition flex items-center gap-1 ml-1 cursor-pointer border border-red-400/40"><i className="fas fa-trash"></i></button>
             </div>
@@ -302,11 +302,11 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
           <h3 className="text-lg font-black text-white leading-tight mt-1 truncate drop-shadow-md">
             {pedidoSeleccionado.cliente_nombre}
             {esContpaqi && <span className="bg-white/20 text-white px-1.5 py-0.5 rounded text-[8px] font-black uppercase align-middle ml-2 shadow-sm border border-white/30 backdrop-blur-sm">CONTPAQI</span>}
-            {pedidoSeleccionado.urgente && <span className="bg-red-500 text-white px-1.5 py-0.5 rounded text-[8px] font-black uppercase align-middle ml-2 shadow-sm border border-red-400"><i className="fas fa-fire-alt"></i> Urgente</span>}
+            {pedidoSeleccionado.urgente && <span className="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-black shadow-sm animate-pulse"><i className="fas fa-fire-alt"></i> Urgente</span>}
           </h3>
 
           <div className="flex justify-between items-center mt-2">
-             <span className="text-[10px] font-bold text-blue-100 flex items-center gap-1.5 drop-shadow-sm"><i className={`fas ${tipoEnvio.icon}`}></i> {tipoEnvio.text}</span>
+             <span className="text-xs font-bold text-blue-100 flex items-center gap-2"><i className={`fas ${tipoEnvio.icon}`}></i> {tipoEnvio.text}</span>
              {getBadgeEstado()}
           </div>
         </div>
@@ -314,9 +314,9 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
         <div className="p-3 overflow-y-auto custom-scroll flex-1 min-h-0 space-y-3 pb-6 relative z-0">
           
           {/* ACORDEÓN: INFO DE ENTREGA (LOOK CRISTAL ESMERILADO BLANCO) */}
-          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl shadow-inner overflow-hidden shrink-0">
+          <div className="bg-white/50 border border-white/60 rounded-2xl p-4 shadow-sm">
             <button onClick={() => setSeccionInfo(!seccionInfo)} className="w-full flex justify-between items-center p-3 hover:bg-white/5 transition">
-              <h4 className="font-black text-[11px] text-slate-800 flex items-center gap-1.5"><i className="fas fa-map-marked-alt text-blue-600"></i> Info de Entrega</h4>
+              <h4 className="font-black text-xs text-blue-900 uppercase tracking-widest mb-3 flex items-center gap-2"></i> Info de Entrega</h4>
               <i className={`fas fa-chevron-${seccionInfo ? 'up' : 'down'} text-slate-500 text-xs transition-transform`}></i>
             </button>
             
@@ -340,15 +340,15 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
                 {/* AVISO DE COBRANZA - ALTA VISIBILIDAD */}
                 {requiereCobro && (
-                  <div className="bg-red-500/80 backdrop-blur-md border border-red-400 rounded-xl p-3 mb-3 flex justify-between items-center shadow-md">
+                  <div className="mt-4 bg-red-600 text-white rounded-xl p-3 flex justify-between items-center shadow-lg border border-red-400">
                      <div className="flex items-start gap-2">
                         <i className="fas fa-exclamation-triangle text-white mt-0.5"></i>
                         <div>
-                           <p className="text-[10px] font-black text-white uppercase tracking-wide drop-shadow-sm">Aviso de Cobranza</p>
+                           <p className="text-[10px] font-black uppercase">Aviso de Cobranza</p>
                            <p className="text-[9px] font-medium text-red-100 leading-snug">Adeudo reportado de CONTPAQi</p>
                         </div>
                      </div>
-                     <span className="text-sm font-black text-white shadow-sm">${saldo.toFixed(2)}</span>
+                     <span className="text-lg font-black">${saldo.toFixed(2)}</span>
                   </div>
                 )}
 
@@ -431,7 +431,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
           {/* ASIGNACIÓN DE UNIDAD CON EFECTO CRISTAL AZUL REY (bg-blue-800/50) */}
           {(esPendiente || modoEdicionAsignacion) && (
-             <div className="bg-blue-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-xl shadow-blue-900/20 text-white border border-blue-400/40 relative shrink-0 mt-3">
+             <div className="bg-blue-900/80 backdrop-blur-xl rounded-2xl p-5 border border-blue-400/30 text-white shadow-xl">
                 
                 {modoEdicionAsignacion && (
                     <button onClick={() => { setModoEdicionAsignacion(false); setVehiculoId(pedidoSeleccionado.vehiculo_asignado); setChoferId(pedidoSeleccionado.chofer_asignado); }} className="absolute top-3 right-3 text-blue-200 hover:text-white bg-white/10 rounded-full w-6 h-6 flex items-center justify-center transition border border-white/20">
@@ -498,7 +498,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
           {/* CONFIRMAR SALIDA (ALTA VISIBILIDAD) */}
           {esRampa && !modoEdicionAsignacion && (
-             <div className="bg-emerald-500/90 backdrop-blur-md border border-emerald-400 rounded-2xl p-4 shadow-md mt-2 relative overflow-hidden">
+             <div className="bg-emerald-600/90 backdrop-blur-md border border-emerald-400/40 rounded-2xl p-4 text-white shadow-xl mt-2 relative overflow-hidden">
                  <h4 className="text-[11px] font-black text-white flex items-center gap-1.5 mb-2 relative z-10 drop-shadow-md"><i className="fas fa-truck-fast text-emerald-200"></i> CONFIRMAR SALIDA</h4>
                  <p className="text-[10px] text-emerald-50 mb-3 leading-snug relative z-10 font-medium drop-shadow-sm">Presiona aquí cuando arranque para registrar la hora exacta de salida y crear el Lote de Viaje.</p>
                  <button onClick={() => cambiarEstadoLogistico('salida')} className="w-full bg-white text-emerald-800 hover:bg-emerald-50 font-black py-3 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 text-xs relative z-10 border border-white">

@@ -77,19 +77,20 @@ const SidebarDispatcher = ({
 
   return (
     // CONTENEDOR PRINCIPAL: Cristal blanco/claro
-    <div className="w-full h-full bg-white/10 backdrop-blur-xl shadow-2xl flex flex-col border-r border-white/20 overflow-hidden rounded-r-3xl">
+    // CAMBIO: bg-white/90 en móvil para evitar que el blur "rompa" el texto
+    <div className="w-full h-full bg-white/90 sm:bg-white/10 backdrop-blur-xl shadow-2xl flex flex-col border-r border-white/20 overflow-hidden rounded-r-3xl transform-gpu">
       
       <div className="p-4 border-b border-white/10 shrink-0 relative z-20 bg-transparent">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <h2 className="text-lg font-black text-[#001A3D] flex items-center gap-2 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
+            <h2 className="text-lg font-black text-[#001A3D] flex items-center gap-2">
               <i className="fas fa-truck-fast text-blue-700"></i> Logística EEN
             </h2>
             <p className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mt-0.5">
               DOMINGO, 3 DE MAYO DE 2026
             </p>
           </div>
-          <button onClick={onToggleSidebar} className="w-8 h-8 rounded-full bg-white/50 border border-white/60 text-slate-600 hover:text-blue-800 hover:bg-white/80 shadow-sm transition flex items-center justify-center">
+          <button onClick={onToggleSidebar} className="w-8 h-8 rounded-full bg-white/50 border border-white/60 text-slate-600 shadow-sm flex items-center justify-center">
             <i className="fas fa-chevron-left text-xs"></i>
           </button>
         </div>
@@ -97,14 +98,14 @@ const SidebarDispatcher = ({
         <div className="flex gap-2 items-center mb-4">
           <div className="relative flex-1">
             <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" placeholder="Buscar cliente, folio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/30 border border-white/40 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition font-bold text-[#1A1A1A] placeholder-slate-500 shadow-inner backdrop-blur-md"  />
+            <input type="text" placeholder="Buscar..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/50 border border-white/40 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 transition font-bold text-slate-900 shadow-inner"  />
           </div>
           <button onClick={onOpenAdmin} className="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition shadow-md shrink-0"><i className="fas fa-cog"></i></button>
           <button onClick={onOpenBitacora} className="w-9 h-9 rounded-xl bg-indigo-50/80 backdrop-blur-sm text-indigo-700 border border-indigo-200 flex items-center justify-center hover:bg-indigo-100 transition shadow-sm shrink-0"><i className="fas fa-book"></i></button>
           <button onClick={onOpenForm} className="w-9 h-9 rounded-xl bg-blue-700/90 backdrop-blur-sm text-white flex items-center justify-center hover:bg-blue-800 transition shadow-md shadow-blue-800/20 shrink-0"><i className="fas fa-plus"></i></button>
         </div>
 
-        {/* 6 FILTROS: Los activos usan Azul Rey esmerilado (bg-blue-800/50), los inactivos cristal blanco */}
+        {/* 6 FILTROS: OPACIDAD MEJORADA), los inactivos cristal blanco */}
         <div className="flex gap-1.5 overflow-x-auto custom-scroll pb-1">
            <button onClick={() => setFiltro('activos')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'activos' ? 'bg-blue-800/50 backdrop-blur-md border border-blue-500/40 text-white shadow-md shadow-blue-900/10' : 'bg-white/40 text-[#2D3748] border border-white/60 hover:bg-white/70 font-bold'}`}><i className="fas fa-layer-group text-[10px]"></i> En Curso</button>
            <button onClick={() => setFiltro('pendiente')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'pendiente' ? 'bg-blue-800/50 backdrop-blur-md border border-blue-500/40 text-white shadow-md shadow-blue-900/10' : 'bg-white/40 text-[#2D3748] border border-white/60 hover:bg-white/70 font-bold'}`}><i className="fas fa-clock text-[10px]"></i> Por Asignar</button>
@@ -115,7 +116,7 @@ const SidebarDispatcher = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 custom-scroll space-y-3 relative z-10 scroll-smooth">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 relative z-10 scroll-smooth">
         {contenidoSidebar}
         
         {pedidosFiltrados.length === 0 && (
