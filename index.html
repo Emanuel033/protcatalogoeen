@@ -5,17 +5,44 @@
        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="icon" href="/icons/logo-192.png" />
     <link rel="apple-touch-icon" href="/icons/logo-192.png" />
-    <link rel="manifest" href="/manifest.json" />
+    
 
     <meta name="theme-color" content="#312e81" />
-    <title>Catálogo | La Económica del Norte</title>
+    <title>Catálogo | Envases La Económica del Norte</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <script>
+      (function() {
+        const path = window.location.pathname;
+        let manifestUrl = '/manifest.json'; // Por defecto instala el Catálogo
+        
+        if (path.includes('rutas')) {
+          manifestUrl = '/manifest-rutas.json';
+        } else if (path.includes('admin')) {
+          manifestUrl = '/manifest-admin.json';
+        } else if (path.includes('chofer')) {
+          manifestUrl = '/manifest-chofer.json';
+        }
+
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestUrl;
+        document.head.appendChild(link);
+      })();
+
+      // REGISTRO DEL SERVICE WORKER UNIFICADO
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW Registrado con éxito', reg.scope))
+            .catch(err => console.error('Error al registrar SW', err));
+        });
+      }
+    </script>
     <style>
       body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
     </style>
