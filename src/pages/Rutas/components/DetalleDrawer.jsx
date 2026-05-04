@@ -316,7 +316,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
           {/* ACORDEÓN: INFO DE ENTREGA (LOOK CRISTAL ESMERILADO BLANCO) */}
           <div className="bg-white/50 border border-white/60 rounded-2xl p-4 shadow-sm">
             <button onClick={() => setSeccionInfo(!seccionInfo)} className="w-full flex justify-between items-center p-3 hover:bg-white/5 transition">
-              <h4 className="font-black text-xs text-blue-900 uppercase tracking-widest mb-3 flex items-center gap-2"></i> Info de Entrega</h4>
+              <h4 className="font-black text-xs text-blue-900 uppercase tracking-widest mb-3 flex items-center gap-2"><i className="fas fa-map-marked-alt text-blue-600"></i> Info de Entrega</h4>
               <i className={`fas fa-chevron-${seccionInfo ? 'up' : 'down'} text-slate-500 text-xs transition-transform`}></i>
             </button>
             
