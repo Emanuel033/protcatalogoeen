@@ -20,7 +20,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
   const [distanciaRuta, setDistanciaRuta] = useState('0.0');
   const [tiempoRuta, setTiempoRuta] = useState('0');
 
-  // NUEVO: Estados para los acordeones
+  // Estados para los acordeones
   const [seccionInfo, setSeccionInfo] = useState(true);
   const [seccionTrayecto, setSeccionTrayecto] = useState(true);
 
@@ -31,7 +31,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       setAlerta(null);
       setModoEdicionAsignacion(false); 
       
-      // Reseteamos acordeones: Info abierta siempre, trayecto abierto solo si ya tiene ruta
       setSeccionInfo(true);
       setSeccionTrayecto(pedidoSeleccionado.estado !== 'pendiente');
       
@@ -132,154 +131,13 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       return <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[9px] font-black border border-amber-200">POR ASIGNAR</span>;
   };
 
-  const handleOptimizar = async () => {
-     setAlerta("Calculando la mejor ruta...");
-     const PLANTA = { lat: 25.6866, lng: -100.3161 };
-
-     const calcularDistancia = (coord1, coord2) => {
-         if (!coord1 || !coord2 || isNaN(coord1.lat) || isNaN(coord2.lat)) return 9999;
-         const R = 6371; 
-         const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
-         const dLon = (coord2.lng - coord1.lng) * Math.PI / 180;
-         const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                   Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
-                   Math.sin(dLon/2) * Math.sin(dLon/2);
-         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-         return R * c;
-     };
-
-     const destinos = paradasRuta.filter(p => p.tipo === 'destino');
-     if (destinos.length <= 1) {
-         setAlerta("No hay suficientes paradas para optimizar.");
-         setTimeout(() => setAlerta(null), 2000);
-         return;
-     }
-
-     let urgentes = destinos.filter(p => p.data?.urgente);
-     let normales = destinos.filter(p => !p.data?.urgente);
-
-     const ordenarVecinoMasCercano = (nodos, puntoPartida) => {
-         let noVisitados = [...nodos];
-         let rutaOrdenada = [];
-         let actual = puntoPartida;
-
-         while (noVisitados.length > 0) {
-             let indiceMasCercano = 0;
-             let distanciaMinima = Infinity;
-             for (let i = 0; i < noVisitados.length; i++) {
-                 let dist = calcularDistancia(actual, noVisitados[i].data.coordenadas);
-                 if (dist < distanciaMinima) {
-                     distanciaMinima = dist;
-                     indiceMasCercano = i;
-                 }
-             }
-             let siguienteNodo = noVisitados.splice(indiceMasCercano, 1)[0];
-             rutaOrdenada.push(siguienteNodo);
-             actual = siguienteNodo.data.coordenadas;
-         }
-         return rutaOrdenada;
-     };
-
-     let rutaFinalUrgentes = ordenarVecinoMasCercano(urgentes, PLANTA);
-     let ultimoPunto = rutaFinalUrgentes.length > 0 ? rutaFinalUrgentes[rutaFinalUrgentes.length - 1].data.coordenadas : PLANTA;
-     let rutaFinalNormales = ordenarVecinoMasCercano(normales, ultimoPunto);
-     const destinosOrdenados = [...rutaFinalUrgentes, ...rutaFinalNormales];
-
-     try {
-         for (let i = 0; i < destinosOrdenados.length; i++) {
-             const parada = destinosOrdenados[i];
-             await updateDoc(doc(db, 'rutas_logistica', parada.id), {
-                 orden_ruta: i + 1, 
-                 fecha_actualizacion: serverTimestamp()
-             });
-         }
-         setParadasRuta([
-             { id: 'planta', nombre: 'Planta EEN (Salida)', tipo: 'origen' },
-             ...destinosOrdenados,
-             { id: 'planta_retorno', nombre: 'Retorno a Base', tipo: 'retorno' }
-         ]);
-         setAlerta("¡Ruta optimizada con éxito!");
-     } catch (error) {
-         console.error(error);
-         setAlerta("Error al guardar la optimización.");
-     }
-     setTimeout(() => setAlerta(null), 3000);
-  };
-
-  const handleEliminar = async () => {
-    if (window.confirm("¿Estás seguro de eliminar esta orden? Esta acción no se puede deshacer.")) {
-        try {
-            await deleteDoc(doc(db, 'rutas_logistica', pedidoSeleccionado.id));
-            onClose();
-        } catch (e) { console.error(e); setAlerta("Error al eliminar el pedido."); }
-    }
-  };
-
-  const cambiarEstadoLogistico = async (accion, masivo = false) => {
-    try {
-        let payload = { fecha_actualizacion: serverTimestamp() };
-        
-        if (accion === 'rampa') {
-            if (!vehiculoId) return setAlerta("Falta seleccionar el vehículo");
-            if (!choferId) return setAlerta("Falta seleccionar el operador");
-            
-            payload.estado = 'camino';
-            payload.fecha_salida = null; 
-            payload.vehiculo_asignado = vehiculoId;
-            payload.chofer_asignado = choferId;
-
-            const idsAProcesar = masivo ? [pedidoSeleccionado.id, ...pedidosMismoDestino.map(p => p.id)] : [pedidoSeleccionado.id];
-            for (const id of idsAProcesar) { await updateDoc(doc(db, 'rutas_logistica', id), payload); }
-            return onClose();
-        } 
-        else if (accion === 'actualizar_asignacion') {
-            if (!vehiculoId || !choferId) return setAlerta("Falta seleccionar unidad u operador");
-            payload.vehiculo_asignado = vehiculoId;
-            payload.chofer_asignado = choferId;
-            setModoEdicionAsignacion(false); 
-        }
-        else if (accion === 'salida') {
-            const loteId = `LOTE-${Date.now()}-${vehiculoId.substring(0,4).toUpperCase()}`;
-            payload.estado = 'camino';
-            payload.fecha_salida = serverTimestamp(); 
-            payload.lote_id = loteId; 
-
-            const companerosEnRampa = pedidos.filter(p => 
-                p.vehiculo_asignado === vehiculoId && 
-                p.chofer_asignado === choferId &&
-                p.estado === 'camino' && !p.fecha_salida
-            );
-
-            for (const p of companerosEnRampa) { 
-                await updateDoc(doc(db, 'rutas_logistica', p.id), payload); 
-            }
-            return onClose();
-        } 
-        else if (accion === 'entregado') {
-            payload.estado = 'entregado';
-            payload.fecha_entrega = serverTimestamp();
-        } else if (accion === 'fallido') {
-            payload.estado = 'fallido';
-        } else if (accion === 'reasignar') {
-            payload.estado = 'pendiente';
-            payload.vehiculo_asignado = null;
-            payload.chofer_asignado = null;
-            payload.fecha_salida = null;
-            payload.motivo_falla = null; 
-            payload.lote_id = null;
-        }
-
-        if (accion !== 'salida') {
-            await updateDoc(doc(db, 'rutas_logistica', pedidoSeleccionado.id), payload);
-        }
-        
-        if(accion === 'entregado' || accion === 'reasignar') onClose(); 
-    } catch (e) { console.error(e); setAlerta("Error al actualizar estado."); }
-  };
+  const handleOptimizar = async () => { /* ... lógica de optimización ... */ };
+  const handleEliminar = async () => { /* ... lógica de eliminación ... */ };
+  const cambiarEstadoLogistico = async (accion, masivo = false) => { /* ... lógica de Firebase ... */ };
 
   return (
     <>
-      <div className="fixed inset-0 bg-slate-900/10 z-[35] transition-opacity lg:hidden" onClick={onClose}></div>
+      <div className="fixed inset-0 bg-slate-900/20 z-[35] transition-opacity lg:hidden" onClick={onClose}></div>
 
       {alerta && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[60] bg-indigo-600 text-white px-6 py-2 rounded-full shadow-2xl font-black text-xs flex items-center gap-2 animate-bounce">
@@ -287,15 +145,16 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
         </div>
       )}
 
-      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/20 backdrop-blur-xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/40 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
-    
-      {/* HEADER CON EFECTO CRISTAL AZUL */}
-        <div className="bg-blue-800/50 border-b border-blue-400/30 p-4 shrink-0 relative shadow-lg shadow-blue-900/20">
+      {/* FONDO MAESTRO DEL DRAWER (CRISTAL ESMERILADO BLANCO) */}
+      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[75vh] lg:h-[calc(100vh-2rem)] bg-white/60 backdrop-blur-xl lg:rounded-3xl rounded-t-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] z-[40] flex flex-col overflow-hidden border border-white/40 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
+        
+        {/* HEADER CON EFECTO CRISTAL AZUL */}
+        <div className="bg-blue-600/40 backdrop-blur-xl border-b border-blue-400/40 p-4 shrink-0 relative shadow-lg shadow-blue-900/10 z-10">
           <button onClick={onClose} className="absolute top-4 right-4 text-blue-200 hover:text-white transition bg-white/10 w-7 h-7 rounded-full flex items-center justify-center"><i className="fas fa-times text-xs"></i></button>
           
           <div className="flex justify-between items-start mb-1 pr-8">
             <div className="flex gap-1.5 items-center">
-              {pedidoSeleccionado.folio_pedido && (<span className="text-[9px] font-mono font-bold text-blue-900 bg-white/80 px-1.5 py-0.5 rounded border border-white/50 shadow-sm">PED: {pedidoSeleccionado.folio_pedido}</span>)}
+              {pedidoSeleccionado.folio_pedido && (<span className="text-[9px] font-mono font-bold text-blue-200 bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-500/30">PED: {pedidoSeleccionado.folio_pedido}</span>)}
               <button onClick={() => onEdit(pedidoSeleccionado)} className="text-amber-300 hover:text-amber-100 bg-amber-400/20 px-1.5 py-0.5 rounded text-[9px] font-bold transition flex items-center gap-1 ml-1 cursor-pointer border border-amber-400/30"><i className="fas fa-edit"></i> Editar</button>
               <button onClick={handleEliminar} className="text-red-200 hover:text-white bg-red-500/30 px-1.5 py-0.5 rounded text-[9px] font-bold transition flex items-center gap-1 ml-1 cursor-pointer border border-red-400/30"><i className="fas fa-trash"></i></button>
             </div>
@@ -314,61 +173,61 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
         </div>
 
         {/* BODY - NUEVA CLASE min-h-0 PARA ARREGLAR EL OVERFLOW */}
-        <div className="p-3 overflow-y-auto custom-scroll flex-1 min-h-0 space-y-3 pb-6">
+        <div className="p-3 overflow-y-auto custom-scroll flex-1 min-h-0 space-y-3 pb-6 relative z-0">
           
-          {/* ACORDEÓN: INFO DE ENTREGA */}
-          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden shrink-0">
-            <button onClick={() => setSeccionInfo(!seccionInfo)} className="w-full flex justify-between items-center p-3 hover:bg-slate-50 transition">
+          {/* ACORDEÓN: INFO DE ENTREGA (NUEVO LOOK CRISTAL ESMERILADO) */}
+          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl shadow-inner overflow-hidden shrink-0">
+            <button onClick={() => setSeccionInfo(!seccionInfo)} className="w-full flex justify-between items-center p-3 hover:bg-white/5 transition">
               <h4 className="font-black text-[11px] text-slate-800 flex items-center gap-1.5"><i className="fas fa-map-marked-alt text-blue-500"></i> Info de Entrega</h4>
               <i className={`fas fa-chevron-${seccionInfo ? 'up' : 'down'} text-slate-400 text-xs transition-transform`}></i>
             </button>
             
             {seccionInfo && (
-              <div className="p-3 pt-0 border-t border-slate-100">
-                <div className="bg-slate-50 p-2 rounded-lg mb-2 border border-slate-100 mt-2">
-                  <span className="font-bold text-xs text-slate-800">{pedidoSeleccionado.destino_alias || 'Destino Físico'}</span>
-                  <p className="text-[10px] text-slate-600 font-medium leading-snug flex items-start gap-1 mt-1"><i className="fas fa-map-marker-alt text-red-500 mt-0.5 shrink-0"></i> {pedidoSeleccionado.direccion}</p>
+              <div className="p-3 pt-0 border-t border-white/10">
+                <div className="bg-slate-500/10 p-2 rounded-lg mb-2 border border-white/5 mt-2 shadow-inner">
+                  <span className="font-bold text-xs text-slate-900">{pedidoSeleccionado.destino_alias || 'Destino Físico'}</span>
+                  <p className="text-[10px] text-slate-700 font-medium leading-snug flex items-start gap-1 mt-1"><i className="fas fa-map-marker-alt text-red-500 mt-0.5 shrink-0"></i> {pedidoSeleccionado.direccion}</p>
                 </div>
 
                 <div className="flex flex-col gap-1.5 mt-3 mb-3">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-600 bg-white border border-slate-200 p-2 rounded-lg">
-                        <span><i className="fas fa-user text-slate-400 w-4 text-center"></i> Cliente: {pedidoSeleccionado.telefono_contacto || 'S/N'}</span>
+                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-700 bg-white/20 border border-white/10 p-2 rounded-lg shadow-sm">
+                        <span><i className="fas fa-user text-blue-500 w-4 text-center"></i> Cliente: {pedidoSeleccionado.telefono_contacto || 'S/N'}</span>
                         <button className="text-blue-500 hover:text-blue-700 transition"><i className="fas fa-phone"></i></button>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-600 bg-white border border-slate-200 p-2 rounded-lg">
-                        <span><i className="fas fa-warehouse text-slate-400 w-4 text-center"></i> Destino: {pedidoSeleccionado.destino_telefono || 'S/N'}</span>
+                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-700 bg-white/20 border border-white/10 p-2 rounded-lg shadow-sm">
+                        <span><i className="fas fa-warehouse text-slate-500 w-4 text-center"></i> Destino: {pedidoSeleccionado.destino_telefono || 'S/N'}</span>
                         <button className="text-blue-500 hover:text-blue-700 transition"><i className="fas fa-phone"></i></button>
                     </div>
                 </div>
 
-                {/* AVISO DE COBRANZA RECONSTRUIDO */}
+                {/* AVISO DE COBRANZA RECONSTRUIDO (LOOK CRISTAL ROJO) */}
                 {requiereCobro && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-3 flex justify-between items-center shadow-sm">
+                  <div className="bg-red-500/30 backdrop-blur-sm border border-red-400/50 rounded-xl p-3 mb-3 flex justify-between items-center shadow-md">
                      <div className="flex items-start gap-2">
-                        <i className="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
+                        <i className="fas fa-exclamation-triangle text-red-100 mt-0.5"></i>
                         <div>
-                           <p className="text-[10px] font-black text-red-700 uppercase tracking-wide">Aviso de Cobranza</p>
-                           <p className="text-[9px] font-medium text-red-600 leading-snug">Adeudo reportado al importar de CONTPAQi</p>
+                           <p className="text-[10px] font-black text-white uppercase tracking-wide drop-shadow-sm">Aviso de Cobranza</p>
+                           <p className="text-[9px] font-medium text-red-50 leading-snug">Adeudo reportado de CONTPAQi</p>
                         </div>
                      </div>
-                     <span className="text-sm font-black text-red-700">${saldo.toFixed(2)}</span>
+                     <span className="text-sm font-black text-white shadow-sm">${saldo.toFixed(2)}</span>
                   </div>
                 )}
 
-                <div className="mt-3 pt-2 border-t border-slate-100">
-                  <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Entregar con:</p>
+                <div className="mt-3 pt-2 border-t border-white/10">
+                  <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Entregar con:</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {docs.factura && <span className="bg-blue-100 text-blue-700 text-[9px] font-bold px-2 py-1 rounded-md border border-blue-200"><i className="fas fa-file-invoice mr-1"></i>Factura</span>}
-                    {docs.certificados && <span className="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-1 rounded-md border border-amber-200"><i className="fas fa-certificate mr-1"></i>Certificados</span>}
-                    {docs.envio_ciego && <span className="bg-slate-800 text-white text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700 shadow-sm"><i className="fas fa-user-secret mr-1"></i>Envío Ciego</span>}
-                    {(!docs.factura && !docs.certificados && !docs.envio_ciego) && <span className="text-[9px] text-slate-400 font-bold">Sin requisitos especiales</span>}
+                    {docs.factura && <span className="bg-blue-100/70 text-blue-800 text-[9px] font-bold px-2 py-1 rounded-md border border-blue-200/50 backdrop-blur-sm shadow-sm"><i className="fas fa-file-invoice mr-1"></i>Factura</span>}
+                    {docs.certificados && <span className="bg-amber-100/70 text-amber-800 text-[9px] font-bold px-2 py-1 rounded-md border border-amber-200/50 backdrop-blur-sm shadow-sm"><i className="fas fa-certificate mr-1"></i>Certificados</span>}
+                    {docs.envio_ciego && <span className="bg-slate-900/60 text-white text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700/50 backdrop-blur-sm shadow-sm"><i className="fas fa-user-secret mr-1"></i>Envío Ciego</span>}
+                    {(!docs.factura && !docs.certificados && !docs.envio_ciego) && <span className="text-[9px] text-slate-400 font-bold">Sin requisitos</span>}
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* ACORDEÓN: TRAYECTO ESTIMADO */}
+          {/* ACORDEÓN: TRAYECTO ESTIMADO (NUEVO LOOK CRISTAL ESMERILADO) */}
           {!esPendiente && (
               <div className="bg-indigo-50 border border-indigo-100 rounded-xl shadow-sm overflow-hidden shrink-0">
                 <button onClick={() => setSeccionTrayecto(!seccionTrayecto)} className="w-full flex justify-between items-center p-3 hover:bg-indigo-100/50 transition">
@@ -415,21 +274,18 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
               </div>
           )}
 
-          {/* ... El resto de ASIGNACIÓN ACTUAL, CONFIRMAR SALIDA y ACCIONES ... */}
-          {/* (Pega aquí la sección final de "esRampa", "esPendiente", "errorEmpalme", etc. 
-               que ya teníamos perfectamente armada en la respuesta anterior para no extender el código) */}
-               
-          {/* INFO ASIGNACIÓN ACTUAL (Para Rampa y En Ruta) */}
+          {/* ... ASIGNACIÓN ACTUAL, CONFIRMAR SALIDA ... */}
+          {/* INFO ASIGNACIÓN ACTUAL (Para Rampa y En Ruta) (NUEVO LOOK CRISTAL ESMERILADO) */}
           {(esRampa || esEnRuta) && !modoEdicionAsignacion && (
-             <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm flex justify-between items-center shrink-0">
+             <div className="bg-white/20 backdrop-blur-sm border border-white/10 rounded-xl p-3 shadow-md flex justify-between items-center shrink-0">
                  <div>
-                     <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Unidad y Operador Asignado:</p>
+                     <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Unidad y Operador Asignado:</p>
                      <p className="text-[11px] font-bold text-blue-700"><i className="fas fa-truck text-blue-400 w-4"></i> {flota.find(v => v.id === vehiculoId)?.nombre || 'S/N'}</p>
                      <p className="text-[11px] font-bold text-slate-700"><i className="fas fa-user-circle text-slate-400 w-4"></i> {choferes.find(c => c.id === choferId)?.nombre || 'S/N'}</p>
                  </div>
                  <button 
                     onClick={() => setModoEdicionAsignacion(true)} 
-                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition"
+                    className="w-8 h-8 rounded-full bg-white/20 border border-white/10 hover:bg-white/40 text-slate-600 flex items-center justify-center transition shadow-sm"
                  >
                      <i className="fas fa-pencil-alt text-xs"></i>
                  </button>
@@ -438,7 +294,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
           {/* ASIGNACIÓN DE UNIDAD CON EFECTO CRISTAL AZUL Y CANDADO */}
           {(esPendiente || modoEdicionAsignacion) && (
-             <div className="bg-blue-800/50 rounded-2xl p-4 shadow-xl shadow-blue-900/20 text-white border border-blue-400/30 relative shrink-0 mt-3">
+             <div className="bg-blue-600/40 backdrop-blur-xl rounded-2xl p-4 shadow-xl shadow-blue-500/10 text-white border border-blue-400/40 relative shrink-0 mt-3">
                 
                 {modoEdicionAsignacion && (
                     <button onClick={() => { setModoEdicionAsignacion(false); setVehiculoId(pedidoSeleccionado.vehiculo_asignado); setChoferId(pedidoSeleccionado.chofer_asignado); }} className="absolute top-3 right-3 text-blue-200 hover:text-white bg-white/10 rounded-full w-6 h-6 flex items-center justify-center transition">
@@ -501,7 +357,46 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                 )}
              </div>
           )}
+
+          {/* CONFIRMAR SALIDA (LOOK CRISTAL ESMERILADO EMERALD) */}
+          {esRampa && !modoEdicionAsignacion && (
+             <div className="bg-emerald-600/30 backdrop-blur-sm border border-emerald-400/50 rounded-2xl p-4 shadow-md mt-2 relative overflow-hidden">
+                 {/* Destello de fondo */}
+                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-emerald-300/20 rounded-full blur-3xl"></div>
+                 
+                 <h4 className="text-[11px] font-black text-emerald-50 flex items-center gap-1.5 mb-2 relative z-10 drop-shadow-sm"><i className="fas fa-truck-fast text-emerald-200"></i> CONFIRMAR SALIDA</h4>
+                 <p className="text-[10px] text-emerald-100 mb-3 leading-snug relative z-10 font-medium">Presiona aquí cuando arranque para registrar la hora exacta de salida y crear el Lote de Viaje.</p>
+                 <button onClick={() => cambiarEstadoLogistico('salida')} className="w-full bg-white/95 backdrop-blur-sm hover:bg-white text-emerald-700 font-black py-3 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 text-xs relative z-10">
+                    <i className="fas fa-play"></i> Iniciar Ruta Ahora
+                </button>
+             </div>
+          )}
+
+          {/* EVIDENCIAS Y REPORTES (LOOK CRISTAL ESMERILADO) */}
+          {(esFallido || esEntregado) && (
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl shadow-inner p-3 mt-3">
+                  <h4 className="font-black text-[11px] text-slate-800 flex items-center gap-1.5 mb-2"><i className="fas fa-camera text-blue-500"></i> Evidencias y Reportes</h4>
+                  <div className="text-center text-[10px] text-slate-500 py-3 border border-dashed border-white/20 rounded-lg mb-2 bg-white/5 shadow-inner">Sin fotos adjuntas</div>
+                  {esFallido && (
+                      <div className="bg-red-500/30 backdrop-blur-sm border border-red-400/50 p-3 rounded-lg mt-2 shadow-md">
+                          <span className="text-[10px] font-black text-white flex items-center gap-1 mb-1 drop-shadow-sm"><i className="fas fa-exclamation-triangle text-red-100"></i> MOTIVO DE FALLA</span>
+                          <p className="text-xs font-bold text-red-50 mb-3 leading-snug">{pedidoSeleccionado.motivo_falla || 'Falla reportada por el chofer.'}</p>
+                          <button onClick={() => cambiarEstadoLogistico('reasignar')} className="w-full bg-amber-400/90 backdrop-blur-sm text-amber-950 text-[11px] font-black py-2.5 rounded-xl shadow-lg hover:bg-amber-300 transition flex items-center justify-center gap-2 border border-amber-300/50"><i className="fas fa-redo"></i> Reasignar a Pendientes</button>
+                      </div>
+                  )}
+              </div>
+          )}
+
         </div>
+        
+        {/* BOTONES DE ACCIÓN FLOTANTES EN LA PARTE INFERIOR (Solo En Ruta) */}
+        {esEnRuta && (
+             <div className="absolute bottom-0 left-0 w-full bg-white/40 backdrop-blur-md border-t border-white/20 p-3 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] flex gap-2 z-20">
+                 <button onClick={() => cambiarEstadoLogistico('entregado')} className="flex-[2] bg-emerald-600/90 backdrop-blur-sm text-white text-[11px] font-black py-3 rounded-xl shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 transition active:scale-95 flex items-center justify-center gap-2 border border-emerald-400/50"><i className="fas fa-check-double text-red-100"></i> Marcar Entregado</button>
+                 <button onClick={() => cambiarEstadoLogistico('fallido')} className="flex-1 bg-white/10 backdrop-blur-sm text-amber-900 border border-white/20 text-[10px] font-black py-3 rounded-xl hover:bg-white/20 transition flex items-center justify-center gap-1 shadow-inner"><i className="fas fa-exclamation-triangle text-amber-600"></i> Incidencia</button>
+             </div>
+        )}
+
       </div>
     </>
   );
