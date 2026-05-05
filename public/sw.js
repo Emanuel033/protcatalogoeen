@@ -1,11 +1,14 @@
-// BUMP DE VERSIÓN: Cambiamos a v2 para que el navegador actualice el caché
-const CACHE_NAME = 'een-sistema-react-v2'; 
+// BUMP DE VERSIÓN: Cambiamos a v3 para forzar la actualización
+const CACHE_NAME = 'een-sistema-react-v3'; 
 
 const urlsToCache = [
   '/',
   '/rutas',
-  '/inventario', // <-- Asegúrate de poner la ruta exacta que usas para el inventario
-  '/catalogo_completo.json', // <-- LA MAGIA: El catálogo guardado en el teléfono
+  '/inventario', 
+  '/catalogo_completo.json', 
+  '/manifest-inventario.json', // <-- Agregamos el manifest
+  '/icons/icono-inventario-192.png', // <-- Agregamos los íconos
+  '/icons/icono-inventario-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 
