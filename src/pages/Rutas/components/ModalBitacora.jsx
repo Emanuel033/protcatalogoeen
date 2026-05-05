@@ -89,11 +89,13 @@ const ModalBitacora = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-2 sm:p-6 transition-opacity">
-      <div className="bg-white/80 backdrop-blur-md border border-white/30 rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden flex flex-col h-[85vh] transform-gpu">
+    // ELIMINADO transition-opacity y blur extremo en el wrapper
+    <div className="fixed inset-0 bg-slate-900/60 z-[120] flex items-center justify-center p-2 sm:p-6">
+      {/* ELIMINADO transform-gpu */}
+      <div className="bg-white/80 backdrop-blur-md border border-white/30 rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden flex flex-col h-[85vh]">
         
-        {/* HEADER CRISTAL OSCURO ÍNDIGO */}
-        <div className="bg-indigo-900/60 backdrop-blur-md border-b border-white/20 p-5 text-white flex justify-between items-center shrink-0 shadow-md z-20">
+        {/* HEADER */}
+        <div className="bg-indigo-900/80 border-b border-white/20 p-5 text-white flex justify-between items-center shrink-0 shadow-md z-20">
           <h3 className="text-lg font-black flex items-center gap-2 drop-shadow-sm">
             <i className="fas fa-book text-indigo-200"></i> Bitácora de Logística (Últimos Movimientos)
           </h3>
@@ -102,46 +104,46 @@ const ModalBitacora = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* TOOLBAR CRISTAL */}
-        <div className="p-4 border-b border-white/30 bg-white/10 backdrop-blur-md flex gap-3 justify-between items-center shrink-0 z-10">
+        {/* TOOLBAR */}
+        <div className="p-4 border-b border-white/50 bg-white/50 flex gap-3 justify-between items-center shrink-0 z-10">
           <div className="relative w-full sm:w-64">
             <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
-            <input type="text" placeholder="Buscar folio, cliente..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="border border-white/50 rounded-xl pl-9 pr-3 py-2 text-sm outline-none focus:border-indigo-400 font-bold w-full bg-white/50 focus:bg-white/80 transition" />
+            <input type="text" placeholder="Buscar folio, cliente..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="border border-white/80 rounded-xl pl-9 pr-3 py-2 text-sm outline-none focus:border-indigo-400 font-bold w-full bg-white/80 focus:bg-white transition" />
           </div>
-          <button onClick={exportToCSV} className="bg-emerald-500/90 hover:bg-emerald-500 text-white border border-emerald-400 px-4 py-2 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2">
+          <button onClick={exportToCSV} className="bg-emerald-500 text-white border border-emerald-400 px-4 py-2 rounded-xl font-bold text-xs shadow-md hover:bg-emerald-600 transition flex items-center gap-2">
             <i className="fas fa-file-excel"></i> Exportar a Excel
           </button>
         </div>
 
-        {/* TABLA CRISTAL */}
-        <div className="flex-1 overflow-y-auto custom-scroll bg-transparent relative z-0">
+        {/* TABLA: Colores mas sólidos pero manteniendo el tema */}
+        <div className="flex-1 overflow-y-auto custom-scroll bg-white/60 relative z-0">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-white/40 backdrop-blur-md border-b border-white/40 text-slate-700 font-black text-[10px] uppercase sticky top-0 z-10 shadow-sm cursor-pointer select-none">
+            <thead className="bg-white/80 border-b border-white text-slate-700 font-black text-[10px] uppercase sticky top-0 z-10 shadow-sm cursor-pointer select-none">
               <tr>
-                <th onClick={() => handleSort('fecha_creacion')} className="px-4 py-3 hover:bg-white/50 transition">Fechas y Lote {getSortIcon('fecha_creacion')}</th>
-                <th onClick={() => handleSort('folio_pedido')} className="px-4 py-3 hover:bg-white/50 transition">Folios {getSortIcon('folio_pedido')}</th>
-                <th onClick={() => handleSort('cliente_nombre')} className="px-4 py-3 hover:bg-white/50 transition">Cliente / Destino {getSortIcon('cliente_nombre')}</th>
-                <th onClick={() => handleSort('tipo_envio')} className="px-4 py-3 hover:bg-white/50 transition">Modalidad {getSortIcon('tipo_envio')}</th>
-                <th onClick={() => handleSort('chofer_asignado')} className="px-4 py-3 hover:bg-white/50 transition">Operador {getSortIcon('chofer_asignado')}</th>
-                <th onClick={() => handleSort('estado')} className="px-4 py-3 hover:bg-white/50 transition text-center">Estado {getSortIcon('estado')}</th>
+                <th onClick={() => handleSort('fecha_creacion')} className="px-4 py-3 hover:bg-white transition">Fechas y Lote {getSortIcon('fecha_creacion')}</th>
+                <th onClick={() => handleSort('folio_pedido')} className="px-4 py-3 hover:bg-white transition">Folios {getSortIcon('folio_pedido')}</th>
+                <th onClick={() => handleSort('cliente_nombre')} className="px-4 py-3 hover:bg-white transition">Cliente / Destino {getSortIcon('cliente_nombre')}</th>
+                <th onClick={() => handleSort('tipo_envio')} className="px-4 py-3 hover:bg-white transition">Modalidad {getSortIcon('tipo_envio')}</th>
+                <th onClick={() => handleSort('chofer_asignado')} className="px-4 py-3 hover:bg-white transition">Operador {getSortIcon('chofer_asignado')}</th>
+                <th onClick={() => handleSort('estado')} className="px-4 py-3 hover:bg-white transition text-center">Estado {getSortIcon('estado')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/20">
+            <tbody className="divide-y divide-white/60">
               {loading ? (
-                <tr><td colSpan="6" className="text-center py-10 text-slate-700 font-bold bg-white/20"><i className="fas fa-spinner fa-spin mr-2"></i> Cargando historial...</td></tr>
+                <tr><td colSpan="6" className="text-center py-10 text-slate-700 font-bold"><i className="fas fa-spinner fa-spin mr-2"></i> Cargando historial...</td></tr>
               ) : (
                 datosProcesados.map(v => {
                   const nombreChofer = choferes.find(c => c.id === v.chofer_asignado)?.nombre || 'S/N';
                   let stBadge = '';
-                  if(v.estado === 'pendiente') stBadge = '<span class="bg-amber-100/80 text-amber-900 border border-amber-300 px-2 py-1 rounded-md text-[9px] font-black shadow-sm backdrop-blur-sm">PENDIENTE</span>';
-                  else if(v.estado === 'camino') stBadge = '<span class="bg-blue-100/80 text-blue-900 border border-blue-300 px-2 py-1 rounded-md text-[9px] font-black shadow-sm backdrop-blur-sm">EN RUTA</span>';
-                  else if(v.estado === 'entregado') stBadge = '<span class="bg-emerald-100/80 text-emerald-900 border border-emerald-300 px-2 py-1 rounded-md text-[9px] font-black shadow-sm backdrop-blur-sm">ENTREGADO</span>';
-                  else stBadge = '<span class="bg-red-100/80 text-red-900 border border-red-300 px-2 py-1 rounded-md text-[9px] font-black shadow-sm backdrop-blur-sm">FALLA</span>';
+                  if(v.estado === 'pendiente') stBadge = '<span class="bg-amber-100 text-amber-900 border border-amber-200 px-2 py-1 rounded-md text-[9px] font-black shadow-sm">PENDIENTE</span>';
+                  else if(v.estado === 'camino') stBadge = '<span class="bg-blue-100 text-blue-900 border border-blue-200 px-2 py-1 rounded-md text-[9px] font-black shadow-sm">EN RUTA</span>';
+                  else if(v.estado === 'entregado') stBadge = '<span class="bg-emerald-100 text-emerald-900 border border-emerald-200 px-2 py-1 rounded-md text-[9px] font-black shadow-sm">ENTREGADO</span>';
+                  else stBadge = '<span class="bg-red-100 text-red-900 border border-red-200 px-2 py-1 rounded-md text-[9px] font-black shadow-sm">FALLA</span>';
 
                   let tipoTxt = v.tipo_envio === 'fletera_domicilio' ? 'Fletera (Dom)' : v.tipo_envio === 'fletera_ocurre' ? 'Fletera (Ocu)' : 'Local';
 
                   return (
-                    <tr key={v.id} className="hover:bg-white/30 transition bg-white/10">
+                    <tr key={v.id} className="hover:bg-white/80 transition bg-transparent">
                       <td className="px-4 py-3">
                         <div className="text-[10px] text-slate-700 font-bold mb-0.5">Cap: {formatearFecha(v.fecha_creacion)}</div>
                         <div className="text-[10px] text-indigo-800 font-bold mb-0.5"><i className="fas fa-truck text-[9px]"></i> Sal: {formatearFecha(v.fecha_salida)}</div>
