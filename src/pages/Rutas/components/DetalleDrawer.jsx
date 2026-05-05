@@ -106,7 +106,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
   const isOpen = Boolean(pedidoSeleccionado);
   if (!isOpen) return null;
 
-  const docs = pedidoSeleccionado?.documentacion || {};
   const esPendiente = pedidoSeleccionado.estado === 'pendiente';
   const esRampa = pedidoSeleccionado.estado === 'camino' && !pedidoSeleccionado.fecha_salida;
   const esEnRuta = pedidoSeleccionado.estado === 'camino' && pedidoSeleccionado.fecha_salida;
@@ -134,7 +133,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       return <span className="bg-slate-800 text-white px-2 py-1 rounded text-[9px] font-black">POR ASIGNAR</span>;
   };
 
-  // --- FUNCIONES LÓGICAS COMPLETAS ---
   const handleOptimizar = async () => {
      setAlerta("Calculando la mejor ruta...");
      const PLANTA = { lat: 25.6866, lng: -100.3161 };
@@ -369,7 +367,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
             )}
           </div>
 
-          {/* RUTA DE VIAJE (Restaurada y con botón Optimizar) */}
+          {/* RUTA DE VIAJE */}
           {(pedidoSeleccionado.estado === 'camino' || pedidoSeleccionado.estado === 'entregado') && paradasRuta.length > 0 && (
             <div className="bg-white/60 border border-white rounded-xl shadow-sm overflow-hidden shrink-0 mt-3">
               <button onClick={() => setSeccionTrayecto(!seccionTrayecto)} className="w-full flex justify-between items-center p-3 hover:bg-white/80 transition">
@@ -409,7 +407,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                         <p className="text-xs font-black text-blue-900">{distanciaRuta} km</p>
                      </div>
                      
-                     {/* BOTÓN OPTIMIZAR APARECE AQUÍ (Solo en rampa y con varios destinos) */}
                      {esRampa && paradasRuta.filter(p => p.tipo === 'destino').length > 1 && (
                        <button onClick={handleOptimizar} className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-black shadow-sm transition active:scale-95 flex items-center gap-1">
                           <i className="fas fa-magic"></i> Optimizar Ruta
@@ -427,13 +424,51 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
             </div>
           )}
 
-          {/* ASIGNACIÓN DE UNIDAD */}
+          {/* ASIGNACIÓN DE UNIDAD Y HOT SWAP */}
+          {(!esPendiente && !modoEdicionAsignacion && !esEntregado && !esFallido) && (
+             <div className="bg-slate-100 rounded-2xl p-4 shadow-sm border border-slate-200 shrink-0 mt-3 flex justify-between items-center">
+                <div>
+                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Unidad Asignada</p>
+                   <p className="text-xs font-black text-blue-900"><i className="fas fa-truck text-blue-600 mr-1"></i> {flota.find(v => v.id === pedidoSeleccionado.vehiculo_asignado)?.nombre || 'Sin unidad'}</p>
+                   <p className="text-[10px] font-bold text-slate-700 mt-1"><i className="fas fa-user-tie text-slate-400 mr-1"></i> {choferes.find(c => c.id === pedidoSeleccionado.chofer_asignado)?.nombre || 'Sin operador'}</p>
+                </div>
+                <button 
+                   onClick={() => {
+                      setVehiculoId(pedidoSeleccionado.vehiculo_asignado);
+                      setChoferId(pedidoSeleccionado.chofer_asignado);
+                      setModoEdicionAsignacion(true);
+                   }} 
+                   className="bg-white border border-slate-300 text-slate-600 hover:text-blue-600 hover:border-blue-400 w-10 h-10 rounded-xl flex items-center justify-center transition shadow-sm"
+                   title="Reasignar Unidad o Chofer"
+                >
+                   <i className="fas fa-exchange-alt"></i>
+                </button>
+             </div>
+          )}
+
           {(esPendiente || modoEdicionAsignacion) && (
-             <div className="bg-blue-800/90 rounded-2xl p-4 shadow-xl text-white border border-blue-700 relative shrink-0 mt-3">
-                <h4 className="text-[10px] font-black uppercase tracking-wider mb-3 text-white">
-                    <i className="fas fa-clipboard-check"></i> {modoEdicionAsignacion ? 'Corregir Asignación' : 'Asignar Unidad'}
-                </h4>
+             <div className="bg-blue-800/90 rounded-2xl p-4 shadow-xl text-white border border-blue-700 relative shrink-0 mt-3 animate-fade-in">
+                <div className="flex justify-between items-center mb-3">
+                   <h4 className="text-[10px] font-black uppercase tracking-wider text-white">
+                       <i className="fas fa-clipboard-check"></i> {modoEdicionAsignacion ? 'Corregir Asignación' : 'Asignar Unidad'}
+                   </h4>
+                   {modoEdicionAsignacion && (
+                      <button onClick={() => setModoEdicionAsignacion(false)} className="text-blue-200 hover:text-white text-xs font-bold"><i className="fas fa-times"></i> Cancelar</button>
+                   )}
+                </div>
                 
+                {/* VALIDACIONES EN VIVO */}
+                {errorEmpalme && (
+                    <div className="bg-red-500/20 border border-red-500 text-red-100 text-[10px] p-2 rounded-lg mb-3 flex items-start gap-2">
+                        <i className="fas fa-exclamation-triangle mt-0.5"></i> <span>{errorEmpalme}</span>
+                    </div>
+                )}
+                {advertenciaChofer && !errorEmpalme && (
+                    <div className="bg-amber-500/20 border border-amber-500 text-amber-200 text-[10px] p-2 rounded-lg mb-3 flex items-start gap-2">
+                        <i className="fas fa-exclamation-circle mt-0.5"></i> <span>El operador ya está armando otra unidad.</span>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {flota.map(v => {
                     const isSelected = vehiculoId === v.id;
@@ -452,13 +487,20 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                   </select>
                 </div>
 
-                {/* AQUÍ SE USA cambiarEstadoLogistico */}
                 {esPendiente ? (
-                    <button onClick={() => cambiarEstadoLogistico('rampa')} className="w-full bg-white text-blue-800 font-black py-3 rounded-xl shadow-lg hover:bg-slate-100 transition active:scale-95 text-xs">
+                    <button 
+                       onClick={() => cambiarEstadoLogistico('rampa')} 
+                       disabled={!!errorEmpalme}
+                       className={`w-full font-black py-3 rounded-xl shadow-lg transition text-xs ${errorEmpalme ? 'bg-slate-400 text-slate-200 cursor-not-allowed opacity-50' : 'bg-white text-blue-800 hover:bg-slate-100 active:scale-95'}`}
+                    >
                         <i className="fas fa-link"></i> Pre-Asignar
                     </button>
                 ) : (
-                    <button onClick={() => cambiarEstadoLogistico('actualizar_asignacion')} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-3 rounded-xl shadow-lg transition active:scale-95 text-xs">
+                    <button 
+                       onClick={() => cambiarEstadoLogistico('actualizar_asignacion')} 
+                       disabled={!!errorEmpalme}
+                       className={`w-full font-black py-3 rounded-xl shadow-lg transition text-xs ${errorEmpalme ? 'bg-slate-400 text-slate-200 cursor-not-allowed opacity-50' : 'bg-emerald-500 hover:bg-emerald-400 text-white active:scale-95'}`}
+                    >
                         <i className="fas fa-save"></i> Guardar Cambios
                     </button>
                 )}
