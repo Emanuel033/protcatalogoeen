@@ -19,6 +19,7 @@ const RecenterMap = ({ lat, lng }) => {
 
 const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   const { clientes, fleteras } = useLogistica();
+  const clientesLista = clientes || [];
   
   const [folioPedido, setFolioPedido] = useState('');
   const [folioFactura, setFolioFactura] = useState('');
@@ -50,14 +51,43 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         setCodigoSAP(ordenAEditar.cliente_codigo || '');
         setTelefonoCliente(ordenAEditar.telefono_contacto || '');
         setUrgente(ordenAEditar.urgente || false);
-        setMetodoEnvio(ordenAEditar.tipo_envio || 'bodega_cliente');
-        setAliasDestino(ordenAEditar.destino_alias || '');
+
+        // --- RESCATE PARA PEDIDOS VIEJOS (Contpaq raw data) ---
+        let tipoEnvioDB = ordenAEditar.tipo_envio || 'bodega_cliente';
+        let aliasDB = ordenAEditar.destino_alias || '';
+
+        if (tipoEnvioDB.includes(' Y ')) {
+            const partes = tipoEnvioDB.split(' Y ');
+            const transp = partes[0].trim();
+            const mod = partes[1].trim();
+
+            if (transp === 'LOCAL') {
+                tipoEnvioDB = 'bodega_cliente';
+                if (mod === 'DF') aliasDB = 'Domicilio Fiscal';
+                if (mod === 'OB') aliasDB = 'Otra Bodega';
+            } else {
+                tipoEnvioDB = (mod === 'O' || mod === 'OCURRE') ? 'fletera_ocurre' : 'fletera_domicilio';
+                aliasDB = transp;
+            }
+        } else if (tipoEnvioDB !== 'fletera_domicilio' && tipoEnvioDB !== 'fletera_ocurre') {
+            tipoEnvioDB = 'bodega_cliente'; // Limpieza forzada
+        }
+
+        setMetodoEnvio(tipoEnvioDB);
+        setAliasDestino(aliasDB);
+        // ------------------------------------------------------
+
         setDireccionFisica(ordenAEditar.direccion || '');
         setTelefonoBodega(ordenAEditar.destino_telefono || '');
         setHorariosEntrega(ordenAEditar.destino_horario || '');
         setLinkMaps(ordenAEditar.link_maps || '');
         setDocs(ordenAEditar.documentacion || { factura: true, certificados: false, orden_compra: false, envio_ciego: false });
         if (ordenAEditar.coordenadas?.lat) setPosicionPin(ordenAEditar.coordenadas);
+
+        // Intentamos cargar el cliente seleccionado para que salgan sus bodegas
+        const foundClient = clientesLista.find(c => c.nombre?.toUpperCase() === (ordenAEditar.cliente_nombre || '').toUpperCase());
+        setClienteSeleccionado(foundClient || null);
+
       } else {
         setFolioPedido(''); setFolioFactura(''); setClienteNombre(''); setCodigoSAP('');
         setTelefonoCliente(''); setUrgente(false); setMetodoEnvio('bodega_cliente');
@@ -65,11 +95,11 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         setTelefonoBodega(''); setHorariosEntrega(''); setLinkMaps('');
         setDocs({ factura: true, certificados: false, orden_compra: false, envio_ciego: false });
         setPosicionPin({ lat: 25.6866, lng: -100.3161 });
+        setClienteSeleccionado(null);
       }
     }
-  }, [isOpen, ordenAEditar]);
+  }, [isOpen, ordenAEditar, clientesLista]);
 
-  const clientesLista = clientes || [];
   const clientesFiltrados = clientesLista.filter(c => {
     if (filtroActivo === 'nombre' && clienteNombre.length > 0) return c.nombre?.toLowerCase().includes(clienteNombre.toLowerCase());
     if (filtroActivo === 'codigo' && codigoSAP.length > 0) return c.codigo?.toLowerCase().includes(codigoSAP.toLowerCase());
@@ -104,18 +134,53 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   const handleGuardar = async () => {
     if(!clienteNombre || !direccionFisica || isNaN(posicionPin.lat) || isNaN(posicionPin.lng)) { alert("Cliente y Dirección son obligatorios"); return; }
 
+    const nombreLimpio = clienteNombre.trim().toUpperCase();
+    
+    // --- LÓGICA DE AUTO-GUARDADO DE CATÁLOGOS (CLIENTES Y DIRECCIONES) ---
+    if (isBodega) {
+        const clienteExistente = clientesLista.find(c => c.nombre?.toUpperCase() === nombreLimpio);
+        
+        const nuevaDireccionObj = {
+            alias: aliasDestino.trim() || 'Bodega Principal',
+            direccion: direccionFisica.trim(),
+            telefono: telefonoBodega.trim() || '',
+            horario: horariosEntrega.trim() || '',
+            link_maps: linkMaps.trim() || '',
+            coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
+        };
+
+        if (clienteExistente) {
+            // Revisar si la dirección ya está en su catálogo
+            const existeDir = (clienteExistente.direcciones || []).some(d => d.direccion.toLowerCase() === direccionFisica.trim().toLowerCase());
+            if (!existeDir) {
+                const nuevasDirecciones = [...(clienteExistente.direcciones || []), nuevaDireccionObj];
+                await updateDoc(doc(db, 'clientes', clienteExistente.id), { direcciones: nuevasDirecciones });
+            }
+        } else {
+            // El cliente no existe, lo damos de alta automáticamente
+            await addDoc(collection(db, 'clientes'), {
+                nombre: nombreLimpio,
+                codigo: (codigoSAP || 'S/C').trim().toUpperCase(),
+                telefono: telefonoCliente || '',
+                direcciones: [nuevaDireccionObj],
+                fecha_creacion: serverTimestamp()
+            });
+        }
+    }
+    // ----------------------------------------------------------------------
+
     const payload = {
         folio_pedido: folioPedido || null,
         folio_factura: folioFactura || null,
-        cliente_codigo: codigoSAP || null,
-        cliente_nombre: clienteNombre,
+        cliente_codigo: (codigoSAP || 'S/C').trim().toUpperCase(),
+        cliente_nombre: nombreLimpio,
         telefono_contacto: telefonoCliente || null,
         tipo_envio: metodoEnvio,
-        destino_alias: aliasDestino,
-        direccion: direccionFisica,
-        destino_telefono: telefonoBodega,
-        destino_horario: horariosEntrega,
-        link_maps: linkMaps || null,
+        destino_alias: aliasDestino.trim(),
+        direccion: direccionFisica.trim(),
+        destino_telefono: telefonoBodega.trim(),
+        destino_horario: horariosEntrega.trim(),
+        link_maps: linkMaps.trim() || null,
         coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng },
         documentacion: docs,
         urgente: urgente,
@@ -140,12 +205,9 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   if (!isOpen) return null;
 
   return (
-    // CONTENEDOR PRINCIPAL: Solo fondo oscuro, SIN BLUR
     <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-2 sm:p-4">
-      {/* MODAL: Aquí va el cristal maestro, SIN transform-gpu */}
       <div className="bg-white/80 backdrop-blur-md border border-white/30 rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden flex flex-col max-h-[98vh] sm:max-h-[90vh]">
         
-        {/* HEADER */}
         <div className="bg-slate-900/70 border-b border-white/20 p-4 sm:p-5 text-white flex justify-between items-center shrink-0 shadow-md z-20">
           <h3 className="text-base sm:text-lg font-black flex items-center gap-2 drop-shadow-sm">
             <i className={`fas ${ordenAEditar ? 'fa-edit text-amber-400' : 'fa-box-open text-blue-300'}`}></i> 
@@ -158,7 +220,6 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             
             <div className="space-y-4">
-              {/* PANELES SIN BLUR ADICIONAL, solo fondo traslucido */}
               <div className="bg-white/60 p-4 rounded-2xl shadow-sm border border-white/60">
                 <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-wider mb-3 flex items-center gap-1.5"><i className="fas fa-hashtag"></i> Identificadores</h4>
                 <div className="grid grid-cols-2 gap-3">
