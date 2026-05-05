@@ -5,6 +5,13 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
   const { flota, choferes } = useLogistica(); 
 
   const esPendiente = pedido.estado === 'pendiente';
+import React from 'react';
+import { useLogistica } from '../context/LogisticaContext';
+
+const PedidoCard = ({ pedido, isActive, onClick }) => {
+  const { flota, choferes } = useLogistica(); 
+
+  const esPendiente = pedido.estado === 'pendiente';
   const esFallido = pedido.estado === 'fallido';
   const esEntregado = pedido.estado === 'entregado';
   const esRampa = pedido.estado === 'camino' && !pedido.fecha_salida;
@@ -14,10 +21,13 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
   const saldo = parseFloat(pedido.saldo_pendiente || 0);
   const requiereCobro = pedido.requiere_cobro || saldo > 0;
 
-  // ESTILOS IGUALADOS AL TEMA CRISTAL CLARO / AZUL REY
+  // CORRECCIÓN DE PARPADEO:
+  // 1. Uso de transform-gpu para forzar la aceleración de hardware.
+  // 2. El scale-[1.02] ahora es md:scale-[1.02] para que NO crezca en el celular al tocarlo.
+  // 3. Reducción de blur de 2xl a md para optimizar rendimiento móvil.
   const fondoTarjeta = isActive 
-    ? 'bg-blue-500/10 backdrop-blur-2xl border-blue-400/60 shadow-xl shadow-blue-500/20 scale-[1.02] z-10' 
-    : 'bg-transparent backdrop-blur-xl border-white/20 shadow-sm hover:border-white/40 hover:bg-white/5';
+    ? 'bg-blue-500/15 backdrop-blur-md border-blue-400/60 shadow-xl shadow-blue-500/20 md:scale-[1.02] z-10 transform-gpu' 
+    : 'bg-white/5 backdrop-blur-md border-white/20 shadow-sm hover:border-white/40 hover:bg-white/10 transform-gpu';
     
   const textoPrincipal = isActive ? 'text-black' : 'text-slate-800';
   const textoSecundario = isActive ? 'text-black-100' : 'text-slate-600';

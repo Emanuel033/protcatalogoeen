@@ -31,33 +31,67 @@ export const LogisticaProvider = ({ children }) => {
   const [fleteras, setFleteras] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // El cerebro auto-masticador migrado a React
+  // EL CEREBRO AUTO-MASTICADOR (AHORA CON EL TRADUCTOR N8N COMPLETO)
   const procesarPedidosCrudos = async (viajesCrudos, clientesActuales, fleterasActuales) => {
     for (let p of viajesCrudos) {
         let updates = { procesado_por_web: true };
-        let isFletera = (p.tipo_envio === 'FLETERA') || (p.detalles_entrega && p.detalles_entrega.toLowerCase().includes('fletera'));
+        
+        // 1. TRADUCTOR N8N: Tipo de Envío
+        let tipoLimpio = p.tipo_envio || p.tipo_destino || 'bodega_cliente';
+        if (p.tipo_envio === 'LOCAL') tipoLimpio = 'bodega_cliente';
+        if (p.tipo_envio === 'FLETERA') {
+            tipoLimpio = (p.detalles_entrega && p.detalles_entrega.toLowerCase().includes('ocurre')) ? 'fletera_ocurre' : 'fletera_domicilio';
+        }
+        updates.tipo_envio = tipoLimpio;
+
+        // 2. TRADUCTOR N8N: Banderas de Cobranza y Variables Extra
+        updates.requiere_cobro = p.requiere_cobro === true || p.requiere_cobro === 'true';
+        updates.destino_alias = p.destino_alias || p.detalles_entrega || '';
+
         let dirLimpia = (p.direccion || '').trim();
-        let aliasLimpio = (p.detalles_entrega || '').trim();
         let codigoCliente = (p.cliente_codigo || '').trim().toUpperCase();
         let nombreCliente = (p.cliente_nombre || '').trim().toUpperCase();
 
-        let clienteMatch = codigoCliente ? clientesActuales.find(c => (c.codigo || '').toUpperCase() === codigoCliente) : null;
-        
-        if (!clienteMatch && nombreCliente) {
-            let mejorPuntajeCliente = 0;
-            clientesActuales.forEach(c => {
-                let score = similitudTextos(c.nombre, nombreCliente);
-                if (score > mejorPuntajeCliente) { mejorPuntajeCliente = score; clienteMatch = c; }
-            });
-            if (mejorPuntajeCliente < 80) clienteMatch = null; 
-        }
+        const isFletera = tipoLimpio.includes('fletera');
 
-        if (!clienteMatch) {
-            updates.destino_alias = aliasLimpio || 'Dirección Matriz';
-            updates.coordenadas = {lat: 25.689804, lng: -100.312066};
+        if (isFletera) {
+            // SI ES FLETERA: Buscar en el catálogo de fleteras, no en clientes
+            let fleteraMatch = null;
+            let mejorPuntajeFletera = 0;
+            fleterasActuales.forEach(f => {
+                let score = similitudTextos(f.nombre, updates.destino_alias || nombreCliente);
+                if (score > mejorPuntajeFletera) { mejorPuntajeFletera = score; fleteraMatch = f; }
+            });
+            
+            if (mejorPuntajeFletera >= 80 && fleteraMatch) {
+                updates.destino_alias = fleteraMatch.alias || fleteraMatch.nombre;
+                if(!dirLimpia) updates.direccion = fleteraMatch.direccion || dirLimpia;
+                updates.coordenadas = fleteraMatch.coordenadas || {lat: 25.689804, lng: -100.312066};
+            } else {
+                updates.destino_alias = updates.destino_alias || 'Fletera Foránea';
+                updates.coordenadas = {lat: 25.689804, lng: -100.312066};
+            }
         } else {
-            updates.destino_alias = aliasLimpio;
-            updates.coordenadas = clienteMatch.direcciones?.[0]?.coordenadas || {lat: 25.689804, lng: -100.312066};
+            // SI ES LOCAL: Buscar en el catálogo de clientes
+            let clienteMatch = codigoCliente ? clientesActuales.find(c => (c.codigo || '').toUpperCase() === codigoCliente) : null;
+            
+            if (!clienteMatch && nombreCliente) {
+                let mejorPuntajeCliente = 0;
+                clientesActuales.forEach(c => {
+                    let score = similitudTextos(c.nombre, nombreCliente);
+                    if (score > mejorPuntajeCliente) { mejorPuntajeCliente = score; clienteMatch = c; }
+                });
+                if (mejorPuntajeCliente < 80) clienteMatch = null; 
+            }
+
+            if (!clienteMatch) {
+                updates.destino_alias = updates.destino_alias || 'Dirección Matriz';
+                updates.coordenadas = {lat: 25.689804, lng: -100.312066};
+            } else {
+                updates.destino_alias = updates.destino_alias || 'Dirección Matriz';
+                updates.coordenadas = clienteMatch.direcciones?.[0]?.coordenadas || {lat: 25.689804, lng: -100.312066};
+                if(!dirLimpia) updates.direccion = clienteMatch.direcciones?.[0]?.direccion || '';
+            }
         }
 
         await updateDoc(doc(db, 'rutas_logistica', p.id), updates);
@@ -87,10 +121,6 @@ export const LogisticaProvider = ({ children }) => {
       
       snapshot.forEach(doc => {
         const data = doc.data();
-        
-        // ==========================================
-        // AQUÍ AGREGAMOS 'entregado' PARA QUE LOS TOME EN CUENTA
-        // ==========================================
         if (['pendiente', 'camino', 'fallido', 'entregado'].includes(data.estado)) {
             activos.push({ id: doc.id, ...data });
         }
@@ -103,7 +133,6 @@ export const LogisticaProvider = ({ children }) => {
       // Ordenar: Fallas primero, luego Pendientes, luego lo que está en movimiento, y al final Entregados
       activos.sort((a,b) => { 
         const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 }; 
-        // Si ambos están en 'camino', poner primero los que ya salieron (En Ruta)
         if (a.estado === 'camino' && b.estado === 'camino') {
             return (b.fecha_salida ? 1 : 0) - (a.fecha_salida ? 1 : 0);
         }
