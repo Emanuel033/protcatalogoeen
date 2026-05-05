@@ -15,6 +15,14 @@ const SidebarDispatcher = ({
   onToggleSidebar 
 }) => {
 
+  // --- NUEVA LÍNEA: Calculamos la fecha actual en español de México ---
+  const fechaHoy = new Date().toLocaleDateString('es-MX', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  }).toUpperCase();
+
   useEffect(() => {
     if (viajeSeleccionado) {
         const timeoutId = setTimeout(() => {
@@ -83,7 +91,7 @@ const SidebarDispatcher = ({
               <i className="fas fa-truck-fast text-blue-700"></i> Logística EEN
             </h2>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">
-              DOMINGO, 3 DE MAYO DE 2026
+              {fechaHoy}
             </p>
           </div>
           <button onClick={onToggleSidebar} className="w-8 h-8 rounded-full bg-white/60 border border-white text-slate-600 hover:text-blue-800 hover:bg-white shadow-sm transition flex items-center justify-center">
