@@ -506,6 +506,18 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                 )}
              </div>
           )}
+          {/* CONFIRMAR SALIDA (ALTA VISIBILIDAD) */}
+          {esRampa && !modoEdicionAsignacion && (
+             <div className="bg-emerald-500/90 backdrop-blur-md border border-emerald-400 rounded-2xl p-4 shadow-md mt-2 relative overflow-hidden">
+                 <h4 className="text-[11px] font-black text-white flex items-center gap-1.5 mb-2 relative z-10 drop-shadow-md"><i className="fas fa-truck-fast text-emerald-200"></i> CONFIRMAR SALIDA</h4>
+                 <p className="text-[10px] text-emerald-50 mb-3 leading-snug relative z-10 font-medium drop-shadow-sm">Presiona aquí cuando arranque para registrar la hora exacta de salida y crear el Lote de Viaje.</p>
+                 <button onClick={() => cambiarEstadoLogistico('salida')} className="w-full bg-white text-emerald-800 hover:bg-emerald-50 font-black py-3 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 text-xs relative z-10 border border-white">
+                    <i className="fas fa-play"></i> Iniciar Ruta Ahora
+                </button>
+               <button onClick={() => cambiarEstadoLogistico('reasignar')} className="w-full bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold text-xs"><i className="fas fa-undo mr-2"></i> Regresar a Pendientes</button>
+             </div>
+          )}
+
 
           {/* PANEL EVIDENCIAS Y REPORTES */}
           {(esEntregado || esFallido) && fotosEvidencia.length > 0 && (
