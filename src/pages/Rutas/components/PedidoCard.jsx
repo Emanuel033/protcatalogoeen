@@ -1,10 +1,4 @@
-import React from 'react';
-import { useLogistica } from '../context/LogisticaContext';
 
-const PedidoCard = ({ pedido, isActive, onClick }) => {
-  const { flota, choferes } = useLogistica(); 
-
-  const esPendiente = pedido.estado === 'pendiente';
 import React from 'react';
 import { useLogistica } from '../context/LogisticaContext';
 
