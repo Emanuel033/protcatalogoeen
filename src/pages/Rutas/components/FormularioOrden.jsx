@@ -140,8 +140,8 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-2 sm:p-4 transition-opacity">
-      <div className="bg-white/20 backdrop-blur-lg border border-white/30 rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden flex flex-col max-h-[98vh] sm:max-h-[90vh] transform-gpu">
+    <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-2 sm:p-4 transition-opacity">
+      <div className="bg-white/80 backdrop-blur-md border border-white/30 rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden flex flex-col max-h-[98vh] sm:max-h-[90vh] transform-gpu">
         
         {/* HEADER CRISTAL OSCURO */}
         <div className="bg-slate-900/60 backdrop-blur-md border-b border-white/20 p-4 sm:p-5 text-white flex justify-between items-center shrink-0 shadow-md z-20">
