@@ -1,9 +1,11 @@
-const CACHE_NAME = 'een-sistema-react-v1'; 
+// BUMP DE VERSIÓN: Cambiamos a v2 para que el navegador actualice el caché
+const CACHE_NAME = 'een-sistema-react-v2'; 
 
-// Ya no apuntamos a .html, apuntamos a las rutas de React
 const urlsToCache = [
   '/',
   '/rutas',
+  '/inventario', // <-- Asegúrate de poner la ruta exacta que usas para el inventario
+  '/catalogo_completo.json', // <-- LA MAGIA: El catálogo guardado en el teléfono
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 
