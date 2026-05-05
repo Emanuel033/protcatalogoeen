@@ -22,10 +22,59 @@ const diccionariosCalc = {
   }
 };
 
+// --- MIS DATOS BASE (Tus patrones inyectados) ---
+const PATRONES_BASE = {
+  3: [ [{"id":"p3_1","forma":"rect-h","numero":1,"x":106,"y":33},{"id":"p3_2","forma":"rect-h","numero":2,"x":105,"y":68},{"id":"p3_3","forma":"rect-v","numero":3,"x":172,"y":33}] ],
+  4: [
+    [{"id":"p4_1","forma":"rect-h","numero":1,"x":176,"y":110},{"id":"p4_2","forma":"rect-h","numero":2,"x":143,"y":42},{"id":"p4_3","forma":"rect-v","numero":3,"x":212,"y":44},{"id":"p4_4","forma":"rect-v","numero":4,"x":144,"y":77}],
+    [{"id":"p4b_1","forma":"rect-h","numero":1,"x":142,"y":35},{"id":"p4b_2","forma":"rect-v","numero":2,"x":142,"y":67},{"id":"p4b_3","forma":"rect-v","numero":3,"x":176,"y":67},{"id":"p4b_4","forma":"rect-h","numero":4,"x":143,"y":136}]
+  ],
+  5: [ [{"id":"p5_1","forma":"caja-h","numero":1,"x":134,"y":33},{"id":"p5_2","forma":"caja-h","numero":2,"x":184,"y":33},{"id":"p5_3","forma":"caja-v","numero":4,"x":133,"y":66},{"id":"p5_4","forma":"caja-v","numero":5,"x":167,"y":66},{"id":"p5_5","forma":"caja-v","numero":6,"x":200,"y":68}] ],
+  7: [ [{"id":"p7_1","forma":"caja-h","numero":1,"x":134,"y":33},{"id":"p7_2","forma":"caja-h","numero":2,"x":184,"y":33},{"id":"p7_3","forma":"caja-h","numero":3,"x":234,"y":33},{"id":"p7_4","forma":"caja-v","numero":4,"x":133,"y":66},{"id":"p7_5","forma":"caja-v","numero":5,"x":173,"y":67},{"id":"p7_6","forma":"caja-v","numero":6,"x":213,"y":68},{"id":"p7_7","forma":"caja-v","numero":7,"x":252,"y":68}] ]
+};
+
+// --- MOTOR DE ROTACIÓN MATEMÁTICA 90 GRADOS ---
+const getDimensionesForma = (forma) => {
+  let w = 34, h = 34;
+  if (forma.includes('caja')) { w = forma.includes('-h')?51:34; h = forma.includes('-v')?51:34; }
+  else if (forma.includes('rect')) { w = forma.includes('-h')?68:34; h = forma.includes('-v')?68:34; }
+  else if (forma.includes('delgado')) { w = forma.includes('-h')?102:34; h = forma.includes('-v')?102:34; }
+  return { w, h };
+};
+
+const rotarPatron90 = (patron) => {
+  if (!patron || patron.length === 0) return [];
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  patron.forEach(p => {
+    const { w, h } = getDimensionesForma(p.forma);
+    if (p.x < minX) minX = p.x; if (p.x + w > maxX) maxX = p.x + w;
+    if (p.y < minY) minY = p.y; if (p.y + h > maxY) maxY = p.y + h;
+  });
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  
+  return patron.map(p => {
+    const { w, h } = getDimensionesForma(p.forma);
+    const px = p.x + w / 2; const py = p.y + h / 2;
+    // Rotar coordenadas alrededor del centro
+    const newPx = cx - (py - cy); const newPy = cy + (px - cx);
+    // Cambiar orientación
+    let newForma = p.forma;
+    if (p.forma.includes('-h')) newForma = p.forma.replace('-h', '-v');
+    else if (p.forma.includes('-v')) newForma = p.forma.replace('-v', '-h');
+    
+    const { w: newW, h: newH } = getDimensionesForma(newForma);
+    return { ...p, id: p.id + '_rot', forma: newForma, x: newPx - newW / 2, y: newPy - newH / 2 };
+  });
+};
+
+// --- COMPONENTE ARRASTRABLE ---
 const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
   const [pos, setPos] = useState({ x: pieza.x, y: pieza.y });
   const [isDragging, setIsDragging] = useState(false);
   const [lastTap, setLastTap] = useState(0);
+
+  useEffect(() => { setPos({ x: pieza.x, y: pieza.y }); }, [pieza.x, pieza.y]);
 
   const handlePointerDown = (e) => {
     const now = Date.now();
@@ -63,10 +112,7 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
 
   return (
     <div
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
+      onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp}
       className={`absolute flex items-center justify-center text-white text-[10px] font-bold shadow-[0_4px_6px_-1px_rgba(0,0,0,0.5)] touch-none select-none transition-transform ${isDragging ? 'z-50 scale-110 opacity-90 cursor-grabbing' : 'cursor-grab'} ${shapeClasses}`}
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, left: 0, top: 0 }}
     >
@@ -74,6 +120,7 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
     </div>
   );
 };
+
 
 const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = 'es' }) => {
   const t = diccionariosCalc[idioma];
@@ -85,14 +132,16 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
   const [tarimas, setTarimas] = useState(1);
   const [frente, setFrente] = useState('');
   const [fondo, setFondo] = useState('');
+  
   const [pzCama, setPzCama] = useState('');
+  const [patronesDisponibles, setPatronesDisponibles] = useState([]);
+  const [patronIndex, setPatronIndex] = useState(0);
+
   const [estibaCruzada, setEstibaCruzada] = useState(false);
   const [formaVisual, setFormaVisual] = useState('cuadrado');
   const [piezasVisuales, setPiezasVisuales] = useState([]);
   const [idPiezaLienzo, setIdPiezaLienzo] = useState(0);
   const [huecos3D, setHuecos3D] = useState([]);
-  const [patronesCustom, setPatronesCustom] = useState([]);
-  const [patronIndex, setPatronIndex] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -102,14 +151,34 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
     }
   }, [isOpen]);
 
+  // Cargar patrones cuando el usuario cambia las Piezas por Cama
   useEffect(() => {
-    if (pzCama > 0) {
-      const saved = localStorage.getItem(`een_patrones_${pzCama}`);
-      setPatronesCustom(saved ? JSON.parse(saved) : []);
+    const pz = parseInt(pzCama);
+    if (pz > 0) {
+      let todos = [];
+      // 1. Patrones predeterminados
+      if (PATRONES_BASE[pz]) {
+        PATRONES_BASE[pz].forEach(pat => {
+          todos.push(pat);
+          todos.push(rotarPatron90(pat)); // Se autogenera la versión 90°
+        });
+      }
+      // 2. Patrones que el usuario guarde en su PC
+      const saved = localStorage.getItem(`een_patrones_${pz}`);
+      if (saved) {
+        JSON.parse(saved).forEach(pat => {
+          todos.push(pat);
+          todos.push(rotarPatron90(pat));
+        });
+      }
+
+      setPatronesDisponibles(todos);
+      setPatronIndex(0);
+      setPiezasVisuales(todos.length > 0 ? todos[0] : []);
     } else {
-      setPatronesCustom([]);
+      setPatronesDisponibles([]);
+      setPiezasVisuales([]);
     }
-    setPatronIndex(0);
   }, [pzCama]);
 
   if (!isOpen) return null;
@@ -133,6 +202,15 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
     if (nuevoModo !== '3d') setModoOrigen(nuevoModo);
     if (nuevoModo !== modo) setHuecos3D([]); 
     setModo(nuevoModo);
+  };
+
+  const alternarPatron = () => {
+    if (patronesDisponibles.length > 0) {
+      const nextIdx = (patronIndex + 1) % patronesDisponibles.length;
+      setPatronIndex(nextIdx);
+      setPiezasVisuales(patronesDisponibles[nextIdx]);
+      setHuecos3D([]);
+    }
   };
 
   const agregarPiezaVisual = () => {
@@ -195,7 +273,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
               </div>
               <div className="flex flex-col">
                 <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">{t.alternar}</label>
-                <button onClick={() => setPatronIndex(prev => prev + 1)} className="w-full flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-400 p-3 rounded-xl font-bold text-xs outline-none transition flex items-center justify-center gap-2">
+                <button onClick={alternarPatron} className="w-full flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-400 p-3 rounded-xl font-bold text-xs outline-none transition flex items-center justify-center gap-2">
                   <i className="fas fa-sync-alt"></i> {t.cambiar}
                 </button>
               </div>
@@ -233,7 +311,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
 
           {modo === '3d' && (
             <div className="w-full h-64 border border-purple-900/50 bg-slate-900 rounded-xl overflow-hidden relative shadow-inner mt-2">
-               <Estiba3D modoOrigen={modoOrigen} frente={frente} fondo={fondo} niveles={niveles} pzCama={pzCama} tarimas={tarimas} piezasVisuales={piezasVisuales} huecos3D={huecos3D} onToggleHueco={toggleHueco} estibaCruzada={estibaCruzada} patronIndex={patronIndex} patronesCustom={patronesCustom} />
+               <Estiba3D modoOrigen={modoOrigen} frente={frente} fondo={fondo} niveles={niveles} pzCama={pzCama} tarimas={tarimas} piezasVisuales={piezasVisuales} huecos3D={huecos3D} onToggleHueco={toggleHueco} estibaCruzada={estibaCruzada} />
                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">{t.toca}</p>
             </div>
           )}
