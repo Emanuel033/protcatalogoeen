@@ -22,6 +22,10 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
   const [seccionInfo, setSeccionInfo] = useState(true);
   const [seccionTrayecto, setSeccionTrayecto] = useState(true);
+  const [seccionEvidencias, setSeccionEvidencias] = useState(true);
+
+  // ESTADOS PARA EL VISOR DE IMÁGENES
+  const [imagenModal, setImagenModal] = useState(null);
 
   useEffect(() => {
     if (pedidoSeleccionado) {
@@ -31,6 +35,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
       setModoEdicionAsignacion(false); 
       setSeccionInfo(true);
       setSeccionTrayecto(pedidoSeleccionado.estado !== 'pendiente');
+      setSeccionEvidencias(true);
       
       const esRampaActual = pedidoSeleccionado.estado === 'camino' && !pedidoSeleccionado.fecha_salida;
 
@@ -113,6 +118,9 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
   const saldo = parseFloat(pedidoSeleccionado.saldo_pendiente || 0);
   const requiereCobro = pedidoSeleccionado.requiere_cobro || saldo > 0;
 
+  // Ya no permitimos editar si está entregado o fallido
+  const permiteEditar = !esEntregado && !esFallido;
+
   const getTipoEnvio = () => {
       if(pedidoSeleccionado.tipo_envio === 'fletera_domicilio') return { text: 'Fletera (A Domicilio)', icon: 'fa-truck' };
       if(pedidoSeleccionado.tipo_envio === 'fletera_ocurre') return { text: 'Fletera (Ocurre)', icon: 'fa-box' };
@@ -132,6 +140,28 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
   const handleEliminar = async () => { /* Logica igual */ };
   const cambiarEstadoLogistico = async (accion, masivo = false) => { /* Logica igual */ };
 
+  // FUNCIÓN PARA DESCARGAR IMAGEN
+  const descargarImagen = (url, titulo) => {
+    fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Evidencia_${titulo}_${pedidoSeleccionado.folio_pedido || 'SN'}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      })
+      .catch(console.error);
+  };
+
+  // RECOPILAMOS LAS FOTOS (Ajusta los nombres de las variables según tu base de datos)
+  const fotosEvidencia = [];
+  if (pedidoSeleccionado.foto_evidencia) fotosEvidencia.push({ url: pedidoSeleccionado.foto_evidencia, titulo: 'Evidencia General' });
+  if (pedidoSeleccionado.foto_entrega) fotosEvidencia.push({ url: pedidoSeleccionado.foto_entrega, titulo: 'Fachada / Paquete' });
+  if (pedidoSeleccionado.foto_firma) fotosEvidencia.push({ url: pedidoSeleccionado.foto_firma, titulo: 'Firma / Recibido' });
+
+
   return (
     <>
       <div className={`fixed inset-0 bg-slate-900/30 z-[45] transition-opacity lg:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose}></div>
@@ -142,17 +172,20 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
         </div>
       )}
 
-      {/* DRAWER PRINCIPAL: ÚNICA CAPA CON DESENFOQUE PARA PROTEGER EL GPU */}
-      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[85vh] lg:h-[calc(100vh-2rem)] bg-white/70 backdrop-blur-md lg:rounded-3xl rounded-t-3xl shadow-2xl z-[50] flex flex-col overflow-hidden border border-white/50 transform-gpu transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
+      {/* DRAWER PRINCIPAL */}
+      <div className={`fixed bottom-0 lg:top-4 lg:bottom-4 right-0 lg:right-4 w-full lg:w-[380px] h-[85vh] lg:h-[calc(100vh-2rem)] bg-white/80 backdrop-blur-md lg:rounded-3xl rounded-t-3xl shadow-2xl z-[50] flex flex-col overflow-hidden border border-white/50 transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0 lg:translate-x-0' : 'translate-y-full lg:translate-x-[120%]'}`}>
         
-        {/* HEADER SIN BLUR EXTRA */}
-        <div className="bg-blue-800/80 p-4 shrink-0 relative shadow-lg z-10">
+        {/* HEADER */}
+        <div className="bg-blue-800/90 p-4 shrink-0 relative shadow-lg z-10 border-b border-blue-900/50">
           <button onClick={onClose} className="absolute top-4 right-4 text-blue-100 hover:text-white transition bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"><i className="fas fa-times"></i></button>
           
           <div className="flex justify-between items-start mb-1 pr-8">
             <div className="flex gap-1.5 items-center">
               {pedidoSeleccionado.folio_pedido && (<span className="text-[9px] font-mono font-black text-blue-900 bg-white px-1.5 py-0.5 rounded shadow-sm">PED: {pedidoSeleccionado.folio_pedido}</span>)}
-              <button onClick={() => onEdit(pedidoSeleccionado)} className="text-amber-900 bg-amber-400 px-2 py-0.5 rounded text-[9px] font-black shadow-sm flex items-center gap-1"><i className="fas fa-edit"></i> Editar</button>
+              {/* EL BOTÓN EDITAR SE OCULTA SI ESTÁ ENTREGADO O FALLIDO */}
+              {permiteEditar && (
+                <button onClick={() => onEdit(pedidoSeleccionado)} className="text-amber-900 bg-amber-400 px-2 py-0.5 rounded text-[9px] font-black shadow-sm flex items-center gap-1 hover:bg-amber-300 transition"><i className="fas fa-edit"></i> Editar</button>
+              )}
             </div>
           </div>
           
@@ -170,15 +203,15 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
         <div className="p-3 overflow-y-auto custom-scroll flex-1 min-h-0 space-y-3 pb-6 relative z-0">
           
           {/* INFO DE ENTREGA */}
-          <div className="bg-white/60 border border-white/60 rounded-xl shadow-sm overflow-hidden shrink-0">
+          <div className="bg-white/60 border border-white rounded-xl shadow-sm overflow-hidden shrink-0">
             <button onClick={() => setSeccionInfo(!seccionInfo)} className="w-full flex justify-between items-center p-3 hover:bg-white/80 transition">
               <h4 className="font-black text-[11px] text-slate-800 flex items-center gap-1.5"><i className="fas fa-map-marked-alt text-blue-600"></i> Info de Entrega</h4>
               <i className={`fas fa-chevron-${seccionInfo ? 'up' : 'down'} text-slate-500 text-xs transition-transform`}></i>
             </button>
             
             {seccionInfo && (
-              <div className="p-3 pt-0 border-t border-white/40">
-                <div className="bg-slate-100/80 p-2 rounded-lg mb-2 shadow-sm">
+              <div className="p-3 pt-0 border-t border-white/60">
+                <div className="bg-white/80 p-2 rounded-lg mb-2 shadow-sm border border-slate-100">
                   <span className="font-bold text-xs text-slate-900">{pedidoSeleccionado.destino_alias || 'Destino Físico'}</span>
                   <p className="text-[10px] text-slate-700 font-medium leading-snug flex items-start gap-1 mt-1"><i className="fas fa-map-marker-alt text-red-600 mt-0.5 shrink-0"></i> {pedidoSeleccionado.direccion}</p>
                 </div>
@@ -199,7 +232,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
             )}
           </div>
 
-          {/* ASIGNACIÓN DE UNIDAD (Sin blur para evitar bugs) */}
+          {/* ASIGNACIÓN DE UNIDAD (Solo si es pendiente o modo edición) */}
           {(esPendiente || modoEdicionAsignacion) && (
              <div className="bg-blue-800/90 rounded-2xl p-4 shadow-xl text-white border border-blue-700 relative shrink-0 mt-3">
                 <h4 className="text-[10px] font-black uppercase tracking-wider mb-3 text-white">
@@ -236,8 +269,57 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
              </div>
           )}
 
+          {/* NUEVO PANEL: EVIDENCIAS Y REPORTES */}
+          {(esEntregado || esFallido) && fotosEvidencia.length > 0 && (
+             <div className="bg-white/60 border border-white rounded-xl shadow-sm overflow-hidden shrink-0 mt-3">
+               <button onClick={() => setSeccionEvidencias(!seccionEvidencias)} className="w-full flex justify-between items-center p-3 hover:bg-white/80 transition">
+                 <h4 className="font-black text-[11px] text-slate-800 flex items-center gap-1.5"><i className="fas fa-camera text-blue-600"></i> Evidencias y Reportes</h4>
+                 <i className={`fas fa-chevron-${seccionEvidencias ? 'up' : 'down'} text-slate-500 text-xs transition-transform`}></i>
+               </button>
+               
+               {seccionEvidencias && (
+                 <div className="p-3 pt-0 border-t border-white/60">
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                        {fotosEvidencia.map((foto, index) => (
+                           <div key={index} className="relative group cursor-pointer overflow-hidden rounded-xl shadow-sm border border-slate-200" onClick={() => setImagenModal(foto)}>
+                              <img src={foto.url} alt={foto.titulo} className="w-full h-24 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                 <i className="fas fa-search-plus text-white text-xl"></i>
+                              </div>
+                              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 pt-4 text-center">
+                                 <p className="text-[8px] font-black text-white uppercase tracking-wider">{foto.titulo}</p>
+                              </div>
+                           </div>
+                        ))}
+                    </div>
+                 </div>
+               )}
+             </div>
+          )}
+
         </div>
       </div>
+
+      {/* MODAL VISOR DE IMÁGENES (PANTALLA COMPLETA) */}
+      {imagenModal && (
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 transition-opacity duration-300">
+           
+           <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
+              <span className="bg-slate-800/80 text-white px-3 py-1.5 rounded-lg text-xs font-black uppercase shadow-md border border-slate-700 backdrop-blur-md">
+                 <i className="fas fa-camera mr-1.5"></i> {imagenModal.titulo}
+              </span>
+              <button onClick={() => setImagenModal(null)} className="w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-md border border-white/20">
+                 <i className="fas fa-times text-lg"></i>
+              </button>
+           </div>
+
+           <img src={imagenModal.url} alt="Evidencia en grande" className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl border border-white/10 relative z-0" />
+           
+           <button onClick={() => descargarImagen(imagenModal.url, imagenModal.titulo)} className="mt-6 bg-blue-600 hover:bg-blue-500 text-white font-black px-6 py-3 rounded-xl shadow-lg border border-blue-400 flex items-center gap-2 transition active:scale-95 z-10">
+              <i className="fas fa-download"></i> Descargar Imagen
+           </button>
+        </div>
+      )}
     </>
   );
 };

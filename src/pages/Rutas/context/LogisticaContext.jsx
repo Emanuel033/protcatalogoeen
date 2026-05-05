@@ -31,29 +31,47 @@ export const LogisticaProvider = ({ children }) => {
   const [fleteras, setFleteras] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // EL CEREBRO AUTO-MASTICADOR (AHORA CON EL TRADUCTOR N8N COMPLETO)
+  // EL CEREBRO AUTO-MASTICADOR (AHORA CON REGLAS CONTPAQ EXACTAS)
   const procesarPedidosCrudos = async (viajesCrudos, clientesActuales, fleterasActuales) => {
     for (let p of viajesCrudos) {
         let updates = { procesado_por_web: true };
         
-        // 1. TRADUCTOR N8N: Tipo de Envío
-        let tipoLimpio = p.tipo_envio || p.tipo_destino || 'bodega_cliente';
-        if (p.tipo_envio === 'LOCAL') tipoLimpio = 'bodega_cliente';
-        if (p.tipo_envio === 'FLETERA') {
-            tipoLimpio = (p.detalles_entrega && p.detalles_entrega.toLowerCase().includes('ocurre')) ? 'fletera_ocurre' : 'fletera_domicilio';
-        }
-        updates.tipo_envio = tipoLimpio;
+        let rawEnvio = (p.tipo_envio || '').toUpperCase();
+        let tipoLimpio = 'bodega_cliente';
+        let destinoAlias = p.destino_alias || p.detalles_entrega || '';
 
-        // 2. TRADUCTOR N8N: Banderas de Cobranza y Variables Extra
+        // 1. TRADUCTOR CONTPAQ: Separar por " Y "
+        if (rawEnvio.includes(' Y ')) {
+            const partes = rawEnvio.split(' Y ');
+            const transporte = partes[0].trim(); // "LOCAL" o Nombre de Fletera
+            const modalidad = partes[1].trim();  // "DF", "OB", "D", "O"
+
+            if (transporte === 'LOCAL') {
+                tipoLimpio = 'bodega_cliente';
+                if (modalidad === 'DF') destinoAlias = 'Domicilio Fiscal';
+                if (modalidad === 'OB') destinoAlias = 'Otra Bodega';
+            } else {
+                // Si no es LOCAL, asume que es el nombre de la fletera
+                tipoLimpio = (modalidad === 'O' || modalidad === 'OCURRE') ? 'fletera_ocurre' : 'fletera_domicilio';
+                destinoAlias = transporte; 
+            }
+        } else {
+            // Fallback por si viene en otro formato
+            if (rawEnvio === 'LOCAL') tipoLimpio = 'bodega_cliente';
+            else if (rawEnvio === 'FLETERA') tipoLimpio = 'fletera_domicilio';
+        }
+
+        updates.tipo_envio = tipoLimpio;
+        updates.destino_alias = destinoAlias;
+
+        // 2. Banderas de Cobranza y Variables Extra
         updates.requiere_cobro = p.requiere_cobro === true || p.requiere_cobro === 'true';
-        updates.destino_alias = p.destino_alias || p.detalles_entrega || '';
 
         let dirLimpia = (p.direccion || '').trim();
         let codigoCliente = (p.cliente_codigo || '').trim().toUpperCase();
         let nombreCliente = (p.cliente_nombre || '').trim().toUpperCase();
 
         const isFletera = tipoLimpio.includes('fletera');
-
         if (isFletera) {
             // SI ES FLETERA: Buscar en el catálogo de fleteras, no en clientes
             let fleteraMatch = null;
