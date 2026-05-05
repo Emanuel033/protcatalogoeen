@@ -5,6 +5,20 @@ import ModalCalculadora from './components/ModalCalculadora';
 import useDictadoVoz from './hooks/useDictadoVoz';
 
 const InventarioView = () => {
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOffline = () => setIsOffline(true);
+    const handleOnline = () => setIsOffline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
   const [idioma, setIdioma] = useState('es');
   const [catalogoBase, setCatalogoBase] = useState([]);
   const [estadoCatalogo, setEstadoCatalogo] = useState('Cargando...');
@@ -158,6 +172,12 @@ const InventarioView = () => {
         </div>
         
         <div className="flex items-center gap-2">
+          {/* 👇 NUEVO INDICADOR OFFLINE 👇 */}
+          {isOffline && (
+            <div className="bg-red-500 text-white px-3 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider animate-pulse flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+              <i className="fas fa-wifi-slash"></i> Modo Offline
+            </div>
+          )}
           {/* BOTÓN NUEVO CONTEO */}
           <button 
             onClick={handleNuevoConteo} 
