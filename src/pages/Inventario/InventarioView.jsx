@@ -8,16 +8,26 @@ const InventarioView = () => {
   const [idioma, setIdioma] = useState('es');
   const [catalogoBase, setCatalogoBase] = useState([]);
   const [estadoCatalogo, setEstadoCatalogo] = useState('Cargando...');
-  const [listaConteo, setListaConteo] = useState([]);
-  const [calcActiva, setCalcActiva] = useState({ isOpen: false, codigo: null, varId: null, nombre: '' });
   
-  // ESTADO PARA EL LIGHTBOX (IMAGEN GIGANTE)
+  // 1. INICIALIZAMOS LA LISTA LEYENDO EL LOCALSTORAGE
+  const [listaConteo, setListaConteo] = useState(() => {
+    const guardado = localStorage.getItem('een_inventario_activo');
+    return guardado ? JSON.parse(guardado) : [];
+  });
+  
+  const [calcActiva, setCalcActiva] = useState({ isOpen: false, codigo: null, varId: null, nombre: '' });
   const [imagenAmpliada, setImagenAmpliada] = useState(null);
 
-useEffect(() => {
-  document.title = "Inventario | La Económica del Norte";
-}, []);
-  // 1. Carga de Catálogo
+  useEffect(() => {
+    document.title = "Inventario | La Económica del Norte";
+  }, []);
+
+  // 2. EFECTO DE AUTO-GUARDADO: CADA VEZ QUE CAMBIA LA LISTA, SE GUARDA
+  useEffect(() => {
+    localStorage.setItem('een_inventario_activo', JSON.stringify(listaConteo));
+  }, [listaConteo]);
+
+  // Carga de Catálogo
   useEffect(() => {
     fetch('/catalogo_completo.json')
       .then(res => res.json())
@@ -29,9 +39,6 @@ useEffect(() => {
       .catch(() => setEstadoCatalogo('Error de carga'));
   }, []);
   
-  
-
-  // 2. Lógica de Cantidades (Memoizada)
   const manualCant = useCallback((codigo, varId, valor) => {
     const pz = parseInt(valor, 10) || 0;
     setListaConteo(prev => prev.map(prod => {
@@ -50,18 +57,15 @@ useEffect(() => {
     if (variante) manualCant(codigo, varId, variante.contadas + delta);
   };
 
-  // 3. Motor de Voz Jarvis
   const { iniciarDictado, estaEscuchando } = useDictadoVoz(idioma, (codigo, varId, cantidad) => {
     manualCant(codigo, varId, cantidad);
   });
 
-  // 4. Agregar Producto (Con Normalizador de Empaques e Imagen)
   const agregarProductoALista = (codigoBuscado) => {
     const cod = String(codigoBuscado).trim().toLowerCase();
     let prod = catalogoBase.find(p => String(p.codigo).toLowerCase() === cod);
     
     if (!prod) {
-      // Normalizamos temporalmente para búsqueda profunda de SKUs
       prod = catalogoBase.find(p => {
         let pkgs = [];
         if (p.paquetes) pkgs = Array.isArray(p.paquetes) ? p.paquetes : Object.values(p.paquetes);
@@ -70,8 +74,6 @@ useEffect(() => {
     }
 
     if (prod && !listaConteo.find(i => i.codigo === String(prod.codigo))) {
-      
-      // LÓGICA BLINDADA PARA LEER LOS EMPAQUES DEL JSON
       let paquetesArray = [];
       if (prod.paquetes && Object.keys(prod.paquetes).length > 0) {
         paquetesArray = Array.isArray(prod.paquetes) ? prod.paquetes : Object.values(prod.paquetes);
@@ -90,7 +92,7 @@ useEffect(() => {
         codigo: String(prod.codigo),
         nombre: prod.descripcion_oficial || prod.nombre,
         stockSistema: parseFloat(prod.stock || 0),
-        imagen: prod.image || prod.imagen || null, // <-- AQUÍ ASEGURAMOS LA FOTO
+        imagen: prod.image || prod.imagen || null,
         variantes,
         totalFisico: 0
       }, ...prev]);
@@ -98,47 +100,52 @@ useEffect(() => {
   };
 
   const descargarCSV = () => {
-  if (listaConteo.length === 0) {
-    alert(idioma === 'es' ? "La lista está vacía" : "La liste est vide");
-    return;
-  }
+    if (listaConteo.length === 0) {
+      alert(idioma === 'es' ? "La lista está vacía" : "La liste est vide");
+      return;
+    }
 
-  // 1. Cabeceras del Excel
-  let csv = "\uFEFF"; // BOM para que Excel lea bien los acentos
-  csv += "Codigo,Producto,Stock Sistema,Total Fisico,Ajuste,Detalle Conteos\n";
+    let csv = "\uFEFF"; 
+    csv += "Codigo,Producto,Stock Sistema,Total Fisico,Ajuste,Detalle Conteos\n";
 
-  // 2. Recorrer la lista que tienes en pantalla
-  listaConteo.forEach(item => {
-    const ajuste = item.totalFisico - item.stockSistema;
+    listaConteo.forEach(item => {
+      const ajuste = item.totalFisico - item.stockSistema;
+      const detalle = item.variantes
+        .filter(v => v.contadas > 0)
+        .map(v => `${v.pz}${idioma === 'es' ? 'pz' : 'pc'}: ${v.contadas}`)
+        .join(" | ");
+      const nombreLimpio = item.nombre.replace(/,/g, "");
+
+      csv += `${item.codigo},${nombreLimpio},${item.stockSistema},${item.totalFisico},${ajuste},"${detalle}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Inventario_EEN_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // 3. FUNCIÓN PARA LIMPIAR EL CONTEO
+  const handleNuevoConteo = () => {
+    const msj = idioma === 'es' 
+      ? "¿Estás seguro de iniciar un nuevo conteo? Se borrarán todos los datos actuales." 
+      : "Êtes-vous sûr de vouloir tout effacer et commencer un nouveau comptage ?";
     
-    // Crear el detalle (ej: "100pz: 2 | 1pz: 5")
-    const detalle = item.variantes
-      .filter(v => v.contadas > 0)
-      .map(v => `${v.pz}${idioma === 'es' ? 'pz' : 'pc'}: ${v.contadas}`)
-      .join(" | ");
-
-    // Limpiar comas del nombre para no romper el CSV
-    const nombreLimpio = item.nombre.replace(/,/g, "");
-
-    csv += `${item.codigo},${nombreLimpio},${item.stockSistema},${item.totalFisico},${ajuste},"${detalle}"\n`;
-  });
-
-  // 3. Crear el archivo y descargar
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", `Inventario_EEN_${new Date().getTime()}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+    if (window.confirm(msj)) {
+      setListaConteo([]); // Limpia la pantalla
+      localStorage.removeItem('een_inventario_activo'); // Limpia la memoria
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-slate-900 text-slate-50">
       
       {/* HEADER */}
-      <header className="bg-slate-900 border-b border-slate-800 px-4 py-4 flex justify-between items-center shrink-0">
+      <header className="bg-slate-900 border-b border-slate-800 px-4 py-4 flex flex-wrap justify-between items-center shrink-0 gap-3">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/50">
             <i className={`fas ${estaEscuchando ? 'fa-microphone animate-pulse text-red-400' : 'fa-clipboard-list text-white'}`}></i>
@@ -149,20 +156,32 @@ useEffect(() => {
             <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{estadoCatalogo}</p>
           </div>
         </div>
-        <button 
-    onClick={descargarCSV} 
-    className="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2"
-  >
-    <i className="fas fa-file-excel text-emerald-400"></i>
-    <span>CSV</span>
-  </button>
+        
+        <div className="flex items-center gap-2">
+          {/* BOTÓN NUEVO CONTEO */}
+          <button 
+            onClick={handleNuevoConteo} 
+            className="bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm"
+          >
+            <i className="fas fa-trash-restore"></i>
+            <span className="hidden sm:inline">{idioma === 'es' ? 'Nuevo Conteo' : 'Nouveau'}</span>
+          </button>
 
-  <button 
-    onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} 
-    className="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl font-bold"
-  >
-    {idioma === 'es' ? '🇲🇽 ES' : '🇫🇷 FR'}
-  </button>
+          <button 
+            onClick={descargarCSV} 
+            className="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm"
+          >
+            <i className="fas fa-file-excel text-emerald-400"></i>
+            <span>CSV</span>
+          </button>
+
+          <button 
+            onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} 
+            className="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl font-bold text-sm"
+          >
+            {idioma === 'es' ? '🇲🇽 ES' : '🇫🇷 FR'}
+          </button>
+        </div>
       </header>
 
       {/* CUERPO PRINCIPAL */}
@@ -187,11 +206,10 @@ useEffect(() => {
             setCalcActiva({ isOpen: true, codigo, varId, nombre: p?.nombre });
           }}
           onIniciarDictado={(codigo, varId, btn, letra) => iniciarDictado(codigo, varId, letra)}
-          onZoomImagen={(img) => setImagenAmpliada(img)} // <-- ESTO CONECTA LA LISTA CON EL MODAL
+          onZoomImagen={(img) => setImagenAmpliada(img)}
         />
       </main>
 
-      {/* MODAL CALCULADORA ESTIBA 3D */}
       <ModalCalculadora 
         isOpen={calcActiva.isOpen}
         tituloTarget={calcActiva.nombre}
@@ -202,7 +220,6 @@ useEffect(() => {
         idioma={idioma}
       />
 
-      {/* 👇 AQUÍ ESTÁ EL FAMOSO MODAL LIGHTBOX BIEN ACOMODADO 👇 */}
       {imagenAmpliada && (
         <div 
           className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 touch-none" 
@@ -229,7 +246,6 @@ useEffect(() => {
           </div>
         </div>
       )}
-      {/* 👆 FIN DEL MODAL LIGHTBOX 👆 */}
 
     </div>
   );
