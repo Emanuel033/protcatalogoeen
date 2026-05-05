@@ -156,20 +156,28 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
     const pz = parseInt(pzCama);
     if (pz > 0) {
       let todos = [];
+
+      // Función que toma un patrón y le genera sus 4 lados
+      const agregarConRotaciones = (patronBase) => {
+        const rot90 = rotarPatron90(patronBase);
+        const rot180 = rotarPatron90(rot90);
+        const rot270 = rotarPatron90(rot180);
+        
+        todos.push(patronBase); // 0°
+        todos.push(rot90);      // 90°
+        todos.push(rot180);     // 180°
+        todos.push(rot270);     // 270°
+      };
+
       // 1. Patrones predeterminados
       if (PATRONES_BASE[pz]) {
-        PATRONES_BASE[pz].forEach(pat => {
-          todos.push(pat);
-          todos.push(rotarPatron90(pat)); // Se autogenera la versión 90°
-        });
+        PATRONES_BASE[pz].forEach(pat => agregarConRotaciones(pat));
       }
+      
       // 2. Patrones que el usuario guarde en su PC
       const saved = localStorage.getItem(`een_patrones_${pz}`);
       if (saved) {
-        JSON.parse(saved).forEach(pat => {
-          todos.push(pat);
-          todos.push(rotarPatron90(pat));
-        });
+        JSON.parse(saved).forEach(pat => agregarConRotaciones(pat));
       }
 
       setPatronesDisponibles(todos);
@@ -209,7 +217,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
       const nextIdx = (patronIndex + 1) % patronesDisponibles.length;
       setPatronIndex(nextIdx);
       setPiezasVisuales(patronesDisponibles[nextIdx]);
-      setHuecos3D([]);
+      setHuecos3D([]); // Limpiar huecos al rotar
     }
   };
 
@@ -227,6 +235,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
     if (piezasVisuales.length === 0) return;
     const numPz = piezasVisuales.length;
     const key = `een_patrones_${numPz}`;
+    // Aquí es donde se agrega a la lista sin sobreescribir lo de antes
     const guardados = JSON.parse(localStorage.getItem(key) || '[]');
     guardados.push(piezasVisuales);
     localStorage.setItem(key, JSON.stringify(guardados));
