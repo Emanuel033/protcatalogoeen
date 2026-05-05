@@ -3,8 +3,8 @@
   "name": "Inventario Físico EEN",
   "description": "Conteo de inventario y estibas.",
   "icons": [
-    { "src": "/icono-inventario-192.png", "type": "image/png", "sizes": "192x192" },
-    { "src": "/icono-inventario-512.png", "type": "image/png", "sizes": "512x512" }
+    { "src": "./icons/icono-inventario-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "./icons/icono-inventario-512.png", "type": "image/png", "sizes": "512x512" }
   ],
   "start_url": "/inventario",
   "scope": "/inventario",
