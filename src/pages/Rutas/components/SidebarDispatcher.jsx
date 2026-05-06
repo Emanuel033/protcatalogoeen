@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import { collection, onSnapshot, query, where, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, addDoc, updateDoc, doc, serverTimestamp, getDocs, deleteDoc } from 'firebase/firestore';
 import { db } from '../../../firebase'; 
 import PedidoCard from './PedidoCard'; 
 
@@ -71,6 +71,32 @@ const SidebarDispatcher = ({
       await updateDoc(doc(db, 'material_pendiente', pendiente.id), { estado: 'resuelto', fecha_resolucion: serverTimestamp() });
     } catch (e) {
       console.error("Error al entregar en mostrador:", e);
+    }
+  };
+
+  // === FUNCIÓN TEMPORAL DE DEPURACIÓN ===
+  const handleDepurarFleteras = async () => {
+    if (!window.confirm("⚠️ ¿Seguro que quieres ejecutar la limpieza de fleteras basura? Esto no se puede deshacer.")) return;
+    
+    try {
+      console.log("Iniciando depuración de fleteras...");
+      const querySnapshot = await getDocs(collection(db, 'catalogo_fleteras'));
+      let borrados = 0;
+      const promesas = [];
+
+      querySnapshot.forEach((documento) => {
+        const data = documento.data();
+        if (data.direccion === "Dirección pendiente") {
+          promesas.push(deleteDoc(doc(db, 'catalogo_fleteras', documento.id)));
+          borrados++;
+        }
+      });
+
+      await Promise.all(promesas); // Ejecutamos todos los borrados en paralelo
+      alert(`✅ Depuración terminada con éxito. Se eliminaron ${borrados} registros basura.`);
+    } catch (error) {
+      console.error("Error al depurar fleteras:", error);
+      alert("❌ Hubo un error durante la depuración. Revisa la consola.");
     }
   };
 
@@ -204,6 +230,12 @@ const SidebarDispatcher = ({
             <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
             <input type="text" placeholder="Buscar cliente, folio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/80 border border-white/60 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition font-medium text-slate-800 placeholder-slate-400 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05)]" />
           </div>
+          
+          {/* BOTÓN DE DEPURACIÓN TEMPORAL */}
+          <button onClick={handleDepurarFleteras} title="Limpiar Fleteras Basura" className="w-9 h-9 rounded-xl bg-red-50 text-red-600 border border-red-200 flex items-center justify-center hover:bg-red-100 transition shadow-sm shrink-0">
+            <i className="fas fa-broom"></i>
+          </button>
+
           <button onClick={onOpenAdmin} className="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition shadow-md shrink-0"><i className="fas fa-cog"></i></button>
           <button onClick={onOpenBitacora} className="w-9 h-9 rounded-xl bg-indigo-50/90 text-indigo-700 border border-indigo-200 flex items-center justify-center hover:bg-indigo-100 transition shadow-sm shrink-0"><i className="fas fa-book"></i></button>
           <button onClick={onOpenForm} className="w-9 h-9 rounded-xl bg-blue-700/90 text-white flex items-center justify-center hover:bg-blue-800 transition shadow-md shadow-blue-800/20 shrink-0"><i className="fas fa-plus"></i></button>
