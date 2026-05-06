@@ -71,7 +71,9 @@ const AppOperador = () => {
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
+    useEffect(() => {
+    document.title = "Operador | Envases La Económica del Norte";
+  }, []);
     // Cargar Choferes para Login
     const unsubChoferes = onSnapshot(collection(db, 'choferes'), (snap) => {
       const lista = [];
