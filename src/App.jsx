@@ -12,7 +12,7 @@ import { LogisticaProvider } from './pages/Rutas/context/LogisticaContext';
 import AdminLayout from './pages/Admin/AdminLayout'; 
 
 // Corrección: Importamos ChoferView con su nombre correcto
-import ChoferView from './pages/Chofer/AppOperador';
+import AppOperador from './pages/Chofer/AppOperador';
 
 function App() {
   return (
