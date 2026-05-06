@@ -30,6 +30,9 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
   const [descFaltante, setDescFaltante] = useState('');
   const [metodoFaltante, setMetodoFaltante] = useState('envio'); 
 
+  // === ESTADO PARA DRAG AND DROP ===
+  const [draggedIndex, setDraggedIndex] = useState(null);
+
   useEffect(() => {
     if (pedidoSeleccionado) {
       setVehiculoId(pedidoSeleccionado.vehiculo_asignado || '');
@@ -307,6 +310,55 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
     }
   };
 
+  // === HANDLERS DE DRAG AND DROP ===
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); 
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    // No permitir soltar sobre los extremos (Planta origen/retorno)
+    if (paradasRuta[dropIndex].tipo !== 'destino') return;
+
+    const nuevasParadas = [...paradasRuta];
+    const draggedItem = nuevasParadas[draggedIndex];
+
+    nuevasParadas.splice(draggedIndex, 1);
+    nuevasParadas.splice(dropIndex, 0, draggedItem);
+
+    setParadasRuta(nuevasParadas);
+    setDraggedIndex(null);
+
+    // Guardar el nuevo orden en Firebase
+    try {
+        const destinosOrdenados = nuevasParadas.filter(p => p.tipo === 'destino');
+        for (let i = 0; i < destinosOrdenados.length; i++) {
+            await updateDoc(doc(db, 'rutas_logistica', destinosOrdenados[i].id), {
+                orden_ruta: i + 1,
+                fecha_actualizacion: serverTimestamp()
+            });
+        }
+    } catch (error) {
+        console.error("Error al reordenar:", error);
+        setAlerta("Error al guardar el nuevo orden");
+        setTimeout(() => setAlerta(null), 3000);
+    }
+  };
+
   const descargarImagen = (url, titulo) => {
     fetch(url)
       .then(response => response.blob())
@@ -343,11 +395,14 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
         {/* HEADER OSCURO CRISTALINO */}
         <div className="bg-gradient-to-br from-slate-900/80 to-blue-900/80 backdrop-blur-xl p-4 shrink-0 relative shadow-[0_4px_20px_rgba(0,0,0,0.15)] z-10 border-b border-white/10 overflow-hidden">
           {/* Brillo decorativo */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/20 blur-3xl rounded-full pointer-events-none"></div>
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/20 blur-3xl rounded-full pointer-events-none z-0"></div>
 
-          <button onClick={onClose} className="absolute top-4 right-4 text-slate-300 hover:text-white transition bg-white/10 hover:bg-white/20 border border-white/10 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md"><i className="fas fa-times"></i></button>
+          {/* === BOTÓN DE CERRAR ARREGLADO === */}
+          <button onClick={onClose} className="absolute top-4 right-4 z-50 text-slate-300 hover:text-white transition bg-white/10 hover:bg-white/20 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md cursor-pointer active:scale-95 shadow-md">
+            <i className="fas fa-times text-lg"></i>
+          </button>
           
-          <div className="flex justify-between items-start mb-1 pr-8 relative z-10">
+          <div className="flex justify-between items-start mb-1 pr-12 relative z-10">
             <div className="flex gap-1.5 items-center flex-wrap">
               {pedidoSeleccionado.folio_pedido && (<span className="text-[9px] font-mono font-black text-blue-100 bg-white/10 border border-white/20 px-1.5 py-0.5 rounded-[4px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]">PED: {pedidoSeleccionado.folio_pedido}</span>)}
               
@@ -361,7 +416,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
             </div>
           </div>
           
-          <h3 className="text-lg font-black text-white leading-tight mt-1.5 truncate drop-shadow-md relative z-10">
+          <h3 className="text-lg font-black text-white leading-tight mt-1.5 truncate drop-shadow-md relative z-10 pr-6">
             {pedidoSeleccionado.cliente_nombre}
             {esContpaqi && <span className="bg-white/10 border border-white/20 text-slate-200 px-1.5 py-0.5 rounded-[4px] text-[8px] font-black uppercase align-middle ml-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]">CONTPAQI</span>}
           </h3>
@@ -404,7 +459,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
             )}
           </div>
 
-          {/* RUTA DE VIAJE */}
+          {/* RUTA DE VIAJE Y DRAG AND DROP */}
           {(pedidoSeleccionado.estado === 'camino' || pedidoSeleccionado.estado === 'entregado') && paradasRuta.length > 0 && (
             <div className="bg-white/40 backdrop-blur-lg border border-white/50 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.02)] overflow-hidden shrink-0 mt-3 hover:bg-white/50 transition-colors">
               <button onClick={() => setSeccionTrayecto(!seccionTrayecto)} className="w-full flex justify-between items-center p-3">
@@ -424,14 +479,36 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                   <div className="relative border-l-2 border-dashed border-blue-300/50 ml-3 my-2 space-y-4 py-2">
                      {paradasRuta.map((parada, index) => {
                         const isPlanta = parada.tipo === 'origen' || parada.tipo === 'retorno';
+                        const isDestino = parada.tipo === 'destino';
+                        // Habilitar Drag&Drop solo para destinos mientras esté en Rampa
+                        const draggabilityActive = isDestino && esRampa;
+
                         return (
-                          <div key={parada.id + index} className="relative flex items-center gap-3 pl-4">
+                          <div 
+                            key={parada.id + index} 
+                            draggable={draggabilityActive}
+                            onDragStart={(e) => draggabilityActive && handleDragStart(e, index)}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={(e) => draggabilityActive && handleDragOver(e)}
+                            onDrop={(e) => draggabilityActive && handleDrop(e, index)}
+                            className={`relative flex items-center gap-3 pl-4 py-1 transition-all ${draggabilityActive ? 'cursor-grab active:cursor-grabbing hover:bg-white/50 rounded-lg' : ''} ${draggedIndex === index ? 'opacity-40 scale-95' : 'opacity-100'}`}
+                          >
+                             {/* Indicador visual de Drag (Opcional, ayuda a la UX) */}
+                             {draggabilityActive && (
+                                <div className="absolute -left-6 text-slate-300 hover:text-blue-500">
+                                   <i className="fas fa-grip-vertical text-[10px]"></i>
+                                </div>
+                             )}
+
                              <div className={`absolute -left-[11px] w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-sm ${isPlanta ? 'bg-slate-700' : 'bg-emerald-500'}`}>
                                 {isPlanta ? <i className="fas fa-building text-white text-[9px]"></i> : <span className="text-white text-[9px] font-black">{index}</span>}
                              </div>
-                             <span className={`text-[10px] font-black ${isPlanta ? 'text-slate-600' : 'text-slate-800'} uppercase`}>
-                               {parada.nombre}
-                             </span>
+                             
+                             <div className="flex-1">
+                                <span className={`text-[10px] font-black ${isPlanta ? 'text-slate-600' : 'text-slate-800'} uppercase block`}>
+                                  {parada.nombre}
+                                </span>
+                             </div>
                           </div>
                         )
                      })}
@@ -563,7 +640,7 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
              </div>
           )}
 
-          {/* ======= NUEVA SECCIÓN: ACCIONES DE FALLA ======= */}
+          {/* ======= SECCIÓN: ACCIONES DE FALLA ======= */}
           {esFallido && (
              <div className="bg-red-500/10 backdrop-blur-xl border border-red-500/30 rounded-2xl p-4 shadow-[0_8px_30px_rgba(239,68,68,0.1)] mt-3 relative overflow-hidden flex flex-col gap-3">
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-400/20 blur-3xl rounded-full pointer-events-none"></div>
