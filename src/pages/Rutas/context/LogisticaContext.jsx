@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, addDoc, arrayUnion } from 'firebase/firestore';
+import { collection, onSnapshot, doc, writeBatch, arrayUnion } from 'firebase/firestore';
 import { db } from '../../../firebase'; 
 
 const LogisticaContext = createContext();
 
-// Función de similitud (Levenshtein) para el fuzzy matching (Mantenida por si se requiere en otras áreas)
+// Función de similitud (Levenshtein) para evitar duplicar direcciones por errores de dedo
 const similitudTextos = (a = '', b = '') => {
     a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
     if (a === b) return 100;
@@ -31,11 +31,13 @@ export const LogisticaProvider = ({ children }) => {
   const [fleteras, setFleteras] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // EL CEREBRO AUTO-MASTICADOR (CON REGLAS ESTRICTAS DE N8N)
+  // EL CEREBRO AUTO-MASTICADOR (OPTIMIZADO CON BATCH Y FUZZY MATCHING)
   const procesarPedidosCrudos = async (viajesCrudos, clientesActuales, fleterasActuales) => {
-    // Copias locales para no duplicar datos si vienen 5 pedidos del mismo cliente nuevo al mismo tiempo
     let localClientes = [...clientesActuales];
     let localFleteras = [...fleterasActuales];
+    
+    const batch = writeBatch(db);
+    let operacionesEnBatch = 0;
 
     for (let p of viajesCrudos) {
         let updates = { procesado_por_web: true };
@@ -46,24 +48,20 @@ export const LogisticaProvider = ({ children }) => {
         let nombreCliente = (p.cliente_nombre || '').trim().toUpperCase();
         let dirLimpia = (p.direccion || '').trim();
 
-        // Asegurar bandera de cobranza
         updates.requiere_cobro = p.requiere_cobro === true || p.requiere_cobro === 'true';
 
         // LÓGICA REPARTO LOCAL
         if (rawEnvio === 'LOCAL' || rawEnvio === 'REPARTO') {
-            updates.tipo_envio = 'reparto_local'; // PUNTO 4: Pre-seleccionar en Edit
+            updates.tipo_envio = 'reparto_local'; 
             
-            // Definir base del ALIAS
             let aliasBase = "MATRIZ";
             if (detallesUpper.includes('FISCAL') || detallesUpper === 'DF') aliasBase = "FISCAL";
             if (detallesUpper.includes('BODEGA') || detallesUpper === 'OB' || detallesUpper.includes('OTRA')) aliasBase = "BODEGA";
 
-            // Buscar Cliente Exacto por Código SAP
             let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
             let clienteMatch = clienteIndex >= 0 ? localClientes[clienteIndex] : null;
 
             if (!clienteMatch && codigoCliente) {
-                // PUNTO 1: Cliente no existe -> Darlo de Alta con todo
                 let aliasFinal = aliasBase;
                 const nuevoCliente = {
                     codigo: codigoCliente,
@@ -72,29 +70,33 @@ export const LogisticaProvider = ({ children }) => {
                     direcciones: [{
                         alias: aliasFinal,
                         direccion: dirLimpia,
-                        coordenadas: { lat: 25.6866, lng: -100.3161 }, // Coordenada default Monterrey
+                        coordenadas: { lat: 25.6866, lng: -100.3161 }, 
                         horario: "", link_maps: "", telefono: p.telefono_contacto || ""
                     }]
                 };
-                try {
-                    const docRef = await addDoc(collection(db, 'clientes_logistica'), nuevoCliente);
-                    updates.destino_alias = aliasFinal;
-                    updates.cliente_id_vinculado = docRef.id;
-                    localClientes.push({ id: docRef.id, ...nuevoCliente }); // Guardar en caché temporal
-                } catch (e) { console.error("Error agregando cliente:", e); }
+                
+                const newClientRef = doc(collection(db, 'clientes_logistica'));
+                batch.set(newClientRef, nuevoCliente); 
+                operacionesEnBatch++;
+                
+                updates.destino_alias = aliasFinal;
+                updates.cliente_id_vinculado = newClientRef.id;
+                localClientes.push({ id: newClientRef.id, ...nuevoCliente }); 
 
             } else if (clienteMatch) {
-                // Cliente existe. Validar direcciones.
                 let direccionesCliente = clienteMatch.direcciones || [];
                 
-                // PUNTO 3: Validar si la dirección exacta ya existe
-                let dirExistente = direccionesCliente.find(d => d.direccion.trim().toLowerCase() === dirLimpia.toLowerCase());
+                // MEJORA: Buscar dirección exacta O con una similitud del 85% o más (Ignora errores de dedo o falta de "#")
+                let dirExistente = direccionesCliente.find(d => {
+                    const esExacta = d.direccion.trim().toLowerCase() === dirLimpia.toLowerCase();
+                    const esMuySimilar = similitudTextos(d.direccion, dirLimpia) >= 85;
+                    return esExacta || esMuySimilar;
+                });
 
                 if (dirExistente) {
                     updates.destino_alias = dirExistente.alias;
                     updates.cliente_id_vinculado = clienteMatch.id;
                 } else {
-                    // PUNTO 2: Dirección NO existe -> Crear Alias Autoincremental
                     let aliasFinal = aliasBase;
                     let contador = 1;
                     while (direccionesCliente.some(d => d.alias === aliasFinal)) {
@@ -109,84 +111,85 @@ export const LogisticaProvider = ({ children }) => {
                         horario: "", link_maps: "", telefono: p.telefono_contacto || ""
                     };
 
-                    try {
-                        await updateDoc(doc(db, 'clientes_logistica', clienteMatch.id), {
-                            direcciones: arrayUnion(nuevaDir)
-                        });
-                        updates.destino_alias = aliasFinal;
-                        updates.cliente_id_vinculado = clienteMatch.id;
-                        
-                        // Actualizar caché temporal
-                        direccionesCliente.push(nuevaDir);
-                        localClientes[clienteIndex].direcciones = direccionesCliente;
-                    } catch(e) { console.error("Error agregando nueva dirección:", e); }
+                    const clientRef = doc(db, 'clientes_logistica', clienteMatch.id);
+                    batch.update(clientRef, { direcciones: arrayUnion(nuevaDir) }); 
+                    operacionesEnBatch++;
+
+                    updates.destino_alias = aliasFinal;
+                    updates.cliente_id_vinculado = clienteMatch.id;
+                    
+                    direccionesCliente.push(nuevaDir);
+                    localClientes[clienteIndex].direcciones = direccionesCliente;
                 }
             }
         } 
         // LÓGICA FLETERA FORÁNEA
         else {
-            // PUNTO 5: Fleteras
-            // CORRECCIÓN: Tomar solo el método de mensajería, ignorar destino_alias para el nombre
             let fleteraNombre = (p.metodo_mensajeria || '').trim(); 
             
-            // Si el nombre viene vacío o trae textos basura comunes de Contpaqi, forzar a "POR ASIGNAR"
             if (!fleteraNombre || ['DOMICILIO', 'D', 'OCURRE', 'POR DEFINIR'].includes(fleteraNombre.toUpperCase())) {
                 fleteraNombre = 'POR ASIGNAR';
             }
 
-            // Pre-Selección en Modal
             if (detallesUpper.includes('DOMICILIO') || detallesUpper === 'D') {
                 updates.tipo_envio = 'fletera_domicilio';
             } else {
                 updates.tipo_envio = 'fletera_ocurre';
             }
-            
-            // Guardamos el alias para el envío, pero NO lo usamos para nombrar a la fletera
             updates.destino_alias = (p.destino_alias || fleteraNombre).trim(); 
 
-            // Buscar Fletera en Catálogo
             let fleteraIndex = localFleteras.findIndex(f => f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase());
             let fleteraMatch = fleteraIndex >= 0 ? localFleteras[fleteraIndex] : null;
 
             if (!fleteraMatch && fleteraNombre !== 'POR ASIGNAR') {
-                // Dar de alta la Fletera SOLO si es un nombre real y no existía
                 const nuevaFletera = {
                     nombre: fleteraNombre,
-                    direccion: "Dirección pendiente", // Placeholder para investigar luego
+                    direccion: "Dirección pendiente", 
                     telefono: "", link_maps: "", coordenadas: { lat: 25.6866, lng: -100.3161 }
                 };
-                try {
-                    const fDoc = await addDoc(collection(db, 'catalogo_fleteras'), nuevaFletera);
-                    updates.fletera_asignada_id = fDoc.id;
-                    localFleteras.push({ id: fDoc.id, ...nuevaFletera });
-                } catch(e) { console.error("Error agregando fletera:", e); }
+                
+                const newFleteraRef = doc(collection(db, 'catalogo_fleteras'));
+                batch.set(newFleteraRef, nuevaFletera); 
+                operacionesEnBatch++;
+                
+                updates.fletera_asignada_id = newFleteraRef.id;
+                localFleteras.push({ id: newFleteraRef.id, ...nuevaFletera });
             } else if (fleteraMatch) {
                 updates.fletera_asignada_id = fleteraMatch.id;
             }
             
-            // Validar Cliente Foráneo (Dar de alta para la Base de Datos pero sin direcciones locales)
             let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
             if(clienteIndex === -1 && codigoCliente) {
                  const nuevoClienteForaneo = {
                     codigo: codigoCliente,
                     nombre: nombreCliente,
                     telefono: p.telefono_contacto || "",
-                    direcciones: [] // Vacío porque la entrega depende de la fletera
+                    direcciones: [] 
                 };
-                try {
-                    const docRef = await addDoc(collection(db, 'clientes_logistica'), nuevoClienteForaneo);
-                    updates.cliente_id_vinculado = docRef.id;
-                    localClientes.push({ id: docRef.id, ...nuevoClienteForaneo });
-                } catch (e) { console.error("Error agregando cliente foraneo:", e); }
+                
+                const newClientForaneoRef = doc(collection(db, 'clientes_logistica'));
+                batch.set(newClientForaneoRef, nuevoClienteForaneo); 
+                operacionesEnBatch++;
+
+                updates.cliente_id_vinculado = newClientForaneoRef.id;
+                localClientes.push({ id: newClientForaneoRef.id, ...nuevoClienteForaneo });
             } else if (clienteIndex !== -1) {
                  updates.cliente_id_vinculado = localClientes[clienteIndex].id;
             }
         }
 
-        // IMPACTAR CAMBIOS EN EL PEDIDO FINAL
+        const rutaRef = doc(db, 'rutas_logistica', p.id);
+        batch.update(rutaRef, updates); 
+        operacionesEnBatch++;
+    }
+
+    if (operacionesEnBatch > 0) {
         try {
-            await updateDoc(doc(db, 'rutas_logistica', p.id), updates);
-        } catch(e) { console.error("Error al actualizar estado web del pedido:", e); }
+            await batch.commit();
+            console.log(`✅ Lote procesado: Se enviaron ${operacionesEnBatch} operaciones a Firebase de manera segura.`);
+        } catch(e) { 
+            console.error("Error ejecutando el Batch de pedidos:", e); 
+        }
     }
   };
 
@@ -215,7 +218,6 @@ export const LogisticaProvider = ({ children }) => {
             activos.push({ id: doc.id, ...data });
         }
 
-        // BLINDAJE: Acepta false, null o undefined
         if (data.origen === 'Contpaqi' && (data.procesado_por_web === false || data.procesado_por_web == null)) {
             crudos.push({ id: doc.id, ...data });
         }
@@ -233,7 +235,6 @@ export const LogisticaProvider = ({ children }) => {
       setLoading(false);
 
       if (crudos.length > 0) {
-          // Ejecutar el procesamiento de forma asíncrona para no trabar la interfaz
           setTimeout(() => procesarPedidosCrudos(crudos, clientesTemp, fleterasTemp), 1000);
       }
     });
