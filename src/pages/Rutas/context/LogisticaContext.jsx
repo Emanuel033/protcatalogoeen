@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, addDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../../firebase'; 
 
 const LogisticaContext = createContext();
 
-// Función de similitud (Levenshtein) para el fuzzy matching
+// Función de similitud (Levenshtein) para el fuzzy matching (Mantenida por si se requiere en otras áreas)
 const similitudTextos = (a = '', b = '') => {
     a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
     if (a === b) return 100;
@@ -31,93 +31,158 @@ export const LogisticaProvider = ({ children }) => {
   const [fleteras, setFleteras] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // EL CEREBRO AUTO-MASTICADOR (AHORA CON REGLAS CONTPAQ EXACTAS)
+  // EL CEREBRO AUTO-MASTICADOR (CON REGLAS ESTRICTAS DE N8N)
   const procesarPedidosCrudos = async (viajesCrudos, clientesActuales, fleterasActuales) => {
+    // Copias locales para no duplicar datos si vienen 5 pedidos del mismo cliente nuevo al mismo tiempo
+    let localClientes = [...clientesActuales];
+    let localFleteras = [...fleterasActuales];
+
     for (let p of viajesCrudos) {
         let updates = { procesado_por_web: true };
         
-        let rawEnvio = (p.tipo_envio || '').toUpperCase();
-        let tipoLimpio = 'bodega_cliente';
-        let destinoAlias = p.destino_alias || p.detalles_entrega || '';
-
-        // 1. TRADUCTOR CONTPAQ: Separar por " Y "
-        if (rawEnvio.includes(' Y ')) {
-            const partes = rawEnvio.split(' Y ');
-            const transporte = partes[0].trim(); // "LOCAL" o Nombre de Fletera
-            const modalidad = partes[1].trim();  // "DF", "OB", "D", "O"
-
-            if (transporte === 'LOCAL') {
-                tipoLimpio = 'bodega_cliente';
-                if (modalidad === 'DF') destinoAlias = 'Domicilio Fiscal';
-                if (modalidad === 'OB') destinoAlias = 'Otra Bodega';
-            } else {
-                // Si no es LOCAL, asume que es el nombre de la fletera
-                tipoLimpio = (modalidad === 'O' || modalidad === 'OCURRE') ? 'fletera_ocurre' : 'fletera_domicilio';
-                destinoAlias = transporte; 
-            }
-        } else {
-            // Fallback por si viene en otro formato
-            if (rawEnvio === 'LOCAL') tipoLimpio = 'bodega_cliente';
-            else if (rawEnvio === 'FLETERA') tipoLimpio = 'fletera_domicilio';
-        }
-
-        updates.tipo_envio = tipoLimpio;
-        updates.destino_alias = destinoAlias;
-
-        // 2. Banderas de Cobranza y Variables Extra
-        updates.requiere_cobro = p.requiere_cobro === true || p.requiere_cobro === 'true';
-
-        let dirLimpia = (p.direccion || '').trim();
+        let rawEnvio = (p.tipo_envio || '').trim().toUpperCase();
+        let detallesUpper = (p.detalles_entrega || '').trim().toUpperCase();
         let codigoCliente = (p.cliente_codigo || '').trim().toUpperCase();
         let nombreCliente = (p.cliente_nombre || '').trim().toUpperCase();
+        let dirLimpia = (p.direccion || '').trim();
 
-        const isFletera = tipoLimpio.includes('fletera');
-        if (isFletera) {
-            // SI ES FLETERA: Buscar en el catálogo de fleteras, no en clientes
-            let fleteraMatch = null;
-            let mejorPuntajeFletera = 0;
-            fleterasActuales.forEach(f => {
-                let score = similitudTextos(f.nombre, updates.destino_alias || nombreCliente);
-                if (score > mejorPuntajeFletera) { mejorPuntajeFletera = score; fleteraMatch = f; }
-            });
-            
-            if (mejorPuntajeFletera >= 80 && fleteraMatch) {
-                updates.destino_alias = fleteraMatch.alias || fleteraMatch.nombre;
-                if(!dirLimpia) updates.direccion = fleteraMatch.direccion || dirLimpia;
-                updates.coordenadas = fleteraMatch.coordenadas || {lat: 25.689804, lng: -100.312066};
-            } else {
-                updates.destino_alias = updates.destino_alias || 'Fletera Foránea';
-                updates.coordenadas = {lat: 25.689804, lng: -100.312066};
-            }
-        } else {
-            // SI ES LOCAL: Buscar en el catálogo de clientes
-            let clienteMatch = codigoCliente ? clientesActuales.find(c => (c.codigo || '').toUpperCase() === codigoCliente) : null;
-            
-            if (!clienteMatch && nombreCliente) {
-                let mejorPuntajeCliente = 0;
-                clientesActuales.forEach(c => {
-                    let score = similitudTextos(c.nombre, nombreCliente);
-                    if (score > mejorPuntajeCliente) { mejorPuntajeCliente = score; clienteMatch = c; }
-                });
-                if (mejorPuntajeCliente < 80) clienteMatch = null; 
-            }
+        // Asegurar bandera de cobranza
+        updates.requiere_cobro = p.requiere_cobro === true || p.requiere_cobro === 'true';
 
-            if (!clienteMatch) {
-                updates.destino_alias = updates.destino_alias || 'Dirección Matriz';
-                updates.coordenadas = {lat: 25.689804, lng: -100.312066};
+        // LÓGICA REPARTO LOCAL
+        if (rawEnvio === 'LOCAL' || rawEnvio === 'REPARTO') {
+            updates.tipo_envio = 'reparto_local'; // PUNTO 4: Pre-seleccionar en Edit
+            
+            // Definir base del ALIAS
+            let aliasBase = "MATRIZ";
+            if (detallesUpper.includes('FISCAL') || detallesUpper === 'DF') aliasBase = "FISCAL";
+            if (detallesUpper.includes('BODEGA') || detallesUpper === 'OB' || detallesUpper.includes('OTRA')) aliasBase = "BODEGA";
+
+            // Buscar Cliente Exacto por Código SAP
+            let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
+            let clienteMatch = clienteIndex >= 0 ? localClientes[clienteIndex] : null;
+
+            if (!clienteMatch && codigoCliente) {
+                // PUNTO 1: Cliente no existe -> Darlo de Alta con todo
+                let aliasFinal = aliasBase;
+                const nuevoCliente = {
+                    codigo: codigoCliente,
+                    nombre: nombreCliente,
+                    telefono: p.telefono_contacto || "",
+                    direcciones: [{
+                        alias: aliasFinal,
+                        direccion: dirLimpia,
+                        coordenadas: { lat: 25.6866, lng: -100.3161 }, // Coordenada default Monterrey
+                        horario: "", link_maps: "", telefono: p.telefono_contacto || ""
+                    }]
+                };
+                try {
+                    const docRef = await addDoc(collection(db, 'clientes_logistica'), nuevoCliente);
+                    updates.destino_alias = aliasFinal;
+                    updates.cliente_id_vinculado = docRef.id;
+                    localClientes.push({ id: docRef.id, ...nuevoCliente }); // Guardar en caché temporal
+                } catch (e) { console.error("Error agregando cliente:", e); }
+
+            } else if (clienteMatch) {
+                // Cliente existe. Validar direcciones.
+                let direccionesCliente = clienteMatch.direcciones || [];
+                
+                // PUNTO 3: Validar si la dirección exacta ya existe
+                let dirExistente = direccionesCliente.find(d => d.direccion.trim().toLowerCase() === dirLimpia.toLowerCase());
+
+                if (dirExistente) {
+                    updates.destino_alias = dirExistente.alias;
+                    updates.cliente_id_vinculado = clienteMatch.id;
+                } else {
+                    // PUNTO 2: Dirección NO existe -> Crear Alias Autoincremental
+                    let aliasFinal = aliasBase;
+                    let contador = 1;
+                    while (direccionesCliente.some(d => d.alias === aliasFinal)) {
+                        aliasFinal = `${aliasBase} ${contador}`;
+                        contador++;
+                    }
+
+                    const nuevaDir = {
+                        alias: aliasFinal,
+                        direccion: dirLimpia,
+                        coordenadas: { lat: 25.6866, lng: -100.3161 },
+                        horario: "", link_maps: "", telefono: p.telefono_contacto || ""
+                    };
+
+                    try {
+                        await updateDoc(doc(db, 'clientes_logistica', clienteMatch.id), {
+                            direcciones: arrayUnion(nuevaDir)
+                        });
+                        updates.destino_alias = aliasFinal;
+                        updates.cliente_id_vinculado = clienteMatch.id;
+                        
+                        // Actualizar caché temporal
+                        direccionesCliente.push(nuevaDir);
+                        localClientes[clienteIndex].direcciones = direccionesCliente;
+                    } catch(e) { console.error("Error agregando nueva dirección:", e); }
+                }
+            }
+        } 
+        // LÓGICA FLETERA FORÁNEA
+        else {
+            // PUNTO 5: Fleteras
+            let fleteraNombre = (p.destino_alias || p.metodo_mensajeria || '').trim(); 
+            
+            // Pre-Selección en Modal
+            if (detallesUpper.includes('DOMICILIO') || detallesUpper === 'D') {
+                updates.tipo_envio = 'fletera_domicilio';
             } else {
-                updates.destino_alias = updates.destino_alias || 'Dirección Matriz';
-                updates.coordenadas = clienteMatch.direcciones?.[0]?.coordenadas || {lat: 25.689804, lng: -100.312066};
-                if(!dirLimpia) updates.direccion = clienteMatch.direcciones?.[0]?.direccion || '';
+                updates.tipo_envio = 'fletera_ocurre';
+            }
+            updates.destino_alias = fleteraNombre; // El alias se convierte en el nombre de la fletera
+
+            // Buscar Fletera en Catálogo
+            let fleteraIndex = localFleteras.findIndex(f => f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase());
+            let fleteraMatch = fleteraIndex >= 0 ? localFleteras[fleteraIndex] : null;
+
+            if (!fleteraMatch && fleteraNombre) {
+                // Dar de alta la Fletera si no existe
+                const nuevaFletera = {
+                    nombre: fleteraNombre,
+                    direccion: "Dirección pendiente", // Placeholder para investigar luego
+                    telefono: "", link_maps: "", coordenadas: { lat: 25.6866, lng: -100.3161 }
+                };
+                try {
+                    const fDoc = await addDoc(collection(db, 'catalogo_fleteras'), nuevaFletera);
+                    updates.fletera_asignada_id = fDoc.id;
+                    localFleteras.push({ id: fDoc.id, ...nuevaFletera });
+                } catch(e) { console.error("Error agregando fletera:", e); }
+            } else if (fleteraMatch) {
+                updates.fletera_asignada_id = fleteraMatch.id;
+            }
+            
+            // Validar Cliente Foráneo (Dar de alta para la Base de Datos pero sin direcciones locales)
+            let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
+            if(clienteIndex === -1 && codigoCliente) {
+                 const nuevoClienteForaneo = {
+                    codigo: codigoCliente,
+                    nombre: nombreCliente,
+                    telefono: p.telefono_contacto || "",
+                    direcciones: [] // Vacío porque la entrega depende de la fletera
+                };
+                try {
+                    const docRef = await addDoc(collection(db, 'clientes_logistica'), nuevoClienteForaneo);
+                    updates.cliente_id_vinculado = docRef.id;
+                    localClientes.push({ id: docRef.id, ...nuevoClienteForaneo });
+                } catch (e) { console.error("Error agregando cliente foraneo:", e); }
+            } else if (clienteIndex !== -1) {
+                 updates.cliente_id_vinculado = localClientes[clienteIndex].id;
             }
         }
 
-        await updateDoc(doc(db, 'rutas_logistica', p.id), updates);
+        // IMPACTAR CAMBIOS EN EL PEDIDO FINAL
+        try {
+            await updateDoc(doc(db, 'rutas_logistica', p.id), updates);
+        } catch(e) { console.error("Error al actualizar estado web del pedido:", e); }
     }
   };
 
   useEffect(() => {
-    // Escuchar catálogos maestros
     const unsubFlota = onSnapshot(collection(db, 'flota'), snap => setFlota(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
     const unsubChoferes = onSnapshot(collection(db, 'choferes'), snap => setChoferes(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
     
@@ -132,7 +197,6 @@ export const LogisticaProvider = ({ children }) => {
         setFleteras(fleterasTemp);
     });
 
-    // Escuchar Rutas y detonar procesamiento
     const unsubRutas = onSnapshot(collection(db, 'rutas_logistica'), (snapshot) => {
       let activos = [];
       let crudos = [];
@@ -143,12 +207,12 @@ export const LogisticaProvider = ({ children }) => {
             activos.push({ id: doc.id, ...data });
         }
 
-        if (data.origen === 'Contpaqi' && data.procesado_por_web === false) {
+        // BLINDAJE: Acepta false, null o undefined
+        if (data.origen === 'Contpaqi' && (data.procesado_por_web === false || data.procesado_por_web == null)) {
             crudos.push({ id: doc.id, ...data });
         }
       });
 
-      // Ordenar: Fallas primero, luego Pendientes, luego lo que está en movimiento, y al final Entregados
       activos.sort((a,b) => { 
         const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 }; 
         if (a.estado === 'camino' && b.estado === 'camino') {
@@ -161,6 +225,7 @@ export const LogisticaProvider = ({ children }) => {
       setLoading(false);
 
       if (crudos.length > 0) {
+          // Ejecutar el procesamiento de forma asíncrona para no trabar la interfaz
           setTimeout(() => procesarPedidosCrudos(crudos, clientesTemp, fleterasTemp), 1000);
       }
     });
