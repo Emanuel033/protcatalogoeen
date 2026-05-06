@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, deleteDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
 import { db } from '../../../firebase'; 
 import { useLogistica } from '../context/LogisticaContext';
 
@@ -25,6 +25,11 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
 
   // ESTADOS PARA EL VISOR DE IMÁGENES
   const [imagenModal, setImagenModal] = useState(null);
+
+  // ESTADOS PARA MATERIAL PENDIENTE (LA TABLITA DIGITAL)
+  const [showFaltanteModal, setShowFaltanteModal] = useState(false);
+  const [descFaltante, setDescFaltante] = useState('');
+  const [metodoFaltante, setMetodoFaltante] = useState('envio'); // 'envio' o 'mostrador'
 
   useEffect(() => {
     if (pedidoSeleccionado) {
@@ -276,6 +281,32 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
     } catch (e) { console.error(e); setAlerta("Error al actualizar estado."); }
   };
 
+  // --- FUNCIÓN GUARDAR FALTANTE (LA TABLITA) ---
+  const handleGuardarFaltante = async () => {
+    if (!descFaltante.trim()) return setAlerta("Escribe qué material faltó");
+    
+    try {
+      await addDoc(collection(db, 'material_pendiente'), {
+        folio_original: pedidoSeleccionado.folio_pedido || 'S/N',
+        cliente_nombre: pedidoSeleccionado.cliente_nombre,
+        cliente_codigo: pedidoSeleccionado.cliente_codigo || '',
+        direccion: pedidoSeleccionado.direccion || '',
+        coordenadas: pedidoSeleccionado.coordenadas || null,
+        descripcion: descFaltante,
+        metodo_solucion: metodoFaltante,
+        estado: 'esperando_material',
+        fecha_reporte: serverTimestamp(),
+      });
+      
+      setShowFaltanteModal(false);
+      setDescFaltante('');
+      setAlerta("¡Faltante anotado en la tablita!");
+      setTimeout(() => setAlerta(null), 3000);
+    } catch (e) {
+      setAlerta("Error al guardar faltante");
+    }
+  };
+
   const descargarImagen = (url, titulo) => {
     fetch(url)
       .then(response => response.blob())
@@ -313,11 +344,13 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
           <button onClick={onClose} className="absolute top-4 right-4 text-blue-100 hover:text-white transition bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"><i className="fas fa-times"></i></button>
           
           <div className="flex justify-between items-start mb-1 pr-8">
-            <div className="flex gap-1.5 items-center">
+            <div className="flex gap-1.5 items-center flex-wrap">
               {pedidoSeleccionado.folio_pedido && (<span className="text-[9px] font-mono font-black text-blue-900 bg-white px-1.5 py-0.5 rounded shadow-sm">PED: {pedidoSeleccionado.folio_pedido}</span>)}
               {permiteEditar && (
                 <>
                   <button onClick={() => onEdit(pedidoSeleccionado)} className="text-amber-900 bg-amber-400 px-2 py-0.5 rounded text-[9px] font-black shadow-sm flex items-center gap-1 hover:bg-amber-300 transition"><i className="fas fa-edit"></i> Editar</button>
+                  {/* BOTÓN FALTANTES */}
+                  <button onClick={() => setShowFaltanteModal(true)} className="text-purple-900 bg-purple-300 px-2 py-0.5 rounded text-[9px] font-black shadow-sm flex items-center gap-1 hover:bg-purple-200 transition"><i className="fas fa-clipboard-list"></i> Faltante</button>
                   <button onClick={handleEliminar} className="text-white bg-red-500 px-2 py-0.5 rounded text-[9px] font-black shadow-sm flex items-center gap-1 hover:bg-red-400 transition"><i className="fas fa-trash-alt"></i> Eliminar</button>
                 </>
               )}
@@ -506,18 +539,30 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                 )}
              </div>
           )}
-          {/* CONFIRMAR SALIDA (ALTA VISIBILIDAD) */}
+
+          {/* CONFIRMAR SALIDA (UI/UX GLASSMORPHISM) */}
           {esRampa && !modoEdicionAsignacion && (
-             <div className="bg-emerald-500/90 backdrop-blur-md flex flex-col gap-2 border border-emerald-400 rounded-2xl p-4 shadow-md mt-2 relative overflow-hidden">
-                 <h4 className="text-[11px] font-black text-white flex items-center gap-1.5 mb-2 relative z-10 drop-shadow-md"><i className="fas fa-truck-fast text-emerald-200"></i> CONFIRMAR SALIDA</h4>
-                 <p className="text-[10px] text-emerald-50 mb-3 leading-snug relative z-10 font-medium drop-shadow-sm">Presiona aquí cuando arranque para registrar la hora exacta de salida y crear el Lote de Viaje.</p>
-                 <button onClick={() => cambiarEstadoLogistico('salida')} className="w-full bg-white text-emerald-800 hover:bg-emerald-50 font-black py-3 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 text-xs relative z-10 border border-white">
-                    <i className="fas fa-play"></i> Iniciar Ruta Ahora
-                </button>
-               <button onClick={() => cambiarEstadoLogistico('reasignar')} className="w-full bg-zinc-100 text-slate-500 py-3 rounded-2xl font-bold text-xs"><i className="fas fa-undo mr-2"></i> Regresar a Pendientes</button>
+             <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl p-4 shadow-[0_8px_30px_rgba(16,185,129,0.15)] mt-3 relative overflow-hidden flex flex-col gap-3">
+                {/* Resplandor de fondo */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-400/20 blur-3xl rounded-full pointer-events-none"></div>
+
+                <div className="relative z-10">
+                    <h4 className="text-[11px] font-black text-emerald-800 flex items-center gap-1.5 mb-1"><i className="fas fa-truck-fast text-emerald-500"></i> UNIDAD CARGADA</h4>
+                    <p className="text-[10px] text-slate-600 leading-snug font-medium">Confirma la salida para generar el Lote de Viaje y comenzar la ruta.</p>
+                </div>
+
+                <div className="flex flex-col gap-2 relative z-10">
+                    {/* Botón Principal (Iniciar Ruta) */}
+                    <button onClick={() => cambiarEstadoLogistico('salida')} className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black py-3.5 rounded-xl shadow-[0_4px_15px_rgba(16,185,129,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2 text-xs border border-emerald-400/50">
+                       <i className="fas fa-play"></i> Iniciar Ruta Ahora
+                    </button>
+                    {/* Botón Secundario (Regresar) */}
+                    <button onClick={() => cambiarEstadoLogistico('reasignar')} className="w-full bg-white/50 hover:bg-white/80 text-slate-600 border border-slate-300/50 py-2.5 rounded-xl font-bold text-[11px] transition-colors shadow-[inset_0_1px_2px_rgba(255,255,255,0.8)] flex items-center justify-center gap-2">
+                       <i className="fas fa-undo"></i> Regresar a Pendientes
+                    </button>
+                </div>
              </div>
           )}
-
 
           {/* PANEL EVIDENCIAS Y REPORTES */}
           {(esEntregado || esFallido) && fotosEvidencia.length > 0 && (
@@ -570,6 +615,53 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
            </button>
         </div>
       )}
+
+      {/* MODAL FALTANTES (LA TABLITA DIGITAL) */}
+      {showFaltanteModal && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
+          <div className="bg-white/80 backdrop-blur-xl border border-white/60 p-5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.1),inset_0_0_20px_rgba(255,255,255,0.8)] w-full max-w-sm transform-gpu">
+            <h3 className="font-black text-slate-800 text-lg mb-1 flex items-center gap-2">
+              <i className="fas fa-clipboard-list text-purple-600"></i> Reportar Faltante
+            </h3>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-4">Se guardará en la tablita de pendientes</p>
+            
+            <label className="block text-[10px] font-black text-slate-700 uppercase mb-1.5 ml-1">¿Qué material faltó?</label>
+            <textarea 
+              value={descFaltante}
+              onChange={(e) => setDescFaltante(e.target.value)}
+              placeholder="Ej. Faltaron 5 cajas de... por falta de stock."
+              className="w-full bg-white/50 border border-slate-200 rounded-xl p-3 text-xs font-medium outline-none focus:border-purple-400 focus:bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all mb-4"
+              rows="3"
+            ></textarea>
+
+            <label className="block text-[10px] font-black text-slate-700 uppercase mb-1.5 ml-1">¿Cómo se le va a entregar?</label>
+            <div className="flex gap-2 mb-6">
+              <button 
+                onClick={() => setMetodoFaltante('envio')}
+                className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase flex flex-col items-center gap-1 transition-all duration-300 border shadow-sm ${metodoFaltante === 'envio' ? 'bg-blue-600 text-white border-blue-500 scale-105' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'}`}
+              >
+                <i className="fas fa-truck-fast text-lg"></i>
+                Se lo enviamos
+              </button>
+              <button 
+                onClick={() => setMetodoFaltante('mostrador')}
+                className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase flex flex-col items-center gap-1 transition-all duration-300 border shadow-sm ${metodoFaltante === 'mostrador' ? 'bg-emerald-500 text-white border-emerald-400 scale-105' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'}`}
+              >
+                <i className="fas fa-store text-lg"></i>
+                Pasa a recoger
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={() => setShowFaltanteModal(false)} className="flex-1 bg-slate-200/50 hover:bg-slate-300 text-slate-600 font-black py-3 rounded-xl text-xs transition-colors border border-slate-300/50">Cancelar</button>
+              <button onClick={handleGuardarFaltante} className="flex-[2] bg-purple-600 hover:bg-purple-500 text-white font-black py-3 rounded-xl text-xs transition-all shadow-[0_4px_15px_rgba(147,51,234,0.3)] flex justify-center items-center gap-2">
+                <i className="fas fa-save"></i> Guardar en Tablita
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 };
