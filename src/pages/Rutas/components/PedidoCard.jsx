@@ -22,9 +22,27 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
   const tipoEnvio = getTipoEnvio();
   const aliasDestino = pedido.destino_alias || 'Destino Físico';
 
+  // --- FORMATEADOR DE FECHAS ROBUSTO (Maneja Timestamps de Firebase y Strings de N8N) ---
+  const formatearFecha = (fechaRaw) => {
+    if (!fechaRaw) return null;
+    try {
+        let d;
+        if (fechaRaw.toDate) {
+            d = fechaRaw.toDate(); // Es Timestamp de Firebase
+        } else {
+            d = new Date(fechaRaw); // Es String ISO
+        }
+        if (isNaN(d.getTime())) return null;
+
+        return d.toLocaleDateString('es-MX', {
+            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+        }).replace(',', ' a las');
+    } catch (e) {
+        return null;
+    }
+  };
+
   // --- 1. CRISTAL ESMERILADO (FROSTED GLASS) ---
-  // Recuperamos el blur fuerte y usamos fondos muy translúcidos.
-  // Al activarse (isActive) adquiere un tono azulado y brilla levemente desde adentro.
   const fondoTarjeta = isActive 
     ? 'bg-blue-50/60 backdrop-blur-xl border-blue-300/50 shadow-[0_8px_30px_rgba(59,130,246,0.15),inset_0_0_20px_rgba(255,255,255,0.7)] md:scale-[1.02] z-10 transform-gpu' 
     : 'bg-white/40 backdrop-blur-lg border-white/50 shadow-[0_4px_15px_rgba(0,0,0,0.03)] hover:bg-white/50 hover:shadow-[0_8px_25px_rgba(0,0,0,0.06)] transform-gpu';
@@ -55,12 +73,19 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
       onClick={onClick}
       className={`relative p-4 rounded-2xl transition-all duration-300 cursor-pointer border ${fondoTarjeta}`}
     >
-      {/* ENCABEZADO: ESTADO Y FOLIO */}
+      {/* ENCABEZADO: ESTADO Y FOLIOS */}
       <div className="flex justify-between items-start mb-2">
         {getBadgeEstado()}
-        <span className={`text-[10px] font-mono font-black transition-colors duration-300 ${textoFolio}`}>
-          {pedido.folio_pedido || 'S/N'}
-        </span>
+        <div className="flex flex-col items-end text-right">
+            <span className={`text-[10px] font-mono font-black transition-colors duration-300 ${textoFolio}`}>
+              {pedido.folio_pedido ? `PED: ${pedido.folio_pedido}` : 'S/N'}
+            </span>
+            {pedido.folio_factura && (
+              <span className={`text-[8.5px] font-mono font-bold transition-colors duration-300 mt-0.5 ${isActive ? 'text-blue-900/60' : 'text-slate-400'}`}>
+                FAC: {pedido.folio_factura}
+              </span>
+            )}
+        </div>
       </div>
 
       {/* NOMBRE DEL CLIENTE Y BADGES EXTRA (CONTPAQI / ADEUDO / URGENTE) */}
@@ -87,7 +112,7 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
         )}
       </div>
       
-      {/* NUEVO RENGLÓN: TIPO DE ENVÍO Y ALIAS (CON EFECTO GRABADO) */}
+      {/* RENGLÓN: TIPO DE ENVÍO Y ALIAS (CON EFECTO GRABADO) */}
       <div className="flex items-center gap-2 mb-2">
         <span className={`px-1.5 py-0.5 rounded-[5px] text-[8px] font-black uppercase flex items-center gap-1 shadow-[inset_0_1px_2px_rgba(0,0,0,0.15)] border transition-all duration-300 ${isActive ? 'bg-blue-200/60 text-blue-900 border-blue-300/40' : 'bg-blue-100/50 text-blue-700 border-blue-200/40'}`}>
           <i className={`fas ${tipoEnvio.icon}`}></i> {tipoEnvio.text}
@@ -95,6 +120,20 @@ const PedidoCard = ({ pedido, isActive, onClick }) => {
         <span className={`text-[9px] font-bold uppercase truncate flex items-center gap-1 transition-colors duration-300 ${isActive ? 'text-slate-800' : 'text-slate-400'}`}>
           <i className="fas fa-tag opacity-60"></i> {aliasDestino}
         </span>
+      </div>
+
+      {/* HISTORIAL DE FECHAS (CREACIÓN / SALIDA) */}
+      <div className="flex flex-col gap-0.5 mb-2 mt-1">
+        <span className={`text-[8.5px] font-medium flex items-center gap-1.5 transition-colors duration-300 ${isActive ? 'text-slate-600' : 'text-slate-400'}`}>
+            <i className="fas fa-calendar-plus opacity-70"></i> 
+            Creado: {formatearFecha(pedido.fecha_creacion) || 'Manual (Fecha no registrada)'}
+        </span>
+        {(esEnRuta || esEntregado) && pedido.fecha_salida && (
+            <span className={`text-[8.5px] font-medium flex items-center gap-1.5 transition-colors duration-300 ${isActive ? 'text-blue-700' : 'text-blue-500'}`}>
+                <i className="fas fa-flag-checkered opacity-70"></i> 
+                Salió a ruta: {formatearFecha(pedido.fecha_salida)}
+            </span>
+        )}
       </div>
 
       {/* DIRECCIÓN */}
