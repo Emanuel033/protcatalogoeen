@@ -1,4 +1,6 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
+import { collection, onSnapshot, query, where, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../../firebase'; 
 import PedidoCard from './PedidoCard'; 
 
 const SidebarDispatcher = ({ 
@@ -15,7 +17,6 @@ const SidebarDispatcher = ({
   onToggleSidebar 
 }) => {
 
-  // --- NUEVA LÍNEA: Calculamos la fecha actual en español de México ---
   const fechaHoy = new Date().toLocaleDateString('es-MX', { 
     weekday: 'long', 
     day: 'numeric', 
@@ -23,8 +24,59 @@ const SidebarDispatcher = ({
     year: 'numeric' 
   }).toUpperCase();
 
+  // === NUEVO ESTADO: CONEXIÓN A LA TABLITA DIGITAL ===
+  const [materialesPendientes, setMaterialesPendientes] = useState([]);
+
   useEffect(() => {
-    if (viajeSeleccionado) {
+    // Escuchamos la colección de material pendiente en tiempo real
+    const q = query(collection(db, 'material_pendiente'), where('estado', '==', 'esperando_material'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Ordenamos para que los más recientes salgan primero
+      data.sort((a, b) => (b.fecha_reporte?.toMillis() || 0) - (a.fecha_reporte?.toMillis() || 0));
+      setMaterialesPendientes(data);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // === FUNCIONES DE LA TABLITA ===
+  const handleMandarRuta = async (pendiente) => {
+    if (!window.confirm("¿Crear un nuevo viaje de reparto para enviar este material?")) return;
+    try {
+      // 1. Crear el nuevo viaje en rutas_logistica
+      await addDoc(collection(db, 'rutas_logistica'), {
+        cliente_nombre: pendiente.cliente_nombre,
+        cliente_codigo: pendiente.cliente_codigo || '',
+        direccion: pendiente.direccion || '',
+        coordenadas: pendiente.coordenadas || { lat: 25.6866, lng: -100.3161 },
+        folio_pedido: (pendiente.folio_original || 'SN') + '-FALTANTE',
+        destino_alias: 'Envío de Pendiente',
+        tipo_envio: 'reparto_local', // Por defecto local
+        estado: 'pendiente',
+        notas: `MATERIAL FALTANTE: ${pendiente.descripcion}`,
+        fecha_creacion: serverTimestamp(),
+        procesado_por_web: true // Para que n8n no lo sobreescriba
+      });
+      // 2. Marcar en la tablita como resuelto
+      await updateDoc(doc(db, 'material_pendiente', pendiente.id), { estado: 'resuelto', fecha_resolucion: serverTimestamp() });
+      setFiltro('pendiente'); // Te regresa a la vista de por asignar para que veas el viaje nuevo
+    } catch (e) {
+      console.error("Error al mandar a ruta:", e);
+    }
+  };
+
+  const handleEntregadoMostrador = async (pendiente) => {
+    if (!window.confirm("¿Confirmar que el cliente ya pasó por este material y entregárselo?")) return;
+    try {
+      await updateDoc(doc(db, 'material_pendiente', pendiente.id), { estado: 'resuelto', fecha_resolucion: serverTimestamp() });
+    } catch (e) {
+      console.error("Error al entregar en mostrador:", e);
+    }
+  };
+
+  // === AUTO-SCROLL AL VIAJE SELECCIONADO ===
+  useEffect(() => {
+    if (viajeSeleccionado && filtro !== 'faltantes') {
         const timeoutId = setTimeout(() => {
             const selectedCard = document.getElementById(`pedido-card-${viajeSeleccionado.id}`);
             if (selectedCard) {
@@ -35,7 +87,56 @@ const SidebarDispatcher = ({
     }
   }, [viajeSeleccionado, filtro]);
 
+  // === RENDERIZADO DEL CONTENIDO ===
   const contenidoSidebar = useMemo(() => {
+    // VISTA DE LA TABLITA DIGITAL
+    if (filtro === 'faltantes') {
+      if (materialesPendientes.length === 0) {
+        return (
+          <div className="text-center py-10 flex flex-col items-center">
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-3 shadow-inner">
+               <i className="fas fa-check text-purple-400 text-3xl"></i>
+            </div>
+            <span className="text-sm font-black text-slate-600">¡Tablita limpia!</span>
+            <span className="text-xs text-slate-400 font-medium">No hay material pendiente.</span>
+          </div>
+        );
+      }
+
+      return materialesPendientes.map(pend => (
+        <div key={pend.id} className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl p-4 mb-3 shadow-[0_4px_15px_rgba(0,0,0,0.02)] relative overflow-hidden group hover:bg-white/60 transition-all transform-gpu">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-purple-400/10 blur-2xl rounded-full"></div>
+          
+          <div className="flex justify-between items-start mb-2 relative z-10">
+             <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-[6px] text-[9px] font-black uppercase tracking-wide border border-purple-200/50 shadow-sm flex items-center gap-1">
+                <i className="fas fa-clipboard-list"></i> Folio original
+             </span>
+             <span className="text-[10px] font-mono font-black text-slate-500">{pend.folio_original}</span>
+          </div>
+
+          <h4 className="font-black text-sm leading-tight text-slate-800 mb-2 relative z-10">{pend.cliente_nombre}</h4>
+          
+          <div className="bg-amber-50/80 border border-amber-200/60 rounded-xl p-3 mb-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] relative z-10">
+            <p className="text-[9px] font-black uppercase text-amber-800 mb-1 tracking-wider"><i className="fas fa-box-open mr-1"></i> Faltó lo siguiente:</p>
+            <p className="text-[11px] font-medium text-slate-700 italic">"{pend.descripcion}"</p>
+          </div>
+
+          <div className="relative z-10">
+             {pend.metodo_solucion === 'envio' ? (
+                <button onClick={() => handleMandarRuta(pend)} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 border border-blue-400">
+                   <i className="fas fa-truck-fast"></i> Mandar a Ruta (Crear Viaje)
+                </button>
+             ) : (
+                <button onClick={() => handleEntregadoMostrador(pend)} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-2.5 rounded-xl text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 border border-emerald-400">
+                   <i className="fas fa-store"></i> Entregado en Mostrador
+                </button>
+             )}
+          </div>
+        </div>
+      ));
+    }
+
+    // VISTA NORMAL DE LOGÍSTICA
     if (pedidosFiltrados.length === 0) return [];
 
     if (filtro === 'pendiente') {
@@ -78,10 +179,9 @@ const SidebarDispatcher = ({
         <PedidoCard pedido={pedido} isActive={viajeSeleccionado?.id === pedido.id} onClick={() => setViajeSeleccionado(pedido)} />
       </div>
     ));
-  }, [pedidosFiltrados, filtro, viajeSeleccionado, setViajeSeleccionado]);
+  }, [pedidosFiltrados, filtro, viajeSeleccionado, setViajeSeleccionado, materialesPendientes]);
 
   return (
-    // UN SOLO BLUR AQUÍ, sin opacidades extremas
     <div className="w-full h-full bg-white/80 backdrop-blur-md shadow-[0_10px_40px_rgba(0,0,0,0.15)] flex flex-col border-r border-white/50 overflow-hidden lg:rounded-r-3xl">
       
       <div className="p-4 border-b border-white/50 shrink-0 relative z-20 bg-white/40">
@@ -102,15 +202,25 @@ const SidebarDispatcher = ({
         <div className="flex gap-2 items-center mb-4">
           <div className="relative flex-1">
             <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" placeholder="Buscar cliente, folio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/80 border border-white/60 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition font-medium text-slate-800 placeholder-slate-400 shadow-sm" />
+            <input type="text" placeholder="Buscar cliente, folio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/80 border border-white/60 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition font-medium text-slate-800 placeholder-slate-400 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05)]" />
           </div>
           <button onClick={onOpenAdmin} className="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition shadow-md shrink-0"><i className="fas fa-cog"></i></button>
           <button onClick={onOpenBitacora} className="w-9 h-9 rounded-xl bg-indigo-50/90 text-indigo-700 border border-indigo-200 flex items-center justify-center hover:bg-indigo-100 transition shadow-sm shrink-0"><i className="fas fa-book"></i></button>
           <button onClick={onOpenForm} className="w-9 h-9 rounded-xl bg-blue-700/90 text-white flex items-center justify-center hover:bg-blue-800 transition shadow-md shadow-blue-800/20 shrink-0"><i className="fas fa-plus"></i></button>
         </div>
 
-        {/* FILTROS SIN BLUR (Evita el bug negro) */}
+        {/* FILTROS Y TABLITA */}
         <div className="flex gap-1.5 overflow-x-auto custom-scroll pb-1">
+           {/* BOTÓN DE LA TABLITA (Resalta si hay pendientes) */}
+           <button onClick={() => setFiltro('faltantes')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border ${filtro === 'faltantes' ? 'bg-purple-700 text-white border-purple-600 shadow-md shadow-purple-900/20' : 'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100'}`}>
+              <i className="fas fa-clipboard-list text-[10px]"></i> Faltantes
+              {materialesPendientes.length > 0 && (
+                <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full shadow-[inset_0_1px_2px_rgba(0,0,0,0.3)]">{materialesPendientes.length}</span>
+              )}
+           </button>
+           
+           <div className="w-px bg-white/50 mx-1 shrink-0"></div>
+
            <button onClick={() => setFiltro('activos')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'activos' ? 'bg-blue-800 text-white shadow-md shadow-blue-900/20' : 'bg-white/60 text-slate-700 border border-white/80 hover:bg-white'}`}><i className="fas fa-layer-group text-[10px]"></i> En Curso</button>
            <button onClick={() => setFiltro('pendiente')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'pendiente' ? 'bg-blue-800 text-white shadow-md shadow-blue-900/20' : 'bg-white/60 text-slate-700 border border-white/80 hover:bg-white'}`}><i className="fas fa-clock text-[10px]"></i> Por Asignar</button>
            <button onClick={() => setFiltro('rampa')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${filtro === 'rampa' ? 'bg-blue-800 text-white shadow-md shadow-blue-900/20' : 'bg-white/60 text-slate-700 border border-white/80 hover:bg-white'}`}><i className="fas fa-dolly text-[10px]"></i> En Rampa</button>
@@ -123,7 +233,7 @@ const SidebarDispatcher = ({
       <div className="flex-1 overflow-y-auto p-3 custom-scroll space-y-3 relative z-10">
         {contenidoSidebar}
         
-        {pedidosFiltrados.length === 0 && (
+        {pedidosFiltrados.length === 0 && filtro !== 'faltantes' && (
             <div className="text-center py-6 text-slate-500 font-bold flex flex-col items-center">
                 <i className="fas fa-search text-slate-400 text-3xl mb-2"></i>
                 <span className="text-xs">No hay resultados.</span>
