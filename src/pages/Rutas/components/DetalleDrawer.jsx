@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc, deleteDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
+
 import { db } from '../../../firebase'; 
 import { useLogistica } from '../context/LogisticaContext';
 
@@ -480,8 +481,9 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                      {paradasRuta.map((parada, index) => {
                         const isPlanta = parada.tipo === 'origen' || parada.tipo === 'retorno';
                         const isDestino = parada.tipo === 'destino';
-                        // Habilitar Drag&Drop solo para destinos mientras esté en Rampa
-                        const draggabilityActive = isDestino && esRampa;
+                        
+                        // === MODIFICACIÓN: Drag & Drop activo tanto en rampa como en ruta ===
+                        const draggabilityActive = isDestino && (esRampa || esEnRuta);
 
                         return (
                           <div 
@@ -493,7 +495,6 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
                             onDrop={(e) => draggabilityActive && handleDrop(e, index)}
                             className={`relative flex items-center gap-3 pl-4 py-1 transition-all ${draggabilityActive ? 'cursor-grab active:cursor-grabbing hover:bg-white/50 rounded-lg' : ''} ${draggedIndex === index ? 'opacity-40 scale-95' : 'opacity-100'}`}
                           >
-                             {/* Indicador visual de Drag (Opcional, ayuda a la UX) */}
                              {draggabilityActive && (
                                 <div className="absolute -left-6 text-slate-300 hover:text-blue-500">
                                    <i className="fas fa-grip-vertical text-[10px]"></i>
