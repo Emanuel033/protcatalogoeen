@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, doc, getDoc, setDoc, onSnapshot, query, where, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../firebase'; // Ajusta la ruta a tu config de Firebase
+import { db } from '../../firebase'; // Ajusta la ruta a tu config de Firebase
 
 const AppOperador = () => {
   // ==========================================
