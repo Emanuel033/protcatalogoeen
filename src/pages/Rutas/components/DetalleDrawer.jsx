@@ -563,6 +563,27 @@ const DetalleDrawer = ({ pedidoSeleccionado, onClose, onEdit }) => {
              </div>
           )}
 
+          {/* ======= NUEVA SECCIÓN: ACCIONES DE FALLA ======= */}
+          {esFallido && (
+             <div className="bg-red-500/10 backdrop-blur-xl border border-red-500/30 rounded-2xl p-4 shadow-[0_8px_30px_rgba(239,68,68,0.1)] mt-3 relative overflow-hidden flex flex-col gap-3">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-400/20 blur-3xl rounded-full pointer-events-none"></div>
+
+                <div className="relative z-10">
+                    <h4 className="text-[11px] font-black text-red-800 flex items-center gap-1.5 mb-1"><i className="fas fa-exclamation-circle text-red-500"></i> ORDEN NO ENTREGADA</h4>
+                    <p className="text-[10px] text-slate-600 leading-snug font-medium">¿Qué deseas hacer con esta orden que regresó a la planta?</p>
+                </div>
+
+                <div className="flex flex-col gap-2 relative z-10">
+                    <button onClick={() => cambiarEstadoLogistico('reasignar')} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-3 rounded-xl shadow-[0_4px_15px_rgba(37,99,235,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2 text-xs border border-blue-400/50">
+                        <i className="fas fa-undo"></i> Reasignar a Pendientes
+                    </button>
+                    <button onClick={handleEliminar} className="w-full bg-white/50 hover:bg-white/80 text-red-600 border border-red-300/50 py-2.5 rounded-xl font-bold text-[10px] uppercase transition-colors shadow-[inset_0_1px_2px_rgba(255,255,255,0.8)] flex items-center justify-center gap-2">
+                        <i className="fas fa-trash-alt"></i> Eliminar Orden
+                    </button>
+                </div>
+             </div>
+          )}
+
           {/* PANEL EVIDENCIAS Y REPORTES */}
           {(esEntregado || esFallido) && fotosEvidencia.length > 0 && (
              <div className="bg-white/40 backdrop-blur-lg border border-white/50 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.02)] overflow-hidden shrink-0 mt-3 hover:bg-white/50 transition-colors">
