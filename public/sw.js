@@ -4,12 +4,14 @@ const CACHE_NAME = 'een-sistema-react-v3';
 const urlsToCache = [
   '/',
   '/rutas',
+  '/chofer',
   '/inventario', 
   '/catalogo_completo.json', 
   '/manifest-inventario.json', // <-- Agregamos el manifest
   '/icons/icono-inventario-192.png', // <-- Agregamos los íconos
   '/icons/icono-inventario-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+  
 ];
 
 self.addEventListener('install', event => {
