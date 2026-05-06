@@ -34,7 +34,7 @@ function App() {
         <Route path="/admin" element={<AdminLayout />} />
         
         {/* Agregamos la ruta para el Chofer */}
-        <Route path="/chofer" element={<ChoferView />} />
+        <Route path="/chofer" element={<AppOperador />} />
         
       </Routes>
     </Router>
