@@ -126,22 +126,30 @@ export const LogisticaProvider = ({ children }) => {
         // LÓGICA FLETERA FORÁNEA
         else {
             // PUNTO 5: Fleteras
-            let fleteraNombre = (p.destino_alias || p.metodo_mensajeria || '').trim(); 
+            // CORRECCIÓN: Tomar solo el método de mensajería, ignorar destino_alias para el nombre
+            let fleteraNombre = (p.metodo_mensajeria || '').trim(); 
             
+            // Si el nombre viene vacío o trae textos basura comunes de Contpaqi, forzar a "POR ASIGNAR"
+            if (!fleteraNombre || ['DOMICILIO', 'D', 'OCURRE', 'POR DEFINIR'].includes(fleteraNombre.toUpperCase())) {
+                fleteraNombre = 'POR ASIGNAR';
+            }
+
             // Pre-Selección en Modal
             if (detallesUpper.includes('DOMICILIO') || detallesUpper === 'D') {
                 updates.tipo_envio = 'fletera_domicilio';
             } else {
                 updates.tipo_envio = 'fletera_ocurre';
             }
-            updates.destino_alias = fleteraNombre; // El alias se convierte en el nombre de la fletera
+            
+            // Guardamos el alias para el envío, pero NO lo usamos para nombrar a la fletera
+            updates.destino_alias = (p.destino_alias || fleteraNombre).trim(); 
 
             // Buscar Fletera en Catálogo
             let fleteraIndex = localFleteras.findIndex(f => f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase());
             let fleteraMatch = fleteraIndex >= 0 ? localFleteras[fleteraIndex] : null;
 
-            if (!fleteraMatch && fleteraNombre) {
-                // Dar de alta la Fletera si no existe
+            if (!fleteraMatch && fleteraNombre !== 'POR ASIGNAR') {
+                // Dar de alta la Fletera SOLO si es un nombre real y no existía
                 const nuevaFletera = {
                     nombre: fleteraNombre,
                     direccion: "Dirección pendiente", // Placeholder para investigar luego
