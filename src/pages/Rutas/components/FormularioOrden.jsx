@@ -31,9 +31,13 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   const [bodegaSeleccionada, setBodegaSeleccionada] = useState('');
   const [aliasDestino, setAliasDestino] = useState('');
   const [direccionFisica, setDireccionFisica] = useState('');
+  
+  // Estados para la sección de Contacto en Destino
+  const [contactoDestino, setContactoDestino] = useState('');
   const [telefonoBodega, setTelefonoBodega] = useState('');
   const [horariosEntrega, setHorariosEntrega] = useState('');
   const [linkMaps, setLinkMaps] = useState('');
+  
   const [docs, setDocs] = useState({ factura: true, certificados: false, orden_compra: false, envio_ciego: false });
   const [posicionPin, setPosicionPin] = useState({ lat: 25.6866, lng: -100.3161 });
   const markerRef = useRef(null);
@@ -44,8 +48,9 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
 
   // --- EXTRACTOR AUTOMÁTICO DE COORDENADAS DESDE LINK ---
   useEffect(() => {
-    if (linkMaps && linkMaps.includes('@')) {
-        const match = linkMaps.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    const linkStr = String(linkMaps || '');
+    if (linkStr && linkStr.includes('@')) {
+        const match = linkStr.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
         if (match && match.length >= 3) {
             const newLat = parseFloat(match[1]);
             const newLng = parseFloat(match[2]);
@@ -59,31 +64,36 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   useEffect(() => {
     if (isOpen) {
       if (ordenAEditar) {
-        setFolioPedido(ordenAEditar.folio_pedido || '');
-        setFolioFactura(ordenAEditar.folio_factura || '');
-        setClienteNombre(ordenAEditar.cliente_nombre || '');
-        setCodigoSAP(ordenAEditar.cliente_codigo || '');
-        setTelefonoCliente(ordenAEditar.telefono_contacto || '');
+        // 🛡️ BLINDADO ANTI-CRASHES
+        setFolioPedido(String(ordenAEditar.folio_pedido || ''));
+        setFolioFactura(String(ordenAEditar.folio_factura || ''));
+        setClienteNombre(String(ordenAEditar.cliente_nombre || ''));
+        setCodigoSAP(String(ordenAEditar.cliente_codigo || ''));
+        setTelefonoCliente(String(ordenAEditar.telefono_contacto || ''));
         setUrgente(ordenAEditar.urgente || false);
         setMetodoEnvio(ordenAEditar.tipo_envio || 'bodega_cliente');
-        setAliasDestino(ordenAEditar.destino_alias || '');
-        setDireccionFisica(ordenAEditar.direccion || '');
-        setTelefonoBodega(ordenAEditar.destino_telefono || '');
-        setHorariosEntrega(ordenAEditar.destino_horario || '');
-        setLinkMaps(ordenAEditar.link_maps || '');
+        setAliasDestino(String(ordenAEditar.destino_alias || ''));
+        setDireccionFisica(String(ordenAEditar.direccion || ''));
+        setContactoDestino(String(ordenAEditar.destino_contacto || ''));
+        setTelefonoBodega(String(ordenAEditar.destino_telefono || ''));
+        setHorariosEntrega(String(ordenAEditar.destino_horario || ''));
+        setLinkMaps(String(ordenAEditar.link_maps || ''));
         setDocs(ordenAEditar.documentacion || { factura: true, certificados: false, orden_compra: false, envio_ciego: false });
         if (ordenAEditar.coordenadas?.lat) setPosicionPin(ordenAEditar.coordenadas);
 
+        const nombreAEditar = String(ordenAEditar.cliente_nombre || '').toUpperCase();
+        const codigoAEditar = String(ordenAEditar.cliente_codigo || '').toUpperCase();
+
         const foundClient = clientesLista.find(c => 
-            (c.nombre?.toUpperCase() === (ordenAEditar.cliente_nombre || '').toUpperCase()) ||
-            (ordenAEditar.cliente_codigo && ordenAEditar.cliente_codigo !== 'S/C' && c.codigo?.toUpperCase() === ordenAEditar.cliente_codigo.toUpperCase())
+            (c.nombre && c.nombre.toUpperCase() === nombreAEditar) ||
+            (codigoAEditar && codigoAEditar !== 'S/C' && c.codigo && c.codigo.toUpperCase() === codigoAEditar)
         );
         setClienteSeleccionado(foundClient || null);
       } else {
         setFolioPedido(''); setFolioFactura(''); setClienteNombre(''); setCodigoSAP('');
         setTelefonoCliente(''); setUrgente(false); setMetodoEnvio('bodega_cliente');
         setBodegaSeleccionada(''); setAliasDestino(''); setDireccionFisica('');
-        setTelefonoBodega(''); setHorariosEntrega(''); setLinkMaps('');
+        setContactoDestino(''); setTelefonoBodega(''); setHorariosEntrega(''); setLinkMaps('');
         setDocs({ factura: true, certificados: false, orden_compra: false, envio_ciego: false });
         setPosicionPin({ lat: 25.6866, lng: -100.3161 });
         setClienteSeleccionado(null);
@@ -92,8 +102,11 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   }, [isOpen, ordenAEditar, clientesLista]);
 
   const clientesFiltrados = clientesLista.filter(c => {
-    if (filtroActivo === 'nombre' && clienteNombre.length > 0) return c.nombre?.toLowerCase().includes(clienteNombre.toLowerCase());
-    if (filtroActivo === 'codigo' && codigoSAP.length > 0) return c.codigo?.toLowerCase().includes(codigoSAP.toLowerCase());
+    const nombreSafe = String(clienteNombre || '').toLowerCase();
+    const codigoSafe = String(codigoSAP || '').toLowerCase();
+
+    if (filtroActivo === 'nombre' && nombreSafe.length > 0) return c.nombre?.toLowerCase().includes(nombreSafe);
+    if (filtroActivo === 'codigo' && codigoSafe.length > 0) return c.codigo?.toLowerCase().includes(codigoSafe);
     return false;
   });
 
@@ -111,6 +124,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     if (val === '' || val === 'nueva') {
         setAliasDestino(''); 
         setDireccionFisica(''); 
+        setContactoDestino('');
         setTelefonoBodega(''); 
         setHorariosEntrega(''); 
         setLinkMaps('');
@@ -119,11 +133,12 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
 
     const destino = listaDestinos[val]; 
     if (destino) {
-        setAliasDestino(destino.alias || destino.nombre || '');
-        setDireccionFisica(destino.direccion || '');
-        setTelefonoBodega(destino.telefono || '');
-        setHorariosEntrega(destino.horario || '');
-        setLinkMaps(destino.link_maps || '');
+        setAliasDestino(String(destino.alias || destino.nombre || ''));
+        setDireccionFisica(String(destino.direccion || ''));
+        setContactoDestino(String(destino.contacto || '')); 
+        setTelefonoBodega(String(destino.telefono || ''));
+        setHorariosEntrega(String(destino.horario || ''));
+        setLinkMaps(String(destino.link_maps || ''));
         if (destino.coordenadas && !isNaN(destino.coordenadas.lat)) {
             setPosicionPin({ lat: destino.coordenadas.lat, lng: destino.coordenadas.lng });
         }
@@ -134,16 +149,22 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     // ==========================================
     // 🛡️ VALIDACIONES ESTRICTAS BLINDADAS 🛡️
     // ==========================================
-    const nombreLimpio = (clienteNombre || '').trim().toUpperCase();
-    const codigoLimpio = (codigoSAP || '').trim().toUpperCase();
-    const pedidoLimpio = (folioPedido || '').trim().toUpperCase();
-    const facturaLimpia = (folioFactura || '').trim().toUpperCase();
-    const direccionLimpia = (direccionFisica || '').trim();
+    const nombreLimpio = String(clienteNombre || '').trim().toUpperCase();
+    const codigoLimpio = String(codigoSAP || '').trim().toUpperCase();
+    const pedidoLimpio = String(folioPedido || '').trim().toUpperCase();
+    const facturaLimpia = String(folioFactura || '').trim().toUpperCase();
+    
+    const aliasDestinoLimpio = String(aliasDestino || '').trim();
+    const direccionLimpia = String(direccionFisica || '').trim();
+    const contactoDestinoLimpio = String(contactoDestino || '').trim();
+    const telefonoBodegaLimpio = String(telefonoBodega || '').trim();
+    const horariosEntregaLimpio = String(horariosEntrega || '').trim();
+    const linkMapsLimpio = String(linkMaps || '').trim();
 
     // Regex: Empieza opcionalmente con "C" (^C?) y luego tiene uno o más números (\d+), hasta el final ($)
     const formatoCodigoValido = /^C?\d+$/.test(codigoLimpio);
 
-    if (!codigoLimpio) {
+    if (!codigoLimpio || codigoLimpio === 'S/C') {
         alert("⚠️ ERROR: El CÓDIGO SAP es obligatorio.");
         return;
     }
@@ -163,6 +184,10 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         alert("⚠️ ERROR: Debes seleccionar un Método de Envío válido (Reparto Local o Fletera).");
         return;
     }
+    if (!aliasDestinoLimpio) {
+        alert("⚠️ ERROR: El Nombre o Alias del Destino es obligatorio.");
+        return;
+    }
     if (!direccionLimpia) {
         alert("⚠️ ERROR: La Dirección Exacta es obligatoria.");
         return;
@@ -173,7 +198,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     let fleteraIdVinculada = ordenAEditar?.fletera_asignada_id || null;
     
     try {
-        // --- 1. GESTIÓN DEL CLIENTE EN CATÁLOGO (BÚSQUEDA OR: NOMBRE O CÓDIGO) ---
+        // --- 1. GESTIÓN DEL CLIENTE EN CATÁLOGO ---
         const clienteExistente = clientesLista.find(c => {
             const matchNombre = c.nombre?.toUpperCase() === nombreLimpio;
             const matchCodigo = c.codigo?.toUpperCase() === codigoLimpio;
@@ -183,21 +208,21 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         if (clienteExistente) {
             clienteIdVinculado = clienteExistente.id;
             
-            // Preparamos los datos para ACTUALIZAR el cliente
             let datosAActualizarCliente = {
                 nombre: nombreLimpio,
                 codigo: codigoLimpio,
-                telefono: telefonoCliente || ''
+                telefono: String(telefonoCliente || '').trim()
             };
             
             if (isBodega) {
                 let direccionesActuales = [...(clienteExistente.direcciones || [])];
                 const nuevaDireccionObj = {
-                    alias: aliasDestino.trim() || 'Bodega Principal',
+                    alias: aliasDestinoLimpio,
                     direccion: direccionLimpia,
-                    telefono: telefonoBodega.trim() || '',
-                    horario: horariosEntrega.trim() || '',
-                    link_maps: linkMaps.trim() || '',
+                    contacto: contactoDestinoLimpio,
+                    telefono: telefonoBodegaLimpio,
+                    horario: horariosEntregaLimpio,
+                    link_maps: linkMapsLimpio,
                     coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
                 };
 
@@ -222,18 +247,19 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
             const nuevoClienteData = {
                 nombre: nombreLimpio,
                 codigo: codigoLimpio,
-                telefono: telefonoCliente || '',
+                telefono: String(telefonoCliente || '').trim(),
                 direcciones: [],
                 fecha_creacion: serverTimestamp()
             };
 
             if (isBodega) {
                 nuevoClienteData.direcciones.push({
-                    alias: aliasDestino.trim() || 'Bodega Principal',
+                    alias: aliasDestinoLimpio,
                     direccion: direccionLimpia,
-                    telefono: telefonoBodega.trim() || '',
-                    horario: horariosEntrega.trim() || '',
-                    link_maps: linkMaps.trim() || '',
+                    contacto: contactoDestinoLimpio,
+                    telefono: telefonoBodegaLimpio,
+                    horario: horariosEntregaLimpio,
+                    link_maps: linkMapsLimpio,
                     coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
                 });
             }
@@ -243,16 +269,17 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         }
 
         // --- 2. GESTIÓN DE FLETERAS MANUALES ---
-        if (!isBodega && aliasDestino.trim()) {
-            const fleteraExistente = fleteras.find(f => f.nombre.toUpperCase() === aliasDestino.trim().toUpperCase());
+        if (!isBodega && aliasDestinoLimpio) {
+            const fleteraExistente = fleteras.find(f => f.nombre.toUpperCase() === aliasDestinoLimpio.toUpperCase());
             if (fleteraExistente) {
                 fleteraIdVinculada = fleteraExistente.id;
             } else {
                 const nuevaFleteraObj = {
-                    nombre: aliasDestino.trim().toUpperCase(),
+                    nombre: aliasDestinoLimpio.toUpperCase(),
                     direccion: direccionLimpia,
-                    telefono: telefonoBodega.trim() || '',
-                    link_maps: linkMaps.trim() || '',
+                    contacto: contactoDestinoLimpio,
+                    telefono: telefonoBodegaLimpio,
+                    link_maps: linkMapsLimpio,
                     coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
                 };
                 const fRef = await addDoc(collection(db, 'catalogo_fleteras'), nuevaFleteraObj);
@@ -266,13 +293,14 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
             folio_factura: facturaLimpia || null,
             cliente_codigo: codigoLimpio,
             cliente_nombre: nombreLimpio,
-            telefono_contacto: telefonoCliente || null,
+            telefono_contacto: String(telefonoCliente || '').trim() || null,
             tipo_envio: metodoEnvio,
-            destino_alias: aliasDestino.trim(),
+            destino_alias: aliasDestinoLimpio,
             direccion: direccionLimpia,
-            destino_telefono: telefonoBodega.trim(),
-            destino_horario: horariosEntrega.trim(),
-            link_maps: linkMaps.trim() || null,
+            destino_contacto: contactoDestinoLimpio,
+            destino_telefono: telefonoBodegaLimpio,
+            destino_horario: horariosEntregaLimpio,
+            link_maps: linkMapsLimpio || null,
             coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng },
             documentacion: docs,
             urgente: urgente,
@@ -374,20 +402,35 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                     </select>
                   </div>
                   <div className={`p-2 rounded-xl border ${isBodega ? 'bg-blue-50 border-blue-200' : 'bg-purple-50 border-purple-200'}`}>
-                     <label className="block text-[10px] font-bold mb-1 uppercase text-slate-600">{isBodega ? 'Direcciones del Cliente' : 'Catálogo de Fleteras'}</label>
+                     <label className="block text-[10px] font-bold mb-1 uppercase text-slate-600">{isBodega ? 'Sucursales / Direcciones' : 'Catálogo de Fleteras'}</label>
                      <select value={bodegaSeleccionada} onChange={handleDestinoChange} className="w-full border rounded-xl p-2 text-xs font-bold bg-white">
                         <option value="">- Selecciona -</option>
                         {listaDestinos.map((dest, i) => (<option key={i} value={i}>{dest.alias || dest.nombre}</option>))}
                         <option value="nueva">+ Agregar Nueva...</option>
                      </select>
                   </div>
-                  <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Nombre / Alias del Destino</label><input type="text" value={aliasDestino} onChange={e => setAliasDestino(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" /></div>
+                  <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Nombre / Alias Destino <span className="text-red-500">*</span></label><input type="text" value={aliasDestino} onChange={e => setAliasDestino(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" /></div>
                   <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Dirección Exacta <span className="text-red-500">*</span></label><textarea rows="2" value={direccionFisica} onChange={e => setDireccionFisica(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition resize-none"></textarea></div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Link de Google Maps</label>
-                    <div className="relative"><i className="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i><input type="text" value={linkMaps} onChange={e => setLinkMaps(e.target.value)} className="w-full border border-white/80 rounded-xl py-2 pl-8 pr-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="Pega el link aquí para ubicar el pin" /></div>
-                  </div>
                 </div>
+
+                {/* --- SECCIÓN RESTAURADA Y PROTEGIDA --- */}
+                <div className="mt-4 pt-4 border-t border-slate-300/50">
+                   <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-wider mb-3 flex items-center gap-1.5"><i className="fas fa-id-card"></i> Información de Contacto en Destino</h4>
+                   <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Nombre del contacto</label><input type="text" value={contactoDestino} onChange={e => setContactoDestino(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="Ej: Juan Pérez" /></div>
+                      <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Teléfono contacto</label><input type="text" value={telefonoBodega} onChange={e => setTelefonoBodega(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="811..." /></div>
+                   </div>
+                   <div className="mb-3">
+                      <label className="block text-[10px] font-bold text-slate-700 mb-1">Horarios de entrega</label>
+                      <textarea rows="2" value={horariosEntrega} onChange={e => setHorariosEntrega(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition resize-none" placeholder="Lunes a Viernes 9am - 6pm"></textarea>
+                   </div>
+                   <div>
+                      <label className="block text-[10px] font-bold text-slate-700 mb-1">Link de Google Maps</label>
+                      <div className="relative"><i className="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i><input type="text" value={linkMaps} onChange={e => setLinkMaps(e.target.value)} className="w-full border border-white/80 rounded-xl py-2 pl-8 pr-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="Pega el link aquí para ubicar el pin" /></div>
+                   </div>
+                </div>
+                {/* -------------------------------------- */}
+
               </div>
               <div className="bg-white/60 p-2 rounded-2xl shadow-sm border border-white/60 flex-1 flex flex-col min-h-[220px]">
                 <div className="flex justify-between items-center px-2 pb-1"><span className="text-[10px] font-bold text-blue-800">Ubicación en Mapa</span><span className="text-[10px] font-mono text-slate-600">{posicionPin.lat.toFixed(6)}, {posicionPin.lng.toFixed(6)}</span></div>
