@@ -74,7 +74,6 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         setDocs(ordenAEditar.documentacion || { factura: true, certificados: false, orden_compra: false, envio_ciego: false });
         if (ordenAEditar.coordenadas?.lat) setPosicionPin(ordenAEditar.coordenadas);
 
-        // También actualizamos la lógica aquí para que lo encuentre por código o nombre al abrir la edición
         const foundClient = clientesLista.find(c => 
             (c.nombre?.toUpperCase() === (ordenAEditar.cliente_nombre || '').toUpperCase()) ||
             (ordenAEditar.cliente_codigo && ordenAEditar.cliente_codigo !== 'S/C' && c.codigo?.toUpperCase() === ordenAEditar.cliente_codigo.toUpperCase())
@@ -132,10 +131,44 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   };
 
   const handleGuardar = async () => {
-    if(!clienteNombre || !direccionFisica) { alert("Cliente y Dirección son obligatorios"); return; }
-
-    const nombreLimpio = clienteNombre.trim().toUpperCase();
+    // ==========================================
+    // 🛡️ VALIDACIONES ESTRICTAS BLINDADAS 🛡️
+    // ==========================================
+    const nombreLimpio = (clienteNombre || '').trim().toUpperCase();
     const codigoLimpio = (codigoSAP || '').trim().toUpperCase();
+    const pedidoLimpio = (folioPedido || '').trim().toUpperCase();
+    const facturaLimpia = (folioFactura || '').trim().toUpperCase();
+    const direccionLimpia = (direccionFisica || '').trim();
+
+    // Regex: Empieza opcionalmente con "C" (^C?) y luego tiene uno o más números (\d+), hasta el final ($)
+    const formatoCodigoValido = /^C?\d+$/.test(codigoLimpio);
+
+    if (!codigoLimpio) {
+        alert("⚠️ ERROR: El CÓDIGO SAP es obligatorio.");
+        return;
+    }
+    if (!formatoCodigoValido) {
+        alert("⚠️ ERROR: Formato de CÓDIGO SAP inválido.\n\nDebe ser la letra 'C' seguida de números (ej. C1234) o exclusivamente números (ej. 1234).");
+        return;
+    }
+    if (!nombreLimpio) {
+        alert("⚠️ ERROR: La Razón Social / Nombre del cliente es obligatoria.");
+        return;
+    }
+    if (!pedidoLimpio && !facturaLimpia) {
+        alert("⚠️ ERROR: Debes ingresar al menos el Folio de Pedido o el Folio de Factura.");
+        return;
+    }
+    if (!metodoEnvio) {
+        alert("⚠️ ERROR: Debes seleccionar un Método de Envío válido (Reparto Local o Fletera).");
+        return;
+    }
+    if (!direccionLimpia) {
+        alert("⚠️ ERROR: La Dirección Exacta es obligatoria.");
+        return;
+    }
+
+    // Si pasamos las validaciones, procedemos al guardado
     let clienteIdVinculado = ordenAEditar?.cliente_id_vinculado || null;
     let fleteraIdVinculada = ordenAEditar?.fletera_asignada_id || null;
     
@@ -143,17 +176,17 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         // --- 1. GESTIÓN DEL CLIENTE EN CATÁLOGO (BÚSQUEDA OR: NOMBRE O CÓDIGO) ---
         const clienteExistente = clientesLista.find(c => {
             const matchNombre = c.nombre?.toUpperCase() === nombreLimpio;
-            const matchCodigo = codigoLimpio && codigoLimpio !== 'S/C' && c.codigo?.toUpperCase() === codigoLimpio;
+            const matchCodigo = c.codigo?.toUpperCase() === codigoLimpio;
             return matchNombre || matchCodigo;
         });
 
         if (clienteExistente) {
             clienteIdVinculado = clienteExistente.id;
             
-            // Preparamos los datos para ACTUALIZAR el cliente (por si le corrigieron un error de dedo)
+            // Preparamos los datos para ACTUALIZAR el cliente
             let datosAActualizarCliente = {
-                nombre: nombreLimpio, // Si antes estaba mal escrito, ahora se actualiza al nuevo valor
-                codigo: codigoLimpio || 'S/C',
+                nombre: nombreLimpio,
+                codigo: codigoLimpio,
                 telefono: telefonoCliente || ''
             };
             
@@ -161,7 +194,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                 let direccionesActuales = [...(clienteExistente.direcciones || [])];
                 const nuevaDireccionObj = {
                     alias: aliasDestino.trim() || 'Bodega Principal',
-                    direccion: direccionFisica.trim(),
+                    direccion: direccionLimpia,
                     telefono: telefonoBodega.trim() || '',
                     horario: horariosEntrega.trim() || '',
                     link_maps: linkMaps.trim() || '',
@@ -169,7 +202,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                 };
 
                 const indexDir = direccionesActuales.findIndex(
-                    d => d.direccion.toLowerCase() === direccionFisica.trim().toLowerCase() ||
+                    d => d.direccion.toLowerCase() === direccionLimpia.toLowerCase() ||
                          d.alias.toLowerCase() === nuevaDireccionObj.alias.toLowerCase()
                 );
 
@@ -182,14 +215,13 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                 datosAActualizarCliente.direcciones = direccionesActuales;
             }
 
-            // Actualiza en Firebase al cliente (corrigiendo sus datos base y bodegas)
             await updateDoc(doc(db, 'clientes_logistica', clienteExistente.id), datosAActualizarCliente);
 
         } else {
-            // SI NO SE ENCUENTRA NI POR NOMBRE NI POR CÓDIGO, SE CREA NUEVO
+            // SI NO SE ENCUENTRA, SE CREA NUEVO
             const nuevoClienteData = {
                 nombre: nombreLimpio,
-                codigo: codigoLimpio || 'S/C',
+                codigo: codigoLimpio,
                 telefono: telefonoCliente || '',
                 direcciones: [],
                 fecha_creacion: serverTimestamp()
@@ -198,7 +230,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
             if (isBodega) {
                 nuevoClienteData.direcciones.push({
                     alias: aliasDestino.trim() || 'Bodega Principal',
-                    direccion: direccionFisica.trim(),
+                    direccion: direccionLimpia,
                     telefono: telefonoBodega.trim() || '',
                     horario: horariosEntrega.trim() || '',
                     link_maps: linkMaps.trim() || '',
@@ -218,7 +250,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
             } else {
                 const nuevaFleteraObj = {
                     nombre: aliasDestino.trim().toUpperCase(),
-                    direccion: direccionFisica.trim(),
+                    direccion: direccionLimpia,
                     telefono: telefonoBodega.trim() || '',
                     link_maps: linkMaps.trim() || '',
                     coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
@@ -230,14 +262,14 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
 
         // --- 3. GUARDAR EL VIAJE ---
         const payload = {
-            folio_pedido: folioPedido || null,
-            folio_factura: folioFactura || null,
-            cliente_codigo: codigoLimpio || 'S/C',
+            folio_pedido: pedidoLimpio || null,
+            folio_factura: facturaLimpia || null,
+            cliente_codigo: codigoLimpio,
             cliente_nombre: nombreLimpio,
             telefono_contacto: telefonoCliente || null,
             tipo_envio: metodoEnvio,
             destino_alias: aliasDestino.trim(),
-            direccion: direccionFisica.trim(),
+            direccion: direccionLimpia,
             destino_telefono: telefonoBodega.trim(),
             destino_horario: horariosEntrega.trim(),
             link_maps: linkMaps.trim() || null,
@@ -285,7 +317,9 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
             {/* COLUMNA IZQUIERDA */}
             <div className="space-y-4">
               <div className="bg-white/60 p-4 rounded-2xl shadow-sm border border-white/60">
-                <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-wider mb-3 flex items-center gap-1.5"><i className="fas fa-hashtag"></i> Identificadores</h4>
+                <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                  <i className="fas fa-hashtag"></i> Identificadores <span className="text-[9px] text-red-500 font-bold ml-2">(Al menos uno *)</span>
+                </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Folio de Pedido</label><input type="text" value={folioPedido} onChange={e => setFolioPedido(e.target.value)} className="w-full border border-white/80 rounded-xl p-2.5 focus:border-blue-400 outline-none text-sm font-bold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="PED-123" /></div>
                   <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Folio de Factura</label><input type="text" value={folioFactura} onChange={e => setFolioFactura(e.target.value)} className="w-full border border-emerald-200 rounded-xl p-2.5 focus:border-emerald-400 outline-none text-sm font-bold text-emerald-900 bg-emerald-50/80 focus:bg-emerald-50 transition" placeholder="FAC-456" /></div>
@@ -295,8 +329,14 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
               <div className="bg-white/60 p-4 rounded-2xl shadow-sm border border-white/60 relative">
                 <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-wider mb-3 flex items-center gap-1.5"><i className="fas fa-user-tag"></i> Información del Cliente</h4>
                 <div className="grid grid-cols-3 gap-3 mb-3 relative">
-                  <div className="col-span-1"><label className="block text-[10px] font-bold text-slate-700 mb-1">Cód. SAP</label><input type="text" value={codigoSAP} onChange={e => { setCodigoSAP(e.target.value); setFiltroActivo('codigo'); setMostrarSugerencias(true); }} onFocus={() => { setFiltroActivo('codigo'); setMostrarSugerencias(true); }} className="w-full border border-white/80 rounded-xl p-2.5 focus:border-blue-400 outline-none text-sm font-mono font-bold text-slate-800 bg-white/80 focus:bg-white transition" /></div>
-                  <div className="col-span-2"><label className="block text-[10px] font-bold text-slate-700 mb-1">Razón Social</label><input type="text" value={clienteNombre} onChange={e => { setClienteNombre(e.target.value); setFiltroActivo('nombre'); setMostrarSugerencias(true); }} onFocus={() => { setFiltroActivo('nombre'); setMostrarSugerencias(true); }} className="w-full border border-white/80 rounded-xl p-2.5 focus:border-blue-400 outline-none text-sm font-bold text-slate-800 bg-white/80 focus:bg-white transition" /></div>
+                  <div className="col-span-1">
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Cód. SAP <span className="text-red-500">*</span></label>
+                    <input type="text" value={codigoSAP} onChange={e => { setCodigoSAP(e.target.value); setFiltroActivo('codigo'); setMostrarSugerencias(true); }} onFocus={() => { setFiltroActivo('codigo'); setMostrarSugerencias(true); }} className="w-full border border-white/80 rounded-xl p-2.5 focus:border-blue-400 outline-none text-sm font-mono font-bold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="C1234" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Razón Social <span className="text-red-500">*</span></label>
+                    <input type="text" value={clienteNombre} onChange={e => { setClienteNombre(e.target.value); setFiltroActivo('nombre'); setMostrarSugerencias(true); }} onFocus={() => { setFiltroActivo('nombre'); setMostrarSugerencias(true); }} className="w-full border border-white/80 rounded-xl p-2.5 focus:border-blue-400 outline-none text-sm font-bold text-slate-800 bg-white/80 focus:bg-white transition" />
+                  </div>
                   {mostrarSugerencias && clientesFiltrados.length > 0 && (
                     <ul className="absolute top-[65px] left-0 z-50 w-full bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto">
                       {clientesFiltrados.map((cliente) => (
@@ -328,7 +368,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                 </div>
                 <div className="grid grid-cols-1 gap-3">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Método de Envío</label>
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Método de Envío <span className="text-red-500">*</span></label>
                     <select value={metodoEnvio} onChange={e => { setMetodoEnvio(e.target.value); setBodegaSeleccionada(''); }} className="w-full border border-white/80 rounded-xl p-2 text-xs font-bold text-slate-800 bg-white/80 focus:bg-white transition">
                       <option value="bodega_cliente">Reparto Local</option><option value="fletera_domicilio">Fletera (A Domicilio)</option><option value="fletera_ocurre">Fletera (Ocurre)</option>
                     </select>
@@ -342,7 +382,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                      </select>
                   </div>
                   <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Nombre / Alias del Destino</label><input type="text" value={aliasDestino} onChange={e => setAliasDestino(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" /></div>
-                  <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Dirección Exacta</label><textarea rows="2" value={direccionFisica} onChange={e => setDireccionFisica(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition resize-none"></textarea></div>
+                  <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Dirección Exacta <span className="text-red-500">*</span></label><textarea rows="2" value={direccionFisica} onChange={e => setDireccionFisica(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition resize-none"></textarea></div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-700 mb-1">Link de Google Maps</label>
                     <div className="relative"><i className="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i><input type="text" value={linkMaps} onChange={e => setLinkMaps(e.target.value)} className="w-full border border-white/80 rounded-xl py-2 pl-8 pr-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="Pega el link aquí para ubicar el pin" /></div>
