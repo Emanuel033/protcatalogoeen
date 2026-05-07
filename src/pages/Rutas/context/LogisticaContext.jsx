@@ -4,11 +4,15 @@ import { db } from '../../../firebase';
 
 const LogisticaContext = createContext();
 
-// Función de similitud (Levenshtein) para evitar duplicar direcciones por errores de dedo
+// Función de similitud (Levenshtein) con candado anti-letras sueltas
 const similitudTextos = (a = '', b = '') => {
     a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
     if (a === b) return 100;
-    if (a.includes(b) || b.includes(a)) return 85; 
+    
+    // CANDADO 1: Si es una palabra muy corta (como "T" o "D"), no hacemos match difuso.
+    // Tienen que ser palabras de más de 3 letras para compararse.
+    if (a.length > 3 && b.length > 3 && (a.includes(b) || b.includes(a))) return 85; 
+    
     let matrix = [];
     for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
     for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
@@ -31,7 +35,7 @@ export const LogisticaProvider = ({ children }) => {
   const [fleteras, setFleteras] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // EL CEREBRO AUTO-MASTICADOR (OPTIMIZADO CON BATCH Y FUZZY MATCHING)
+  // EL CEREBRO AUTO-MASTICADOR
   const procesarPedidosCrudos = async (viajesCrudos, clientesActuales, fleterasActuales) => {
     let localClientes = [...clientesActuales];
     let localFleteras = [...fleterasActuales];
@@ -50,10 +54,13 @@ export const LogisticaProvider = ({ children }) => {
 
         updates.requiere_cobro = p.requiere_cobro === true || p.requiere_cobro === 'true';
 
+        // =====================================
         // LÓGICA REPARTO LOCAL
+        // =====================================
         if (rawEnvio === 'LOCAL' || rawEnvio === 'REPARTO') {
             updates.tipo_envio = 'reparto_local'; 
             
+            // Sincronizado con n8n
             let aliasBase = "MATRIZ";
             if (detallesUpper.includes('FISCAL') || detallesUpper === 'DF') aliasBase = "FISCAL";
             if (detallesUpper.includes('BODEGA') || detallesUpper === 'OB' || detallesUpper.includes('OTRA')) aliasBase = "BODEGA";
@@ -86,7 +93,7 @@ export const LogisticaProvider = ({ children }) => {
             } else if (clienteMatch) {
                 let direccionesCliente = clienteMatch.direcciones || [];
                 
-                // MEJORA: Buscar dirección exacta O con una similitud del 85% o más (Ignora errores de dedo o falta de "#")
+                // MEJORA: Buscar dirección exacta O con similitud del 85%
                 let dirExistente = direccionesCliente.find(d => {
                     const esExacta = d.direccion.trim().toLowerCase() === dirLimpia.toLowerCase();
                     const esMuySimilar = similitudTextos(d.direccion, dirLimpia) >= 85;
@@ -123,23 +130,36 @@ export const LogisticaProvider = ({ children }) => {
                 }
             }
         } 
+        // =====================================
         // LÓGICA FLETERA FORÁNEA
+        // =====================================
         else {
-            let fleteraNombre = (p.metodo_mensajeria || '').trim(); 
+            // CANDADO 2: Extraer el nombre correcto. Según tu script de n8n, 
+            // mandas el nombre de la mensajería en el campo "DestinoAlias"
+            let fleteraNombreCrudo = (p.destino_alias || p.metodo_mensajeria || '').trim().toUpperCase();
             
-            if (!fleteraNombre || ['DOMICILIO', 'D', 'OCURRE', 'POR DEFINIR'].includes(fleteraNombre.toUpperCase())) {
+            const palabrasBasura = ['DOMICILIO', 'D', 'OCURRE', 'POR DEFINIR', 'LOCAL', 'NO REELECCIÓN'];
+            let fleteraNombre = fleteraNombreCrudo;
+
+            if (!fleteraNombre || fleteraNombre.length <= 2 || palabrasBasura.some(b => fleteraNombre.includes(b))) {
                 fleteraNombre = 'POR ASIGNAR';
             }
 
+            // El script n8n manda la info en DetallesEntrega
             if (detallesUpper.includes('DOMICILIO') || detallesUpper === 'D') {
                 updates.tipo_envio = 'fletera_domicilio';
             } else {
                 updates.tipo_envio = 'fletera_ocurre';
             }
-            updates.destino_alias = (p.destino_alias || fleteraNombre).trim(); 
+            
+            updates.destino_alias = fleteraNombre; 
 
-            let fleteraIndex = localFleteras.findIndex(f => f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase());
-            let fleteraMatch = fleteraIndex >= 0 ? localFleteras[fleteraIndex] : null;
+            // Buscar en el catálogo con Fuzzy Matching
+            let fleteraMatch = localFleteras.find(f => {
+                const exacto = f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase();
+                const similar = similitudTextos(f.nombre, fleteraNombre) >= 85;
+                return exacto || similar;
+            });
 
             if (!fleteraMatch && fleteraNombre !== 'POR ASIGNAR') {
                 const nuevaFletera = {
@@ -158,6 +178,7 @@ export const LogisticaProvider = ({ children }) => {
                 updates.fletera_asignada_id = fleteraMatch.id;
             }
             
+            // Validar Cliente Foráneo
             let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
             if(clienteIndex === -1 && codigoCliente) {
                  const nuevoClienteForaneo = {
@@ -223,6 +244,7 @@ export const LogisticaProvider = ({ children }) => {
         }
       });
 
+      // RESTAURADO: Tu lógica original de ordenamiento (No te la vuelvo a tocar 😅)
       activos.sort((a,b) => { 
         const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 }; 
         if (a.estado === 'camino' && b.estado === 'camino') {
