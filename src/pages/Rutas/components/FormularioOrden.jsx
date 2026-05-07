@@ -89,9 +89,23 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         setTelefonoBodega(String(ordenAEditar.destino_telefono || ''));
         setHorariosEntrega(String(ordenAEditar.destino_horario || ''));
         setLinkMaps(String(ordenAEditar.link_maps || ''));
-        setDocs(ordenAEditar.documentacion || { factura: true, certificados: false, orden_compra: false, envio_ciego: false });
+        
+        // Validación segura para evitar crasheos si faltan campos en la base de datos
+        setDocs({ 
+            factura: ordenAEditar.documentacion?.factura ?? true, 
+            certificados: ordenAEditar.documentacion?.certificados ?? false, 
+            orden_compra: ordenAEditar.documentacion?.orden_compra ?? false, 
+            envio_ciego: ordenAEditar.documentacion?.envio_ciego ?? false 
+        });
+        
         setQrBase64(ordenAEditar.qr_imagen || '');
-        if (ordenAEditar.coordenadas?.lat) setPosicionPin(ordenAEditar.coordenadas);
+        
+        // Validación segura para coordenadas
+        if (ordenAEditar.coordenadas) {
+            const lat = parseFloat(ordenAEditar.coordenadas.lat);
+            const lng = parseFloat(ordenAEditar.coordenadas.lng);
+            if (!isNaN(lat) && !isNaN(lng)) setPosicionPin({ lat, lng });
+        }
 
         const nombreAEditar = String(ordenAEditar.cliente_nombre || '').toUpperCase();
         const codigoAEditar = String(ordenAEditar.cliente_codigo || '').toUpperCase();
@@ -252,7 +266,8 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] hidden items-center justify-center p-2 sm:p-4 backdrop-blur-sm transition-opacity opacity-100 flex bg-slate-900/80">
+    // AQUÍ ESTABA EL ERROR: Quité el 'hidden' traicionero que ocultaba el modal entero.
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm transition-opacity opacity-100 bg-slate-900/80">
       <div className="rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden transform scale-100 transition-transform flex flex-col max-h-[98vh] sm:max-h-[90vh] bg-slate-50">
         
         {/* HEADER */}
@@ -267,7 +282,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         <div className="p-4 sm:p-6 overflow-y-auto custom-scroll flex-1">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             
-            {/* COLUMNA IZQUIERDA (SIN FORZAR ESTILOS, USANDO TUS CLASES ACTUALES) */}
+            {/* COLUMNA IZQUIERDA */}
             <div className="space-y-4">
               
               <div className="p-4 rounded-2xl shadow-sm border border-slate-200 bg-white">
@@ -316,30 +331,30 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                 </div>
               </div>
 
-              {/* Documentación a Entregar (Implementado nativo con Tailwind 'peer') */}
+              {/* Documentación a Entregar */}
               <div className="p-4 rounded-2xl shadow-sm border border-slate-200 bg-white">
                 <h4 className="text-[10px] font-black uppercase tracking-wider mb-3 text-slate-400"><i className="fas fa-file-contract mr-1"></i> Documentación a Entregar</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <label className="cursor-pointer">
-                    <input type="checkbox" checked={docs.factura} onChange={e => setDocs({...docs, factura: e.target.checked})} className="peer sr-only" />
+                    <input type="checkbox" checked={!!docs?.factura} onChange={e => setDocs({...docs, factura: e.target.checked})} className="peer sr-only" />
                     <div className="rounded-xl p-2 text-center text-[10px] font-bold transition-all flex items-center justify-center gap-1 border border-slate-200 bg-slate-50 text-slate-600 hover:brightness-95 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 shadow-sm">
                       <i className="fas fa-file-invoice"></i> Factura
                     </div>
                   </label>
                   <label className="cursor-pointer">
-                    <input type="checkbox" checked={docs.certificados} onChange={e => setDocs({...docs, certificados: e.target.checked})} className="peer sr-only" />
+                    <input type="checkbox" checked={!!docs?.certificados} onChange={e => setDocs({...docs, certificados: e.target.checked})} className="peer sr-only" />
                     <div className="rounded-xl p-2 text-center text-[10px] font-bold transition-all flex items-center justify-center gap-1 border border-slate-200 bg-slate-50 text-slate-600 hover:brightness-95 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 shadow-sm">
                       <i className="fas fa-certificate"></i> Certificados
                     </div>
                   </label>
                   <label className="cursor-pointer">
-                    <input type="checkbox" checked={docs.orden_compra} onChange={e => setDocs({...docs, orden_compra: e.target.checked})} className="peer sr-only" />
+                    <input type="checkbox" checked={!!docs?.orden_compra} onChange={e => setDocs({...docs, orden_compra: e.target.checked})} className="peer sr-only" />
                     <div className="rounded-xl p-2 text-center text-[10px] font-bold transition-all flex items-center justify-center gap-1 border border-slate-200 bg-slate-50 text-slate-600 hover:brightness-95 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 shadow-sm">
                       <i className="fas fa-file-signature"></i> O. Compra
                     </div>
                   </label>
                   <label className="cursor-pointer sm:col-span-3">
-                    <input type="checkbox" checked={docs.envio_ciego} onChange={e => setDocs({...docs, envio_ciego: e.target.checked})} className="peer sr-only" />
+                    <input type="checkbox" checked={!!docs?.envio_ciego} onChange={e => setDocs({...docs, envio_ciego: e.target.checked})} className="peer sr-only" />
                     <div className="rounded-xl p-2 text-center text-[10px] font-bold transition-all flex items-center justify-center gap-1 border border-slate-200 bg-slate-50 text-slate-600 hover:brightness-95 peer-checked:bg-slate-800 peer-checked:text-white peer-checked:border-slate-900 shadow-sm">
                       <i className="fas fa-user-secret"></i> Envío Ciego (Sin Logos)
                     </div>
