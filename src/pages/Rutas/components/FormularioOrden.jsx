@@ -45,7 +45,6 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   // --- 1. EXTRACTOR AUTOMÁTICO DE COORDENADAS DESDE LINK ---
   useEffect(() => {
     if (linkMaps && linkMaps.includes('@')) {
-        // Busca el patrón de coordenadas @25.12345,-100.12345
         const match = linkMaps.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
         if (match && match.length >= 3) {
             const newLat = parseFloat(match[1]);
@@ -78,7 +77,6 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         const foundClient = clientesLista.find(c => c.nombre?.toUpperCase() === (ordenAEditar.cliente_nombre || '').toUpperCase());
         setClienteSeleccionado(foundClient || null);
       } else {
-        // Reset campos para nueva orden
         setFolioPedido(''); setFolioFactura(''); setClienteNombre(''); setCodigoSAP('');
         setTelefonoCliente(''); setUrgente(false); setMetodoEnvio('bodega_cliente');
         setBodegaSeleccionada(''); setAliasDestino(''); setDireccionFisica('');
@@ -108,7 +106,6 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     setBodegaSeleccionada(val);
     
     if (val === '' || val === 'nueva') {
-        // No borramos el nombre del cliente, solo los datos de dirección
         setAliasDestino(''); 
         setDireccionFisica(''); 
         setTelefonoBodega(''); 
@@ -134,57 +131,141 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     if(!clienteNombre || !direccionFisica) { alert("Cliente y Dirección son obligatorios"); return; }
 
     const nombreLimpio = clienteNombre.trim().toUpperCase();
+    let clienteIdVinculado = null;
+    let fleteraAsignadaId = null;
     
-    // --- LÓGICA DE ACTUALIZACIÓN DE CATÁLOGOS ---
-    if (isBodega) {
+    try {
+        // ==========================================
+        // 1. LÓGICA DE CLIENTES Y SUS BODEGAS
+        // ==========================================
         const clienteExistente = clientesLista.find(c => c.nombre?.toUpperCase() === nombreLimpio);
-        const nuevaDireccionObj = {
-            alias: aliasDestino.trim() || 'Bodega Principal',
-            direccion: direccionFisica.trim(),
-            telefono: telefonoBodega.trim() || '',
-            horario: horariosEntrega.trim() || '',
-            link_maps: linkMaps.trim() || '',
-            coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
-        };
-
+        
         if (clienteExistente) {
-            const existeDir = (clienteExistente.direcciones || []).some(d => d.direccion.toLowerCase() === direccionFisica.trim().toLowerCase());
-            if (!existeDir) {
+            clienteIdVinculado = clienteExistente.id;
+            
+            if (isBodega) {
+                // Clonamos las direcciones actuales para poder editarlas
+                let direccionesActualizadas = [...(clienteExistente.direcciones || [])];
+                const nuevaDireccionObj = {
+                    alias: aliasDestino.trim() || 'Bodega Principal',
+                    direccion: direccionFisica.trim(),
+                    telefono: telefonoBodega.trim() || '',
+                    horario: horariosEntrega.trim() || '',
+                    link_maps: linkMaps.trim() || '',
+                    coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
+                };
+
+                if (bodegaSeleccionada !== '' && bodegaSeleccionada !== 'nueva') {
+                    // EDITAR BODEGA EXISTENTE (Sobrescribe la posición exacta)
+                    direccionesActualizadas[bodegaSeleccionada] = nuevaDireccionObj;
+                } else {
+                    // AGREGAR BODEGA NUEVA (O editar si escribieron la misma calle a mano)
+                    const indexDir = direccionesActualizadas.findIndex(d => d.direccion.toLowerCase() === direccionFisica.trim().toLowerCase());
+                    if (indexDir >= 0) {
+                        direccionesActualizadas[indexDir] = nuevaDireccionObj; 
+                    } else {
+                        direccionesActualizadas.push(nuevaDireccionObj);
+                    }
+                }
+                
                 await updateDoc(doc(db, 'clientes_logistica', clienteExistente.id), { 
-                    direcciones: arrayUnion(nuevaDireccionObj) 
+                    direcciones: direccionesActualizadas,
+                    telefono: telefonoCliente || clienteExistente.telefono // Actualiza teléfono global si se puso uno
                 });
             }
+        } else {
+            // ¡CLIENTE NUEVO! CREARLO EN LA BASE DE DATOS
+            const nuevaDireccionObj = {
+                alias: aliasDestino.trim() || (isBodega ? 'Bodega Principal' : 'Dirección Matriz'),
+                direccion: direccionFisica.trim(),
+                telefono: telefonoBodega.trim() || '',
+                horario: horariosEntrega.trim() || '',
+                link_maps: linkMaps.trim() || '',
+                coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
+            };
+
+            const docRef = await addDoc(collection(db, 'clientes_logistica'), {
+                nombre: nombreLimpio,
+                codigo: (codigoSAP || 'S/C').trim().toUpperCase(),
+                telefono: telefonoCliente || '',
+                direcciones: [nuevaDireccionObj],
+                fecha_creacion: serverTimestamp()
+            });
+            clienteIdVinculado = docRef.id;
         }
-    }
 
-    const payload = {
-        folio_pedido: folioPedido || null,
-        folio_factura: folioFactura || null,
-        cliente_codigo: (codigoSAP || 'S/C').trim().toUpperCase(),
-        cliente_nombre: nombreLimpio,
-        telefono_contacto: telefonoCliente || null,
-        tipo_envio: metodoEnvio,
-        destino_alias: aliasDestino.trim(),
-        direccion: direccionFisica.trim(),
-        destino_telefono: telefonoBodega.trim(),
-        destino_horario: horariosEntrega.trim(),
-        link_maps: linkMaps.trim() || null,
-        coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng },
-        documentacion: docs,
-        urgente: urgente,
-        fecha_actualizacion: serverTimestamp()
-    };
+        // ==========================================
+        // 2. LÓGICA PARA CATÁLOGO DE FLETERAS
+        // ==========================================
+        if (!isBodega) {
+            const nombreFletera = aliasDestino.trim().toUpperCase() || 'POR ASIGNAR';
+            const fleteraExistente = (fleteras || []).find(f => f.nombre.toUpperCase() === nombreFletera);
+            
+            if (fleteraExistente) {
+                fleteraAsignadaId = fleteraExistente.id;
+                // Si la seleccionaron de la lista y le cambiaron la calle, actualizamos el catálogo general
+                if (bodegaSeleccionada !== '' && bodegaSeleccionada !== 'nueva') {
+                    await updateDoc(doc(db, 'catalogo_fleteras', fleteraExistente.id), {
+                        direccion: direccionFisica.trim(),
+                        telefono: telefonoBodega.trim() || '',
+                        horario: horariosEntrega.trim() || '',
+                        link_maps: linkMaps.trim() || '',
+                        coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
+                    });
+                }
+            } else if (nombreFletera !== 'POR ASIGNAR') {
+                // CREAR NUEVA FLETERA EN EL CATÁLOGO (Captura manual)
+                const fRef = await addDoc(collection(db, 'catalogo_fleteras'), {
+                    nombre: nombreFletera,
+                    direccion: direccionFisica.trim(),
+                    telefono: telefonoBodega.trim() || '',
+                    horario: horariosEntrega.trim() || '',
+                    link_maps: linkMaps.trim() || '',
+                    coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
+                });
+                fleteraAsignadaId = fRef.id;
+            }
+        }
 
-    try {
+        // ==========================================
+        // 3. GUARDAR EL VIAJE / ORDEN FINAL
+        // ==========================================
+        const payload = {
+            folio_pedido: folioPedido || null,
+            folio_factura: folioFactura || null,
+            cliente_codigo: (codigoSAP || 'S/C').trim().toUpperCase(),
+            cliente_nombre: nombreLimpio,
+            telefono_contacto: telefonoCliente || null,
+            tipo_envio: metodoEnvio,
+            destino_alias: aliasDestino.trim(),
+            direccion: direccionFisica.trim(),
+            destino_telefono: telefonoBodega.trim(),
+            destino_horario: horariosEntrega.trim(),
+            link_maps: linkMaps.trim() || null,
+            coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng },
+            documentacion: docs,
+            urgente: urgente,
+            cliente_id_vinculado: clienteIdVinculado, // Vínculo fuerte al cliente
+            ...(fleteraAsignadaId && { fletera_asignada_id: fleteraAsignadaId }), // Vínculo a la fletera
+            fecha_actualizacion: serverTimestamp()
+        };
+
         if(ordenAEditar?.id) {
             await updateDoc(doc(db, 'rutas_logistica', ordenAEditar.id), payload);
         } else {
             payload.estado = 'pendiente';
+            payload.origen = 'Manual Web'; // Para diferenciarlo de Contpaqi
+            payload.procesado_por_web = true;
             payload.fecha_creacion = serverTimestamp();
             await addDoc(collection(db, 'rutas_logistica'), payload);
         }
+        
         onClose(); 
-    } catch(e) { console.error(e); alert("Error al guardar"); }
+    } catch(e) { 
+        console.error("Error crítico al guardar:", e); 
+        // Esta alerta ahora te dirá si es problema de Firebase (Ej: quota-exceeded)
+        alert(`Ocurrió un error al guardar en la base de datos.\n\nDetalle técnico:\n${e.message}`); 
+    }
   };
 
   if (!isOpen) return null;
@@ -231,6 +312,10 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                     </ul>
                   )}
                 </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-700 mb-1">Teléfono Contacto Cliente</label>
+                  <div className="relative"><i className="fas fa-phone absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i><input type="text" value={telefonoCliente} onChange={e => setTelefonoCliente(e.target.value)} className="w-full border border-white/80 rounded-xl py-2.5 pl-9 pr-3 focus:border-blue-400 outline-none text-sm font-bold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="Ej. 81 1234 5678" /></div>
+                </div>
               </div>
 
               <div className="bg-white/60 p-4 rounded-2xl shadow-sm border border-white/60">
@@ -267,6 +352,10 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                   </div>
                   <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Nombre / Alias del Destino</label><input type="text" value={aliasDestino} onChange={e => setAliasDestino(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" /></div>
                   <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Dirección Exacta</label><textarea rows="2" value={direccionFisica} onChange={e => setDireccionFisica(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition resize-none"></textarea></div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Teléfono Bodega</label><input type="text" value={telefonoBodega} onChange={e => setTelefonoBodega(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" /></div>
+                    <div><label className="block text-[10px] font-bold text-slate-700 mb-1">Horarios</label><input type="text" value={horariosEntrega} onChange={e => setHorariosEntrega(e.target.value)} className="w-full border border-white/80 rounded-xl p-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" /></div>
+                  </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-700 mb-1">Link de Google Maps</label>
                     <div className="relative"><i className="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i><input type="text" value={linkMaps} onChange={e => setLinkMaps(e.target.value)} className="w-full border border-white/80 rounded-xl py-2 pl-8 pr-2 text-xs font-semibold text-slate-800 bg-white/80 focus:bg-white transition" placeholder="Pega el link aquí para ubicar el pin" /></div>
