@@ -24,15 +24,12 @@ const SidebarDispatcher = ({
     year: 'numeric' 
   }).toUpperCase();
 
-  // === NUEVO ESTADO: CONEXIÓN A LA TABLITA DIGITAL ===
   const [materialesPendientes, setMaterialesPendientes] = useState([]);
 
   useEffect(() => {
-    // Escuchamos la colección de material pendiente en tiempo real
     const q = query(collection(db, 'material_pendiente'), where('estado', '==', 'esperando_material'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Ordenamos para que los más recientes salgan primero
       data.sort((a, b) => (b.fecha_reporte?.toMillis() || 0) - (a.fecha_reporte?.toMillis() || 0));
       setMaterialesPendientes(data);
     });
@@ -43,7 +40,6 @@ const SidebarDispatcher = ({
   const handleMandarRuta = async (pendiente) => {
     if (!window.confirm("¿Crear un nuevo viaje de reparto para enviar este material?")) return;
     try {
-      // 1. Crear el nuevo viaje en rutas_logistica
       await addDoc(collection(db, 'rutas_logistica'), {
         cliente_nombre: pendiente.cliente_nombre,
         cliente_codigo: pendiente.cliente_codigo || '',
@@ -51,15 +47,14 @@ const SidebarDispatcher = ({
         coordenadas: pendiente.coordenadas || { lat: 25.6866, lng: -100.3161 },
         folio_pedido: (pendiente.folio_original || 'SN') + '-FALTANTE',
         destino_alias: 'Envío de Pendiente',
-        tipo_envio: 'reparto_local', // Por defecto local
+        tipo_envio: 'reparto_local',
         estado: 'pendiente',
         notas: `MATERIAL FALTANTE: ${pendiente.descripcion}`,
         fecha_creacion: serverTimestamp(),
-        procesado_por_web: true // Para que n8n no lo sobreescriba
+        procesado_por_web: true
       });
-      // 2. Marcar en la tablita como resuelto
       await updateDoc(doc(db, 'material_pendiente', pendiente.id), { estado: 'resuelto', fecha_resolucion: serverTimestamp() });
-      setFiltro('pendiente'); // Te regresa a la vista de por asignar para que veas el viaje nuevo
+      setFiltro('pendiente');
     } catch (e) {
       console.error("Error al mandar a ruta:", e);
     }
@@ -74,12 +69,11 @@ const SidebarDispatcher = ({
     }
   };
 
-  // === FUNCIÓN TEMPORAL DE DEPURACIÓN ===
+  // === FUNCIONES DE DEPURACIÓN ===
   const handleDepurarFleteras = async () => {
     if (!window.confirm("⚠️ ¿Seguro que quieres ejecutar la limpieza de fleteras basura? Esto no se puede deshacer.")) return;
     
     try {
-      console.log("Iniciando depuración de fleteras...");
       const querySnapshot = await getDocs(collection(db, 'catalogo_fleteras'));
       let borrados = 0;
       const promesas = [];
@@ -92,11 +86,85 @@ const SidebarDispatcher = ({
         }
       });
 
-      await Promise.all(promesas); // Ejecutamos todos los borrados en paralelo
+      await Promise.all(promesas);
       alert(`✅ Depuración terminada con éxito. Se eliminaron ${borrados} registros basura.`);
     } catch (error) {
       console.error("Error al depurar fleteras:", error);
       alert("❌ Hubo un error durante la depuración. Revisa la consola.");
+    }
+  };
+
+  // NUEVA LÓGICA ESTRICTA: FUSIÓN EXCLUSIVA POR CÓDIGO SAP
+  const handleDepurarClientes = async () => {
+    if (!window.confirm("⚠️ ¿Buscar y fusionar clientes duplicados usando su CÓDIGO SAP? Se unirán sus bodegas y se borrarán las copias.")) return;
+    
+    try {
+      console.log("Iniciando fusión estricta de clientes duplicados por Código...");
+      const querySnapshot = await getDocs(collection(db, 'clientes_logistica'));
+      
+      const clientesMap = new Map();
+      let borrados = 0;
+      let actualizados = 0;
+
+      querySnapshot.forEach((documento) => {
+        const data = documento.data();
+        const id = documento.id;
+        const codigo = (data.codigo || '').trim().toUpperCase();
+
+        // Si por alguna anomalía hay un cliente sin código en la base de datos, lo ignoramos para no borrarlo por accidente
+        if (!codigo || codigo === 'S/C') {
+            console.warn(`Se omitió un registro sin código: ${data.nombre}`);
+            return; 
+        }
+
+        if (!clientesMap.has(codigo)) {
+            // El primero que encontramos con este Código es el "Maestro"
+            clientesMap.set(codigo, { id, data, necesitaActualizar: false, duplicadosABorrar: [] });
+        } else {
+            // ¡Ya existe este Código! Este registro es un Clon.
+            const master = clientesMap.get(codigo);
+            const clonDirs = data.direcciones || [];
+            let masterDirs = [...(master.data.direcciones || [])];
+
+            // Rescatamos las bodegas del clon
+            clonDirs.forEach(dClon => {
+                const existe = masterDirs.some(mDir => mDir.direccion.toLowerCase().trim() === dClon.direccion.toLowerCase().trim());
+                if (!existe) {
+                    masterDirs.push(dClon);
+                    master.necesitaActualizar = true; // El maestro recibirá nuevas direcciones
+                }
+            });
+
+            master.data.direcciones = masterDirs; // Actualizamos la memoria
+            master.duplicadosABorrar.push(id);    // Marcamos el Clon para ser destruido
+        }
+      });
+
+      // Ejecutar cambios en Firebase
+      const promesas = [];
+      for (const [codigo, master] of clientesMap.entries()) {
+          if (master.necesitaActualizar) {
+              promesas.push(updateDoc(doc(db, 'clientes_logistica', master.id), { direcciones: master.data.direcciones }));
+              actualizados++;
+          }
+          if (master.duplicadosABorrar.length > 0) {
+              master.duplicadosABorrar.forEach(dupeId => {
+                  promesas.push(deleteDoc(doc(db, 'clientes_logistica', dupeId)));
+                  borrados++;
+              });
+          }
+      }
+
+      if (promesas.length > 0) {
+          await Promise.all(promesas);
+          alert(`✅ Fusión completada.\n- Clientes Maestros actualizados: ${actualizados}\n- Copias eliminadas: ${borrados}`);
+      } else {
+          alert(`✅ Tu catálogo está limpio. No se encontraron Códigos SAP duplicados.`);
+      }
+
+    } catch (error) {
+      console.error("Error al depurar clientes:", error);
+      alert("❌ Error de Firebase al depurar clientes. Revisa la consola.");
     }
   };
 
@@ -115,7 +183,6 @@ const SidebarDispatcher = ({
 
   // === RENDERIZADO DEL CONTENIDO ===
   const contenidoSidebar = useMemo(() => {
-    // VISTA DE LA TABLITA DIGITAL
     if (filtro === 'faltantes') {
       if (materialesPendientes.length === 0) {
         return (
@@ -162,7 +229,6 @@ const SidebarDispatcher = ({
       ));
     }
 
-    // VISTA NORMAL DE LOGÍSTICA
     if (pedidosFiltrados.length === 0) return [];
 
     if (filtro === 'pendiente') {
@@ -231,9 +297,14 @@ const SidebarDispatcher = ({
             <input type="text" placeholder="Buscar cliente, folio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/80 border border-white/60 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition font-medium text-slate-800 placeholder-slate-400 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05)]" />
           </div>
           
-          {/* BOTÓN DE DEPURACIÓN TEMPORAL */}
+          {/* BOTÓN 1: LIMPIAR FLETERAS */}
           <button onClick={handleDepurarFleteras} title="Limpiar Fleteras Basura" className="w-9 h-9 rounded-xl bg-red-50 text-red-600 border border-red-200 flex items-center justify-center hover:bg-red-100 transition shadow-sm shrink-0">
             <i className="fas fa-broom"></i>
+          </button>
+
+          {/* BOTÓN 2: FUSIONAR CLIENTES DUPLICADOS */}
+          <button onClick={handleDepurarClientes} title="Fusionar Clientes Duplicados" className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center hover:bg-amber-100 transition shadow-sm shrink-0">
+            <i className="fas fa-users-slash"></i>
           </button>
 
           <button onClick={onOpenAdmin} className="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition shadow-md shrink-0"><i className="fas fa-cog"></i></button>
@@ -243,7 +314,6 @@ const SidebarDispatcher = ({
 
         {/* FILTROS Y TABLITA */}
         <div className="flex gap-1.5 overflow-x-auto custom-scroll pb-1">
-           {/* BOTÓN DE LA TABLITA (Resalta si hay pendientes) */}
            <button onClick={() => setFiltro('faltantes')} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border ${filtro === 'faltantes' ? 'bg-purple-700 text-white border-purple-600 shadow-md shadow-purple-900/20' : 'bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100'}`}>
               <i className="fas fa-clipboard-list text-[10px]"></i> Faltantes
               {materialesPendientes.length > 0 && (
