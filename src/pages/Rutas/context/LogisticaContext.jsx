@@ -58,7 +58,8 @@ export const LogisticaProvider = ({ children }) => {
         // LÓGICA REPARTO LOCAL
         // =====================================
         if (rawEnvio === 'LOCAL' || rawEnvio === 'REPARTO') {
-            updates.tipo_envio = 'reparto_local'; 
+            // CORRECCIÓN: Alineado con el FormularioOrden.js
+            updates.tipo_envio = 'bodega_cliente'; 
             
             // Sincronizado con n8n
             let aliasBase = "MATRIZ";
@@ -244,7 +245,6 @@ export const LogisticaProvider = ({ children }) => {
         }
       });
 
-      // RESTAURADO: Tu lógica original de ordenamiento (No te la vuelvo a tocar 😅)
       activos.sort((a,b) => { 
         const ord = { 'fallido': 1, 'pendiente': 2, 'camino': 3, 'entregado': 4 }; 
         if (a.estado === 'camino' && b.estado === 'camino') {
