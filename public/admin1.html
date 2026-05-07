@@ -1644,6 +1644,8 @@
                 receta_desglose: receta,
                 hereda_empaques_de: heredaDe,
                 activo: activo
+                // 👇 Agregas esta línea:
+                ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             const wasImport = document.getElementById('importOldId').value;
@@ -1735,13 +1737,20 @@
 
             try {
                 await productsRef.doc(productId).collection('paquetes').add({ piezas: qty, sku: sku, fecha_creacion: firebase.firestore.FieldValue.serverTimestamp() });
+                await productsRef.doc(productId).update({
+                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 showToast('Paquete añadido'); document.getElementById('newPkgQty').value = ''; document.getElementById('newPkgSku').value = '';
             } catch (error) { showToast('Error al añadir', 'error'); }
         }
 
         window.deletePackage = async (productId, pkgId) => {
             if(!(await customConfirm('¿Eliminar esta presentación?'))) return;
-            try { await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete(); showToast('Eliminado', 'info'); } catch (error) { showToast('Error al eliminar', 'error'); }
+            try { await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete(); showToast('Eliminado', 'info');
+                 // 2. 🔥 ACTUALIZAMOS EL PADRE PARA ROMPER EL HASH
+                await productsRef.doc(productId).update({
+                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+                } catch (error) { showToast('Error al eliminar', 'error'); }
         };
 
         function openMassActions() {
