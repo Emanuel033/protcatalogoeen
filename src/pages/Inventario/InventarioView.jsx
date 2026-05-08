@@ -4,8 +4,85 @@ import ListaConteo from './components/ListaConteo';
 import ModalCalculadora from './components/ModalCalculadora';
 import useDictadoVoz from './hooks/useDictadoVoz';
 
+// --- DICCIONARIO BILINGÜE CENTRALIZADO ---
+const tInv = {
+  es: {
+    titulo: 'Inventario EEN',
+    cargando: 'Cargando catálogo...',
+    listas: 'piezas listas',
+    errorCarga: 'Error de carga',
+    modoOffline: 'Modo Offline',
+    archivar: 'Archivar',
+    csvVista: 'CSV Actual',
+    csvDia: 'CSV del Día',
+    historial: 'Historial',
+    idioma: '🇲🇽 ES',
+    detalleConteo: 'Detalle del Conteo',
+    historialArchivados: 'Historial Archivados',
+    recuperar: 'Recuperar Conteo',
+    noArchivados: 'No hay conteos archivados.',
+    usaArchivar: 'Utiliza el botón "Archivar" para guardar tu progreso.',
+    skusContados: 'SKUs contados',
+    cerrarVerificacion: 'Cerrar verificación',
+    listaVacia: 'La lista actual está vacía.',
+    noArchivarVacio: 'No hay productos para archivar.',
+    confirmaArchivar: '¿Deseas archivar este conteo? Se limpiará tu pantalla para iniciar uno nuevo.',
+    confirmaRecuperar: '¿Deseas recuperar este conteo? Se unirá a tu lista actual y se quitará del historial.',
+    noConteosDia: 'No hay conteos registrados el día de hoy.',
+    archivoExito: 'Conteo archivado correctamente.',
+    recuperadoExito: 'Conteo recuperado y listo para editar.',
+    csvExito: 'Archivo CSV generado exitosamente.',
+    cancelar: 'Cancelar',
+    aceptar: 'Aceptar'
+  },
+  fr: {
+    titulo: 'Inventaire EEN',
+    cargando: 'Chargement du catalogue...',
+    listas: 'pièces prêtes',
+    errorCarga: 'Erreur de chargement',
+    modoOffline: 'Hors Ligne',
+    archivar: 'Archiver',
+    csvVista: 'CSV Actuel',
+    csvDia: 'CSV du Jour',
+    historial: 'Historique',
+    idioma: '🇫🇷 FR',
+    detalleConteo: 'Détail du comptage',
+    historialArchivados: 'Historique archivé',
+    recuperar: 'Récupérer Comptage',
+    noArchivados: 'Aucun comptage archivé.',
+    usaArchivar: 'Utilisez le bouton "Archiver" pour enregistrer votre progression.',
+    skusContados: 'SKUs comptés',
+    cerrarVerificacion: 'Fermer la vérification',
+    listaVacia: 'La liste actuelle est vide.',
+    noArchivarVacio: 'Aucun produit à archiver.',
+    confirmaArchivar: 'Voulez-vous archiver ce comptage ? L\'écran sera effacé pour un nouveau.',
+    confirmaRecuperar: 'Voulez-vous récupérer ce comptage ? Il sera ajouté à votre liste actuelle.',
+    noConteosDia: 'Aucun comptage enregistré aujourd\'hui.',
+    archivoExito: 'Comptage archivé avec succès.',
+    recuperadoExito: 'Comptage récupéré et prêt à être édité.',
+    csvExito: 'Fichier CSV généré avec succès.',
+    cancelar: 'Annuler',
+    aceptar: 'Accepter'
+  }
+};
+
 const InventarioView = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [idioma, setIdioma] = useState('es');
+  const t = tInv[idioma]; 
+
+  // --- SISTEMA DE NOTIFICACIONES (TOAST) ---
+  const [toast, setToast] = useState({ visible: false, mensaje: '', tipo: 'info' });
+  const mostrarToast = (mensaje, tipo = 'info') => {
+    setToast({ visible: true, mensaje, tipo });
+    setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3500);
+  };
+
+  // --- SISTEMA DE CONFIRMACIÓN MODAL ---
+  const [confirmar, setConfirmar] = useState({ visible: false, mensaje: '', onConfirm: null });
+  const pedirConfirmacion = (mensaje, onConfirm) => {
+    setConfirmar({ visible: true, mensaje, onConfirm });
+  };
 
   useEffect(() => {
     const handleOffline = () => setIsOffline(true);
@@ -19,15 +96,13 @@ const InventarioView = () => {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-  const [idioma, setIdioma] = useState('es');
+
   const [catalogoBase, setCatalogoBase] = useState([]);
-  const [estadoCatalogo, setEstadoCatalogo] = useState('Cargando...');
+  const [catStatus, setCatStatus] = useState({ loading: true, count: 0, error: false });
   
-  // NUEVOS ESTADOS PARA HISTORIAL
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
   const [conteoSeleccionado, setConteoSeleccionado] = useState(null);
   
-  // 1. INICIALIZAMOS LA LISTA LEYENDO EL LOCALSTORAGE
   const [listaConteo, setListaConteo] = useState(() => {
     const guardado = localStorage.getItem('een_inventario_activo');
     return guardado ? JSON.parse(guardado) : [];
@@ -40,21 +115,19 @@ const InventarioView = () => {
     document.title = "Inventario | La Económica del Norte";
   }, []);
 
-  // 2. EFECTO DE AUTO-GUARDADO: CADA VEZ QUE CAMBIA LA LISTA, SE GUARDA
   useEffect(() => {
     localStorage.setItem('een_inventario_activo', JSON.stringify(listaConteo));
   }, [listaConteo]);
 
-  // Carga de Catálogo
   useEffect(() => {
     fetch('/catalogo_completo.json')
       .then(res => res.json())
       .then(data => {
         const piezas = data.filter(p => p.tipo_item === 'PIEZA_BASE');
         setCatalogoBase(piezas);
-        setEstadoCatalogo(`${piezas.length} piezas listas`);
+        setCatStatus({ loading: false, count: piezas.length, error: false });
       })
-      .catch(() => setEstadoCatalogo('Error de carga'));
+      .catch(() => setCatStatus({ loading: false, count: 0, error: true }));
   }, []);
   
   const manualCant = useCallback((codigo, varId, valor) => {
@@ -119,7 +192,7 @@ const InventarioView = () => {
 
   const descargarCSV = () => {
     if (listaConteo.length === 0) {
-      alert(idioma === 'es' ? "La lista está vacía" : "La liste est vide");
+      mostrarToast(t.listaVacia, 'error');
       return;
     }
 
@@ -145,20 +218,17 @@ const InventarioView = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    mostrarToast(t.csvExito, 'success');
   };
 
-  // 3. FUNCIÓN PARA ARCHIVAR Y LIMPIAR EL CONTEO (Reemplaza a Nuevo Conteo)
   const handleFinalizarConteo = () => {
     if (listaConteo.length === 0) {
-      alert(idioma === 'es' ? "No hay productos para archivar." : "Aucun produit à archiver.");
+      mostrarToast(t.noArchivarVacio, 'error');
       return;
     }
 
-    const msj = idioma === 'es' 
-      ? "¿Deseas archivar este conteo? Se guardará en tu historial y se limpiará la pantalla para uno nuevo." 
-      : "Voulez-vous archiver ce comptage ? Il sera sauvegardé dans l'historique et l'écran sera effacé.";
-    
-    if (window.confirm(msj)) {
+    pedirConfirmacion(t.confirmaArchivar, () => {
       const nuevoRegistro = {
         id: Date.now(),
         fecha: new Date().toISOString(),
@@ -168,55 +238,44 @@ const InventarioView = () => {
       const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
       const nuevoHistorial = [nuevoRegistro, ...historialPrevio];
 
-      // Límite ampliado a 50
       localStorage.setItem('een_historial_conteos', JSON.stringify(nuevoHistorial.slice(0, 50)));
 
       setListaConteo([]); 
       localStorage.removeItem('een_inventario_activo'); 
-    }
+      mostrarToast(t.archivoExito, 'success');
+    });
   };
 
-  // 4. FUNCIÓN PARA RECUPERAR UN CONTEO DEL HISTORIAL
   const handleRecuperarConteo = (registro) => {
-    const msj = idioma === 'es' 
-      ? "¿Deseas recuperar este conteo? Se combinará con lo que tengas en pantalla y se eliminará del historial para evitar duplicados." 
-      : "Voulez-vous récupérer ce comptage ? Il sera combiné avec l'écran et supprimé de l'historique.";
-    
-    if (window.confirm(msj)) {
-      // 1. Combinar items del registro con la lista actual
+    pedirConfirmacion(t.confirmaRecuperar, () => {
       setListaConteo(prev => {
         let nuevaLista = [...prev];
         registro.items.forEach(itemRecuperado => {
           const index = nuevaLista.findIndex(i => i.codigo === itemRecuperado.codigo);
           if (index > -1) {
-            // Si ya existe en pantalla, sumamos las variantes
             itemRecuperado.variantes.forEach(vRec => {
               const vEx = nuevaLista[index].variantes.find(vx => vx.id === vRec.id);
               if (vEx) vEx.contadas += vRec.contadas;
               else nuevaLista[index].variantes.push({...vRec});
             });
-            // Recalcular total físico
             nuevaLista[index].totalFisico = nuevaLista[index].variantes.reduce((acc, v) => acc + (v.pz * v.contadas), 0);
           } else {
-            // Si no existe, lo agregamos tal cual
             nuevaLista.push(JSON.parse(JSON.stringify(itemRecuperado)));
           }
         });
         return nuevaLista;
       });
 
-      // 2. Quitarlo del historial para que no se cuente doble al generar el CSV del Día
       const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
       const nuevoHistorial = historialPrevio.filter(r => r.id !== registro.id);
       localStorage.setItem('een_historial_conteos', JSON.stringify(nuevoHistorial));
 
-      // 3. Cerrar modales
       setConteoSeleccionado(null);
       setMostrarHistorial(false);
-    }
+      mostrarToast(t.recuperadoExito, 'success');
+    });
   };
 
-  // 5. FUNCIÓN PARA GENERAR EL CSV CONSOLIDADO DEL DÍA
   const generarCSVDia = () => {
     const historial = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
     const hoyStr = new Date().toDateString();
@@ -229,7 +288,7 @@ const InventarioView = () => {
     });
 
     if (todosLosItems.length === 0) {
-      alert(idioma === 'es' ? "No hay conteos registrados el día de hoy." : "Aucun comptage enregistré aujourd'hui.");
+      mostrarToast(t.noConteosDia, 'error');
       return;
     }
 
@@ -242,12 +301,11 @@ const InventarioView = () => {
         item.variantes.forEach(vNueva => {
           const vEx = existente.variantes.find(vx => vx.id === vNueva.id);
           if (vEx) {
-            vEx.contadas += vNueva.contadas; // Sumamos usando tu variable 'contadas'
+            vEx.contadas += vNueva.contadas;
           } else {
             existente.variantes.push({...vNueva});
           }
         });
-        // Recalculamos el total físico con tu fórmula exacta
         existente.totalFisico = existente.variantes.reduce((sum, v) => sum + (v.pz * v.contadas), 0);
       }
     });
@@ -276,83 +334,122 @@ const InventarioView = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    mostrarToast(t.csvExito, 'success');
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-slate-900 text-slate-50">
+    <div className="h-screen flex flex-col overflow-hidden bg-slate-900 text-slate-100 relative selection:bg-blue-500/30">
       
-      {/* HEADER */}
-      <header className="bg-slate-900 border-b border-slate-800 px-4 py-4 flex flex-wrap justify-between items-center shrink-0 gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/50">
-            <i className={`fas ${estaEscuchando ? 'fa-microphone animate-pulse text-red-400' : 'fa-clipboard-list text-white'}`}></i>
+      {/* COMPONENTE TOAST (Alto Contraste) */}
+      {toast.visible && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[400] animate-fade-in pointer-events-none w-[90%] max-w-sm">
+          <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border-2 ${
+            toast.tipo === 'error' ? 'bg-red-900/95 border-red-500/80 text-white' : 
+            toast.tipo === 'success' ? 'bg-emerald-900/95 border-emerald-500/80 text-white' : 
+            'bg-slate-800/95 border-blue-500/80 text-white'
+          } backdrop-blur-md`}>
+             <i className={`fas ${
+               toast.tipo === 'error' ? 'fa-exclamation-circle text-red-400' : 
+               toast.tipo === 'success' ? 'fa-check-circle text-emerald-400' : 
+               'fa-info-circle text-blue-400'
+             } text-2xl`}></i>
+             <p className="text-base font-bold leading-tight">{toast.mensaje}</p>
+          </div>
+        </div>
+      )}
+
+      {/* COMPONENTE CONFIRMAR MODAL */}
+      {confirmar.visible && (
+        <div className="fixed inset-0 z-[500] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
+           <div className="bg-slate-800 border border-slate-600 p-6 rounded-3xl max-w-sm w-full shadow-2xl animate-fade-in text-center">
+              <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-amber-500/40">
+                <i className="fas fa-question text-3xl text-amber-400"></i>
+              </div>
+              <p className="text-white text-lg font-black mb-6 leading-snug">{confirmar.mensaje}</p>
+              <div className="flex gap-3">
+                 <button onClick={() => setConfirmar({visible: false})} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3.5 rounded-xl font-bold transition-colors border border-slate-600">
+                   {t.cancelar}
+                 </button>
+                 <button onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/50 transition-colors border border-blue-500">
+                   {t.aceptar}
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* HEADER OPTIMIZADO PARA MÓVIL (Bordes más definidos) */}
+      <header className="bg-slate-900 border-b border-slate-700 pt-4 pb-4 px-4 flex flex-col gap-4 shrink-0 shadow-lg z-40">
+        
+        {/* Fila Superior */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/50 border border-blue-500/50">
+              <i className={`fas ${estaEscuchando ? 'fa-microphone animate-pulse text-red-200' : 'fa-clipboard-list text-white'}`}></i>
+            </div>
+            <div>
+              <h1 className="text-xl font-black tracking-tight text-white">{t.titulo}</h1>
+              <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider">
+                {catStatus.error ? t.errorCarga : catStatus.loading ? t.cargando : `${catStatus.count} ${t.listas}`}
+              </p>
+            </div>
           </div>
           
-          <div>
-            <h1 className="text-xl font-black">{idioma === 'es' ? 'Inventario' : 'Inventaire'}</h1>
-            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{estadoCatalogo}</p>
+          <div className="flex items-center gap-2">
+            {isOffline && (
+              <div className="bg-red-500 text-white px-2 py-1.5 rounded-lg font-black text-[10px] uppercase animate-pulse shadow-md flex items-center gap-1 border border-red-400">
+                <i className="fas fa-wifi-slash"></i> <span className="hidden sm:inline">{t.modoOffline}</span>
+              </div>
+            )}
+            <button 
+              onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} 
+              className="bg-slate-800 border border-slate-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-slate-700 transition-colors shadow-sm text-white"
+            >
+              {t.idioma}
+            </button>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* INDICADOR OFFLINE */}
-          {isOffline && (
-            <div className="bg-red-500 text-white px-3 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider animate-pulse flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.5)]">
-              <i className="fas fa-wifi-slash"></i> <span className="hidden sm:inline">Modo Offline</span>
-            </div>
-          )}
-          
-          {/* BOTÓN ARCHIVAR / NUEVO CONTEO */}
+        {/* Fila de Acciones: Botones con mayor opacidad y relieve */}
+        <div className="grid grid-cols-4 gap-3">
           <button 
             onClick={handleFinalizarConteo} 
-            className="bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500 hover:text-white px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm"
+            className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
           >
-            <i className="fas fa-archive"></i>
-            <span className="hidden sm:inline">{idioma === 'es' ? 'Archivar' : 'Archiver'}</span>
+            <i className="fas fa-archive text-xl"></i>
+            <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span>
           </button>
 
-          {/* BOTÓN CSV ACTUAL */}
           <button 
             onClick={descargarCSV} 
-            className="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm"
-            title={idioma === 'es' ? 'Descargar vista actual' : 'Télécharger la vue actuelle'}
+            className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
           >
-            <i className="fas fa-file-excel text-emerald-400"></i>
-            <span className="hidden sm:inline">CSV</span>
+            <i className="fas fa-file-excel text-xl"></i>
+            <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span>
           </button>
 
-          {/* BOTÓN CSV CONSOLIDADO DEL DÍA */}
           <button 
             onClick={generarCSVDia} 
-            className="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm"
-            title={idioma === 'es' ? 'Descargar todo el día' : 'Télécharger toute la journée'}
+            className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
           >
-            <i className="fas fa-file-csv text-blue-400"></i>
-            <span className="hidden sm:inline">Día</span>
+            <i className="fas fa-file-csv text-xl"></i>
+            <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span>
           </button>
 
-          {/* BOTÓN HISTORIAL */}
           <button 
             onClick={() => setMostrarHistorial(true)} 
-            className="bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 text-sm"
-            title={idioma === 'es' ? 'Ver Historial' : 'Voir Historique'}
+            className="flex flex-col items-center justify-center gap-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 text-purple-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
           >
-            <i className="fas fa-history text-purple-400"></i>
-          </button>
-
-          {/* BOTÓN IDIOMA */}
-          <button 
-            onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} 
-            className="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl font-bold text-sm"
-          >
-            {idioma === 'es' ? '🇲🇽 ES' : '🇫🇷 FR'}
+            <i className="fas fa-history text-xl"></i>
+            <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-purple-200">{t.historial}</span>
           </button>
         </div>
       </header>
 
       {/* CUERPO PRINCIPAL */}
       <main className="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full flex flex-col gap-6 custom-scroll">
-        <div className="bg-slate-800 p-5 rounded-3xl border border-slate-700 shadow-lg">
+        <div className="bg-slate-800 p-5 rounded-3xl border border-slate-600 shadow-xl">
            <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} idioma={idioma} />
         </div>
 
@@ -390,26 +487,26 @@ const InventarioView = () => {
       {/* MODAL IMAGEN AMPLIADA */}
       {imagenAmpliada && (
         <div 
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 touch-none" 
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/95 backdrop-blur-md p-4 touch-none" 
           onClick={() => setImagenAmpliada(null)}
         >
           <div className="relative max-w-md w-full flex flex-col items-center animate-fade-in" onClick={e => e.stopPropagation()}>
             <button 
               onClick={() => setImagenAmpliada(null)} 
-              className="absolute -top-12 right-0 w-10 h-10 bg-slate-800 border border-slate-700 rounded-full text-white shadow-lg flex items-center justify-center hover:bg-slate-700 transition"
+              className="absolute -top-14 right-0 w-12 h-12 bg-slate-800 border border-slate-600 rounded-full text-white shadow-xl flex items-center justify-center hover:bg-slate-700 transition"
             >
-              <i className="fas fa-times"></i>
+              <i className="fas fa-times text-xl"></i>
             </button>
-            <div className="bg-white p-2 rounded-2xl shadow-2xl w-full flex justify-center">
+            <div className="bg-white p-3 rounded-3xl shadow-2xl w-full flex justify-center">
                 <img 
                   src={imagenAmpliada} 
                   alt="Verificación visual" 
-                  className="w-full max-h-[70vh] object-contain rounded-xl mix-blend-multiply"
+                  className="w-full max-h-[70vh] object-contain rounded-2xl mix-blend-multiply"
                   onError={(e) => e.target.src = 'https://dummyimage.com/300x300/e2e8f0/0f172a&text=Sin+Imagen'}
                 />
             </div>
-            <p className="text-slate-400 font-bold text-[10px] mt-4 uppercase tracking-widest bg-slate-800 px-5 py-2.5 rounded-full border border-slate-700 cursor-pointer shadow-lg active:scale-95 transition" onClick={() => setImagenAmpliada(null)}>
-              {idioma === 'es' ? 'Cerrar verificación' : 'Fermer la vérification'}
+            <p className="text-white font-black text-xs mt-6 uppercase tracking-widest bg-slate-800 px-6 py-3 rounded-full border border-slate-600 cursor-pointer shadow-lg active:scale-95 transition" onClick={() => setImagenAmpliada(null)}>
+              {t.cerrarVerificacion}
             </p>
           </div>
         </div>
@@ -418,17 +515,15 @@ const InventarioView = () => {
       {/* MODAL DE HISTORIAL */}
       {mostrarHistorial && (
         <div className="fixed inset-0 z-[150] flex flex-col bg-slate-900/98 backdrop-blur-xl animate-fade-in">
-          <div className="p-6 flex justify-between items-center border-b border-slate-800">
-            <h2 className="text-xl font-black text-white">
-              {conteoSeleccionado 
-                ? (idioma === 'es' ? "Detalle del Conteo" : "Détail du comptage") 
-                : (idioma === 'es' ? "Historial Archivados" : "Historique archivé")}
+          <div className="p-6 flex justify-between items-center border-b border-slate-700 bg-slate-900 sticky top-0 z-10 shadow-md">
+            <h2 className="text-2xl font-black text-white">
+              {conteoSeleccionado ? t.detalleConteo : t.historialArchivados}
             </h2>
             <button 
               onClick={() => conteoSeleccionado ? setConteoSeleccionado(null) : setMostrarHistorial(false)}
-              className="w-12 h-12 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-center text-white hover:bg-slate-700 transition"
+              className="w-12 h-12 bg-slate-800 border border-slate-600 rounded-2xl flex items-center justify-center text-white hover:bg-slate-700 transition shadow-sm"
             >
-              <i className={`fas ${conteoSeleccionado ? 'fa-arrow-left' : 'fa-times'}`}></i>
+              <i className={`fas ${conteoSeleccionado ? 'fa-arrow-left' : 'fa-times'} text-lg`}></i>
             </button>
           </div>
 
@@ -437,15 +532,14 @@ const InventarioView = () => {
               <div className="flex flex-col gap-4">
                 <button 
                   onClick={() => handleRecuperarConteo(conteoSeleccionado)}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black uppercase text-sm shadow-lg mb-2 flex items-center justify-center gap-2 transition-colors active:scale-95"
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black uppercase text-sm shadow-xl mb-2 flex items-center justify-center gap-2 transition-colors active:scale-95 border border-blue-500"
                 >
-                  <i className="fas fa-file-import"></i> {idioma === 'es' ? 'Recuperar para editar' : 'Récupérer pour éditer'}
+                  <i className="fas fa-file-import text-lg"></i> {t.recuperar}
                 </button>
                 <ListaConteo 
                   listaConteo={conteoSeleccionado.items} 
                   idioma={idioma} 
                   soloLectura={true}
-                  // Funciones vacías por seguridad en modo lectura
                   onCambiarCant={() => {}}
                   onManualCant={() => {}}
                   onEliminar={() => {}}
@@ -456,37 +550,35 @@ const InventarioView = () => {
                 />
               </div>
             ) : (
-              <div className="grid gap-3 max-w-3xl mx-auto">
+              <div className="grid gap-4 max-w-3xl mx-auto">
                 {JSON.parse(localStorage.getItem('een_historial_conteos') || '[]').length === 0 ? (
-                  <div className="text-center text-slate-500 mt-20">
-                    <i className="fas fa-box-open text-5xl mb-4 opacity-40"></i>
-                    <p className="font-bold">{idioma === 'es' ? 'No hay conteos archivados.' : 'Aucun comptage archivé.'}</p>
-                    <p className="text-xs mt-2 opacity-60">
-                      {idioma === 'es' ? 'Utiliza el botón "Archivar" para guardar tu progreso.' : 'Utilisez le bouton "Archiver" pour enregistrer votre progression.'}
-                    </p>
+                  <div className="text-center text-slate-400 mt-20">
+                    <i className="fas fa-box-open text-6xl mb-6 opacity-30"></i>
+                    <p className="font-black text-xl text-white">{t.noArchivados}</p>
+                    <p className="text-sm mt-3 opacity-80 px-6 leading-relaxed">{t.usaArchivar}</p>
                   </div>
                 ) : (
                   JSON.parse(localStorage.getItem('een_historial_conteos') || '[]').map(reg => (
                     <div 
                       key={reg.id} 
                       onClick={() => setConteoSeleccionado(reg)}
-                      className="bg-slate-800/80 border border-slate-700 p-5 rounded-3xl flex justify-between items-center cursor-pointer hover:bg-slate-700 active:scale-[0.98] transition-all shadow-lg"
+                      className="bg-slate-800 border border-slate-600 p-5 rounded-3xl flex justify-between items-center cursor-pointer hover:bg-slate-700 active:scale-[0.98] transition-all shadow-md"
                     >
                       <div>
-                        <p className="text-white font-bold text-lg mb-1 capitalize">
+                        <p className="text-white font-black text-lg mb-1.5 capitalize">
                           {new Date(reg.fecha).toLocaleDateString(idioma === 'es' ? 'es-MX' : 'fr-FR', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
                         </p>
                         <div className="flex items-center gap-3 text-xs font-bold">
-                           <span className="text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg">
+                           <span className="text-blue-200 bg-blue-600/30 border border-blue-500/40 px-2.5 py-1.5 rounded-lg shadow-sm">
                              <i className="far fa-clock mr-1"></i> {new Date(reg.fecha).toLocaleTimeString(idioma === 'es' ? 'es-MX' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })}
                            </span>
-                           <span className="text-slate-400">
-                             {reg.items.length} {idioma === 'es' ? 'SKUs contados' : 'SKUs comptés'}
+                           <span className="text-slate-300">
+                             {reg.items.length} {t.skusContados}
                            </span>
                         </div>
                       </div>
-                      <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-slate-500 border border-slate-700">
-                        <i className="fas fa-chevron-right"></i>
+                      <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center text-slate-400 border border-slate-600 shadow-inner">
+                        <i className="fas fa-chevron-right text-lg"></i>
                       </div>
                     </div>
                   ))
