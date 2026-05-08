@@ -176,7 +176,47 @@ const InventarioView = () => {
     }
   };
 
-  // 4. FUNCIÓN PARA GENERAR EL CSV CONSOLIDADO DEL DÍA
+  // 4. FUNCIÓN PARA RECUPERAR UN CONTEO DEL HISTORIAL
+  const handleRecuperarConteo = (registro) => {
+    const msj = idioma === 'es' 
+      ? "¿Deseas recuperar este conteo? Se combinará con lo que tengas en pantalla y se eliminará del historial para evitar duplicados." 
+      : "Voulez-vous récupérer ce comptage ? Il sera combiné avec l'écran et supprimé de l'historique.";
+    
+    if (window.confirm(msj)) {
+      // 1. Combinar items del registro con la lista actual
+      setListaConteo(prev => {
+        let nuevaLista = [...prev];
+        registro.items.forEach(itemRecuperado => {
+          const index = nuevaLista.findIndex(i => i.codigo === itemRecuperado.codigo);
+          if (index > -1) {
+            // Si ya existe en pantalla, sumamos las variantes
+            itemRecuperado.variantes.forEach(vRec => {
+              const vEx = nuevaLista[index].variantes.find(vx => vx.id === vRec.id);
+              if (vEx) vEx.contadas += vRec.contadas;
+              else nuevaLista[index].variantes.push({...vRec});
+            });
+            // Recalcular total físico
+            nuevaLista[index].totalFisico = nuevaLista[index].variantes.reduce((acc, v) => acc + (v.pz * v.contadas), 0);
+          } else {
+            // Si no existe, lo agregamos tal cual
+            nuevaLista.push(JSON.parse(JSON.stringify(itemRecuperado)));
+          }
+        });
+        return nuevaLista;
+      });
+
+      // 2. Quitarlo del historial para que no se cuente doble al generar el CSV del Día
+      const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
+      const nuevoHistorial = historialPrevio.filter(r => r.id !== registro.id);
+      localStorage.setItem('een_historial_conteos', JSON.stringify(nuevoHistorial));
+
+      // 3. Cerrar modales
+      setConteoSeleccionado(null);
+      setMostrarHistorial(false);
+    }
+  };
+
+  // 5. FUNCIÓN PARA GENERAR EL CSV CONSOLIDADO DEL DÍA
   const generarCSVDia = () => {
     const historial = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
     const hoyStr = new Date().toDateString();
@@ -394,19 +434,27 @@ const InventarioView = () => {
 
           <div className="flex-1 overflow-y-auto p-4 pb-20 custom-scroll">
             {conteoSeleccionado ? (
-              <ListaConteo 
-                listaConteo={conteoSeleccionado.items} 
-                idioma={idioma} 
-                soloLectura={true}
-                // Funciones vacías por seguridad en modo lectura
-                onCambiarCant={() => {}}
-                onManualCant={() => {}}
-                onEliminar={() => {}}
-                onAgregarEmpaque={() => {}}
-                onAbrirCalculadora={() => {}}
-                onIniciarDictado={() => {}}
-                onZoomImagen={(img) => setImagenAmpliada(img)}
-              />
+              <div className="flex flex-col gap-4">
+                <button 
+                  onClick={() => handleRecuperarConteo(conteoSeleccionado)}
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black uppercase text-sm shadow-lg mb-2 flex items-center justify-center gap-2 transition-colors active:scale-95"
+                >
+                  <i className="fas fa-file-import"></i> {idioma === 'es' ? 'Recuperar para editar' : 'Récupérer pour éditer'}
+                </button>
+                <ListaConteo 
+                  listaConteo={conteoSeleccionado.items} 
+                  idioma={idioma} 
+                  soloLectura={true}
+                  // Funciones vacías por seguridad en modo lectura
+                  onCambiarCant={() => {}}
+                  onManualCant={() => {}}
+                  onEliminar={() => {}}
+                  onAgregarEmpaque={() => {}}
+                  onAbrirCalculadora={() => {}}
+                  onIniciarDictado={() => {}}
+                  onZoomImagen={(img) => setImagenAmpliada(img)}
+                />
+              </div>
             ) : (
               <div className="grid gap-3 max-w-3xl mx-auto">
                 {JSON.parse(localStorage.getItem('een_historial_conteos') || '[]').length === 0 ? (
