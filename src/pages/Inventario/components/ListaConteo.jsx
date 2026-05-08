@@ -32,11 +32,15 @@ const ListaConteo = ({
   onAbrirCalculadora,
   onIniciarDictado,
   onZoomImagen,
-  soloLectura = false 
+  soloLectura = false,
+  // --- NUEVAS PROPS DE SELECCIÓN ---
+  modoSeleccion = false,
+  seleccionados = [],
+  onToggleSeleccion = () => {}
 }) => {
   const t = diccionarios[idioma] || diccionarios.es;
 
-  // ESTADO LOCAL PARA EL MODAL DE "NUEVO EMPAQUE" (Reemplaza al prompt nativo)
+  // ESTADO LOCAL PARA EL MODAL DE "NUEVO EMPAQUE"
   const [modalEmpaque, setModalEmpaque] = useState({ isOpen: false, codigo: null, cantidad: '' });
 
   const handleAbrirModalEmpaque = (codigo) => {
@@ -66,16 +70,39 @@ const ListaConteo = ({
     <div className="space-y-6 pb-10">
       {listaConteo.map((item) => {
         const ajuste = item.totalFisico - item.stockSistema;
-        // Colores de alto contraste para logística
+        const isSelected = seleccionados.includes(item.codigo);
+        
+        // Estilos dinámicos dependiendo del Modo Selección
         const bgAjuste = ajuste === 0 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' :
                          ajuste > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/50' :
                          'bg-red-500/20 text-red-300 border-red-500/50';
+
+        const cardStyle = modoSeleccion
+          ? (isSelected ? 'border-blue-500 bg-slate-800 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : 'border-slate-700 bg-slate-900/80 opacity-60 scale-[0.98]')
+          : 'border-slate-600 bg-slate-800 shadow-xl';
         
         return (
-          <div key={item.codigo} className="relative bg-slate-800 border border-slate-600 rounded-3xl p-5 overflow-hidden shadow-xl">
+          <div key={item.codigo} className={`relative rounded-3xl p-5 overflow-hidden transition-all duration-300 border ${cardStyle}`}>
             
-            {/* Botón Eliminar (Alto contraste, esquina superior) */}
-            {!soloLectura && (
+            {/* CAPA INVISIBLE QUE INTERCEPTA CLICS EN MODO SELECCIÓN */}
+            {modoSeleccion && (
+              <div 
+                className="absolute inset-0 z-20 cursor-pointer" 
+                onClick={() => onToggleSeleccion(item.codigo)}
+              ></div>
+            )}
+
+            {/* CHECKBOX GIGANTE (Solo visible en modo selección) */}
+            {modoSeleccion && (
+              <div className="absolute top-4 right-4 z-30 pointer-events-none">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300 ${isSelected ? 'bg-blue-600 border-blue-400 text-white scale-110 shadow-lg shadow-blue-900/50' : 'bg-slate-800 border-slate-500 text-transparent'}`}>
+                  <i className="fas fa-check text-xl"></i>
+                </div>
+              </div>
+            )}
+
+            {/* Botón Eliminar (Se oculta en modo lectura y en modo selección) */}
+            {!soloLectura && !modoSeleccion && (
               <button 
                 onClick={() => onEliminar(item.codigo)}
                 className="absolute top-0 right-0 w-14 h-14 bg-slate-900 rounded-bl-3xl text-slate-500 hover:text-red-400 hover:bg-slate-950 transition-all flex items-center justify-center z-10 border-b border-l border-slate-700 shadow-sm active:scale-95"
@@ -87,8 +114,8 @@ const ListaConteo = ({
             {/* Cabecera Producto */}
             <div className="flex gap-4 mb-6 pr-10">
               <div 
-                className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-inner shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform border border-slate-300"
-                onClick={() => onZoomImagen && onZoomImagen(item.imagen)}
+                className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-inner shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform border border-slate-300 relative z-10"
+                onClick={() => !modoSeleccion && onZoomImagen && onZoomImagen(item.imagen)}
               >
                 <img 
                   src={item.imagen || 'https://via.placeholder.com/100?text=S/I'} 
@@ -97,7 +124,7 @@ const ListaConteo = ({
                   onError={(e) => e.target.src = 'https://via.placeholder.com/100?text=S/I'}
                 />
               </div>
-              <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
+              <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 relative z-10">
                 <h3 className="text-white font-black text-sm leading-tight line-clamp-2 uppercase">
                   {item.nombre}
                 </h3>
@@ -110,7 +137,7 @@ const ListaConteo = ({
             </div>
 
             {/* Variantes (Cajas, Paquetes, Sueltas) */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-6 relative z-10">
               {item.variantes.map((v) => {
                 const nombreVariante = v.isFantasma 
                   ? t.txtNuevoPaquete.replace('{pz}', v.pz) 
@@ -128,15 +155,16 @@ const ListaConteo = ({
                       </span>
                     </div>
                     
-                    {/* CONTROLES: Modo Edición */}
+                    {/* CONTROLES: Modo Edición (Se desactivan visualmente si está en modo selección, aunque el div overlay ya previene clics) */}
                     {!soloLectura ? (
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className={`flex items-center gap-2 mt-1 ${modoSeleccion ? 'opacity-50 grayscale' : ''}`}>
                         
                         {/* Micrófono (Satélite Izquierdo) */}
                         <button 
-                          onMouseDown={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
-                          onTouchStart={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
+                          onMouseDown={(e) => { if(!modoSeleccion) { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); } }}
+                          onTouchStart={(e) => { if(!modoSeleccion) { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); } }}
                           className="w-14 h-14 bg-slate-800 border border-slate-600 rounded-xl text-slate-300 hover:text-red-400 hover:border-red-400 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
+                          disabled={modoSeleccion}
                         >
                           <i className="fas fa-microphone text-lg"></i>
                         </button>
@@ -144,8 +172,9 @@ const ListaConteo = ({
                         {/* Bloque Stepper (Unido) */}
                         <div className="flex-1 flex items-center bg-slate-800 border border-slate-600 rounded-xl overflow-hidden shadow-sm h-14">
                           <button 
-                            onClick={() => onCambiarCant(item.codigo, v.id, -1)}
+                            onClick={() => !modoSeleccion && onCambiarCant(item.codigo, v.id, -1)}
                             className="w-14 h-full bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center active:bg-slate-500 transition-colors border-r border-slate-600 shrink-0"
+                            disabled={modoSeleccion}
                           >
                             <i className="fas fa-minus"></i>
                           </button>
@@ -154,14 +183,16 @@ const ListaConteo = ({
                             type="number" 
                             min="0"
                             value={v.contadas || ''} 
-                            onChange={(e) => onManualCant(item.codigo, v.id, e.target.value)}
-                            className="w-full h-full bg-transparent text-white font-black text-center text-xl outline-none placeholder-slate-600"
+                            onChange={(e) => !modoSeleccion && onManualCant(item.codigo, v.id, e.target.value)}
+                            className="w-full h-full bg-transparent text-white font-black text-center text-xl outline-none placeholder-slate-600 disabled:opacity-100"
                             placeholder="0"
+                            disabled={modoSeleccion}
                           />
 
                           <button 
-                            onClick={() => onCambiarCant(item.codigo, v.id, 1)}
+                            onClick={() => !modoSeleccion && onCambiarCant(item.codigo, v.id, 1)}
                             className="w-14 h-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center active:bg-blue-400 transition-colors border-l border-blue-500 shrink-0 shadow-inner"
+                            disabled={modoSeleccion}
                           >
                             <i className="fas fa-plus"></i>
                           </button>
@@ -169,8 +200,9 @@ const ListaConteo = ({
 
                         {/* Calculadora (Satélite Derecho) */}
                         <button 
-                          onClick={() => onAbrirCalculadora(item.codigo, v.id)}
+                          onClick={() => !modoSeleccion && onAbrirCalculadora(item.codigo, v.id)}
                           className="w-14 h-14 bg-purple-600/20 border border-purple-500/40 rounded-xl text-purple-300 hover:bg-purple-600/40 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
+                          disabled={modoSeleccion}
                         >
                           <i className="fas fa-calculator text-lg"></i>
                         </button>
@@ -186,18 +218,18 @@ const ListaConteo = ({
               })}
             </div>
 
-            {/* Botón Añadir Empaque (Estilizado) */}
-            {!soloLectura && (
+            {/* Botón Añadir Empaque (Oculto en modo lectura y selección) */}
+            {!soloLectura && !modoSeleccion && (
               <button 
                 onClick={() => handleAbrirModalEmpaque(item.codigo)} 
-                className="w-full text-center bg-slate-900 border border-dashed border-slate-500 hover:bg-slate-800 text-blue-400 font-black text-[11px] py-3.5 mb-5 rounded-xl uppercase tracking-wider transition-colors active:scale-[0.98] flex justify-center items-center gap-2"
+                className="w-full text-center bg-slate-900 border border-dashed border-slate-500 hover:bg-slate-800 text-blue-400 font-black text-[11px] py-3.5 mb-5 rounded-xl uppercase tracking-wider transition-colors active:scale-[0.98] flex justify-center items-center gap-2 relative z-10"
               >
                 <i className="fas fa-box-open"></i> {t.btnNuevoEmpaque}
               </button>
             )}
 
             {/* Totales (Alto Contraste Logístico) */}
-            <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-2 gap-3 mb-3 relative z-10">
               <div className="bg-slate-900 rounded-2xl p-4 border border-slate-600 text-center shadow-inner relative overflow-hidden">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">{t.stockSistema}</p>
                 <p className="text-3xl font-black text-slate-300 relative z-10 mt-1">{item.stockSistema}</p>
@@ -210,7 +242,7 @@ const ListaConteo = ({
             </div>
             
             {/* Ajuste Bottom (Color Dinámico Intenso) */}
-            <div className={`flex justify-center items-center py-3 px-4 rounded-xl font-black text-sm uppercase tracking-wider border shadow-sm ${bgAjuste}`}>
+            <div className={`flex justify-center items-center py-3 px-4 rounded-xl font-black text-sm uppercase tracking-wider border shadow-sm relative z-10 ${bgAjuste}`}>
               <span className="mr-2 opacity-80">{t.ajuste}:</span>
               {ajuste > 0 ? `+${ajuste}` : ajuste} {ajuste === 0 ? `(${t.ok})` : ''}
             </div>
