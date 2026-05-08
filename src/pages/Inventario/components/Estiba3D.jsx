@@ -1,6 +1,6 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Box, Grid, Cylinder } from '@react-three/drei';
+import { OrbitControls, Box, Grid, Cylinder, Edges } from '@react-three/drei';
 
 const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasVisuales, huecos3D, onToggleHueco, estibaCruzada }) => {
   const cajas = [];
@@ -10,9 +10,14 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
   const n = Math.max(1, parseInt(niveles) || 1);
   const t = Math.max(1, parseInt(tarimas) || 1);
 
+  // --- RENDERIZADO DE ALTO CONTRASTE ---
   const renderMaterial = (isHueco, colorBase = "#3b82f6") => {
-    if (isHueco) return <meshStandardMaterial color="#ef4444" transparent opacity={0.3} depthWrite={false} />;
-    return <meshStandardMaterial color={colorBase} roughness={0.3} metalness={0.1} />;
+    if (isHueco) {
+      // Material Fantasma (Rojo translúcido con ligero brillo)
+      return <meshStandardMaterial color="#ef4444" transparent opacity={0.25} depthWrite={false} emissive="#7f1d1d" emissiveIntensity={0.5} />;
+    }
+    // Material Físico (Color sólido con algo de brillo para resaltar bordes)
+    return <meshStandardMaterial color={colorBase} roughness={0.4} metalness={0.1} />;
   };
 
   // ==========================================
@@ -63,11 +68,23 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
 
           const key = `lienzo-${tarima}-${y}-${idx}`;
           const isHueco = huecos3D.includes(key);
+          const colorLogistico = modoOrigen === 'cama' ? "#8b5cf6" : "#3b82f6"; // Morado o Azul
 
           if (f === 'circulo') {
-            cajas.push(<Cylinder key={key} position={[x3D, posY, z3D + (tarima * 4)]} args={[0.5, 0.5, boxHeight, 32]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial(isHueco, "#f59e0b")}</Cylinder>);
+            cajas.push(
+              <Cylinder key={key} position={[x3D, posY, z3D + (tarima * 4)]} args={[0.5, 0.5, boxHeight, 32]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>
+                {renderMaterial(isHueco, "#f59e0b")}
+                <Edges scale={1.01} color={isHueco ? "#fca5a5" : "#78350f"} opacity={isHueco ? 0.5 : 0.8} transparent />
+              </Cylinder>
+            );
           } else {
-            cajas.push(<Box key={key} position={[x3D, posY, z3D + (tarima * 4)]} args={[finalW, boxHeight, finalD]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>{renderMaterial(isHueco, modoOrigen === 'cama' ? "#8b5cf6" : "#3b82f6")}</Box>);
+            cajas.push(
+              <Box key={key} position={[x3D, posY, z3D + (tarima * 4)]} args={[finalW, boxHeight, finalD]} onClick={(e) => { e.stopPropagation(); onToggleHueco(key); }}>
+                {renderMaterial(isHueco, colorLogistico)}
+                {/* Bordes para separación visual estricta */}
+                <Edges scale={1.01} color={isHueco ? "#fca5a5" : "#0f172a"} opacity={isHueco ? 0.5 : 0.85} transparent />
+              </Box>
+            );
           }
         });
       }
@@ -86,7 +103,13 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
         for (let i = 0; i < pz; i++) {
           const col = i % cols; const row = Math.floor(i / cols);
           const key = `cama-gen-${tarima}-${y}-${i}`;
-          cajas.push(<Box key={key} position={[col*(1+gap)-offsetX, y*(1+gap)+0.5, row*(1+gap)-offsetZ + (tarima * 4)]} args={[1,1,1]} onClick={(e)=>{e.stopPropagation(); onToggleHueco(key);}}>{renderMaterial(huecos3D.includes(key), "#8b5cf6")}</Box>);
+          const isHueco = huecos3D.includes(key);
+          cajas.push(
+            <Box key={key} position={[col*(1+gap)-offsetX, y*(1+gap)+0.5, row*(1+gap)-offsetZ + (tarima * 4)]} args={[1,1,1]} onClick={(e)=>{e.stopPropagation(); onToggleHueco(key);}}>
+              {renderMaterial(isHueco, "#8b5cf6")}
+              <Edges scale={1.01} color={isHueco ? "#fca5a5" : "#2e1065"} opacity={isHueco ? 0.5 : 0.85} transparent />
+            </Box>
+          );
         }
       }
     }
@@ -103,19 +126,42 @@ const Estiba3D = ({ modoOrigen, frente, fondo, niveles, pzCama, tarimas, piezasV
       for (let x = 0; x < iterF; x++) {
         for (let z = 0; z < iterD; z++) {
           const key=`b-${y}-${x}-${z}`;
-          cajas.push(<Box key={key} position={[x*(1+gap)-offX, y*(1+gap)+0.5, z*(1+gap)-offZ]} args={[1,1,1]} onClick={(e)=>{e.stopPropagation(); onToggleHueco(key);}}>{renderMaterial(huecos3D.includes(key), "#10b981")}</Box>);
+          const isHueco = huecos3D.includes(key);
+          cajas.push(
+            <Box key={key} position={[x*(1+gap)-offX, y*(1+gap)+0.5, z*(1+gap)-offZ]} args={[1,1,1]} onClick={(e)=>{e.stopPropagation(); onToggleHueco(key);}}>
+              {renderMaterial(isHueco, "#10b981")}
+              <Edges scale={1.01} color={isHueco ? "#fca5a5" : "#022c22"} opacity={isHueco ? 0.5 : 0.85} transparent />
+            </Box>
+          );
         }
       }
     }
   }
 
   return (
-    <Canvas camera={{ position: [0, 8, 10], fov: 45 }}>
-      <ambientLight intensity={0.6} /><directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} />
+    <Canvas 
+      camera={{ position: [0, 8, 12], fov: 45 }}
+      // Optimizamos el pixel ratio para evitar consumo excesivo de batería en celulares
+      dpr={[1, 2]} 
+    >
+      <ambientLight intensity={0.7} />
+      {/* Luz direccional más fuerte para crear sombras duras y volumen */}
+      <directionalLight position={[10, 20, 15]} intensity={1.8} castShadow />
+      <directionalLight position={[-10, 10, -10]} intensity={0.6} />
+      
       {cajas}
-      <OrbitControls makeDefault maxPolarAngle={Math.PI / 2 - 0.1} />
-      <Grid position={[0, 0, 0]} args={[40, 40]} cellColor="#475569" sectionColor="#1e293b" fadeDistance={25} />
+      
+      <OrbitControls 
+        makeDefault 
+        // LÍMITES PARA MÓVIL: Evitan perderse en el espacio vacío
+        maxPolarAngle={Math.PI / 2 - 0.05} // No deja ver debajo del piso
+        minDistance={3}  // No deja meterse "dentro" de las cajas
+        maxDistance={28} // No deja alejarse demasiado
+        enableDamping={true} // Movimiento táctil suave
+        dampingFactor={0.1}
+      />
+      
+      <Grid position={[0, 0, 0]} args={[40, 40]} cellColor="#475569" sectionColor="#1e293b" fadeDistance={30} />
     </Canvas>
   );
 };
