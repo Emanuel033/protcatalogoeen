@@ -1745,13 +1745,20 @@
         }
 
         window.deletePackage = async (productId, pkgId) => {
-            if(!(await customConfirm('¿Eliminar esta presentación?'))) return;
-            try { await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete(); showToast('Eliminado', 'info');
-                 // 2. 🔥 ACTUALIZAMOS EL PADRE PARA ROMPER EL HASH
-                await productsRef.doc(productId).update({
-                    ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-                } catch (error) { showToast('Error al eliminar', 'error'); }
-        };
+    if(!(await customConfirm('¿Eliminar esta presentación?'))) return;
+    try { 
+        await productsRef.doc(productId).collection('paquetes').doc(pkgId).delete(); 
+        showToast('Eliminado', 'info');
+        
+        // 2. 🔥 ACTUALIZAMOS EL PADRE PARA ROMPER EL HASH
+        await productsRef.doc(productId).update({
+            ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+        }); // <--- AQUÍ FALTABA ESTO
+        
+    } catch (error) { 
+        showToast('Error al eliminar', 'error'); 
+    }
+}; // <--- FALTABA EL PUNTO Y COMA AUNQUE NO ES ESTRICTAMENTE OBLIGATORIO, ES BUENA PRÁCTICA
 
         function openMassActions() {
             const modal = document.getElementById('massActionsModal'); modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10);
