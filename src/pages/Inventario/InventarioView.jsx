@@ -26,14 +26,21 @@ const tInv = {
     cerrarVerificacion: 'Cerrar verificación',
     listaVacia: 'La lista actual está vacía.',
     noArchivarVacio: 'No hay productos para archivar.',
-    confirmaArchivar: '¿Deseas archivar este conteo? Se limpiará tu pantalla para iniciar uno nuevo.',
-    confirmaRecuperar: '¿Deseas recuperar este conteo? Se unirá a tu lista actual y se quitará del historial.',
+    confirmaArchivar: '¿Deseas archivar los productos seleccionados?',
+    confirmaRecuperar: '¿Deseas recuperar los productos seleccionados a tu lista actual?',
     noConteosDia: 'No hay conteos registrados el día de hoy.',
-    archivoExito: 'Conteo archivado correctamente.',
-    recuperadoExito: 'Conteo recuperado y listo para editar.',
+    archivoExito: 'Productos archivados correctamente.',
+    recuperadoExito: 'Productos recuperados y listos para editar.',
     csvExito: 'Archivo CSV generado exitosamente.',
     cancelar: 'Cancelar',
-    aceptar: 'Aceptar'
+    aceptar: 'Aceptar',
+    // TEXTOS MODO SELECCIÓN
+    seleccionar: 'Seleccionar',
+    selTodo: 'Todo',
+    selNada: 'Nada', 
+    archivarSel: 'Archivar ({n})',
+    recuperarSel: 'Recuperar ({n})',
+    errorSelVacia: 'Selecciona al menos un producto.'
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -55,14 +62,21 @@ const tInv = {
     cerrarVerificacion: 'Fermer la vérification',
     listaVacia: 'La liste actuelle est vide.',
     noArchivarVacio: 'Aucun produit à archiver.',
-    confirmaArchivar: 'Voulez-vous archiver ce comptage ? L\'écran sera effacé pour un nouveau.',
-    confirmaRecuperar: 'Voulez-vous récupérer ce comptage ? Il sera ajouté à votre liste actuelle.',
+    confirmaArchivar: 'Voulez-vous archiver les produits sélectionnés ?',
+    confirmaRecuperar: 'Voulez-vous récupérer ces produits dans votre liste ?',
     noConteosDia: 'Aucun comptage enregistré aujourd\'hui.',
-    archivoExito: 'Comptage archivé avec succès.',
-    recuperadoExito: 'Comptage récupéré et prêt à être édité.',
+    archivoExito: 'Produits archivés avec succès.',
+    recuperadoExito: 'Produits récupérés et prêts à être édités.',
     csvExito: 'Fichier CSV généré avec succès.',
     cancelar: 'Annuler',
-    aceptar: 'Accepter'
+    aceptar: 'Accepter',
+    // TEXTOS MODO SELECCIÓN
+    seleccionar: 'Sélectionner',
+    selTodo: 'Tout',
+    selNada: 'Rien', 
+    archivarSel: 'Archiver ({n})',
+    recuperarSel: 'Récupérer ({n})',
+    errorSelVacia: 'Sélectionnez au moins un produit.'
   }
 };
 
@@ -70,6 +84,13 @@ const InventarioView = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [idioma, setIdioma] = useState('es');
   const t = tInv[idioma]; 
+
+  // --- ESTADOS DE SELECCIÓN ---
+  const [modoSeleccion, setModoSeleccion] = useState(false);
+  const [seleccionados, setSeleccionados] = useState([]);
+  
+  const [modoSeleccionHistorial, setModoSeleccionHistorial] = useState(false);
+  const [seleccionadosHistorial, setSeleccionadosHistorial] = useState([]);
 
   // --- SISTEMA DE NOTIFICACIONES (TOAST) ---
   const [toast, setToast] = useState({ visible: false, mensaje: '', tipo: 'info' });
@@ -190,6 +211,143 @@ const InventarioView = () => {
     }
   };
 
+  // --- FUNCIONES DE SELECCIÓN ---
+  const toggleSeleccion = (codigo) => {
+    setSeleccionados(prev => prev.includes(codigo) ? prev.filter(c => c !== codigo) : [...prev, codigo]);
+  };
+  
+  const toggleSeleccionHistorial = (codigo) => {
+    setSeleccionadosHistorial(prev => prev.includes(codigo) ? prev.filter(c => c !== codigo) : [...prev, codigo]);
+  };
+  
+  const toggleTodos = () => {
+    if (seleccionados.length === listaConteo.length) {
+      setSeleccionados([]);
+    } else {
+      setSeleccionados(listaConteo.map(i => i.codigo));
+    }
+  };
+  
+  const toggleTodosHistorial = () => {
+    if (seleccionadosHistorial.length === conteoSeleccionado.items.length) {
+      setSeleccionadosHistorial([]);
+    } else {
+      setSeleccionadosHistorial(conteoSeleccionado.items.map(i => i.codigo));
+    }
+  };
+
+  // --- ARCHIVAR (Modificado para parciales) ---
+  const handleFinalizarConteo = () => {
+    if (listaConteo.length === 0) {
+      mostrarToast(t.noArchivarVacio, 'error');
+      return;
+    }
+
+    if (modoSeleccion && seleccionados.length === 0) {
+      mostrarToast(t.errorSelVacia, 'error');
+      return;
+    }
+
+    pedirConfirmacion(t.confirmaArchivar, () => {
+      // Separar lo que se archiva de lo que se queda
+      const itemsAArchivar = modoSeleccion && seleccionados.length > 0 
+        ? listaConteo.filter(item => seleccionados.includes(item.codigo)) 
+        : [...listaConteo];
+        
+      const itemsRestantes = modoSeleccion && seleccionados.length > 0
+        ? listaConteo.filter(item => !seleccionados.includes(item.codigo))
+        : [];
+
+      // Guardar en Historial
+      const nuevoRegistro = {
+        id: Date.now(),
+        fecha: new Date().toISOString(),
+        items: itemsAArchivar 
+      };
+
+      const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
+      const nuevoHistorial = [nuevoRegistro, ...historialPrevio];
+
+      localStorage.setItem('een_historial_conteos', JSON.stringify(nuevoHistorial.slice(0, 50)));
+
+      // Actualizar Pantalla (Dejamos solo lo que NO se seleccionó)
+      setListaConteo(itemsRestantes); 
+      setModoSeleccion(false);
+      setSeleccionados([]);
+      
+      if(itemsRestantes.length === 0) {
+        localStorage.removeItem('een_inventario_activo'); 
+      }
+      
+      mostrarToast(t.archivoExito, 'success');
+    });
+  };
+
+  // --- RECUPERAR (Modificado para parciales) ---
+  const handleRecuperarConteo = () => {
+    const registro = conteoSeleccionado;
+
+    if (modoSeleccionHistorial && seleccionadosHistorial.length === 0) {
+      mostrarToast(t.errorSelVacia, 'error');
+      return;
+    }
+
+    pedirConfirmacion(t.confirmaRecuperar, () => {
+      // Separar lo que se recupera de lo que se queda en el historial
+      const itemsARecuperar = modoSeleccionHistorial && seleccionadosHistorial.length > 0
+        ? registro.items.filter(item => seleccionadosHistorial.includes(item.codigo))
+        : [...registro.items];
+
+      const itemsRestantesEnHistorial = modoSeleccionHistorial && seleccionadosHistorial.length > 0
+        ? registro.items.filter(item => !seleccionadosHistorial.includes(item.codigo))
+        : [];
+
+      // Unir a la pantalla actual (sumando cantidades si ya existe)
+      setListaConteo(prev => {
+        let nuevaLista = [...prev];
+        itemsARecuperar.forEach(itemRecuperado => {
+          const index = nuevaLista.findIndex(i => i.codigo === itemRecuperado.codigo);
+          if (index > -1) {
+            itemRecuperado.variantes.forEach(vRec => {
+              const vEx = nuevaLista[index].variantes.find(vx => vx.id === vRec.id);
+              if (vEx) vEx.contadas += vRec.contadas;
+              else nuevaLista[index].variantes.push({...vRec});
+            });
+            nuevaLista[index].totalFisico = nuevaLista[index].variantes.reduce((acc, v) => acc + (v.pz * v.contadas), 0);
+          } else {
+            nuevaLista.push(JSON.parse(JSON.stringify(itemRecuperado)));
+          }
+        });
+        return nuevaLista;
+      });
+
+      // Actualizar o Eliminar el bloque del historial
+      const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
+      let nuevoHistorial;
+      
+      if (itemsRestantesEnHistorial.length === 0) {
+        // Se vació por completo, eliminar el registro
+        nuevoHistorial = historialPrevio.filter(r => r.id !== registro.id);
+        setConteoSeleccionado(null);
+      } else {
+        // Quedan items, actualizar el registro
+        nuevoHistorial = historialPrevio.map(r => r.id === registro.id ? { ...r, items: itemsRestantesEnHistorial } : r);
+        setConteoSeleccionado({ ...registro, items: itemsRestantesEnHistorial }); 
+      }
+      
+      localStorage.setItem('een_historial_conteos', JSON.stringify(nuevoHistorial));
+
+      setModoSeleccionHistorial(false);
+      setSeleccionadosHistorial([]);
+      
+      if(itemsRestantesEnHistorial.length === 0) {
+        setMostrarHistorial(false);
+      }
+      
+      mostrarToast(t.recuperadoExito, 'success');
+    });
+  };
+
   const descargarCSV = () => {
     if (listaConteo.length === 0) {
       mostrarToast(t.listaVacia, 'error');
@@ -220,60 +378,6 @@ const InventarioView = () => {
     document.body.removeChild(link);
     
     mostrarToast(t.csvExito, 'success');
-  };
-
-  const handleFinalizarConteo = () => {
-    if (listaConteo.length === 0) {
-      mostrarToast(t.noArchivarVacio, 'error');
-      return;
-    }
-
-    pedirConfirmacion(t.confirmaArchivar, () => {
-      const nuevoRegistro = {
-        id: Date.now(),
-        fecha: new Date().toISOString(),
-        items: listaConteo 
-      };
-
-      const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
-      const nuevoHistorial = [nuevoRegistro, ...historialPrevio];
-
-      localStorage.setItem('een_historial_conteos', JSON.stringify(nuevoHistorial.slice(0, 50)));
-
-      setListaConteo([]); 
-      localStorage.removeItem('een_inventario_activo'); 
-      mostrarToast(t.archivoExito, 'success');
-    });
-  };
-
-  const handleRecuperarConteo = (registro) => {
-    pedirConfirmacion(t.confirmaRecuperar, () => {
-      setListaConteo(prev => {
-        let nuevaLista = [...prev];
-        registro.items.forEach(itemRecuperado => {
-          const index = nuevaLista.findIndex(i => i.codigo === itemRecuperado.codigo);
-          if (index > -1) {
-            itemRecuperado.variantes.forEach(vRec => {
-              const vEx = nuevaLista[index].variantes.find(vx => vx.id === vRec.id);
-              if (vEx) vEx.contadas += vRec.contadas;
-              else nuevaLista[index].variantes.push({...vRec});
-            });
-            nuevaLista[index].totalFisico = nuevaLista[index].variantes.reduce((acc, v) => acc + (v.pz * v.contadas), 0);
-          } else {
-            nuevaLista.push(JSON.parse(JSON.stringify(itemRecuperado)));
-          }
-        });
-        return nuevaLista;
-      });
-
-      const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
-      const nuevoHistorial = historialPrevio.filter(r => r.id !== registro.id);
-      localStorage.setItem('een_historial_conteos', JSON.stringify(nuevoHistorial));
-
-      setConteoSeleccionado(null);
-      setMostrarHistorial(false);
-      mostrarToast(t.recuperadoExito, 'success');
-    });
   };
 
   const generarCSVDia = () => {
@@ -379,77 +483,117 @@ const InventarioView = () => {
         </div>
       )}
 
-      {/* HEADER OPTIMIZADO PARA MÓVIL (Bordes más definidos) */}
-      <header className="bg-slate-900 border-b border-slate-700 pt-4 pb-4 px-4 flex flex-col gap-4 shrink-0 shadow-lg z-40">
+      {/* HEADER DINÁMICO (NORMAL VS SELECCIÓN) */}
+      <header className={`border-b shrink-0 shadow-lg z-40 transition-colors ${modoSeleccion ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'} pt-4 pb-4 px-4 flex flex-col gap-4`}>
         
         {/* Fila Superior */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/50 border border-blue-500/50">
-              <i className={`fas ${estaEscuchando ? 'fa-microphone animate-pulse text-red-200' : 'fa-clipboard-list text-white'}`}></i>
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg border ${modoSeleccion ? 'bg-blue-500 border-blue-400 text-white' : 'bg-blue-600 border-blue-500/50 shadow-blue-900/50'}`}>
+              <i className={`fas ${modoSeleccion ? 'fa-check-double' : estaEscuchando ? 'fa-microphone animate-pulse text-red-200' : 'fa-clipboard-list text-white'}`}></i>
             </div>
             <div>
-              <h1 className="text-xl font-black tracking-tight text-white">{t.titulo}</h1>
+              <h1 className="text-xl font-black tracking-tight text-white">
+                {modoSeleccion ? `${seleccionados.length} Seleccionados` : t.titulo}
+              </h1>
               <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider">
-                {catStatus.error ? t.errorCarga : catStatus.loading ? t.cargando : `${catStatus.count} ${t.listas}`}
+                {modoSeleccion ? 'Modo de edición parcial' : (catStatus.error ? t.errorCarga : catStatus.loading ? t.cargando : `${catStatus.count} ${t.listas}`)}
               </p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            {isOffline && (
+            {!modoSeleccion && isOffline && (
               <div className="bg-red-500 text-white px-2 py-1.5 rounded-lg font-black text-[10px] uppercase animate-pulse shadow-md flex items-center gap-1 border border-red-400">
                 <i className="fas fa-wifi-slash"></i> <span className="hidden sm:inline">{t.modoOffline}</span>
               </div>
             )}
-            <button 
-              onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} 
-              className="bg-slate-800 border border-slate-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-slate-700 transition-colors shadow-sm text-white"
-            >
-              {t.idioma}
-            </button>
+            
+            {/* BOTÓN SELECCIONAR / CANCELAR */}
+            {listaConteo.length > 0 && (
+              <button 
+                onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} 
+                className={`px-4 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}
+              >
+                <i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i>
+                {modoSeleccion ? t.cancelar : t.seleccionar}
+              </button>
+            )}
+
+            {!modoSeleccion && (
+              <button 
+                onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} 
+                className="bg-slate-800 border border-slate-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-slate-700 transition-colors shadow-sm text-white"
+              >
+                {t.idioma}
+              </button>
+            )}
           </div>
         </div>
         
-        {/* Fila de Acciones: Botones con mayor opacidad y relieve */}
-        <div className="grid grid-cols-4 gap-3">
-          <button 
-            onClick={handleFinalizarConteo} 
-            className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
-          >
-            <i className="fas fa-archive text-xl"></i>
-            <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span>
-          </button>
+        {/* Fila de Acciones (Cambia según el modo) */}
+        {modoSeleccion ? (
+          <div className="flex gap-3">
+             <button 
+               onClick={toggleTodos} 
+               className="flex-1 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white p-3 rounded-2xl transition-all shadow-sm font-bold text-sm flex justify-center items-center gap-2 active:scale-95"
+             >
+               <i className={`far ${seleccionados.length === listaConteo.length ? 'fa-square' : 'fa-check-square'}`}></i> 
+               {seleccionados.length === listaConteo.length ? t.selNada : t.selTodo}
+             </button>
+             <button 
+               onClick={handleFinalizarConteo} 
+               className="flex-[2] bg-amber-500 border border-amber-400 hover:bg-amber-400 text-amber-950 p-3 rounded-2xl transition-all shadow-lg font-black text-sm uppercase tracking-wider flex justify-center items-center gap-2 active:scale-95"
+             >
+               <i className="fas fa-archive"></i> {t.archivarSel.replace('{n}', seleccionados.length)}
+             </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-3">
+            <button 
+              onClick={handleFinalizarConteo} 
+              className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
+            >
+              <i className="fas fa-archive text-xl"></i>
+              <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span>
+            </button>
 
-          <button 
-            onClick={descargarCSV} 
-            className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
-          >
-            <i className="fas fa-file-excel text-xl"></i>
-            <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span>
-          </button>
+            <button 
+              onClick={descargarCSV} 
+              className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
+            >
+              <i className="fas fa-file-excel text-xl"></i>
+              <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span>
+            </button>
 
-          <button 
-            onClick={generarCSVDia} 
-            className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
-          >
-            <i className="fas fa-file-csv text-xl"></i>
-            <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span>
-          </button>
+            <button 
+              onClick={generarCSVDia} 
+              className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
+            >
+              <i className="fas fa-file-csv text-xl"></i>
+              <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span>
+            </button>
 
-          <button 
-            onClick={() => setMostrarHistorial(true)} 
-            className="flex flex-col items-center justify-center gap-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 text-purple-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
-          >
-            <i className="fas fa-history text-xl"></i>
-            <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-purple-200">{t.historial}</span>
-          </button>
-        </div>
+            <button 
+              onClick={() => setMostrarHistorial(true)} 
+              className="flex flex-col items-center justify-center gap-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 text-purple-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"
+            >
+              <i className="fas fa-history text-xl"></i>
+              <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-purple-200">{t.historial}</span>
+            </button>
+          </div>
+        )}
       </header>
 
       {/* CUERPO PRINCIPAL */}
-      <main className="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full flex flex-col gap-6 custom-scroll">
-        <div className="bg-slate-800 p-5 rounded-3xl border border-slate-600 shadow-xl">
+      <main className="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full flex flex-col gap-6 custom-scroll relative">
+        
+        {/* Capa que bloquea el escáner si estamos en modo selección */}
+        {modoSeleccion && (
+          <div className="absolute top-0 left-0 right-0 h-24 z-10 bg-slate-900/50 backdrop-blur-[1px] rounded-3xl" />
+        )}
+        
+        <div className="bg-slate-800 p-5 rounded-3xl border border-slate-600 shadow-xl relative">
            <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} idioma={idioma} />
         </div>
 
@@ -470,6 +614,11 @@ const InventarioView = () => {
           }}
           onIniciarDictado={(codigo, varId, btn, letra) => iniciarDictado(codigo, varId, letra)}
           onZoomImagen={(img) => setImagenAmpliada(img)}
+          
+          // NUEVAS PROPS PARA SELECCIÓN
+          modoSeleccion={modoSeleccion}
+          seleccionados={seleccionados}
+          onToggleSeleccion={toggleSeleccion}
         />
       </main>
 
@@ -512,43 +661,90 @@ const InventarioView = () => {
         </div>
       )}
 
-      {/* MODAL DE HISTORIAL */}
+      {/* MODAL DE HISTORIAL (CON MODO SELECCIÓN) */}
       {mostrarHistorial && (
         <div className="fixed inset-0 z-[150] flex flex-col bg-slate-900/98 backdrop-blur-xl animate-fade-in">
-          <div className="p-6 flex justify-between items-center border-b border-slate-700 bg-slate-900 sticky top-0 z-10 shadow-md">
-            <h2 className="text-2xl font-black text-white">
-              {conteoSeleccionado ? t.detalleConteo : t.historialArchivados}
-            </h2>
-            <button 
-              onClick={() => conteoSeleccionado ? setConteoSeleccionado(null) : setMostrarHistorial(false)}
-              className="w-12 h-12 bg-slate-800 border border-slate-600 rounded-2xl flex items-center justify-center text-white hover:bg-slate-700 transition shadow-sm"
-            >
-              <i className={`fas ${conteoSeleccionado ? 'fa-arrow-left' : 'fa-times'} text-lg`}></i>
-            </button>
+          
+          <div className={`p-5 flex flex-col gap-4 border-b shrink-0 shadow-md transition-colors sticky top-0 z-10 ${modoSeleccionHistorial ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'}`}>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-black text-white">
+                  {modoSeleccionHistorial ? `${seleccionadosHistorial.length} Seleccionados` : conteoSeleccionado ? t.detalleConteo : t.historialArchivados}
+                </h2>
+                {conteoSeleccionado && !modoSeleccionHistorial && (
+                  <p className="text-blue-400 text-[10px] font-bold uppercase mt-1">
+                    {new Date(conteoSeleccionado.fecha).toLocaleString(idioma==='es'?'es-MX':'fr-FR')}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {conteoSeleccionado && (
+                   <button 
+                     onClick={() => { setModoSeleccionHistorial(!modoSeleccionHistorial); setSeleccionadosHistorial([]); }} 
+                     className={`px-4 py-2.5 rounded-xl font-bold text-xs transition-colors shadow-sm border ${modoSeleccionHistorial ? 'bg-red-500/20 text-red-400 border-red-500/40' : 'bg-blue-500/20 text-blue-400 border-blue-500/40'}`}
+                   >
+                     <i className={`fas ${modoSeleccionHistorial ? 'fa-times' : 'fa-check-square'}`}></i>
+                   </button>
+                )}
+                {!modoSeleccionHistorial && (
+                  <button 
+                    onClick={() => { conteoSeleccionado ? setConteoSeleccionado(null) : setMostrarHistorial(false); setModoSeleccionHistorial(false); }} 
+                    className="w-11 h-11 bg-slate-800 border border-slate-600 rounded-xl flex items-center justify-center text-white hover:bg-slate-700 transition shadow-sm"
+                  >
+                    <i className={`fas ${conteoSeleccionado ? 'fa-arrow-left' : 'fa-times'} text-lg`}></i>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Fila Acciones Historial */}
+            {conteoSeleccionado && modoSeleccionHistorial && (
+               <div className="flex gap-3 animate-fade-in">
+                  <button 
+                    onClick={toggleTodosHistorial} 
+                    className="flex-1 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white p-3 rounded-xl transition-all shadow-sm font-bold text-xs uppercase flex justify-center items-center gap-2 active:scale-95"
+                  >
+                    <i className={`far ${seleccionadosHistorial.length === conteoSeleccionado.items.length ? 'fa-square' : 'fa-check-square'}`}></i> 
+                    {seleccionadosHistorial.length === conteoSeleccionado.items.length ? t.selNada : t.selTodo}
+                  </button>
+                  <button 
+                    onClick={handleRecuperarConteo} 
+                    className="flex-[2] bg-blue-600 border border-blue-500 hover:bg-blue-500 text-white p-3 rounded-xl transition-all shadow-lg shadow-blue-900/50 font-black text-xs uppercase tracking-wider flex justify-center items-center gap-2 active:scale-95"
+                  >
+                    <i className="fas fa-file-import"></i> {t.recuperarSel.replace('{n}', seleccionadosHistorial.length)}
+                  </button>
+               </div>
+            )}
+
+            {conteoSeleccionado && !modoSeleccionHistorial && (
+                <button 
+                  onClick={handleRecuperarConteo} 
+                  className="w-full bg-blue-600 border border-blue-500 hover:bg-blue-500 text-white py-3.5 rounded-xl font-black uppercase text-xs tracking-wider shadow-lg shadow-blue-900/50 flex items-center justify-center gap-2 transition-colors active:scale-95"
+                >
+                  <i className="fas fa-file-import text-lg"></i> Recuperar Todo
+                </button>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 pb-20 custom-scroll">
             {conteoSeleccionado ? (
-              <div className="flex flex-col gap-4">
-                <button 
-                  onClick={() => handleRecuperarConteo(conteoSeleccionado)}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black uppercase text-sm shadow-xl mb-2 flex items-center justify-center gap-2 transition-colors active:scale-95 border border-blue-500"
-                >
-                  <i className="fas fa-file-import text-lg"></i> {t.recuperar}
-                </button>
                 <ListaConteo 
                   listaConteo={conteoSeleccionado.items} 
                   idioma={idioma} 
                   soloLectura={true}
-                  onCambiarCant={() => {}}
-                  onManualCant={() => {}}
-                  onEliminar={() => {}}
-                  onAgregarEmpaque={() => {}}
-                  onAbrirCalculadora={() => {}}
-                  onIniciarDictado={() => {}}
+                  onCambiarCant={() => {}} 
+                  onManualCant={() => {}} 
+                  onEliminar={() => {}} 
+                  onAgregarEmpaque={() => {}} 
+                  onAbrirCalculadora={() => {}} 
+                  onIniciarDictado={() => {}} 
                   onZoomImagen={(img) => setImagenAmpliada(img)}
+                  
+                  // Props de Selección para Historial
+                  modoSeleccion={modoSeleccionHistorial}
+                  seleccionados={seleccionadosHistorial}
+                  onToggleSeleccion={toggleSeleccionHistorial}
                 />
-              </div>
             ) : (
               <div className="grid gap-4 max-w-3xl mx-auto">
                 {JSON.parse(localStorage.getItem('een_historial_conteos') || '[]').length === 0 ? (
@@ -561,7 +757,7 @@ const InventarioView = () => {
                   JSON.parse(localStorage.getItem('een_historial_conteos') || '[]').map(reg => (
                     <div 
                       key={reg.id} 
-                      onClick={() => setConteoSeleccionado(reg)}
+                      onClick={() => setConteoSeleccionado(reg)} 
                       className="bg-slate-800 border border-slate-600 p-5 rounded-3xl flex justify-between items-center cursor-pointer hover:bg-slate-700 active:scale-[0.98] transition-all shadow-md"
                     >
                       <div>
