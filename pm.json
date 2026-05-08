@@ -56,7 +56,15 @@
       "tipo_item": "KIT_OFICIAL",
       "hereda_empaques_de": "-Ok_o9uLeKDN0ouD3Odt"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_168",
+        "nombre_paquete": "Paquete de 168 piezas",
+        "piezas": 168,
+        "sku": "-OK_O9ULEKDN0OUD3ODT-168PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-Ok_o9uLeKDN0ouD3Odt",
@@ -75,7 +83,15 @@
       "codigo_sistema_oficial": "BPC-500-ST/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_168",
+        "nombre_paquete": "Paquete de 168 piezas",
+        "piezas": 168,
+        "sku": "-OK_O9ULEKDN0OUD3ODT-168PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-Ok_oiLDPPFc1A6OIRF5",
@@ -121,15 +137,7 @@
       "codigo_sistema_oficial": "BPLA-500/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_153",
-        "nombre_paquete": "Paquete de 153 piezas",
-        "piezas": 153,
-        "sku": "-OK_P3TQLOBZBZEYAY1B-153PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ok_pHQK9uX1XZ3QVtht",
@@ -167,15 +175,7 @@
       "codigo_sistema_oficial": "BPL-125/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_231",
-        "nombre_paquete": "Paquete de 231 piezas",
-        "piezas": 231,
-        "sku": "-OK_PSST-ZVUYJRO_SZL-231PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ok_pY2KXChr0gRv_1TL",
@@ -194,15 +194,7 @@
       "codigo_sistema_oficial": "BPLA-L-110/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_238",
-        "nombre_paquete": "Paquete de 238 piezas",
-        "piezas": 238,
-        "sku": "-OK_PY2KXCHR0GRV_1TL-238PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ok_pno5YiKgHCwgq13H",
@@ -222,24 +214,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_170",
-        "nombre_paquete": "Paquete de 170 piezas",
-        "piezas": "170",
-        "sku": "-OK_PNO5YIKGHCWGQ13H-170PZ",
-        "es_default": true
-      },
-      {
-        "id": "oBvPCgo2u3V2ShSTI2lG",
-        "piezas": 180,
-        "sku": "BPLAN-1-L/CP-180PZ",
-        "fecha_creacion": {
-          "_seconds": 1777509173,
-          "_nanoseconds": 990000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ok_pxMaD2_OT0m9_Svd",
@@ -285,15 +260,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OK_QKU4OUGJBQMPXB4V-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ok_qXK40XlOwAG2S1cF",
@@ -339,15 +306,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1400",
-        "nombre_paquete": "Paquete de 1400 piezas",
-        "piezas": 1400,
-        "sku": "-OK_QYQCGPLRW7LNKOWA-1400PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ok_r5A44xa0H7e7GhLd",
@@ -478,15 +437,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OKKIU61OZ14G2QNBPVY-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkkJ5W9ukSWRJfANgcZ",
@@ -505,15 +456,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OKKJ5W9UKSWRJFANGCZ-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkkJRl9HJq5FVsB5h0N",
@@ -613,17 +556,7 @@
       "imagen_url": "https://i.ibb.co/PX9ZVWm/BOTELLA-PET-PIRAMIDE-DE-30-ML-CON-TAPA-Y-FUNDA.jpg",
       "hereda_empaques_de": "xIujXq7XQcKQqLzFXbsv"
     },
-    "paquetes": [
-      {
-        "id": "vviNh8fdWOWwOuwo8ROg",
-        "piezas": 1000,
-        "sku": "BPP-30-FT/CP-1000PZ",
-        "fecha_creacion": {
-          "_seconds": 1772903117,
-          "_nanoseconds": 728000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkkKqf-n7jitv_pYQX5",
@@ -642,7 +575,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "-OKKKQF-N7JITV_PYQX5-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-OkkL8a06TIlulB9_Te3",
@@ -661,15 +602,7 @@
       "codigo_sistema_oficial": "GPC-GAL/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_24",
-        "nombre_paquete": "Paquete de 24 piezas",
-        "piezas": 24,
-        "sku": "-OKKL8A06TILULB9_TE3-24PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkkLHDOIu2bmZkCP6MS",
@@ -688,15 +621,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OKKLHDOIU2BMZKCP6MS-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkkLdCN0j7HmM6IH2N3",
@@ -761,15 +686,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OKKM3TTKQFWWHAWUAO--1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkoE-7kdwipAu1Xup2K",
@@ -788,15 +705,7 @@
       "codigo_sistema_oficial": "BPL-900/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_180",
-        "nombre_paquete": "Paquete de 180 piezas",
-        "piezas": 180,
-        "sku": "-OKOE-7KDWIPAU1XUP2K-180PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkoE3tLsi4aZKGpo6ng",
@@ -907,15 +816,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OKOEIVMHOVZQBZ7VER3-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkoEmHiy8km9EhnDhju",
@@ -934,15 +835,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OKOEMHIY8KM9EHNDHJU-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkoEttLRTNGdfVUTifH",
@@ -1036,15 +929,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "-OkoG5YafijOHpAu_PAi"
     },
-    "paquetes": [
-      {
-        "id": "paquete_162",
-        "nombre_paquete": "Paquete de 162 piezas",
-        "piezas": 162,
-        "sku": "-OKOG5YAFIJOHPAU_PAI-162PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkoFOLpEXpOfionhNW4",
@@ -1117,7 +1002,15 @@
       "codigo_sistema_oficial": "BO-E80/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_400",
+        "nombre_paquete": "Paquete de 400 piezas",
+        "piezas": 400,
+        "sku": "-OKOFUMIVG2VM3LKFVBX-400PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-OkoFbImmaDJ4t2Hp7Fn",
@@ -1137,15 +1030,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "-OkoE-7kdwipAu1Xup2K"
     },
-    "paquetes": [
-      {
-        "id": "paquete_180",
-        "nombre_paquete": "Paquete de 180 piezas",
-        "piezas": 180,
-        "sku": "-OKOE-7KDWIPAU1XUP2K-180PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkoFkGsJqz6yLBQo2Yb",
@@ -1164,7 +1049,15 @@
       "codigo_sistema_oficial": "EN-2/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": "100",
+        "sku": "-OKOFKGSJQZ6YLBQO2YB-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-OkoFtaDuhYJ0vQuzAq3",
@@ -1203,15 +1096,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_500",
-        "nombre_paquete": "Paquete de 500 piezas",
-        "piezas": "500",
-        "sku": "-OKOFZDJIKUR6WLUPNJB-500PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OkoG5YafijOHpAu_PAi",
@@ -1230,15 +1115,7 @@
       "codigo_sistema_oficial": "TPL-250-R70-NEG/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_162",
-        "nombre_paquete": "Paquete de 162 piezas",
-        "piezas": 162,
-        "sku": "-OKOG5YAFIJOHPAU_PAI-162PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ol88ZMuEpdCj_FmngCS",
@@ -1290,15 +1167,7 @@
       "codigo_sistema_oficial": "TPA-19-M-L/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "-OL88JJTR689MW1UZEZF-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ol88vQtZEx0e-rwpk9Q",
@@ -1363,15 +1232,7 @@
       "codigo_sistema_oficial": "TPNL-19-U/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "-OL89HG8_PKREX5WHGLZ-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-Ol89MLOhGByoF5l955V",
@@ -1390,7 +1251,15 @@
       "codigo_sistema_oficial": "TPRL-19/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_50",
+        "nombre_paquete": "Paquete de 50 piezas",
+        "piezas": 50,
+        "sku": "-OL89MLOHGBYOF5L955V-50PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-Ol89YsWZjOr6cjF6Se3",
@@ -1413,7 +1282,17 @@
         "6Fv2rDEMeUgY5Tz9U9xR": 1
       }
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "Cd9lXtkAM4dmYW6rhfq8",
+        "piezas": 50,
+        "sku": "TPA-19-M/CP-50PZ",
+        "fecha_creacion": {
+          "_seconds": 1773519357,
+          "_nanoseconds": 413000000
+        }
+      }
+    ]
   },
   {
     "id": "-Ol89ek8TY3XIsuuKhbt",
@@ -1969,15 +1848,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "-OL8DHKVABDISAXZJMVG-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlCzdmoQfDhdjaUerqV",
@@ -2069,7 +1940,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": 1,
+        "sku": "-OLDSBOUYAH9XYE5O6IL-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-OlDSoNbxSoWbALDM5bT",
@@ -2088,15 +1967,7 @@
       "codigo_sistema_oficial": "FPP-110-CR/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_220",
-        "nombre_paquete": "Paquete de 220 piezas",
-        "piezas": 220,
-        "sku": "-OLDSONBXSOWBALDM5BT-220PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlDSsijWib4N6mza2z4",
@@ -2116,15 +1987,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "-OlDSoNbxSoWbALDM5bT"
     },
-    "paquetes": [
-      {
-        "id": "paquete_220",
-        "nombre_paquete": "Paquete de 220 piezas",
-        "piezas": 220,
-        "sku": "-OLDSONBXSOWBALDM5BT-220PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlDTrwUO5blKuomo17w",
@@ -2147,15 +2010,7 @@
       "hereda_empaques_de": "-OlNkDYYgIXZ59247x1U",
       "codigo_sistema_oficial": ""
     },
-    "paquetes": [
-      {
-        "id": "paquete_104",
-        "nombre_paquete": "Paquete de 104 piezas",
-        "piezas": 104,
-        "sku": "-OLNKDYYGIXZ59247X1U-104PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlDU1c6zfvADqxCHq1G",
@@ -2196,15 +2051,7 @@
       "codigo_sistema_oficial": "CPB-TL-5-GDL",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "-OLNES6M4IAPCIYV7MFW-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNEgwG-EW98pHyqC-2",
@@ -2278,7 +2125,15 @@
       "codigo_sistema_oficial": "T-R50-COL/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": 1,
+        "sku": "-OLNHUV5GLODKT8GTSDC-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-OlNi34q6FwntxgN1hBh",
@@ -2316,15 +2171,7 @@
       "codigo_sistema_oficial": "TPB-8/10/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "-OLNIDBQP_YLPV8L18LX-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNi_viZE2B1MxY4bf6",
@@ -2343,7 +2190,15 @@
       "codigo_sistema_oficial": "CPB-10-U/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_25",
+        "nombre_paquete": "Paquete de 25 piezas",
+        "piezas": 25,
+        "sku": "-OLNI_VIZE2B1MXY4BF6-25PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-OlNinRLT1PaHIMf4c6h",
@@ -2362,15 +2217,7 @@
       "codigo_sistema_oficial": "TPB-5-GDL/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "-OLNINRLT1PAHIMF4C6H-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNix946hLtPuF_NroW",
@@ -2389,15 +2236,7 @@
       "codigo_sistema_oficial": "TPB-8/10/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_20",
-        "nombre_paquete": "Paquete de 20 piezas",
-        "piezas": 20,
-        "sku": "-OLNIX946HLTPUF_NROW-20PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNjG0aLRKNKK5MtDdg",
@@ -2456,7 +2295,15 @@
       "receta_desglose": null,
       "hereda_empaques_de": "-OlNi_viZE2B1MxY4bf6"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_25",
+        "nombre_paquete": "Paquete de 25 piezas",
+        "piezas": 25,
+        "sku": "-OLNI_VIZE2B1MXY4BF6-25PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-OlNk0ceZOT8Vh39d0-_",
@@ -2503,15 +2350,7 @@
       "codigo_sistema_oficial": "BMC-B-N-1/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_104",
-        "nombre_paquete": "Paquete de 104 piezas",
-        "piezas": 104,
-        "sku": "-OLNKDYYGIXZ59247X1U-104PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNkUn2KQ2KyXDTCYOj",
@@ -2584,15 +2423,7 @@
       "codigo_sistema_oficial": "GCPNGR-1LT S/T",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_98",
-        "nombre_paquete": "Paquete de 98 piezas",
-        "piezas": 98,
-        "sku": "-OLNL0O_TFCD7QDBDLIJ-98PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNl59m62CG6LNtwYDs",
@@ -2667,15 +2498,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "-OlNl0O_TFCD7QdbdLIJ"
     },
-    "paquetes": [
-      {
-        "id": "paquete_98",
-        "nombre_paquete": "Paquete de 98 piezas",
-        "piezas": 98,
-        "sku": "-OLNL0O_TFCD7QDBDLIJ-98PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNlUA9xugLglZk1JrQ",
@@ -2741,15 +2564,7 @@
       "codigo_sistema_oficial": "GP-4-BCA/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_36",
-        "nombre_paquete": "Paquete de 36 piezas",
-        "piezas": 36,
-        "sku": "-OLNME83F3LXP2F9ZVR1-36PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNmb1Cy4WY2i_4D4In",
@@ -2823,15 +2638,7 @@
       "codigo_sistema_oficial": "BPM-250/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": 1,
-        "sku": "-OLNN0AWP3BFUVCBDDLQ-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNn6Gg-D-bxZTFJL_R",
@@ -2854,15 +2661,7 @@
       "hereda_empaques_de": "-OlNn0Awp3BfuvcbDdlQ",
       "codigo_sistema_oficial": ""
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": 1,
-        "sku": "-OLNN0AWP3BFUVCBDDLQ-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNnHy3jb7AcJmNUhEd",
@@ -2881,15 +2680,7 @@
       "codigo_sistema_oficial": "BPW-500/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_210",
-        "nombre_paquete": "Paquete de 210 piezas",
-        "piezas": 210,
-        "sku": "-OLNNHY3JB7ACJMNUHED-210PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNnOV48qqPwHbbX1uc",
@@ -2936,15 +2727,7 @@
       "codigo_sistema_oficial": "BPQ-1L-CR/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_80",
-        "nombre_paquete": "Paquete de 80 piezas",
-        "piezas": 80,
-        "sku": "-OLNNXY_-WETDPEOOHQJ-80PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNneV3dQOX8RjDTs_D",
@@ -2964,15 +2747,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "-OlNnXy_-WeTDpEooHQj"
     },
-    "paquetes": [
-      {
-        "id": "paquete_80",
-        "nombre_paquete": "Paquete de 80 piezas",
-        "piezas": 80,
-        "sku": "-OLNNXY_-WETDPEOOHQJ-80PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNnnMRwd_W-Ra3a3CZ",
@@ -2991,15 +2766,7 @@
       "codigo_sistema_oficial": "BPQ-500-CR/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_128",
-        "nombre_paquete": "Paquete de 128 piezas",
-        "piezas": 128,
-        "sku": "-OLNNNMRWD_W-RA3A3CZ-128PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNnrmgwUB0X4uH5Cw-",
@@ -3019,15 +2786,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "-OlNnnMRwd_W-Ra3a3CZ"
     },
-    "paquetes": [
-      {
-        "id": "paquete_128",
-        "nombre_paquete": "Paquete de 128 piezas",
-        "piezas": 128,
-        "sku": "-OLNNNMRWD_W-RA3A3CZ-128PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNo2XwI5yKbirO3q8V",
@@ -3105,15 +2864,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "-OlNnHy3jb7AcJmNUhEd"
     },
-    "paquetes": [
-      {
-        "id": "paquete_210",
-        "nombre_paquete": "Paquete de 210 piezas",
-        "piezas": 210,
-        "sku": "-OLNNHY3JB7ACJMNUHED-210PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlNo_cBTAkTCgbhu69a",
@@ -3151,7 +2902,15 @@
       "codigo_sistema_oficial": "T-R50-COL/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": 1,
+        "sku": "-OLNOERH8Z7ZFEGUY8Q4-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "-OlOe4aZa_N1DiiU5mz5",
@@ -3171,15 +2930,7 @@
       "codigo_sistema_oficial": "BM-500-BCA-CT",
       "hereda_empaques_de": "p195"
     },
-    "paquetes": [
-      {
-        "id": "paquete_126",
-        "nombre_paquete": "Paquete de 126 piezas",
-        "piezas": 126,
-        "sku": "P195-126PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "-OlOeD7RHmJY-aECG4mt",
@@ -3221,15 +2972,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": 1,
-        "sku": "-OLNCGXZXJ9F65F2SYKS-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "0Kl5tlaHczPQD0HAUOAy",
@@ -3405,15 +3148,7 @@
         "_nanoseconds": 688000000
       }
     },
-    "paquetes": [
-      {
-        "id": "paquete_153",
-        "nombre_paquete": "Paquete de 153 piezas",
-        "piezas": 153,
-        "sku": "-OK_P3TQLOBZBZEYAY1B-153PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "4Nf1a1yu3GYUAVFq73Eh",
@@ -3434,15 +3169,7 @@
       "hereda_empaques_de": "p412",
       "tipo_item": "KIT_OFICIAL"
     },
-    "paquetes": [
-      {
-        "id": "paquete_150",
-        "nombre_paquete": "Paquete de 150 piezas",
-        "piezas": 150,
-        "sku": "P412-150PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "5DhGuJstnmhj3ZcQFPFv",
@@ -3599,7 +3326,17 @@
         "_nanoseconds": 827000000
       }
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "yDMnVnd8dpa5jTZD5nwX",
+        "piezas": 100,
+        "sku": "BP91-SUP-AZUL-150/CP-100PZ",
+        "fecha_creacion": {
+          "_seconds": 1773347295,
+          "_nanoseconds": 310000000
+        }
+      }
+    ]
   },
   {
     "id": "9yUH5ohpjmI3RJORsSM3",
@@ -3734,17 +3471,7 @@
       },
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "VcRJS0gwfg9K1Vh47CF0",
-        "piezas": 100,
-        "sku": "BP89-SUP-ROJA-250/CP-100PZ",
-        "fecha_creacion": {
-          "_seconds": 1773347197,
-          "_nanoseconds": 671000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "DqhwioTok1XMQeAJAeaG",
@@ -3765,7 +3492,17 @@
         "_nanoseconds": 293000000
       }
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "Cd9lXtkAM4dmYW6rhfq8",
+        "piezas": 50,
+        "sku": "TPA-19-M/CP-50PZ",
+        "fecha_creacion": {
+          "_seconds": 1773519357,
+          "_nanoseconds": 413000000
+        }
+      }
+    ]
   },
   {
     "id": "FJB9A3A752vZXkF4DHGv",
@@ -3807,17 +3544,7 @@
         "_nanoseconds": 11000000
       }
     },
-    "paquetes": [
-      {
-        "id": "jdfF4EmxrkkltXAP4aXD",
-        "piezas": 100,
-        "sku": "BP52-SU-KRAFT-TRANS-150/CP-100PZ",
-        "fecha_creacion": {
-          "_seconds": 1773347165,
-          "_nanoseconds": 504000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "He6sc7ORtxUFEUETQmbu",
@@ -4285,17 +4012,7 @@
       },
       "hereda_empaques_de": "xIujXq7XQcKQqLzFXbsv"
     },
-    "paquetes": [
-      {
-        "id": "vviNh8fdWOWwOuwo8ROg",
-        "piezas": 1000,
-        "sku": "BPP-30-FT/CP-1000PZ",
-        "fecha_creacion": {
-          "_seconds": 1772903117,
-          "_nanoseconds": 728000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "RK4PZ855z3P4NeX74IOQ",
@@ -4337,17 +4054,7 @@
         "_nanoseconds": 258000000
       }
     },
-    "paquetes": [
-      {
-        "id": "gKoFlSg9bbS5JWOGJxNX",
-        "piezas": 100,
-        "sku": "BP94-SUP-ROSA-150/CP-100PZ",
-        "fecha_creacion": {
-          "_seconds": 1773347593,
-          "_nanoseconds": 749000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "SRyEF8aiWwxf59OGZfwd",
@@ -4572,17 +4279,7 @@
       "hereda_empaques_de": "lMVADP0WZRK2JFIoH8OZ",
       "tipo_item": "KIT_OFICIAL"
     },
-    "paquetes": [
-      {
-        "id": "SD1FXcShRbEnXI6ZptAM",
-        "piezas": 600,
-        "sku": "TPL-40-R38-NAT/CP-600PZ",
-        "fecha_creacion": {
-          "_seconds": 1778116416,
-          "_nanoseconds": 108000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "ZTTmDZ1LE1GFBnZMWRD6",
@@ -4645,17 +4342,7 @@
         "_nanoseconds": 164000000
       }
     },
-    "paquetes": [
-      {
-        "id": "HyLJQMmFujnQS3XU0ObH",
-        "piezas": 100,
-        "sku": "BP96-SUP-ROSA-500/CP-100PZ",
-        "fecha_creacion": {
-          "_seconds": 1773347702,
-          "_nanoseconds": 562000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "byfbZP2W1NYnzr5wyFN4",
@@ -4738,24 +4425,7 @@
       },
       "hereda_empaques_de": "-Ok_pno5YiKgHCwgq13H"
     },
-    "paquetes": [
-      {
-        "id": "paquete_170",
-        "nombre_paquete": "Paquete de 170 piezas",
-        "piezas": "170",
-        "sku": "-OK_PNO5YIKGHCWGQ13H-170PZ",
-        "es_default": true
-      },
-      {
-        "id": "oBvPCgo2u3V2ShSTI2lG",
-        "piezas": 180,
-        "sku": "BPLAN-1-L/CP-180PZ",
-        "fecha_creacion": {
-          "_seconds": 1777509173,
-          "_nanoseconds": 990000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "cn7qEnml8Q0bKreibXrH",
@@ -4859,17 +4529,7 @@
         "_nanoseconds": 258000000
       }
     },
-    "paquetes": [
-      {
-        "id": "iKr6zB6wFBqfC4tV5zV5",
-        "piezas": 500,
-        "sku": "BPLA-60/CP-500PZ",
-        "fecha_creacion": {
-          "_seconds": 1778026545,
-          "_nanoseconds": 72000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "eBkNTIBuroE1MZiWkNLa",
@@ -4932,7 +4592,17 @@
       },
       "categoria": "LAMINA"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "2vd1sjqPUq5kJXCV9E9H",
+        "piezas": 40,
+        "sku": "BLPS-2/CP-40PZ",
+        "fecha_creacion": {
+          "_seconds": 1772903082,
+          "_nanoseconds": 885000000
+        }
+      }
+    ]
   },
   {
     "id": "exj4VxPxcWpnJgUg90r4",
@@ -5025,17 +4695,7 @@
         "_nanoseconds": 186000000
       }
     },
-    "paquetes": [
-      {
-        "id": "QslQTxewLdyQ9PF0mAzc",
-        "piezas": 108,
-        "sku": "EPL-1/2-GAL/CP-108PZ",
-        "fecha_creacion": {
-          "_seconds": 1772909249,
-          "_nanoseconds": 57000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "gOQkF5IvtFZvIwoA4jbK",
@@ -5056,17 +4716,7 @@
         "_nanoseconds": 721000000
       }
     },
-    "paquetes": [
-      {
-        "id": "lY4J6xncL6ouHJhVr9Di",
-        "piezas": 100,
-        "sku": "BP98-SU-LIQP-500/CP-100PZ",
-        "fecha_creacion": {
-          "_seconds": 1773347813,
-          "_nanoseconds": 476000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "gptZFO1eaRRqCHD2ubpf",
@@ -5201,15 +4851,7 @@
         "_nanoseconds": 946000000
       }
     },
-    "paquetes": [
-      {
-        "id": "paquete_238",
-        "nombre_paquete": "Paquete de 238 piezas",
-        "piezas": 238,
-        "sku": "-OK_PY2KXCHR0GRV_1TL-238PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "jfFv8C3DgP0JuBGKxm6K",
@@ -5230,17 +4872,7 @@
         "_nanoseconds": 141000000
       }
     },
-    "paquetes": [
-      {
-        "id": "7wRh65zNBlVrAkjtSs0D",
-        "piezas": 100,
-        "sku": "BP101-SU-LIQP-3/CP-100PZ",
-        "fecha_creacion": {
-          "_seconds": 1773347910,
-          "_nanoseconds": 7000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "kM4i21853GhUWqgRISfq",
@@ -5311,17 +4943,7 @@
         "_nanoseconds": 954000000
       }
     },
-    "paquetes": [
-      {
-        "id": "SD1FXcShRbEnXI6ZptAM",
-        "piezas": 600,
-        "sku": "TPL-40-R38-NAT/CP-600PZ",
-        "fecha_creacion": {
-          "_seconds": 1778116416,
-          "_nanoseconds": 108000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "lYbmujjw2Y7uhMReOrWy",
@@ -5557,17 +5179,7 @@
       "receta_desglose": null,
       "categoria": "LAMINA"
     },
-    "paquetes": [
-      {
-        "id": "7gaW5jr4Q8moaGDvZRB3",
-        "piezas": 252,
-        "sku": "BLSF-TTP-500-GZ/CP-252PZ",
-        "fecha_creacion": {
-          "_seconds": 1776794983,
-          "_nanoseconds": 423000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p100",
@@ -5685,15 +5297,7 @@
       "receta_desglose": null,
       "categoria": "LAMINA"
     },
-    "paquetes": [
-      {
-        "id": "paquete_70",
-        "nombre_paquete": "Paquete de 70 piezas",
-        "piezas": "70",
-        "sku": "P11-70PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p114",
@@ -5847,15 +5451,7 @@
       "codigo_sistema_oficial": "GPL-10/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_30",
-        "nombre_paquete": "Paquete de 30 piezas",
-        "piezas": 30,
-        "sku": "P127-30PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p128",
@@ -5901,15 +5497,7 @@
       "codigo_sistema_oficial": "GPL-5/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "P130-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p131",
@@ -5928,15 +5516,7 @@
       "codigo_sistema_oficial": "GPP-440/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_160",
-        "nombre_paquete": "Paquete de 160 piezas",
-        "piezas": 160,
-        "sku": "P131-160PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p132",
@@ -5974,15 +5554,7 @@
       "codigo_sistema_oficial": "TPET-750-PS/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P133-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p134",
@@ -6002,15 +5574,7 @@
       "codigo_sistema_oficial": "TPET-750-PSAMA-TN/CP",
       "hereda_empaques_de": "p133"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P133-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p135",
@@ -6029,15 +5593,7 @@
       "codigo_sistema_oficial": "TPET-750-PSAZU-TN/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P135-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p136",
@@ -6057,15 +5613,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p133"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P133-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p137",
@@ -6085,15 +5633,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p133"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P133-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p138",
@@ -6113,15 +5653,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p133"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P133-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p139",
@@ -6141,15 +5673,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p133"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P133-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p14",
@@ -6188,15 +5712,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p133"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P133-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p141",
@@ -6216,15 +5732,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p142"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P142-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p142",
@@ -6243,15 +5751,7 @@
       "codigo_sistema_oficial": "TP-CIL-1000/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P142-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p143",
@@ -6271,15 +5771,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p144"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P144-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p144",
@@ -6298,15 +5790,7 @@
       "codigo_sistema_oficial": "TP-CIL-500/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P144-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p145",
@@ -6326,7 +5810,15 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p146"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_104",
+        "nombre_paquete": "Paquete de 104 piezas",
+        "piezas": 104,
+        "sku": "P146-104PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p146",
@@ -6345,7 +5837,15 @@
       "codigo_sistema_oficial": "TP-CIL-250/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_104",
+        "nombre_paquete": "Paquete de 104 piezas",
+        "piezas": 104,
+        "sku": "P146-104PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p147",
@@ -6365,15 +5865,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p148"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P148-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p148",
@@ -6392,15 +5884,7 @@
       "codigo_sistema_oficial": "TP-CIL-750/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P148-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p149",
@@ -6561,15 +6045,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p155"
     },
-    "paquetes": [
-      {
-        "id": "paquete_32",
-        "nombre_paquete": "Paquete de 32 piezas",
-        "piezas": 32,
-        "sku": "P155-32PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p155",
@@ -6588,15 +6064,7 @@
       "codigo_sistema_oficial": "VP-4-R110/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_32",
-        "nombre_paquete": "Paquete de 32 piezas",
-        "piezas": 32,
-        "sku": "P155-32PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p156",
@@ -6693,15 +6161,7 @@
       "receta_desglose": null,
       "categoria": "LAMINA"
     },
-    "paquetes": [
-      {
-        "id": "paquete_96",
-        "nombre_paquete": "Paquete de 96 piezas",
-        "piezas": 96,
-        "sku": "P16-96PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p160",
@@ -6721,15 +6181,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p161"
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "P161-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p161",
@@ -6748,15 +6200,7 @@
       "codigo_sistema_oficial": "VPC-1/2-GAL/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "P161-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p162",
@@ -6776,15 +6220,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p163"
     },
-    "paquetes": [
-      {
-        "id": "paquete_196",
-        "nombre_paquete": "Paquete de 196 piezas",
-        "piezas": 196,
-        "sku": "P163-196PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p163",
@@ -6803,15 +6239,7 @@
       "codigo_sistema_oficial": "BPAN-1/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_196",
-        "nombre_paquete": "Paquete de 196 piezas",
-        "piezas": 196,
-        "sku": "P163-196PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p164",
@@ -6830,15 +6258,7 @@
       "codigo_sistema_oficial": "BAPOL-BCA/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "P164-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p165",
@@ -6951,15 +6371,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p171"
     },
-    "paquetes": [
-      {
-        "id": "paquete_170",
-        "nombre_paquete": "Paquete de 170 piezas",
-        "piezas": 170,
-        "sku": "P171-170PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p171",
@@ -6978,15 +6390,7 @@
       "codigo_sistema_oficial": "BPLB-1-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_170",
-        "nombre_paquete": "Paquete de 170 piezas",
-        "piezas": 170,
-        "sku": "P171-170PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p172",
@@ -7032,15 +6436,7 @@
       "codigo_sistema_oficial": "BPLB-500-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_162",
-        "nombre_paquete": "Paquete de 162 piezas",
-        "piezas": 162,
-        "sku": "P173-162PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p174",
@@ -7059,15 +6455,7 @@
       "codigo_sistema_oficial": "BPLB-60-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_334",
-        "nombre_paquete": "Paquete de 334 piezas",
-        "piezas": 334,
-        "sku": "P174-334PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p175",
@@ -7106,15 +6494,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p177"
     },
-    "paquetes": [
-      {
-        "id": "paquete_170",
-        "nombre_paquete": "Paquete de 170 piezas",
-        "piezas": 170,
-        "sku": "P177-170PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p177",
@@ -7133,15 +6513,7 @@
       "codigo_sistema_oficial": "BPLB-1-NEG/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_170",
-        "nombre_paquete": "Paquete de 170 piezas",
-        "piezas": 170,
-        "sku": "P177-170PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p18",
@@ -7160,15 +6532,7 @@
       "receta_desglose": null,
       "categoria": "LAMINA"
     },
-    "paquetes": [
-      {
-        "id": "paquete_120",
-        "nombre_paquete": "Paquete de 120 piezas",
-        "piezas": "120",
-        "sku": "P18-120PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p180",
@@ -7242,15 +6606,7 @@
       "codigo_sistema_oficial": "BPG-ACP-500-R-28/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P182-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p183",
@@ -7338,7 +6694,15 @@
       "codigo_sistema_oficial": "BM-1000-NEG-CT",
       "hereda_empaques_de": "p196"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_72",
+        "nombre_paquete": "Paquete de 72 piezas",
+        "piezas": 72,
+        "sku": "P196-72PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p189",
@@ -7485,15 +6849,7 @@
       "codigo_sistema_oficial": "BM-.500-BCA/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_126",
-        "nombre_paquete": "Paquete de 126 piezas",
-        "piezas": 126,
-        "sku": "P195-126PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p196",
@@ -7512,7 +6868,15 @@
       "codigo_sistema_oficial": "BM-1-NEGRO/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_72",
+        "nombre_paquete": "Paquete de 72 piezas",
+        "piezas": 72,
+        "sku": "P196-72PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p198",
@@ -7531,15 +6895,7 @@
       "codigo_sistema_oficial": "BPLA-10/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_2000",
-        "nombre_paquete": "Paquete de 2000 piezas",
-        "piezas": 2000,
-        "sku": "P198-2000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p20",
@@ -7585,15 +6941,7 @@
       "receta_desglose": null,
       "categoria": "LAMINA"
     },
-    "paquetes": [
-      {
-        "id": "paquete_84",
-        "nombre_paquete": "Paquete de 84 piezas",
-        "piezas": "84",
-        "sku": "P21-84PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p213",
@@ -7613,15 +6961,7 @@
       "codigo_sistema_oficial": "BPCN-1-L-CT",
       "hereda_empaques_de": "p214"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P214-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p214",
@@ -7640,15 +6980,7 @@
       "codigo_sistema_oficial": "BPCN-1-L/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P214-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p215",
@@ -7686,15 +7018,7 @@
       "codigo_sistema_oficial": "BPT-CON-BCO-1/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P216-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p217",
@@ -7732,15 +7056,7 @@
       "codigo_sistema_oficial": "BPAF-1L/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_120",
-        "nombre_paquete": "Paquete de 120 piezas",
-        "piezas": 120,
-        "sku": "P218-120PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p219",
@@ -7798,7 +7114,15 @@
       "hereda_empaques_de": "p221",
       "imagen_url": "https://i.ibb.co/fGFGkmkp/BOTELLA-PAD-BLANCA-SUAVITEL-3-L-R-63-CON-TAPA.jpg"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_36",
+        "nombre_paquete": "Paquete de 36 piezas",
+        "piezas": 36,
+        "sku": "P221-36PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p221",
@@ -7817,7 +7141,15 @@
       "codigo_sistema_oficial": "BPS-3L/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_36",
+        "nombre_paquete": "Paquete de 36 piezas",
+        "piezas": 36,
+        "sku": "P221-36PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p222",
@@ -7836,7 +7168,15 @@
       "codigo_sistema_oficial": "CT-1000/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P222-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p223",
@@ -7855,15 +7195,7 @@
       "codigo_sistema_oficial": "CPB-19-U/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_22",
-        "nombre_paquete": "Paquete de 22 piezas",
-        "piezas": 22,
-        "sku": "P223-22PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p225",
@@ -7903,7 +7235,15 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p251"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_22",
+        "nombre_paquete": "Paquete de 22 piezas",
+        "piezas": 22,
+        "sku": "P251-22PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p238",
@@ -7923,15 +7263,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p223"
     },
-    "paquetes": [
-      {
-        "id": "paquete_22",
-        "nombre_paquete": "Paquete de 22 piezas",
-        "piezas": 22,
-        "sku": "P223-22PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p241",
@@ -7951,15 +7283,7 @@
       "tipo_item": "KIT_OFICIAL",
       "hereda_empaques_de": "p223"
     },
-    "paquetes": [
-      {
-        "id": "paquete_22",
-        "nombre_paquete": "Paquete de 22 piezas",
-        "piezas": 22,
-        "sku": "P223-22PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p244",
@@ -7999,15 +7323,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p246"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P246-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p246",
@@ -8026,15 +7342,7 @@
       "codigo_sistema_oficial": "CPB-4-M/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P246-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p249",
@@ -8080,7 +7388,15 @@
       "codigo_sistema_oficial": "CPB-15-U/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_22",
+        "nombre_paquete": "Paquete de 22 piezas",
+        "piezas": 22,
+        "sku": "P251-22PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p252",
@@ -8164,15 +7480,7 @@
       "codigo_sistema_oficial": "CPB-1-RE/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P272-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p274",
@@ -8246,15 +7554,7 @@
       "codigo_sistema_oficial": "CPB-RE-2/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P276-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p281",
@@ -8300,15 +7600,7 @@
       "codigo_sistema_oficial": "EN-1/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_200",
-        "nombre_paquete": "Paquete de 200 piezas",
-        "piezas": "200",
-        "sku": "P282-200PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p283",
@@ -8327,15 +7619,7 @@
       "codigo_sistema_oficial": "EN-125/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_650",
-        "nombre_paquete": "Paquete de 650 piezas",
-        "piezas": "650",
-        "sku": "P283-650PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p285",
@@ -8381,7 +7665,15 @@
       "codigo_sistema_oficial": "EN-1-REC/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_200",
+        "nombre_paquete": "Paquete de 200 piezas",
+        "piezas": "200",
+        "sku": "P286-200PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p287",
@@ -8400,15 +7692,7 @@
       "codigo_sistema_oficial": "ENN-1/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_200",
-        "nombre_paquete": "Paquete de 200 piezas",
-        "piezas": 200,
-        "sku": "P287-200PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p288",
@@ -8454,15 +7738,7 @@
       "codigo_sistema_oficial": "EPP-CIL-125/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_200",
-        "nombre_paquete": "Paquete de 200 piezas",
-        "piezas": 200,
-        "sku": "P289-200PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p290",
@@ -8481,15 +7757,7 @@
       "codigo_sistema_oficial": "EPP-CIL-250/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_168",
-        "nombre_paquete": "Paquete de 168 piezas",
-        "piezas": 168,
-        "sku": "P290-168PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p291",
@@ -8535,15 +7803,7 @@
       "codigo_sistema_oficial": "EPP-CIL-500/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_200",
-        "nombre_paquete": "Paquete de 200 piezas",
-        "piezas": 200,
-        "sku": "P292-200PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p294",
@@ -8562,15 +7822,7 @@
       "codigo_sistema_oficial": "EPP-OV-125/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P294-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p295",
@@ -8590,15 +7842,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p296"
     },
-    "paquetes": [
-      {
-        "id": "paquete_425",
-        "nombre_paquete": "Paquete de 425 piezas",
-        "piezas": 425,
-        "sku": "P296-425PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p296",
@@ -8617,15 +7861,7 @@
       "codigo_sistema_oficial": "FPPOL-150-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_425",
-        "nombre_paquete": "Paquete de 425 piezas",
-        "piezas": 425,
-        "sku": "P296-425PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p297",
@@ -8703,15 +7939,7 @@
       "receta_desglose": null,
       "categoria": "LAMINA"
     },
-    "paquetes": [
-      {
-        "id": "paquete_48",
-        "nombre_paquete": "Paquete de 48 piezas",
-        "piezas": "48",
-        "sku": "P3-48PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p300",
@@ -8731,15 +7959,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p301"
     },
-    "paquetes": [
-      {
-        "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
-        "piezas": 40,
-        "sku": "P301-40PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p301",
@@ -8758,15 +7978,7 @@
       "codigo_sistema_oficial": "GIR-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
-        "piezas": 40,
-        "sku": "P301-40PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p302",
@@ -8786,15 +7998,7 @@
       "codigo_sistema_oficial": "GIR-NAT-CTCC",
       "hereda_empaques_de": "p304"
     },
-    "paquetes": [
-      {
-        "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
-        "piezas": 40,
-        "sku": "P304-40PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p303",
@@ -8814,15 +8018,7 @@
       "codigo_sistema_oficial": "GIR-NAT-CTSC",
       "hereda_empaques_de": "p304"
     },
-    "paquetes": [
-      {
-        "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
-        "piezas": 40,
-        "sku": "P304-40PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p304",
@@ -8841,15 +8037,7 @@
       "codigo_sistema_oficial": "GIR-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
-        "piezas": 40,
-        "sku": "P304-40PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p306",
@@ -8924,15 +8112,7 @@
       "tipo_item": "KIT_OFICIAL",
       "hereda_empaques_de": "p309"
     },
-    "paquetes": [
-      {
-        "id": "paquete_36",
-        "nombre_paquete": "Paquete de 36 piezas",
-        "piezas": 36,
-        "sku": "P309-36PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p309",
@@ -8951,15 +8131,7 @@
       "codigo_sistema_oficial": "GP-5-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_36",
-        "nombre_paquete": "Paquete de 36 piezas",
-        "piezas": 36,
-        "sku": "P309-36PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p312",
@@ -8979,15 +8151,7 @@
       "tipo_item": "KIT_OFICIAL",
       "hereda_empaques_de": "p313"
     },
-    "paquetes": [
-      {
-        "id": "paquete_54",
-        "nombre_paquete": "Paquete de 54 piezas",
-        "piezas": 54,
-        "sku": "P313-54PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p313",
@@ -9006,15 +8170,7 @@
       "codigo_sistema_oficial": "GPA-1-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_54",
-        "nombre_paquete": "Paquete de 54 piezas",
-        "piezas": 54,
-        "sku": "P313-54PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p314",
@@ -9100,15 +8256,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p313"
     },
-    "paquetes": [
-      {
-        "id": "paquete_54",
-        "nombre_paquete": "Paquete de 54 piezas",
-        "piezas": 54,
-        "sku": "P313-54PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p319",
@@ -9249,15 +8397,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p324"
     },
-    "paquetes": [
-      {
-        "id": "paquete_36",
-        "nombre_paquete": "Paquete de 36 piezas",
-        "piezas": 36,
-        "sku": "P324-36PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p324",
@@ -9276,15 +8416,7 @@
       "codigo_sistema_oficial": "GPA-4-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_36",
-        "nombre_paquete": "Paquete de 36 piezas",
-        "piezas": 36,
-        "sku": "P324-36PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p325",
@@ -9378,7 +8510,15 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p330"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P330-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p330",
@@ -9397,7 +8537,15 @@
       "codigo_sistema_oficial": "GPB-6L/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P330-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p339",
@@ -9416,7 +8564,15 @@
       "codigo_sistema_oficial": "GPI-1/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_70",
+        "nombre_paquete": "Paquete de 70 piezas",
+        "piezas": 70,
+        "sku": "P339-70PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p340",
@@ -9454,7 +8610,15 @@
       "codigo_sistema_oficial": "GPI-2/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_54",
+        "nombre_paquete": "Paquete de 54 piezas",
+        "piezas": 54,
+        "sku": "P341-54PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p342",
@@ -9519,15 +8683,7 @@
       "codigo_sistema_oficial": "GPI-500/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_84",
-        "nombre_paquete": "Paquete de 84 piezas",
-        "piezas": 84,
-        "sku": "P344-84PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p345",
@@ -9657,15 +8813,7 @@
       "codigo_sistema_oficial": "BPAT-1/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P35-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p350",
@@ -9684,15 +8832,7 @@
       "codigo_sistema_oficial": "G-NB-20/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P350-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p351",
@@ -9711,15 +8851,7 @@
       "codigo_sistema_oficial": "G-NB-30/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_2160",
-        "nombre_paquete": "Paquete de 2160 piezas",
-        "piezas": 2160,
-        "sku": "P351-2160PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p352",
@@ -9738,15 +8870,7 @@
       "codigo_sistema_oficial": "G-NB-45/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P352-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p353",
@@ -9792,7 +8916,15 @@
       "codigo_sistema_oficial": "M-125-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_75",
+        "nombre_paquete": "Paquete de 75 piezas",
+        "piezas": 75,
+        "sku": "P354-75PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p355",
@@ -9811,15 +8943,7 @@
       "codigo_sistema_oficial": "M-250/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_50",
-        "nombre_paquete": "Paquete de 50 piezas",
-        "piezas": 50,
-        "sku": "P355-50PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p356",
@@ -9838,15 +8962,7 @@
       "codigo_sistema_oficial": "M-500/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_75",
-        "nombre_paquete": "Paquete de 75 piezas",
-        "piezas": 75,
-        "sku": "P356-75PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p357",
@@ -9865,15 +8981,7 @@
       "codigo_sistema_oficial": "M-750-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P357-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p358",
@@ -10054,17 +9162,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": null
     },
-    "paquetes": [
-      {
-        "id": "I4Prau6z9wd3SAmrFrXk",
-        "piezas": 40,
-        "sku": "PPB-DF-30/CP-40PZ",
-        "fecha_creacion": {
-          "_seconds": 1778116372,
-          "_nanoseconds": 967000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p364",
@@ -10121,7 +9219,15 @@
       "codigo_sistema_oficial": "PPN-DF-240/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P366-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p367",
@@ -10140,15 +9246,7 @@
       "codigo_sistema_oficial": "PPN-DF-30/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P367-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p368",
@@ -10187,7 +9285,15 @@
       "codigo_sistema_oficial": "BPAT-600/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_150",
+        "nombre_paquete": "Paquete de 150 piezas",
+        "piezas": 150,
+        "sku": "P37-150PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p374",
@@ -10206,7 +9312,15 @@
       "codigo_sistema_oficial": "PIN-10-P/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_24",
+        "nombre_paquete": "Paquete de 24 piezas",
+        "piezas": 24,
+        "sku": "P374-24PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p375",
@@ -10225,15 +9339,7 @@
       "codigo_sistema_oficial": "PIN-20-S/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_10",
-        "nombre_paquete": "Paquete de 10 piezas",
-        "piezas": 10,
-        "sku": "P375-10PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p376",
@@ -10271,15 +9377,7 @@
       "codigo_sistema_oficial": "PIN-4-P/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_35",
-        "nombre_paquete": "Paquete de 35 piezas",
-        "piezas": 35,
-        "sku": "P377-35PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p378",
@@ -10345,7 +9443,15 @@
       "codigo_sistema_oficial": "BPB-120/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_350",
+        "nombre_paquete": "Paquete de 350 piezas",
+        "piezas": 350,
+        "sku": "P38-350PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p381",
@@ -10364,7 +9470,15 @@
       "codigo_sistema_oficial": "TPA-200/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P381-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p382",
@@ -10383,15 +9497,7 @@
       "codigo_sistema_oficial": "TPC-200-AC/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P382-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p383",
@@ -10410,15 +9516,7 @@
       "codigo_sistema_oficial": "TPC-200-B/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P383-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p384",
@@ -10475,7 +9573,15 @@
       "codigo_sistema_oficial": "TPA-220-A/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P386-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p389",
@@ -10494,15 +9600,7 @@
       "codigo_sistema_oficial": "TPA-50-A/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P389-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p39",
@@ -10521,15 +9619,7 @@
       "codigo_sistema_oficial": "BPB-250/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_128",
-        "nombre_paquete": "Paquete de 128 piezas",
-        "piezas": 128,
-        "sku": "P39-128PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p390",
@@ -10549,15 +9639,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p391"
     },
-    "paquetes": [
-      {
-        "id": "paquete_70",
-        "nombre_paquete": "Paquete de 70 piezas",
-        "piezas": 70,
-        "sku": "P391-70PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p391",
@@ -10576,15 +9658,7 @@
       "codigo_sistema_oficial": "TPL-1-R89-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_70",
-        "nombre_paquete": "Paquete de 70 piezas",
-        "piezas": 70,
-        "sku": "P391-70PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p392",
@@ -10686,15 +9760,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p414"
     },
-    "paquetes": [
-      {
-        "id": "paquete_32",
-        "nombre_paquete": "Paquete de 32 piezas",
-        "piezas": 32,
-        "sku": "P414-32PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p396",
@@ -10714,15 +9780,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p397"
     },
-    "paquetes": [
-      {
-        "id": "paquete_135",
-        "nombre_paquete": "Paquete de 135 piezas",
-        "piezas": 135,
-        "sku": "P397-135PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p397",
@@ -10741,15 +9799,7 @@
       "codigo_sistema_oficial": "TPL-500-R70-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_135",
-        "nombre_paquete": "Paquete de 135 piezas",
-        "piezas": 135,
-        "sku": "P397-135PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p399",
@@ -10873,15 +9923,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p403"
     },
-    "paquetes": [
-      {
-        "id": "paquete_32",
-        "nombre_paquete": "Paquete de 32 piezas",
-        "piezas": 32,
-        "sku": "P403-32PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p403",
@@ -10900,15 +9942,7 @@
       "codigo_sistema_oficial": "TPLG-500-R110-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_32",
-        "nombre_paquete": "Paquete de 32 piezas",
-        "piezas": 32,
-        "sku": "P403-32PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p404",
@@ -11021,15 +10055,7 @@
       "codigo_sistema_oficial": "TPL-2-R110-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
-        "piezas": 40,
-        "sku": "P408-40PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p409",
@@ -11049,15 +10075,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p408"
     },
-    "paquetes": [
-      {
-        "id": "paquete_40",
-        "nombre_paquete": "Paquete de 40 piezas",
-        "piezas": 40,
-        "sku": "P408-40PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p41",
@@ -11076,7 +10094,15 @@
       "codigo_sistema_oficial": "BPB-60/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_900",
+        "nombre_paquete": "Paquete de 900 piezas",
+        "piezas": 900,
+        "sku": "P41-900PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p412",
@@ -11095,15 +10121,7 @@
       "codigo_sistema_oficial": "TPL-250-R70-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_150",
-        "nombre_paquete": "Paquete de 150 piezas",
-        "piezas": 150,
-        "sku": "P412-150PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p413",
@@ -11123,15 +10141,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p414"
     },
-    "paquetes": [
-      {
-        "id": "paquete_32",
-        "nombre_paquete": "Paquete de 32 piezas",
-        "piezas": 32,
-        "sku": "P414-32PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p414",
@@ -11150,15 +10160,7 @@
       "codigo_sistema_oficial": "TPL-4-R110-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_32",
-        "nombre_paquete": "Paquete de 32 piezas",
-        "piezas": 32,
-        "sku": "P414-32PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p419",
@@ -11177,15 +10179,7 @@
       "codigo_sistema_oficial": "TPL-500-R70-NAT/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_135",
-        "nombre_paquete": "Paquete de 135 piezas",
-        "piezas": 135,
-        "sku": "P419-135PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p420",
@@ -11205,15 +10199,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p419"
     },
-    "paquetes": [
-      {
-        "id": "paquete_135",
-        "nombre_paquete": "Paquete de 135 piezas",
-        "piezas": 135,
-        "sku": "P419-135PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p423",
@@ -11253,15 +10239,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p425"
     },
-    "paquetes": [
-      {
-        "id": "paquete_91",
-        "nombre_paquete": "Paquete de 91 piezas",
-        "piezas": 91,
-        "sku": "P425-91PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p425",
@@ -11280,15 +10258,7 @@
       "codigo_sistema_oficial": "TP-500-R89-BCO/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_91",
-        "nombre_paquete": "Paquete de 91 piezas",
-        "piezas": 91,
-        "sku": "P425-91PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p426",
@@ -11417,17 +10387,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "fa7iP5gnqu68i8hPRrMy"
     },
-    "paquetes": [
-      {
-        "id": "QslQTxewLdyQ9PF0mAzc",
-        "piezas": 108,
-        "sku": "EPL-1/2-GAL/CP-108PZ",
-        "fecha_creacion": {
-          "_seconds": 1772909249,
-          "_nanoseconds": 57000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p436",
@@ -11446,15 +10406,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P436-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p437",
@@ -11500,15 +10452,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P438-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p439",
@@ -11554,15 +10498,7 @@
       "codigo_sistema_oficial": "BPC-250/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_275",
-        "nombre_paquete": "Paquete de 275 piezas",
-        "piezas": 275,
-        "sku": "P44-275PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p440",
@@ -11581,15 +10517,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P440-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p441",
@@ -11608,15 +10536,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P441-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p442",
@@ -11689,15 +10609,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P444-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p449",
@@ -11716,15 +10628,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P449-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p45",
@@ -11743,7 +10647,15 @@
       "codigo_sistema_oficial": "BPC-500/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_126",
+        "nombre_paquete": "Paquete de 126 piezas",
+        "piezas": 126,
+        "sku": "P45-126PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p450",
@@ -11762,15 +10674,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P450-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p451",
@@ -11808,7 +10712,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P452-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p453",
@@ -11846,15 +10758,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P454-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p455",
@@ -11973,15 +10877,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P459-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p460",
@@ -12027,7 +10923,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P461-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p462",
@@ -12046,7 +10950,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P462-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p463",
@@ -12092,15 +11004,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P464-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p465",
@@ -12119,15 +11023,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P465-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p466",
@@ -12165,15 +11061,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P467-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p468",
@@ -12257,15 +11145,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P471-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p472",
@@ -12330,15 +11210,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P474-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p475",
@@ -12422,15 +11294,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P478-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p479",
@@ -12449,15 +11313,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P479-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p480",
@@ -12476,15 +11332,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P480-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p481",
@@ -12503,15 +11351,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P481-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p482",
@@ -12530,7 +11370,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P482-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p483",
@@ -12549,15 +11397,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P483-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p484",
@@ -12603,15 +11443,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P485-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p486",
@@ -12630,15 +11462,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P486-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p487",
@@ -12657,15 +11481,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P487-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p488",
@@ -12684,15 +11500,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P488-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p489",
@@ -12730,15 +11538,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P490-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p493",
@@ -12784,15 +11584,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P494-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p495",
@@ -12811,15 +11603,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P495-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p496",
@@ -12838,15 +11622,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P496-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p497",
@@ -12919,15 +11695,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P499-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p5",
@@ -12946,7 +11714,15 @@
       "receta_desglose": null,
       "categoria": "LAMINA"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_70",
+        "nombre_paquete": "Paquete de 70 piezas",
+        "piezas": 70,
+        "sku": "P5-70PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p500",
@@ -12992,15 +11768,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P501-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p502",
@@ -13019,15 +11787,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P502-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p503",
@@ -13046,15 +11806,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P503-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p504",
@@ -13138,15 +11890,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P507-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p508",
@@ -13165,7 +11909,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P508-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p509",
@@ -13184,7 +11936,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P509-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p510",
@@ -13268,15 +12028,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P513-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p514",
@@ -13295,15 +12047,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P514-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p515",
@@ -13341,7 +12085,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P516-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p517",
@@ -13414,7 +12166,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P519-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p520",
@@ -13452,15 +12212,7 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_100",
-        "nombre_paquete": "Paquete de 100 piezas",
-        "piezas": 100,
-        "sku": "P521-100PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p522",
@@ -13479,7 +12231,15 @@
       "receta_desglose": null,
       "categoria": "BOLSAS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_100",
+        "nombre_paquete": "Paquete de 100 piezas",
+        "piezas": 100,
+        "sku": "P522-100PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p53",
@@ -13499,15 +12259,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p54"
     },
-    "paquetes": [
-      {
-        "id": "paquete_351",
-        "nombre_paquete": "Paquete de 351 piezas",
-        "piezas": 351,
-        "sku": "P54-351PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p54",
@@ -13526,15 +12278,7 @@
       "codigo_sistema_oficial": "BPF-120-AMB/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_351",
-        "nombre_paquete": "Paquete de 351 piezas",
-        "piezas": 351,
-        "sku": "P54-351PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p540",
@@ -13553,15 +12297,7 @@
       "receta_desglose": null,
       "categoria": "CUBETA DE PLASTICO"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P540-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p542",
@@ -13580,15 +12316,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P542-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p543",
@@ -13607,15 +12335,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P543-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p544",
@@ -13672,15 +12392,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P546-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p547",
@@ -13699,15 +12411,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P547-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p548",
@@ -13773,15 +12477,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p56"
     },
-    "paquetes": [
-      {
-        "id": "paquete_180",
-        "nombre_paquete": "Paquete de 180 piezas",
-        "piezas": 180,
-        "sku": "P56-180PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p550",
@@ -13846,7 +12542,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P553-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p554",
@@ -13865,15 +12569,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P554-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p556",
@@ -13911,15 +12607,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P558-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p559",
@@ -13938,15 +12626,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P559-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p56",
@@ -13965,15 +12645,7 @@
       "codigo_sistema_oficial": "BPF-240-AM/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_180",
-        "nombre_paquete": "Paquete de 180 piezas",
-        "piezas": 180,
-        "sku": "P56-180PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p564",
@@ -14076,7 +12748,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_2000",
+        "nombre_paquete": "Paquete de 2000 piezas",
+        "piezas": 2000,
+        "sku": "P570-2000PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p573",
@@ -14095,15 +12775,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P573-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p574",
@@ -14122,15 +12794,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_500",
-        "nombre_paquete": "Paquete de 500 piezas",
-        "piezas": 500,
-        "sku": "P574-500PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p575",
@@ -14149,15 +12813,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P575-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p577",
@@ -14176,7 +12832,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P577-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p578",
@@ -14195,15 +12859,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P578-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p592",
@@ -14287,7 +12943,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P597-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p598",
@@ -14325,15 +12989,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P599-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p6",
@@ -14352,7 +13008,42 @@
       "receta_desglose": null,
       "categoria": "LAMINA"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_70",
+        "nombre_paquete": "Paquete de 70 piezas",
+        "piezas": 70,
+        "sku": "P6-70PZ",
+        "es_default": true
+      },
+      {
+        "id": "dgU1PnBch0RpoHNpVhgd",
+        "piezas": 140,
+        "sku": "BLSF-TTP-1-GZ/CP-140PZ",
+        "fecha_creacion": {
+          "_seconds": 1777483374,
+          "_nanoseconds": 837000000
+        }
+      },
+      {
+        "id": "EsyfpLHNzcfgzGozw3To",
+        "piezas": 1242,
+        "sku": "BLSF-TTP-1-GZ/CP-1242PZ",
+        "fecha_creacion": {
+          "_seconds": 1777483384,
+          "_nanoseconds": 627000000
+        }
+      },
+      {
+        "id": "hvEc5DsgWGb2CilpxQDo",
+        "piezas": 2100,
+        "sku": "BLSF-TTP-1-GZ/CP-2100PZ",
+        "fecha_creacion": {
+          "_seconds": 1777483462,
+          "_nanoseconds": 372000000
+        }
+      }
+    ]
   },
   {
     "id": "p60",
@@ -14398,15 +13089,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P600-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p601",
@@ -14452,15 +13135,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P602-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p603",
@@ -14506,15 +13181,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P604-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p605",
@@ -14552,15 +13219,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P606-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p607",
@@ -14617,15 +13276,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P609-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p610",
@@ -14682,15 +13333,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P612-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p613",
@@ -14709,15 +13352,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P613-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p614",
@@ -14736,15 +13371,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P614-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p615",
@@ -14782,7 +13409,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_5000",
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "piezas": 5000,
+        "sku": "P616-5000PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p617",
@@ -14828,15 +13463,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P618-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p619",
@@ -14901,7 +13528,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_5000",
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "piezas": 5000,
+        "sku": "P621-5000PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p622",
@@ -14939,15 +13574,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P623-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p624",
@@ -14966,7 +13593,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_5000",
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "piezas": 5000,
+        "sku": "P624-5000PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p625",
@@ -14985,15 +13620,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P625-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p626",
@@ -15058,7 +13685,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_5000",
+        "nombre_paquete": "Paquete de 5000 piezas",
+        "piezas": 5000,
+        "sku": "P628-5000PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p629",
@@ -15077,15 +13712,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P629-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p63",
@@ -15124,15 +13751,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P630-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p631",
@@ -15151,15 +13770,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P631-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p632",
@@ -15205,15 +13816,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P633-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p634",
@@ -15232,15 +13835,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_5000",
-        "nombre_paquete": "Paquete de 5000 piezas",
-        "piezas": 5000,
-        "sku": "P634-5000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p637",
@@ -15286,15 +13881,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P638-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p639",
@@ -15440,7 +14027,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P643-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p649",
@@ -15479,15 +14074,7 @@
       "tipo_item": "KIT_OFICIAL",
       "hereda_empaques_de": "p66"
     },
-    "paquetes": [
-      {
-        "id": "paquete_128",
-        "nombre_paquete": "Paquete de 128 piezas",
-        "piezas": 128,
-        "sku": "P66-128PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p652",
@@ -15506,7 +14093,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_12",
+        "nombre_paquete": "Paquete de 12 piezas",
+        "piezas": 12,
+        "sku": "P652-12PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p653",
@@ -15525,15 +14120,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P653-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p654",
@@ -15579,15 +14166,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1000",
-        "nombre_paquete": "Paquete de 1000 piezas",
-        "piezas": 1000,
-        "sku": "P655-1000PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p656",
@@ -15633,15 +14212,7 @@
       "codigo_sistema_oficial": "BPGE-930/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_128",
-        "nombre_paquete": "Paquete de 128 piezas",
-        "piezas": 128,
-        "sku": "P66-128PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p661",
@@ -15660,15 +14231,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P661-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p662",
@@ -15687,15 +14250,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P662-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p663",
@@ -15714,15 +14269,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P663-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p67",
@@ -15760,15 +14307,7 @@
       "codigo_sistema_oficial": "BPH-180/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_162",
-        "nombre_paquete": "Paquete de 162 piezas",
-        "piezas": 162,
-        "sku": "P68-162PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p699",
@@ -15787,15 +14326,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P699-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p7",
@@ -15879,7 +14410,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P702-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p703",
@@ -15898,7 +14437,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P703-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p704",
@@ -15917,15 +14464,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P704-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p705",
@@ -15944,7 +14483,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_1",
+        "nombre_paquete": "Paquete de 1 piezas",
+        "piezas": "1",
+        "sku": "P705-1PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p708",
@@ -16036,15 +14583,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P712-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p714",
@@ -16117,15 +14656,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P716-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p72",
@@ -16144,15 +14675,7 @@
       "codigo_sistema_oficial": "BPO-250/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_189",
-        "nombre_paquete": "Paquete de 189 piezas",
-        "piezas": 189,
-        "sku": "P72-189PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p73",
@@ -16171,7 +14694,15 @@
       "codigo_sistema_oficial": "BPO-125/CP",
       "receta_desglose": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_442",
+        "nombre_paquete": "Paquete de 442 piezas",
+        "piezas": 442,
+        "sku": "P73-442PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p74",
@@ -16190,15 +14721,7 @@
       "codigo_sistema_oficial": "BPO-60/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_650",
-        "nombre_paquete": "Paquete de 650 piezas",
-        "piezas": 650,
-        "sku": "P74-650PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p741",
@@ -16282,15 +14805,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P745-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p747",
@@ -16309,15 +14824,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P747-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p75",
@@ -16364,15 +14871,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P752-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p753",
@@ -16391,15 +14890,7 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": [
-      {
-        "id": "paquete_1",
-        "nombre_paquete": "Paquete de 1 piezas",
-        "piezas": "1",
-        "sku": "P753-1PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p754",
@@ -16418,7 +14909,15 @@
       "receta_desglose": null,
       "categoria": "OTROS"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "paquete_500",
+        "nombre_paquete": "Paquete de 500 piezas",
+        "piezas": 500,
+        "sku": "P754-500PZ",
+        "es_default": true
+      }
+    ]
   },
   {
     "id": "p755",
@@ -16438,7 +14937,17 @@
       "categoria": "OTROS",
       "hereda_empaques_de": null
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "KerxteyzEWdBgBBKEOrW",
+        "piezas": 1249,
+        "sku": "TPP-5/CP-1249PZ",
+        "fecha_creacion": {
+          "_seconds": 1778198800,
+          "_nanoseconds": 48000000
+        }
+      }
+    ]
   },
   {
     "id": "p76",
@@ -16457,15 +14966,7 @@
       "codigo_sistema_oficial": "BPA-500-CT",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_200",
-        "nombre_paquete": "Paquete de 200 piezas",
-        "piezas": 200,
-        "sku": "P76-200PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p77",
@@ -16560,7 +15061,44 @@
       "hereda_empaques_de": null,
       "categoria": "LAMINA"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "500f4khuz80o2lCBF8tS",
+        "piezas": 48,
+        "sku": "BLSF-TTP-4-GZ/CP-48PZ",
+        "fecha_creacion": {
+          "_seconds": 1772668541,
+          "_nanoseconds": 632000000
+        }
+      },
+      {
+        "id": "SHQ4XT6iTKVF9Y8bO0wV",
+        "piezas": 336,
+        "sku": "BLSF-TTP-4-GZ/CP-336PZ",
+        "fecha_creacion": {
+          "_seconds": 1777483499,
+          "_nanoseconds": 724000000
+        }
+      },
+      {
+        "id": "zBfqZY6CiTFgLwOHBqzP",
+        "piezas": 480,
+        "sku": "BLSF-TTP-4-GZ/CP-480PZ",
+        "fecha_creacion": {
+          "_seconds": 1777483491,
+          "_nanoseconds": 977000000
+        }
+      },
+      {
+        "id": "PKu5IFXFpYlWXgbCPc17",
+        "piezas": 720,
+        "sku": "BLSF-TTP-4-GZ/CP-720PZ",
+        "fecha_creacion": {
+          "_seconds": 1777483485,
+          "_nanoseconds": 509000000
+        }
+      }
+    ]
   },
   {
     "id": "p80",
@@ -16607,15 +15145,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p82"
     },
-    "paquetes": [
-      {
-        "id": "paquete_70",
-        "nombre_paquete": "Paquete de 70 piezas",
-        "piezas": 70,
-        "sku": "P82-70PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p82",
@@ -16634,15 +15164,7 @@
       "codigo_sistema_oficial": "BPA-1.5/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_70",
-        "nombre_paquete": "Paquete de 70 piezas",
-        "piezas": 70,
-        "sku": "P82-70PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p86",
@@ -16707,15 +15229,7 @@
       "codigo_sistema_oficial": "BPSQ-500/CP",
       "receta_desglose": null
     },
-    "paquetes": [
-      {
-        "id": "paquete_121",
-        "nombre_paquete": "Paquete de 121 piezas",
-        "piezas": 121,
-        "sku": "P94-121PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p95",
@@ -16735,15 +15249,7 @@
       "receta_desglose": null,
       "hereda_empaques_de": "p94"
     },
-    "paquetes": [
-      {
-        "id": "paquete_121",
-        "nombre_paquete": "Paquete de 121 piezas",
-        "piezas": 121,
-        "sku": "P94-121PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "p96",
@@ -16866,15 +15372,7 @@
         "_nanoseconds": 796000000
       }
     },
-    "paquetes": [
-      {
-        "id": "paquete_231",
-        "nombre_paquete": "Paquete de 231 piezas",
-        "piezas": 231,
-        "sku": "-OK_PSST-ZVUYJRO_SZL-231PZ",
-        "es_default": true
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "xIujXq7XQcKQqLzFXbsv",
@@ -16895,17 +15393,7 @@
         "_nanoseconds": 267000000
       }
     },
-    "paquetes": [
-      {
-        "id": "vviNh8fdWOWwOuwo8ROg",
-        "piezas": 1000,
-        "sku": "BPP-30-FT/CP-1000PZ",
-        "fecha_creacion": {
-          "_seconds": 1772903117,
-          "_nanoseconds": 728000000
-        }
-      }
-    ]
+    "paquetes": []
   },
   {
     "id": "xlaTGZAv0YRkFDRO0XzV",
@@ -16968,6 +15456,16 @@
         "_nanoseconds": 507000000
       }
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "HQoa7F1C8mvejqhoq1lR",
+        "piezas": 600,
+        "sku": "CPP-4/CP-600PZ",
+        "fecha_creacion": {
+          "_seconds": 1778198907,
+          "_nanoseconds": 876000000
+        }
+      }
+    ]
   }
 ]
