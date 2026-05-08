@@ -10,7 +10,7 @@ const diccionarios = {
     listaVaciaSub: "Busca un producto arriba para agregarlo."
   },
   fr: {
-    stockSistema: "STOCK SYSTÈME", totalFisique: "TOTAL PHYSIQUE", ajuste: "AJUSTEMENT",
+    stockSistema: "STOCK SYSTÈME", totalFisico: "TOTAL PHYSIQUE", ajuste: "AJUSTEMENT",
     entrada: "ENTRÉE", salida: "SORTIE", ok: "CORRECT", sueltas: "Unité (1pc)",
     paquete: "Paquet", caja: "Boîte", btnNuevoEmpaque: "Ajouter paquet",
     promptPiezas: "Nombre de pièces ?", pz_abrev: "pc",
@@ -20,13 +20,20 @@ const diccionarios = {
 };
 
 const ListaConteo = ({ 
-  listaConteo, idioma, onSumaPz, onRestaPz, onActualizarCalculadora, 
-  onQuitarProducto, onAgregarEmpaque, setCalcActiva,
-  soloLectura = false // <-- Propiedad para el modo historial
+  listaConteo, 
+  idioma, 
+  onCambiarCant, 
+  onManualCant, 
+  onEliminar, 
+  onAgregarEmpaque, 
+  onAbrirCalculadora,
+  onIniciarDictado,
+  onZoomImagen,
+  soloLectura = false // <-- NUEVA VARIABLE PARA MODO HISTORIAL
 }) => {
   const t = diccionarios[idioma] || diccionarios.es;
 
-  if (listaConteo.length === 0) {
+  if (!listaConteo || listaConteo.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center opacity-40">
         <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-slate-700">
@@ -40,118 +47,150 @@ const ListaConteo = ({
 
   return (
     <div className="space-y-6 pb-10">
-      {listaConteo.map((item) => (
-        <div key={item.codigo} className="relative bg-slate-800/40 border border-slate-700/50 rounded-3xl p-5 overflow-hidden group">
-          
-          {/* BOTÓN ELIMINAR (Solo si no es lectura) */}
-          {!soloLectura && (
-            <button 
-              onClick={() => onQuitarProducto(item.codigo)}
-              className="absolute -top-3 -right-3 w-10 h-10 bg-slate-900 border-2 border-slate-700 rounded-full text-slate-500 hover:text-red-400 hover:border-red-400 transition-all flex items-center justify-center z-10"
-            >
-              <i className="fas fa-times"></i>
-            </button>
-          )}
+      {listaConteo.map((item) => {
+        const ajuste = item.totalFisico - item.stockSistema;
+        const bgAjuste = ajuste === 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                         ajuste > 0 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                         'bg-red-500/10 text-red-400 border-red-500/20';
+        
+        return (
+          <div key={item.codigo} className="relative bg-slate-800/40 border border-slate-700/50 rounded-3xl p-5 overflow-hidden group shadow-lg">
+            
+            {/* Botón Eliminar (Se oculta en modo historial) */}
+            {!soloLectura && (
+              <button 
+                onClick={() => onEliminar(item.codigo)}
+                className="absolute -top-3 -right-3 w-10 h-10 bg-slate-900 border-2 border-slate-700 rounded-full text-slate-500 hover:text-red-400 hover:border-red-400 transition-all flex items-center justify-center z-10"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            )}
 
-          <div className="flex gap-4 mb-5">
-            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-xl shrink-0">
-              <img 
-                src={item.imagen} 
-                alt={item.nombre} 
-                className="w-full h-full object-contain mix-blend-multiply"
-                onError={(e) => e.target.src = 'https://via.placeholder.com/100?text=S/I'}
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-white font-black text-sm leading-tight mb-1 line-clamp-2 uppercase">
-                {item.nombre}
-              </h3>
-              <p className="text-blue-400 font-mono text-[10px] tracking-widest">{item.codigo}</p>
-            </div>
-          </div>
-
-          {/* Variantes de Conteo */}
-          <div className="space-y-2 mb-5">
-            {item.variantes.map((v) => (
-              <div key={v.id} className="flex items-center justify-between bg-slate-900/60 p-3 rounded-2xl border border-slate-700/30">
-                <span className="text-slate-300 text-[11px] font-bold uppercase ml-2">
-                  {v.nombre}
-                </span>
-                
-                {!soloLectura ? (
-                  <div className="flex items-center gap-1">
-                    <button 
-                      onClick={() => onRestaPz(item.codigo, v.id)}
-                      className="w-10 h-10 bg-slate-800 border border-slate-700 rounded-xl text-white flex items-center justify-center active:scale-90 transition"
-                    >
-                      <i className="fas fa-minus text-xs"></i>
-                    </button>
-                    
-                    <div className="w-14 relative">
-                      <input 
-                        type="number"
-                        value={v.cantidad}
-                        onChange={(e) => onActualizarCalculadora(item.codigo, v.id, parseInt(e.target.value) || 0)}
-                        className="w-full bg-slate-900 border border-slate-700 text-white font-black text-center py-2 rounded-xl text-sm outline-none focus:border-blue-500"
-                      />
-                      <button 
-                        onClick={() => setCalcActiva({ isOpen: true, codigo: item.codigo, varId: v.id, nombre: item.nombre })}
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full text-[8px] flex items-center justify-center shadow-lg"
-                      >
-                        <i className="fas fa-calculator"></i>
-                      </button>
-                    </div>
-
-                    <button 
-                      onClick={() => onSumaPz(item.codigo, v.id)}
-                      className="w-10 h-10 bg-blue-600 border border-blue-500 rounded-xl text-white flex items-center justify-center active:scale-90 transition shadow-lg shadow-blue-900/20"
-                    >
-                      <i className="fas fa-plus text-xs"></i>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="px-4 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white font-black text-sm">
-                    {v.cantidad} {v.id === '1pz' ? t.pz_abrev : ''}
-                  </div>
-                )}
+            {/* Cabecera Producto */}
+            <div className="flex gap-4 mb-5">
+              <div 
+                className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-xl shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                onClick={() => onZoomImagen && onZoomImagen(item.imagen)}
+              >
+                <img 
+                  src={item.imagen || 'https://via.placeholder.com/100?text=S/I'} 
+                  alt={item.nombre} 
+                  className="w-full h-full object-contain mix-blend-multiply"
+                  onError={(e) => e.target.src = 'https://via.placeholder.com/100?text=S/I'}
+                />
               </div>
-            ))}
-          </div>
-
-          {!soloLectura && (
-            <button 
-              onClick={() => {
-                const pz = prompt(t.promptPiezas);
-                if (pz) onAgregarEmpaque(item.codigo, pz);
-              }}
-              className="w-full text-center text-[10px] text-blue-400 font-bold py-3 mb-4 hover:bg-slate-700 rounded-xl border border-dashed border-slate-600 uppercase transition-colors"
-            >
-              <i className="fas fa-plus mr-1"></i> {t.btnNuevoEmpaque}
-            </button>
-          )}
-
-          {/* Totales */}
-          <div className="grid grid-cols-2 gap-3 mb-2">
-            <div className="bg-slate-900/80 rounded-2xl p-3 border border-slate-700 text-center">
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{t.stockSistema}</p>
-              <p className="text-2xl font-black text-slate-400">{item.stockSistema}</p>
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <h3 className="text-white font-black text-sm leading-tight mb-1 line-clamp-2 uppercase">
+                  {item.nombre}
+                </h3>
+                <p className="text-blue-400 font-mono text-[10px] tracking-widest bg-blue-500/10 self-start px-2 py-0.5 rounded-md border border-blue-500/20">{item.codigo}</p>
+              </div>
             </div>
-            <div className="bg-blue-600/10 rounded-2xl p-3 border border-blue-500/30 text-center">
-              <p className="text-[9px] font-bold text-blue-400 uppercase tracking-widest">{t.totalFisico}</p>
-              <p className="text-3xl font-black text-white">{item.totalFisico}</p>
+
+            {/* Variantes */}
+            <div className="space-y-3 mb-5">
+              {item.variantes.map((v) => {
+                const nombreVariante = v.isFantasma 
+                  ? t.txtNuevoPaquete.replace('{pz}', v.pz) 
+                  : (v.id === 'sueltas' ? t.sueltas : `${t.paquete} (${v.pz}${t.pz_abrev})`);
+                
+                return (
+                  <div key={v.id} className="flex flex-col gap-2 bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
+                    <div className="flex justify-between items-center px-1">
+                      <span className="text-slate-300 text-[11px] font-bold uppercase tracking-wider flex items-center gap-2">
+                        <i className={`fas ${v.id === 'sueltas' ? 'fa-cube text-slate-500' : 'fa-boxes text-blue-400'}`}></i>
+                        {nombreVariante}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-500 font-bold bg-slate-800 px-2 py-0.5 rounded-md">
+                        x{v.pz}
+                      </span>
+                    </div>
+                    
+                    {/* CONTROLES: Se muestran normales si no es Solo Lectura */}
+                    {!soloLectura ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <button 
+                          onMouseDown={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
+                          onTouchStart={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
+                          className="w-12 h-12 bg-slate-800 border border-slate-700 rounded-xl text-slate-400 hover:text-red-400 active:scale-90 transition flex items-center justify-center shrink-0"
+                        >
+                          <i className="fas fa-microphone"></i>
+                        </button>
+
+                        <button 
+                          onClick={() => onCambiarCant(item.codigo, v.id, -1)}
+                          className="w-12 h-12 bg-slate-800 border border-slate-700 rounded-xl text-white hover:bg-slate-700 active:scale-90 transition flex items-center justify-center shrink-0"
+                        >
+                          <i className="fas fa-minus text-sm"></i>
+                        </button>
+                        
+                        <div className="flex-1 relative">
+                          <input 
+                            type="number" 
+                            min="0"
+                            value={v.contadas || ''} 
+                            onChange={(e) => onManualCant(item.codigo, v.id, e.target.value)}
+                            className="w-full h-12 bg-slate-900 border-2 border-slate-700 text-white font-black text-center rounded-xl text-lg outline-none focus:border-blue-500 transition-colors"
+                            placeholder="0"
+                          />
+                        </div>
+
+                        <button 
+                          onClick={() => onCambiarCant(item.codigo, v.id, 1)}
+                          className="w-12 h-12 bg-blue-600 border border-blue-500 rounded-xl text-white hover:bg-blue-500 active:scale-90 transition shadow-lg shadow-blue-900/20 flex items-center justify-center shrink-0"
+                        >
+                          <i className="fas fa-plus text-sm"></i>
+                        </button>
+
+                        <button 
+                          onClick={() => onAbrirCalculadora(item.codigo, v.id)}
+                          className="w-12 h-12 bg-purple-600/20 border border-purple-500/30 rounded-xl text-purple-400 hover:bg-purple-600/40 active:scale-90 transition flex items-center justify-center shrink-0"
+                        >
+                          <i className="fas fa-calculator"></i>
+                        </button>
+                      </div>
+                    ) : (
+                      // CONTROLES HISTORIAL: Muestra solo la cantidad fija
+                      <div className="flex items-center justify-center h-12 bg-slate-800 border border-slate-700 rounded-xl text-white font-black text-xl shadow-inner">
+                        {v.contadas || 0}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+
+            {/* Botón Añadir Empaque (Oculto en modo historial) */}
+            {!soloLectura && (
+              <button onClick={() => {
+                const pzInput = prompt(t.promptPiezas);
+                if (pzInput) onAgregarEmpaque(item.codigo, pzInput);
+              }} className="w-full text-center text-[10px] text-blue-400 font-bold py-2.5 mb-4 hover:bg-slate-700 rounded-xl border border-dashed border-slate-600 uppercase transition-colors">
+                <i className="fas fa-plus mr-1"></i> <span>{t.btnNuevoEmpaque}</span>
+              </button>
+            )}
+
+            {/* Totales */}
+            <div className="grid grid-cols-2 gap-3 mb-2">
+              <div className="bg-slate-900 rounded-2xl p-3 border border-slate-700 text-center">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t.stockSistema}</p>
+                <p className="text-2xl font-black text-slate-300">{item.stockSistema}</p>
+              </div>
+              <div className="bg-blue-900/30 rounded-2xl p-3 border border-blue-900/50 text-center">
+                <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{t.totalFisico}</p>
+                <p className="text-3xl font-black text-white">{item.totalFisico}</p>
+              </div>
+            </div>
+            
+            {/* Ajuste Bottom */}
+            <div className={`flex justify-center items-center py-2.5 px-4 rounded-xl font-black text-xs uppercase tracking-tighter border ${bgAjuste}`}>
+              <span className="mr-2 opacity-60 font-bold">{t.ajuste}:</span>
+              {ajuste > 0 ? `+${ajuste}` : ajuste} {ajuste === 0 ? `(${t.ok})` : ''}
+            </div>
+
           </div>
-          
-          <div className={`flex justify-center items-center py-2 px-4 rounded-xl font-black text-xs uppercase tracking-tighter ${
-            item.ajuste === 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-            item.ajuste > 0 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-            'bg-red-500/10 text-red-400 border border-red-500/20'
-          }`}>
-            <span className="mr-2 opacity-60 font-bold">{t.ajuste}:</span>
-            {item.ajuste > 0 ? `+${item.ajuste}` : item.ajuste} {item.ajuste === 0 ? `(${t.ok})` : ''}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
