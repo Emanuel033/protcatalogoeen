@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import Estiba3D from './Estiba3D';
 
+// --- DICCIONARIO BILINGÜE CENTRALIZADO ---
 const diccionariosCalc = {
   es: {
     titulo: "Calculadora de Estiba", bloque: "Bloque", cama: "Cama", lienzo: "Lienzo",
     frente: "Frente", fondo: "Fondo", pzCama: "Pz Cama", alternar: "Alternar Patrón", cambiar: "Cambiar",
-    anadir: "Añadir", guardar: "Guardar", arrastra: "Arrastra los envases", doble: "Doble toque para eliminar",
-    toca: "Toca un empaque para marcar hueco", cruzada: "Estiba Cruzada (Rotar 180° por capa)",
-    tarimas: "Tarimas Hacia Atrás (Fondo)", niveles: "Niveles (Capas)", ajuste: "Ajuste (+/-)",
+    anadir: "Añadir", guardar: "Guardar", arrastra: "Arrastra para mover", doble: "Doble toque para borrar",
+    toca: "Toca un empaque para marcar hueco", cruzada: "Estiba Cruzada (Rotar 180°)",
+    tarimas: "Pallets / Tarimas", niveles: "Niveles (Capas)", ajuste: "Ajuste Fino (+/-)",
     total: "Total Estimado", cancelar: "Cancelar", sumar: "Sumar al Conteo",
-    alertGuardado: "Plantilla de {n} empaques guardada. Búscala en la pestaña Cama."
+    alertGuardado: "Plantilla de {n} pz guardada con éxito."
   },
   fr: {
     titulo: "Calculateur d'Arrimage", bloque: "Bloc", cama: "Lit", lienzo: "Toile",
     frente: "Face", fondo: "Fond", pzCama: "Pc Lit", alternar: "Alterner Modèle", cambiar: "Changer",
-    anadir: "Ajouter", guardar: "Enregistrer", arrastra: "Faites glisser les paquets", doble: "Double tap pour supprimer",
-    toca: "Touchez un paquet pour marquer un vide", cruzada: "Arrimage Croisé (Rotation 180°)",
+    anadir: "Ajouter", guardar: "Sauver", arrastra: "Glisser pour déplacer", doble: "Double tap pour effacer",
+    toca: "Touchez pour marquer un vide", cruzada: "Arrimage Croisé (Rot. 180°)",
     tarimas: "Palettes (Fond)", niveles: "Niveaux (Couches)", ajuste: "Ajustement (+/-)",
     total: "Total Estimé", cancelar: "Annuler", sumar: "Ajouter au comptage",
-    alertGuardado: "Modèle de {n} paquets enregistré. Cherchez-le dans l'onglet Lit."
+    alertGuardado: "Modèle de {n} pc enregistré avec succès."
   }
 };
 
@@ -56,9 +57,7 @@ const rotarPatron90 = (patron) => {
   return patron.map(p => {
     const { w, h } = getDimensionesForma(p.forma);
     const px = p.x + w / 2; const py = p.y + h / 2;
-    // Rotar coordenadas alrededor del centro
     const newPx = cx - (py - cy); const newPy = cy + (px - cx);
-    // Cambiar orientación
     let newForma = p.forma;
     if (p.forma.includes('-h')) newForma = p.forma.replace('-h', '-v');
     else if (p.forma.includes('-v')) newForma = p.forma.replace('-v', '-h');
@@ -68,7 +67,7 @@ const rotarPatron90 = (patron) => {
   });
 };
 
-// --- COMPONENTE ARRASTRABLE ---
+// --- COMPONENTE ARRASTRABLE OPTIMIZADO (Contraste) ---
 const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
   const [pos, setPos] = useState({ x: pieza.x, y: pieza.y });
   const [isDragging, setIsDragging] = useState(false);
@@ -97,23 +96,23 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
     if (onMover) onMover(pieza.id, pos.x, pos.y);
   };
 
-  let shapeClasses = "border-2 border-blue-400 bg-blue-600";
+  let shapeClasses = "border-2 border-slate-900 bg-blue-500 text-white";
   switch (pieza.forma) {
-    case 'circulo': shapeClasses += " w-[34px] h-[34px] rounded-full bg-amber-500 border-amber-300"; break;
-    case 'cuadrado': shapeClasses += " w-[34px] h-[34px] rounded-[4px]"; break;
-    case 'caja-h': shapeClasses += " w-[51px] h-[34px] rounded-[4px]"; break;
-    case 'caja-v': shapeClasses += " w-[34px] h-[51px] rounded-[4px]"; break;
-    case 'rect-h': shapeClasses += " w-[68px] h-[34px] rounded-[4px]"; break;
-    case 'rect-v': shapeClasses += " w-[34px] h-[68px] rounded-[4px]"; break;
-    case 'delgado-h': shapeClasses += " w-[102px] h-[34px] rounded-[4px]"; break;
-    case 'delgado-v': shapeClasses += " w-[34px] h-[102px] rounded-[4px]"; break;
+    case 'circulo': shapeClasses += " w-[34px] h-[34px] rounded-full bg-amber-500 border-amber-700"; break;
+    case 'cuadrado': shapeClasses += " w-[34px] h-[34px] rounded-md"; break;
+    case 'caja-h': shapeClasses += " w-[51px] h-[34px] rounded-md"; break;
+    case 'caja-v': shapeClasses += " w-[34px] h-[51px] rounded-md"; break;
+    case 'rect-h': shapeClasses += " w-[68px] h-[34px] rounded-md"; break;
+    case 'rect-v': shapeClasses += " w-[34px] h-[68px] rounded-md"; break;
+    case 'delgado-h': shapeClasses += " w-[102px] h-[34px] rounded-md"; break;
+    case 'delgado-v': shapeClasses += " w-[34px] h-[102px] rounded-md"; break;
     default: shapeClasses += " w-[34px] h-[34px]";
   }
 
   return (
     <div
       onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp}
-      className={`absolute flex items-center justify-center text-white text-[10px] font-bold shadow-[0_4px_6px_-1px_rgba(0,0,0,0.5)] touch-none select-none transition-transform ${isDragging ? 'z-50 scale-110 opacity-90 cursor-grabbing' : 'cursor-grab'} ${shapeClasses}`}
+      className={`absolute flex items-center justify-center text-[12px] font-black shadow-md touch-none select-none transition-transform ${isDragging ? 'z-50 scale-110 opacity-90 cursor-grabbing shadow-2xl' : 'cursor-grab'} ${shapeClasses}`}
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, left: 0, top: 0 }}
     >
       {pieza.forma === 'circulo' ? '' : pieza.numero}
@@ -125,6 +124,9 @@ const PiezaArrastrable = ({ pieza, onEliminar, onMover }) => {
 const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = 'es' }) => {
   const t = diccionariosCalc[idioma];
   
+  // Estado local para Toast (Notificaciones)
+  const [toastMsg, setToastMsg] = useState('');
+
   const [modo, setModo] = useState('bloque'); 
   const [modoOrigen, setModoOrigen] = useState('bloque'); 
   const [niveles, setNiveles] = useState('');
@@ -148,37 +150,25 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
       setNiveles(''); setAjuste(0); setTarimas(1); setFrente(''); setFondo(''); setPzCama('');
       setPiezasVisuales([]); setIdPiezaLienzo(0); setHuecos3D([]); setEstibaCruzada(false); setPatronIndex(0);
       setModo('bloque'); setModoOrigen('bloque'); 
+      setToastMsg('');
     }
   }, [isOpen]);
 
-  // Cargar patrones cuando el usuario cambia las Piezas por Cama
   useEffect(() => {
     const pz = parseInt(pzCama);
     if (pz > 0) {
       let todos = [];
-
-      // Función que toma un patrón y le genera sus 4 lados
       const agregarConRotaciones = (patronBase) => {
         const rot90 = rotarPatron90(patronBase);
         const rot180 = rotarPatron90(rot90);
         const rot270 = rotarPatron90(rot180);
-        
-        todos.push(patronBase); // 0°
-        todos.push(rot90);      // 90°
-        todos.push(rot180);     // 180°
-        todos.push(rot270);     // 270°
+        todos.push(patronBase); todos.push(rot90); todos.push(rot180); todos.push(rot270); 
       };
 
-      // 1. Patrones predeterminados
-      if (PATRONES_BASE[pz]) {
-        PATRONES_BASE[pz].forEach(pat => agregarConRotaciones(pat));
-      }
+      if (PATRONES_BASE[pz]) PATRONES_BASE[pz].forEach(pat => agregarConRotaciones(pat));
       
-      // 2. Patrones que el usuario guarde en su PC
       const saved = localStorage.getItem(`een_patrones_${pz}`);
-      if (saved) {
-        JSON.parse(saved).forEach(pat => agregarConRotaciones(pat));
-      }
+      if (saved) JSON.parse(saved).forEach(pat => agregarConRotaciones(pat));
 
       setPatronesDisponibles(todos);
       setPatronIndex(0);
@@ -217,7 +207,7 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
       const nextIdx = (patronIndex + 1) % patronesDisponibles.length;
       setPatronIndex(nextIdx);
       setPiezasVisuales(patronesDisponibles[nextIdx]);
-      setHuecos3D([]); // Limpiar huecos al rotar
+      setHuecos3D([]); 
     }
   };
 
@@ -235,137 +225,191 @@ const ModalCalculadora = ({ isOpen, onClose, onAplicar, tituloTarget, idioma = '
     if (piezasVisuales.length === 0) return;
     const numPz = piezasVisuales.length;
     const key = `een_patrones_${numPz}`;
-    // Aquí es donde se agrega a la lista sin sobreescribir lo de antes
     const guardados = JSON.parse(localStorage.getItem(key) || '[]');
     guardados.push(piezasVisuales);
     localStorage.setItem(key, JSON.stringify(guardados));
-    alert(t.alertGuardado.replace('{n}', numPz));
+    
+    // Toast en lugar de Alert
+    setToastMsg(t.alertGuardado.replace('{n}', numPz));
+    setTimeout(() => setToastMsg(''), 3000);
   };
 
+  // --- COMPONENTE INTERNO: STEPPER TÁCTIL MÓVIL ---
+  const StepperInput = ({ label, valor, setter, colorClass = "text-white" }) => (
+    <div className="flex flex-col">
+      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">{label}</label>
+      <div className="flex items-center bg-slate-900 border border-slate-600 rounded-xl overflow-hidden shadow-inner h-12">
+        <button 
+          onClick={() => setter(Math.max(0, (parseInt(valor)||0) - 1))} 
+          className="w-12 h-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center active:bg-slate-600 transition-colors border-r border-slate-700"
+        >
+          <i className="fas fa-minus"></i>
+        </button>
+        <input 
+          type="number" 
+          value={valor} 
+          onChange={e => setter(e.target.value)} 
+          className={`flex-1 w-full bg-transparent text-center font-black text-xl outline-none ${colorClass}`} 
+          placeholder="0"
+        />
+        <button 
+          onClick={() => setter((parseInt(valor)||0) + 1)} 
+          className="w-12 h-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center active:bg-slate-600 transition-colors border-l border-slate-700"
+        >
+          <i className="fas fa-plus"></i>
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] flex items-center justify-center p-2 md:p-4 overflow-y-auto">
-      <div className="bg-slate-800 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden my-auto">
-        <div className="p-4 md:p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-          <div>
-            <h3 className="font-black text-lg text-white">{t.titulo}</h3>
-            <p className="text-xs text-blue-400 font-bold truncate max-w-[200px]">{tituloTarget}</p>
+    <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      
+      <div className="bg-slate-800 border border-slate-600 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden my-auto relative animate-fade-in">
+        
+        {/* TOAST LOCAL (Notificación de guardado) */}
+        {toastMsg && (
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-white px-5 py-2.5 rounded-full shadow-xl font-bold text-xs flex items-center gap-2 animate-fade-in w-max border border-emerald-400">
+            <i className="fas fa-check-circle text-sm"></i> {toastMsg}
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white w-10 h-10 rounded-full bg-slate-700/50 flex items-center justify-center"><i className="fas fa-times"></i></button>
+        )}
+
+        {/* CABECERA MODAL */}
+        <div className="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+          <div>
+            <h3 className="font-black text-xl text-white tracking-tight">{t.titulo}</h3>
+            <p className="text-xs text-blue-400 font-bold truncate max-w-[200px] mt-0.5 px-2 py-0.5 bg-blue-500/10 rounded-md border border-blue-500/20 inline-block">{tituloTarget}</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white w-10 h-10 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center shadow-sm active:scale-90 transition">
+            <i className="fas fa-times text-lg"></i>
+          </button>
         </div>
         
-        <div className="p-4 md:p-5 space-y-4">
-          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-700 overflow-x-auto custom-scroll">
-            <button onClick={() => cambiarPestana('bloque')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'bloque' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>{t.bloque}</button>
-            <button onClick={() => cambiarPestana('cama')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'cama' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>{t.cama}</button>
-            <button onClick={() => cambiarPestana('visual')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition ${modo === 'visual' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}>{t.lienzo}</button>
-            <button onClick={() => cambiarPestana('3d')} className={`flex-1 min-w-[70px] py-2.5 rounded-lg font-black text-[10px] uppercase tracking-wider transition shadow-[0_0_10px_rgba(168,85,247,0.4)] ${modo === '3d' ? 'bg-purple-600 text-white' : 'text-purple-400 hover:text-purple-300 border border-purple-900/50'}`}><i className="fas fa-cube mr-1"></i>3D</button>
+        <div className="p-4 md:p-5 space-y-5">
+          
+          {/* TABS DE NAVEGACIÓN (Estilo App Nativa) */}
+          <div className="flex bg-slate-900 p-1.5 rounded-2xl border border-slate-600 overflow-x-auto custom-scroll shadow-inner gap-1">
+            <button onClick={() => cambiarPestana('bloque')} className={`flex-1 min-w-[70px] py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all ${modo === 'bloque' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}>{t.bloque}</button>
+            <button onClick={() => cambiarPestana('cama')} className={`flex-1 min-w-[70px] py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all ${modo === 'cama' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}>{t.cama}</button>
+            <button onClick={() => cambiarPestana('visual')} className={`flex-1 min-w-[70px] py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all ${modo === 'visual' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}>{t.lienzo}</button>
+            <button onClick={() => cambiarPestana('3d')} className={`flex-1 min-w-[70px] py-2.5 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all flex justify-center items-center gap-1 ${modo === '3d' ? 'bg-purple-600 text-white shadow-md shadow-purple-900/50' : 'text-purple-400 hover:text-purple-300 hover:bg-slate-800'}`}>
+              <i className="fas fa-cube"></i> 3D
+            </button>
           </div>
 
+          {/* VISTA BLOQUE */}
           {(modo === 'bloque' || (modo === '3d' && modoOrigen === 'bloque')) && (
-            <div className="grid grid-cols-2 gap-3 text-center">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">{t.frente}</label>
-                <input type="number" value={frente} onChange={e => setFrente(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">{t.fondo}</label>
-                <input type="number" value={fondo} onChange={e => setFondo(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <StepperInput label={t.frente} valor={frente} setter={setFrente} colorClass="text-white" />
+              <StepperInput label={t.fondo} valor={fondo} setter={setFondo} colorClass="text-white" />
             </div>
           )}
 
+          {/* VISTA CAMA */}
           {(modo === 'cama' || (modo === '3d' && modoOrigen === 'cama')) && (
-            <div className="grid grid-cols-2 gap-3 text-center">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">{t.pzCama}</label>
-                <input type="number" value={pzCama} onChange={e => setPzCama(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-amber-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <StepperInput label={t.pzCama} valor={pzCama} setter={setPzCama} colorClass="text-amber-400" />
               <div className="flex flex-col">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">{t.alternar}</label>
-                <button onClick={alternarPatron} className="w-full flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-400 p-3 rounded-xl font-bold text-xs outline-none transition flex items-center justify-center gap-2">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">{t.alternar}</label>
+                <button onClick={alternarPatron} className="h-12 w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-blue-400 rounded-xl font-bold text-xs outline-none transition flex items-center justify-center gap-2 active:scale-95 shadow-sm">
                   <i className="fas fa-sync-alt"></i> {t.cambiar}
                 </button>
               </div>
             </div>
           )}
 
+          {/* VISTA LIENZO VISUAL */}
           {modo === 'visual' && (
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700 mb-1 overflow-x-auto custom-scroll pb-1">
+            <div className="flex flex-col gap-3 bg-slate-800/50 p-3 rounded-2xl border border-slate-700">
+              
+              {/* Botones de Formas (Scroll Horizontal Suave) */}
+              <div className="flex gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-600 overflow-x-auto custom-scroll pb-1.5 shadow-inner">
                   {[ {f:'circulo', t:'Cil', i:'fa-circle'}, {f:'cuadrado', t:'Cubo', i:'fa-square'}, {f:'caja-h', t:'1.5 ▬', i:null}, {f:'caja-v', t:'1.5 ▮', i:null}, {f:'rect-h', t:'2.0 ▬', i:null}, {f:'rect-v', t:'2.0 ▮', i:null}, {f:'delgado-h', t:'3.0 ▬', i:null}, {f:'delgado-v', t:'3.0 ▮', i:null} ].map(form => (
-                    <button key={form.f} onClick={() => setFormaVisual(form.f)} className={`flex-shrink-0 px-3 py-2 rounded-lg text-[9px] font-black uppercase transition ${formaVisual === form.f ? 'bg-blue-600 text-white' : 'text-slate-400 bg-slate-800/50'}`}>
-                      {form.i && <i className={`fas ${form.i} mr-1`}></i>}{form.t}
+                    <button key={form.f} onClick={() => setFormaVisual(form.f)} className={`flex-shrink-0 px-3.5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-colors shadow-sm border ${formaVisual === form.f ? 'bg-blue-600 text-white border-blue-500' : 'text-slate-400 bg-slate-800 hover:bg-slate-700 border-slate-600'}`}>
+                      {form.i && <i className={`fas ${form.i} mr-1.5`}></i>}{form.t}
                     </button>
                   ))}
               </div>
 
+              {/* Botones de Acción Lienzo */}
               <div className="flex gap-2">
-                <button onClick={agregarPiezaVisual} className="flex-[2] bg-amber-500 hover:bg-amber-400 text-slate-900 font-black py-2.5 rounded-xl text-[11px] uppercase tracking-wider transition shadow-lg flex justify-center items-center gap-2">
-                  <i className="fas fa-plus-circle"></i> {t.anadir}
+                <button onClick={agregarPiezaVisual} className="flex-[2] bg-amber-500 hover:bg-amber-400 text-amber-950 font-black py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-md active:scale-95 flex justify-center items-center gap-2 border border-amber-400">
+                  <i className="fas fa-plus-circle text-lg"></i> {t.anadir}
                 </button>
-                <button onClick={guardarPlantilla} className="flex-[2] bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-2.5 rounded-xl text-[11px] uppercase transition shadow-lg flex items-center justify-center gap-2">
-                  <i className="fas fa-save"></i> {t.guardar}
+                <button onClick={guardarPlantilla} className="flex-[2] bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-md active:scale-95 flex justify-center items-center gap-2 border border-emerald-500">
+                  <i className="fas fa-save text-lg"></i> {t.guardar}
                 </button>
-                <button onClick={() => { setPiezasVisuales([]); setIdPiezaLienzo(0); }} className="w-12 bg-slate-700 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition"><i className="fas fa-trash"></i></button>
+                <button onClick={() => { setPiezasVisuales([]); setIdPiezaLienzo(0); }} className="w-14 bg-slate-800 hover:bg-red-500 text-slate-400 hover:text-white font-bold py-3 rounded-xl text-lg transition border border-slate-600 active:scale-95 flex items-center justify-center shadow-sm">
+                  <i className="fas fa-trash"></i>
+                </button>
               </div>
               
-              <div className="bg-slate-900 p-2 rounded-2xl border border-slate-700 relative">
-                <p className="absolute top-2 left-0 right-0 text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center pointer-events-none z-0">{t.arrastra}<br/>{t.doble}</p>
-                <div className="w-full h-44 border-2 border-dashed border-slate-600 rounded-xl relative overflow-hidden z-10 bg-slate-900/50 touch-none">
+              {/* Lienzo Arrastrable */}
+              <div className="bg-slate-900 p-2 rounded-2xl border border-slate-600 relative shadow-inner">
+                <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30 pointer-events-none z-0 text-center">
+                   <i className="fas fa-hand-pointer text-3xl mb-2 text-slate-400"></i>
+                   <p className="text-xs font-bold uppercase tracking-widest text-slate-400">{t.arrastra}<br/>{t.doble}</p>
+                </div>
+                <div className="w-full h-48 border-2 border-dashed border-slate-500 rounded-xl relative overflow-hidden z-10 touch-none">
                    {piezasVisuales.map(p => <PiezaArrastrable key={p.id} pieza={p} onEliminar={eliminarPiezaVisual} onMover={moverPiezaVisual} />)}
                 </div>
               </div>
             </div>
           )}
 
+          {/* VISTA 3D */}
           {modo === '3d' && (
-            <div className="w-full h-64 border border-purple-900/50 bg-slate-900 rounded-xl overflow-hidden relative shadow-inner mt-2">
+            <div className="w-full h-64 border-2 border-purple-500/50 bg-slate-900 rounded-2xl overflow-hidden relative shadow-inner mt-2">
                <Estiba3D modoOrigen={modoOrigen} frente={frente} fondo={fondo} niveles={niveles} pzCama={pzCama} tarimas={tarimas} piezasVisuales={piezasVisuales} huecos3D={huecos3D} onToggleHueco={toggleHueco} estibaCruzada={estibaCruzada} />
-               <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400 font-bold pointer-events-none drop-shadow-md">{t.toca}</p>
+               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur px-4 py-1.5 rounded-full border border-slate-700 pointer-events-none shadow-lg">
+                 <p className="text-[10px] text-purple-300 font-bold uppercase tracking-widest whitespace-nowrap"><i className="fas fa-hand-pointer mr-1"></i> {t.toca}</p>
+               </div>
             </div>
           )}
 
+          {/* CHECKBOX ESTIBA CRUZADA */}
           {(modo === '3d' && ['visual', 'cama', 'bloque'].includes(modoOrigen)) && (
-             <div className="flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-pointer" onClick={() => setEstibaCruzada(!estibaCruzada)}>
-               <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${estibaCruzada ? 'bg-purple-500' : 'bg-slate-900 border border-slate-600'}`}>
-                 {estibaCruzada && <i className="fas fa-check text-white text-xs"></i>}
+             <div className="flex items-center justify-center gap-3 bg-slate-800 border border-slate-600 p-3.5 rounded-xl cursor-pointer shadow-sm active:scale-95 transition-transform" onClick={() => setEstibaCruzada(!estibaCruzada)}>
+               <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors shadow-inner border ${estibaCruzada ? 'bg-purple-500 border-purple-400' : 'bg-slate-900 border-slate-600'}`}>
+                 {estibaCruzada && <i className="fas fa-check text-white text-sm"></i>}
                </div>
-               <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">{t.cruzada}</span>
+               <span className="text-xs font-black text-slate-200 uppercase tracking-wider">{t.cruzada}</span>
              </div>
           )}
 
-          {['cama', 'visual'].includes(modo) || (modo === '3d' && ['cama', 'visual'].includes(modoOrigen)) ? (
-            <div className="text-center mt-2 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
-              <label className="block text-[10px] font-bold text-purple-400 uppercase mb-2">{t.tarimas}</label>
-              <div className="flex items-center justify-center gap-3">
-                <button onClick={() => setTarimas(Math.max(1, tarimas - 1))} className="w-10 h-10 rounded-lg bg-slate-700 text-white"><i className="fas fa-minus"></i></button>
-                <input type="number" value={tarimas} onChange={e => setTarimas(Math.max(1, parseInt(e.target.value)||1))} className="w-16 bg-slate-900 border border-slate-700 text-purple-400 p-2 rounded-xl text-center font-black text-xl outline-none" />
-                <button onClick={() => setTarimas(tarimas + 1)} className="w-10 h-10 rounded-lg bg-slate-700 text-white"><i className="fas fa-plus"></i></button>
+          {/* CONTROLES INFERIORES: NIVELES, TARIMAS, AJUSTE */}
+          <div className="grid grid-cols-2 gap-4 border-t border-slate-700 pt-5 mt-2 relative">
+            <StepperInput label={t.niveles} valor={niveles} setter={setNiveles} colorClass="text-blue-400" />
+            <StepperInput label={t.ajuste} valor={ajuste} setter={setAjuste} colorClass="text-emerald-400" />
+            
+            {/* Solo mostramos Tarimas en Cama o Visual para no abrumar en Bloque simple */}
+            {(['cama', 'visual'].includes(modo) || (modo === '3d' && ['cama', 'visual'].includes(modoOrigen))) && (
+              <div className="col-span-2">
+                 <StepperInput label={t.tarimas} valor={tarimas} setter={setTarimas} colorClass="text-purple-400" />
               </div>
-            </div>
-          ) : null}
-
-          <div className="grid grid-cols-2 gap-3 text-center border-t border-slate-700 pt-4 mt-2">
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">{t.niveles}</label>
-              <input type="number" value={niveles} onChange={e => setNiveles(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-blue-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-2">{t.ajuste}</label>
-              <input type="number" value={ajuste} onChange={e => setAjuste(e.target.value)} className="w-full bg-slate-900 border border-slate-700 text-emerald-400 p-3 rounded-xl text-center font-black text-xl outline-none focus:border-blue-500" />
-            </div>
+            )}
           </div>
 
-          <div className="bg-blue-600/20 border border-blue-500/30 p-3 rounded-2xl text-center mt-2 flex justify-between items-center px-6 shadow-inner">
-            <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">{t.total}</p>
-            <p className="text-4xl font-black text-white">{totalCalculado}{huecos3D.length > 0 && <span className="text-sm text-red-400 ml-2">(-{huecos3D.length})</span>}</p>
+          {/* GRAN TOTAL CALCULADO */}
+          <div className="bg-blue-600/20 border-2 border-blue-500 p-4 rounded-2xl text-center flex justify-between items-center px-6 shadow-lg relative overflow-hidden mt-2">
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-blue-500/20 to-transparent pointer-events-none"></div>
+            <p className="text-blue-300 text-xs font-black uppercase tracking-widest relative z-10">{t.total}</p>
+            <p className="text-5xl font-black text-white relative z-10 drop-shadow-md">
+              {totalCalculado}
+              {huecos3D.length > 0 && <span className="text-base text-red-400 ml-2 align-top bg-red-500/10 px-2 py-0.5 rounded-lg border border-red-500/20">(-{huecos3D.length})</span>}
+            </p>
           </div>
+
         </div>
 
-        <div className="p-4 bg-slate-900/50 flex gap-3">
-          <button onClick={onClose} className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-2xl text-sm transition">{t.cancelar}</button>
-          <button onClick={() => { onAplicar(totalCalculado); onClose(); }} className="flex-[2] py-3 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20 text-sm transition">{t.sumar}</button>
+        {/* BOTONES DE ACCIÓN PRINCIPALES */}
+        <div className="p-4 md:p-5 bg-slate-900/80 flex gap-3 border-t border-slate-700">
+          <button onClick={onClose} className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 font-bold rounded-xl text-sm transition active:scale-95">{t.cancelar}</button>
+          <button onClick={() => { onAplicar(totalCalculado); onClose(); }} className="flex-[2] py-3.5 bg-blue-600 hover:bg-blue-500 border border-blue-500 text-white font-black rounded-xl shadow-lg shadow-blue-900/50 text-sm transition active:scale-95 flex items-center justify-center gap-2">
+            <i className="fas fa-plus-circle text-lg"></i> {t.sumar}
+          </button>
         </div>
+
       </div>
     </div>
   );
