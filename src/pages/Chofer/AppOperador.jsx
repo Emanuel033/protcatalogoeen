@@ -54,6 +54,14 @@ const AppOperador = () => {
   const lastXRef = useRef(null);
   const lastYRef = useRef(null);
 
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/chofer' })
+        .then(reg => console.log('SW chofer aislado con éxito:', reg.scope))
+        .catch(err => console.error('Error SW chofer:', err));
+    }
+  }, []);
+
   // ==========================================
   // EFECTOS Y LISTENER INICIAL
   // ==========================================

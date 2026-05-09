@@ -1,15 +1,15 @@
 {
-  "id": "/inventario",
-  "short_name": "Inventario",
+  "id": "/app-inventario-v1",
+  "scope": "/inventario",
   "name": "Inventario Físico EEN",
+  "short_name": "Inventario",
   "description": "Conteo de inventario y estibas.",
+  "start_url": "/inventario?modo=app",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
   "icons": [
     { "src": "/icons/icono-inventario-192.png", "type": "image/png", "sizes": "192x192" },
     { "src": "/icons/icono-inventario-512.png", "type": "image/png", "sizes": "512x512" }
-  ],
-  "start_url": "/inventario",
-  "scope": "/inventario",
-  "display": "standalone",
-  "theme_color": "#0f172a",
-  "background_color": "#0f172a"
+  ]
 }

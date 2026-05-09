@@ -119,7 +119,13 @@ export const AppProvider = ({ children }) => {
     setSearchTerm('');      // Borra el texto del buscador
     setFiltroRapido(null);  // Quita la píldora seleccionada
   };
-
+useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then(reg => console.log('SW Catálogo registrado en raíz:', reg.scope))
+        .catch(err => console.error('Error SW Catálogo:', err));
+    }
+  }, []);
   // ---------------------------------------------------------
   // ✨ EFECTO PARA LEER LA URL Y AUTO-BUSCAR
   // ---------------------------------------------------------

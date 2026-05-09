@@ -1,11 +1,12 @@
 {
   "id": "/app-chofer-v2",
-  "scope": "/", 
+  "scope": "/chofer", 
   "name": "EEN Operador",
   "short_name": "Operador EEN",
-  "start_url": "/chofer", 
+  "start_url": "/chofer?modo=app", 
   "display": "standalone",
   "theme_color": "#1e293b",
+  "background_color": "#1e293b",
   "icons": [
     {
       "src": "/icons/chofer-192.png",

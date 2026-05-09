@@ -104,6 +104,13 @@ const InventarioView = () => {
   const pedirConfirmacion = (mensaje, onConfirm) => {
     setConfirmar({ visible: true, mensaje, onConfirm });
   };
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/inventario' })
+        .then(reg => console.log('SW Inventario aislado con éxito:', reg.scope))
+        .catch(err => console.error('Error SW Inventario:', err));
+    }
+  }, []);
 
   useEffect(() => {
     const handleOffline = () => setIsOffline(true);

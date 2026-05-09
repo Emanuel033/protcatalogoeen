@@ -3,7 +3,7 @@
   "scope": "/",
   "name": "Catálogo La Económica",
   "short_name": "Catálogo",
-  "start_url": "./index.html?modo=app",
+  "start_url": "/?modo=app",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",

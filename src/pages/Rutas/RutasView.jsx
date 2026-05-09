@@ -23,6 +23,14 @@ const RutasView = () => {
   useEffect(() => {
     document.title = "Logística y Rutas | La Económica del Norte";
   }, []);
+  
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/rutas' })
+        .then(reg => console.log('SW Rutas aislado con éxito:', reg.scope))
+        .catch(err => console.error('Error SW Rutas:', err));
+    }
+  }, []);
 
   const listaPedidos = Array.isArray(pedidos) ? pedidos : [];
 
