@@ -1,5 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// --- 1. FUNCIÓN PARA ELIMINAR ACENTOS (Normalización NFD) ---
+const quitarAcentos = (texto) => {
+  return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
+
+// --- 2. DICCIONARIO DE AUTOCORRECCIÓN FONÉTICA (Alias de Almacén) ---
+// Agrega aquí todas las confusiones típicas que detectes con el uso diario
+const correccionesVoz = {
+  'perro': 'tarro',
+  'perros': 'tarros',
+  'perrito': 'tarrito',
+  'perritos': 'tarritos',
+  'samsung': 'sampson',
+  'samson': 'sampson'
+};
+
+// Función auxiliar que limpia acentos y aplica el diccionario palabra por palabra
+const limpiarYCorregir = (texto) => {
+  const sinAcentos = quitarAcentos(texto.toLowerCase().trim());
+  
+  const palabras = sinAcentos.split(/\s+/).map(palabra => {
+    return correccionesVoz[palabra] || palabra;
+  });
+
+  return palabras.join(' ');
+};
+
 // --- DICCIONARIO BILINGÜE COMPACTO PARA MÓVIL ---
 const diccionariosEscaner = {
   es: {
@@ -36,24 +63,26 @@ const EscanerManual = ({ catalogoBase, onAgregarProducto, idioma = 'es' }) => {
   }, []);
 
   const buscarSugerencias = (texto) => {
-    const termino = texto.toLowerCase().trim();
-    setBusqueda(texto);
+    setBusqueda(texto); // Mantiene visible el texto original o el corregido en el input
 
-    if (!termino) {
+    if (!texto.trim()) {
       setSugerencias([]);
       setMostrarSugerencias(false);
       return;
     }
 
-    const palabras = termino.split(' ');
+    // 1. Limpiamos el término buscado (quita acentos y aplica alias si aplica)
+    const terminoCorregido = limpiarYCorregir(texto);
+    const palabras = terminoCorregido.split(/\s+/);
 
+    // 2. Filtramos comparando contra el catálogo también sin acentos
     const filtrados = catalogoBase.filter(p => {
-      let textoProducto = `${p.codigo} ${p.nombre} ${p.descripcion_oficial || ''}`.toLowerCase();
+      let textoProducto = quitarAcentos(`${p.codigo} ${p.nombre} ${p.descripcion_oficial || ''}`.toLowerCase());
       
       let empaques = [];
       if (p.paquetes) empaques = Array.isArray(p.paquetes) ? p.paquetes : Object.values(p.paquetes);
       empaques.forEach(e => {
-        if(e && e.sku) textoProducto += ` ${e.sku.toLowerCase()}`;
+        if(e && e.sku) textoProducto += ` ${quitarAcentos(e.sku.toLowerCase())}`;
       });
 
       return palabras.every(palabra => textoProducto.includes(palabra));
@@ -80,7 +109,12 @@ const EscanerManual = ({ catalogoBase, onAgregarProducto, idioma = 'es' }) => {
     
     recognition.onresult = (event) => {
       const comando = event.results[0][0].transcript.replace('.', '');
-      const resultados = buscarSugerencias(comando);
+      
+      // Interceptamos lo que escuchó y aplicamos el mapeo de alias
+      const comandoCorregido = limpiarYCorregir(comando);
+      
+      // Buscamos usando la palabra ya corregida (esto actualizará la barra visualmente)
+      const resultados = buscarSugerencias(comandoCorregido);
       
       if (resultados && resultados.length === 1) {
         seleccionarProducto(resultados[0].codigo);
