@@ -44,7 +44,7 @@ const ListaConteo = ({
   const [expandido, setExpandido] = useState(null); // Controla qué tarjeta está abierta
   const [prevLength, setPrevLength] = useState(0);
 
-  // EFECTO 1: Auto-expandir cuando se agrega un nuevo producto (el escáner siempre lo pone al inicio)
+  // EFECTO 1: Auto-expandir cuando se agrega un nuevo producto
   useEffect(() => {
     if (listaConteo && listaConteo.length > prevLength && listaConteo.length > 0) {
       setExpandido(listaConteo[0].codigo);
@@ -52,7 +52,7 @@ const ListaConteo = ({
     setPrevLength(listaConteo?.length || 0);
   }, [listaConteo, prevLength]);
 
-  // EFECTO 2: Cuando entramos a "Modo Selección", colapsar todas las tarjetas a la fuerza
+  // EFECTO 2: Cuando entramos a "Modo Selección", colapsar todas las tarjetas
   useEffect(() => {
     if (modoSeleccion) {
       setExpandido(null);
@@ -87,7 +87,7 @@ const ListaConteo = ({
       {listaConteo.map((item) => {
         const ajuste = item.totalFisico - item.stockSistema;
         const isSelected = seleccionados.includes(item.codigo);
-        const isExpanded = expandido === item.codigo && !modoSeleccion; // Nunca expandir si estamos seleccionando
+        const isExpanded = expandido === item.codigo && !modoSeleccion; 
         
         // Colores de alto contraste
         const bgAjuste = ajuste === 0 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' :
@@ -96,14 +96,22 @@ const ListaConteo = ({
 
         const textAjuste = ajuste === 0 ? 'text-emerald-400' : ajuste > 0 ? 'text-amber-400' : 'text-red-400';
 
+        // Resumen compacto de cantidades contadas (Ej: "3x50, 10x1")
+        const resumenDetalle = item.variantes
+          .filter(v => v.contadas > 0)
+          .map(v => `${v.contadas}x${v.pz}`)
+          .join(', ');
+
         const cardStyle = modoSeleccion
-          ? (isSelected ? 'border-blue-500 bg-blue-900/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-slate-700 bg-slate-900/80 opacity-70')
+          ? (isSelected ? 'border-blue-500 bg-blue-900/10 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-slate-700 bg-slate-900/80 opacity-70')
           : (isExpanded ? 'border-slate-500 bg-slate-800 shadow-2xl scale-[1.02] my-6' : 'border-slate-700 bg-slate-800/80 hover:bg-slate-800');
         
         return (
           <div key={item.codigo} className={`relative rounded-3xl overflow-hidden transition-all duration-300 border ${cardStyle}`}>
             
+            {/* ========================================== */}
             {/* 1. CABECERA COMPACTA (SIEMPRE VISIBLE) */}
+            {/* ========================================== */}
             <div 
               className={`p-4 flex items-center gap-3.5 cursor-pointer ${modoSeleccion ? 'active:bg-slate-700' : ''}`}
               onClick={() => modoSeleccion ? onToggleSeleccion(item.codigo) : toggleExpandir(item.codigo)}
@@ -122,7 +130,7 @@ const ListaConteo = ({
                 className="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-inner shrink-0 relative z-20"
                 onClick={(e) => {
                   if (!modoSeleccion && onZoomImagen) {
-                    e.stopPropagation(); // Evita que se abra/cierre el acordeón al tocar la foto
+                    e.stopPropagation(); 
                     onZoomImagen(item.imagen);
                   }
                 }}
@@ -137,23 +145,31 @@ const ListaConteo = ({
 
               {/* Info Texto */}
               <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <h3 className="text-white font-black text-sm leading-tight truncate uppercase">
+                <h3 className="text-white font-black text-[13px] leading-tight truncate uppercase">
                   {item.nombre}
                 </h3>
-                <p className="text-blue-400 font-black text-[10px] tracking-widest mt-0.5 uppercase">
-                  <i className="fas fa-barcode mr-1 opacity-70"></i>{item.codigo}
-                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                   <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">
+                     <i className="fas fa-barcode mr-1 opacity-70"></i>{item.codigo}
+                   </p>
+                   {/* Mini resumen de cantidades */}
+                   {resumenDetalle && (
+                     <p className="text-[10px] font-bold text-slate-400 italic truncate border-l border-slate-700 pl-2">
+                       {resumenDetalle}
+                     </p>
+                   )}
+                </div>
               </div>
 
-              {/* Resumen de Conteo (Se oculta en modo selección para limpiar la vista) */}
-              {!modoSeleccion && (
-                <div className="shrink-0 flex flex-col items-end pr-1">
-                  <p className="text-xl font-black text-white leading-none">{item.totalFisico}</p>
-                  <p className={`text-[10px] font-black mt-1 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 ${textAjuste}`}>
-                    {ajuste > 0 ? `+${ajuste}` : ajuste}
-                  </p>
-                </div>
-              )}
+              {/* Resumen Numérico Lateral (Visible siempre) */}
+              <div className="shrink-0 flex flex-col items-end pr-1 min-w-[50px]">
+                <p className={`text-xl font-black leading-none ${modoSeleccion && isSelected ? 'text-blue-200' : 'text-white'}`}>
+                  {item.totalFisico}
+                </p>
+                <p className={`text-[10px] font-black mt-1 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 ${textAjuste}`}>
+                  {ajuste > 0 ? `+${ajuste}` : ajuste}
+                </p>
+              </div>
 
               {/* Flecha Acordeón */}
               {!modoSeleccion && (
@@ -163,9 +179,11 @@ const ListaConteo = ({
               )}
             </div>
 
+            {/* ========================================== */}
             {/* 2. CUERPO EXPANDIDO (CONTROLES Y VARIANTES) */}
+            {/* ========================================== */}
             <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-              <div className="p-5 pt-1 border-t border-slate-700/50 mt-2">
+              <div className="p-5 pt-1 border-t border-slate-700/50 mt-2 bg-slate-900/20">
                 
                 {/* Botón Eliminar Físico (Solo cuando está abierto) */}
                 {!soloLectura && (
@@ -199,6 +217,7 @@ const ListaConteo = ({
                         {/* CONTROLES: Modo Edición */}
                         {!soloLectura ? (
                           <div className="flex items-center gap-2 mt-1">
+                            
                             {/* Micrófono */}
                             <button 
                               onMouseDown={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
