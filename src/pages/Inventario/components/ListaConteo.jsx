@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // --- DICCIONARIO BILINGÜE ---
 const diccionarios = {
@@ -33,18 +33,34 @@ const ListaConteo = ({
   onIniciarDictado,
   onZoomImagen,
   soloLectura = false,
-  // --- NUEVAS PROPS DE SELECCIÓN ---
   modoSeleccion = false,
   seleccionados = [],
   onToggleSeleccion = () => {}
 }) => {
   const t = diccionarios[idioma] || diccionarios.es;
 
-  // ESTADO LOCAL PARA EL MODAL DE "NUEVO EMPAQUE"
+  // ESTADOS LOCALES
   const [modalEmpaque, setModalEmpaque] = useState({ isOpen: false, codigo: null, cantidad: '' });
+  const [expandido, setExpandido] = useState(null); // Controla qué tarjeta está abierta
+  const [prevLength, setPrevLength] = useState(0);
 
-  const handleAbrirModalEmpaque = (codigo) => {
-    setModalEmpaque({ isOpen: true, codigo, cantidad: '' });
+  // EFECTO 1: Auto-expandir cuando se agrega un nuevo producto (el escáner siempre lo pone al inicio)
+  useEffect(() => {
+    if (listaConteo && listaConteo.length > prevLength && listaConteo.length > 0) {
+      setExpandido(listaConteo[0].codigo);
+    }
+    setPrevLength(listaConteo?.length || 0);
+  }, [listaConteo, prevLength]);
+
+  // EFECTO 2: Cuando entramos a "Modo Selección", colapsar todas las tarjetas a la fuerza
+  useEffect(() => {
+    if (modoSeleccion) {
+      setExpandido(null);
+    }
+  }, [modoSeleccion]);
+
+  const toggleExpandir = (codigo) => {
+    setExpandido(prev => prev === codigo ? null : codigo);
   };
 
   const handleConfirmarEmpaque = () => {
@@ -67,55 +83,49 @@ const ListaConteo = ({
   }
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-4 pb-10">
       {listaConteo.map((item) => {
         const ajuste = item.totalFisico - item.stockSistema;
         const isSelected = seleccionados.includes(item.codigo);
+        const isExpanded = expandido === item.codigo && !modoSeleccion; // Nunca expandir si estamos seleccionando
         
-        // Estilos dinámicos dependiendo del Modo Selección
+        // Colores de alto contraste
         const bgAjuste = ajuste === 0 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' :
                          ajuste > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/50' :
                          'bg-red-500/20 text-red-300 border-red-500/50';
 
+        const textAjuste = ajuste === 0 ? 'text-emerald-400' : ajuste > 0 ? 'text-amber-400' : 'text-red-400';
+
         const cardStyle = modoSeleccion
-          ? (isSelected ? 'border-blue-500 bg-slate-800 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : 'border-slate-700 bg-slate-900/80 opacity-60 scale-[0.98]')
-          : 'border-slate-600 bg-slate-800 shadow-xl';
+          ? (isSelected ? 'border-blue-500 bg-blue-900/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'border-slate-700 bg-slate-900/80 opacity-70')
+          : (isExpanded ? 'border-slate-500 bg-slate-800 shadow-2xl scale-[1.02] my-6' : 'border-slate-700 bg-slate-800/80 hover:bg-slate-800');
         
         return (
-          <div key={item.codigo} className={`relative rounded-3xl p-5 overflow-hidden transition-all duration-300 border ${cardStyle}`}>
+          <div key={item.codigo} className={`relative rounded-3xl overflow-hidden transition-all duration-300 border ${cardStyle}`}>
             
-            {/* CAPA INVISIBLE QUE INTERCEPTA CLICS EN MODO SELECCIÓN */}
-            {modoSeleccion && (
-              <div 
-                className="absolute inset-0 z-20 cursor-pointer" 
-                onClick={() => onToggleSeleccion(item.codigo)}
-              ></div>
-            )}
-
-            {/* CHECKBOX GIGANTE (Solo visible en modo selección) */}
-            {modoSeleccion && (
-              <div className="absolute top-4 right-4 z-30 pointer-events-none">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300 ${isSelected ? 'bg-blue-600 border-blue-400 text-white scale-110 shadow-lg shadow-blue-900/50' : 'bg-slate-800 border-slate-500 text-transparent'}`}>
-                  <i className="fas fa-check text-xl"></i>
+            {/* 1. CABECERA COMPACTA (SIEMPRE VISIBLE) */}
+            <div 
+              className={`p-4 flex items-center gap-3.5 cursor-pointer ${modoSeleccion ? 'active:bg-slate-700' : ''}`}
+              onClick={() => modoSeleccion ? onToggleSeleccion(item.codigo) : toggleExpandir(item.codigo)}
+            >
+              {/* Checkbox (Solo modo selección) */}
+              {modoSeleccion && (
+                <div className="shrink-0 flex items-center justify-center">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all ${isSelected ? 'bg-blue-600 border-blue-400 text-white shadow-lg' : 'bg-slate-800 border-slate-500 text-transparent'}`}>
+                    <i className="fas fa-check text-sm"></i>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Botón Eliminar (Se oculta en modo lectura y en modo selección) */}
-            {!soloLectura && !modoSeleccion && (
-              <button 
-                onClick={() => onEliminar(item.codigo)}
-                className="absolute top-0 right-0 w-14 h-14 bg-slate-900 rounded-bl-3xl text-slate-500 hover:text-red-400 hover:bg-slate-950 transition-all flex items-center justify-center z-10 border-b border-l border-slate-700 shadow-sm active:scale-95"
-              >
-                <i className="fas fa-times text-xl"></i>
-              </button>
-            )}
-
-            {/* Cabecera Producto */}
-            <div className="flex gap-4 mb-6 pr-10">
+              {/* Imagen Miniatura */}
               <div 
-                className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-2 shadow-inner shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform border border-slate-300 relative z-10"
-                onClick={() => !modoSeleccion && onZoomImagen && onZoomImagen(item.imagen)}
+                className="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-inner shrink-0 relative z-20"
+                onClick={(e) => {
+                  if (!modoSeleccion && onZoomImagen) {
+                    e.stopPropagation(); // Evita que se abra/cierre el acordeón al tocar la foto
+                    onZoomImagen(item.imagen);
+                  }
+                }}
               >
                 <img 
                   src={item.imagen || 'https://via.placeholder.com/100?text=S/I'} 
@@ -124,129 +134,156 @@ const ListaConteo = ({
                   onError={(e) => e.target.src = 'https://via.placeholder.com/100?text=S/I'}
                 />
               </div>
-              <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5 relative z-10">
-                <h3 className="text-white font-black text-sm leading-tight line-clamp-2 uppercase">
+
+              {/* Info Texto */}
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <h3 className="text-white font-black text-sm leading-tight truncate uppercase">
                   {item.nombre}
                 </h3>
-                <div className="inline-flex">
-                   <p className="text-blue-300 font-black text-[11px] tracking-widest bg-blue-900/40 px-2.5 py-1 rounded-lg border border-blue-500/40 shadow-sm uppercase">
-                     <i className="fas fa-barcode mr-1.5 opacity-70"></i>{item.codigo}
-                   </p>
+                <p className="text-blue-400 font-black text-[10px] tracking-widest mt-0.5 uppercase">
+                  <i className="fas fa-barcode mr-1 opacity-70"></i>{item.codigo}
+                </p>
+              </div>
+
+              {/* Resumen de Conteo (Se oculta en modo selección para limpiar la vista) */}
+              {!modoSeleccion && (
+                <div className="shrink-0 flex flex-col items-end pr-1">
+                  <p className="text-xl font-black text-white leading-none">{item.totalFisico}</p>
+                  <p className={`text-[10px] font-black mt-1 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700 ${textAjuste}`}>
+                    {ajuste > 0 ? `+${ajuste}` : ajuste}
+                  </p>
                 </div>
-              </div>
+              )}
+
+              {/* Flecha Acordeón */}
+              {!modoSeleccion && (
+                <div className={`shrink-0 w-8 h-8 flex items-center justify-center text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-blue-400' : ''}`}>
+                  <i className="fas fa-chevron-down"></i>
+                </div>
+              )}
             </div>
 
-            {/* Variantes (Cajas, Paquetes, Sueltas) */}
-            <div className="space-y-3 mb-6 relative z-10">
-              {item.variantes.map((v) => {
-                const nombreVariante = v.isFantasma 
-                  ? t.txtNuevoPaquete.replace('{pz}', v.pz) 
-                  : (v.id === 'sueltas' ? t.sueltas : `${t.paquete} (${v.pz}${t.pz_abrev})`);
+            {/* 2. CUERPO EXPANDIDO (CONTROLES Y VARIANTES) */}
+            <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className="p-5 pt-1 border-t border-slate-700/50 mt-2">
                 
-                return (
-                  <div key={v.id} className="flex flex-col gap-2.5 bg-slate-900 p-3.5 rounded-2xl border border-slate-700 shadow-inner">
-                    <div className="flex justify-between items-center px-1">
-                      <span className="text-slate-200 text-xs font-black uppercase tracking-wider flex items-center gap-2">
-                        <i className={`fas ${v.id === 'sueltas' ? 'fa-cube text-slate-400' : 'fa-boxes text-blue-400'} text-sm`}></i>
-                        {nombreVariante}
-                      </span>
-                      <span className="text-[10px] font-black text-slate-400 uppercase bg-slate-800 px-2.5 py-1 rounded-md border border-slate-600 shadow-sm">
-                        x{v.pz}
-                      </span>
-                    </div>
+                {/* Botón Eliminar Físico (Solo cuando está abierto) */}
+                {!soloLectura && (
+                  <button 
+                    onClick={() => onEliminar(item.codigo)}
+                    className="absolute top-14 right-4 w-10 h-10 bg-slate-900 rounded-full text-slate-500 hover:text-red-400 border border-slate-700 shadow-sm flex items-center justify-center active:scale-95 transition-all z-10"
+                  >
+                    <i className="fas fa-trash-alt text-sm"></i>
+                  </button>
+                )}
+
+                {/* Variantes (Cajas, Paquetes, Sueltas) */}
+                <div className="space-y-3 mb-6 mt-4">
+                  {item.variantes.map((v) => {
+                    const nombreVariante = v.isFantasma 
+                      ? t.txtNuevoPaquete.replace('{pz}', v.pz) 
+                      : (v.id === 'sueltas' ? t.sueltas : `${t.paquete} (${v.pz}${t.pz_abrev})`);
                     
-                    {/* CONTROLES: Modo Edición (Se desactivan visualmente si está en modo selección, aunque el div overlay ya previene clics) */}
-                    {!soloLectura ? (
-                      <div className={`flex items-center gap-2 mt-1 ${modoSeleccion ? 'opacity-50 grayscale' : ''}`}>
-                        
-                        {/* Micrófono (Satélite Izquierdo) */}
-                        <button 
-                          onMouseDown={(e) => { if(!modoSeleccion) { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); } }}
-                          onTouchStart={(e) => { if(!modoSeleccion) { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); } }}
-                          className="w-14 h-14 bg-slate-800 border border-slate-600 rounded-xl text-slate-300 hover:text-red-400 hover:border-red-400 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
-                          disabled={modoSeleccion}
-                        >
-                          <i className="fas fa-microphone text-lg"></i>
-                        </button>
-
-                        {/* Bloque Stepper (Unido) */}
-                        <div className="flex-1 flex items-center bg-slate-800 border border-slate-600 rounded-xl overflow-hidden shadow-sm h-14">
-                          <button 
-                            onClick={() => !modoSeleccion && onCambiarCant(item.codigo, v.id, -1)}
-                            className="w-14 h-full bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center active:bg-slate-500 transition-colors border-r border-slate-600 shrink-0"
-                            disabled={modoSeleccion}
-                          >
-                            <i className="fas fa-minus"></i>
-                          </button>
-                          
-                          <input 
-                            type="number" 
-                            min="0"
-                            value={v.contadas || ''} 
-                            onChange={(e) => !modoSeleccion && onManualCant(item.codigo, v.id, e.target.value)}
-                            className="w-full h-full bg-transparent text-white font-black text-center text-xl outline-none placeholder-slate-600 disabled:opacity-100"
-                            placeholder="0"
-                            disabled={modoSeleccion}
-                          />
-
-                          <button 
-                            onClick={() => !modoSeleccion && onCambiarCant(item.codigo, v.id, 1)}
-                            className="w-14 h-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center active:bg-blue-400 transition-colors border-l border-blue-500 shrink-0 shadow-inner"
-                            disabled={modoSeleccion}
-                          >
-                            <i className="fas fa-plus"></i>
-                          </button>
+                    return (
+                      <div key={v.id} className="flex flex-col gap-2.5 bg-slate-900 p-3.5 rounded-2xl border border-slate-700 shadow-inner">
+                        <div className="flex justify-between items-center px-1">
+                          <span className="text-slate-200 text-xs font-black uppercase tracking-wider flex items-center gap-2">
+                            <i className={`fas ${v.id === 'sueltas' ? 'fa-cube text-slate-400' : 'fa-boxes text-blue-400'} text-sm`}></i>
+                            {nombreVariante}
+                          </span>
+                          <span className="text-[10px] font-black text-slate-400 uppercase bg-slate-800 px-2.5 py-1 rounded-md border border-slate-600 shadow-sm">
+                            x{v.pz}
+                          </span>
                         </div>
+                        
+                        {/* CONTROLES: Modo Edición */}
+                        {!soloLectura ? (
+                          <div className="flex items-center gap-2 mt-1">
+                            {/* Micrófono */}
+                            <button 
+                              onMouseDown={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
+                              onTouchStart={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
+                              className="w-14 h-14 bg-slate-800 border border-slate-600 rounded-xl text-slate-300 hover:text-red-400 hover:border-red-400 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
+                            >
+                              <i className="fas fa-microphone text-lg"></i>
+                            </button>
 
-                        {/* Calculadora (Satélite Derecho) */}
-                        <button 
-                          onClick={() => !modoSeleccion && onAbrirCalculadora(item.codigo, v.id)}
-                          className="w-14 h-14 bg-purple-600/20 border border-purple-500/40 rounded-xl text-purple-300 hover:bg-purple-600/40 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
-                          disabled={modoSeleccion}
-                        >
-                          <i className="fas fa-calculator text-lg"></i>
-                        </button>
+                            {/* Bloque Stepper */}
+                            <div className="flex-1 flex items-center bg-slate-800 border border-slate-600 rounded-xl overflow-hidden shadow-sm h-14">
+                              <button 
+                                onClick={() => onCambiarCant(item.codigo, v.id, -1)}
+                                className="w-14 h-full bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center active:bg-slate-500 transition-colors border-r border-slate-600 shrink-0"
+                              >
+                                <i className="fas fa-minus"></i>
+                              </button>
+                              
+                              <input 
+                                type="number" 
+                                min="0"
+                                value={v.contadas || ''} 
+                                onChange={(e) => onManualCant(item.codigo, v.id, e.target.value)}
+                                className="w-full h-full bg-transparent text-white font-black text-center text-xl outline-none placeholder-slate-600"
+                                placeholder="0"
+                              />
+
+                              <button 
+                                onClick={() => onCambiarCant(item.codigo, v.id, 1)}
+                                className="w-14 h-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center active:bg-blue-400 transition-colors border-l border-blue-500 shrink-0 shadow-inner"
+                              >
+                                <i className="fas fa-plus"></i>
+                              </button>
+                            </div>
+
+                            {/* Calculadora */}
+                            <button 
+                              onClick={() => onAbrirCalculadora(item.codigo, v.id)}
+                              className="w-14 h-14 bg-purple-600/20 border border-purple-500/40 rounded-xl text-purple-300 hover:bg-purple-600/40 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
+                            >
+                              <i className="fas fa-calculator text-lg"></i>
+                            </button>
+                          </div>
+                        ) : (
+                          // CONTROLES: Modo Historial (Solo Lectura)
+                          <div className="flex items-center justify-center h-14 bg-slate-800 border border-slate-600 rounded-xl text-white font-black text-2xl shadow-inner mt-1">
+                            {v.contadas || 0}
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      // CONTROLES: Modo Historial (Solo Lectura)
-                      <div className="flex items-center justify-center h-14 bg-slate-800 border border-slate-600 rounded-xl text-white font-black text-2xl shadow-inner mt-1">
-                        {v.contadas || 0}
-                      </div>
-                    )}
+                    );
+                  })}
+                </div>
+
+                {/* Botón Añadir Empaque */}
+                {!soloLectura && (
+                  <button 
+                    onClick={() => setModalEmpaque({ isOpen: true, codigo: item.codigo, cantidad: '' })} 
+                    className="w-full text-center bg-slate-900 border border-dashed border-slate-500 hover:bg-slate-800 text-blue-400 font-black text-[11px] py-3.5 mb-5 rounded-xl uppercase tracking-wider transition-colors active:scale-[0.98] flex justify-center items-center gap-2"
+                  >
+                    <i className="fas fa-box-open"></i> {t.btnNuevoEmpaque}
+                  </button>
+                )}
+
+                {/* Totales Detallados (Solo visibles al expandir) */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="bg-slate-900 rounded-2xl p-4 border border-slate-600 text-center shadow-inner relative overflow-hidden">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">{t.stockSistema}</p>
+                    <p className="text-3xl font-black text-slate-300 relative z-10 mt-1">{item.stockSistema}</p>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="bg-blue-600/20 rounded-2xl p-4 border border-blue-500/40 text-center shadow-inner relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-full -mr-8 -mt-8 pointer-events-none"></div>
+                    <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest relative z-10">{t.totalFisico}</p>
+                    <p className="text-4xl font-black text-white relative z-10 mt-1 drop-shadow-md">{item.totalFisico}</p>
+                  </div>
+                </div>
+                
+                {/* Ajuste Bottom Completo */}
+                <div className={`flex justify-center items-center py-3 px-4 rounded-xl font-black text-sm uppercase tracking-wider border shadow-sm ${bgAjuste}`}>
+                  <span className="mr-2 opacity-80">{t.ajuste}:</span>
+                  {ajuste > 0 ? `+${ajuste}` : ajuste} {ajuste === 0 ? `(${t.ok})` : ''}
+                </div>
 
-            {/* Botón Añadir Empaque (Oculto en modo lectura y selección) */}
-            {!soloLectura && !modoSeleccion && (
-              <button 
-                onClick={() => handleAbrirModalEmpaque(item.codigo)} 
-                className="w-full text-center bg-slate-900 border border-dashed border-slate-500 hover:bg-slate-800 text-blue-400 font-black text-[11px] py-3.5 mb-5 rounded-xl uppercase tracking-wider transition-colors active:scale-[0.98] flex justify-center items-center gap-2 relative z-10"
-              >
-                <i className="fas fa-box-open"></i> {t.btnNuevoEmpaque}
-              </button>
-            )}
-
-            {/* Totales (Alto Contraste Logístico) */}
-            <div className="grid grid-cols-2 gap-3 mb-3 relative z-10">
-              <div className="bg-slate-900 rounded-2xl p-4 border border-slate-600 text-center shadow-inner relative overflow-hidden">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">{t.stockSistema}</p>
-                <p className="text-3xl font-black text-slate-300 relative z-10 mt-1">{item.stockSistema}</p>
-              </div>
-              <div className="bg-blue-600/20 rounded-2xl p-4 border border-blue-500/40 text-center shadow-inner relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-full -mr-8 -mt-8 pointer-events-none"></div>
-                <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest relative z-10">{t.totalFisico}</p>
-                <p className="text-4xl font-black text-white relative z-10 mt-1 drop-shadow-md">{item.totalFisico}</p>
               </div>
             </div>
-            
-            {/* Ajuste Bottom (Color Dinámico Intenso) */}
-            <div className={`flex justify-center items-center py-3 px-4 rounded-xl font-black text-sm uppercase tracking-wider border shadow-sm relative z-10 ${bgAjuste}`}>
-              <span className="mr-2 opacity-80">{t.ajuste}:</span>
-              {ajuste > 0 ? `+${ajuste}` : ajuste} {ajuste === 0 ? `(${t.ok})` : ''}
-            </div>
-
           </div>
         );
       })}
@@ -288,7 +325,6 @@ const ListaConteo = ({
            </div>
         </div>
       )}
-
     </div>
   );
 };
