@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, writeBatch, arrayUnion } from 'firebase/firestore';
+import { collection, onSnapshot, doc, writeBatch, arrayUnion, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase'; 
 
 const LogisticaContext = createContext();
@@ -91,9 +91,16 @@ export const LogisticaProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // EL CEREBRO AUTO-MASTICADOR
-  const procesarPedidosCrudos = async (viajesCrudos, clientesActuales, fleterasActuales) => {
-    let localClientes = [...clientesActuales];
-    let localFleteras = [...fleterasActuales];
+  const procesarPedidosCrudos = async (viajesCrudos) => {
+    // ========================================================================
+    // SOLUCIÓN: OBTENER LA VERDAD ABSOLUTA DE LA BD ANTES DE PROCESAR
+    // Garantiza que los catálogos estén 100% cargados eliminando la condición de carrera.
+    // ========================================================================
+    const snapClientes = await getDocs(collection(db, 'clientes_logistica'));
+    const snapFleteras = await getDocs(collection(db, 'catalogo_fleteras'));
+
+    let localClientes = snapClientes.docs.map(d => ({ id: d.id, ...d.data() }));
+    let localFleteras = snapFleteras.docs.map(d => ({ id: d.id, ...d.data() }));
     
     const batch = writeBatch(db);
     let operacionesEnBatch = 0;
@@ -147,10 +154,9 @@ export const LogisticaProvider = ({ children }) => {
             } else if (clienteMatch) {
                 let direccionesCliente = clienteMatch.direcciones || [];
                 
-                // Usamos el nuevo motor fino para validar direcciones locales
                 let dirExistente = direccionesCliente.find(d => {
                     const esExacta = d.direccion.trim().toLowerCase() === dirLimpia.toLowerCase();
-                    const esMuySimilar = similitudTextosFina(d.direccion, dirLimpia) >= 85; // Para direcciones mantenemos 85%
+                    const esMuySimilar = similitudTextosFina(d.direccion, dirLimpia) >= 85; 
                     return esExacta || esMuySimilar;
                 });
 
@@ -190,7 +196,6 @@ export const LogisticaProvider = ({ children }) => {
         else {
             let fleteraNombreCrudo = (p.destino_alias || p.metodo_mensajeria || '').trim().toUpperCase();
             
-            // Filtro de ruido entrante
             const palabrasBasura = ['DOMICILIO', 'D', 'OCURRE', 'POR DEFINIR', 'LOCAL', 'NO REELECCIÓN'];
             let fleteraNombre = fleteraNombreCrudo;
 
@@ -204,18 +209,17 @@ export const LogisticaProvider = ({ children }) => {
                 updates.tipo_envio = 'fletera_ocurre';
             }
             
-            // Asignamos inicialmente el nombre comercial limpio detectado
             updates.destino_alias = limpiarRazonSocial(fleteraNombre) || fleteraNombre; 
 
             // ========================================================
-            // SELECCIÓN INTELIGENTE DE FLETERAS (EL CORAZÓN DE LA SOLUCIÓN)
+            // SELECCIÓN INTELIGENTE DE FLETERAS
             // ========================================================
             let fleteraMatch = null;
             let mejorPuntaje = 0;
 
             if (fleteraNombre !== 'POR ASIGNAR') {
-                // Iteramos buscando el match con el puntaje más alto
                 localFleteras.forEach(f => {
+                    // Match exacto directo
                     const exacto = f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase();
                     if (exacto) {
                         fleteraMatch = f;
@@ -223,8 +227,8 @@ export const LogisticaProvider = ({ children }) => {
                         return;
                     }
                     
+                    // Match difuso fino
                     const score = similitudTextosFina(f.nombre, fleteraNombre);
-                    // Subimos el umbral mínimo de aprobación al 88% para evitar cruces
                     if (score >= 88 && score > mejorPuntaje) {
                         mejorPuntaje = score;
                         fleteraMatch = f;
@@ -233,7 +237,6 @@ export const LogisticaProvider = ({ children }) => {
             }
 
             if (!fleteraMatch && fleteraNombre !== 'POR ASIGNAR') {
-                // Si de verdad no existe, damos de alta el nombre limpio en el catálogo
                 const nombreParaCatalogo = limpiarRazonSocial(fleteraNombre);
                 const nuevaFletera = {
                     nombre: nombreParaCatalogo.length > 2 ? nombreParaCatalogo : fleteraNombre,
@@ -246,15 +249,14 @@ export const LogisticaProvider = ({ children }) => {
                 operacionesEnBatch++;
                 
                 updates.fletera_asignada_id = newFleteraRef.id;
-                updates.destino_alias = nuevaFletera.nombre; // Sobreescribimos con el nombre oficial
+                updates.destino_alias = nuevaFletera.nombre; 
                 localFleteras.push({ id: newFleteraRef.id, ...nuevaFletera });
             } else if (fleteraMatch) {
-                // Si la encuentra, vinculamos su ID y normalizamos el texto visual al nombre oficial del catálogo
                 updates.fletera_asignada_id = fleteraMatch.id;
                 updates.destino_alias = fleteraMatch.nombre; 
             }
             
-            // Validar Cliente Foráneo vinculado a este viaje
+            // Validar Cliente Foráneo
             let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
             if (clienteIndex === -1 && codigoCliente) {
                  const nuevoClienteForaneo = {
@@ -283,7 +285,7 @@ export const LogisticaProvider = ({ children }) => {
     if (operacionesEnBatch > 0) {
         try {
             await batch.commit();
-            console.log(`✅ Lote procesado: Se enviaron ${operacionesEnBatch} operaciones a Firebase de manera segura.`);
+            console.log(`✅ Lote procesado: Se enviaron ${operacionesEnBatch} operaciones a Firebase tras verificar catálogos en vivo.`);
         } catch(e) { 
             console.error("Error ejecutando el Batch de pedidos:", e); 
         }
@@ -294,15 +296,11 @@ export const LogisticaProvider = ({ children }) => {
     const unsubFlota = onSnapshot(collection(db, 'flota'), snap => setFlota(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
     const unsubChoferes = onSnapshot(collection(db, 'choferes'), snap => setChoferes(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
     
-    let clientesTemp = [];
-    let fleterasTemp = [];
     const unsubClientes = onSnapshot(collection(db, 'clientes_logistica'), snap => {
-        clientesTemp = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setClientes(clientesTemp);
+        setClientes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
     const unsubFleteras = onSnapshot(collection(db, 'catalogo_fleteras'), snap => {
-        fleterasTemp = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setFleteras(fleterasTemp);
+        setFleteras(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
     const unsubRutas = onSnapshot(collection(db, 'rutas_logistica'), (snapshot) => {
@@ -331,8 +329,9 @@ export const LogisticaProvider = ({ children }) => {
       setPedidos(activos);
       setLoading(false);
 
+      // Disparamos el masticador pasándole únicamente los datos crudos
       if (crudos.length > 0) {
-          setTimeout(() => procesarPedidosCrudos(crudos, clientesTemp, fleterasTemp), 1000);
+          procesarPedidosCrudos(crudos);
       }
     });
 
