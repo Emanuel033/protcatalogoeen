@@ -10,7 +10,9 @@ const diccionarios = {
     txtNuevoPaquete: "Nuevo Paquete ({pz}pz) ✨", listaVacia: "La lista está vacía.",
     listaVaciaSub: "Busca un producto arriba para agregarlo.",
     cancelar: "Cancelar", anadir: "Añadir",
-    eliminar: "Quitar de la lista" // <-- Nueva cadena
+    eliminar: "Quitar de la lista",
+    confirmarEliminar: "¿Seguro que deseas quitarlo?", // <-- Nuevas cadenas
+    siQuitar: "Sí, quitar"
   },
   fr: {
     stockSistema: "STOCK SYSTÈME", totalFisico: "TOTAL PHYSIQUE", ajuste: "AJUSTEMENT",
@@ -20,7 +22,9 @@ const diccionarios = {
     txtNuevoPaquete: "Paquet ({pz}pc) ✨", listaVacia: "La liste est vide.",
     listaVaciaSub: "Recherchez un produit ci-dessus.",
     cancelar: "Annuler", anadir: "Ajouter",
-    eliminar: "Retirer de la liste" // <-- Nueva cadena
+    eliminar: "Retirer de la liste",
+    confirmarEliminar: "Êtes-vous sûr de vouloir le retirer ?", // <-- Nuevas cadenas
+    siQuitar: "Oui, retirer"
   }
 };
 
@@ -45,11 +49,15 @@ const ListaConteo = ({
   const [modalEmpaque, setModalEmpaque] = useState({ isOpen: false, codigo: null, cantidad: '' });
   const [expandido, setExpandido] = useState(null);
   const [prevLength, setPrevLength] = useState(0);
+  
+  // NUEVO ESTADO: Rastrea qué código está en proceso de confirmación para borrarse
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState(null);
 
   // EFECTO 1: Auto-expandir cuando se agrega un nuevo producto
   useEffect(() => {
     if (listaConteo && listaConteo.length > prevLength && listaConteo.length > 0) {
       setExpandido(listaConteo[0].codigo);
+      setConfirmandoEliminar(null); // Reseteamos confirmaciones al cambiar listas
     }
     setPrevLength(listaConteo?.length || 0);
   }, [listaConteo, prevLength]);
@@ -58,11 +66,13 @@ const ListaConteo = ({
   useEffect(() => {
     if (modoSeleccion) {
       setExpandido(null);
+      setConfirmandoEliminar(null);
     }
   }, [modoSeleccion]);
 
   const toggleExpandir = (codigo) => {
     setExpandido(prev => prev === codigo ? null : codigo);
+    setConfirmandoEliminar(null); // Si el usuario cierra la tarjeta, cancelamos el borrado pendiente
   };
 
   const handleConfirmarEmpaque = () => {
@@ -90,6 +100,7 @@ const ListaConteo = ({
         const ajuste = item.totalFisico - item.stockSistema;
         const isSelected = seleccionados.includes(item.codigo);
         const isExpanded = expandido === item.codigo && !modoSeleccion; 
+        const isConfirming = confirmandoEliminar === item.codigo; // ¿Esta tarjeta está pidiendo confirmación?
         
         // Colores de alto contraste
         const bgAjuste = ajuste === 0 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' :
@@ -278,14 +289,45 @@ const ListaConteo = ({
                   {ajuste > 0 ? `+${ajuste}` : ajuste} {ajuste === 0 ? `(${t.ok})` : ''}
                 </div>
 
-                {/* NUEVA POSICIÓN: Botón Eliminar seguro en la parte inferior */}
+                {/* ======================================================== */}
+                {/* BOTÓN ELIMINAR CON DOBLE CONFIRMACIÓN INTEGRADA (INLINE) */}
+                {/* ======================================================== */}
                 {!soloLectura && (
-                  <button 
-                    onClick={() => onEliminar(item.codigo)}
-                    className="w-full mt-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                  >
-                    <i className="fas fa-trash-alt"></i> {t.eliminar}
-                  </button>
+                  <div className="mt-4 overflow-hidden">
+                    {!isConfirming ? (
+                      // Estado Normal: Botón único para iniciar el borrado
+                      <button 
+                        onClick={() => setConfirmandoEliminar(item.codigo)}
+                        className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                      >
+                        <i className="fas fa-trash-alt"></i> {t.eliminar}
+                      </button>
+                    ) : (
+                      // Estado Confirmación: Muestra la pregunta y dos opciones rápidas
+                      <div className="bg-red-950/40 border border-red-500/40 rounded-xl p-3 text-center animate-fade-in">
+                        <p className="text-red-300 text-xs font-black mb-2.5 flex items-center justify-center gap-1.5">
+                          <i className="fas fa-exclamation-triangle text-red-500 animate-pulse"></i> {t.confirmarEliminar}
+                        </p>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => setConfirmandoEliminar(null)}
+                            className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] py-2.5 rounded-lg border border-slate-600 transition-colors uppercase tracking-wider"
+                          >
+                            {t.cancelar}
+                          </button>
+                          <button 
+                            onClick={() => {
+                              onEliminar(item.codigo);
+                              setConfirmandoEliminar(null); // Reseteamos al confirmar
+                            }}
+                            className="flex-1 bg-red-600 hover:bg-red-500 text-white font-black text-[11px] py-2.5 rounded-lg shadow-md shadow-red-950 transition-colors uppercase tracking-wider"
+                          >
+                            {t.siQuitar}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
               </div>
