@@ -4,27 +4,82 @@ import { db } from '../../../firebase';
 
 const LogisticaContext = createContext();
 
-// Función de similitud (Levenshtein) con candado anti-letras sueltas
-const similitudTextos = (a = '', b = '') => {
-    a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
+// ============================================================================
+// MOTOR DE SIMILITUD DE TEXTOS (VERSIÓN QUIRÚRGICA)
+// ============================================================================
+
+// 1. Limpieza de razones sociales para dejar solo el nombre comercial puro
+const limpiarRazonSocial = (texto = '') => {
+    return texto.toUpperCase()
+        .replace(/\b(SA|DE|CV|RL|SAPI|SNC|LLC|CO|INC|LTD)\b/g, '')
+        .replace(/\b(TRANSPORTES|TRANSPORTE|FLETERA|FLETES|LOGISTICA|EXPRESS|CARGA|ENVIOS)\b/g, '')
+        .replace(/[^A-Z0-9 ]/g, '') // Quitar puntos, comas y guiones
+        .replace(/\s+/g, ' ')       // Quitar dobles espacios
+        .trim();
+};
+
+// 2. Candado estricto para pares conflictivos comunes
+const esConflictoConocido = (strA, strB) => {
+    const a = strA.replace(/\s+/g, '');
+    const b = strB.replace(/\s+/g, '');
+    
+    // Si uno es TEAMMEX y el otro TRATAMEX, bloquear match difuso
+    if ((a.includes('TEAM') && b.includes('TRATA')) || (b.includes('TEAM') && a.includes('TRATA'))) return true;
+    
+    // Si uno es ESTRELLABLANCA y el otro es solo ESTRELLA, bloquear match difuso
+    if ((a === 'ESTRELLA' && b.includes('BLANCA')) || (b === 'ESTRELLA' && a.includes('BLANCA'))) return true;
+
+    return false;
+};
+
+// 3. Algoritmo combinado: Levenshtein + Coeficiente de Jaccard (Bigramas)
+const similitudTextosFina = (crudoA = '', crudoB = '') => {
+    const a = limpiarRazonSocial(crudoA);
+    const b = limpiarRazonSocial(crudoB);
+
+    if (!a || !b) return 0;
     if (a === b) return 100;
-    
-    // CANDADO 1: Si es una palabra muy corta (como "T" o "D"), no hacemos match difuso.
-    // Tienen que ser palabras de más de 3 letras para compararse.
-    if (a.length > 3 && b.length > 3 && (a.includes(b) || b.includes(a))) return 85; 
-    
+
+    // CANDADO DE PARES CRÍTICOS
+    if (esConflictoConocido(a, b)) return 0; 
+
+    // COINCIDENCIA DE PALABRA COMPLETA EXACTA (Regex Boundary)
+    const regexA = new RegExp(`\\b${a}\\b`);
+    const regexB = new RegExp(`\\b${b}\\b`);
+    if (regexA.test(b) || regexB.test(a)) {
+        // Solo damos 100% si las longitudes son muy similares para evitar que "PAQUETEX" valide "PAQUETEXPRESS"
+        if (Math.abs(a.length - b.length) <= 3) return 95;
+    }
+
+    // CÁLCULO LEVENSHTEIN TRADICIONAL
     let matrix = [];
     for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
     for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
     for (let i = 1; i <= b.length; i++) {
         for (let j = 1; j <= a.length; j++) {
-            if (b.charAt(i - 1) == a.charAt(j - 1)) { matrix[i][j] = matrix[i - 1][j - 1]; } 
+            if (b.charAt(i - 1) === a.charAt(j - 1)) { matrix[i][j] = matrix[i - 1][j - 1]; } 
             else { matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)); }
         }
     }
-    let distance = matrix[b.length][a.length];
-    let maxLen = Math.max(a.length, b.length);
-    return ((maxLen - distance) / maxLen) * 100;
+    const editDistance = matrix[b.length][a.length];
+    const maxLen = Math.max(a.length, b.length);
+    const levenshteinScore = ((maxLen - editDistance) / maxLen) * 100;
+
+    // CÁLCULO JACCARD (Porcentaje de pares de letras compartidas)
+    const getBigrams = (str) => {
+        let bigrams = new Set();
+        for (let i = 0; i < str.length - 1; i++) { bigrams.add(str.substring(i, i + 2)); }
+        return bigrams;
+    };
+    const setA = getBigrams(a);
+    const setB = getBigrams(b);
+    let intersection = 0;
+    setA.forEach(bigram => { if (setB.has(bigram)) intersection++; });
+    const union = setA.size + setB.size - intersection;
+    const jaccardScore = union === 0 ? 0 : (intersection / union) * 100;
+
+    // Promediamos ambos motores para obtener un veredicto final altamente preciso
+    return (levenshteinScore * 0.6) + (jaccardScore * 0.4);
 };
 
 export const LogisticaProvider = ({ children }) => {
@@ -58,10 +113,8 @@ export const LogisticaProvider = ({ children }) => {
         // LÓGICA REPARTO LOCAL
         // =====================================
         if (rawEnvio === 'LOCAL' || rawEnvio === 'REPARTO') {
-            // CORRECCIÓN: Alineado con el FormularioOrden.js
             updates.tipo_envio = 'bodega_cliente'; 
             
-            // Sincronizado con n8n
             let aliasBase = "MATRIZ";
             if (detallesUpper.includes('FISCAL') || detallesUpper === 'DF') aliasBase = "FISCAL";
             if (detallesUpper.includes('BODEGA') || detallesUpper === 'OB' || detallesUpper.includes('OTRA')) aliasBase = "BODEGA";
@@ -94,10 +147,10 @@ export const LogisticaProvider = ({ children }) => {
             } else if (clienteMatch) {
                 let direccionesCliente = clienteMatch.direcciones || [];
                 
-                // MEJORA: Buscar dirección exacta O con similitud del 85%
+                // Usamos el nuevo motor fino para validar direcciones locales
                 let dirExistente = direccionesCliente.find(d => {
                     const esExacta = d.direccion.trim().toLowerCase() === dirLimpia.toLowerCase();
-                    const esMuySimilar = similitudTextos(d.direccion, dirLimpia) >= 85;
+                    const esMuySimilar = similitudTextosFina(d.direccion, dirLimpia) >= 85; // Para direcciones mantenemos 85%
                     return esExacta || esMuySimilar;
                 });
 
@@ -132,39 +185,58 @@ export const LogisticaProvider = ({ children }) => {
             }
         } 
         // =====================================
-        // LÓGICA FLETERA FORÁNEA
+        // LÓGICA FLETERA FORÁNEA (BÚSQUEDA FINA)
         // =====================================
         else {
-            // CANDADO 2: Extraer el nombre correcto. Según tu script de n8n, 
-            // mandas el nombre de la mensajería en el campo "DestinoAlias"
             let fleteraNombreCrudo = (p.destino_alias || p.metodo_mensajeria || '').trim().toUpperCase();
             
+            // Filtro de ruido entrante
             const palabrasBasura = ['DOMICILIO', 'D', 'OCURRE', 'POR DEFINIR', 'LOCAL', 'NO REELECCIÓN'];
             let fleteraNombre = fleteraNombreCrudo;
 
-            if (!fleteraNombre || fleteraNombre.length <= 2 || palabrasBasura.some(b => fleteraNombre.includes(b))) {
+            if (!fleteraNombre || fleteraNombre.length <= 2 || palabrasBasura.some(b => fleteraNombre === b)) {
                 fleteraNombre = 'POR ASIGNAR';
             }
 
-            // El script n8n manda la info en DetallesEntrega
             if (detallesUpper.includes('DOMICILIO') || detallesUpper === 'D') {
                 updates.tipo_envio = 'fletera_domicilio';
             } else {
                 updates.tipo_envio = 'fletera_ocurre';
             }
             
-            updates.destino_alias = fleteraNombre; 
+            // Asignamos inicialmente el nombre comercial limpio detectado
+            updates.destino_alias = limpiarRazonSocial(fleteraNombre) || fleteraNombre; 
 
-            // Buscar en el catálogo con Fuzzy Matching
-            let fleteraMatch = localFleteras.find(f => {
-                const exacto = f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase();
-                const similar = similitudTextos(f.nombre, fleteraNombre) >= 85;
-                return exacto || similar;
-            });
+            // ========================================================
+            // SELECCIÓN INTELIGENTE DE FLETERAS (EL CORAZÓN DE LA SOLUCIÓN)
+            // ========================================================
+            let fleteraMatch = null;
+            let mejorPuntaje = 0;
+
+            if (fleteraNombre !== 'POR ASIGNAR') {
+                // Iteramos buscando el match con el puntaje más alto
+                localFleteras.forEach(f => {
+                    const exacto = f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase();
+                    if (exacto) {
+                        fleteraMatch = f;
+                        mejorPuntaje = 100;
+                        return;
+                    }
+                    
+                    const score = similitudTextosFina(f.nombre, fleteraNombre);
+                    // Subimos el umbral mínimo de aprobación al 88% para evitar cruces
+                    if (score >= 88 && score > mejorPuntaje) {
+                        mejorPuntaje = score;
+                        fleteraMatch = f;
+                    }
+                });
+            }
 
             if (!fleteraMatch && fleteraNombre !== 'POR ASIGNAR') {
+                // Si de verdad no existe, damos de alta el nombre limpio en el catálogo
+                const nombreParaCatalogo = limpiarRazonSocial(fleteraNombre);
                 const nuevaFletera = {
-                    nombre: fleteraNombre,
+                    nombre: nombreParaCatalogo.length > 2 ? nombreParaCatalogo : fleteraNombre,
                     direccion: "Dirección pendiente", 
                     telefono: "", link_maps: "", coordenadas: { lat: 25.6866, lng: -100.3161 }
                 };
@@ -174,14 +246,17 @@ export const LogisticaProvider = ({ children }) => {
                 operacionesEnBatch++;
                 
                 updates.fletera_asignada_id = newFleteraRef.id;
+                updates.destino_alias = nuevaFletera.nombre; // Sobreescribimos con el nombre oficial
                 localFleteras.push({ id: newFleteraRef.id, ...nuevaFletera });
             } else if (fleteraMatch) {
+                // Si la encuentra, vinculamos su ID y normalizamos el texto visual al nombre oficial del catálogo
                 updates.fletera_asignada_id = fleteraMatch.id;
+                updates.destino_alias = fleteraMatch.nombre; 
             }
             
-            // Validar Cliente Foráneo
+            // Validar Cliente Foráneo vinculado a este viaje
             let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
-            if(clienteIndex === -1 && codigoCliente) {
+            if (clienteIndex === -1 && codigoCliente) {
                  const nuevoClienteForaneo = {
                     codigo: codigoCliente,
                     nombre: nombreCliente,
