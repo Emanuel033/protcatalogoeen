@@ -9,7 +9,8 @@ const diccionarios = {
     promptPiezas: "¿Cuántas piezas tiene este paquete?", pz_abrev: "pz",
     txtNuevoPaquete: "Nuevo Paquete ({pz}pz) ✨", listaVacia: "La lista está vacía.",
     listaVaciaSub: "Busca un producto arriba para agregarlo.",
-    cancelar: "Cancelar", anadir: "Añadir"
+    cancelar: "Cancelar", anadir: "Añadir",
+    eliminar: "Quitar de la lista" // <-- Nueva cadena
   },
   fr: {
     stockSistema: "STOCK SYSTÈME", totalFisico: "TOTAL PHYSIQUE", ajuste: "AJUSTEMENT",
@@ -18,7 +19,8 @@ const diccionarios = {
     promptPiezas: "Nombre de pièces ?", pz_abrev: "pc",
     txtNuevoPaquete: "Paquet ({pz}pc) ✨", listaVacia: "La liste est vide.",
     listaVaciaSub: "Recherchez un produit ci-dessus.",
-    cancelar: "Annuler", anadir: "Ajouter"
+    cancelar: "Annuler", anadir: "Ajouter",
+    eliminar: "Retirer de la liste" // <-- Nueva cadena
   }
 };
 
@@ -41,7 +43,7 @@ const ListaConteo = ({
 
   // ESTADOS LOCALES
   const [modalEmpaque, setModalEmpaque] = useState({ isOpen: false, codigo: null, cantidad: '' });
-  const [expandido, setExpandido] = useState(null); // Controla qué tarjeta está abierta
+  const [expandido, setExpandido] = useState(null);
   const [prevLength, setPrevLength] = useState(0);
 
   // EFECTO 1: Auto-expandir cuando se agrega un nuevo producto
@@ -96,7 +98,7 @@ const ListaConteo = ({
 
         const textAjuste = ajuste === 0 ? 'text-emerald-400' : ajuste > 0 ? 'text-amber-400' : 'text-red-400';
 
-        // Resumen compacto de cantidades contadas (Ej: "3x50, 10x1")
+        // Resumen compacto de cantidades contadas
         const resumenDetalle = item.variantes
           .filter(v => v.contadas > 0)
           .map(v => `${v.contadas}x${v.pz}`)
@@ -116,7 +118,6 @@ const ListaConteo = ({
               className={`p-4 flex items-center gap-3.5 cursor-pointer ${modoSeleccion ? 'active:bg-slate-700' : ''}`}
               onClick={() => modoSeleccion ? onToggleSeleccion(item.codigo) : toggleExpandir(item.codigo)}
             >
-              {/* Checkbox (Solo modo selección) */}
               {modoSeleccion && (
                 <div className="shrink-0 flex items-center justify-center">
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all ${isSelected ? 'bg-blue-600 border-blue-400 text-white shadow-lg' : 'bg-slate-800 border-slate-500 text-transparent'}`}>
@@ -125,7 +126,6 @@ const ListaConteo = ({
                 </div>
               )}
 
-              {/* Imagen Miniatura */}
               <div 
                 className="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-inner shrink-0 relative z-20"
                 onClick={(e) => {
@@ -143,7 +143,6 @@ const ListaConteo = ({
                 />
               </div>
 
-              {/* Info Texto */}
               <div className="flex-1 min-w-0 flex flex-col justify-center">
                 <h3 className="text-white font-black text-[13px] leading-tight truncate uppercase">
                   {item.nombre}
@@ -152,7 +151,6 @@ const ListaConteo = ({
                    <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">
                      <i className="fas fa-barcode mr-1 opacity-70"></i>{item.codigo}
                    </p>
-                   {/* Mini resumen de cantidades */}
                    {resumenDetalle && (
                      <p className="text-[10px] font-bold text-slate-400 italic truncate border-l border-slate-700 pl-2">
                        {resumenDetalle}
@@ -161,7 +159,6 @@ const ListaConteo = ({
                 </div>
               </div>
 
-              {/* Resumen Numérico Lateral (Visible siempre) */}
               <div className="shrink-0 flex flex-col items-end pr-1 min-w-[50px]">
                 <p className={`text-xl font-black leading-none ${modoSeleccion && isSelected ? 'text-blue-200' : 'text-white'}`}>
                   {item.totalFisico}
@@ -171,7 +168,6 @@ const ListaConteo = ({
                 </p>
               </div>
 
-              {/* Flecha Acordeón */}
               {!modoSeleccion && (
                 <div className={`shrink-0 w-8 h-8 flex items-center justify-center text-slate-500 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-blue-400' : ''}`}>
                   <i className="fas fa-chevron-down"></i>
@@ -185,17 +181,7 @@ const ListaConteo = ({
             <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
               <div className="p-5 pt-1 border-t border-slate-700/50 mt-2 bg-slate-900/20">
                 
-                {/* Botón Eliminar Físico (Solo cuando está abierto) */}
-                {!soloLectura && (
-                  <button 
-                    onClick={() => onEliminar(item.codigo)}
-                    className="absolute top-14 right-4 w-10 h-10 bg-slate-900 rounded-full text-slate-500 hover:text-red-400 border border-slate-700 shadow-sm flex items-center justify-center active:scale-95 transition-all z-10"
-                  >
-                    <i className="fas fa-trash-alt text-sm"></i>
-                  </button>
-                )}
-
-                {/* Variantes (Cajas, Paquetes, Sueltas) */}
+                {/* Variantes */}
                 <div className="space-y-3 mb-6 mt-4">
                   {item.variantes.map((v) => {
                     const nombreVariante = v.isFantasma 
@@ -214,11 +200,8 @@ const ListaConteo = ({
                           </span>
                         </div>
                         
-                        {/* CONTROLES: Modo Edición */}
                         {!soloLectura ? (
                           <div className="flex items-center gap-2 mt-1">
-                            
-                            {/* Micrófono */}
                             <button 
                               onMouseDown={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
                               onTouchStart={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
@@ -227,7 +210,6 @@ const ListaConteo = ({
                               <i className="fas fa-microphone text-lg"></i>
                             </button>
 
-                            {/* Bloque Stepper */}
                             <div className="flex-1 flex items-center bg-slate-800 border border-slate-600 rounded-xl overflow-hidden shadow-sm h-14">
                               <button 
                                 onClick={() => onCambiarCant(item.codigo, v.id, -1)}
@@ -253,7 +235,6 @@ const ListaConteo = ({
                               </button>
                             </div>
 
-                            {/* Calculadora */}
                             <button 
                               onClick={() => onAbrirCalculadora(item.codigo, v.id)}
                               className="w-14 h-14 bg-purple-600/20 border border-purple-500/40 rounded-xl text-purple-300 hover:bg-purple-600/40 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
@@ -262,7 +243,6 @@ const ListaConteo = ({
                             </button>
                           </div>
                         ) : (
-                          // CONTROLES: Modo Historial (Solo Lectura)
                           <div className="flex items-center justify-center h-14 bg-slate-800 border border-slate-600 rounded-xl text-white font-black text-2xl shadow-inner mt-1">
                             {v.contadas || 0}
                           </div>
@@ -272,7 +252,6 @@ const ListaConteo = ({
                   })}
                 </div>
 
-                {/* Botón Añadir Empaque */}
                 {!soloLectura && (
                   <button 
                     onClick={() => setModalEmpaque({ isOpen: true, codigo: item.codigo, cantidad: '' })} 
@@ -282,7 +261,6 @@ const ListaConteo = ({
                   </button>
                 )}
 
-                {/* Totales Detallados (Solo visibles al expandir) */}
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="bg-slate-900 rounded-2xl p-4 border border-slate-600 text-center shadow-inner relative overflow-hidden">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">{t.stockSistema}</p>
@@ -295,11 +273,20 @@ const ListaConteo = ({
                   </div>
                 </div>
                 
-                {/* Ajuste Bottom Completo */}
                 <div className={`flex justify-center items-center py-3 px-4 rounded-xl font-black text-sm uppercase tracking-wider border shadow-sm ${bgAjuste}`}>
                   <span className="mr-2 opacity-80">{t.ajuste}:</span>
                   {ajuste > 0 ? `+${ajuste}` : ajuste} {ajuste === 0 ? `(${t.ok})` : ''}
                 </div>
+
+                {/* NUEVA POSICIÓN: Botón Eliminar seguro en la parte inferior */}
+                {!soloLectura && (
+                  <button 
+                    onClick={() => onEliminar(item.codigo)}
+                    className="w-full mt-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    <i className="fas fa-trash-alt"></i> {t.eliminar}
+                  </button>
+                )}
 
               </div>
             </div>
