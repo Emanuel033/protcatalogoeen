@@ -90,12 +90,9 @@ export const LogisticaProvider = ({ children }) => {
   const [fleteras, setFleteras] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // EL CEREBRO AUTO-MASTICADOR
+  // EL CEREBRO AUTO-MASTICADOR CON ENRIQUECIMIENTO DE DATOS
   const procesarPedidosCrudos = async (viajesCrudos) => {
-    // ========================================================================
-    // SOLUCIÓN: OBTENER LA VERDAD ABSOLUTA DE LA BD ANTES DE PROCESAR
-    // Garantiza que los catálogos estén 100% cargados eliminando la condición de carrera.
-    // ========================================================================
+    // 1. Garantizar catálogos en vivo antes de procesar
     const snapClientes = await getDocs(collection(db, 'clientes_logistica'));
     const snapFleteras = await getDocs(collection(db, 'catalogo_fleteras'));
 
@@ -117,7 +114,7 @@ export const LogisticaProvider = ({ children }) => {
         updates.requiere_cobro = p.requiere_cobro === true || p.requiere_cobro === 'true';
 
         // =====================================
-        // LÓGICA REPARTO LOCAL
+        // LÓGICA REPARTO LOCAL (BODEGAS)
         // =====================================
         if (rawEnvio === 'LOCAL' || rawEnvio === 'REPARTO') {
             updates.tipo_envio = 'bodega_cliente'; 
@@ -161,8 +158,13 @@ export const LogisticaProvider = ({ children }) => {
                 });
 
                 if (dirExistente) {
+                    // ✅ JALAR DATOS: El cliente y la bodega existen
                     updates.destino_alias = dirExistente.alias;
                     updates.cliente_id_vinculado = clienteMatch.id;
+                    updates.direccion = dirExistente.direccion; 
+                    updates.coordenadas = dirExistente.coordenadas;
+                    updates.telefono_contacto = dirExistente.telefono || p.telefono_contacto || "";
+                    if (dirExistente.link_maps) updates.link_maps = dirExistente.link_maps;
                 } else {
                     let aliasFinal = aliasBase;
                     let contador = 1;
@@ -191,7 +193,7 @@ export const LogisticaProvider = ({ children }) => {
             }
         } 
         // =====================================
-        // LÓGICA FLETERA FORÁNEA (BÚSQUEDA FINA)
+        // LÓGICA FLETERA FORÁNEA
         // =====================================
         else {
             let fleteraNombreCrudo = (p.destino_alias || p.metodo_mensajeria || '').trim().toUpperCase();
@@ -209,17 +211,14 @@ export const LogisticaProvider = ({ children }) => {
                 updates.tipo_envio = 'fletera_ocurre';
             }
             
-            updates.destino_alias = limpiarRazonSocial(fleteraNombre) || fleteraNombre; 
-
             // ========================================================
-            // SELECCIÓN INTELIGENTE DE FLETERAS
+            // SELECCIÓN INTELIGENTE DE FLETERAS CON ENRIQUECIMIENTO
             // ========================================================
             let fleteraMatch = null;
             let mejorPuntaje = 0;
 
             if (fleteraNombre !== 'POR ASIGNAR') {
                 localFleteras.forEach(f => {
-                    // Match exacto directo
                     const exacto = f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase();
                     if (exacto) {
                         fleteraMatch = f;
@@ -227,7 +226,6 @@ export const LogisticaProvider = ({ children }) => {
                         return;
                     }
                     
-                    // Match difuso fino
                     const score = similitudTextosFina(f.nombre, fleteraNombre);
                     if (score >= 88 && score > mejorPuntaje) {
                         mejorPuntaje = score;
@@ -236,7 +234,16 @@ export const LogisticaProvider = ({ children }) => {
                 });
             }
 
-            if (!fleteraMatch && fleteraNombre !== 'POR ASIGNAR') {
+            if (fleteraMatch) {
+                // ✅ JALAR DATOS: La fletera existe en el catálogo
+                updates.fletera_asignada_id = fleteraMatch.id;
+                updates.destino_alias = fleteraMatch.nombre; 
+                updates.direccion = fleteraMatch.direccion; 
+                updates.coordenadas = fleteraMatch.coordenadas;
+                updates.telefono_contacto = fleteraMatch.telefono || p.telefono_contacto || "";
+                if (fleteraMatch.link_maps) updates.link_maps = fleteraMatch.link_maps;
+            } else if (fleteraNombre !== 'POR ASIGNAR') {
+                // Si no existe, se crea limpia
                 const nombreParaCatalogo = limpiarRazonSocial(fleteraNombre);
                 const nuevaFletera = {
                     nombre: nombreParaCatalogo.length > 2 ? nombreParaCatalogo : fleteraNombre,
@@ -251,12 +258,11 @@ export const LogisticaProvider = ({ children }) => {
                 updates.fletera_asignada_id = newFleteraRef.id;
                 updates.destino_alias = nuevaFletera.nombre; 
                 localFleteras.push({ id: newFleteraRef.id, ...nuevaFletera });
-            } else if (fleteraMatch) {
-                updates.fletera_asignada_id = fleteraMatch.id;
-                updates.destino_alias = fleteraMatch.nombre; 
+            } else {
+                updates.destino_alias = fleteraNombre;
             }
             
-            // Validar Cliente Foráneo
+            // Validar Cliente Foráneo asociado
             let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
             if (clienteIndex === -1 && codigoCliente) {
                  const nuevoClienteForaneo = {
@@ -285,7 +291,7 @@ export const LogisticaProvider = ({ children }) => {
     if (operacionesEnBatch > 0) {
         try {
             await batch.commit();
-            console.log(`✅ Lote procesado: Se enviaron ${operacionesEnBatch} operaciones a Firebase tras verificar catálogos en vivo.`);
+            console.log(`✅ Lote procesado y ENRIQUECIDO: ${operacionesEnBatch} operaciones inyectadas con datos de catálogo.`);
         } catch(e) { 
             console.error("Error ejecutando el Batch de pedidos:", e); 
         }
@@ -329,7 +335,6 @@ export const LogisticaProvider = ({ children }) => {
       setPedidos(activos);
       setLoading(false);
 
-      // Disparamos el masticador pasándole únicamente los datos crudos
       if (crudos.length > 0) {
           procesarPedidosCrudos(crudos);
       }
