@@ -5,10 +5,9 @@ import { db } from '../../../firebase.js';
 const LogisticaContext = createContext();
 
 // ============================================================================
-// MOTOR DE SIMILITUD DE TEXTOS (VERSIÓN QUIRÚRGICA Y BLINDADA)
+// MOTOR DE SIMILITUD DE TEXTOS (VERSIÓN QUIRÚRGICA Y BLINDADA AL 100%)
 // ============================================================================
 
-// 1. Limpieza de razones sociales (BLINDADO CONTRA NULL/UNDEFINED)
 const limpiarRazonSocial = (texto) => {
     return String(texto || '').toUpperCase()
         .replace(/\b(SA|DE|CV|RL|SAPI|SNC|LLC|CO|INC|LTD)\b/g, '')
@@ -17,17 +16,15 @@ const limpiarRazonSocial = (texto) => {
         .replace(/\s+/g, ' ').trim();
 };
 
-// 1.5 NUEVO: Limpieza específica para DIRECCIONES (BLINDADO)
 const limpiarDireccion = (texto) => {
     return String(texto || '').toUpperCase()
-        .replace(/NUEVO LE[OÓ]N/g, 'NL') // Homologar estado
+        .replace(/NUEVO LE[OÓ]N/g, 'NL') 
         .replace(/N\.L\./g, 'NL')
-        .replace(/\b(COLONIA|COL|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '') // Quitar prefijos basura
-        .replace(/[^A-Z0-9 ]/g, '') // Quitar puntos y comas
+        .replace(/\b(COLONIA|COL|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '') 
+        .replace(/[^A-Z0-9 ]/g, '') 
         .replace(/\s+/g, ' ').trim();
 };
 
-// 2. Candado estricto (BLINDADO)
 const esConflictoConocido = (strA, strB) => {
     const a = String(strA || '').replace(/\s+/g, '');
     const b = String(strB || '').replace(/\s+/g, '');
@@ -36,14 +33,12 @@ const esConflictoConocido = (strA, strB) => {
     return false;
 };
 
-// 3. Algoritmo combinado ADAPTADO PARA RECIBIR 'TIPO'
 const similitudTextosFina = (crudoA = '', crudoB = '', tipo = 'razon_social') => {
     const a = tipo === 'direccion' ? limpiarDireccion(crudoA) : limpiarRazonSocial(crudoA);
     const b = tipo === 'direccion' ? limpiarDireccion(crudoB) : limpiarRazonSocial(crudoB);
 
     if (!a || !b) return 0;
     if (a === b) return 100;
-
     if (esConflictoConocido(a, b)) return 0; 
 
     const regexA = new RegExp(`\\b${a}\\b`);
@@ -101,7 +96,6 @@ export const LogisticaProvider = ({ children }) => {
     for (let p of viajesCrudos) {
         let updates = { procesado_por_web: true };
         
-        // Todas las lecturas blindadas con String( ... || '')
         let rawEnvio = String(p.tipo_envio || '').trim().toUpperCase();
         let detallesUpper = String(p.detalles_entrega || '').trim().toUpperCase();
         let codigoCliente = String(p.cliente_codigo || '').trim().toUpperCase();
@@ -149,7 +143,6 @@ export const LogisticaProvider = ({ children }) => {
                 let direccionesCliente = clienteMatch.direcciones || [];
                 
                 let dirExistente = direccionesCliente.find(d => {
-                    // Blindado
                     const esExacta = String(d.direccion || '').trim().toLowerCase() === dirLimpia.toLowerCase();
                     const esMuySimilar = similitudTextosFina(d.direccion, dirLimpia, 'direccion') >= 85; 
                     return esExacta || esMuySimilar;
@@ -213,8 +206,7 @@ export const LogisticaProvider = ({ children }) => {
 
             if (fleteraNombre !== 'POR ASIGNAR') {
                 localFleteras.forEach(f => {
-                    // Blindado
-                    const exacto = String(f.nombre || '').trim().toUpperCase() === fleteraNombre.toUpperCase();
+                    const exacto = String(f.nombre || '').trim().toUpperCase() === fleteraNombre;
                     if (exacto) {
                         fleteraMatch = f;
                         mejorPuntaje = 100;
