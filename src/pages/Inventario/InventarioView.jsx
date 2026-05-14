@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, doc, addDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../firebase'; 
+// CORRECCIÓN LÍNEA 3: Forzamos explícitamente la extensión .js para que Vite no lea firebase.json
+import { db } from '../../firebase.js'; 
 
 import EscanerManual from './components/EscanerManual';
 import ListaConteo from './components/ListaConteo';
@@ -236,17 +237,23 @@ const InventarioView = () => {
 
       // 2. Dar de alta de forma transparente los paquetes nuevos (Fantasmas)
       for (const item of itemsAProcesar) {
+        // Utilizamos el "codigo_sistema_oficial" nativo (o el ID del documento si no existe el campo)
         const codigoPadre = String(item.codigo).toUpperCase();
         const paquetesFantasmas = item.variantes.filter(v => v.isFantasma && v.pz > 1);
         
         for (const fantasma of paquetesFantasmas) {
           const pz = parseInt(fantasma.pz);
           const nuevoSku = `${codigoPadre}-${pz}PZ`;
+          const llavePaquete = `paquete_${pz}`; // Llave limpia adaptada a tu BD maestro
+
           try {
             await setDoc(doc(db, 'productos_master', codigoPadre), {
               paquetes: {
-                [`pkg_${codigoPadre.toLowerCase()}_${pz}pz`]: {
-                  sku: nuevoSku, codigo_barras: nuevoSku, nombre: `PAQUETE ${pz}PZ`, piezas: pz
+                [llavePaquete]: {
+                  sku: nuevoSku, 
+                  nombre_paquete: `Paquete de ${pz} piezas`, 
+                  piezas: pz,
+                  es_default: true
                 }
               }
             }, { merge: true });
