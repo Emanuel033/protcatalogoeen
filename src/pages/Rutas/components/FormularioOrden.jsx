@@ -127,6 +127,38 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     }
   }, [isOpen, ordenAEditar, clientesLista]);
 
+  // --- NUEVO: SINCRONIZADOR DEL DROPDOWN AL EDITAR (LÓGICA AISLADA Y SEGURA) ---
+  useEffect(() => {
+    if (isOpen && ordenAEditar) {
+      let indexEncontrado = -1;
+      const esBodegaLocal = metodoEnvio === 'bodega_cliente';
+
+      if (esBodegaLocal) {
+        // Buscamos en las bodegas del cliente
+        const dirs = clienteSeleccionado?.direcciones || [];
+        indexEncontrado = dirs.findIndex(d => 
+          (d && d.alias === ordenAEditar.destino_alias) || 
+          (d && d.direccion === ordenAEditar.direccion)
+        );
+      } else {
+        // Buscamos en las fleteras foráneas
+        const listaFleteras = fleteras || [];
+        indexEncontrado = listaFleteras.findIndex(f => 
+          (f && f.id === ordenAEditar.fletera_asignada_id) || 
+          (f && f.nombre === ordenAEditar.destino_alias)
+        );
+      }
+
+      // Si encuentra coincidencia, asigna el índice al dropdown. Si no, lo deja en blanco.
+      if (indexEncontrado !== -1) {
+        setBodegaSeleccionada(String(indexEncontrado));
+      } else {
+        setBodegaSeleccionada('');
+      }
+    }
+  }, [isOpen, ordenAEditar, clienteSeleccionado, fleteras, metodoEnvio]);
+  // ----------------------------------------------------------------------------
+
   const clientesFiltrados = clientesLista.filter(c => {
     const nombreSafe = String(clienteNombre || '').toLowerCase();
     const codigoSafe = String(codigoSAP || '').toLowerCase();
@@ -230,7 +262,8 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         }
 
         if (!isBodega && aliasDestinoLimpio) {
-            const fleteraExistente = fleteras.find(f => f.nombre.toUpperCase() === aliasDestinoLimpio.toUpperCase());
+            // Se agregó un ligero '?' de seguridad en f.nombre para que no rompa el guardado si hay datos raros.
+            const fleteraExistente = fleteras.find(f => f.nombre?.toUpperCase() === aliasDestinoLimpio.toUpperCase());
             if (fleteraExistente) fleteraIdVinculada = fleteraExistente.id;
             else {
                 const nuevaFleteraObj = {
@@ -266,7 +299,6 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   if (!isOpen) return null;
 
   return (
-    // AQUÍ ESTABA EL ERROR: Quité el 'hidden' traicionero que ocultaba el modal entero.
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm transition-opacity opacity-100 bg-slate-900/80">
       <div className="rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden transform scale-100 transition-transform flex flex-col max-h-[98vh] sm:max-h-[90vh] bg-slate-50">
         
