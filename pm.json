@@ -18138,11 +18138,22 @@
     },
     "paquetes": [
       {
-        "id": "paquete_325",
-        "nombre_paquete": "Paquete de 325 piezas",
+        "id": "qDmdRZuIUn66vhM7poLJ",
+        "piezas": 214,
+        "sku": "BPA-250-S/T/CP-214PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774375,
+          "_nanoseconds": 705000000
+        }
+      },
+      {
+        "id": "Cdrm7xvPioDD5PpF91EV",
         "piezas": 325,
-        "sku": "P80-325PZ",
-        "es_default": true
+        "sku": "BPA-250-S/T/CP-325PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774393,
+          "_nanoseconds": 587000000
+        }
       }
     ]
   },
@@ -18300,9 +18311,22 @@
       "codigo_sistema_oficial": "BPA-500-ST/CP",
       "receta_desglose": null,
       "hereda_empaques_de": null,
-      "tipo_item": "PIEZA_BASE"
+      "tipo_item": "PIEZA_BASE",
+      "ultima_actualizacion": {
+        "_seconds": 1778774326,
+        "_nanoseconds": 317000000
+      }
     },
     "paquetes": [
+      {
+        "id": "2fV9kRLRNsMrU1ufGKL9",
+        "piezas": 144,
+        "sku": "BPA-500-ST/CP-144PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774326,
+          "_nanoseconds": 140000000
+        }
+      },
       {
         "id": "CnvXKB6jBKui0c6FYtwp",
         "piezas": 200,
@@ -18334,11 +18358,22 @@
     },
     "paquetes": [
       {
-        "id": "paquete_92",
-        "nombre_paquete": "Paquete de 92 piezas",
-        "piezas": 92,
-        "sku": "P79-92PZ",
-        "es_default": true
+        "id": "yh2zR7zXkIgYSRFxslJr",
+        "piezas": 94,
+        "sku": "BPA-1-S/T/CP-94PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774264,
+          "_nanoseconds": 115000000
+        }
+      },
+      {
+        "id": "czHXqw0pRbB3mjn0ijb1",
+        "piezas": 108,
+        "sku": "BPA-1-S/T/CP-108PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774272,
+          "_nanoseconds": 355000000
+        }
       }
     ]
   },
@@ -18357,15 +18392,31 @@
         "_nanoseconds": 836000000
       },
       "codigo_sistema_oficial": "BPA-1-S/T/CP",
-      "receta_desglose": null
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "ultima_actualizacion": {
+        "_seconds": 1778774278,
+        "_nanoseconds": 70000000
+      }
     },
     "paquetes": [
       {
-        "id": "paquete_92",
-        "nombre_paquete": "Paquete de 92 piezas",
-        "piezas": 92,
-        "sku": "P79-92PZ",
-        "es_default": true
+        "id": "yh2zR7zXkIgYSRFxslJr",
+        "piezas": 94,
+        "sku": "BPA-1-S/T/CP-94PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774264,
+          "_nanoseconds": 115000000
+        }
+      },
+      {
+        "id": "czHXqw0pRbB3mjn0ijb1",
+        "piezas": 108,
+        "sku": "BPA-1-S/T/CP-108PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774272,
+          "_nanoseconds": 355000000
+        }
       }
     ]
   },
@@ -18441,15 +18492,31 @@
         "_nanoseconds": 880000000
       },
       "codigo_sistema_oficial": "BPA-250-S/T/CP",
-      "receta_desglose": null
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "ultima_actualizacion": {
+        "_seconds": 1778774396,
+        "_nanoseconds": 216000000
+      }
     },
     "paquetes": [
       {
-        "id": "paquete_325",
-        "nombre_paquete": "Paquete de 325 piezas",
+        "id": "qDmdRZuIUn66vhM7poLJ",
+        "piezas": 214,
+        "sku": "BPA-250-S/T/CP-214PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774375,
+          "_nanoseconds": 705000000
+        }
+      },
+      {
+        "id": "Cdrm7xvPioDD5PpF91EV",
         "piezas": 325,
-        "sku": "P80-325PZ",
-        "es_default": true
+        "sku": "BPA-250-S/T/CP-325PZ",
+        "fecha_creacion": {
+          "_seconds": 1778774393,
+          "_nanoseconds": 587000000
+        }
       }
     ]
   },
