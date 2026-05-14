@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, doc, addDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
-// CORRECCIÓN LÍNEA 3: Forzamos explícitamente la extensión .js para que Vite no lea firebase.json
 import { db } from '../../firebase.js'; 
 
 import EscanerManual from './components/EscanerManual';
@@ -8,7 +7,7 @@ import ListaConteo from './components/ListaConteo';
 import ModalCalculadora from './components/ModalCalculadora';
 import useDictadoVoz from './hooks/useDictadoVoz';
 
-// --- DICCIONARIO BILINGÜE CENTRALIZADO ---
+// --- DICCIONARIO BILINGÜE CENTRALIZADO (Completo) ---
 const tInv = {
   es: {
     titulo: 'Inventario EEN',
@@ -28,10 +27,10 @@ const tInv = {
     cerrarVerificacion: 'Cerrar verificación',
     listaVacia: 'La lista actual está vacía.',
     noArchivarVacio: 'No hay productos para sincronizar.',
-    confirmaSincronizar: '¿Deseas finalizar este conteo y enviarlo a la PC para su revisión?',
+    confirmaSincronizar: '¿Deseas finalizar este conteo y enviarlo a la nube/PC para su revisión?',
     confirmaRecuperar: '¿Deseas recuperar los productos seleccionados a tu lista actual?',
     noConteosDia: 'No hay conteos registrados el día de hoy.',
-    sincExito: '¡Conteo finalizado y enviado a la PC exitosamente!',
+    sincExito: '¡Conteo finalizado y respaldado en la nube exitosamente!',
     recuperadoExito: 'Productos recuperados y listos para editar.',
     csvExito: 'Archivo CSV generado exitosamente.',
     cancelar: 'Cancelar',
@@ -46,8 +45,21 @@ const tInv = {
     // TEXTOS NUBE / VISTAS
     botonSincronizar: 'Finalizar y Sincronizar',
     pestañaConteo: '📱 Captura',
-    pestañaNube: '💻 Revisión PC',
-    copiado: '¡Código copiado al portapapeles!'
+    pestañaNube: '☁️ Nube / PC',
+    copiado: '¡Código copiado al portapapeles!',
+    // TRADUCCIONES NUEVA SECCIÓN NUBE
+    nubeVacia: 'No hay sesiones sincronizadas pendientes.',
+    sesionNum: 'Sesión #{n}',
+    origenDispositivo: 'Almacén',
+    tablaTitulo: 'Revisión de Ajustes (Nube)',
+    tablaSub: 'Toca el SKU para copiarlo al POS',
+    colSku: 'Código (SKU)',
+    colProd: 'Producto',
+    colSis: 'Sistema',
+    colFis: 'Físico',
+    colDif: 'Dif.',
+    sinSesionSel: 'Selecciona una sesión de la barra superior para revisar sus diferencias.',
+    copiarBoton: 'Copiar'
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -67,10 +79,10 @@ const tInv = {
     cerrarVerificacion: 'Fermer la vérification',
     listaVacia: 'La liste actuelle est vide.',
     noArchivarVacio: 'Aucun produit à synchroniser.',
-    confirmaSincronizar: 'Voulez-vous finaliser ce comptage et l\'envoyer au PC ?',
+    confirmaSincronizar: 'Voulez-vous finaliser ce comptage et l\'envoyer au serveur ?',
     confirmaRecuperar: 'Voulez-vous récupérer ces produits dans votre liste ?',
     noConteosDia: 'Aucun comptage enregistré aujourd\'hui.',
-    sincExito: 'Comptage finalisé et envoyé au PC avec succès !',
+    sincExito: 'Comptage finalisé et synchronisé avec succès !',
     recuperadoExito: 'Produits récupérés et prêts à être édités.',
     csvExito: 'Fichier CSV généré avec succès.',
     cancelar: 'Annuler',
@@ -85,8 +97,21 @@ const tInv = {
     // TEXTOS NUBE / VISTAS
     botonSincronizar: 'Finaliser et Synchroniser',
     pestañaConteo: '📱 Capture',
-    pestañaNube: '💻 Révision PC',
-    copiado: 'Code copié !'
+    pestañaNube: '☁️ Serveur / PC',
+    copiado: 'Code copié dans le presse-papiers !',
+    // TRADUCCIONES NUEVA SECCIÓN NUBE
+    nubeVacia: 'Aucune session synchronisée en attente.',
+    sesionNum: 'Session #{n}',
+    origenDispositivo: 'Entrepôt',
+    tablaTitulo: 'Révision des Ajustements',
+    tablaSub: 'Touchez le SKU pour le copier',
+    colSku: 'Code (SKU)',
+    colProd: 'Produit',
+    colSis: 'Système',
+    colFis: 'Physique',
+    colDif: 'Diff.',
+    sinSesionSel: 'Sélectionnez une session ci-dessus pour voir les différences.',
+    copiarBoton: 'Copier'
   }
 };
 
@@ -95,7 +120,7 @@ const InventarioView = () => {
   const [idioma, setIdioma] = useState('es');
   const t = tInv[idioma]; 
 
-  // --- CONTROL DE VISTAS (Móvil vs PC) ---
+  // --- CONTROL DE VISTAS ---
   const [vistaActual, setVistaActual] = useState('conteo'); 
   const [sesionesNube, setSesionesNube] = useState([]);
   const [sesionSeleccionadaNube, setSesionSeleccionadaNube] = useState(null);
@@ -220,14 +245,13 @@ const InventarioView = () => {
   };
 
   // ==========================================================================
-  // FLUJO MAESTRO UNIFICADO: SINCRONIZAR A NUBE + GUARDAR HISTORIAL + CREAR MASTER
+  // SINCRONIZACIÓN MAESTRA
   // ==========================================================================
   const handleSincronizacionTotal = () => {
     if (listaConteo.length === 0) { mostrarToast(t.noArchivarVacio, 'error'); return; }
     if (modoSeleccion && seleccionados.length === 0) { mostrarToast(t.errorSelVacia, 'error'); return; }
 
     pedirConfirmacion(t.confirmaSincronizar, async () => {
-      // 1. Separar lo que se procesa según selección
       const itemsAProcesar = modoSeleccion && seleccionados.length > 0 
         ? listaConteo.filter(item => seleccionados.includes(item.codigo)) 
         : [...listaConteo];
@@ -235,48 +259,41 @@ const InventarioView = () => {
         ? listaConteo.filter(item => !seleccionados.includes(item.codigo))
         : [];
 
-      // 2. Dar de alta de forma transparente los paquetes nuevos (Fantasmas)
+      // Inyectar Master Fantasmas
       for (const item of itemsAProcesar) {
-        // Utilizamos el "codigo_sistema_oficial" nativo (o el ID del documento si no existe el campo)
         const codigoPadre = String(item.codigo).toUpperCase();
         const paquetesFantasmas = item.variantes.filter(v => v.isFantasma && v.pz > 1);
         
         for (const fantasma of paquetesFantasmas) {
           const pz = parseInt(fantasma.pz);
           const nuevoSku = `${codigoPadre}-${pz}PZ`;
-          const llavePaquete = `paquete_${pz}`; // Llave limpia adaptada a tu BD maestro
-
           try {
             await setDoc(doc(db, 'productos_master', codigoPadre), {
               paquetes: {
-                [llavePaquete]: {
-                  sku: nuevoSku, 
-                  nombre_paquete: `Paquete de ${pz} piezas`, 
-                  piezas: pz,
-                  es_default: true
+                [`paquete_${pz}`]: {
+                  sku: nuevoSku, nombre_paquete: `Paquete de ${pz} piezas`, piezas: pz, es_default: true
                 }
               }
             }, { merge: true });
-          } catch (err) { console.error(`Error inyectando master ${nuevoSku}:`, err); }
+          } catch (err) { console.error(`Error master ${nuevoSku}:`, err); }
         }
       }
 
-      // 3. Subir a Nube (Bitácora Firebase)
+      // Subir Bitácora
       try {
         await addDoc(collection(db, 'bitacora_inventario'), {
           fecha: serverTimestamp(),
           items: itemsAProcesar,
           total_skus: itemsAProcesar.length,
-          origen: 'Tablet Almacén'
+          origen: t.origenDispositivo
         });
       } catch (e) { console.error("Error nube:", e); }
 
-      // 4. Respaldar en Historial Local de la Tablet
+      // Respaldar Local
       const nuevoRegistro = { id: Date.now(), fecha: new Date().toISOString(), items: itemsAProcesar };
       const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
       localStorage.setItem('een_historial_conteos', JSON.stringify([nuevoRegistro, ...historialPrevio].slice(0, 50)));
 
-      // 5. Limpiar UI
       setListaConteo(itemsRestantes); 
       setModoSeleccion(false);
       setSeleccionados([]);
@@ -288,13 +305,13 @@ const InventarioView = () => {
 
   const copiarCodigo = (texto) => { navigator.clipboard.writeText(texto); mostrarToast(t.copiado, 'success'); };
 
-  // Funciones Selección Local
+  // Selección Local
   const toggleSeleccion = (codigo) => setSeleccionados(prev => prev.includes(codigo) ? prev.filter(c => c !== codigo) : [...prev, codigo]);
   const toggleSeleccionHistorial = (codigo) => setSeleccionadosHistorial(prev => prev.includes(codigo) ? prev.filter(c => c !== codigo) : [...prev, codigo]);
   const toggleTodos = () => setSeleccionados(seleccionados.length === listaConteo.length ? [] : listaConteo.map(i => i.codigo));
   const toggleTodosHistorial = () => setSeleccionadosHistorial(seleccionadosHistorial.length === conteoSeleccionado.items.length ? [] : conteoSeleccionado.items.map(i => i.codigo));
 
-  // Recuperar del Historial
+  // Recuperar Historial
   const handleRecuperarConteo = () => {
     const registro = conteoSeleccionado;
     if (modoSeleccionHistorial && seleccionadosHistorial.length === 0) { mostrarToast(t.errorSelVacia, 'error'); return; }
@@ -328,7 +345,7 @@ const InventarioView = () => {
     });
   };
 
-  // Exportaciones CSV auxiliares
+  // Exportaciones CSV
   const descargarCSV = () => {
     if (listaConteo.length === 0) { mostrarToast(t.listaVacia, 'error'); return; }
     let csv = "\uFEFFCodigo,Producto,Stock Sistema,Total Fisico,Ajuste,Detalle Conteos\n";
@@ -386,7 +403,7 @@ const InventarioView = () => {
         </div>
       )}
 
-      {/* HEADER LIMPIO: Solo pestañas de navegación globales e idioma */}
+      {/* HEADER LIMPIO */}
       <header className="bg-slate-900 border-b border-slate-700 p-4 flex justify-between items-center shrink-0 shadow-md z-40">
         <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700 shadow-inner">
           <button onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1.5 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
@@ -406,7 +423,7 @@ const InventarioView = () => {
         </div>
       </header>
 
-      {/* SUB-BARRA DE HERRAMIENTAS (Visible en modo conteo) */}
+      {/* SUB-BARRA DE HERRAMIENTAS */}
       {vistaActual === 'conteo' && (
         <div className="bg-slate-850 border-b border-slate-700 p-3 px-4 flex justify-between items-center shrink-0 z-30">
           {modoSeleccion ? (
@@ -420,14 +437,13 @@ const InventarioView = () => {
               </button>
               {listaConteo.length > 0 && (
                 <>
-                  <button onClick={descargarCSV} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 text-slate-300 px-2.5 py-2 rounded-xl text-[11px] font-bold" title="CSV Local"><i className="fas fa-file-excel text-emerald-400"></i></button>
-                  <button onClick={generarCSVDia} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 text-slate-300 px-2.5 py-2 rounded-xl text-[11px] font-bold" title="CSV del Día"><i className="fas fa-file-csv text-blue-400"></i></button>
+                  <button onClick={descargarCSV} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 text-slate-300 px-2.5 py-2 rounded-xl text-[11px] font-bold"><i className="fas fa-file-excel text-emerald-400"></i></button>
+                  <button onClick={generarCSVDia} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 text-slate-300 px-2.5 py-2 rounded-xl text-[11px] font-bold"><i className="fas fa-file-csv text-blue-400"></i></button>
                 </>
               )}
             </div>
           )}
 
-          {/* BOTÓN MODO SELECCIÓN PARCIAL */}
           {listaConteo.length > 0 && (
             <button onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`px-3 py-2 rounded-xl font-bold text-xs transition-colors border ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40' : 'bg-blue-500/20 text-blue-400 border-blue-500/40'}`}>
               <i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}
@@ -436,7 +452,7 @@ const InventarioView = () => {
         </div>
       )}
 
-      {/* CUERPO CENTRAL DE LA APLICACIÓN */}
+      {/* CUERPO CENTRAL */}
       <main className="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full custom-scroll relative">
         
         {/* VISTA 1: CAPTURA MÓVIL */}
@@ -465,15 +481,12 @@ const InventarioView = () => {
               onToggleSeleccion={toggleSeleccion}
             />
 
-            {/* BOTÓN PRINCIPAL UNIFICADO (Call to Action Infalible en la base) */}
             {listaConteo.length > 0 && (
               <div className="fixed bottom-4 left-4 right-4 max-w-5xl mx-auto z-30 animate-fade-in">
                 <button 
                   onClick={handleSincronizacionTotal}
                   className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider shadow-2xl transition-all flex items-center justify-center gap-2.5 border active:scale-[0.99] ${
-                    modoSeleccion 
-                      ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-400 shadow-amber-950/50' 
-                      : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400 shadow-emerald-950/80'
+                    modoSeleccion ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-400' : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400'
                   }`}
                 >
                   <i className={`fas ${modoSeleccion ? 'fa-archive' : 'fa-cloud-upload-alt'} text-lg`}></i> 
@@ -484,77 +497,126 @@ const InventarioView = () => {
           </div>
         ) : (
           
-        /* VISTA 2: PANEL DE REVISIÓN PC */
-          <div className="flex flex-col gap-6 animate-fade-in pb-10">
+        /* VISTA 2: NUBE / REVISIÓN RESPONSIVA (MÓVIL + TRADUCCIÓN FRANCÉS) */
+          <div className="flex flex-col gap-5 animate-fade-in pb-10">
+            
+            {/* Carrusel Horizontal de Sesiones */}
             <div className="flex gap-3 overflow-x-auto pb-2 custom-scroll">
               {sesionesNube.length === 0 ? (
-                <p className="text-slate-500 text-sm italic py-4">No hay sesiones en la nube pendientes de revisión.</p>
+                <p className="text-slate-500 text-sm italic py-4">{t.nubeVacia}</p>
               ) : (
                 sesionesNube.map((sesion, idx) => {
                   const isSelected = sesionSeleccionadaNube?.id === sesion.id;
-                  const fechaStr = sesion.fecha ? new Date(sesion.fecha.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Reciente';
+                  const fechaStr = sesion.fecha ? new Date(sesion.fecha.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
                   return (
                     <button
                       key={sesion.id}
                       onClick={() => setSesionSeleccionadaNube(sesion)}
-                      className={`p-3 rounded-2xl border text-left shrink-0 transition-all flex flex-col gap-1 min-w-[160px] ${isSelected ? 'bg-purple-950/60 border-purple-500 text-white shadow-lg shadow-purple-950' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-750'}`}
+                      className={`p-3 rounded-2xl border text-left shrink-0 transition-all flex flex-col gap-1 min-w-[140px] ${isSelected ? 'bg-purple-950/60 border-purple-500 text-white shadow-lg' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-750'}`}
                     >
-                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-400">Sesión #{sesionesNube.length - idx}</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-400">
+                        {t.sesionNum.replace('{n}', sesionesNube.length - idx)}
+                      </span>
                       <span className="font-bold text-xs text-slate-200">{fechaStr} • {sesion.total_skus || 0} SKUs</span>
-                      <span className="text-[9px] text-slate-500 truncate"><i className="fas fa-tablet-alt mr-1"></i>{sesion.origen || 'Almacén'}</span>
+                      <span className="text-[9px] text-slate-500 truncate"><i className="fas fa-warehouse mr-1"></i>{sesion.origen || t.origenDispositivo}</span>
                     </button>
                   );
                 })
               )}
             </div>
 
+            {/* CONTENIDO DE LA SESIÓN: Tarjetas en Móvil / Tabla en Escritorio */}
             {sesionSeleccionadaNube ? (
-              <div className="bg-slate-800 rounded-3xl border border-slate-600 overflow-hidden shadow-2xl">
-                <div className="p-4 bg-slate-850 border-b border-slate-700 flex justify-between items-center">
+              <div className="flex flex-col gap-4">
+                <div className="bg-slate-850 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
                   <h3 className="font-black text-sm text-white flex items-center gap-2">
-                    <i className="fas fa-table text-purple-400"></i> Tabla para Ajustes en POS
+                    <i className="fas fa-cloud-download-alt text-purple-400"></i> {t.tablaTitulo}
                   </h3>
-                  <span className="text-xs text-slate-400">Haz clic en el SKU para copiarlo rápido</span>
+                  <span className="text-[11px] text-slate-400">{t.tablaSub}</span>
                 </div>
-                
-                <div className="overflow-x-auto">
+
+                {/* --- VISTA MÓVIL: Listado de Tarjetas Compactas --- */}
+                <div className="grid grid-cols-1 gap-3 md:hidden">
+                  {sesionSeleccionadaNube.items?.map((item) => {
+                    const ajuste = item.totalFisico - item.stockSistema;
+                    const colorDif = ajuste > 0 ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/10' : 'text-emerald-400 border-slate-700 bg-slate-800/50';
+                    
+                    return (
+                      <div key={item.codigo} className="bg-slate-800 border border-slate-700 rounded-2xl p-4 flex flex-col gap-3 shadow-md">
+                        {/* Fila Superior: Botón Copiar Gigante */}
+                        <button 
+                          onClick={() => copiarCodigo(item.codigo)}
+                          className="w-full bg-slate-900 border border-slate-650 hover:border-blue-500 text-blue-400 p-2.5 rounded-xl font-mono font-black text-sm flex items-center justify-between active:scale-[0.98] transition-all"
+                        >
+                          <span className="tracking-wider">{item.codigo}</span>
+                          <span className="text-[10px] font-sans font-bold bg-blue-600/20 text-blue-300 px-2 py-1 rounded border border-blue-500/30 uppercase tracking-widest flex items-center gap-1">
+                            <i className="fas fa-copy"></i> {t.copiarBoton}
+                          </span>
+                        </button>
+                        
+                        {/* Nombre del Producto */}
+                        <p className="font-bold text-xs text-white leading-tight">{item.nombre}</p>
+
+                        {/* Cuadrícula de Cantidades */}
+                        <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-700/60 text-center">
+                          <div className="bg-slate-900/40 p-2 rounded-lg">
+                            <span className="block text-[9px] font-black text-slate-500 uppercase">{t.colSis}</span>
+                            <span className="font-bold text-xs text-slate-300">{item.stockSistema}</span>
+                          </div>
+                          <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-750">
+                            <span className="block text-[9px] font-black text-blue-400 uppercase">{t.colFis}</span>
+                            <span className="font-black text-xs text-white">{item.totalFisico}</span>
+                          </div>
+                          <div className={`p-2 rounded-lg border ${colorDif}`}>
+                            <span className="block text-[9px] font-black uppercase opacity-80">{t.colDif}</span>
+                            <span className="font-black text-xs">{ajuste > 0 ? `+${ajuste}` : ajuste}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* --- VISTA ESCRITORIO: Tabla Clásica Ancha --- */}
+                <div className="hidden md:block bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-slate-900/50 text-[10px] font-black uppercase text-slate-400 tracking-wider border-b border-slate-700">
-                        <th className="p-3 pl-4">Código (SKU)</th>
-                        <th className="p-3">Producto</th>
-                        <th className="p-3 text-center">Sistema</th>
-                        <th className="p-3 text-center">Físico</th>
-                        <th className="p-3 text-center pr-4">Diferencia</th>
+                      <tr className="bg-slate-900/60 text-[10px] font-black uppercase text-slate-400 tracking-wider border-b border-slate-700">
+                        <th className="p-3 pl-4 w-36">{t.colSku}</th>
+                        <th className="p-3">{t.colProd}</th>
+                        <th className="p-3 text-center w-20">{t.colSis}</th>
+                        <th className="p-3 text-center w-20">{t.colFis}</th>
+                        <th className="p-3 text-center pr-4 w-20">{t.colDif}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700/50 text-xs font-medium text-slate-200">
                       {sesionSeleccionadaNube.items?.map((item) => {
                         const ajuste = item.totalFisico - item.stockSistema;
-                        const colorAjuste = ajuste > 0 ? 'text-amber-400 font-black' : ajuste < 0 ? 'text-red-400 font-black' : 'text-emerald-400';
+                        const colorDif = ajuste > 0 ? 'text-amber-400 font-black' : ajuste < 0 ? 'text-red-400 font-black' : 'text-emerald-400';
                         return (
                           <tr key={item.codigo} className="hover:bg-slate-750/50 transition-colors group">
-                            <td className="p-3 pl-4 font-mono font-bold w-32">
-                              <button onClick={() => copiarCodigo(item.codigo)} className="w-full text-left text-blue-400 hover:text-blue-300 flex items-center justify-between bg-slate-900/40 hover:bg-slate-900 p-1.5 rounded-lg border border-slate-700 group-hover:border-blue-500/40 transition-all" title="Copiar código">
-                                <span>{item.codigo}</span> <i className="fas fa-copy text-[10px] opacity-40 group-hover:opacity-100 transition-opacity"></i>
+                            <td className="p-3 pl-4 font-mono font-bold">
+                              <button onClick={() => copiarCodigo(item.codigo)} className="w-full text-left text-blue-400 hover:text-blue-300 flex items-center justify-between bg-slate-900/40 hover:bg-slate-900 p-1.5 rounded-lg border border-slate-700 group-hover:border-blue-500/40 transition-all">
+                                <span>{item.codigo}</span> <i className="fas fa-copy text-[10px] opacity-40 group-hover:opacity-100"></i>
                               </button>
                             </td>
-                            <td className="p-3 font-bold text-white max-w-xs truncate">{item.nombre}</td>
+                            <td className="p-3 font-bold text-white truncate max-w-sm">{item.nombre}</td>
                             <td className="p-3 text-center text-slate-400">{item.stockSistema}</td>
                             <td className="p-3 text-center font-bold text-white bg-slate-900/20">{item.totalFisico}</td>
-                            <td className={`p-3 text-center pr-4 ${colorAjuste}`}>{ajuste > 0 ? `+${ajuste}` : ajuste}</td>
+                            <td className={`p-3 text-center pr-4 ${colorDif}`}>{ajuste > 0 ? `+${ajuste}` : ajuste}</td>
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
                 </div>
+
               </div>
             ) : (
               sesionesNube.length > 0 && (
                 <div className="text-center py-12 bg-slate-800/40 rounded-3xl border border-dashed border-slate-700">
-                  <i className="fas fa-desktop text-3xl text-slate-600 mb-3 animate-pulse"></i>
-                  <p className="text-xs font-bold text-slate-400">Selecciona una sesión de la barra superior para revisar sus diferencias.</p>
+                  <i className="fas fa-mobile-alt text-3xl text-slate-600 mb-3 animate-pulse"></i>
+                  <p className="text-xs font-bold text-slate-400">{t.sinSesionSel}</p>
                 </div>
               )
             )}
