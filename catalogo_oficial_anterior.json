@@ -106,7 +106,7 @@
     "codigo": "CPB-10-U/CP",
     "precio": 58.46,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 10 L  SIN TAPA",
-    "stock": 8276,
+    "stock": 8256,
     "tipo": 1,
     "receta": null
   },
@@ -852,7 +852,7 @@
     "codigo": "SGAP-3/4/CP",
     "precio": 5.51,
     "nombre": "SELLO DE GARANTIA ALL PLASTIC DE 3/4\" BLANCO  ( 7000000369 )",
-    "stock": 2367,
+    "stock": 2397,
     "tipo": 1,
     "receta": null
   },
@@ -1534,7 +1534,7 @@
     "codigo": "SGAP-2/CP",
     "precio": 13.73,
     "nombre": "SELLO DE GARANTIA ALL PLASTIC 2 \" BLANCO ( 7000000370 )",
-    "stock": 2097,
+    "stock": 2127,
     "tipo": 1,
     "receta": null
   },
@@ -2576,7 +2576,7 @@
     "codigo": "PIN-20-S/CP",
     "precio": 71.88,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 20 L C/TAPON SAMPSON",
-    "stock": 101,
+    "stock": 161,
     "tipo": 1,
     "receta": null
   },
@@ -2681,7 +2681,7 @@
     "codigo": "TP-CIL-250/CP",
     "precio": 3.71,
     "nombre": "TARRO PET CILINDRICO DE 250 ML R-63 S/TAPA",
-    "stock": 16707,
+    "stock": 16767,
     "tipo": 1,
     "receta": null
   },
@@ -3011,7 +3011,7 @@
     "codigo": "GIC-NAT/CP",
     "precio": 12.46,
     "nombre": "GALON INDUSTRIAL CUADRADO NATURAL S/TAPA R-38",
-    "stock": 5240,
+    "stock": 5192,
     "tipo": 1,
     "receta": null
   },
@@ -3866,6 +3866,14 @@
         "cantidad": 1
       }
     ]
+  },
+  {
+    "codigo": "J-2018",
+    "precio": 0,
+    "nombre": "JETTA MK VI 4 PUERTAS",
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
   },
   {
     "codigo": "FPP-110-CR-CT",
@@ -6503,7 +6511,7 @@
     "codigo": "TP-R38-SC/CP",
     "precio": 0.9,
     "nombre": "TAPA R-38 SIN CINTILLO",
-    "stock": 237063,
+    "stock": 237015,
     "tipo": 1,
     "receta": null
   },
