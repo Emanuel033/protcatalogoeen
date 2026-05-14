@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, doc, addDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
-// Importación explícita con extensión .js para evitar conflictos en el build de GitHub Actions
+// Importación blindada con extensión .js para compilar perfecto en GitHub Actions
 import { db } from '../../firebase.js'; 
 
 import EscanerManual from './components/EscanerManual';
@@ -30,16 +30,16 @@ const tInv = {
     listaVacia: 'La lista actual está vacía.',
     noArchivarVacio: 'No hay productos para procesar.',
     confirmaArchivar: '¿Deseas archivar localmente tu progreso actual?',
-    confirmaSincronizar: '¿Deseas finalizar este conteo y enviarlo a la nube/PC para su revisión?',
+    confirmaSincronizar: '¿Deseas finalizar este conteo y enviar el CONSOLIDADO DEL DÍA a la PC?',
     confirmaRecuperar: '¿Deseas recuperar los productos seleccionados a tu lista actual?',
     noConteosDia: 'No hay conteos registrados el día de hoy.',
     archivoExito: 'Productos archivados localmente con éxito.',
-    sincExito: '¡Conteo finalizado y respaldado en la nube exitosamente!',
+    sincExito: '¡Consolidado del día respaldado en la nube exitosamente!',
     recuperadoExito: 'Productos recuperados y listos para editar.',
     csvExito: 'Archivo CSV generado exitosamente.',
     cancelar: 'Cancelar',
     aceptar: 'Aceptar',
-    aceptarSinc: 'Sí, Sincronizar',
+    aceptarSinc: 'Sí, Sincronizar Día',
     // TEXTOS MODO SELECCIÓN
     seleccionar: 'Seleccionar',
     selTodo: 'Todo',
@@ -49,7 +49,7 @@ const tInv = {
     recuperarSel: 'Recuperar ({n})',
     errorSelVacia: 'Selecciona al menos un producto.',
     // TEXTOS NUBE / VISTAS
-    botonSincronizar: 'Finalizar y Sincronizar',
+    botonSincronizar: 'Finalizar y Sincronizar Día',
     pestañaConteo: '📱 Captura',
     pestañaNube: '☁️ Nube / PC',
     copiado: '¡Código copiado al portapapeles!',
@@ -57,7 +57,7 @@ const tInv = {
     nubeVacia: 'No hay sesiones sincronizadas pendientes.',
     sesionNum: 'Sesión #{n}',
     origenDispositivo: 'Almacén',
-    tablaTitulo: 'Revisión de Ajustes (Nube)',
+    tablaTitulo: 'Consolidado del Día (Nube)',
     tablaSub: 'Toca el SKU para copiarlo al POS',
     colSku: 'Código (SKU)',
     colProd: 'Producto',
@@ -65,7 +65,8 @@ const tInv = {
     colFis: 'Físico',
     colDif: 'Dif.',
     sinSesionSel: 'Selecciona una sesión de la barra superior para revisar sus diferencias.',
-    copiarBoton: 'Copiar'
+    copiarBoton: 'Copiar',
+    etiquetaConsolidado: '📊 Consolidado Hoy'
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -87,16 +88,16 @@ const tInv = {
     listaVacia: 'La liste actuelle est vide.',
     noArchivarVacio: 'Aucun produit à traiter.',
     confirmaArchivar: 'Voulez-vous archiver localement votre progression ?',
-    confirmaSincronizar: 'Voulez-vous finaliser ce comptage et l\'envoyer au serveur ?',
+    confirmaSincronizar: 'Voulez-vous finaliser et envoyer le CUMUL DU JOUR au PC ?',
     confirmaRecuperar: 'Voulez-vous récupérer ces produits dans votre liste ?',
     noConteosDia: 'Aucun comptage enregistré aujourd\'hui.',
     archivoExito: 'Produits archivés localement avec succès.',
-    sincExito: 'Comptage finalisé et synchronisé avec succès !',
+    sincExito: 'Cumul du jour synchronisé avec succès !',
     recuperadoExito: 'Produits récupérés et prêts à être édités.',
     csvExito: 'Fichier CSV généré avec succès.',
     cancelar: 'Annuler',
     aceptar: 'Accepter',
-    aceptarSinc: 'Oui, Synchroniser',
+    aceptarSinc: 'Oui, Synchroniser Jour',
     // TEXTOS MODO SELECCIÓN
     seleccionar: 'Sélectionner',
     selTodo: 'Tout',
@@ -106,7 +107,7 @@ const tInv = {
     recuperarSel: 'Récupérer ({n})',
     errorSelVacia: 'Sélectionnez au moins un produit.',
     // TEXTOS NUBE / VISTAS
-    botonSincronizar: 'Finaliser et Synchroniser',
+    botonSincronizar: 'Finaliser et Synchroniser Jour',
     pestañaConteo: '📱 Capture',
     pestañaNube: '☁️ Serveur / PC',
     copiado: 'Code copié dans le presse-papiers !',
@@ -114,7 +115,7 @@ const tInv = {
     nubeVacia: 'Aucune session synchronisée en attente.',
     sesionNum: 'Session #{n}',
     origenDispositivo: 'Entrepôt',
-    tablaTitulo: 'Révision des Ajustements',
+    tablaTitulo: 'Cumul Global du Jour',
     tablaSub: 'Touchez le SKU pour le copier',
     colSku: 'Code (SKU)',
     colProd: 'Produit',
@@ -122,7 +123,8 @@ const tInv = {
     colFis: 'Physique',
     colDif: 'Diff.',
     sinSesionSel: 'Sélectionnez une session ci-dessus pour voir les différences.',
-    copiarBoton: 'Copier'
+    copiarBoton: 'Copier',
+    etiquetaConsolidado: '📊 Cumul du Jour'
   }
 };
 
@@ -256,13 +258,14 @@ const InventarioView = () => {
   };
 
   // ==========================================================================
-  // FLUJO 1: SINCRONIZACIÓN MAESTRA A NUBE (Incluye creación de Master)
+  // SINCRONIZACIÓN MAESTRA CONSOLIDADA (Aplica la misma fusión del CSV del Día)
   // ==========================================================================
   const handleSincronizacionTotal = () => {
     if (listaConteo.length === 0) { mostrarToast(t.noArchivarVacio, 'error'); return; }
     if (modoSeleccion && seleccionados.length === 0) { mostrarToast(t.errorSelVacia, 'error'); return; }
 
     pedirConfirmacion(t.confirmaSincronizar, async () => {
+      // 1. Separar lo que se procesa
       const itemsAProcesar = modoSeleccion && seleccionados.length > 0 
         ? listaConteo.filter(item => seleccionados.includes(item.codigo)) 
         : [...listaConteo];
@@ -270,7 +273,7 @@ const InventarioView = () => {
         ? listaConteo.filter(item => !seleccionados.includes(item.codigo))
         : [];
 
-      // Inyectar empaques nuevos en productos_master
+      // 2. Inyectar de forma permanente los paquetes nuevos (Fantasmas)
       for (const item of itemsAProcesar) {
         const codigoPadre = String(item.codigo).toUpperCase();
         const paquetesFantasmas = item.variantes.filter(v => v.isFantasma && v.pz > 1);
@@ -290,21 +293,50 @@ const InventarioView = () => {
         }
       }
 
-      // Subir Bitácora Firebase
+      // 3. Respaldar en Historial Local PRIMERO (Para que cuente en la suma de hoy)
+      const nuevoRegistro = { id: Date.now(), fecha: new Date().toISOString(), items: itemsAProcesar };
+      const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
+      const nuevoHistorial = [nuevoRegistro, ...historialPrevio].slice(0, 50);
+      localStorage.setItem('een_historial_conteos', JSON.stringify(nuevoHistorial));
+
+      // 4. MOTOR CONSOLIDADOR: Extraer todo lo de hoy y fusionar cantidades
+      const hoyStr = new Date().toDateString();
+      const conteosHoy = nuevoHistorial.filter(r => new Date(r.fecha).toDateString() === hoyStr);
+
+      const agruparConsolidado = {};
+      conteosHoy.forEach(reg => {
+        reg.items.forEach(item => {
+          if (!agruparConsolidado[item.codigo]) {
+            agruparConsolidado[item.codigo] = JSON.parse(JSON.stringify(item));
+          } else {
+            const existente = agruparConsolidado[item.codigo];
+            item.variantes.forEach(vNueva => {
+              const vEx = existente.variantes.find(vx => vx.id === vNueva.id);
+              if (vEx) {
+                vEx.contadas += vNueva.contadas;
+              } else {
+                existente.variantes.push({ ...vNueva });
+              }
+            });
+            existente.totalFisico = existente.variantes.reduce((sum, v) => sum + (v.pz * v.contadas), 0);
+          }
+        });
+      });
+
+      const arrayConsolidadoFinal = Object.values(agruparConsolidado);
+
+      // 5. Subir a Nube el Total del Día Consolidado
       try {
         await addDoc(collection(db, 'bitacora_inventario'), {
           fecha: serverTimestamp(),
-          items: itemsAProcesar,
-          total_skus: itemsAProcesar.length,
-          origen: t.origenDispositivo
+          items: arrayConsolidadoFinal,
+          total_skus: arrayConsolidadoFinal.length,
+          origen: t.origenDispositivo,
+          etiqueta: t.etiquetaConsolidado // Fuerza a que salga con el tag visual en PC
         });
       } catch (e) { console.error("Error nube:", e); }
 
-      // Respaldar en Historial Local
-      const nuevoRegistro = { id: Date.now(), fecha: new Date().toISOString(), items: itemsAProcesar };
-      const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
-      localStorage.setItem('een_historial_conteos', JSON.stringify([nuevoRegistro, ...historialPrevio].slice(0, 50)));
-
+      // 6. Limpiar UI
       setListaConteo(itemsRestantes); 
       setModoSeleccion(false);
       setSeleccionados([]);
@@ -315,7 +347,7 @@ const InventarioView = () => {
   };
 
   // ==========================================================================
-  // FLUJO 2: ARCHIVADO EXCLUSIVAMENTE LOCAL (Comportamiento Clásico)
+  // ARCHIVADO EXCLUSIVAMENTE LOCAL
   // ==========================================================================
   const handleFinalizarConteo = () => {
     if (listaConteo.length === 0) { mostrarToast(t.noArchivarVacio, 'error'); return; }
@@ -325,7 +357,6 @@ const InventarioView = () => {
       const itemsAArchivar = modoSeleccion && seleccionados.length > 0 
         ? listaConteo.filter(item => seleccionados.includes(item.codigo)) 
         : [...listaConteo];
-        
       const itemsRestantes = modoSeleccion && seleccionados.length > 0
         ? listaConteo.filter(item => !seleccionados.includes(item.codigo))
         : [];
@@ -337,7 +368,6 @@ const InventarioView = () => {
       setListaConteo(itemsRestantes); 
       setModoSeleccion(false);
       setSeleccionados([]);
-      
       if(itemsRestantes.length === 0) localStorage.removeItem('een_inventario_activo'); 
       mostrarToast(t.archivoExito, 'success');
     });
@@ -443,7 +473,7 @@ const InventarioView = () => {
         </div>
       )}
 
-      {/* 1. BARRA SUPERIOR DE NAVEGACIÓN GLOBAL ULTRA COMPACTA */}
+      {/* 1. BARRA SUPERIOR COMPACTA */}
       <div className="bg-slate-950 border-b border-slate-850 px-4 py-2.5 flex justify-between items-center shrink-0 z-50">
         <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-750 shadow-inner">
           <button onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>
@@ -463,11 +493,10 @@ const InventarioView = () => {
         </div>
       </div>
 
-      {/* 2. CABECERA DINÁMICA ORIGINAL (Solo activa en Captura) */}
+      {/* 2. CABECERA DINÁMICA ORIGINAL */}
       {vistaActual === 'conteo' && (
         <header className={`border-b shrink-0 shadow-lg z-40 transition-colors ${modoSeleccion ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'} p-4 flex flex-col gap-4`}>
           
-          {/* Fila del Título Principal */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3 min-w-0">
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg border shrink-0 ${modoSeleccion ? 'bg-blue-500 border-blue-400 text-white' : 'bg-blue-600 border-blue-500/50 shadow-blue-900/50'}`}>
@@ -483,19 +512,13 @@ const InventarioView = () => {
               </div>
             </div>
 
-            {/* Botón de Selección Parcial */}
             {listaConteo.length > 0 && (
-              <button 
-                onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} 
-                className={`px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}
-              >
-                <i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i>
-                {modoSeleccion ? t.cancelar : t.seleccionar}
+              <button onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}>
+                <i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}
               </button>
             )}
           </div>
 
-          {/* Fila de Botonera Maestra */}
           {modoSeleccion ? (
             <div className="flex gap-3">
                <button onClick={toggleTodos} className="flex-1 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white p-3 rounded-2xl transition-all shadow-sm font-bold text-sm flex justify-center items-center gap-2 active:scale-95">
@@ -508,7 +531,7 @@ const InventarioView = () => {
           ) : (
             <div className="flex flex-col gap-3">
               
-              {/* BOTÓN MAESTRO DE NUBE (Fácil acceso arriba) */}
+              {/* BOTÓN MAESTRO DE NUBE EXCLUSIVO EN CABECERA */}
               {listaConteo.length > 0 && (
                 <button 
                   onClick={handleSincronizacionTotal}
@@ -518,7 +541,7 @@ const InventarioView = () => {
                 </button>
               )}
 
-              {/* TUS 4 BOTONES GRANDES CLÁSICOS EN CUADRÍCULA */}
+              {/* LOS 4 BOTONES GRANDES CLÁSICOS */}
               <div className="grid grid-cols-4 gap-3">
                 <button onClick={handleFinalizarConteo} className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95">
                   <i className="fas fa-archive text-xl"></i>
@@ -548,7 +571,7 @@ const InventarioView = () => {
         
         {/* VISTA 1: CAPTURA MÓVIL */}
         {vistaActual === 'conteo' ? (
-          <div className="flex flex-col gap-5 pb-24">
+          <div className="flex flex-col gap-5 pb-12">
             {modoSeleccion && <div className="absolute top-0 left-0 right-0 h-24 z-10 bg-slate-900/50 backdrop-blur-[1px] rounded-3xl" />}
             
             <div className="bg-slate-800 p-5 rounded-3xl border border-slate-600 shadow-xl">
@@ -571,25 +594,10 @@ const InventarioView = () => {
               seleccionados={seleccionados}
               onToggleSeleccion={toggleSeleccion}
             />
-
-            {/* BOTÓN INFERIOR FIJO (Mantenido como red de seguridad al final del scroll) */}
-            {listaConteo.length > 0 && (
-              <div className="fixed bottom-4 left-4 right-4 max-w-5xl mx-auto z-30 animate-fade-in">
-                <button 
-                  onClick={handleSincronizacionTotal}
-                  className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider shadow-2xl transition-all flex items-center justify-center gap-2.5 border active:scale-[0.99] ${
-                    modoSeleccion ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 border-amber-400' : 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400'
-                  }`}
-                >
-                  <i className={`fas ${modoSeleccion ? 'fa-archive' : 'fa-cloud-upload-alt'} text-lg`}></i> 
-                  {modoSeleccion ? t.sincronizarSel.replace('{n}', seleccionados.length) : t.botonSincronizar}
-                </button>
-              </div>
-            )}
           </div>
         ) : (
           
-        /* VISTA 2: NUBE / REVISIÓN RESPONSIVA (MÓVIL + TRADUCCIÓN FRANCÉS) */
+        /* VISTA 2: NUBE / REVISIÓN RESPONSIVA */
           <div className="flex flex-col gap-5 animate-fade-in pb-10">
             
             <div className="flex gap-3 overflow-x-auto pb-2 custom-scroll">
@@ -599,14 +607,16 @@ const InventarioView = () => {
                 sesionesNube.map((sesion, idx) => {
                   const isSelected = sesionSeleccionadaNube?.id === sesion.id;
                   const fechaStr = sesion.fecha ? new Date(sesion.fecha.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
+                  const tagVisual = sesion.etiqueta ? sesion.etiqueta : t.sesionNum.replace('{n}', sesionesNube.length - idx);
+                  
                   return (
                     <button
                       key={sesion.id}
                       onClick={() => setSesionSeleccionadaNube(sesion)}
                       className={`p-3 rounded-2xl border text-left shrink-0 transition-all flex flex-col gap-1 min-w-[140px] ${isSelected ? 'bg-purple-950/60 border-purple-500 text-white shadow-lg' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-750'}`}
                     >
-                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-400">
-                        {t.sesionNum.replace('{n}', sesionesNube.length - idx)}
+                      <span className={`text-[10px] font-black uppercase tracking-wider ${sesion.etiqueta ? 'text-emerald-400' : 'text-purple-400'}`}>
+                        {tagVisual}
                       </span>
                       <span className="font-bold text-xs text-slate-200">{fechaStr} • {sesion.total_skus || 0} SKUs</span>
                       <span className="text-[9px] text-slate-500 truncate"><i className="fas fa-warehouse mr-1"></i>{sesion.origen || t.origenDispositivo}</span>
@@ -625,7 +635,7 @@ const InventarioView = () => {
                   <span className="text-[11px] text-slate-400">{t.tablaSub}</span>
                 </div>
 
-                {/* VISTA MÓVIL: Listado de Tarjetas Compactas */}
+                {/* VISTA MÓVIL: Tarjetas Compactas */}
                 <div className="grid grid-cols-1 gap-3 md:hidden">
                   {sesionSeleccionadaNube.items?.map((item) => {
                     const ajuste = item.totalFisico - item.stockSistema;
@@ -664,7 +674,7 @@ const InventarioView = () => {
                   })}
                 </div>
 
-                {/* VISTA ESCRITORIO: Tabla Clásica Ancha */}
+                {/* VISTA ESCRITORIO: Tabla Clásica */}
                 <div className="hidden md:block bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
                   <table className="w-full text-left border-collapse">
                     <thead>
