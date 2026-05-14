@@ -8,50 +8,51 @@ const LogisticaContext = createContext();
 // MOTOR DE SIMILITUD DE TEXTOS (VERSIÓN QUIRÚRGICA)
 // ============================================================================
 
-// 1. Limpieza de razones sociales para dejar solo el nombre comercial puro
+// 1. Limpieza de razones sociales
 const limpiarRazonSocial = (texto = '') => {
     return texto.toUpperCase()
         .replace(/\b(SA|DE|CV|RL|SAPI|SNC|LLC|CO|INC|LTD)\b/g, '')
         .replace(/\b(TRANSPORTES|TRANSPORTE|FLETERA|FLETES|LOGISTICA|EXPRESS|CARGA|ENVIOS)\b/g, '')
-        .replace(/[^A-Z0-9 ]/g, '') // Quitar puntos, comas y guiones
-        .replace(/\s+/g, ' ')       // Quitar dobles espacios
-        .trim();
+        .replace(/[^A-Z0-9 ]/g, '') 
+        .replace(/\s+/g, ' ').trim();
 };
 
-// 2. Candado estricto para pares conflictivos comunes
+// 1.5 NUEVO: Limpieza específica para DIRECCIONES
+const limpiarDireccion = (texto = '') => {
+    return texto.toUpperCase()
+        .replace(/NUEVO LE[OÓ]N/g, 'NL') // Homologar estado
+        .replace(/N\.L\./g, 'NL')
+        .replace(/\b(COLONIA|COL|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '') // Quitar prefijos basura
+        .replace(/[^A-Z0-9 ]/g, '') // Quitar puntos y comas
+        .replace(/\s+/g, ' ').trim();
+};
+
+// 2. Candado estricto
 const esConflictoConocido = (strA, strB) => {
     const a = strA.replace(/\s+/g, '');
     const b = strB.replace(/\s+/g, '');
-    
-    // Si uno es TEAMMEX y el otro TRATAMEX, bloquear match difuso
     if ((a.includes('TEAM') && b.includes('TRATA')) || (b.includes('TEAM') && a.includes('TRATA'))) return true;
-    
-    // Si uno es ESTRELLABLANCA y el otro es solo ESTRELLA, bloquear match difuso
     if ((a === 'ESTRELLA' && b.includes('BLANCA')) || (b === 'ESTRELLA' && a.includes('BLANCA'))) return true;
-
     return false;
 };
 
-// 3. Algoritmo combinado: Levenshtein + Coeficiente de Jaccard (Bigramas)
-const similitudTextosFina = (crudoA = '', crudoB = '') => {
-    const a = limpiarRazonSocial(crudoA);
-    const b = limpiarRazonSocial(crudoB);
+// 3. Algoritmo combinado ADAPTADO PARA RECIBIR 'TIPO'
+const similitudTextosFina = (crudoA = '', crudoB = '', tipo = 'razon_social') => {
+    // Si es dirección, usa el limpiador de direcciones; si no, el de empresas
+    const a = tipo === 'direccion' ? limpiarDireccion(crudoA) : limpiarRazonSocial(crudoA);
+    const b = tipo === 'direccion' ? limpiarDireccion(crudoB) : limpiarRazonSocial(crudoB);
 
     if (!a || !b) return 0;
     if (a === b) return 100;
 
-    // CANDADO DE PARES CRÍTICOS
     if (esConflictoConocido(a, b)) return 0; 
 
-    // COINCIDENCIA DE PALABRA COMPLETA EXACTA (Regex Boundary)
     const regexA = new RegExp(`\\b${a}\\b`);
     const regexB = new RegExp(`\\b${b}\\b`);
     if (regexA.test(b) || regexB.test(a)) {
-        // Solo damos 100% si las longitudes son muy similares para evitar que "PAQUETEX" valide "PAQUETEXPRESS"
         if (Math.abs(a.length - b.length) <= 3) return 95;
     }
 
-    // CÁLCULO LEVENSHTEIN TRADICIONAL
     let matrix = [];
     for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
     for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
@@ -65,7 +66,6 @@ const similitudTextosFina = (crudoA = '', crudoB = '') => {
     const maxLen = Math.max(a.length, b.length);
     const levenshteinScore = ((maxLen - editDistance) / maxLen) * 100;
 
-    // CÁLCULO JACCARD (Porcentaje de pares de letras compartidas)
     const getBigrams = (str) => {
         let bigrams = new Set();
         for (let i = 0; i < str.length - 1; i++) { bigrams.add(str.substring(i, i + 2)); }
@@ -78,7 +78,6 @@ const similitudTextosFina = (crudoA = '', crudoB = '') => {
     const union = setA.size + setB.size - intersection;
     const jaccardScore = union === 0 ? 0 : (intersection / union) * 100;
 
-    // Promediamos ambos motores para obtener un veredicto final altamente preciso
     return (levenshteinScore * 0.6) + (jaccardScore * 0.4);
 };
 
@@ -153,7 +152,8 @@ export const LogisticaProvider = ({ children }) => {
                 
                 let dirExistente = direccionesCliente.find(d => {
                     const esExacta = d.direccion.trim().toLowerCase() === dirLimpia.toLowerCase();
-                    const esMuySimilar = similitudTextosFina(d.direccion, dirLimpia) >= 85; 
+                    // AQUÍ ESTÁ LA MAGIA: Le pasamos 'direccion' al final
+                    const esMuySimilar = similitudTextosFina(d.direccion, dirLimpia, 'direccion') >= 85; 
                     return esExacta || esMuySimilar;
                 });
 
