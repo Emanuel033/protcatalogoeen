@@ -132,6 +132,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     if (isOpen && ordenAEditar) {
       let indexEncontrado = -1;
       const esBodegaLocal = metodoEnvio === 'bodega_cliente';
+      let destinoEncontrado = null; // Guardamos la referencia para sacar sus datos
 
       if (esBodegaLocal) {
         // Buscamos en las bodegas del cliente
@@ -140,6 +141,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
           (d && d.alias === ordenAEditar.destino_alias) || 
           (d && d.direccion === ordenAEditar.direccion)
         );
+        if (indexEncontrado !== -1) destinoEncontrado = dirs[indexEncontrado];
       } else {
         // Buscamos en las fleteras foráneas
         const listaFleteras = fleteras || [];
@@ -147,11 +149,20 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
           (f && f.id === ordenAEditar.fletera_asignada_id) || 
           (f && f.nombre === ordenAEditar.destino_alias)
         );
+        if (indexEncontrado !== -1) destinoEncontrado = listaFleteras[indexEncontrado];
       }
 
-      // Si encuentra coincidencia, asigna el índice al dropdown. Si no, lo deja en blanco.
+      // Si encuentra coincidencia, asigna el índice al dropdown.
       if (indexEncontrado !== -1) {
         setBodegaSeleccionada(String(indexEncontrado));
+        
+        // ¡LA MAGIA AQUÍ! Rellenar si en la orden venía vacío, pero en el catálogo sí existe
+        if (destinoEncontrado) {
+            setTelefonoBodega(prev => prev || String(destinoEncontrado.telefono || ''));
+            setHorariosEntrega(prev => prev || String(destinoEncontrado.horario || ''));
+            setContactoDestino(prev => prev || String(destinoEncontrado.contacto || ''));
+            setLinkMaps(prev => prev || String(destinoEncontrado.link_maps || ''));
+        }
       } else {
         setBodegaSeleccionada('');
       }
@@ -262,7 +273,6 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         }
 
         if (!isBodega && aliasDestinoLimpio) {
-            // Se agregó un ligero '?' de seguridad en f.nombre para que no rompa el guardado si hay datos raros.
             const fleteraExistente = fleteras.find(f => f.nombre?.toUpperCase() === aliasDestinoLimpio.toUpperCase());
             if (fleteraExistente) fleteraIdVinculada = fleteraExistente.id;
             else {
