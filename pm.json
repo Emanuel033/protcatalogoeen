@@ -617,7 +617,17 @@
       "receta_desglose": null,
       "hereda_empaques_de": "FJB9A3A752vZXkF4DHGv"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "rUJCGMblkj6KQwLUr5tC",
+        "piezas": 70,
+        "sku": "GPA-1-N/CP-70PZ",
+        "fecha_creacion": {
+          "_seconds": 1778779328,
+          "_nanoseconds": 148000000
+        }
+      }
+    ]
   },
   {
     "id": "-OkkKEJ7v8xy7DDrfJ6E",
@@ -665,7 +675,17 @@
       "tipo_item": "KIT_OFICIAL",
       "hereda_empaques_de": "LzkkGNfgifvZ1KyaXsb0"
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "dzvDeSOAQAjWrAYWVbOZ",
+        "piezas": 56,
+        "sku": "GPA-4-BCOS/T-56PZ",
+        "fecha_creacion": {
+          "_seconds": 1778779349,
+          "_nanoseconds": 844000000
+        }
+      }
+    ]
   },
   {
     "id": "-OkkK_kO8FLmMbLs6HSN",
@@ -4216,9 +4236,23 @@
       "fecha_creacion": {
         "_seconds": 1773776070,
         "_nanoseconds": 998000000
+      },
+      "ultima_actualizacion": {
+        "_seconds": 1778779328,
+        "_nanoseconds": 305000000
       }
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "rUJCGMblkj6KQwLUr5tC",
+        "piezas": 70,
+        "sku": "GPA-1-N/CP-70PZ",
+        "fecha_creacion": {
+          "_seconds": 1778779328,
+          "_nanoseconds": 148000000
+        }
+      }
+    ]
   },
   {
     "id": "GV6QJFKWlpHRN2dYQI6g",
@@ -4504,9 +4538,23 @@
       "fecha_creacion": {
         "_seconds": 1773776292,
         "_nanoseconds": 106000000
+      },
+      "ultima_actualizacion": {
+        "_seconds": 1778779351,
+        "_nanoseconds": 857000000
       }
     },
-    "paquetes": []
+    "paquetes": [
+      {
+        "id": "dzvDeSOAQAjWrAYWVbOZ",
+        "piezas": 56,
+        "sku": "GPA-4-BCOS/T-56PZ",
+        "fecha_creacion": {
+          "_seconds": 1778779349,
+          "_nanoseconds": 844000000
+        }
+      }
+    ]
   },
   {
     "id": "MWOfNuaxLVGZypql8E3W",
@@ -9969,34 +10017,6 @@
         "nombre_paquete": "Paquete de 54 piezas",
         "piezas": 54,
         "sku": "P316-54PZ",
-        "es_default": true
-      }
-    ]
-  },
-  {
-    "id": "p317",
-    "firebase_data": {
-      "id": "p317",
-      "nombre_flexible": "GARRAFA P/ANTICONGELANTE BLANCO 1 L C/TAPA NORTE",
-      "stock_total_piezas": 0,
-      "categoria": "PAD",
-      "imagen_url": "https://i.ibb.co/whhJ6Hr0/GARRAFA-PARA-ANTICONGELANTE-DE-1-L-BLANCA-R-38.jpg",
-      "activo": true,
-      "fecha_creacion": {
-        "_seconds": 1771885776,
-        "_nanoseconds": 792000000
-      },
-      "tipo_item": "KIT_OFICIAL",
-      "codigo_sistema_oficial": "GPA-1-NTE-CT",
-      "receta_desglose": null,
-      "hereda_empaques_de": "p313"
-    },
-    "paquetes": [
-      {
-        "id": "paquete_54",
-        "nombre_paquete": "Paquete de 54 piezas",
-        "piezas": 54,
-        "sku": "P313-54PZ",
         "es_default": true
       }
     ]
