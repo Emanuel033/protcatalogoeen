@@ -127,6 +127,32 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     }
   }, [isOpen, ordenAEditar, clientesLista]);
 
+  // --- NUEVO: SINCRONIZADOR DEL DROPDOWN AL EDITAR ---
+  useEffect(() => {
+    if (isOpen && ordenAEditar) {
+      let indexEncontrado = -1;
+
+      if (isBodega && clienteSeleccionado && clienteSeleccionado.direcciones) {
+        // Buscar el índice de la bodega local guardada
+        indexEncontrado = clienteSeleccionado.direcciones.findIndex(
+          d => d.alias === ordenAEditar.destino_alias || d.direccion === ordenAEditar.direccion
+        );
+      } else if (!isBodega && fleteras && fleteras.length > 0) {
+        // Buscar el índice de la fletera foránea guardada
+        indexEncontrado = fleteras.findIndex(
+          f => f.id === ordenAEditar.fletera_asignada_id || f.nombre === ordenAEditar.destino_alias
+        );
+      }
+
+      // Si lo encuentra, actualiza el Dropdown; si no, lo deja en blanco
+      if (indexEncontrado !== -1) {
+        setBodegaSeleccionada(String(indexEncontrado));
+      } else {
+        setBodegaSeleccionada('');
+      }
+    }
+  }, [isOpen, ordenAEditar, clienteSeleccionado, fleteras, isBodega]);
+
   const clientesFiltrados = clientesLista.filter(c => {
     const nombreSafe = String(clienteNombre || '').toLowerCase();
     const codigoSafe = String(codigoSAP || '').toLowerCase();
