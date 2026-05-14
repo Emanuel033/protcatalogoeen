@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, doc, addDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+// Importación explícita con extensión .js para evitar conflictos en el build de GitHub Actions
 import { db } from '../../firebase.js'; 
 
 import EscanerManual from './components/EscanerManual';
@@ -7,7 +8,7 @@ import ListaConteo from './components/ListaConteo';
 import ModalCalculadora from './components/ModalCalculadora';
 import useDictadoVoz from './hooks/useDictadoVoz';
 
-// --- DICCIONARIO BILINGÜE CENTRALIZADO (Completo) ---
+// --- DICCIONARIO BILINGÜE CENTRALIZADO ---
 const tInv = {
   es: {
     titulo: 'Inventario EEN',
@@ -15,6 +16,7 @@ const tInv = {
     listas: 'piezas listas',
     errorCarga: 'Error de carga',
     modoOffline: 'Modo Offline',
+    archivar: 'Archivar',
     csvVista: 'CSV Actual',
     csvDia: 'CSV del Día',
     historial: 'Historial',
@@ -26,20 +28,24 @@ const tInv = {
     skusContados: 'SKUs contados',
     cerrarVerificacion: 'Cerrar verificación',
     listaVacia: 'La lista actual está vacía.',
-    noArchivarVacio: 'No hay productos para sincronizar.',
+    noArchivarVacio: 'No hay productos para procesar.',
+    confirmaArchivar: '¿Deseas archivar localmente tu progreso actual?',
     confirmaSincronizar: '¿Deseas finalizar este conteo y enviarlo a la nube/PC para su revisión?',
     confirmaRecuperar: '¿Deseas recuperar los productos seleccionados a tu lista actual?',
     noConteosDia: 'No hay conteos registrados el día de hoy.',
+    archivoExito: 'Productos archivados localmente con éxito.',
     sincExito: '¡Conteo finalizado y respaldado en la nube exitosamente!',
     recuperadoExito: 'Productos recuperados y listos para editar.',
     csvExito: 'Archivo CSV generado exitosamente.',
     cancelar: 'Cancelar',
-    aceptar: 'Sí, Enviar',
+    aceptar: 'Aceptar',
+    aceptarSinc: 'Sí, Sincronizar',
     // TEXTOS MODO SELECCIÓN
     seleccionar: 'Seleccionar',
     selTodo: 'Todo',
     selNada: 'Nada', 
-    sincronizarSel: 'Enviar Seleccionados ({n})',
+    archivarSel: 'Archivar ({n})',
+    sincronizarSel: 'Sincronizar ({n})',
     recuperarSel: 'Recuperar ({n})',
     errorSelVacia: 'Selecciona al menos un producto.',
     // TEXTOS NUBE / VISTAS
@@ -47,7 +53,7 @@ const tInv = {
     pestañaConteo: '📱 Captura',
     pestañaNube: '☁️ Nube / PC',
     copiado: '¡Código copiado al portapapeles!',
-    // TRADUCCIONES NUEVA SECCIÓN NUBE
+    // TRADUCCIONES TABLA NUBE
     nubeVacia: 'No hay sesiones sincronizadas pendientes.',
     sesionNum: 'Sesión #{n}',
     origenDispositivo: 'Almacén',
@@ -67,6 +73,7 @@ const tInv = {
     listas: 'pièces prêtes',
     errorCarga: 'Erreur de chargement',
     modoOffline: 'Hors Ligne',
+    archivar: 'Archiver',
     csvVista: 'CSV Actuel',
     csvDia: 'CSV du Jour',
     historial: 'Historique',
@@ -78,20 +85,24 @@ const tInv = {
     skusContados: 'SKUs comptés',
     cerrarVerificacion: 'Fermer la vérification',
     listaVacia: 'La liste actuelle est vide.',
-    noArchivarVacio: 'Aucun produit à synchroniser.',
+    noArchivarVacio: 'Aucun produit à traiter.',
+    confirmaArchivar: 'Voulez-vous archiver localement votre progression ?',
     confirmaSincronizar: 'Voulez-vous finaliser ce comptage et l\'envoyer au serveur ?',
     confirmaRecuperar: 'Voulez-vous récupérer ces produits dans votre liste ?',
     noConteosDia: 'Aucun comptage enregistré aujourd\'hui.',
+    archivoExito: 'Produits archivés localement avec succès.',
     sincExito: 'Comptage finalisé et synchronisé avec succès !',
     recuperadoExito: 'Produits récupérés et prêts à être édités.',
     csvExito: 'Fichier CSV généré avec succès.',
     cancelar: 'Annuler',
-    aceptar: 'Oui, Envoyer',
+    aceptar: 'Accepter',
+    aceptarSinc: 'Oui, Synchroniser',
     // TEXTOS MODO SELECCIÓN
     seleccionar: 'Sélectionner',
     selTodo: 'Tout',
     selNada: 'Rien', 
-    sincronizarSel: 'Envoyer Sélection ({n})',
+    archivarSel: 'Archiver ({n})',
+    sincronizarSel: 'Synchroniser ({n})',
     recuperarSel: 'Récupérer ({n})',
     errorSelVacia: 'Sélectionnez au moins un produit.',
     // TEXTOS NUBE / VISTAS
@@ -99,7 +110,7 @@ const tInv = {
     pestañaConteo: '📱 Capture',
     pestañaNube: '☁️ Serveur / PC',
     copiado: 'Code copié dans le presse-papiers !',
-    // TRADUCCIONES NUEVA SECCIÓN NUBE
+    // TRADUCCIONES TABLA NUBE
     nubeVacia: 'Aucune session synchronisée en attente.',
     sesionNum: 'Session #{n}',
     origenDispositivo: 'Entrepôt',
@@ -139,9 +150,9 @@ const InventarioView = () => {
     setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3500);
   };
 
-  const [confirmar, setConfirmar] = useState({ visible: false, mensaje: '', onConfirm: null });
-  const pedirConfirmacion = (mensaje, onConfirm) => {
-    setConfirmar({ visible: true, mensaje, onConfirm });
+  const [confirmar, setConfirmar] = useState({ visible: false, mensaje: '', onConfirm: null, textoAceptar: t.aceptar });
+  const pedirConfirmacion = (mensaje, onConfirm, textoPersonalizado = t.aceptar) => {
+    setConfirmar({ visible: true, mensaje, onConfirm, textoAceptar: textoPersonalizado });
   };
 
   useEffect(() => {
@@ -245,7 +256,7 @@ const InventarioView = () => {
   };
 
   // ==========================================================================
-  // SINCRONIZACIÓN MAESTRA
+  // FLUJO 1: SINCRONIZACIÓN MAESTRA A NUBE (Incluye creación de Master)
   // ==========================================================================
   const handleSincronizacionTotal = () => {
     if (listaConteo.length === 0) { mostrarToast(t.noArchivarVacio, 'error'); return; }
@@ -259,7 +270,7 @@ const InventarioView = () => {
         ? listaConteo.filter(item => !seleccionados.includes(item.codigo))
         : [];
 
-      // Inyectar Master Fantasmas
+      // Inyectar empaques nuevos en productos_master
       for (const item of itemsAProcesar) {
         const codigoPadre = String(item.codigo).toUpperCase();
         const paquetesFantasmas = item.variantes.filter(v => v.isFantasma && v.pz > 1);
@@ -275,11 +286,11 @@ const InventarioView = () => {
                 }
               }
             }, { merge: true });
-          } catch (err) { console.error(`Error master ${nuevoSku}:`, err); }
+          } catch (err) { console.error(`Error inyectando master ${nuevoSku}:`, err); }
         }
       }
 
-      // Subir Bitácora
+      // Subir Bitácora Firebase
       try {
         await addDoc(collection(db, 'bitacora_inventario'), {
           fecha: serverTimestamp(),
@@ -289,7 +300,7 @@ const InventarioView = () => {
         });
       } catch (e) { console.error("Error nube:", e); }
 
-      // Respaldar Local
+      // Respaldar en Historial Local
       const nuevoRegistro = { id: Date.now(), fecha: new Date().toISOString(), items: itemsAProcesar };
       const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
       localStorage.setItem('een_historial_conteos', JSON.stringify([nuevoRegistro, ...historialPrevio].slice(0, 50)));
@@ -300,6 +311,35 @@ const InventarioView = () => {
       if(itemsRestantes.length === 0) localStorage.removeItem('een_inventario_activo'); 
       
       mostrarToast(t.sincExito, 'success');
+    }, t.aceptarSinc);
+  };
+
+  // ==========================================================================
+  // FLUJO 2: ARCHIVADO EXCLUSIVAMENTE LOCAL (Comportamiento Clásico)
+  // ==========================================================================
+  const handleFinalizarConteo = () => {
+    if (listaConteo.length === 0) { mostrarToast(t.noArchivarVacio, 'error'); return; }
+    if (modoSeleccion && seleccionados.length === 0) { mostrarToast(t.errorSelVacia, 'error'); return; }
+
+    pedirConfirmacion(t.confirmaArchivar, () => {
+      const itemsAArchivar = modoSeleccion && seleccionados.length > 0 
+        ? listaConteo.filter(item => seleccionados.includes(item.codigo)) 
+        : [...listaConteo];
+        
+      const itemsRestantes = modoSeleccion && seleccionados.length > 0
+        ? listaConteo.filter(item => !seleccionados.includes(item.codigo))
+        : [];
+
+      const nuevoRegistro = { id: Date.now(), fecha: new Date().toISOString(), items: itemsAArchivar };
+      const historialPrevio = JSON.parse(localStorage.getItem('een_historial_conteos') || '[]');
+      localStorage.setItem('een_historial_conteos', JSON.stringify([nuevoRegistro, ...historialPrevio].slice(0, 50)));
+
+      setListaConteo(itemsRestantes); 
+      setModoSeleccion(false);
+      setSeleccionados([]);
+      
+      if(itemsRestantes.length === 0) localStorage.removeItem('een_inventario_activo'); 
+      mostrarToast(t.archivoExito, 'success');
     });
   };
 
@@ -397,19 +437,19 @@ const InventarioView = () => {
               <p className="text-white text-lg font-black mb-6 leading-snug">{confirmar.mensaje}</p>
               <div className="flex gap-3">
                  <button onClick={() => setConfirmar({visible: false})} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3.5 rounded-xl font-bold">{t.cancelar}</button>
-                 <button onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/50">{t.aceptar}</button>
+                 <button onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/50">{confirmar.textoAceptar}</button>
               </div>
            </div>
         </div>
       )}
 
-      {/* HEADER LIMPIO */}
-      <header className="bg-slate-900 border-b border-slate-700 p-4 flex justify-between items-center shrink-0 shadow-md z-40">
-        <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700 shadow-inner">
-          <button onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1.5 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
+      {/* 1. BARRA SUPERIOR DE NAVEGACIÓN GLOBAL ULTRA COMPACTA */}
+      <div className="bg-slate-950 border-b border-slate-850 px-4 py-2.5 flex justify-between items-center shrink-0 z-50">
+        <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-750 shadow-inner">
+          <button onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>
             {t.pestañaConteo}
           </button>
-          <button onClick={() => { setVistaActual('nube'); setModoSeleccion(false); }} className={`px-3 py-1.5 rounded-lg font-black text-xs transition-all flex items-center gap-1.5 ${vistaActual === 'nube' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>
+          <button onClick={() => { setVistaActual('nube'); setModoSeleccion(false); }} className={`px-3 py-1 rounded-lg font-black text-xs transition-all flex items-center gap-1.5 ${vistaActual === 'nube' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>
             {t.pestañaNube}
             {sesionesNube.length > 0 && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}
           </button>
@@ -417,39 +457,90 @@ const InventarioView = () => {
 
         <div className="flex items-center gap-2">
           {isOffline && <span className="bg-red-500 text-white font-black text-[9px] px-2 py-1 rounded animate-pulse">OFFLINE</span>}
-          <button onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} className="bg-slate-800 border border-slate-600 px-3 py-1.5 rounded-lg font-bold text-xs text-white">
+          <button onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 px-3 py-1 rounded-lg font-bold text-xs text-white transition-colors">
             {t.idioma}
           </button>
         </div>
-      </header>
+      </div>
 
-      {/* SUB-BARRA DE HERRAMIENTAS */}
+      {/* 2. CABECERA DINÁMICA ORIGINAL (Solo activa en Captura) */}
       {vistaActual === 'conteo' && (
-        <div className="bg-slate-850 border-b border-slate-700 p-3 px-4 flex justify-between items-center shrink-0 z-30">
-          {modoSeleccion ? (
-            <button onClick={toggleTodos} className="bg-slate-800 border border-slate-600 text-white px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-2">
-              <i className={`far ${seleccionados.length === listaConteo.length ? 'fa-square' : 'fa-check-square'}`}></i> {seleccionados.length === listaConteo.length ? t.selNada : t.selTodo}
-            </button>
-          ) : (
-            <div className="flex gap-2">
-              <button onClick={() => setMostrarHistorial(true)} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 text-slate-300 px-3 py-2 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
-                <i className="fas fa-history text-purple-400"></i> <span className="hidden sm:inline">{t.historial}</span>
+        <header className={`border-b shrink-0 shadow-lg z-40 transition-colors ${modoSeleccion ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'} p-4 flex flex-col gap-4`}>
+          
+          {/* Fila del Título Principal */}
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg border shrink-0 ${modoSeleccion ? 'bg-blue-500 border-blue-400 text-white' : 'bg-blue-600 border-blue-500/50 shadow-blue-900/50'}`}>
+                <i className={`fas ${modoSeleccion ? 'fa-check-double' : estaEscuchando ? 'fa-microphone animate-pulse text-red-200' : 'fa-clipboard-list text-white'}`}></i>
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-xl font-black tracking-tight text-white truncate">
+                  {modoSeleccion ? `${seleccionados.length} Seleccionados` : t.titulo}
+                </h1>
+                <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider truncate">
+                  {modoSeleccion ? 'Modo de edición parcial' : (catStatus.error ? t.errorCarga : catStatus.loading ? t.cargando : `${catStatus.count} ${t.listas}`)}
+                </p>
+              </div>
+            </div>
+
+            {/* Botón de Selección Parcial */}
+            {listaConteo.length > 0 && (
+              <button 
+                onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} 
+                className={`px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}
+              >
+                <i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i>
+                {modoSeleccion ? t.cancelar : t.seleccionar}
               </button>
+            )}
+          </div>
+
+          {/* Fila de Botonera Maestra */}
+          {modoSeleccion ? (
+            <div className="flex gap-3">
+               <button onClick={toggleTodos} className="flex-1 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white p-3 rounded-2xl transition-all shadow-sm font-bold text-sm flex justify-center items-center gap-2 active:scale-95">
+                 <i className={`far ${seleccionados.length === listaConteo.length ? 'fa-square' : 'fa-check-square'}`}></i> {seleccionados.length === listaConteo.length ? t.selNada : t.selTodo}
+               </button>
+               <button onClick={handleSincronizacionTotal} className="flex-[2] bg-emerald-600 border border-emerald-500 hover:bg-emerald-500 text-white p-3 rounded-2xl transition-all shadow-lg font-black text-sm uppercase tracking-wider flex justify-center items-center gap-2 active:scale-95">
+                 <i className="fas fa-cloud-upload-alt"></i> {t.sincronizarSel?.replace('{n}', seleccionados.length)}
+               </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              
+              {/* BOTÓN MAESTRO DE NUBE (Fácil acceso arriba) */}
               {listaConteo.length > 0 && (
-                <>
-                  <button onClick={descargarCSV} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 text-slate-300 px-2.5 py-2 rounded-xl text-[11px] font-bold"><i className="fas fa-file-excel text-emerald-400"></i></button>
-                  <button onClick={generarCSVDia} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 text-slate-300 px-2.5 py-2 rounded-xl text-[11px] font-bold"><i className="fas fa-file-csv text-blue-400"></i></button>
-                </>
+                <button 
+                  onClick={handleSincronizacionTotal}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-950/50 border border-emerald-400 flex items-center justify-center gap-2 active:scale-95 transition-all"
+                >
+                  <i className="fas fa-cloud-upload-alt text-lg"></i> {t.botonSincronizar}
+                </button>
               )}
+
+              {/* TUS 4 BOTONES GRANDES CLÁSICOS EN CUADRÍCULA */}
+              <div className="grid grid-cols-4 gap-3">
+                <button onClick={handleFinalizarConteo} className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95">
+                  <i className="fas fa-archive text-xl"></i>
+                  <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span>
+                </button>
+                <button onClick={descargarCSV} className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95">
+                  <i className="fas fa-file-excel text-xl"></i>
+                  <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span>
+                </button>
+                <button onClick={generarCSVDia} className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95">
+                  <i className="fas fa-file-csv text-xl"></i>
+                  <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span>
+                </button>
+                <button onClick={() => setMostrarHistorial(true)} className="flex flex-col items-center justify-center gap-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 text-purple-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95">
+                  <i className="fas fa-history text-xl"></i>
+                  <span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-purple-200">{t.historial}</span>
+                </button>
+              </div>
+
             </div>
           )}
-
-          {listaConteo.length > 0 && (
-            <button onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`px-3 py-2 rounded-xl font-bold text-xs transition-colors border ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40' : 'bg-blue-500/20 text-blue-400 border-blue-500/40'}`}>
-              <i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}
-            </button>
-          )}
-        </div>
+        </header>
       )}
 
       {/* CUERPO CENTRAL */}
@@ -481,6 +572,7 @@ const InventarioView = () => {
               onToggleSeleccion={toggleSeleccion}
             />
 
+            {/* BOTÓN INFERIOR FIJO (Mantenido como red de seguridad al final del scroll) */}
             {listaConteo.length > 0 && (
               <div className="fixed bottom-4 left-4 right-4 max-w-5xl mx-auto z-30 animate-fade-in">
                 <button 
@@ -500,7 +592,6 @@ const InventarioView = () => {
         /* VISTA 2: NUBE / REVISIÓN RESPONSIVA (MÓVIL + TRADUCCIÓN FRANCÉS) */
           <div className="flex flex-col gap-5 animate-fade-in pb-10">
             
-            {/* Carrusel Horizontal de Sesiones */}
             <div className="flex gap-3 overflow-x-auto pb-2 custom-scroll">
               {sesionesNube.length === 0 ? (
                 <p className="text-slate-500 text-sm italic py-4">{t.nubeVacia}</p>
@@ -525,7 +616,6 @@ const InventarioView = () => {
               )}
             </div>
 
-            {/* CONTENIDO DE LA SESIÓN: Tarjetas en Móvil / Tabla en Escritorio */}
             {sesionSeleccionadaNube ? (
               <div className="flex flex-col gap-4">
                 <div className="bg-slate-850 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
@@ -535,7 +625,7 @@ const InventarioView = () => {
                   <span className="text-[11px] text-slate-400">{t.tablaSub}</span>
                 </div>
 
-                {/* --- VISTA MÓVIL: Listado de Tarjetas Compactas --- */}
+                {/* VISTA MÓVIL: Listado de Tarjetas Compactas */}
                 <div className="grid grid-cols-1 gap-3 md:hidden">
                   {sesionSeleccionadaNube.items?.map((item) => {
                     const ajuste = item.totalFisico - item.stockSistema;
@@ -543,7 +633,6 @@ const InventarioView = () => {
                     
                     return (
                       <div key={item.codigo} className="bg-slate-800 border border-slate-700 rounded-2xl p-4 flex flex-col gap-3 shadow-md">
-                        {/* Fila Superior: Botón Copiar Gigante */}
                         <button 
                           onClick={() => copiarCodigo(item.codigo)}
                           className="w-full bg-slate-900 border border-slate-650 hover:border-blue-500 text-blue-400 p-2.5 rounded-xl font-mono font-black text-sm flex items-center justify-between active:scale-[0.98] transition-all"
@@ -554,10 +643,8 @@ const InventarioView = () => {
                           </span>
                         </button>
                         
-                        {/* Nombre del Producto */}
                         <p className="font-bold text-xs text-white leading-tight">{item.nombre}</p>
 
-                        {/* Cuadrícula de Cantidades */}
                         <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-700/60 text-center">
                           <div className="bg-slate-900/40 p-2 rounded-lg">
                             <span className="block text-[9px] font-black text-slate-500 uppercase">{t.colSis}</span>
@@ -577,7 +664,7 @@ const InventarioView = () => {
                   })}
                 </div>
 
-                {/* --- VISTA ESCRITORIO: Tabla Clásica Ancha --- */}
+                {/* VISTA ESCRITORIO: Tabla Clásica Ancha */}
                 <div className="hidden md:block bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
                   <table className="w-full text-left border-collapse">
                     <thead>
