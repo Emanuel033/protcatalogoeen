@@ -243,12 +243,15 @@ export const LogisticaProvider = ({ children }) => {
                 updates.telefono_contacto = fleteraMatch.telefono || p.telefono_contacto || "";
                 if (fleteraMatch.link_maps) updates.link_maps = fleteraMatch.link_maps;
             } else if (fleteraNombre !== 'POR ASIGNAR') {
-                // Si no existe, se crea limpia
+                // Si no existe, se crea limpia pero ¡APROVECHANDO los datos que mandó Contpaqi!
                 const nombreParaCatalogo = limpiarRazonSocial(fleteraNombre);
                 const nuevaFletera = {
                     nombre: nombreParaCatalogo.length > 2 ? nombreParaCatalogo : fleteraNombre,
-                    direccion: "Dirección pendiente", 
-                    telefono: "", link_maps: "", coordenadas: { lat: 25.6866, lng: -100.3161 }
+                    // Si Contpaqi mandó dirección, la guardamos directo en el catálogo maestro
+                    direccion: dirLimpia && dirLimpia.length > 5 ? dirLimpia : "Dirección pendiente", 
+                    telefono: p.telefono_contacto || "", 
+                    link_maps: "", 
+                    coordenadas: { lat: 25.6866, lng: -100.3161 }
                 };
                 
                 const newFleteraRef = doc(collection(db, 'catalogo_fleteras'));
@@ -257,7 +260,9 @@ export const LogisticaProvider = ({ children }) => {
                 
                 updates.fletera_asignada_id = newFleteraRef.id;
                 updates.destino_alias = nuevaFletera.nombre; 
-                localFleteras.push({ id: newFleteraRef.id, ...nuevaFletera });
+                
+                // Inyectamos al inicio de la lista local para ayudar a la UI a encontrarla rápido
+                localFleteras.unshift({ id: newFleteraRef.id, ...nuevaFletera });
             } else {
                 updates.destino_alias = fleteraNombre;
             }
