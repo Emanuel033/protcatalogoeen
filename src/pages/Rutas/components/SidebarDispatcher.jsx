@@ -69,79 +69,109 @@ const SidebarDispatcher = ({
     }
   };
 
-  // === FUNCIONES DE DEPURACIÓN ===
+  // === FUNCIONES DE DEPURACIÓN BLINDADAS ===
   const handleDepurarFleteras = async () => {
-    if (!window.confirm("⚠️ ¿Seguro que quieres ejecutar la limpieza de fleteras basura? Esto no se puede deshacer.")) return;
+    if (!window.confirm("⚠️ ¿Seguro que quieres ejecutar la limpieza de fleteras basura y corruptas? Esto no se puede deshacer.")) return;
     
     try {
       const querySnapshot = await getDocs(collection(db, 'catalogo_fleteras'));
       let borrados = 0;
+      let corruptosBorrados = 0;
       const promesas = [];
 
       querySnapshot.forEach((documento) => {
         const data = documento.data();
-        if (data.direccion === "Dirección pendiente") {
+        
+        // 1. Detectar fleteras corruptas (nombre nulo, vacío o undefined)
+        if (!data || !data.nombre || typeof data.nombre !== 'string' || data.nombre.trim() === '') {
+          promesas.push(deleteDoc(doc(db, 'catalogo_fleteras', documento.id)));
+          corruptosBorrados++;
+        } 
+        // 2. Detectar fleteras basura generadas automáticamente
+        else if (data.direccion === "Dirección pendiente") {
           promesas.push(deleteDoc(doc(db, 'catalogo_fleteras', documento.id)));
           borrados++;
         }
       });
 
       await Promise.all(promesas);
-      alert(`✅ Depuración terminada con éxito. Se eliminaron ${borrados} registros basura.`);
+      alert(`✅ Depuración de Fleteras terminada.\n- Registros basura eliminados: ${borrados}\n- Registros corruptos (null) eliminados: ${corruptosBorrados}`);
     } catch (error) {
       console.error("Error al depurar fleteras:", error);
       alert("❌ Hubo un error durante la depuración. Revisa la consola.");
     }
   };
 
-  // NUEVA LÓGICA ESTRICTA: FUSIÓN EXCLUSIVA POR CÓDIGO SAP
   const handleDepurarClientes = async () => {
-    if (!window.confirm("⚠️ ¿Buscar y fusionar clientes duplicados usando su CÓDIGO SAP? Se unirán sus bodegas y se borrarán las copias.")) return;
+    if (!window.confirm("⚠️ ¿Limpiar direcciones corruptas (nulas) y fusionar clientes duplicados por SAP?")) return;
     
     try {
-      console.log("Iniciando fusión estricta de clientes duplicados por Código...");
+      console.log("Iniciando saneamiento de direcciones y fusión...");
       const querySnapshot = await getDocs(collection(db, 'clientes_logistica'));
       
       const clientesMap = new Map();
       let borrados = 0;
       let actualizados = 0;
+      let direccionesCorruptasBorradas = 0; // NUEVO TRACKER PARA NULLS
+      const promesas = [];
 
       querySnapshot.forEach((documento) => {
         const data = documento.data();
         const id = documento.id;
+
+        // --- SANEAMIENTO DE DIRECCIONES (Filtro anti-nulls) ---
+        let direccionesSanas = [];
+        let teniaCorruptas = false;
+
+        if (Array.isArray(data.direcciones)) {
+            direccionesSanas = data.direcciones.filter(d => {
+                // Si la dirección es nula, no tiene propiedad 'direccion' o 'alias', o no son textos, se descarta
+                if (!d || !d.direccion || !d.alias || typeof d.direccion !== 'string' || typeof d.alias !== 'string') {
+                    teniaCorruptas = true;
+                    direccionesCorruptasBorradas++;
+                    return false; 
+                }
+                return true;
+            });
+        }
+        
+        if (teniaCorruptas) {
+            data.direcciones = direccionesSanas; // Actualizamos temporalmente en memoria
+        }
+        // ------------------------------------------------------
+
         const codigo = (data.codigo || '').trim().toUpperCase();
 
-        // Si por alguna anomalía hay un cliente sin código en la base de datos, lo ignoramos para no borrarlo por accidente
         if (!codigo || codigo === 'S/C') {
-            console.warn(`Se omitió un registro sin código: ${data.nombre}`);
+            // Si el cliente no tiene código pero le limpiamos direcciones corruptas, guardamos su limpieza
+            if (teniaCorruptas) {
+                promesas.push(updateDoc(doc(db, 'clientes_logistica', id), { direcciones: direccionesSanas }));
+                actualizados++;
+            }
             return; 
         }
 
         if (!clientesMap.has(codigo)) {
-            // El primero que encontramos con este Código es el "Maestro"
-            clientesMap.set(codigo, { id, data, necesitaActualizar: false, duplicadosABorrar: [] });
+            clientesMap.set(codigo, { id, data, necesitaActualizar: teniaCorruptas, duplicadosABorrar: [] });
         } else {
-            // ¡Ya existe este Código! Este registro es un Clon.
             const master = clientesMap.get(codigo);
             const clonDirs = data.direcciones || [];
             let masterDirs = [...(master.data.direcciones || [])];
 
-            // Rescatamos las bodegas del clon
             clonDirs.forEach(dClon => {
                 const existe = masterDirs.some(mDir => mDir.direccion.toLowerCase().trim() === dClon.direccion.toLowerCase().trim());
                 if (!existe) {
                     masterDirs.push(dClon);
-                    master.necesitaActualizar = true; // El maestro recibirá nuevas direcciones
+                    master.necesitaActualizar = true; 
                 }
             });
 
-            master.data.direcciones = masterDirs; // Actualizamos la memoria
-            master.duplicadosABorrar.push(id);    // Marcamos el Clon para ser destruido
+            master.data.direcciones = masterDirs; 
+            master.duplicadosABorrar.push(id);    
         }
       });
 
       // Ejecutar cambios en Firebase
-      const promesas = [];
       for (const [codigo, master] of clientesMap.entries()) {
           if (master.necesitaActualizar) {
               promesas.push(updateDoc(doc(db, 'clientes_logistica', master.id), { direcciones: master.data.direcciones }));
@@ -157,9 +187,9 @@ const SidebarDispatcher = ({
 
       if (promesas.length > 0) {
           await Promise.all(promesas);
-          alert(`✅ Fusión completada.\n- Clientes Maestros actualizados: ${actualizados}\n- Copias eliminadas: ${borrados}`);
+          alert(`✅ Saneamiento y Fusión completada.\n- Direcciones corruptas (null) eliminadas: ${direccionesCorruptasBorradas}\n- Clientes actualizados: ${actualizados}\n- Copias eliminadas: ${borrados}`);
       } else {
-          alert(`✅ Tu catálogo está limpio. No se encontraron Códigos SAP duplicados.`);
+          alert(`✅ Tu catálogo está perfectamente limpio. No se encontraron Códigos SAP duplicados ni direcciones corruptas.`);
       }
 
     } catch (error) {
@@ -297,13 +327,13 @@ const SidebarDispatcher = ({
             <input type="text" placeholder="Buscar cliente, folio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/80 border border-white/60 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition font-medium text-slate-800 placeholder-slate-400 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05)]" />
           </div>
           
-          {/* BOTÓN 1: LIMPIAR FLETERAS */}
+          {/* BOTÓN 1: LIMPIAR FLETERAS (ROJO) */}
           <button onClick={handleDepurarFleteras} title="Limpiar Fleteras Basura" className="w-9 h-9 rounded-xl bg-red-50 text-red-600 border border-red-200 flex items-center justify-center hover:bg-red-100 transition shadow-sm shrink-0">
             <i className="fas fa-broom"></i>
           </button>
 
-          {/* BOTÓN 2: FUSIONAR CLIENTES DUPLICADOS */}
-          <button onClick={handleDepurarClientes} title="Fusionar Clientes Duplicados" className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center hover:bg-amber-100 transition shadow-sm shrink-0">
+          {/* BOTÓN 2: FUSIONAR CLIENTES Y LIMPIAR NULLS (ÁMBAR) */}
+          <button onClick={handleDepurarClientes} title="Limpiar Direcciones y Fusionar Clientes" className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center hover:bg-amber-100 transition shadow-sm shrink-0">
             <i className="fas fa-users-slash"></i>
           </button>
 
