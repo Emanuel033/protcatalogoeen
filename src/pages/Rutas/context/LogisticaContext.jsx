@@ -5,21 +5,21 @@ import { db } from '../../../firebase';
 const LogisticaContext = createContext();
 
 // ============================================================================
-// MOTOR DE SIMILITUD DE TEXTOS (VERSIÓN QUIRÚRGICA)
+// MOTOR DE SIMILITUD DE TEXTOS (VERSIÓN QUIRÚRGICA Y BLINDADA)
 // ============================================================================
 
-// 1. Limpieza de razones sociales
-const limpiarRazonSocial = (texto = '') => {
-    return texto.toUpperCase()
+// 1. Limpieza de razones sociales (BLINDADO CONTRA NULL/UNDEFINED)
+const limpiarRazonSocial = (texto) => {
+    return String(texto || '').toUpperCase()
         .replace(/\b(SA|DE|CV|RL|SAPI|SNC|LLC|CO|INC|LTD)\b/g, '')
         .replace(/\b(TRANSPORTES|TRANSPORTE|FLETERA|FLETES|LOGISTICA|EXPRESS|CARGA|ENVIOS)\b/g, '')
         .replace(/[^A-Z0-9 ]/g, '') 
         .replace(/\s+/g, ' ').trim();
 };
 
-// 1.5 NUEVO: Limpieza específica para DIRECCIONES
-const limpiarDireccion = (texto = '') => {
-    return texto.toUpperCase()
+// 1.5 NUEVO: Limpieza específica para DIRECCIONES (BLINDADO)
+const limpiarDireccion = (texto) => {
+    return String(texto || '').toUpperCase()
         .replace(/NUEVO LE[OÓ]N/g, 'NL') // Homologar estado
         .replace(/N\.L\./g, 'NL')
         .replace(/\b(COLONIA|COL|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '') // Quitar prefijos basura
@@ -27,10 +27,10 @@ const limpiarDireccion = (texto = '') => {
         .replace(/\s+/g, ' ').trim();
 };
 
-// 2. Candado estricto
+// 2. Candado estricto (BLINDADO)
 const esConflictoConocido = (strA, strB) => {
-    const a = strA.replace(/\s+/g, '');
-    const b = strB.replace(/\s+/g, '');
+    const a = String(strA || '').replace(/\s+/g, '');
+    const b = String(strB || '').replace(/\s+/g, '');
     if ((a.includes('TEAM') && b.includes('TRATA')) || (b.includes('TEAM') && a.includes('TRATA'))) return true;
     if ((a === 'ESTRELLA' && b.includes('BLANCA')) || (b === 'ESTRELLA' && a.includes('BLANCA'))) return true;
     return false;
@@ -38,7 +38,6 @@ const esConflictoConocido = (strA, strB) => {
 
 // 3. Algoritmo combinado ADAPTADO PARA RECIBIR 'TIPO'
 const similitudTextosFina = (crudoA = '', crudoB = '', tipo = 'razon_social') => {
-    // Si es dirección, usa el limpiador de direcciones; si no, el de empresas
     const a = tipo === 'direccion' ? limpiarDireccion(crudoA) : limpiarRazonSocial(crudoA);
     const b = tipo === 'direccion' ? limpiarDireccion(crudoB) : limpiarRazonSocial(crudoB);
 
@@ -89,9 +88,7 @@ export const LogisticaProvider = ({ children }) => {
   const [fleteras, setFleteras] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // EL CEREBRO AUTO-MASTICADOR CON ENRIQUECIMIENTO DE DATOS
   const procesarPedidosCrudos = async (viajesCrudos) => {
-    // 1. Garantizar catálogos en vivo antes de procesar
     const snapClientes = await getDocs(collection(db, 'clientes_logistica'));
     const snapFleteras = await getDocs(collection(db, 'catalogo_fleteras'));
 
@@ -104,11 +101,12 @@ export const LogisticaProvider = ({ children }) => {
     for (let p of viajesCrudos) {
         let updates = { procesado_por_web: true };
         
-        let rawEnvio = (p.tipo_envio || '').trim().toUpperCase();
-        let detallesUpper = (p.detalles_entrega || '').trim().toUpperCase();
-        let codigoCliente = (p.cliente_codigo || '').trim().toUpperCase();
-        let nombreCliente = (p.cliente_nombre || '').trim().toUpperCase();
-        let dirLimpia = (p.direccion || '').trim();
+        // Todas las lecturas blindadas con String( ... || '')
+        let rawEnvio = String(p.tipo_envio || '').trim().toUpperCase();
+        let detallesUpper = String(p.detalles_entrega || '').trim().toUpperCase();
+        let codigoCliente = String(p.cliente_codigo || '').trim().toUpperCase();
+        let nombreCliente = String(p.cliente_nombre || '').trim().toUpperCase();
+        let dirLimpia = String(p.direccion || '').trim();
 
         updates.requiere_cobro = p.requiere_cobro === true || p.requiere_cobro === 'true';
 
@@ -122,7 +120,7 @@ export const LogisticaProvider = ({ children }) => {
             if (detallesUpper.includes('FISCAL') || detallesUpper === 'DF') aliasBase = "FISCAL";
             if (detallesUpper.includes('BODEGA') || detallesUpper === 'OB' || detallesUpper.includes('OTRA')) aliasBase = "BODEGA";
 
-            let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
+            let clienteIndex = localClientes.findIndex(c => String(c.codigo || '').toUpperCase() === codigoCliente);
             let clienteMatch = clienteIndex >= 0 ? localClientes[clienteIndex] : null;
 
             if (!clienteMatch && codigoCliente) {
@@ -151,14 +149,13 @@ export const LogisticaProvider = ({ children }) => {
                 let direccionesCliente = clienteMatch.direcciones || [];
                 
                 let dirExistente = direccionesCliente.find(d => {
-                    const esExacta = d.direccion.trim().toLowerCase() === dirLimpia.toLowerCase();
-                    // AQUÍ ESTÁ LA MAGIA: Le pasamos 'direccion' al final
+                    // Blindado
+                    const esExacta = String(d.direccion || '').trim().toLowerCase() === dirLimpia.toLowerCase();
                     const esMuySimilar = similitudTextosFina(d.direccion, dirLimpia, 'direccion') >= 85; 
                     return esExacta || esMuySimilar;
                 });
 
                 if (dirExistente) {
-                    // ✅ JALAR DATOS: El cliente y la bodega existen
                     updates.destino_alias = dirExistente.alias;
                     updates.cliente_id_vinculado = clienteMatch.id;
                     updates.direccion = dirExistente.direccion; 
@@ -196,7 +193,7 @@ export const LogisticaProvider = ({ children }) => {
         // LÓGICA FLETERA FORÁNEA
         // =====================================
         else {
-            let fleteraNombreCrudo = (p.destino_alias || p.metodo_mensajeria || '').trim().toUpperCase();
+            let fleteraNombreCrudo = String(p.destino_alias || p.metodo_mensajeria || '').trim().toUpperCase();
             
             const palabrasBasura = ['DOMICILIO', 'D', 'OCURRE', 'POR DEFINIR', 'LOCAL', 'NO REELECCIÓN'];
             let fleteraNombre = fleteraNombreCrudo;
@@ -211,15 +208,13 @@ export const LogisticaProvider = ({ children }) => {
                 updates.tipo_envio = 'fletera_ocurre';
             }
             
-            // ========================================================
-            // SELECCIÓN INTELIGENTE DE FLETERAS CON ENRIQUECIMIENTO
-            // ========================================================
             let fleteraMatch = null;
             let mejorPuntaje = 0;
 
             if (fleteraNombre !== 'POR ASIGNAR') {
                 localFleteras.forEach(f => {
-                    const exacto = f.nombre.trim().toUpperCase() === fleteraNombre.toUpperCase();
+                    // Blindado
+                    const exacto = String(f.nombre || '').trim().toUpperCase() === fleteraNombre.toUpperCase();
                     if (exacto) {
                         fleteraMatch = f;
                         mejorPuntaje = 100;
@@ -235,21 +230,18 @@ export const LogisticaProvider = ({ children }) => {
             }
 
             if (fleteraMatch) {
-                // ✅ JALAR DATOS: La fletera existe en el catálogo
                 updates.fletera_asignada_id = fleteraMatch.id;
                 updates.destino_alias = fleteraMatch.nombre; 
-                updates.direccion = fleteraMatch.direccion; 
-                updates.coordenadas = fleteraMatch.coordenadas;
-                updates.telefono_contacto = fleteraMatch.telefono || p.telefono_contacto || "";
+                updates.direccion = fleteraMatch.direccion || "Dirección pendiente"; 
+                updates.coordenadas = fleteraMatch.coordenadas || { lat: 25.6866, lng: -100.3161 };
+                updates.telefono_contacto = fleteraMatch.telefono || "";
                 if (fleteraMatch.link_maps) updates.link_maps = fleteraMatch.link_maps;
             } else if (fleteraNombre !== 'POR ASIGNAR') {
-                // Si no existe, se crea limpia pero ¡APROVECHANDO los datos que mandó Contpaqi!
                 const nombreParaCatalogo = limpiarRazonSocial(fleteraNombre);
                 const nuevaFletera = {
                     nombre: nombreParaCatalogo.length > 2 ? nombreParaCatalogo : fleteraNombre,
-                    // Si Contpaqi mandó dirección, la guardamos directo en el catálogo maestro
-                    direccion: dirLimpia && dirLimpia.length > 5 ? dirLimpia : "Dirección pendiente", 
-                    telefono: p.telefono_contacto || "", 
+                    direccion: "Dirección de terminal pendiente", 
+                    telefono: "", 
                     link_maps: "", 
                     coordenadas: { lat: 25.6866, lng: -100.3161 }
                 };
@@ -261,14 +253,14 @@ export const LogisticaProvider = ({ children }) => {
                 updates.fletera_asignada_id = newFleteraRef.id;
                 updates.destino_alias = nuevaFletera.nombre; 
                 
-                // Inyectamos al inicio de la lista local para ayudar a la UI a encontrarla rápido
-                localFleteras.unshift({ id: newFleteraRef.id, ...nuevaFletera });
+                localFleteras.push({ id: newFleteraRef.id, ...nuevaFletera });
             } else {
                 updates.destino_alias = fleteraNombre;
             }
             
-            // Validar Cliente Foráneo asociado
-            let clienteIndex = localClientes.findIndex(c => (c.codigo || '').toUpperCase() === codigoCliente);
+            updates.direccion_cliente_final = dirLimpia;
+            
+            let clienteIndex = localClientes.findIndex(c => String(c.codigo || '').toUpperCase() === codigoCliente);
             if (clienteIndex === -1 && codigoCliente) {
                  const nuevoClienteForaneo = {
                     codigo: codigoCliente,
@@ -296,7 +288,7 @@ export const LogisticaProvider = ({ children }) => {
     if (operacionesEnBatch > 0) {
         try {
             await batch.commit();
-            console.log(`✅ Lote procesado y ENRIQUECIDO: ${operacionesEnBatch} operaciones inyectadas con datos de catálogo.`);
+            console.log(`✅ Lote procesado y ENRIQUECIDO: ${operacionesEnBatch} operaciones.`);
         } catch(e) { 
             console.error("Error ejecutando el Batch de pedidos:", e); 
         }
