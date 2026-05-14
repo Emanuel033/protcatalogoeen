@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useLogistica } from '../context/LogisticaContext';
 import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../firebase.js';
+import { db } from '../../../firebase';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -21,7 +21,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   const { clientes, fleteras } = useLogistica();
   const clientesLista = clientes || [];
   
-  // --- ESTADOS: COLUMNA IZQUIERDA ---
+  // --- ESTADOS: COLUMNA IZQUIERDA (IDENTIFICADORES, CLIENTE, DOCS, QR) ---
   const [folioPedido, setFolioPedido] = useState('');
   const [folioFactura, setFolioFactura] = useState('');
   const [clienteNombre, setClienteNombre] = useState('');
@@ -30,7 +30,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   const [docs, setDocs] = useState({ factura: true, certificados: false, orden_compra: false, envio_ciego: false });
   const [qrBase64, setQrBase64] = useState('');
 
-  // --- ESTADOS: COLUMNA DERECHA ---
+  // --- ESTADOS: COLUMNA DERECHA (DESTINO) ---
   const [urgente, setUrgente] = useState(false);
   const [metodoEnvio, setMetodoEnvio] = useState('bodega_cliente');
   const [bodegaSeleccionada, setBodegaSeleccionada] = useState('');
@@ -43,11 +43,12 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   const [posicionPin, setPosicionPin] = useState({ lat: 25.6866, lng: -100.3161 });
   const markerRef = useRef(null);
 
-  // --- ESTADOS: BÚSQUEDA ---
+  // --- ESTADOS: BÚSQUEDA Y SUGERENCIAS ---
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
   const [filtroActivo, setFiltroActivo] = useState(''); 
 
+  // --- LÓGICA: CARGA DE IMAGEN QR ---
   const handleQrUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -89,6 +90,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         setHorariosEntrega(String(ordenAEditar.destino_horario || ''));
         setLinkMaps(String(ordenAEditar.link_maps || ''));
         
+        // Validación segura para evitar crasheos si faltan campos en la base de datos
         setDocs({ 
             factura: ordenAEditar.documentacion?.factura ?? true, 
             certificados: ordenAEditar.documentacion?.certificados ?? false, 
@@ -98,6 +100,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         
         setQrBase64(ordenAEditar.qr_imagen || '');
         
+        // Validación segura para coordenadas
         if (ordenAEditar.coordenadas) {
             const lat = parseFloat(ordenAEditar.coordenadas.lat);
             const lng = parseFloat(ordenAEditar.coordenadas.lng);
@@ -108,8 +111,8 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         const codigoAEditar = String(ordenAEditar.cliente_codigo || '').toUpperCase();
 
         const foundClient = clientesLista.find(c => 
-            (c.nombre && String(c.nombre || '').toUpperCase() === nombreAEditar) ||
-            (codigoAEditar && codigoAEditar !== 'S/C' && c.codigo && String(c.codigo || '').toUpperCase() === codigoAEditar)
+            (c.nombre && c.nombre.toUpperCase() === nombreAEditar) ||
+            (codigoAEditar && codigoAEditar !== 'S/C' && c.codigo && c.codigo.toUpperCase() === codigoAEditar)
         );
         setClienteSeleccionado(foundClient || null);
       } else {
@@ -124,33 +127,11 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     }
   }, [isOpen, ordenAEditar, clientesLista]);
 
-  useEffect(() => {
-    if (isOpen && ordenAEditar) {
-      let indexEncontrado = -1;
-
-      if (isBodega && clienteSeleccionado && clienteSeleccionado.direcciones) {
-        indexEncontrado = clienteSeleccionado.direcciones.findIndex(
-          d => d.alias === ordenAEditar.destino_alias || d.direccion === ordenAEditar.direccion
-        );
-      } else if (!isBodega && fleteras && fleteras.length > 0) {
-        indexEncontrado = fleteras.findIndex(
-          f => f.id === ordenAEditar.fletera_asignada_id || f.nombre === ordenAEditar.destino_alias
-        );
-      }
-
-      if (indexEncontrado !== -1) {
-        setBodegaSeleccionada(String(indexEncontrado));
-      } else {
-        setBodegaSeleccionada('');
-      }
-    }
-  }, [isOpen, ordenAEditar, clienteSeleccionado, fleteras, isBodega]);
-
   const clientesFiltrados = clientesLista.filter(c => {
     const nombreSafe = String(clienteNombre || '').toLowerCase();
     const codigoSafe = String(codigoSAP || '').toLowerCase();
-    if (filtroActivo === 'nombre' && nombreSafe.length > 0) return String(c.nombre || '').toLowerCase().includes(nombreSafe);
-    if (filtroActivo === 'codigo' && codigoSafe.length > 0) return String(c.codigo || '').toLowerCase().includes(codigoSafe);
+    if (filtroActivo === 'nombre' && nombreSafe.length > 0) return c.nombre?.toLowerCase().includes(nombreSafe);
+    if (filtroActivo === 'codigo' && codigoSafe.length > 0) return c.codigo?.toLowerCase().includes(codigoSafe);
     return false;
   });
 
@@ -210,8 +191,8 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
     
     try {
         const clienteExistente = clientesLista.find(c => {
-            const matchNombre = String(c.nombre || '').toUpperCase() === nombreLimpio;
-            const matchCodigo = String(c.codigo || '').toUpperCase() === codigoLimpio;
+            const matchNombre = c.nombre?.toUpperCase() === nombreLimpio;
+            const matchCodigo = c.codigo?.toUpperCase() === codigoLimpio;
             return matchNombre || matchCodigo;
         });
 
@@ -226,7 +207,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
                     telefono: telefonoBodegaLimpio, horario: horariosEntregaLimpio, link_maps: linkMapsLimpio,
                     coordenadas: { lat: posicionPin.lat, lng: posicionPin.lng }
                 };
-                const indexDir = direccionesActuales.findIndex(d => String(d.direccion || '').toLowerCase() === String(direccionLimpia || '').toLowerCase() || String(d.alias || '').toLowerCase() === String(nuevaDireccionObj.alias || '').toLowerCase());
+                const indexDir = direccionesActuales.findIndex(d => d.direccion.toLowerCase() === direccionLimpia.toLowerCase() || d.alias.toLowerCase() === nuevaDireccionObj.alias.toLowerCase());
                 if (indexDir >= 0) direccionesActuales[indexDir] = { ...direccionesActuales[indexDir], ...nuevaDireccionObj }; 
                 else direccionesActuales.push(nuevaDireccionObj); 
                 datosAActualizarCliente.direcciones = direccionesActuales;
@@ -249,7 +230,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
         }
 
         if (!isBodega && aliasDestinoLimpio) {
-            const fleteraExistente = fleteras.find(f => String(f.nombre || '').toUpperCase() === String(aliasDestinoLimpio || '').toUpperCase());
+            const fleteraExistente = fleteras.find(f => f.nombre.toUpperCase() === aliasDestinoLimpio.toUpperCase());
             if (fleteraExistente) fleteraIdVinculada = fleteraExistente.id;
             else {
                 const nuevaFleteraObj = {
@@ -285,6 +266,7 @@ const FormularioOrden = ({ isOpen, onClose, ordenAEditar = null }) => {
   if (!isOpen) return null;
 
   return (
+    // AQUÍ ESTABA EL ERROR: Quité el 'hidden' traicionero que ocultaba el modal entero.
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm transition-opacity opacity-100 bg-slate-900/80">
       <div className="rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden transform scale-100 transition-transform flex flex-col max-h-[98vh] sm:max-h-[90vh] bg-slate-50">
         
