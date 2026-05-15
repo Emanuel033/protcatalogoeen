@@ -146,6 +146,9 @@ const InventarioView = () => {
   const pedirConfirmacion = (mensaje, onConfirm, textoPersonalizado = t.aceptar) => {
     setConfirmar({ visible: true, mensaje, onConfirm, textoAceptar: textoPersonalizado });
   };
+   useEffect(() => {
+    document.title = "Inventario | La Económica del Norte";
+  }, []);
 
   useEffect(() => {
     const handleOffline = () => setIsOffline(true);
