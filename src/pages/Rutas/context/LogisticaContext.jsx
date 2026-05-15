@@ -20,7 +20,11 @@ const limpiarDireccion = (texto) => {
     return String(texto || '').toUpperCase()
         .replace(/NUEVO LE[OÓ]N/g, 'NL') 
         .replace(/N\.L\./g, 'NL')
-        .replace(/\b(COLONIA|COL|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '') 
+        .replace(/\b(COLONIA|COL|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '')
+        .replace(/\bMTY\b/g, 'MONTERREY') // <-- NUEVO: Normaliza MTY a MONTERREY
+        .replace(/\b(AVE|AVENIDA)\b/g, 'AV') // <-- NUEVO: Estandariza las Avenidas
+        // <-- NUEVO: Se agregó FRACC y FRACCIONAMIENTO a la lista de basura a ignorar
+        .replace(/\b(COLONIA|COL|FRACCIONAMIENTO|FRACC|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '')
         .replace(/[^A-Z0-9 ]/g, '') 
         .replace(/\s+/g, ' ').trim();
 };
