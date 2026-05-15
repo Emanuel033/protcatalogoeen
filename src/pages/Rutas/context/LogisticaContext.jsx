@@ -10,6 +10,7 @@ const LogisticaContext = createContext();
 
 const limpiarRazonSocial = (texto) => {
     return String(texto || '').toUpperCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // <-- NUEVO: Quita acentos (Á->A, Ñ->N)
         // 1. Unificar nombres separados por error de captura
         .replace(/\bTEAM MEX\b/g, 'TEAMMEX')
         // 2. Extirpar instrucciones de envío que se cuelan en el nombre
@@ -18,21 +19,25 @@ const limpiarRazonSocial = (texto) => {
         .replace(/\b(SA|DE|CV|RL|SAPI|SNC|LLC|CO|INC|LTD)\b/g, '')
         // 4. Quitar palabras genéricas de transporte
         .replace(/\b(TRANSPORTES|TRANSPORTE|FLETERA|FLETES|LOGISTICA|EXPRESS|CARGA|ENVIOS|PAQUETERIA|MENSAJERIA)\b/g, '')
-        // 5. Limpiar símbolos raros y dobles espacios
-        .replace(/[^A-Z0-9 ]/g, '') 
+        // 5. Limpiar símbolos raros (reemplaza por espacio en vez de juntar)
+        .replace(/[^A-Z0-9 ]/g, ' ') 
         .replace(/\s+/g, ' ').trim();
 };
 
 const limpiarDireccion = (texto) => {
     return String(texto || '').toUpperCase()
-        .replace(/NUEVO LE[OÓ]N/g, 'NL') 
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // <-- NUEVO: Quita acentos y normaliza
+        .replace(/NUEVO LE[OON]/g, 'NL') // Blindado sin acento
         .replace(/N\.L\./g, 'NL')
-        .replace(/\b(COLONIA|COL|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '')
-        .replace(/\bMTY\b/g, 'MONTERREY') // <-- NUEVO: Normaliza MTY a MONTERREY
-        .replace(/\b(AVE|AVENIDA)\b/g, 'AV') // <-- NUEVO: Estandariza las Avenidas
-        // <-- NUEVO: Se agregó FRACC y FRACCIONAMIENTO a la lista de basura a ignorar
+        .replace(/\bMTY\b/g, 'MONTERREY') 
+        .replace(/\b(AVE|AVENIDA)\b/g, 'AV') 
+        .replace(/\b(PRIVADA)\b/g, 'PRIV') // <-- NUEVO: Estandariza "Privada"
+        // <-- NUEVO: Elimina referencias de interior como "BODEGA 17", "INT 4", "LOCAL B"
+        .replace(/\b(BODEGA|BOD|INT|INTERIOR|LOCAL|EDIFICIO|EDIF|LOTE|LT|MANZANA|MZ)\s*[A-Z0-9-]*\b/g, '')
+        // <-- Basura clásica a ignorar
         .replace(/\b(COLONIA|COL|FRACCIONAMIENTO|FRACC|CP|C\.P\.|NUMERO|NUM|NO|#)\b/g, '')
-        .replace(/[^A-Z0-9 ]/g, '') 
+        // <-- NUEVO: Reemplaza símbolos por espacio para evitar que "0-BODEGA" se fusione en "0BODEGA"
+        .replace(/[^A-Z0-9 ]/g, ' ') 
         .replace(/\s+/g, ' ').trim();
 };
 
