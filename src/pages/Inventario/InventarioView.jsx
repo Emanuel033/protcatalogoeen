@@ -62,7 +62,11 @@ const tInv = {
     colDif: 'Dif.',
     sinSesionSel: 'Selecciona una sesión de la barra superior para revisar sus diferencias.',
     copiarBoton: 'Copiar',
+    // En la sección de 'es':
+sincExito: '¡Consolidado del día respaldado en la nube exitosamente!',
+sincOffline: '⚠️ Guardado localmente. Se sincronizará automáticamente al tener internet.', // <-- AGREGA ESTO
     etiquetaConsolidado: '📊 Consolidado Hoy'
+    
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -118,6 +122,9 @@ const tInv = {
     colDif: 'Diff.',
     sinSesionSel: 'Sélectionnez une session ci-dessus pour voir les différences.',
     copiarBoton: 'Copier',
+    // En la sección de 'fr':
+sincExito: 'Cumul du jour synchronisé avec succès !',
+sincOffline: '⚠️ Sauvegardé localement. Il sera synchronisé dès la connexion internet.', // <-- AGREGA ESTO
     etiquetaConsolidado: '📊 Cumul du Jour'
   }
 };
@@ -303,19 +310,33 @@ const InventarioView = () => {
       });
 
       const arrayConsolidadoFinal = Object.values(agruparConsolidado);
+      // 5. Subir a la nube (MODIFICADO PARA MODO OFFLINE)
       try {
-        await addDoc(collection(db, 'bitacora_inventario'), {
+        // Ejecutamos la promesa SIN el 'await' para que no bloquee la interfaz si no hay red.
+        // Firebase se encargará de encolarlo en background.
+        const promesaSubida = addDoc(collection(db, 'bitacora_inventario'), {
           fecha: serverTimestamp(),
           items: arrayConsolidadoFinal,
           total_skus: arrayConsolidadoFinal.length,
           origen: t.origenDispositivo,
           etiqueta: t.etiquetaConsolidado
         });
-      } catch (e) { console.error(e); }
+      } catch (e) { 
+        console.error("Error nube:", e); 
+      }
 
-      setListaConteo(itemsRestantes); setModoSeleccion(false); setSeleccionados([]);
+      // 6. Limpiar UI
+      setListaConteo(itemsRestantes); 
+      setModoSeleccion(false); 
+      setSeleccionados([]);
       if(itemsRestantes.length === 0) localStorage.removeItem('een_inventario_activo'); 
-      mostrarToast(t.sincExito, 'success');
+      
+      // 7. LANZAR EL TOAST INTELIGENTE
+      if (isOffline || !navigator.onLine) {
+        mostrarToast(t.sincOffline, 'info');
+      } else {
+        mostrarToast(t.sincExito, 'success');
+      }
     }, t.aceptarSinc);
   };
 
