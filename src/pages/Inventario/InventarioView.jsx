@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { collection, doc, addDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, addDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 // Importación blindada con extensión .js para compilar perfecto en GitHub Actions
 import { db } from '../../firebase.js'; 
 
@@ -58,7 +58,7 @@ const tInv = {
     sesionNum: 'Sesión #{n}',
     origenDispositivo: 'Almacén',
     tablaTitulo: 'Consolidado del Día (Nube)',
-    tablaSub: 'Toca el SKU para copiarlo al POS',
+    tablaSub: 'Edita el "Sistema" si necesitas ajustar en vivo.',
     colSku: 'Código (SKU)',
     colProd: 'Producto',
     colSis: 'Sistema',
@@ -116,7 +116,7 @@ const tInv = {
     sesionNum: 'Session #{n}',
     origenDispositivo: 'Entrepôt',
     tablaTitulo: 'Cumul Global du Jour',
-    tablaSub: 'Touchez le SKU pour le copier',
+    tablaSub: 'Modifiez "Système" si besoin d\'ajuster.',
     colSku: 'Code (SKU)',
     colProd: 'Produit',
     colSis: 'Système',
@@ -202,6 +202,16 @@ const InventarioView = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Mantiene la sesión seleccionada actualizada si hay cambios desde Firebase
+  useEffect(() => {
+    if (sesionSeleccionadaNube) {
+      const sesionActualizada = sesionesNube.find(s => s.id === sesionSeleccionadaNube.id);
+      if (sesionActualizada) {
+        setSesionSeleccionadaNube(sesionActualizada);
+      }
+    }
+  }, [sesionesNube]);
   
   const manualCant = useCallback((codigo, varId, valor) => {
     const pz = parseInt(valor, 10) || 0;
@@ -344,6 +354,33 @@ const InventarioView = () => {
       
       mostrarToast(t.sincExito, 'success');
     }, t.aceptarSinc);
+  };
+
+  // ==========================================================================
+  // ACTUALIZACIÓN DE STOCK DESDE LA NUBE (RECONCILIACIÓN EN VIVO)
+  // ==========================================================================
+  const handleUpdateStockSistema = async (codigoItem, nuevoValor) => {
+    if (!sesionSeleccionadaNube) return;
+    const nuevoStock = parseFloat(nuevoValor);
+    
+    // Si dejan el campo vacío o ponen letras, no hace nada
+    if (isNaN(nuevoStock)) return;
+
+    // Actualiza localmente de inmediato para que se sienta rápido
+    const nuevosItems = sesionSeleccionadaNube.items.map(item =>
+      item.codigo === codigoItem ? { ...item, stockSistema: nuevoStock } : item
+    );
+
+    try {
+      // Guarda directo en Firebase (esto disparará el onSnapshot y actualizará en todas las PCs)
+      await updateDoc(doc(db, 'bitacora_inventario', sesionSeleccionadaNube.id), {
+        items: nuevosItems
+      });
+      mostrarToast("Stock del sistema ajustado", "success");
+    } catch (e) {
+      console.error("Error actualizando stock:", e);
+      mostrarToast("Error al guardar el ajuste", "error");
+    }
   };
 
   // ==========================================================================
@@ -632,7 +669,7 @@ const InventarioView = () => {
                   <h3 className="font-black text-sm text-white flex items-center gap-2">
                     <i className="fas fa-cloud-download-alt text-purple-400"></i> {t.tablaTitulo}
                   </h3>
-                  <span className="text-[11px] text-slate-400">{t.tablaSub}</span>
+                  <span className="text-[11px] text-slate-400"><i className="fas fa-pencil-alt mr-1"></i>{t.tablaSub}</span>
                 </div>
 
                 {/* VISTA MÓVIL: Tarjetas Compactas */}
@@ -656,17 +693,25 @@ const InventarioView = () => {
                         <p className="font-bold text-xs text-white leading-tight">{item.nombre}</p>
 
                         <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-700/60 text-center">
-                          <div className="bg-slate-900/40 p-2 rounded-lg">
-                            <span className="block text-[9px] font-black text-slate-500 uppercase">{t.colSis}</span>
-                            <span className="font-bold text-xs text-slate-300">{item.stockSistema}</span>
+                          <div className="bg-slate-900/40 p-2 rounded-lg relative group">
+                            <span className="block text-[9px] font-black text-slate-500 uppercase">{t.colSis} <i className="fas fa-pencil-alt text-[8px]"></i></span>
+                            {/* INPUT EDITABLE MÓVIL */}
+                            <input
+                                key={`movil-${item.codigo}-${item.stockSistema}`}
+                                type="number"
+                                className="w-full bg-transparent text-slate-300 font-bold text-xs text-center focus:outline-none focus:bg-slate-800 focus:ring-1 focus:ring-purple-500 rounded px-1 py-0.5 mt-0.5 border-b border-dashed border-slate-600 focus:border-transparent transition-all"
+                                defaultValue={item.stockSistema}
+                                onBlur={(e) => handleUpdateStockSistema(item.codigo, e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
+                            />
                           </div>
                           <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-750">
                             <span className="block text-[9px] font-black text-blue-400 uppercase">{t.colFis}</span>
-                            <span className="font-black text-xs text-white">{item.totalFisico}</span>
+                            <span className="font-black text-xs text-white block mt-1">{item.totalFisico}</span>
                           </div>
                           <div className={`p-2 rounded-lg border ${colorDif}`}>
                             <span className="block text-[9px] font-black uppercase opacity-80">{t.colDif}</span>
-                            <span className="font-black text-xs">{ajuste > 0 ? `+${ajuste}` : ajuste}</span>
+                            <span className="font-black text-xs block mt-1">{ajuste > 0 ? `+${ajuste}` : ajuste}</span>
                           </div>
                         </div>
                       </div>
@@ -681,7 +726,9 @@ const InventarioView = () => {
                       <tr className="bg-slate-900/60 text-[10px] font-black uppercase text-slate-400 tracking-wider border-b border-slate-700">
                         <th className="p-3 pl-4 w-36">{t.colSku}</th>
                         <th className="p-3">{t.colProd}</th>
-                        <th className="p-3 text-center w-20">{t.colSis}</th>
+                        <th className="p-3 text-center w-24">
+                          {t.colSis} <i className="fas fa-pencil-alt text-slate-500 ml-1" title="Campo Editable"></i>
+                        </th>
                         <th className="p-3 text-center w-20">{t.colFis}</th>
                         <th className="p-3 text-center pr-4 w-20">{t.colDif}</th>
                       </tr>
@@ -698,7 +745,17 @@ const InventarioView = () => {
                               </button>
                             </td>
                             <td className="p-3 font-bold text-white truncate max-w-sm">{item.nombre}</td>
-                            <td className="p-3 text-center text-slate-400">{item.stockSistema}</td>
+                            <td className="p-3 text-center">
+                              {/* INPUT EDITABLE PC */}
+                              <input
+                                  key={`pc-${item.codigo}-${item.stockSistema}`}
+                                  type="number"
+                                  className="w-16 bg-slate-900/30 text-slate-300 text-center font-bold border-b border-dashed border-slate-500 focus:outline-none focus:bg-slate-900 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 py-1 rounded transition-all hover:bg-slate-800"
+                                  defaultValue={item.stockSistema}
+                                  onBlur={(e) => handleUpdateStockSistema(item.codigo, e.target.value)}
+                                  onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
+                              />
+                            </td>
                             <td className="p-3 text-center font-bold text-white bg-slate-900/20">{item.totalFisico}</td>
                             <td className={`p-3 text-center pr-4 ${colorDif}`}>{ajuste > 0 ? `+${ajuste}` : ajuste}</td>
                           </tr>
