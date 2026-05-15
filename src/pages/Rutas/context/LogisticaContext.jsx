@@ -10,8 +10,15 @@ const LogisticaContext = createContext();
 
 const limpiarRazonSocial = (texto) => {
     return String(texto || '').toUpperCase()
+        // 1. Unificar nombres separados por error de captura
+        .replace(/\bTEAM MEX\b/g, 'TEAMMEX')
+        // 2. Extirpar instrucciones de envío que se cuelan en el nombre
+        .replace(/\b(A DOMICILIO|DOMICILIO|A OCURRE|OCURRE)\b/g, '')
+        // 3. Quitar terminaciones legales
         .replace(/\b(SA|DE|CV|RL|SAPI|SNC|LLC|CO|INC|LTD)\b/g, '')
-        .replace(/\b(TRANSPORTES|TRANSPORTE|FLETERA|FLETES|LOGISTICA|EXPRESS|CARGA|ENVIOS)\b/g, '')
+        // 4. Quitar palabras genéricas de transporte
+        .replace(/\b(TRANSPORTES|TRANSPORTE|FLETERA|FLETES|LOGISTICA|EXPRESS|CARGA|ENVIOS|PAQUETERIA|MENSAJERIA)\b/g, '')
+        // 5. Limpiar símbolos raros y dobles espacios
         .replace(/[^A-Z0-9 ]/g, '') 
         .replace(/\s+/g, ' ').trim();
 };
