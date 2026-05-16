@@ -4,7 +4,7 @@ import { AdminProvider, useAdminContext } from './context/AdminContext';
 import { Sidebar } from './components/Sidebar';
 // Importaremos estas tablas en el siguiente paso:
 import { MasterTable } from './components/tables/MasterTable';
-// import { Importations } from './components/Importations';
+import { ImportTable } from './components/tables/ImportTable';
 
 const CentroComandoContent = () => {
   const { userRole, userName, isLoadingAuth, authError, allItems, facturacionCatalog, isDataLoading } = useAdminData();
@@ -85,11 +85,10 @@ const CentroComandoContent = () => {
   </div>
 )}
               {activeTab === 'import' && userRole === 'admin' && (
-                <div className="h-full w-full flex items-center justify-center text-slate-400">
-                  {/* <Importations allItems={allItems} facturacionCatalog={facturacionCatalog} /> */}
-                  <p className="font-bold">Vista de Importaciones (En construcción...)</p>
-                </div>
-              )}
+  <div className="h-full w-full flex flex-col relative bg-white">
+    <ImportTable allItems={allItems} facturacionCatalog={facturacionCatalog} />
+  </div>
+)}
             </>
           )}
         </main>
