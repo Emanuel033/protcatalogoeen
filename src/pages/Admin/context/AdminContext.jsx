@@ -101,6 +101,31 @@ export const AdminProvider = ({ children }) => {
     alert(`Preparando clonación de: ${productToClone.nombre_flexible}. Se abrirá en el modal próximamente.`);
   };
 
+  const applyMassEdit = async (ids, updates) => {
+    if (!ids || ids.length === 0) return;
+    
+    try {
+      const batch = writeBatch(db);
+      
+      // Añadimos cada producto al lote de actualización
+      ids.forEach((id) => {
+        const productRef = doc(db, 'productos_master', id);
+        batch.update(productRef, updates);
+      });
+      
+      // Ejecutamos el lote en Firebase
+      await batch.commit();
+      
+      // Limpiamos la selección de checkboxes
+      clearSelection();
+      console.log(`Actualizados ${ids.length} productos con éxito.`);
+    } catch (error) {
+      console.error("Error en la edición masiva de Firebase:", error);
+      alert("Hubo un error de conexión al aplicar los cambios en lote.");
+      throw error; // Re-lanzamos para que el modal sepa si falló
+    }
+  };
+
   return (
     <AdminContext.Provider
       value={{
@@ -131,6 +156,7 @@ export const AdminProvider = ({ children }) => {
 
         toggleProductStatus,
       deleteProduct,
+      applyMassEdit,
       cloneProduct,
 
       lightboxImg,

@@ -2,35 +2,55 @@ import React, { useState } from 'react';
 import { useAdminContext } from '../context/AdminContext';
 
 export const BulkActionBar = () => {
-  const { selectedItems, clearSelection } = useAdminContext();
+  // Extraemos selectedItems, clearSelection y la nueva función applyMassEdit
+  const { selectedItems, clearSelection, applyMassEdit } = useAdminContext();
   
-  // Estados nativos para el Modal Masivo (Sin librerías externas)
+  // Estados nativos para el Modal Masivo
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCategory, setNewCategory] = useState('');
   const [newTipo, setNewTipo] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Si no hay nada seleccionado, no renderizamos absolutamente nada
+  // Si no hay nada seleccionado, no renderizamos nada
   if (selectedItems.length === 0) return null;
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    // Limpiamos los campos para la próxima vez
     setNewCategory('');
     setNewTipo('');
+    setIsSaving(false);
   };
 
-  const handleApplyChanges = () => {
-    // Aquí es donde haremos la actualización en lote en Firebase después
-    console.log(`Aplicando cambios a ${selectedItems.length} elementos:`, {
-      nuevaCategoria: newCategory || '(Sin cambios)',
-      nuevoTipo: newTipo || '(Sin cambios)',
-      itemsAfectados: selectedItems
-    });
-    
-    // Cerramos, limpiamos campos y deseleccionamos todo
-    handleCloseModal();
-    clearSelection();
-    alert('Cambios masivos aplicados (Ver consola para detalles)');
+  const handleApplyChanges = async () => {
+    const updates = {};
+
+    // Construimos las actualizaciones de forma dinámica
+    // Si escribió algo en categoría, lo agregamos (forzando mayúsculas como en tu sistema original)
+    if (newCategory.trim() !== '') {
+      updates.categoria = newCategory.trim().toUpperCase();
+    }
+
+    // Si seleccionó un tipo de artículo válido, lo agregamos
+    if (newTipo !== '') {
+      updates.tipo_item = newTipo;
+    }
+
+    // Validación de seguridad: si no hizo ningún cambio, le avisamos
+    if (Object.keys(updates).length === 0) {
+      alert("Por favor, introduce una nueva categoría o selecciona un tipo de artículo para cambiar.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      // Ejecutamos la actualización masiva real en Firebase
+      await applyMassEdit(selectedItems, updates);
+      
+      // Si todo sale bien, cerramos el modal limpiamente
+      handleCloseModal();
+    } catch (e) {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -82,7 +102,7 @@ export const BulkActionBar = () => {
                   </p>
                 </div>
               </div>
-              <button onClick={handleCloseModal} className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 flex items-center justify-center transition">
+              <button disabled={isSaving} onClick={handleCloseModal} className="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 flex items-center justify-center transition disabled:opacity-50">
                 <i className="fas fa-times"></i>
               </button>
             </div>
@@ -99,9 +119,10 @@ export const BulkActionBar = () => {
                 </label>
                 <input 
                   type="text" 
+                  disabled={isSaving}
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full input-modern px-4 py-3 rounded-xl font-bold text-slate-900 uppercase text-sm border border-slate-200 outline-none focus:border-blue-500" 
+                  className="w-full input-modern px-4 py-3 rounded-xl font-bold text-slate-900 uppercase text-sm border border-slate-200 outline-none focus:border-blue-500 disabled:bg-slate-50" 
                   placeholder="Ej: TAPAS" 
                 />
               </div>
@@ -112,9 +133,10 @@ export const BulkActionBar = () => {
                 </label>
                 <div className="relative">
                   <select 
+                    disabled={isSaving}
                     value={newTipo}
                     onChange={(e) => setNewTipo(e.target.value)}
-                    className="w-full input-modern px-4 py-3 rounded-xl text-slate-800 font-bold text-sm appearance-none border border-slate-200 outline-none focus:border-blue-500 bg-white"
+                    className="w-full input-modern px-4 py-3 rounded-xl text-slate-800 font-bold text-sm appearance-none border border-slate-200 outline-none focus:border-blue-500 bg-white disabled:bg-slate-50"
                   >
                     <option value="">-- No modificar --</option>
                     <option value="PIEZA_BASE">Pieza Base Suelta</option>
@@ -128,11 +150,27 @@ export const BulkActionBar = () => {
             
             {/* Footer Modal */}
             <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex gap-3">
-              <button onClick={handleCloseModal} className="flex-1 py-3 text-slate-600 font-bold text-sm hover:bg-slate-200 rounded-xl transition">
+              <button 
+                type="button"
+                disabled={isSaving} 
+                onClick={handleCloseModal} 
+                className="flex-1 py-3 text-slate-600 font-bold text-sm hover:bg-slate-200 rounded-xl transition disabled:opacity-50"
+              >
                 Cancelar
               </button>
-              <button onClick={handleApplyChanges} className="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 text-sm transition-all">
-                Aplicar Cambios
+              <button 
+                type="button"
+                disabled={isSaving}
+                onClick={handleApplyChanges} 
+                className="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 text-sm transition-all flex items-center justify-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <i className="fas fa-sync fa-spin"></i> Aplicando...
+                  </>
+                ) : (
+                  'Aplicar Cambios'
+                )}
               </button>
             </div>
             
