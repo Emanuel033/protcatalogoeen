@@ -20,5 +20,6 @@ try {
   // Si da el error de "ya fue inicializado" por recargar la página, simplemente usamos el que ya existe
   db = getFirestore(app);
 }
+const auth = getAuth(app); // <-- 2. Inicializa auth
 
-export { db };
+export { db, auth }; // <-- 3. Exporta auth junto con db

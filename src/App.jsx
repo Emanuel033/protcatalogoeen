@@ -14,6 +14,8 @@ import AdminLayout from './pages/Admin/AdminLayout';
 // Corrección: Importamos ChoferView con su nombre correcto
 import AppOperador from './pages/Chofer/AppOperador';
 
+import CentroComando from './pages/Admin/CentroComando';
+
 function App() {
   return (
     <Router>
@@ -30,8 +32,8 @@ function App() {
           } 
         />
 
-        {/* Agregamos la ruta para la nueva vista de Administración */}
-        <Route path="/admin" element={<AdminLayout />} />
+       {/* La nueva ruta del Admin */}
+    <Route path="/admin" element={<CentroComando />} />
         
         {/* Agregamos la ruta para el Chofer */}
         <Route path="/chofer" element={<AppOperador />} />
