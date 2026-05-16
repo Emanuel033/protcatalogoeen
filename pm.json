@@ -4441,13 +4441,13 @@
       "tipo_item": "PIEZA_BASE",
       "receta_desglose": null,
       "hereda_empaques_de": null,
-      "activo": true,
       "id_facturacion": "TPL-R50-NAT-CP",
       "stock_total_piezas": 0,
       "fecha_creacion": {
         "_seconds": 1778116121,
         "_nanoseconds": 339000000
-      }
+      },
+      "activo": true
     },
     "paquetes": [
       {
