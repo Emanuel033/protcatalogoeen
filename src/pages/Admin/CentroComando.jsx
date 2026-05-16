@@ -3,7 +3,7 @@ import { useAdminData } from './hooks/useAdminData';
 import { AdminProvider, useAdminContext } from './context/AdminContext';
 import { Sidebar } from './components/Sidebar';
 // Importaremos estas tablas en el siguiente paso:
-// import { MasterCatalog } from './components/MasterCatalog';
+import { MasterTable } from './components/tables/MasterTable';
 // import { Importations } from './components/Importations';
 
 const CentroComandoContent = () => {
@@ -80,11 +80,10 @@ const CentroComandoContent = () => {
             <>
               {/* Aquí montaremos los componentes según la pestaña activa */}
               {activeTab === 'master' && (
-                <div className="h-full w-full flex items-center justify-center text-slate-400">
-                   {/* <MasterCatalog allItems={allItems} facturacionCatalog={facturacionCatalog} /> */}
-                   <p className="font-bold">Vista del Catálogo Maestro (En construcción...)</p>
-                </div>
-              )}
+  <div className="h-full w-full flex flex-col relative bg-white">
+     <MasterTable allItems={allItems} />
+  </div>
+)}
               {activeTab === 'import' && userRole === 'admin' && (
                 <div className="h-full w-full flex items-center justify-center text-slate-400">
                   {/* <Importations allItems={allItems} facturacionCatalog={facturacionCatalog} /> */}
