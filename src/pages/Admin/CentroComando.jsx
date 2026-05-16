@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar';
 // Importaremos estas tablas en el siguiente paso:
 import { MasterTable } from './components/tables/MasterTable';
 import { ImportTable } from './components/tables/ImportTable';
+import { BulkActionBar } from './components/BulkActionBar';
 
 const CentroComandoContent = () => {
   const { userRole, userName, isLoadingAuth, authError, allItems, facturacionCatalog, isDataLoading } = useAdminData();
@@ -93,6 +94,9 @@ const CentroComandoContent = () => {
           )}
         </main>
       </div>
+      {/* COMPONENTES FLOTANTES GLOBALES */}
+    <BulkActionBar />
+    {/* <ProductConfigModal /> */}
     </div>
   );
 };
