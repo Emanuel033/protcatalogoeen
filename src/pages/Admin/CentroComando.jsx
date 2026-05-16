@@ -9,9 +9,7 @@ import { BulkActionBar } from './components/BulkActionBar';
 
 const CentroComandoContent = () => {
   const { userRole, userName, isLoadingAuth, authError, allItems, facturacionCatalog, isDataLoading } = useAdminData();
-  const { activeTab, masterView } = useAdminContext();
-  // ESTADO PARA EL VISOR DE IMÁGENES
-  const [lightboxImg, setLightboxImg] = useState(null);
+  const { activeTab, masterView, lightboxImg, setLightboxImg } = useAdminContext();
 
   // 1. Estados de Autenticación
   if (isLoadingAuth) {
