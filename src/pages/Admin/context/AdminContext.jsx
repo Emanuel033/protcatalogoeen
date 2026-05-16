@@ -60,6 +60,45 @@ export const AdminProvider = ({ children }) => {
     clearSelection();
   };
 
+  const toggleProductStatus = async (id, currentState) => {
+    try {
+      const productRef = doc(db, 'productos_master', id);
+      await updateDoc(productRef, { activo: !currentState });
+      console.log(!currentState ? 'El producto ahora es VISIBLE' : 'El producto ha sido OCULTADO');
+    } catch (error) {
+      console.error("Error al cambiar visibilidad", error);
+      alert('Error al cambiar visibilidad');
+    }
+  };
+
+  const deleteProduct = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este producto permanentemente?\nEsta acción no se puede deshacer y borrará también sus cajas configuradas.')) return;
+    
+    try {
+      const batch = writeBatch(db);
+      const productRef = doc(db, 'productos_master', id);
+      
+      const paquetesRef = collection(db, 'productos_master', id, 'paquetes');
+      const paquetesSnapshot = await getDocs(paquetesRef);
+      
+      paquetesSnapshot.forEach((docSnap) => {
+        batch.delete(docSnap.ref);
+      });
+      
+      batch.delete(productRef);
+      await batch.commit();
+      clearSelection();
+      console.log('Producto eliminado correctamente');
+    } catch (error) {
+      console.error("Error al eliminar", error);
+      alert('Error de conexión al eliminar');
+    }
+  };
+
+  const cloneProduct = (productToClone) => {
+    alert(`Preparando clonación de: ${productToClone.nombre_flexible}. Se abrirá en el modal próximamente.`);
+  };
+
   return (
     <AdminContext.Provider
       value={{
@@ -87,7 +126,7 @@ export const AdminProvider = ({ children }) => {
         selectAll,
         handleSortChange,
 
-        
+
         toggleProductStatus,
       deleteProduct,
       cloneProduct
