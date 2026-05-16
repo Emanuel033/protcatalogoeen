@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 import { doc, updateDoc, deleteDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import { db } from '../../../firebase.js';
 // Creamos el contexto
 const AdminContext = createContext();
 
@@ -59,7 +59,6 @@ export const AdminProvider = ({ children }) => {
     setActiveTab(tab);
     clearSelection();
   };
-  import { db } from '../../../firebase';
 
   return (
     <AdminContext.Provider
