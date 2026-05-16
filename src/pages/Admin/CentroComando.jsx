@@ -9,7 +9,9 @@ import { BulkActionBar } from './components/BulkActionBar';
 
 const CentroComandoContent = () => {
   const { userRole, userName, isLoadingAuth, authError, allItems, facturacionCatalog, isDataLoading } = useAdminData();
-  const { activeTab } = useAdminContext();
+  const { activeTab, masterView } = useAdminContext();
+  // ESTADO PARA EL VISOR DE IMÁGENES
+  const [lightboxImg, setLightboxImg] = useState(null);
 
   // 1. Estados de Autenticación
   if (isLoadingAuth) {
@@ -96,10 +98,34 @@ const CentroComandoContent = () => {
       </div>
       {/* COMPONENTES FLOTANTES GLOBALES */}
     <BulkActionBar />
+    {/* --- NUEVO: VISOR DE IMÁGENES (LIGHTBOX) --- */}
+      {lightboxImg && (
+        <div 
+          className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4 cursor-zoom-out transition-opacity duration-300 animate-fade-in"
+          onClick={() => setLightboxImg(null)} // Se cierra al hacer clic en cualquier lado
+        >
+          <div className="relative max-w-4xl max-h-[90vh] w-full flex items-center justify-center">
+            <img 
+              src={lightboxImg} 
+              alt="Vista ampliada" 
+              className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl animate-scale-up" 
+            />
+            <button 
+              onClick={(e) => { e.stopPropagation(); setLightboxImg(null); }}
+              className="absolute -top-4 -right-4 w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-md border border-white/20"
+            >
+              <i className="fas fa-times text-lg"></i>
+            </button>
+          </div>
+        </div>
+      )}
+
     {/* <ProductConfigModal /> */}
     </div>
   );
 };
+
+
 
 // Envolvemos el componente en el Provider para que el Contexto funcione
 export default function CentroComando() {

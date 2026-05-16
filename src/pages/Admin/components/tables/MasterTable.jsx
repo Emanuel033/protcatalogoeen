@@ -151,11 +151,11 @@ export const MasterTable = ({ allItems }) => {
                   </td>
                   <td className="px-3 py-3 flex items-center gap-4 border-b border-slate-100 min-w-[280px]">
                     <img 
-                      src={p.imagen_url || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'} 
-                      alt="Img"
-                      onClick={() => alert(`Ampliar imagen en construcción`)} // TODO: Modales
-                      className={`w-10 h-10 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform ${!isActivo ? 'grayscale' : ''}`} 
-                    />
+  src={p.imagen_url || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'} 
+  alt="Img"
+  onClick={() => setLightboxImg(p.imagen_url || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO')} 
+  className={`w-10 h-10 object-cover rounded-xl border border-slate-200 bg-white shrink-0 cursor-zoom-in hover:scale-105 transition-transform ${!isActivo ? 'grayscale' : ''}`} 
+/>
                     <div className="min-w-0 pr-2">
                       <p 
                         onClick={() => alert(`Editar ${p.id} en construcción`)} // TODO: Modal Editar

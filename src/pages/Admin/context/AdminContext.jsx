@@ -23,6 +23,8 @@ export const AdminProvider = ({ children }) => {
   // --- 4. SELECCIÓN MASIVA (Reemplaza a document.querySelectorAll('.row-cb:checked')) ---
   const [selectedItems, setSelectedItems] = useState([]);
 
+  const [lightboxImg, setLightboxImg] = useState(null);
+
   // Funciones de ayuda para la selección masiva
   const toggleSelection = (id) => {
     setSelectedItems((prev) => 
@@ -129,7 +131,10 @@ export const AdminProvider = ({ children }) => {
 
         toggleProductStatus,
       deleteProduct,
-      cloneProduct
+      cloneProduct,
+
+      lightboxImg,
+      setLightboxImg
       }}
     >
       {children}
