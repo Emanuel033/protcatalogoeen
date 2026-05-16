@@ -8,9 +8,6 @@ import InventarioView from './pages/Inventario/InventarioView';
 import RutasView from './pages/Rutas/RutasView';
 import { LogisticaProvider } from './pages/Rutas/context/LogisticaContext';
 
-// Importamos el componente del Admin
-import AdminLayout from './pages/Admin/AdminLayout'; 
-
 // Corrección: Importamos ChoferView con su nombre correcto
 import AppOperador from './pages/Chofer/AppOperador';
 
