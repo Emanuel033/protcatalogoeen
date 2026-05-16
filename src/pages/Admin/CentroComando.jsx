@@ -4,12 +4,13 @@ import { AdminProvider, useAdminContext } from './context/AdminContext';
 import { Sidebar } from './components/Sidebar';
 // Importaremos estas tablas en el siguiente paso:
 import { MasterTable } from './components/tables/MasterTable';
+import { GroupedTable } from './components/tables/GroupedTable';
 import { ImportTable } from './components/tables/ImportTable';
 import { BulkActionBar } from './components/BulkActionBar';
 
 const CentroComandoContent = () => {
   const { userRole, userName, isLoadingAuth, authError, allItems, facturacionCatalog, isDataLoading } = useAdminData();
-  const { activeTab, masterView, lightboxImg, setLightboxImg } = useAdminContext();
+  const { activeTab, masterView, setMasterView, lightboxImg, setLightboxImg } = useAdminContext();
 
   // 1. Estados de Autenticación
   if (isLoadingAuth) {
@@ -81,10 +82,37 @@ const CentroComandoContent = () => {
             <>
               {/* Aquí montaremos los componentes según la pestaña activa */}
               {activeTab === 'master' && (
-  <div className="h-full w-full flex flex-col relative bg-white">
-     <MasterTable allItems={allItems} />
-  </div>
-)}
+                <div className="h-full w-full flex flex-col relative bg-white">
+                  
+                  {/* BARRA DE VISTAS (SWITCH) */}
+                  <div className="bg-white px-4 py-3 border-b border-slate-100 flex items-center justify-between z-20 shrink-0">
+                    <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
+                      <button 
+                        onClick={() => setMasterView('desglose')}
+                        className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${masterView === 'desglose' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        <i className="fas fa-list-ul mr-2"></i> Desglose
+                      </button>
+                      <button 
+                        onClick={() => setMasterView('agrupado')}
+                        className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${masterView === 'agrupado' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        <i className="fas fa-layer-group mr-2"></i> Agrupado
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* RENDERIZADO CONDICIONAL DE LAS TABLAS */}
+                  <div className="flex-1 flex flex-col overflow-hidden relative">
+                    {masterView === 'desglose' ? (
+                      <MasterTable allItems={allItems} />
+                    ) : (
+                      <GroupedTable allItems={allItems} facturacionCatalog={facturacionCatalog} />
+                    )}
+                  </div>
+
+                </div>
+              )}
               {activeTab === 'import' && userRole === 'admin' && (
   <div className="h-full w-full flex flex-col relative bg-white">
     <ImportTable allItems={allItems} facturacionCatalog={facturacionCatalog} />
