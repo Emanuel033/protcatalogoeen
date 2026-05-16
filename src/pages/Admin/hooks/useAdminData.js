@@ -64,7 +64,7 @@ export const useAdminData = () => {
     setIsDataLoading(true);
     
     // Suscripción al catálogo web
-    const unsubscribeProducts = onSnapshot(collection(db, 'productos'), (snapshot) => {
+    const unsubscribeProducts = onSnapshot(collection(db, 'productos_master'), (snapshot) => {
       const items = [];
       const bases = [];
       
