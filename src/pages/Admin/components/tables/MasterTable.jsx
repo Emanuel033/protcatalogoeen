@@ -11,7 +11,10 @@ export const MasterTable = ({ allItems }) => {
     handleSortChange,
     selectedItems,
     toggleSelection,
-    selectAll 
+    selectAll,
+    toggleProductStatus,
+    deleteProduct,
+    cloneProduct 
   } = useAdminContext();
 
   // 1. FILTRADO REACTIVO (Sustituye al "filterTable" de Vanilla)
@@ -189,13 +192,23 @@ export const MasterTable = ({ allItems }) => {
                   <td className={`px-3 py-3 text-right border-b border-slate-100 sticky right-0 ${activeStickyBg} transition-colors shadow-[-8px_0_15px_-5px_rgba(0,0,0,0.05)] z-10 w-[240px]`}>
                     <div className="flex justify-end items-center gap-1.5 flex-wrap w-max ml-auto opacity-80 group-hover:opacity-100 transition-opacity">
                       
-                      <button onClick={() => alert('Toggle Activo en construcción')} className={`w-8 h-8 rounded-lg ${isActivo ? 'bg-blue-50 hover:bg-blue-100 border border-blue-100' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'} transition-all shadow-sm flex items-center justify-center`} title={isActivo ? 'Ocultar de web' : 'Mostrar en web'}>
-                        <i className={`fas ${isActivo ? 'fa-eye text-blue-500' : 'fa-eye-slash text-slate-400'} text-xs`}></i>
-                      </button>
+                      {/* Ocultar/Mostrar de Web */}
+<button 
+  onClick={() => toggleProductStatus(p.id, isActivo)} 
+  className={`w-8 h-8 rounded-lg ${isActivo ? 'bg-blue-50 hover:bg-blue-100 border border-blue-100' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'} transition-all shadow-sm flex items-center justify-center`} 
+  title={isActivo ? 'Ocultar de web' : 'Mostrar en web'}
+>
+  <i className={`fas ${isActivo ? 'fa-eye text-blue-500' : 'fa-eye-slash text-slate-400'} text-xs`}></i>
+</button>
                       
-                      <button onClick={() => alert('Clonar en construcción')} className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="Clonar Producto">
-                        <i className="fas fa-copy text-xs"></i>
-                      </button>
+                      {/* Clonar */}
+<button 
+  onClick={() => cloneProduct(p)} 
+  className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" 
+  title="Clonar Producto"
+>
+  <i className="fas fa-copy text-xs"></i>
+</button>
                       
                       <div className="w-px h-5 bg-slate-200 mx-0.5"></div>
                       
@@ -217,9 +230,14 @@ export const MasterTable = ({ allItems }) => {
                         <i className="fas fa-pen text-xs"></i>
                       </button>
                       
-                      <button onClick={() => alert('Eliminar en construcción')} className="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all shadow-sm flex items-center justify-center border border-red-100" title="Eliminar Producto">
-                        <i className="fas fa-trash-alt text-xs"></i>
-                      </button>
+                      {/* Eliminar */}
+<button 
+  onClick={() => deleteProduct(p.id)} 
+  className="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all shadow-sm flex items-center justify-center border border-red-100" 
+  title="Eliminar Producto"
+>
+  <i className="fas fa-trash-alt text-xs"></i>
+</button>
                     </div>
                   </td>
                 </tr>
