@@ -87,6 +87,7 @@ export const AdminProvider = ({ children }) => {
         selectAll,
         handleSortChange,
 
+        
         toggleProductStatus,
       deleteProduct,
       cloneProduct

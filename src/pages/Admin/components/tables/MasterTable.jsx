@@ -14,7 +14,7 @@ export const MasterTable = ({ allItems }) => {
     selectAll,
     toggleProductStatus,
     deleteProduct,
-    cloneProduct 
+    cloneProduct
   } = useAdminContext();
 
   // 1. FILTRADO REACTIVO (Sustituye al "filterTable" de Vanilla)
