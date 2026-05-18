@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAdminContext } from '../context/AdminContext';
+import { RecetaBuilder } from './RecetaBuilder';
 export const ProductConfigModal = ({ isOpen, onClose }) => {
   
-    const { saveProduct, editingProduct } = useAdminContext();
+    const { saveProduct, editingProduct, allItems } = useAdminContext();
 
   const { 
     register, 
@@ -44,6 +45,7 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
   const fileInputRef = useRef(null);
   const currentImageUrl = watch('imagen_url');
   const currentTipoItem = watch('tipo_item');
+  const currentReceta = watch('receta') || [];
   const isActivo = watch('activo');
 
   // --- SUBIDA DE IMAGEN A VERCEL ---
@@ -235,13 +237,17 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
 
               {/* RENDERIZADO CONDICIONAL DE RECETAS */}
               {currentTipoItem === 'KIT_FLEXIBLE' && (
-                <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up">
+                <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up w-full">
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Receta Estructural (Árbol)</label>
                   <p className="text-[10px] text-slate-500 font-medium mb-4">Su existencia web se calculará automáticamente en base al stock de los componentes listados aquí.</p>
-                  <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-5 flex flex-col items-center justify-center min-h-[100px]">
-                     {/* TODO: Montar el componente <RecetaBuilder /> aquí */}
-                     <p className="text-xs text-slate-400 font-bold mb-3">Zona de armado de kits en construcción...</p>
-                     <button type="button" className="text-xs bg-white border border-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-xl shadow-sm"><i className="fas fa-plus mr-2"></i> Añadir Componente</button>
+                  
+                  <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center min-h-[100px] w-full">
+                     {/* INYECTAMOS EL BUILDER AQUÍ 👇 */}
+                     <RecetaBuilder 
+                       receta={currentReceta} 
+                       onChange={(nuevaReceta) => setValue('receta', nuevaReceta, { shouldDirty: true })}
+                       allItems={allItems}
+                     />
                   </div>
                 </div>
               )}
