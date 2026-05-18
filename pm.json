@@ -2186,7 +2186,6 @@
     "id": "-Ol8DOl7WrKI41lrYcu1",
     "firebase_data": {
       "id": "-Ol8DOl7WrKI41lrYcu1",
-      "nombre_flexible": "CUBETA DE PLASTICO BLANCA DE 19 L SIN TAPA",
       "tipo_item": "PIEZA_BASE",
       "stock_total_piezas": 0,
       "categoria": "CUBETA DE PLASTICO",
@@ -2197,7 +2196,12 @@
         "_nanoseconds": 423000000
       },
       "codigo_sistema_oficial": "CPB-19-M/CP",
-      "receta_desglose": null
+      "receta_desglose": null,
+      "nombre_flexible": "CUBETA DE PLASTICO BLANCA DE 19 L SIN TAPA MUN",
+      "fecha_actualizacion": {
+        "_seconds": 1779134917,
+        "_nanoseconds": 568000000
+      }
     },
     "paquetes": [
       {
@@ -18947,7 +18951,6 @@
     "firebase_data": {
       "id": "zXpaHw4GPWXjU18rQAf8",
       "nombre_flexible": "CAJITA DE POLIPROPILENO NO. 4 CON TAPA 60 GRS.",
-      "imagen_url": "",
       "categoria": "OTROS",
       "codigo_sistema_oficial": "CPP-4/CP",
       "tipo_item": "PIEZA_BASE",
@@ -18959,6 +18962,11 @@
       "fecha_creacion": {
         "_seconds": 1778198883,
         "_nanoseconds": 507000000
+      },
+      "imagen_url": "https://i.ibb.co/0yQTJXH4/55b60f5a041b.jpg",
+      "fecha_actualizacion": {
+        "_seconds": 1779136676,
+        "_nanoseconds": 481000000
       }
     },
     "paquetes": [
