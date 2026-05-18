@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAdminContext } from '../context/AdminContext';
 import { RecetaBuilder } from './RecetaBuilder';
+import { PackagesManager } from './PackagesManager';
 export const ProductConfigModal = ({ isOpen, onClose }) => {
   
     const { saveProduct, editingProduct, allItems } = useAdminContext();
@@ -46,6 +47,11 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
   const currentImageUrl = watch('imagen_url');
   const currentTipoItem = watch('tipo_item');
   const currentReceta = watch('receta') || [];
+  const currentPackages = watch('presentaciones') || [];
+const currentBaseSku = watch('codigo_sistema_oficial');
+const heredaDeId = watch('hereda_empaques_de');
+const [heredaSearch, setHeredaSearch] = useState('');
+const [showHeredaList, setShowHeredaList] = useState(false);
   const isActivo = watch('activo');
 
   // --- SUBIDA DE IMAGEN A VERCEL ---
@@ -95,6 +101,12 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
   const onSubmit = async (data) => {
     await saveProduct(data);
   };
+
+  const filteredHeredar = allItems.filter(p => 
+  p.id !== editingProduct?.id && // No heredarse a sí mismo
+  (p.nombre_flexible?.toLowerCase().includes(heredaSearch.toLowerCase()) ||
+   p.codigo_sistema_oficial?.toLowerCase().includes(heredaSearch.toLowerCase()))
+).slice(0, 5);
 
   if (!isOpen) return null;
 
@@ -252,46 +264,69 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
                 </div>
               )}
 
-              {/* RENDERIZADO CONDICIONAL DE HERENCIA */}
-              {currentTipoItem !== 'PIEZA_BASE' && (
-                <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up relative">
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                    <i className="fas fa-link text-blue-500 mr-1"></i> Heredar Empaques / Cajas de:
-                  </label>
-                  <p className="text-[10px] text-slate-500 font-medium mb-3">Busca y elige el producto maestro para compartir sus presentaciones de cajas.</p>
-                  <input type="text" placeholder="Escribe para buscar un producto maestro..." className="w-full input-modern px-4 py-3 rounded-xl font-bold text-sm text-slate-800 border border-slate-200 outline-none" />
-                </div>
-              )}
+              {/* SECCIÓN HERENCIA (Actualizada) */}
+{currentTipoItem !== 'PIEZA_BASE' && (
+  <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up relative">
+    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+      <i className="fas fa-link text-blue-500 mr-1"></i> Heredar Empaques / Cajas de:
+    </label>
+    <div className="relative">
+      <input 
+        type="text" 
+        value={heredaSearch}
+        onFocus={() => setShowHeredaList(true)}
+        onChange={(e) => setHeredaSearch(e.target.value)}
+        placeholder={heredaDeId ? "Heredando de un producto vinculado..." : "Busca un producto para compartir sus cajas..."}
+        className="w-full input-modern px-4 py-3 rounded-xl font-bold text-sm text-slate-800 border border-slate-200 outline-none focus:border-blue-500" 
+      />
+      {heredaDeId && (
+        <button 
+          type="button"
+          onClick={() => { setValue('hereda_empaques_de', ''); setHeredaSearch(''); }}
+          className="absolute right-10 top-1/2 -translate-y-1/2 text-red-500 text-xs font-bold"
+        >
+          Quitar vínculo
+        </button>
+      )}
+      <i className="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      
+      {showHeredaList && heredaSearch && (
+        <ul className="absolute z-[90] w-full bg-white border border-slate-200 shadow-2xl rounded-xl mt-1 max-h-48 overflow-y-auto divide-y divide-slate-100">
+          {filteredHeredar.map(p => (
+            <li 
+              key={p.id}
+              onClick={() => {
+                setValue('hereda_empaques_de', p.id);
+                setHeredaSearch(p.nombre_flexible);
+                setShowHeredaList(false);
+              }}
+              className="p-3 hover:bg-blue-50 cursor-pointer flex justify-between items-center"
+            >
+              <span className="text-xs font-bold text-slate-700">{p.nombre_flexible}</span>
+              <span className="text-[10px] font-mono bg-slate-100 px-2 py-1 rounded text-slate-500">{p.codigo_sistema_oficial}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+)}
 
             </div>
 
-            {/* SECCIÓN 3: PAQUETES PROPIOS (Solo si no está heredando o si es Pieza Base) */}
-            <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100">
-              <h3 className="text-sm font-black text-slate-800 mb-5 flex items-center gap-2">
-                <div className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-500 flex items-center justify-center"><i className="fas fa-boxes text-xs"></i></div> 
-                Presentaciones (Bolsas/Cajas) Propias
-              </h3>
-              
-              <div className="bg-slate-900 p-5 rounded-2xl flex flex-col md:flex-row gap-4 items-end mb-6 shadow-lg shadow-slate-900/10">
-                <div className="w-full md:w-32">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Piezas</label>
-                  <input type="number" min="2" className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl text-sm text-center font-black focus:border-blue-500 outline-none transition-colors" />
-                </div>
-                <div className="flex-1 w-full">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">SKU Físico de Caja</label>
-                  <div className="flex">
-                    <input type="text" className="w-full bg-slate-800 border border-r-0 border-slate-700 text-white px-4 py-3 rounded-l-xl text-sm font-mono focus:border-blue-500 outline-none transition-colors" />
-                    <button type="button" className="bg-blue-600 hover:bg-blue-500 text-white px-5 rounded-r-xl font-bold text-[10px] uppercase tracking-wider transition">Auto</button>
-                  </div>
-                </div>
-                <button type="button" className="w-full md:w-auto bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-3 rounded-xl font-black text-sm transition h-[46px]">Añadir</button>
-              </div>
-
-              {/* TODO: Montar el componente <PackagesTable /> aquí */}
-              <div className="border border-slate-100 rounded-2xl overflow-hidden bg-slate-50 text-center py-8">
-                  <p className="text-xs text-slate-400 font-bold">Guarda el producto primero para gestionar sus cajas.</p>
-              </div>
-            </div>
+            {/* SECCIÓN PAQUETES PROPIOS (Actualizada) */}
+<div className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100">
+  <h3 className="text-sm font-black text-slate-800 mb-5 flex items-center gap-2">
+    <div className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-500 flex items-center justify-center"><i className="fas fa-boxes text-xs"></i></div> 
+    Presentaciones (Bolsas/Cajas) Propias
+  </h3>
+  
+  <PackagesManager 
+    packages={currentPackages}
+    baseSku={currentBaseSku}
+    onChange={(newPkgs) => setValue('presentaciones', newPkgs, { shouldDirty: true })}
+  />
+</div>
 
             {/* SECCIÓN 4: VISIBILIDAD */}
             <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
