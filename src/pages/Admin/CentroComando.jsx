@@ -8,10 +8,12 @@ import { MasterTable } from './components/tables/MasterTable';
 import { ImportTable } from './components/tables/ImportTable';
 import { BulkActionBar } from './components/BulkActionBar';
 import { Topbar } from './components/Topbar';
+import { ProductConfigModal } from './components/ProductConfigModal';
 
 const CentroComandoContent = () => {
   const { userRole, userName, isLoadingAuth, authError, allItems, facturacionCatalog, isDataLoading } = useAdminData();
-  const { activeTab, masterView, setMasterView, lightboxImg, setLightboxImg } = useAdminContext();
+  const { activeTab, masterView, lightboxImg, setLightboxImg, isConfigModalOpen, setIsConfigModalOpen } = useAdminContext();
+ 
 
   // 1. Estados de Autenticación
   if (isLoadingAuth) {
@@ -71,7 +73,7 @@ const CentroComandoContent = () => {
             </button>
           )}
         </header>
-        
+
         {/* NUEVO TOPBAR DE ESCRITORIO (Buscador y Filtros) */}
         <Topbar />
 
@@ -101,6 +103,10 @@ const CentroComandoContent = () => {
       </div>
       {/* COMPONENTES FLOTANTES GLOBALES */}
     <BulkActionBar />
+    <ProductConfigModal 
+        isOpen={isConfigModalOpen} 
+        onClose={() => setIsConfigModalOpen(false)} 
+      />
     {/* --- NUEVO: VISOR DE IMÁGENES (LIGHTBOX) --- */}
       {lightboxImg && (
         <div 

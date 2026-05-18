@@ -24,6 +24,7 @@ export const AdminProvider = ({ children }) => {
   const [selectedItems, setSelectedItems] = useState([]);
 
   const [lightboxImg, setLightboxImg] = useState(null);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
   // Funciones de ayuda para la selección masiva
   const toggleSelection = (id) => {
@@ -160,7 +161,9 @@ export const AdminProvider = ({ children }) => {
       cloneProduct,
 
       lightboxImg,
-      setLightboxImg
+      setLightboxImg,
+      isConfigModalOpen,      // 👈 Agrega esta
+        setIsConfigModalOpen
       }}
     >
       {children}
