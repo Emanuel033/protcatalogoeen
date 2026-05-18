@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form';
 import { useAdminContext } from '../context/AdminContext';
 import { RecetaBuilder } from './RecetaBuilder';
 import { PackagesManager } from './PackagesManager';
-export const ProductConfigModal = ({ isOpen, onClose }) => {
+export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
   
-    const { saveProduct, editingProduct, allItems } = useAdminContext();
+    const { saveProduct, editingProduct } = useAdminContext();
 
   const { 
     register, 

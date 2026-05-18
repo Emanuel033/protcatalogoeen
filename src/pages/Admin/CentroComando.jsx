@@ -106,6 +106,7 @@ const CentroComandoContent = () => {
     <ProductConfigModal 
         isOpen={isConfigModalOpen} 
         onClose={() => setIsConfigModalOpen(false)} 
+        allItems={allItems}
       />
     {/* --- NUEVO: VISOR DE IMÁGENES (LIGHTBOX) --- */}
       {lightboxImg && (
