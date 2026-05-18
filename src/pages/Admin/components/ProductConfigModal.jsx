@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAdminContext } from '../context/AdminContext';
 export const ProductConfigModal = ({ isOpen, onClose }) => {
+  
+    const { saveProduct, editingProduct } = useAdminContext();
+
   const { 
     register, 
     handleSubmit, 
