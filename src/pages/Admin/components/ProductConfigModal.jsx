@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAdminContext } from '../context/AdminContext';
 export const ProductConfigModal = ({ isOpen, onClose }) => {
@@ -9,7 +9,8 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
     register, 
     handleSubmit, 
     watch,
-    reset, 
+    reset,
+    setValue, 
     formState: { errors } 
   } = useForm({
     defaultValues: {
@@ -39,10 +40,55 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
       });
     }
   }, [editingProduct, reset]);
-
+  const [isUploading, setIsUploading] = useState(false); // Ya la teníamos
+  const fileInputRef = useRef(null);
   const currentImageUrl = watch('imagen_url');
   const currentTipoItem = watch('tipo_item');
   const isActivo = watch('activo');
+
+  // --- SUBIDA DE IMAGEN A VERCEL ---
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    try {
+      // 1. Convertir a Base64 nativamente
+      const base64String = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+
+      // ¡REEMPLAZA ESTO CON TU URL REAL DE VERCEL!
+      const URL_VERCEL_IMGBB = "https://api-proxy-een.vercel.app/api/upload"; 
+
+      // 2. Enviar a Vercel
+      const response = await fetch(URL_VERCEL_IMGBB, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64String })
+      });
+      
+      const data = await response.json();
+
+      if (response.ok) {
+        // 3. Magia de React Hook Form: actualiza el input y la previsualización al instante
+        setValue('imagen_url', data.url, { shouldValidate: true, shouldDirty: true });
+        console.log("Imagen subida con bóveda segura");
+      } else {
+        alert("Error de la API: " + (data.error || 'Desconocido'));
+      }
+    } catch (error) { 
+      console.error(error);
+      alert("Error de conexión al subir la imagen");
+    } finally { 
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = ''; // Resetea el input
+    }
+  };
 
   const onSubmit = async (data) => {
     await saveProduct(data);
@@ -90,27 +136,55 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Imagen del Producto</label>
-                  <div className="flex gap-4 items-center">
-                    <img 
-                      src={currentImageUrl || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'} 
-                      className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0 bg-slate-50"
-                      alt="Preview"
-                    />
-                    <div className="flex-1 flex gap-2">
+                {/* IMAGEN Y UPLOAD */}
+              <div className="md:col-span-2">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Imagen del Producto</label>
+                <div className="flex gap-4 items-center">
+                  <img 
+                    src={currentImageUrl || 'https://dummyimage.com/200x200/e2e8f0/0f172a&text=FOTO'} 
+                    className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0 bg-slate-50"
+                    alt="Preview"
+                  />
+                  <div className="flex-1 flex flex-col gap-1">
+                    <div className="flex gap-2">
                       <input 
                         type="url" 
-                        placeholder="Pega una URL..."
+                        placeholder="Pega una URL o sube una foto..."
                         className="w-full input-modern px-4 py-3 rounded-xl text-slate-600 text-sm border border-slate-200 outline-none focus:border-blue-500"
                         {...register('imagen_url')}
+                        disabled={isUploading}
                       />
-                      <button type="button" onClick={() => alert('ImgBB en construcción')} className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border border-indigo-200 shrink-0">
+                      
+                      {/* INPUT OCULTO DE ARCHIVO */}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        ref={fileInputRef} 
+                        onChange={handleImageUpload} 
+                      />
+
+                      {/* BOTÓN VISIBLE */}
+                      <button 
+                        type="button" 
+                        onClick={() => fileInputRef.current.click()} 
+                        disabled={isUploading}
+                        className={`px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 border shrink-0 ${isUploading ? 'bg-indigo-50/50 text-indigo-400 border-indigo-100 cursor-not-allowed' : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-indigo-200'}`}
+                      >
                         <i className="fas fa-upload"></i> <span className="hidden sm:inline">Subir</span>
                       </button>
                     </div>
+
+                    {/* MENSAJE DE CARGA (Igual al tuyo) */}
+                    {isUploading && (
+                      <p className="text-[10px] text-indigo-500 font-bold animate-pulse mt-1">
+                        <i className="fas fa-spinner fa-spin mr-1"></i> Subiendo a servidor seguro...
+                      </p>
+                    )}
+
                   </div>
                 </div>
+              </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Categoría</label>
