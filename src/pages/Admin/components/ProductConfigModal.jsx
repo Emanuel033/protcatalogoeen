@@ -59,7 +59,7 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="font-black text-slate-900 text-lg leading-tight">
-                {initialData ? 'Editar Producto' : 'Nuevo Producto'}
+                {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
             </div>
           </div>
