@@ -7,6 +7,7 @@ import { MasterTable } from './components/tables/MasterTable';
 //import { GroupedTable } from './components/tables/GroupedTable';
 import { ImportTable } from './components/tables/ImportTable';
 import { BulkActionBar } from './components/BulkActionBar';
+import { Topbar } from './components/Topbar';
 
 const CentroComandoContent = () => {
   const { userRole, userName, isLoadingAuth, authError, allItems, facturacionCatalog, isDataLoading } = useAdminData();
@@ -70,6 +71,9 @@ const CentroComandoContent = () => {
             </button>
           )}
         </header>
+        
+        {/* NUEVO TOPBAR DE ESCRITORIO (Buscador y Filtros) */}
+        <Topbar />
 
         {/* CONTENEDOR DE LA PANTALLA ACTIVA */}
         <main className="flex-1 overflow-hidden relative w-full flex flex-col">
