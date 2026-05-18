@@ -15,7 +15,9 @@ export const MasterTable = ({ allItems }) => {
     toggleProductStatus,
     deleteProduct,
     cloneProduct,
-    setLightboxImg
+    setLightboxImg,
+    setIsConfigModalOpen,
+    setEditingProduct
   } = useAdminContext();
 
   // 1. FILTRADO REACTIVO (Sustituye al "filterTable" de Vanilla)
@@ -227,9 +229,17 @@ export const MasterTable = ({ allItems }) => {
                       
                       <div className="w-px h-5 bg-slate-200 mx-0.5"></div>
                       
-                      <button onClick={() => alert('Editar en construcción')} className="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center justify-center" title="Editar / Configurar">
-                        <i className="fas fa-pen text-xs"></i>
-                      </button>
+                      {/* Editar */}
+<button 
+  onClick={() => {
+    setEditingProduct(p);          // Le decimos al cerebro qué producto es
+    setIsConfigModalOpen(true);    // Abrimos el modal
+  }} 
+  className="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center justify-center" 
+  title="Editar / Configurar"
+>
+  <i className="fas fa-pen text-xs"></i>
+</button>
                       
                       {/* Eliminar */}
 <button 

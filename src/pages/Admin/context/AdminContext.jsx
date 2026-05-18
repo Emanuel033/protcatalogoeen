@@ -25,6 +25,7 @@ export const AdminProvider = ({ children }) => {
 
   const [lightboxImg, setLightboxImg] = useState(null);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // Funciones de ayuda para la selección masiva
   const toggleSelection = (id) => {
@@ -71,6 +72,35 @@ export const AdminProvider = ({ children }) => {
     } catch (error) {
       console.error("Error al cambiar visibilidad", error);
       alert('Error al cambiar visibilidad');
+    }
+  };
+
+  // --- GUARDAR PRODUCTO (NUEVO O EDICIÓN) ---
+  const saveProduct = async (productData) => {
+    try {
+      if (editingProduct && editingProduct.id) {
+        // Es una EDICIÓN
+        const productRef = doc(db, 'productos_master', editingProduct.id);
+        // Fecha de actualización
+        productData.fecha_actualizacion = new Date();
+        await updateDoc(productRef, productData);
+        console.log("Producto actualizado con éxito");
+      } else {
+        // Es un producto NUEVO
+        const productsCol = collection(db, 'productos_master');
+        // Fecha de creación
+        productData.fecha_creacion = new Date();
+        // Generamos un ID nuevo (o puedes usar doc(productsCol) para auto-id)
+        await updateDoc(doc(productsCol), productData); // O addDoc si prefieres
+        console.log("Producto creado con éxito");
+      }
+      
+      // Cerramos modal y limpiamos
+      setIsConfigModalOpen(false);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error("Error al guardar producto:", error);
+      alert("Error al guardar en la base de datos.");
     }
   };
 
@@ -157,6 +187,9 @@ export const AdminProvider = ({ children }) => {
 
         toggleProductStatus,
       deleteProduct,
+      editingProduct,
+      setEditingProduct,
+      saveProduct,
       applyMassEdit,
       cloneProduct,
 

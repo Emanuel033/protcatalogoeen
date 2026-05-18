@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-
-export const ProductConfigModal = ({ isOpen, onClose, initialData = null }) => {
+import { useAdminContext } from '../context/AdminContext';
+export const ProductConfigModal = ({ isOpen, onClose }) => {
   const { 
     register, 
     handleSubmit, 
-    watch, 
+    watch,
+    reset, 
     formState: { errors } 
   } = useForm({
     defaultValues: initialData || {
@@ -19,13 +20,29 @@ export const ProductConfigModal = ({ isOpen, onClose, initialData = null }) => {
     }
   });
 
+  useEffect(() => {
+    if (editingProduct) {
+      // Si hay un producto, lo cargamos
+      reset(editingProduct);
+    } else {
+      // Si no, lo vaciamos para uno "Nuevo"
+      reset({
+        nombre_flexible: '',
+        imagen_url: '',
+        categoria: '',
+        tipo_item: 'PIEZA_BASE',
+        codigo_sistema_oficial: '',
+        activo: true,
+      });
+    }
+  }, [editingProduct, reset]);
+
   const currentImageUrl = watch('imagen_url');
   const currentTipoItem = watch('tipo_item');
   const isActivo = watch('activo');
 
-  const onSubmit = (data) => {
-    console.log("Datos listos para guardar:", data);
-    // TODO: Enviar a Firebase
+  const onSubmit = async (data) => {
+    await saveProduct(data);
   };
 
   if (!isOpen) return null;
