@@ -9,7 +9,7 @@ export const ProductConfigModal = ({ isOpen, onClose }) => {
     reset, 
     formState: { errors } 
   } = useForm({
-    defaultValues: initialData || {
+    defaultValues: {
       nombre_flexible: '',
       imagen_url: '',
       categoria: '',
