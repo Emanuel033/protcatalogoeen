@@ -22,7 +22,8 @@ export const PackagesManager = ({ packages = [], onAddPackage, onDeletePackage, 
       return;
     }
 
-    onAddPackage(Number(newQty), newSku.toUpperCase());
+    // Aquí nos aseguramos de que el SKU sea string antes de mandarlo a mayúsculas
+    onAddPackage(Number(newQty), String(newSku).toUpperCase());
     setNewQty('');
     setNewSku('');
   };
