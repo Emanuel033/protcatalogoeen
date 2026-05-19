@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useAdminContext } from '../context/AdminContext';
 import { RecetaBuilder } from './RecetaBuilder';
 import { PackagesManager } from './PackagesManager';
+import { db } from '../../../firebase.js';
 export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
   
     const { saveProduct, editingProduct } = useAdminContext();
@@ -97,17 +98,29 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
       await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').add({
         piezas: qty,
         sku: sku,
-        fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
+        fecha_creacion: new Date() // Cambiado para no depender del import global de firebase
       });
+      
       // Rompemos el hash actualizando el documento principal
       await db.collection('productos_master').doc(editingProduct.id).update({
-        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+        ultima_actualizacion: new Date() 
       });
     } catch (e) {
       console.error("Error al añadir empaque:", e);
     }
   };
 
+  const handleDeletePackageFromFirebase = async (pkgId) => {
+    if (!window.confirm("¿Eliminar esta presentación?")) return;
+    try {
+      await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').doc(pkgId).delete();
+      await db.collection('productos_master').doc(editingProduct.id).update({
+        ultima_actualizacion: new Date()
+      });
+    } catch (e) {
+      console.error("Error al eliminar empaque:", e);
+    }
+  };
   const handleDeletePackageFromFirebase = async (pkgId) => {
     if (!window.confirm("¿Eliminar esta presentación?")) return;
     try {
