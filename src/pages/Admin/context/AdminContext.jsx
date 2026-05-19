@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import { doc, updateDoc, deleteDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
+import { doc,addDoc, updateDoc, deleteDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '../../../firebase.js';
 // Creamos el contexto
 const AdminContext = createContext();
