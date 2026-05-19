@@ -1,25 +1,22 @@
 import React from 'react';
 
-export const RecetaBuilder = ({ receta = [], onChange, allItems = [] }) => {
+export const RecetaBuilder = ({ receta = [], onChange, allItems = [], currentProductId = null }) => {
   
-  // Función para añadir una fila vacía
   const addRow = () => {
     onChange([...receta, { id_producto: '', cantidad: 1, nombre: '' }]);
   };
 
-  // Función para eliminar una fila
   const removeRow = (index) => {
     const newReceta = [...receta];
     newReceta.splice(index, 1);
     onChange(newReceta);
   };
 
-  // Función para actualizar un dato (el producto elegido o su cantidad)
   const updateRow = (index, field, value) => {
     const newReceta = [...receta];
-    newReceta[index][field] = value;
+    // Hacemos una copia profunda de la fila para que React detecte el cambio instantáneamente
+    newReceta[index] = { ...newReceta[index], [field]: value };
     
-    // Si cambiamos el producto, auto-guardamos su nombre para tenerlo de referencia fácil en Firebase
     if (field === 'id_producto') {
       const prod = allItems.find(p => p.id === value);
       newReceta[index].nombre = prod ? prod.nombre_flexible : '';
@@ -28,8 +25,9 @@ export const RecetaBuilder = ({ receta = [], onChange, allItems = [] }) => {
     onChange(newReceta);
   };
 
-  // Filtramos para que en la receta solo puedas meter Piezas Base o Kits Oficiales (evitamos loops infinitos)
-  const opciones = allItems.filter(p => p.tipo_item !== 'KIT_FLEXIBLE');
+  // Solo filtramos el producto que estamos editando actualmente para que no pueda agregarse a sí mismo (bucle infinito).
+  // Sí permitimos Kits dentro de Kits.
+  const opciones = allItems.filter(p => p.id !== currentProductId);
 
   return (
     <div className="w-full">
@@ -40,13 +38,13 @@ export const RecetaBuilder = ({ receta = [], onChange, allItems = [] }) => {
       {/* LISTA DE COMPONENTES */}
       <div className="space-y-2 mb-4 w-full">
         {receta.map((item, index) => (
-          <div key={index} className="flex gap-2 items-center bg-white p-2 border border-slate-200 rounded-xl shadow-sm animate-fade-in-up">
+          <div key={index} className="flex flex-col sm:flex-row gap-2 sm:items-center bg-white p-2 border border-slate-200 rounded-xl shadow-sm animate-fade-in-up">
             
-            {/* SELECTOR DE PRODUCTO */}
+            {/* SELECTOR DE PRODUCTO (Ajustado con min-w-0 para que no desborde) */}
             <select 
               value={item.id_producto} 
               onChange={(e) => updateRow(index, 'id_producto', e.target.value)}
-              className="flex-1 input-modern px-3 py-2 rounded-lg text-sm border border-slate-200 outline-none focus:border-blue-500 font-medium text-slate-700 bg-slate-50"
+              className="flex-1 min-w-0 w-full input-modern px-3 py-2 rounded-lg text-[11px] sm:text-xs border border-slate-200 outline-none focus:border-blue-500 font-bold text-slate-700 bg-slate-50 truncate"
             >
               <option value="">-- Selecciona un componente --</option>
               {opciones.map(op => (
@@ -56,27 +54,30 @@ export const RecetaBuilder = ({ receta = [], onChange, allItems = [] }) => {
               ))}
             </select>
             
-            {/* INPUT DE CANTIDAD */}
-            <div className="relative">
-              <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-[10px] text-slate-400 font-bold">Cant:</span>
-              <input 
-                type="number" 
-                min="1" 
-                value={item.cantidad} 
-                onChange={(e) => updateRow(index, 'cantidad', Number(e.target.value))}
-                className="w-24 input-modern pl-10 pr-3 py-2 rounded-lg text-sm border border-slate-200 outline-none text-center font-black focus:border-blue-500"
-              />
+            {/* CONTENEDOR DE CANTIDAD Y BORRAR (Se agrupan en móviles) */}
+            <div className="flex items-center gap-2 justify-end">
+                {/* INPUT DE CANTIDAD */}
+                <div className="relative shrink-0">
+                  <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-[10px] text-slate-400 font-bold">Cant:</span>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    value={item.cantidad} 
+                    onChange={(e) => updateRow(index, 'cantidad', Number(e.target.value))}
+                    className="w-20 input-modern pl-9 pr-2 py-2 rounded-lg text-xs border border-slate-200 outline-none text-center font-black focus:border-blue-500"
+                  />
+                </div>
+                
+                {/* BOTÓN ELIMINAR */}
+                <button 
+                  type="button" 
+                  onClick={() => removeRow(index)}
+                  className="w-8 h-8 shrink-0 flex items-center justify-center bg-red-50 text-red-500 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors border border-red-100"
+                  title="Quitar componente"
+                >
+                  <i className="fas fa-trash-alt text-xs"></i>
+                </button>
             </div>
-            
-            {/* BOTÓN ELIMINAR */}
-            <button 
-              type="button" 
-              onClick={() => removeRow(index)}
-              className="w-9 h-9 shrink-0 flex items-center justify-center bg-red-50 text-red-500 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors border border-red-100"
-              title="Quitar componente"
-            >
-              <i className="fas fa-trash-alt text-xs"></i>
-            </button>
           </div>
         ))}
       </div>
