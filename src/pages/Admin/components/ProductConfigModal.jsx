@@ -26,12 +26,23 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
     }
   });
 
+  // 👇 1. CUANDO SE ABRE EL MODAL: Transformamos el Objeto de Firebase al Array que entiende React
   useEffect(() => {
     if (editingProduct) {
-      // Si hay un producto, lo cargamos
-      reset(editingProduct);
+      // Transformar receta_desglose de { id: cant } a [{ id_producto, cantidad }]
+      let recetaFormateada = [];
+      if (editingProduct.receta_desglose) {
+        recetaFormateada = Object.keys(editingProduct.receta_desglose).map(compId => ({
+          id_producto: compId,
+          cantidad: editingProduct.receta_desglose[compId]
+        }));
+      }
+
+      reset({
+        ...editingProduct,
+        receta_desglose: recetaFormateada // Le pasamos la receta ya masticada
+      });
     } else {
-      // Si no, lo vaciamos para uno "Nuevo"
       reset({
         nombre_flexible: '',
         imagen_url: '',
@@ -39,15 +50,16 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
         tipo_item: 'PIEZA_BASE',
         codigo_sistema_oficial: '',
         activo: true,
+        receta_desglose: []
       });
     }
   }, [editingProduct, reset]);
+  
   const [isUploading, setIsUploading] = useState(false); // Ya la teníamos
   const fileInputRef = useRef(null);
   const currentImageUrl = watch('imagen_url');
   const currentTipoItem = watch('tipo_item');
   const currentReceta = watch('receta_desglose') || [];
-  const currentPackages = watch('presentaciones') || [];
 const currentBaseSku = watch('codigo_sistema_oficial');
 const heredaDeId = watch('hereda_empaques_de');
 const [heredaSearch, setHeredaSearch] = useState('');
@@ -98,8 +110,40 @@ const [showHeredaList, setShowHeredaList] = useState(false);
     }
   };
 
+  // 👇 2. AL GUARDAR: Volvemos a transformar el Array al Objeto que Firebase exige
   const onSubmit = async (data) => {
-    await saveProduct(data);
+    let recetaParaFirebase = null;
+    
+    // Si es un Kit Flexible, armamos el objeto { "ID": cantidad }
+    if (data.tipo_item === 'KIT_FLEXIBLE') {
+      recetaParaFirebase = {};
+      const recetaActual = data.receta_desglose || [];
+      
+      recetaActual.forEach(item => {
+        if (item.id_producto && item.cantidad > 0) {
+          recetaParaFirebase[item.id_producto] = item.cantidad;
+        }
+      });
+
+      if (Object.keys(recetaParaFirebase).length === 0) {
+        alert("Los Kits Web necesitan al menos 1 componente en su receta.");
+        return;
+      }
+    }
+
+    // Preparamos el paquete de datos final (idéntico a tu vanilla JS)
+    const dataToUpdate = {
+      nombre_flexible: data.nombre_flexible,
+      imagen_url: data.imagen_url || '',
+      categoria: data.categoria || '',
+      codigo_sistema_oficial: data.codigo_sistema_oficial || '',
+      tipo_item: data.tipo_item,
+      receta_desglose: recetaParaFirebase,
+      hereda_empaques_de: data.hereda_empaques_de || null,
+      activo: data.activo
+    };
+
+    await saveProduct(dataToUpdate);
   };
 
   const filteredHeredar = allItems.filter(p => 
