@@ -110,6 +110,24 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
     }
   };
 
+  // Funciones de Escritura Directa en Subcolección
+  const handleAddPackageToFirebase = async (qty, sku) => {
+    if (!editingProduct?.id) return;
+    try {
+      await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').add({
+        piezas: qty,
+        sku: sku,
+        fecha_creacion: new Date()
+      });
+      
+      await db.collection('productos_master').doc(editingProduct.id).update({
+        ultima_actualizacion: new Date() 
+      });
+    } catch (e) {
+      console.error("Error al añadir empaque:", e);
+    }
+  };
+
   const handleDeletePackageFromFirebase = async (pkgId) => {
     if (!window.confirm("¿Eliminar esta presentación?")) return;
     try {
@@ -121,17 +139,8 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
       console.error("Error al eliminar empaque:", e);
     }
   };
-  const handleDeletePackageFromFirebase = async (pkgId) => {
-    if (!window.confirm("¿Eliminar esta presentación?")) return;
-    try {
-      await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').doc(pkgId).delete();
-      await db.collection('productos_master').doc(editingProduct.id).update({
-        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } catch (e) {
-      console.error("Error al eliminar empaque:", e);
-    }
-  };
+
+
 
   // --- SUBIDA DE IMAGEN A VERCEL ---
   const handleImageUpload = async (event) => {
