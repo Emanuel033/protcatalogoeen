@@ -205,11 +205,16 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
     await saveProduct(dataToUpdate);
   };
 
-  const filteredHeredar = allItems.filter(p => 
-  p.id !== editingProduct?.id && // No heredarse a sí mismo
-  (p.nombre_flexible?.toLowerCase().includes(heredaSearch.toLowerCase()) ||
-   p.codigo_sistema_oficial?.toLowerCase().includes(heredaSearch.toLowerCase()))
-).slice(0, 5);
+  // Buscador seguro (evita crasheos si faltan datos en la BD)
+  const filteredHeredar = allItems.filter(p => {
+    if (p.id === editingProduct?.id) return false; // No heredarse a sí mismo
+    
+    const searchLower = (heredaSearch || '').toLowerCase();
+    const nombre = (p.nombre_flexible || '').toLowerCase();
+    const codigo = (p.codigo_sistema_oficial || '').toLowerCase();
+    
+    return nombre.includes(searchLower) || codigo.includes(searchLower);
+  }).slice(0, 5);
 
   if (!isOpen) return null;
 
