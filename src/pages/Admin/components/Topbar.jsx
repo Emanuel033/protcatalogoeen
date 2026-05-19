@@ -94,16 +94,31 @@ export const Topbar = () => {
           
           {isToolsMenuOpen && (
             <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 shadow-xl rounded-xl w-52 p-1.5 z-50 animate-fade-in-up">
-              <button onClick={() => alert('Exportar Excel en construcción')} className="w-full text-left px-3 py-2 hover:bg-orange-50 hover:text-orange-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
+              
+              <button onClick={() => alert('Exportar Excel Faltantes (Próximamente)')} className="w-full text-left px-3 py-2 hover:bg-orange-50 hover:text-orange-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
                 <i className="fas fa-file-excel w-4 text-center text-orange-500"></i> Exportar Faltantes
               </button>
-              <button onClick={() => alert('QRs Masivos en construcción')} className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
-                <i className="fas fa-qrcode w-4 text-center text-slate-400"></i> Imprimir QRs
+              
+              <button onClick={() => alert('Abrir Modal QR Masivo (Próximamente)')} className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
+                <i className="fas fa-qrcode w-4 text-center text-slate-400"></i> Imprimir QRs (Masivo)
               </button>
+              
               <div className="h-px bg-slate-100 my-1"></div>
-              <button onClick={() => alert('Deploy en construcción')} className="w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
-                <i className="fas fa-rocket w-4 text-center text-blue-500"></i> Publicar Web
+              
+              <button onClick={() => alert('Disparar Webhook Vercel (Próximamente)')} className="w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
+                <i className="fas fa-rocket w-4 text-center text-blue-500"></i> Compilar y Publicar Web
               </button>
+              
+              <div className="h-px bg-slate-100 my-1"></div>
+              
+              <button onClick={() => alert('Generar CSV Facebook (Próximamente)')} className="w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
+                <i className="fab fa-facebook w-4 text-center text-blue-600"></i> Descargar CSV Meta
+              </button>
+              
+              <button onClick={() => alert('Generar PDF Base de Conocimiento (Próximamente)')} className="w-full text-left px-3 py-2 hover:bg-green-50 hover:text-green-700 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
+                <i className="fab fa-whatsapp w-4 text-center text-green-500"></i> Descargar PDF para IA
+              </button>
+
             </div>
           )}
         </div>

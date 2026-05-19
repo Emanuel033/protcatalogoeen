@@ -75,34 +75,46 @@ export const AdminProvider = ({ children }) => {
     }
   };
 
-  const saveProduct = async (dataToUpdate) => {
-  try {
-    if (editingProduct?.id) {
-      // 1. EDICIÓN (updateDoc es correcto porque el documento ya existe)
-      const prodRef = doc(db, 'productos_master', editingProduct.id);
-      await updateDoc(prodRef, {
-        ...dataToUpdate,
-        ultima_actualizacion: new Date()
-      });
-      console.log("Producto actualizado:", editingProduct.id);
-    } else {
-      // 2. NUEVO (Debe ser addDoc para que Firebase genere el ID automático)
-      const prodRef = collection(db, 'productos_master');
-      await addDoc(prodRef, {
-        ...dataToUpdate,
-        fecha_creacion: new Date()
-      });
-      console.log("Producto creado exitosamente");
+  // GUARDAR / ACTUALIZAR PRODUCTO
+  const saveProduct = async (formData) => {
+    // 🚨 Con react-hook-form NO usamos e.preventDefault() aquí.
+    try {
+      // Si el editingProduct no tiene ID, es uno nuevo (o un clon recién hecho)
+      const isNew = !editingProduct?.id;
+      
+      const productData = {
+        nombre_flexible: formData.nombre_flexible || '',
+        imagen_url: formData.imagen_url || '',
+        categoria: formData.categoria ? formData.categoria.toUpperCase() : '',
+        codigo_sistema_oficial: formData.codigo_sistema_oficial || '',
+        tipo_item: formData.tipo_item || 'PIEZA_BASE',
+        activo: formData.activo !== false,
+        ultima_actualizacion: new Date(),
+        // TODO: En el siguiente paso inyectaremos la receta y la herencia de empaques aquí
+      };
+
+      if (isNew) {
+        // Al clonar o crear nuevo, seteamos datos iniciales
+        productData.fecha_creacion = new Date();
+        productData.stock_total_piezas = 0;
+        await addDoc(collection(db, 'productos_master'), productData);
+        console.log('Producto creado/clonado con éxito');
+      } else {
+        // Actualizamos el existente
+        const docRef = doc(db, 'productos_master', editingProduct.id);
+        await updateDoc(docRef, productData);
+        console.log('Producto actualizado con éxito');
+      }
+
+      // Cerramos modal y limpiamos estado
+      setIsConfigModalOpen(false);
+      setEditingProduct(null);
+      
+    } catch (error) {
+      console.error("Error al guardar producto:", error);
+      alert('Hubo un error de conexión al guardar la ficha.');
     }
-    
-    // Cerramos el modal y limpiamos
-    setIsConfigModalOpen(false);
-    setEditingProduct(null);
-  } catch (error) {
-    console.error("Error al guardar en Firebase:", error);
-    alert("Error crítico al guardar: " + error.message);
-  }
-};
+  };
 
   const deleteProduct = async (productId) => {
     if (!window.confirm('¿Estás seguro de eliminar este producto permanentemente?\\nEsta acción no se puede deshacer y borrará también sus cajas configuradas.')) return;
