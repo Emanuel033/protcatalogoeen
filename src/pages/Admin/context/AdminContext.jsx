@@ -75,34 +75,34 @@ export const AdminProvider = ({ children }) => {
     }
   };
 
-  // --- GUARDAR PRODUCTO (NUEVO O EDICIÓN) ---
-  const saveProduct = async (productData) => {
-    try {
-      if (editingProduct && editingProduct.id) {
-        // Es una EDICIÓN
-        const productRef = doc(db, 'productos_master', editingProduct.id);
-        // Fecha de actualización
-        productData.fecha_actualizacion = new Date();
-        await updateDoc(productRef, productData);
-        console.log("Producto actualizado con éxito");
-      } else {
-        // Es un producto NUEVO
-        const productsCol = collection(db, 'productos_master');
-        // Fecha de creación
-        productData.fecha_creacion = new Date();
-        // Generamos un ID nuevo (o puedes usar doc(productsCol) para auto-id)
-        await updateDoc(doc(productsCol), productData); // O addDoc si prefieres
-        console.log("Producto creado con éxito");
-      }
-      
-      // Cerramos modal y limpiamos
-      setIsConfigModalOpen(false);
-      setEditingProduct(null);
-    } catch (error) {
-      console.error("Error al guardar producto:", error);
-      alert("Error al guardar en la base de datos.");
+  const saveProduct = async (dataToUpdate) => {
+  try {
+    if (editingProduct?.id) {
+      // 1. EDICIÓN (updateDoc es correcto porque el documento ya existe)
+      const prodRef = doc(db, 'productos_master', editingProduct.id);
+      await updateDoc(prodRef, {
+        ...dataToUpdate,
+        ultima_actualizacion: new Date()
+      });
+      console.log("Producto actualizado:", editingProduct.id);
+    } else {
+      // 2. NUEVO (Debe ser addDoc para que Firebase genere el ID automático)
+      const prodRef = collection(db, 'productos_master');
+      await addDoc(prodRef, {
+        ...dataToUpdate,
+        fecha_creacion: new Date()
+      });
+      console.log("Producto creado exitosamente");
     }
-  };
+    
+    // Cerramos el modal y limpiamos
+    setIsConfigModalOpen(false);
+    setEditingProduct(null);
+  } catch (error) {
+    console.error("Error al guardar en Firebase:", error);
+    alert("Error crítico al guardar: " + error.message);
+  }
+};
 
   const deleteProduct = async (id) => {
     if (!window.confirm('¿Estás seguro de eliminar este producto permanentemente?\nEsta acción no se puede deshacer y borrará también sus cajas configuradas.')) return;
