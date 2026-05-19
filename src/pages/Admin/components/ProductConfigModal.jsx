@@ -65,7 +65,60 @@ const currentBaseSku = watch('codigo_sistema_oficial');
 const heredaDeId = watch('hereda_empaques_de');
 const [heredaSearch, setHeredaSearch] = useState('');
 const [showHeredaList, setShowHeredaList] = useState(false);
+const [subcollectionPackages, setSubcollectionPackages] = useState([]);
   const isActivo = watch('activo');
+
+  // Escucha activa de la subcolección /paquetes en Firestore
+  useEffect(() => {
+    if (!editingProduct?.id) {
+      setSubcollectionPackages([]);
+      return;
+    }
+
+    // Vinculamos el listener dinámico a productos_master
+    const unsubscribe = db.collection('productos_master')
+      .doc(editingProduct.id)
+      .collection('paquetes')
+      .onSnapshot((snap) => {
+        const pkgs = [];
+        snap.forEach(doc => pkgs.push({ id: doc.id, ...doc.data() }));
+        // Ordenamos por piezas ascendentemente
+        pkgs.sort((a, b) => a.piezas - b.piezas);
+        setSubcollectionPackages(pkgs);
+      }, (error) => console.error("Error cargando paquetes:", error));
+
+    return () => unsubscribe();
+  }, [editingProduct]);
+
+  // Funciones de Escritura Directa en Subcolección
+  const handleAddPackageToFirebase = async (qty, sku) => {
+    if (!editingProduct?.id) return;
+    try {
+      await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').add({
+        piezas: qty,
+        sku: sku,
+        fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      // Rompemos el hash actualizando el documento principal
+      await db.collection('productos_master').doc(editingProduct.id).update({
+        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (e) {
+      console.error("Error al añadir empaque:", e);
+    }
+  };
+
+  const handleDeletePackageFromFirebase = async (pkgId) => {
+    if (!window.confirm("¿Eliminar esta presentación?")) return;
+    try {
+      await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').doc(pkgId).delete();
+      await db.collection('productos_master').doc(editingProduct.id).update({
+        ultima_actualizacion: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (e) {
+      console.error("Error al eliminar empaque:", e);
+    }
+  };
 
   // --- SUBIDA DE IMAGEN A VERCEL ---
   const handleImageUpload = async (event) => {
@@ -359,19 +412,25 @@ const [showHeredaList, setShowHeredaList] = useState(false);
 
             </div>
 
-            {/* SECCIÓN PAQUETES PROPIOS (Actualizada) */}
-<div className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100">
-  <h3 className="text-sm font-black text-slate-800 mb-5 flex items-center gap-2">
-    <div className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-500 flex items-center justify-center"><i className="fas fa-boxes text-xs"></i></div> 
-    Presentaciones (Bolsas/Cajas) Propias
-  </h3>
-  
-  <PackagesManager 
-    packages={currentPackages}
-    baseSku={currentBaseSku}
-    onChange={(newPkgs) => setValue('presentaciones', newPkgs, { shouldDirty: true })}
-  />
-</div>
+            {/* SECCIÓN PAQUETES PROPIOS */}
+            {currentTipoItem === 'PIEZA_BASE' && (
+              <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h3 className="text-sm font-black text-slate-800 mb-5 flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                    <i className="fas fa-boxes text-xs"></i>
+                  </div> 
+                  Presentaciones (Bolsas/Cajas) Propias
+                </h3>
+                
+                <PackagesManager 
+                  packages={subcollectionPackages}
+                  baseSku={currentBaseSku}
+                  onAddPackage={handleAddPackageToFirebase}
+                  onDeletePackage={handleDeletePackageFromFirebase}
+                  isNewProduct={!editingProduct?.id}
+                />
+              </div>
+            )}
 
             {/* SECCIÓN 4: VISIBILIDAD */}
             <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
