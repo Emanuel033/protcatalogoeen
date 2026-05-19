@@ -4,9 +4,9 @@ import { useAdminContext } from '../context/AdminContext';
 import { RecetaBuilder } from './RecetaBuilder';
 import { PackagesManager } from './PackagesManager';
 import { db } from '../../../firebase';
+
 export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
-  
-    const { saveProduct, editingProduct } = useAdminContext();
+  const { saveProduct, editingProduct } = useAdminContext();
 
   const { 
     register, 
@@ -23,14 +23,13 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
       tipo_item: 'PIEZA_BASE',
       codigo_sistema_oficial: '',
       activo: true,
-      // hereda_empaques_de: '' // Lo agregaremos luego
+      hereda_empaques_de: ''
     }
   });
 
-  // 👇 1. CUANDO SE ABRE EL MODAL: Transformamos el Objeto de Firebase al Array que entiende React
+  // 1. CUANDO SE ABRE EL MODAL
   useEffect(() => {
     if (editingProduct) {
-      // Transformar receta_desglose de { id: cant } a [{ id_producto, cantidad }]
       let recetaFormateada = [];
       if (editingProduct.receta_desglose) {
         recetaFormateada = Object.keys(editingProduct.receta_desglose).map(compId => ({
@@ -41,7 +40,7 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
 
       reset({
         ...editingProduct,
-        receta_desglose: recetaFormateada // Le pasamos la receta ya masticada
+        receta_desglose: recetaFormateada
       });
     } else {
       reset({
@@ -56,44 +55,38 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
     }
   }, [editingProduct, reset]);
   
-  const [isUploading, setIsUploading] = useState(false); // Ya la teníamos
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
   const currentImageUrl = watch('imagen_url');
   const currentTipoItem = watch('tipo_item');
   const currentReceta = watch('receta_desglose') || [];
-  const currentPackages = watch('presentaciones') || [];
-const currentBaseSku = watch('codigo_sistema_oficial');
-const heredaDeId = watch('hereda_empaques_de');
-const [heredaSearch, setHeredaSearch] = useState('');
-const [showHeredaList, setShowHeredaList] = useState(false);
-const [subcollectionPackages, setSubcollectionPackages] = useState([]);
-  const isActivo = watch('activo');
+  const currentBaseSku = watch('codigo_sistema_oficial');
+  const heredaDeId = watch('hereda_empaques_de');
+  
+  const [heredaSearch, setHeredaSearch] = useState('');
+  const [showHeredaList, setShowHeredaList] = useState(false);
+  const [subcollectionPackages, setSubcollectionPackages] = useState([]);
 
-  // Escucha activa de la subcolección /paquetes en Firestore
+  // ESCUCHA SEGURA DE SUBCREACIÓN DE PAQUETES
   useEffect(() => {
     if (!editingProduct?.id) {
       setSubcollectionPackages([]);
       return;
     }
 
-    // Vinculamos el listener dinámico a productos_master
     const unsubscribe = db.collection('productos_master')
       .doc(editingProduct.id)
       .collection('paquetes')
       .onSnapshot((snap) => {
         const pkgs = [];
         snap.forEach(doc => pkgs.push({ id: doc.id, ...doc.data() }));
-        // Ordenamos por piezas ascendentemente
         pkgs.sort((a, b) => a.piezas - b.piezas);
         setSubcollectionPackages(pkgs);
       }, (error) => console.error("Error cargando paquetes:", error));
 
     return () => unsubscribe();
-  }, [editingProduct]);
+  }, [editingProduct?.id]); 
 
- 
-
-  // Funciones de Escritura Directa en Subcolección
   const handleAddPackageToFirebase = async (qty, sku) => {
     if (!editingProduct?.id) return;
     try {
@@ -123,9 +116,6 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
     }
   };
 
-
-
-  // --- SUBIDA DE IMAGEN A VERCEL ---
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -133,7 +123,6 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
     setIsUploading(true);
 
     try {
-      // 1. Convertir a Base64 nativamente
       const base64String = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -141,10 +130,8 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
         reader.onerror = error => reject(error);
       });
 
-      // ¡REEMPLAZA ESTO CON TU URL REAL DE VERCEL!
       const URL_VERCEL_IMGBB = "https://api-proxy-een.vercel.app/api/upload"; 
 
-      // 2. Enviar a Vercel
       const response = await fetch(URL_VERCEL_IMGBB, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -154,7 +141,6 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
       const data = await response.json();
 
       if (response.ok) {
-        // 3. Magia de React Hook Form: actualiza el input y la previsualización al instante
         setValue('imagen_url', data.url, { shouldValidate: true, shouldDirty: true });
         console.log("Imagen subida con bóveda segura");
       } else {
@@ -165,15 +151,13 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
       alert("Error de conexión al subir la imagen");
     } finally { 
       setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = ''; // Resetea el input
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  // 👇 2. AL GUARDAR: Volvemos a transformar el Array al Objeto que Firebase exige
   const onSubmit = async (data) => {
     let recetaParaFirebase = null;
     
-    // Si es un Kit Flexible, armamos el objeto { "ID": cantidad }
     if (data.tipo_item === 'KIT_FLEXIBLE') {
       recetaParaFirebase = {};
       const recetaActual = data.receta_desglose || [];
@@ -190,7 +174,6 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
       }
     }
 
-    // Preparamos el paquete de datos final (idéntico a tu vanilla JS)
     const dataToUpdate = {
       nombre_flexible: data.nombre_flexible,
       imagen_url: data.imagen_url || '',
@@ -205,16 +188,16 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
     await saveProduct(dataToUpdate);
   };
 
-  // Buscador SUPER seguro a prueba de fallos
+  // 👇 BUSCADOR CON CANDADO 100% SEGURO (Imposible que rompa la pantalla) 👇
   const itemsSeguros = allItems || [];
   const filteredHeredar = itemsSeguros.filter(p => {
     if (!p) return false;
-    if (p.id === editingProduct?.id) return false; // No heredarse a sí mismo
+    if (p.id === editingProduct?.id) return false; 
     
-    // Si un producto no tiene nombre o código, le asignamos texto vacío ('') para que no explote
-    const searchLower = (heredaSearch || '').toLowerCase();
-    const nombre = (p.nombre_flexible || '').toLowerCase();
-    const codigo = (p.codigo_sistema_oficial || '').toLowerCase();
+    // String() fuerza a que sea texto siempre, evitando el error de "toLowerCase"
+    const searchLower = String(heredaSearch || '').toLowerCase();
+    const nombre = String(p.nombre_flexible || '').toLowerCase();
+    const codigo = String(p.codigo_sistema_oficial || '').toLowerCase();
     
     return nombre.includes(searchLower) || codigo.includes(searchLower);
   }).slice(0, 5);
@@ -280,7 +263,6 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
                         disabled={isUploading}
                       />
                       
-                      {/* INPUT OCULTO DE ARCHIVO */}
                       <input 
                         type="file" 
                         accept="image/*" 
@@ -289,7 +271,6 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
                         onChange={handleImageUpload} 
                       />
 
-                      {/* BOTÓN VISIBLE */}
                       <button 
                         type="button" 
                         onClick={() => fileInputRef.current.click()} 
@@ -300,7 +281,6 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
                       </button>
                     </div>
 
-                    {/* MENSAJE DE CARGA (Igual al tuyo) */}
                     {isUploading && (
                       <p className="text-[10px] text-indigo-500 font-bold animate-pulse mt-1">
                         <i className="fas fa-spinner fa-spin mr-1"></i> Subiendo a servidor seguro...
@@ -365,63 +345,64 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
                   <p className="text-[10px] text-slate-500 font-medium mb-4">Su existencia web se calculará automáticamente en base al stock de los componentes listados aquí.</p>
                   
                   <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center min-h-[100px] w-full">
-                     {/* INYECTAMOS EL BUILDER AQUÍ 👇 */}
                      <RecetaBuilder 
                        receta={currentReceta} 
-                       onChange={(nuevaReceta) => setValue('receta_desglose', nuevaReceta, { shouldDirty: true })}
+                       onChange={(nuevaReceta) => setValue('receta_desglose', nuevaReceta, { shouldDirty: true, shouldValidate: true })}
                        allItems={allItems}
+                       currentProductId={editingProduct?.id}
                      />
                   </div>
                 </div>
               )}
 
-              {/* SECCIÓN HERENCIA (Actualizada) */}
-{currentTipoItem !== 'PIEZA_BASE' && (
-  <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up relative">
-    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-      <i className="fas fa-link text-blue-500 mr-1"></i> Heredar Empaques / Cajas de:
-    </label>
-    <div className="relative">
-      <input 
-        type="text" 
-        value={heredaSearch}
-        onFocus={() => setShowHeredaList(true)}
-        onChange={(e) => setHeredaSearch(e.target.value)}
-        placeholder={heredaDeId ? "Heredando de un producto vinculado..." : "Busca un producto para compartir sus cajas..."}
-        className="w-full input-modern px-4 py-3 rounded-xl font-bold text-sm text-slate-800 border border-slate-200 outline-none focus:border-blue-500" 
-      />
-      {heredaDeId && (
-        <button 
-          type="button"
-          onClick={() => { setValue('hereda_empaques_de', ''); setHeredaSearch(''); }}
-          className="absolute right-10 top-1/2 -translate-y-1/2 text-red-500 text-xs font-bold"
-        >
-          Quitar vínculo
-        </button>
-      )}
-      <i className="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-      
-      {showHeredaList && heredaSearch && (
-        <ul className="absolute z-[90] w-full bg-white border border-slate-200 shadow-2xl rounded-xl mt-1 max-h-48 overflow-y-auto divide-y divide-slate-100">
-          {filteredHeredar.map(p => (
-            <li 
-              key={p.id}
-              onClick={() => {
-                setValue('hereda_empaques_de', p.id);
-                setHeredaSearch(p.nombre_flexible);
-                setShowHeredaList(false);
-              }}
-              className="p-3 hover:bg-blue-50 cursor-pointer flex justify-between items-center"
-            >
-              <span className="text-xs font-bold text-slate-700">{p.nombre_flexible}</span>
-              <span className="text-[10px] font-mono bg-slate-100 px-2 py-1 rounded text-slate-500">{p.codigo_sistema_oficial}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  </div>
-)}
+              {/* SECCIÓN HERENCIA */}
+              {currentTipoItem !== 'PIEZA_BASE' && (
+                <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up relative">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                    <i className="fas fa-link text-blue-500 mr-1"></i> Heredar Empaques / Cajas de:
+                  </label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      value={heredaSearch}
+                      onFocus={() => setShowHeredaList(true)}
+                      onChange={(e) => setHeredaSearch(e.target.value)}
+                      placeholder={heredaDeId ? "Heredando de un producto vinculado..." : "Busca un producto para compartir sus cajas..."}
+                      className="w-full input-modern px-4 py-3 rounded-xl font-bold text-sm text-slate-800 border border-slate-200 outline-none focus:border-blue-500" 
+                    />
+                    {heredaDeId && (
+                      <button 
+                        type="button"
+                        onClick={() => { setValue('hereda_empaques_de', ''); setHeredaSearch(''); }}
+                        className="absolute right-10 top-1/2 -translate-y-1/2 text-red-500 text-xs font-bold"
+                      >
+                        Quitar vínculo
+                      </button>
+                    )}
+                    <i className="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    
+                    {showHeredaList && heredaSearch && (
+                      <ul className="absolute z-[90] w-full bg-white border border-slate-200 shadow-2xl rounded-xl mt-1 max-h-48 overflow-y-auto divide-y divide-slate-100">
+                        {filteredHeredar.map(p => (
+                          <li 
+                            key={p.id}
+                            onClick={() => {
+                              setValue('hereda_empaques_de', p.id);
+                              // También convertimos esto a String por si acaso
+                              setHeredaSearch(String(p.nombre_flexible || p.codigo_sistema_oficial || 'Sin nombre'));
+                              setShowHeredaList(false);
+                            }}
+                            className="p-3 hover:bg-blue-50 cursor-pointer flex justify-between items-center"
+                          >
+                            <span className="text-xs font-bold text-slate-700">{p.nombre_flexible || 'Sin nombre'}</span>
+                            <span className="text-[10px] font-mono bg-slate-100 px-2 py-1 rounded text-slate-500">{p.codigo_sistema_oficial || 'Sin código'}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )}
 
             </div>
 
