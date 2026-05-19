@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useAdminContext } from '../context/AdminContext';
 import { RecetaBuilder } from './RecetaBuilder';
 import { PackagesManager } from './PackagesManager';
-import { db } from '../../../firebase.js';
+import { db } from '../../../firebase';
 export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
   
     const { saveProduct, editingProduct } = useAdminContext();
