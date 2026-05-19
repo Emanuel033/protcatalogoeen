@@ -302,7 +302,7 @@ const [showHeredaList, setShowHeredaList] = useState(false);
                      {/* INYECTAMOS EL BUILDER AQUÍ 👇 */}
                      <RecetaBuilder 
                        receta={currentReceta} 
-                       onChange={(nuevaReceta) => setValue('receta', nuevaReceta, { shouldDirty: true })}
+                       onChange={(nuevaReceta) => setValue('receta_desglose', nuevaReceta, { shouldDirty: true })}
                        allItems={allItems}
                      />
                   </div>
