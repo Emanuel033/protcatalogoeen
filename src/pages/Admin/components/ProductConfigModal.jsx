@@ -205,10 +205,13 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
     await saveProduct(dataToUpdate);
   };
 
-  // Buscador seguro (evita crasheos si faltan datos en la BD)
-  const filteredHeredar = allItems.filter(p => {
+  // Buscador SUPER seguro a prueba de fallos
+  const itemsSeguros = allItems || [];
+  const filteredHeredar = itemsSeguros.filter(p => {
+    if (!p) return false;
     if (p.id === editingProduct?.id) return false; // No heredarse a sí mismo
     
+    // Si un producto no tiene nombre o código, le asignamos texto vacío ('') para que no explote
     const searchLower = (heredaSearch || '').toLowerCase();
     const nombre = (p.nombre_flexible || '').toLowerCase();
     const codigo = (p.codigo_sistema_oficial || '').toLowerCase();
