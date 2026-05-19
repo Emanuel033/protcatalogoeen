@@ -4,6 +4,8 @@ import { useAdminContext } from '../context/AdminContext';
 import { RecetaBuilder } from './RecetaBuilder';
 import { PackagesManager } from './PackagesManager';
 import { db } from '../../../firebase';
+// 👇 AQUÍ ESTÁ EL SECRETO: Importamos las funciones de Firebase V9 Modular
+import { collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore'; 
 
 export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
   const { saveProduct, editingProduct } = useAdminContext();
@@ -67,36 +69,39 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
   const [showHeredaList, setShowHeredaList] = useState(false);
   const [subcollectionPackages, setSubcollectionPackages] = useState([]);
 
-  // ESCUCHA SEGURA DE SUBCREACIÓN DE PAQUETES
+  // 👇 2. ESCUCHA DE PAQUETES (AHORA EN V9 MODULAR) 👇
   useEffect(() => {
     if (!editingProduct?.id) {
       setSubcollectionPackages([]);
       return;
     }
 
-    const unsubscribe = db.collection('productos_master')
-      .doc(editingProduct.id)
-      .collection('paquetes')
-      .onSnapshot((snap) => {
-        const pkgs = [];
-        snap.forEach(doc => pkgs.push({ id: doc.id, ...doc.data() }));
-        pkgs.sort((a, b) => a.piezas - b.piezas);
-        setSubcollectionPackages(pkgs);
-      }, (error) => console.error("Error cargando paquetes:", error));
+    // Así se llama a una subcolección en Firebase V9
+    const paquetesRef = collection(db, 'productos_master', editingProduct.id, 'paquetes');
+    
+    const unsubscribe = onSnapshot(paquetesRef, (snap) => {
+      const pkgs = [];
+      snap.forEach(docSnap => pkgs.push({ id: docSnap.id, ...docSnap.data() }));
+      pkgs.sort((a, b) => a.piezas - b.piezas);
+      setSubcollectionPackages(pkgs);
+    }, (error) => console.error("Error cargando paquetes:", error));
 
     return () => unsubscribe();
   }, [editingProduct?.id]); 
 
+  // 👇 3. AGREGAR PAQUETES (AHORA EN V9 MODULAR) 👇
   const handleAddPackageToFirebase = async (qty, sku) => {
     if (!editingProduct?.id) return;
     try {
-      await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').add({
+      const paquetesRef = collection(db, 'productos_master', editingProduct.id, 'paquetes');
+      await addDoc(paquetesRef, {
         piezas: qty,
         sku: sku,
         fecha_creacion: new Date()
       });
       
-      await db.collection('productos_master').doc(editingProduct.id).update({
+      const productRef = doc(db, 'productos_master', editingProduct.id);
+      await updateDoc(productRef, {
         ultima_actualizacion: new Date() 
       });
     } catch (e) {
@@ -104,11 +109,15 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
     }
   };
 
+  // 👇 4. BORRAR PAQUETES (AHORA EN V9 MODULAR) 👇
   const handleDeletePackageFromFirebase = async (pkgId) => {
     if (!window.confirm("¿Eliminar esta presentación?")) return;
     try {
-      await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').doc(pkgId).delete();
-      await db.collection('productos_master').doc(editingProduct.id).update({
+      const packageRef = doc(db, 'productos_master', editingProduct.id, 'paquetes', pkgId);
+      await deleteDoc(packageRef);
+      
+      const productRef = doc(db, 'productos_master', editingProduct.id);
+      await updateDoc(productRef, {
         ultima_actualizacion: new Date()
       });
     } catch (e) {
@@ -188,13 +197,11 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
     await saveProduct(dataToUpdate);
   };
 
-  // 👇 BUSCADOR CON CANDADO 100% SEGURO (Imposible que rompa la pantalla) 👇
   const itemsSeguros = allItems || [];
   const filteredHeredar = itemsSeguros.filter(p => {
     if (!p) return false;
     if (p.id === editingProduct?.id) return false; 
     
-    // String() fuerza a que sea texto siempre, evitando el error de "toLowerCase"
     const searchLower = String(heredaSearch || '').toLowerCase();
     const nombre = String(p.nombre_flexible || '').toLowerCase();
     const codigo = String(p.codigo_sistema_oficial || '').toLowerCase();
@@ -244,7 +251,6 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
                   />
                 </div>
 
-                {/* IMAGEN Y UPLOAD */}
               <div className="md:col-span-2">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Imagen del Producto</label>
                 <div className="flex gap-4 items-center">
@@ -338,7 +344,6 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
                 </div>
               </div>
 
-              {/* RENDERIZADO CONDICIONAL DE RECETAS */}
               {currentTipoItem === 'KIT_FLEXIBLE' && (
                 <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up w-full">
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Receta Estructural (Árbol)</label>
@@ -355,7 +360,6 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
                 </div>
               )}
 
-              {/* SECCIÓN HERENCIA */}
               {currentTipoItem !== 'PIEZA_BASE' && (
                 <div className="mt-6 pt-6 border-t border-slate-100 animate-fade-in-up relative">
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
@@ -388,7 +392,6 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
                             key={p.id}
                             onClick={() => {
                               setValue('hereda_empaques_de', p.id);
-                              // También convertimos esto a String por si acaso
                               setHeredaSearch(String(p.nombre_flexible || p.codigo_sistema_oficial || 'Sin nombre'));
                               setShowHeredaList(false);
                             }}
