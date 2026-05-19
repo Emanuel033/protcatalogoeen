@@ -91,24 +91,7 @@ const [subcollectionPackages, setSubcollectionPackages] = useState([]);
     return () => unsubscribe();
   }, [editingProduct]);
 
-  // Funciones de Escritura Directa en Subcolección
-  const handleAddPackageToFirebase = async (qty, sku) => {
-    if (!editingProduct?.id) return;
-    try {
-      await db.collection('productos_master').doc(editingProduct.id).collection('paquetes').add({
-        piezas: qty,
-        sku: sku,
-        fecha_creacion: new Date() // Cambiado para no depender del import global de firebase
-      });
-      
-      // Rompemos el hash actualizando el documento principal
-      await db.collection('productos_master').doc(editingProduct.id).update({
-        ultima_actualizacion: new Date() 
-      });
-    } catch (e) {
-      console.error("Error al añadir empaque:", e);
-    }
-  };
+ 
 
   // Funciones de Escritura Directa en Subcolección
   const handleAddPackageToFirebase = async (qty, sku) => {
