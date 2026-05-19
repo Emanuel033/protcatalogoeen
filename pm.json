@@ -18956,7 +18956,6 @@
       "tipo_item": "PIEZA_BASE",
       "receta_desglose": null,
       "hereda_empaques_de": null,
-      "activo": true,
       "id_facturacion": "CPP-4-CP",
       "stock_total_piezas": 0,
       "fecha_creacion": {
@@ -18969,9 +18968,10 @@
         "_seconds": 1779164329,
         "_nanoseconds": 767000000
       },
+      "activo": true,
       "ultima_actualizacion": {
-        "_seconds": 1779218234,
-        "_nanoseconds": 742000000
+        "_seconds": 1779230794,
+        "_nanoseconds": 106000000
       }
     },
     "paquetes": [
