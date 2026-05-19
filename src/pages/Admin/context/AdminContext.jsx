@@ -104,56 +104,71 @@ export const AdminProvider = ({ children }) => {
   }
 };
 
-  const deleteProduct = async (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar este producto permanentemente?\nEsta acción no se puede deshacer y borrará también sus cajas configuradas.')) return;
+  const deleteProduct = async (productId) => {
+    if (!window.confirm('¿Estás seguro de eliminar este producto permanentemente?\\nEsta acción no se puede deshacer y borrará también sus cajas configuradas.')) return;
     
     try {
       const batch = writeBatch(db);
-      const productRef = doc(db, 'productos_master', id);
       
-      const paquetesRef = collection(db, 'productos_master', id, 'paquetes');
-      const paquetesSnapshot = await getDocs(paquetesRef);
-      
-      paquetesSnapshot.forEach((docSnap) => {
-        batch.delete(docSnap.ref);
+      // 1. Obtener y borrar todos los documentos de la subcolección 'paquetes'
+      const paquetesRef = collection(db, 'productos_master', productId, 'paquetes');
+      const paquetesSnap = await getDocs(paquetesRef);
+      paquetesSnap.forEach(doc => {
+        batch.delete(doc.ref);
       });
       
+      // 2. Borrar el producto padre
+      const productRef = doc(db, 'productos_master', productId);
       batch.delete(productRef);
+
+      // 3. Ejecutar todo de golpe
       await batch.commit();
-      clearSelection();
+      
       console.log('Producto eliminado correctamente');
+      clearSelection(); // Limpiamos selección por si estaba checkeado
     } catch (error) {
-      console.error("Error al eliminar", error);
+      console.error("Error al eliminar el producto:", error);
       alert('Error de conexión al eliminar');
     }
   };
 
   const cloneProduct = (productToClone) => {
-    alert(`Preparando clonación de: ${productToClone.nombre_flexible}. Se abrirá en el modal próximamente.`);
+    // Clonamos la data, quitamos el ID para que Firebase sepa que es nuevo
+    const clonedData = {
+      ...productToClone,
+      id: null, 
+      nombre_flexible: `${productToClone.nombre_flexible || 'Sin Nombre'} (Copia)`,
+      codigo_sistema_oficial: productToClone.codigo_sistema_oficial ? `${productToClone.codigo_sistema_oficial}-COPIA` : '',
+      activo: productToClone.activo !== false,
+      // Nota: No pasamos la subcolección de paquetes porque es un producto nuevo.
+    };
+
+    setEditingProduct(clonedData);
+    setIsConfigModalOpen(true);
   };
 
-  const applyMassEdit = async (ids, updates) => {
-    if (!ids || ids.length === 0) return;
-    
+  const applyMassEdit = async (selectedIds, updates) => {
     try {
       const batch = writeBatch(db);
       
-      // Añadimos cada producto al lote de actualización
-      ids.forEach((id) => {
-        const productRef = doc(db, 'productos_master', id);
-        batch.update(productRef, updates);
+      // Agregamos la fecha de actualización a los cambios
+      const finalUpdates = {
+        ...updates,
+        ultima_actualizacion: new Date()
+      };
+
+      selectedIds.forEach(id => {
+        const ref = doc(db, 'productos_master', id);
+        batch.update(ref, finalUpdates);
       });
-      
-      // Ejecutamos el lote en Firebase
+
       await batch.commit();
+      console.log(`¡Se actualizaron ${selectedIds.length} productos!`);
+      clearSelection(); // Limpiamos la barra al terminar
       
-      // Limpiamos la selección de checkboxes
-      clearSelection();
-      console.log(`Actualizados ${ids.length} productos con éxito.`);
     } catch (error) {
-      console.error("Error en la edición masiva de Firebase:", error);
-      alert("Hubo un error de conexión al aplicar los cambios en lote.");
-      throw error; // Re-lanzamos para que el modal sepa si falló
+      console.error("Error en edición masiva:", error);
+      throw error; // Lanzamos el error para que el catch del BulkActionBar quite el "isSaving"
     }
   };
 
