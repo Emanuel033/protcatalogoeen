@@ -46,7 +46,7 @@ export const ProductConfigModal = ({ isOpen, onClose, allItems = []}) => {
   const fileInputRef = useRef(null);
   const currentImageUrl = watch('imagen_url');
   const currentTipoItem = watch('tipo_item');
-  const currentReceta = watch('receta') || [];
+  const currentReceta = watch('receta_desglose') || [];
   const currentPackages = watch('presentaciones') || [];
 const currentBaseSku = watch('codigo_sistema_oficial');
 const heredaDeId = watch('hereda_empaques_de');
