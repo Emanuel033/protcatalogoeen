@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAdminContext } from '../context/AdminContext';
+import { printMassiveQRs } from '../utils/qrPrintService';
 
 export const Topbar = () => {
   const { 
@@ -99,8 +100,19 @@ export const Topbar = () => {
                 <i className="fas fa-file-excel w-4 text-center text-orange-500"></i> Exportar Faltantes
               </button>
               
-              <button onClick={() => alert('Abrir Modal QR Masivo (Próximamente)')} className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2">
-                <i className="fas fa-qrcode w-4 text-center text-slate-400"></i> Imprimir QRs (Masivo)
+              {/* Botones de QR Conectados */}
+              <button 
+                onClick={() => printMassiveQRs([{ codigo_sistema_oficial: 'TEST-123', nombre_flexible: 'Prueba de QR en Sistema' }], 'VITRINA')} 
+                className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"
+              >
+                <i className="fas fa-qrcode w-4 text-center text-slate-400"></i> Imprimir QRs (Vitrina)
+              </button>
+
+              <button 
+                onClick={() => printMassiveQRs([{ codigo_sistema_oficial: 'TEST-123', nombre_flexible: 'Prueba de QR en Sistema' }], 'ALMACEN')} 
+                className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"
+              >
+                <i className="fas fa-box w-4 text-center text-slate-400"></i> Imprimir QRs (Almacén)
               </button>
               
               <div className="h-px bg-slate-100 my-1"></div>
