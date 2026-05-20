@@ -2,25 +2,21 @@ import React, { useMemo } from 'react';
 import { useAdminContext } from '../../context/AdminContext';
 
 export const ImportTable = ({ allItems, facturacionCatalog }) => {
-  const { searchTerm, sortImport, handleSortChange } = useAdminContext();
+  // 👇 1. Extraemos las funciones para abrir el modal desde el contexto
+  const { searchTerm, sortImport, handleSortChange, setEditingProduct, setIsConfigModalOpen } = useAdminContext();
 
-  // 1. CÁLCULO DE PENDIENTES, FILTRADO Y ORDENAMIENTO REACITVO
   const pendingToImport = useMemo(() => {
-    // A. Extraemos todos los códigos que YA existen en el catálogo web
     const existingCodes = new Set(
       allItems
         .map(p => String(p.codigo_sistema_oficial || '').trim().toLowerCase())
         .filter(Boolean)
     );
 
-    // B. Filtramos el catálogo de facturación para dejar solo los que NO están en la web
     let result = facturacionCatalog.filter(fact => {
       const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || '').trim().toLowerCase();
-      // Si tiene código y no está en los existentes, es un pendiente
       return code && !existingCodes.has(code);
     });
 
-    // C. Aplicamos el buscador global del Topbar
     if (searchTerm) {
       const term = searchTerm.toLowerCase().trim();
       result = result.filter(fact => {
@@ -30,7 +26,6 @@ export const ImportTable = ({ allItems, facturacionCatalog }) => {
       });
     }
 
-    // D. Ordenamiento (Sort)
     result.sort((a, b) => {
       const valA = sortImport.key === 'codigo' 
         ? String(a.codigo_sistema_oficial || a.codigo || a.id || '') 
@@ -46,10 +41,33 @@ export const ImportTable = ({ allItems, facturacionCatalog }) => {
     return result;
   }, [allItems, facturacionCatalog, searchTerm, sortImport]);
 
-  // Helper para renderizar los iconos de ordenamiento
   const SortIcon = ({ columnKey }) => {
     if (sortImport.key !== columnKey) return <i className="fas fa-sort sort-icon ml-1 text-slate-300"></i>;
     return <i className={`fas ${sortImport.desc ? 'fa-sort-down' : 'fa-sort-up'} sort-icon ml-1 text-blue-600`}></i>;
+  };
+
+  // 👇 2. FUNCIÓN DE IMPORTACIÓN
+  const handleImportClick = (fact) => {
+    // Extraemos los valores con los mismos fallbacks que usas en el renderizado
+    const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || ''); 
+    const name = String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || '');
+
+    // Armamos la plantilla con el id en null (para que Firebase sepa que es nuevo)
+    // PERO le inyectamos el id_facturacion para que AdminContext lo atrape y lo guarde
+    const productTemplate = {
+      id: null, 
+      id_facturacion: fact.id, // El vínculo vital
+      nombre_flexible: name,
+      codigo_sistema_oficial: code,
+      categoria: '', 
+      tipo_item: 'PIEZA_BASE', 
+      activo: true,
+      imagen_url: ''
+    };
+
+    // Mandamos la plantilla al estado y abrimos el modal
+    setEditingProduct(productTemplate);
+    setIsConfigModalOpen(true);
   };
 
   return (
@@ -88,7 +106,6 @@ export const ImportTable = ({ allItems, facturacionCatalog }) => {
             </tr>
           ) : (
             pendingToImport.map(fact => {
-              // Aplicamos tus fallbacks de nombres
               const code = String(fact.codigo_sistema_oficial || fact.codigo || fact.Codigo || fact.id || ''); 
               const name = String(fact.descripcion_oficial || fact.Descripcion_Oficial || fact.descripcion || fact.Descripcion || fact.nombre || fact.Nombre || fact.Articulo || fact.Concepto || fact.producto || 'Sin descripción');
 
@@ -101,8 +118,9 @@ export const ImportTable = ({ allItems, facturacionCatalog }) => {
                     {name}
                   </td>
                   <td className="px-6 py-4 text-right border-b border-slate-50/50">
+                    {/* 👇 3. REEMPLAZAMOS EL ALERT POR LA FUNCIÓN */}
                     <button 
-                      onClick={() => alert(`Importar producto ${fact.id} en construcción`)} // TODO: Conectar a Modal de Importación
+                      onClick={() => handleImportClick(fact)}
                       className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl transition-all font-bold text-xs shadow-sm flex items-center justify-end gap-2 ml-auto border border-blue-100 group-hover:shadow-md"
                     >
                       Crear Ficha <i className="fas fa-arrow-right"></i>
