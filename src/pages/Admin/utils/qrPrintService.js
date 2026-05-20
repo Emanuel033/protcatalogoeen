@@ -82,7 +82,7 @@ export const printMassiveQRs = (itemsToPrint, type = 'ALMACEN') => {
   itemsToPrint.forEach(p => {
     const sku = p.codigo_sistema_oficial || p.sku || 'SIN-CODIGO';
     const name = p.nombre_flexible || p.descripcion_oficial || 'Producto Web';
-    const qrUrl = \`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=\${encodeURIComponent(sku)}&margin=0\`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(sku)}&margin=0`;
     
     html += `
       <div class="label">

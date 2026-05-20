@@ -75,11 +75,10 @@ export const AdminProvider = ({ children }) => {
     }
   };
 
-  // GUARDAR / ACTUALIZAR PRODUCTO
+  // GUARDAR / ACTUALIZAR PRODUCTO (VERSIÓN FINAL INTEGRADA)
   const saveProduct = async (formData) => {
-    // 🚨 Con react-hook-form NO usamos e.preventDefault() aquí.
     try {
-      // Si el editingProduct no tiene ID, es uno nuevo (o un clon recién hecho)
+      // Si el editingProduct no tiene ID, es uno nuevo (o un clon)
       const isNew = !editingProduct?.id;
       
       const productData = {
@@ -90,20 +89,35 @@ export const AdminProvider = ({ children }) => {
         tipo_item: formData.tipo_item || 'PIEZA_BASE',
         activo: formData.activo !== false,
         ultima_actualizacion: new Date(),
-        // TODO: En el siguiente paso inyectaremos la receta y la herencia de empaques aquí
       };
 
+      // 📦 INYECCIÓN DE LÓGICA COMPLETA: Recetas y Herencias
+      // Si el modal nos manda una receta (porque es KIT_FLEXIBLE), la guardamos
+      if (formData.receta_desglose !== undefined) {
+        productData.receta_desglose = formData.receta_desglose;
+      }
+
+      // Si el modal nos manda un ID de herencia, lo guardamos
+      if (formData.hereda_empaques_de !== undefined) {
+        productData.hereda_empaques_de = formData.hereda_empaques_de;
+      }
+
+      // 🔗 RETENCIÓN DE FACTURACIÓN
+      // Si el producto viene de una importación, rescatamos su enlace
+      if (editingProduct?.id_facturacion) {
+        productData.id_facturacion = editingProduct.id_facturacion;
+      }
+
+      // EJECUCIÓN EN LA BASE DE DATOS
       if (isNew) {
-        // Al clonar o crear nuevo, seteamos datos iniciales
         productData.fecha_creacion = new Date();
         productData.stock_total_piezas = 0;
         await addDoc(collection(db, 'productos_master'), productData);
-        console.log('Producto creado/clonado con éxito');
+        console.log('✅ Producto creado/clonado con éxito');
       } else {
-        // Actualizamos el existente
         const docRef = doc(db, 'productos_master', editingProduct.id);
         await updateDoc(docRef, productData);
-        console.log('Producto actualizado con éxito');
+        console.log('✅ Producto actualizado con éxito');
       }
 
       // Cerramos modal y limpiamos estado
