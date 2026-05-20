@@ -6,7 +6,7 @@
  * Exportado por: MasterTable, Topbar
  */
 
-import { db } from '../../../config/firebase'; // Ajusta la ruta según tu config
+import { db } from '../../../firebase'; // Ajusta la ruta según tu config
 
 /**
  * Construye el HTML para imprimir etiquetas con QRs
