@@ -5054,6 +5054,41 @@
     "paquetes": []
   },
   {
+    "id": "VMDxkUYJn9nPsNT1HKll",
+    "firebase_data": {
+      "id": "VMDxkUYJn9nPsNT1HKll",
+      "nombre_flexible": "PORRON INDUSTRIAL BLANCO DE 5 L C/TAPON E03C3010KA18",
+      "imagen_url": "",
+      "categoria": "PAD",
+      "codigo_sistema_oficial": "PIB-5-P/CP",
+      "tipo_item": "PIEZA_BASE",
+      "activo": true,
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "id_facturacion": "PIB-5-P-CP",
+      "fecha_creacion": {
+        "_seconds": 1779299247,
+        "_nanoseconds": 95000000
+      },
+      "stock_total_piezas": 0,
+      "ultima_actualizacion": {
+        "_seconds": 1779299265,
+        "_nanoseconds": 821000000
+      }
+    },
+    "paquetes": [
+      {
+        "id": "bcECLTD6DjHFNYZdSVSs",
+        "piezas": 32,
+        "sku": "PIB-5-P/CP-32PZ",
+        "fecha_creacion": {
+          "_seconds": 1779299263,
+          "_nanoseconds": 605000000
+        }
+      }
+    ]
+  },
+  {
     "id": "WpAh4VYwLNOQFK00nHfb",
     "firebase_data": {
       "id": "WpAh4VYwLNOQFK00nHfb",
