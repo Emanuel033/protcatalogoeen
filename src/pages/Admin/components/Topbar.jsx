@@ -7,7 +7,8 @@ export const Topbar = () => {
     searchTerm, setSearchTerm, 
     filterType, setFilterType, 
     showOnlyPending, setShowOnlyPending,
-    setIsConfigModalOpen 
+    setIsConfigModalOpen,
+    selectedItems 
   } = useAdminContext();
 
   // Estados para controlar los menús por CLIC en lugar de Hover
@@ -17,6 +18,17 @@ export const Topbar = () => {
   // Referencias para cerrar al hacer clic afuera
   const viewMenuRef = useRef(null);
   const toolsMenuRef = useRef(null);
+
+  const handlePrintSelected = (type) => {
+    if (selectedItems.length === 0) {
+      alert("Por favor, selecciona al menos un producto usando las casillas de la tabla.");
+      return;
+    }
+    // Filtramos los objetos completos de la base de datos que coincidan con los IDs seleccionados
+    const itemsToPrint = allItems.filter(item => selectedItems.includes(item.id));
+    printMassiveQRs(itemsToPrint, type);
+    setIsToolsMenuOpen(false); // Cerramos el menú
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -100,20 +112,20 @@ export const Topbar = () => {
                 <i className="fas fa-file-excel w-4 text-center text-orange-500"></i> Exportar Faltantes
               </button>
               
-              {/* Botones de QR Conectados */}
-              <button 
-                onClick={() => printMassiveQRs([{ codigo_sistema_oficial: 'TEST-123', nombre_flexible: 'Prueba de QR en Sistema' }], 'VITRINA')} 
-                className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"
-              >
-                <i className="fas fa-qrcode w-4 text-center text-slate-400"></i> Imprimir QRs (Vitrina)
-              </button>
+              {/* Botones de QR Conectados Reales */}
+  <button 
+    onClick={() => handlePrintSelected('VITRINA')} 
+    className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"
+  >
+    <i className="fas fa-qrcode w-4 text-center text-slate-400"></i> Imprimir QRs (Vitrina) <span className="ml-auto bg-slate-200 text-[9px] px-1.5 rounded">{selectedItems.length}</span>
+  </button>
 
-              <button 
-                onClick={() => printMassiveQRs([{ codigo_sistema_oficial: 'TEST-123', nombre_flexible: 'Prueba de QR en Sistema' }], 'ALMACEN')} 
-                className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"
-              >
-                <i className="fas fa-box w-4 text-center text-slate-400"></i> Imprimir QRs (Almacén)
-              </button>
+  <button 
+    onClick={() => handlePrintSelected('ALMACEN')} 
+    className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-md text-xs font-bold text-slate-700 transition-colors flex items-center gap-2"
+  >
+    <i className="fas fa-box w-4 text-center text-slate-400"></i> Imprimir QRs (Almacén) <span className="ml-auto bg-slate-200 text-[9px] px-1.5 rounded">{selectedItems.length}</span>
+  </button>
               
               <div className="h-px bg-slate-100 my-1"></div>
               

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useAdminContext } from '../../context/AdminContext';
 import { getCalculatedStock, isProductPending } from '../../utils/businessRules';
+import { printMassiveQRs } from '../../utils/qrPrintService';
 
 export const MasterTable = ({ allItems }) => {
   const { 
@@ -215,17 +216,41 @@ export const MasterTable = ({ allItems }) => {
                       
                       <div className="w-px h-5 bg-slate-200 mx-0.5"></div>
                       
-                      <button onClick={() => alert('QR Vitrina en construcción')} className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 text-purple-600 hover:bg-purple-100 transition-all shadow-sm flex items-center justify-center" title="QR Vitrina (Carrito Web)">
-                        <i className="fas fa-store text-xs"></i>
-                      </button>
-                      
-                      <button onClick={() => { if(pType === 'PIEZA_BASE') alert('QR Inventario en construcción') }} className={`w-8 h-8 rounded-lg ${pType === 'PIEZA_BASE' ? 'bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 cursor-pointer' : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50'} border transition-all shadow-sm flex items-center justify-center`} title="QR Inventario (Sueltas)">
-                        <i className="fas fa-qrcode text-xs"></i>
-                      </button>
-                      
-                      <button onClick={() => alert('QR Paquetes en construcción')} className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 transition-all shadow-sm flex items-center justify-center" title="QR Paquetes / Cajas">
-                        <i className="fas fa-box-open text-xs"></i>
-                      </button>
+                      {/* QR Vitrina */}
+  <button 
+    onClick={() => printMassiveQRs([p], 'VITRINA')} 
+    className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 text-purple-600 hover:bg-purple-100 transition-all shadow-sm flex items-center justify-center" 
+    title="QR Vitrina (Carrito Web)"
+  >
+    <i className="fas fa-store text-xs"></i>
+  </button>
+  
+  {/* QR Inventario (Sueltas) */}
+  <button 
+    onClick={() => { if(pType === 'PIEZA_BASE') printMassiveQRs([p], 'ALMACEN') }} 
+    className={`w-8 h-8 rounded-lg ${pType === 'PIEZA_BASE' ? 'bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 cursor-pointer' : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50'} border transition-all shadow-sm flex items-center justify-center`} 
+    title="QR Inventario (Sueltas)"
+  >
+    <i className="fas fa-qrcode text-xs"></i>
+  </button>
+  
+  {/* QR Paquetes / Cajas */}
+  <button 
+    onClick={() => {
+      // Como un paquete lleva sufijo, armamos un objeto temporal rápido para la impresión
+      if (pType === 'PIEZA_BASE') {
+        const fakePkg = { 
+          codigo_sistema_oficial: p.codigo_sistema_oficial ? `${p.codigo_sistema_oficial}-CAJA` : 'SIN-CODIGO-CAJA',
+          nombre_flexible: `CAJA - ${p.nombre_flexible || 'Producto'}`
+        };
+        printMassiveQRs([fakePkg], 'ALMACEN');
+      }
+    }} 
+    className={`w-8 h-8 rounded-lg ${pType === 'PIEZA_BASE' ? 'bg-emerald-50 border-emerald-100 text-emerald-600 hover:bg-emerald-100' : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50'} transition-all shadow-sm flex items-center justify-center border`} 
+    title="QR Paquetes / Cajas"
+  >
+    <i className="fas fa-box-open text-xs"></i>
+  </button>
                       
                       <div className="w-px h-5 bg-slate-200 mx-0.5"></div>
                       

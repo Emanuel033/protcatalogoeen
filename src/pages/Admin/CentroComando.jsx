@@ -75,7 +75,7 @@ const CentroComandoContent = () => {
         </header>
 
         {/* NUEVO TOPBAR DE ESCRITORIO (Buscador y Filtros) */}
-        <Topbar />
+        <Topbar allItems={allItems} />
 
         {/* CONTENEDOR DE LA PANTALLA ACTIVA */}
         <main className="flex-1 overflow-hidden relative w-full flex flex-col">
