@@ -260,7 +260,6 @@ export const MasterTable = ({ allItems }) => {
   showToast,
   customPrompt
 )}
-    }} 
     className={`w-8 h-8 rounded-lg ${pType === 'PIEZA_BASE' ? 'bg-emerald-50 border-emerald-100 text-emerald-600 hover:bg-emerald-100' : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50'} transition-all shadow-sm flex items-center justify-center border`} 
     title="QR Paquetes / Cajas"
   >
