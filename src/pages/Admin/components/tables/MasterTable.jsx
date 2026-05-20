@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useAdminContext } from '../../context/AdminContext';
 import { getCalculatedStock, isProductPending } from '../../utils/businessRules';
 import { printMassiveQRs } from '../../utils/qrPrintService';
+import { printAllQRs, printAllPackagesQRs } from '../../utils/massQRPrintService';
 
 export const MasterTable = ({ allItems }) => {
   const { 
@@ -218,7 +219,15 @@ export const MasterTable = ({ allItems }) => {
                       
                       {/* QR Vitrina */}
   <button 
-    onClick={() => printMassiveQRs([p], 'VITRINA')} 
+    onClick={() => printAllQRs(
+  'vitrina',
+  allItems,
+  isProductPending,
+  { searchTerm, filterType, showOnlyPending },
+  'https://tu-tienda.com/?add=',
+  showToast,
+  customPrompt
+)}
     className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 text-purple-600 hover:bg-purple-100 transition-all shadow-sm flex items-center justify-center" 
     title="QR Vitrina (Carrito Web)"
   >
@@ -227,7 +236,15 @@ export const MasterTable = ({ allItems }) => {
   
   {/* QR Inventario (Sueltas) */}
   <button 
-    onClick={() => { if(pType === 'PIEZA_BASE') printMassiveQRs([p], 'ALMACEN') }} 
+    onClick={() => printAllQRs(
+  'inventario',
+  allItems,
+  isProductPending,
+  { searchTerm, filterType, showOnlyPending },
+  '',
+  showToast,
+  customPrompt
+)}
     className={`w-8 h-8 rounded-lg ${pType === 'PIEZA_BASE' ? 'bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 cursor-pointer' : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50'} border transition-all shadow-sm flex items-center justify-center`} 
     title="QR Inventario (Sueltas)"
   >
@@ -236,15 +253,13 @@ export const MasterTable = ({ allItems }) => {
   
   {/* QR Paquetes / Cajas */}
   <button 
-    onClick={() => {
-      // Como un paquete lleva sufijo, armamos un objeto temporal rápido para la impresión
-      if (pType === 'PIEZA_BASE') {
-        const fakePkg = { 
-          codigo_sistema_oficial: p.codigo_sistema_oficial ? `${p.codigo_sistema_oficial}-CAJA` : 'SIN-CODIGO-CAJA',
-          nombre_flexible: `CAJA - ${p.nombre_flexible || 'Producto'}`
-        };
-        printMassiveQRs([fakePkg], 'ALMACEN');
-      }
+    onClick={() => printAllPackagesQRs(
+  allItems,
+  isProductPending,
+  { searchTerm, filterType, showOnlyPending },
+  showToast,
+  customPrompt
+)}
     }} 
     className={`w-8 h-8 rounded-lg ${pType === 'PIEZA_BASE' ? 'bg-emerald-50 border-emerald-100 text-emerald-600 hover:bg-emerald-100' : 'bg-slate-50 text-slate-300 cursor-not-allowed opacity-50'} transition-all shadow-sm flex items-center justify-center border`} 
     title="QR Paquetes / Cajas"
