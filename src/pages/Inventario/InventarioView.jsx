@@ -64,7 +64,11 @@ const tInv = {
     copiarBoton: 'Copiar',
     sincExito: '¡Consolidado del día respaldado en la nube exitosamente!',
     sincOffline: '⚠️ Guardado localmente. Se sincronizará automáticamente al tener internet.',
-    etiquetaConsolidado: '📊 Consolidado Hoy'
+    etiquetaConsolidado: '📊 Consolidado Hoy',
+    // ✨ NUEVOS TÍTULOS DE TABLAS SEPARADAS
+    tituloEntradas: "🟢 ENTRADAS (Sobrantes)",
+    tituloSalidas: "🔴 SALIDAS (Faltantes)",
+    tituloCorrectos: "⚪ SIN DIFERENCIA (Correctos)"
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -121,7 +125,11 @@ const tInv = {
     copiarBoton: 'Copier',
     sincExito: 'Cumul du jour synchronisé avec succès !',
     sincOffline: '⚠️ Sauvegardé localement. Il sera synchronisé dès la connexion internet.',
-    etiquetaConsolidado: '📊 Cumul du Jour'
+    etiquetaConsolidado: '📊 Cumul du Jour',
+    // ✨ NUEVOS TÍTULOS DE TABLAS SEPARADAS
+    tituloEntradas: "🟢 ENTRÉES (Excédents)",
+    tituloSalidas: "🔴 SORTIES (Manquants)",
+    tituloCorrectos: "⚪ SANS DIFFÉRENCE (Corrects)"
   }
 };
 
@@ -137,7 +145,6 @@ const InventarioView = () => {
   const [modoSeleccion, setModoSeleccion] = useState(false);
   const [seleccionados, setSeleccionados] = useState([]);
 
-  // ✨ ESTADO PARA EL ESCÁNER DE INVENTARIO
   const [mostrarScanner, setMostrarScanner] = useState(false);
 
   const [toast, setToast] = useState({ visible: false, mensaje: '', tipo: 'info' });
@@ -257,13 +264,11 @@ const InventarioView = () => {
     }
   };
 
-  // ✨ NUEVA FUNCIÓN: Maneja los disparos del QRScannerInventario
   const handleScanSuccess = (producto, cantidadPiezasPaquete, tipoEscaneo) => {
     setListaConteo(prev => {
         let prodEnLista = prev.find(i => i.codigo === String(producto.codigo));
 
         if (!prodEnLista) {
-            // Si no estaba en la lista, lo armamos con sus variantes default
             let empaquesLimpios = [];
             if (producto.paquetes && Object.keys(producto.paquetes).length > 0) {
                 empaquesLimpios = Object.values(producto.paquetes).filter(p => p && p.piezas);
@@ -285,17 +290,14 @@ const InventarioView = () => {
                 totalFisico: 0
             };
         } else {
-            prodEnLista = JSON.parse(JSON.stringify(prodEnLista)); // Clonamos para modificar seguro
+            prodEnLista = JSON.parse(JSON.stringify(prodEnLista)); 
         }
 
-        // Sumamos lo que haya escaneado
         if (tipoEscaneo === 'PAQUETE') {
-            // Buscamos la variante que coincida con las piezas de la caja
             let varIndex = prodEnLista.variantes.findIndex(v => v.pz === cantidadPiezasPaquete && v.id !== 'sueltas');
             if (varIndex >= 0) {
                 prodEnLista.variantes[varIndex].contadas += 1;
             } else {
-                // Si la caja no estaba registrada, creamos la variante fantasma
                 prodEnLista.variantes.push({
                     id: `f_${Date.now()}`,
                     pz: cantidadPiezasPaquete,
@@ -305,7 +307,6 @@ const InventarioView = () => {
                 prodEnLista.variantes.sort((a, b) => b.pz - a.pz);
             }
         } else {
-            // Si escaneó inventario interno o vitrina, suma a piezas sueltas
             let varIndex = prodEnLista.variantes.findIndex(v => v.id === 'sueltas');
             if (varIndex >= 0) prodEnLista.variantes[varIndex].contadas += 1;
         }
@@ -313,7 +314,6 @@ const InventarioView = () => {
         prodEnLista.totalFisico = prodEnLista.variantes.reduce((sum, v) => sum + (v.pz * v.contadas), 0);
         const nuevaLista = prev.filter(i => i.codigo !== String(producto.codigo));
         
-        // Lo regresamos al principio de la lista para que el trabajador lo vea inmediatamente
         return [prodEnLista, ...nuevaLista];
     });
   };
@@ -369,7 +369,7 @@ const InventarioView = () => {
       const arrayConsolidadoFinal = Object.values(agruparConsolidado);
       
       try {
-        addDoc(collection(db, 'bitacora_inventario'), { // Sin await para modo offline
+        addDoc(collection(db, 'bitacora_inventario'), { 
           fecha: serverTimestamp(),
           items: arrayConsolidadoFinal,
           total_skus: arrayConsolidadoFinal.length,
@@ -459,10 +459,33 @@ const InventarioView = () => {
     l.setAttribute("download", `Consolidado_Dia.csv`); document.body.appendChild(l); l.click();
   };
 
+  // ✨ LÓGICA DE SEPARACIÓN DE TABLAS PARA LA NUBE
+  const getGruposNube = () => {
+    if (!sesionSeleccionadaNube || !sesionSeleccionadaNube.items) return [];
+
+    const entradas = [];
+    const salidas = [];
+    const correctos = [];
+
+    sesionSeleccionadaNube.items.forEach(item => {
+      const ajuste = item.totalFisico - item.stockSistema;
+      if (ajuste > 0) entradas.push(item);
+      else if (ajuste < 0) salidas.push(item);
+      else correctos.push(item);
+    });
+
+    return [
+      { id: 'entradas', titulo: t.tituloEntradas, data: entradas, textColor: 'text-emerald-400', borderColor: 'border-emerald-500/30' },
+      { id: 'salidas', titulo: t.tituloSalidas, data: salidas, textColor: 'text-red-400', borderColor: 'border-red-500/30' },
+      { id: 'correctos', titulo: t.tituloCorrectos, data: correctos, textColor: 'text-slate-400', borderColor: 'border-slate-700' }
+    ];
+  };
+
+  const gruposNube = getGruposNube();
+
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-slate-900 text-slate-100 relative selection:bg-blue-500/30">
       
-      {/* ✨ RENDER DEL ESCÁNER FLOTANTE */}
       {mostrarScanner && (
         <QRScannerInventario 
           productos={catalogoBase} 
@@ -585,74 +608,100 @@ const InventarioView = () => {
 
             {sesionSeleccionadaNube ? (
               <div className="flex flex-col gap-4">
-                <div className="bg-slate-850 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
+                <div className="bg-slate-850 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 mb-2">
                   <h3 className="font-black text-sm text-white flex items-center gap-2"><i className="fas fa-cloud-download-alt text-purple-400"></i> {t.tablaTitulo}</h3>
                   <span className="text-[11px] text-slate-400"><i className="fas fa-pencil-alt mr-1"></i>{t.tablaSub}</span>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 md:hidden">
-                  {sesionSeleccionadaNube.items?.map((item) => {
-                    const ajuste = item.totalFisico - item.stockSistema;
-                    const canEdit = esRegistroDeHoy();
-                    return (
-                      <div key={item.codigo} className="bg-slate-800 border border-slate-700 rounded-2xl p-4 flex flex-col gap-3 shadow-md">
-                        <button onClick={() => copiarCodigo(item.codigo)} className="w-full bg-slate-900 border border-slate-650 hover:border-blue-500 text-blue-400 p-2.5 rounded-xl font-mono font-black text-sm flex items-center justify-between active:scale-[0.98] transition-all">
-                          <span className="tracking-wider">{item.codigo}</span> <span className="text-[10px] bg-blue-600/20 text-blue-300 px-2 py-1 rounded border border-blue-500/30 uppercase tracking-widest flex items-center gap-1"><i className="fas fa-copy"></i> {t.copiarBoton}</span>
-                        </button>
-                        <p className="font-bold text-xs text-white leading-tight">{item.nombre}</p>
-                        <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-700/60 text-center">
-                          <div className={`p-2 rounded-lg relative ${canEdit ? 'bg-slate-900/40' : 'bg-slate-900/10 opacity-50'}`}>
-                            <span className="block text-[9px] font-black text-slate-500 uppercase">{t.colSis} {canEdit && <i className="fas fa-pencil-alt text-[8px]"></i>}</span>
-                            <input key={`movil-${item.codigo}-${item.stockSistema}`} type="number" disabled={!canEdit} className={`w-full bg-transparent text-slate-300 font-bold text-xs text-center focus:outline-none focus:bg-slate-800 rounded px-1 py-0.5 mt-0.5 border-b border-dashed border-slate-600 ${!canEdit ? 'cursor-not-allowed' : ''}`} defaultValue={item.stockSistema} onBlur={(e) => handleUpdateStockSistema(item.codigo, e.target.value)} />
-                          </div>
-                          <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-750">
-                            <span className="block text-[9px] font-black text-blue-400 uppercase">{t.colFis}</span>
-                            <span className="font-black text-xs text-white block mt-1">{item.totalFisico}</span>
-                          </div>
-                          <button onClick={() => copiarAjuste(ajuste)} className={`p-2 rounded-lg border flex flex-col items-center justify-center active:scale-95 transition-all ${ajuste > 0 ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/10' : 'text-emerald-400 border-slate-700 bg-slate-800/50'}`}>
-                            <span className="block text-[9px] font-black uppercase opacity-80">{t.colDif}</span>
-                            <span className="font-black text-xs block mt-1">{ajuste > 0 ? `+${ajuste}` : ajuste}</span>
-                          </button>
+                {/* ======================================================== */}
+                {/* ✨ RENDERIZADO DE LAS 3 TABLAS (MOBILE Y DESKTOP) */}
+                {/* ======================================================== */}
+                
+                {gruposNube.map((grupo) => {
+                  if (grupo.data.length === 0) return null;
+                  const canEdit = esRegistroDeHoy();
+
+                  return (
+                    <div key={grupo.id} className="mb-6">
+                      
+                      {/* VISTA MOBILE (Tarjetas) */}
+                      <div className="md:hidden">
+                        <h4 className={`${grupo.textColor} font-black text-xs uppercase tracking-wider mb-3 ml-2 border-b border-slate-700 pb-2`}>
+                          {grupo.titulo} <span className="bg-slate-800 px-2 py-0.5 rounded-full ml-1 text-white">{grupo.data.length}</span>
+                        </h4>
+                        <div className="grid grid-cols-1 gap-3">
+                          {grupo.data.map((item) => {
+                            const ajuste = item.totalFisico - item.stockSistema;
+                            return (
+                              <div key={item.codigo} className={`bg-slate-800 border ${grupo.borderColor} rounded-2xl p-4 flex flex-col gap-3 shadow-md`}>
+                                <button onClick={() => copiarCodigo(item.codigo)} className="w-full bg-slate-900 border border-slate-650 hover:border-blue-500 text-blue-400 p-2.5 rounded-xl font-mono font-black text-sm flex items-center justify-between active:scale-[0.98] transition-all">
+                                  <span className="tracking-wider">{item.codigo}</span> <span className="text-[10px] bg-blue-600/20 text-blue-300 px-2 py-1 rounded border border-blue-500/30 uppercase tracking-widest flex items-center gap-1"><i className="fas fa-copy"></i> {t.copiarBoton}</span>
+                                </button>
+                                <p className="font-bold text-xs text-white leading-tight">{item.nombre}</p>
+                                <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-700/60 text-center">
+                                  <div className={`p-2 rounded-lg relative ${canEdit ? 'bg-slate-900/40' : 'bg-slate-900/10 opacity-50'}`}>
+                                    <span className="block text-[9px] font-black text-slate-500 uppercase">{t.colSis} {canEdit && <i className="fas fa-pencil-alt text-[8px]"></i>}</span>
+                                    <input key={`movil-${item.codigo}-${item.stockSistema}`} type="number" disabled={!canEdit} className={`w-full bg-transparent text-slate-300 font-bold text-xs text-center focus:outline-none focus:bg-slate-800 rounded px-1 py-0.5 mt-0.5 border-b border-dashed border-slate-600 ${!canEdit ? 'cursor-not-allowed' : ''}`} defaultValue={item.stockSistema} onBlur={(e) => handleUpdateStockSistema(item.codigo, e.target.value)} />
+                                  </div>
+                                  <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-750">
+                                    <span className="block text-[9px] font-black text-blue-400 uppercase">{t.colFis}</span>
+                                    <span className="font-black text-xs text-white block mt-1">{item.totalFisico}</span>
+                                  </div>
+                                  <button onClick={() => copiarAjuste(ajuste)} className={`p-2 rounded-lg border flex flex-col items-center justify-center active:scale-95 transition-all ${ajuste > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/10' : 'text-slate-400 border-slate-700 bg-slate-800/50'}`}>
+                                    <span className="block text-[9px] font-black uppercase opacity-80">{t.colDif}</span>
+                                    <span className="font-black text-xs block mt-1">{ajuste > 0 ? `+${ajuste}` : ajuste}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
 
-                <div className="hidden md:block bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-900/60 text-[10px] font-black uppercase text-slate-400 tracking-wider border-b border-slate-700">
-                        <th className="p-3 pl-4 w-36">{t.colSku}</th>
-                        <th className="p-3">{t.colProd}</th>
-                        <th className="p-3 text-center w-24">{t.colSis}</th>
-                        <th className="p-3 text-center w-20">{t.colFis}</th>
-                        <th className="p-3 text-center pr-4 w-24">{t.colDif}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-700/50 text-xs font-medium text-slate-200">
-                      {sesionSeleccionadaNube.items?.map((item) => {
-                        const ajuste = item.totalFisico - item.stockSistema;
-                        const canEdit = esRegistroDeHoy();
-                        return (
-                          <tr key={item.codigo} className="hover:bg-slate-750/50 transition-colors group">
-                            <td className="p-3 pl-4"><button onClick={() => copiarCodigo(item.codigo)} className="w-full text-left text-blue-400 hover:text-blue-300 flex items-center justify-between bg-slate-900/40 p-1.5 rounded-lg border border-slate-700 group-hover:border-blue-500/40 transition-all font-mono font-bold"><span>{item.codigo}</span> <i className="fas fa-copy text-[10px]"></i></button></td>
-                            <td className="p-3 font-bold text-white truncate max-w-sm">{item.nombre}</td>
-                            <td className="p-3 text-center">
-                              <input key={`pc-${item.codigo}-${item.stockSistema}`} type="number" disabled={!canEdit} className={`w-16 bg-slate-900/30 text-slate-300 text-center font-bold border-b border-dashed border-slate-500 focus:outline-none focus:bg-slate-900 py-1 rounded transition-all ${!canEdit ? 'opacity-40 cursor-not-allowed border-none' : 'hover:bg-slate-800'}`} defaultValue={item.stockSistema} onBlur={(e) => handleUpdateStockSistema(item.codigo, e.target.value)} onKeyDown={(e) => e.key === 'Enter' && e.target.blur()} />
-                            </td>
-                            <td className="p-3 text-center font-bold text-white bg-slate-900/20">{item.totalFisico}</td>
-                            <td className="p-3 text-center pr-4">
-                              <button onClick={() => copiarAjuste(ajuste)} className={`w-full py-2 rounded-lg border font-black active:scale-95 transition-all flex items-center justify-center gap-2 ${ajuste > 0 ? 'text-amber-400 border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/5 hover:bg-red-500/10' : 'text-emerald-400 border-slate-700 bg-slate-800/50 hover:bg-slate-700'}`}>
-                                {ajuste > 0 ? `+${ajuste}` : ajuste} <i className="fas fa-copy text-[10px] opacity-30"></i>
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                      {/* VISTA DESKTOP (Tablas Separadas) */}
+                      <div className="hidden md:block bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
+                        <div className={`bg-slate-900/60 p-3 border-b border-slate-700 flex justify-between items-center`}>
+                          <h4 className={`${grupo.textColor} font-black text-xs uppercase tracking-wider`}>
+                            {grupo.titulo}
+                          </h4>
+                          <span className="bg-slate-800 border border-slate-600 px-2 py-0.5 rounded-md text-[10px] text-white font-bold">{grupo.data.length} SKUs</span>
+                        </div>
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="bg-slate-900/40 text-[10px] font-black uppercase text-slate-400 tracking-wider border-b border-slate-700/50">
+                              <th className="p-3 pl-4 w-36">{t.colSku}</th>
+                              <th className="p-3">{t.colProd}</th>
+                              <th className="p-3 text-center w-24">{t.colSis}</th>
+                              <th className="p-3 text-center w-20">{t.colFis}</th>
+                              <th className="p-3 text-center pr-4 w-24">{t.colDif}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-700/50 text-xs font-medium text-slate-200">
+                            {grupo.data.map((item) => {
+                              const ajuste = item.totalFisico - item.stockSistema;
+                              return (
+                                <tr key={item.codigo} className="hover:bg-slate-750/50 transition-colors group">
+                                  <td className="p-3 pl-4"><button onClick={() => copiarCodigo(item.codigo)} className="w-full text-left text-blue-400 hover:text-blue-300 flex items-center justify-between bg-slate-900/40 p-1.5 rounded-lg border border-slate-700 group-hover:border-blue-500/40 transition-all font-mono font-bold"><span>{item.codigo}</span> <i className="fas fa-copy text-[10px]"></i></button></td>
+                                  <td className="p-3 font-bold text-white truncate max-w-sm">{item.nombre}</td>
+                                  <td className="p-3 text-center">
+                                    <input key={`pc-${item.codigo}-${item.stockSistema}`} type="number" disabled={!canEdit} className={`w-16 bg-slate-900/30 text-slate-300 text-center font-bold border-b border-dashed border-slate-500 focus:outline-none focus:bg-slate-900 py-1 rounded transition-all ${!canEdit ? 'opacity-40 cursor-not-allowed border-none' : 'hover:bg-slate-800'}`} defaultValue={item.stockSistema} onBlur={(e) => handleUpdateStockSistema(item.codigo, e.target.value)} onKeyDown={(e) => e.key === 'Enter' && e.target.blur()} />
+                                  </td>
+                                  <td className="p-3 text-center font-bold text-white bg-slate-900/20">{item.totalFisico}</td>
+                                  <td className="p-3 text-center pr-4">
+                                    <button onClick={() => copiarAjuste(ajuste)} className={`w-full py-2 rounded-lg border font-black active:scale-95 transition-all flex items-center justify-center gap-2 ${ajuste > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/5 hover:bg-red-500/10' : 'text-slate-400 border-slate-700 bg-slate-800/50 hover:bg-slate-700'}`}>
+                                      {ajuste > 0 ? `+${ajuste}` : ajuste} <i className="fas fa-copy text-[10px] opacity-30"></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })}
+
               </div>
             ) : ( sesionesNube.length > 0 && ( <div className="text-center py-12 bg-slate-800/40 rounded-3xl border border-dashed border-slate-700"><i className="fas fa-mobile-alt text-3xl text-slate-600 mb-3 animate-pulse"></i><p className="text-xs font-bold text-slate-400">{t.sinSesionSel}</p></div> ) )}
           </div>
