@@ -258,8 +258,10 @@ const ListaConteo = ({
                                 onClick={() => setModalSumaRapida({ isOpen: true, codigo: item.codigo, varId: v.id, cantidad: '' })}
                                 className="w-14 h-14 bg-emerald-600/20 border border-emerald-500/40 rounded-xl text-emerald-400 hover:bg-emerald-600/40 active:scale-95 transition-all flex items-center justify-center"
                               >
-                                <i className="fas fa-plus text-xs"></i>
-                              <i className="fas fa-box-open text-[10px] mt-0.5 opacity-80"></i>
+                                <div className="flex flex-col items-center">
+    <i className="fas fa-plus text-xs"></i>
+    <i className="fas fa-puzzle-piece text-[10px] -mt-1 opacity-80"></i>
+  </div>
                               </button>
                             )}
 
