@@ -6,6 +6,7 @@ import EscanerManual from './components/EscanerManual';
 import ListaConteo from './components/ListaConteo';
 import ModalCalculadora from './components/ModalCalculadora';
 import useDictadoVoz from './hooks/useDictadoVoz';
+import QRScannerInventario from './components/QRScannerInventario'; // ✨ ESCÁNER INTEGRADO
 
 const tInv = {
   es: {
@@ -61,11 +62,9 @@ const tInv = {
     colDif: 'Dif.',
     sinSesionSel: 'Selecciona una sesión de la barra superior para revisar sus diferencias.',
     copiarBoton: 'Copiar',
-    // En la sección de 'es':
-sincExito: '¡Consolidado del día respaldado en la nube exitosamente!',
-sincOffline: '⚠️ Guardado localmente. Se sincronizará automáticamente al tener internet.', // <-- AGREGA ESTO
+    sincExito: '¡Consolidado del día respaldado en la nube exitosamente!',
+    sincOffline: '⚠️ Guardado localmente. Se sincronizará automáticamente al tener internet.',
     etiquetaConsolidado: '📊 Consolidado Hoy'
-    
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -120,9 +119,8 @@ sincOffline: '⚠️ Guardado localmente. Se sincronizará automáticamente al t
     colDif: 'Diff.',
     sinSesionSel: 'Sélectionnez une session ci-dessus pour voir les différences.',
     copiarBoton: 'Copier',
-    // En la sección de 'fr':
-sincExito: 'Cumul du jour synchronisé avec succès !',
-sincOffline: '⚠️ Sauvegardé localement. Il sera synchronisé dès la connexion internet.', // <-- AGREGA ESTO
+    sincExito: 'Cumul du jour synchronisé avec succès !',
+    sincOffline: '⚠️ Sauvegardé localement. Il sera synchronisé dès la connexion internet.',
     etiquetaConsolidado: '📊 Cumul du Jour'
   }
 };
@@ -138,8 +136,9 @@ const InventarioView = () => {
 
   const [modoSeleccion, setModoSeleccion] = useState(false);
   const [seleccionados, setSeleccionados] = useState([]);
-  const [modoSeleccionHistorial, setModoSeleccionHistorial] = useState(false);
-  const [seleccionadosHistorial, setSeleccionadosHistorial] = useState([]);
+
+  // ✨ ESTADO PARA EL ESCÁNER DE INVENTARIO
+  const [mostrarScanner, setMostrarScanner] = useState(false);
 
   const [toast, setToast] = useState({ visible: false, mensaje: '', tipo: 'info' });
   const mostrarToast = (mensaje, tipo = 'info') => {
@@ -151,9 +150,8 @@ const InventarioView = () => {
   const pedirConfirmacion = (mensaje, onConfirm, textoPersonalizado = t.aceptar) => {
     setConfirmar({ visible: true, mensaje, onConfirm, textoAceptar: textoPersonalizado });
   };
-   useEffect(() => {
-    document.title = "Inventario | La Económica del Norte";
-  }, []);
+   
+  useEffect(() => { document.title = "Inventario | La Económica del Norte"; }, []);
 
   useEffect(() => {
     const handleOffline = () => setIsOffline(true);
@@ -203,7 +201,7 @@ const InventarioView = () => {
       const sesionActualizada = sesionesNube.find(s => s.id === sesionSeleccionadaNube.id);
       if (sesionActualizada) setSesionSeleccionadaNube(sesionActualizada);
     }
-  }, [sesionesNube]);
+  }, [sesionesNube]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const manualCant = useCallback((codigo, varId, valor) => {
     const pz = parseInt(valor, 10) || 0;
@@ -259,6 +257,67 @@ const InventarioView = () => {
     }
   };
 
+  // ✨ NUEVA FUNCIÓN: Maneja los disparos del QRScannerInventario
+  const handleScanSuccess = (producto, cantidadPiezasPaquete, tipoEscaneo) => {
+    setListaConteo(prev => {
+        let prodEnLista = prev.find(i => i.codigo === String(producto.codigo));
+
+        if (!prodEnLista) {
+            // Si no estaba en la lista, lo armamos con sus variantes default
+            let empaquesLimpios = [];
+            if (producto.paquetes && Object.keys(producto.paquetes).length > 0) {
+                empaquesLimpios = Object.values(producto.paquetes).filter(p => p && p.piezas);
+            } else if (producto.empaques_tips && Object.keys(producto.empaques_tips).length > 0) {
+                empaquesLimpios = Object.values(producto.empaques_tips).map(qty => ({ piezas: parseInt(qty) })).filter(p => p.piezas);
+            }
+
+            const variantes = [
+                { id: 'sueltas', pz: 1, contadas: 0 },
+                ...empaquesLimpios.map((e, i) => ({ id: `emp_${i}`, pz: parseInt(e.piezas), contadas: 0 }))
+            ].sort((a, b) => b.pz - a.pz);
+
+            prodEnLista = {
+                codigo: String(producto.codigo),
+                nombre: producto.descripcion_oficial || producto.nombre,
+                stockSistema: parseFloat(producto.stock || 0),
+                imagen: producto.image || producto.imagen || null,
+                variantes: variantes,
+                totalFisico: 0
+            };
+        } else {
+            prodEnLista = JSON.parse(JSON.stringify(prodEnLista)); // Clonamos para modificar seguro
+        }
+
+        // Sumamos lo que haya escaneado
+        if (tipoEscaneo === 'PAQUETE') {
+            // Buscamos la variante que coincida con las piezas de la caja
+            let varIndex = prodEnLista.variantes.findIndex(v => v.pz === cantidadPiezasPaquete && v.id !== 'sueltas');
+            if (varIndex >= 0) {
+                prodEnLista.variantes[varIndex].contadas += 1;
+            } else {
+                // Si la caja no estaba registrada, creamos la variante fantasma
+                prodEnLista.variantes.push({
+                    id: `f_${Date.now()}`,
+                    pz: cantidadPiezasPaquete,
+                    contadas: 1,
+                    isFantasma: true
+                });
+                prodEnLista.variantes.sort((a, b) => b.pz - a.pz);
+            }
+        } else {
+            // Si escaneó inventario interno o vitrina, suma a piezas sueltas
+            let varIndex = prodEnLista.variantes.findIndex(v => v.id === 'sueltas');
+            if (varIndex >= 0) prodEnLista.variantes[varIndex].contadas += 1;
+        }
+
+        prodEnLista.totalFisico = prodEnLista.variantes.reduce((sum, v) => sum + (v.pz * v.contadas), 0);
+        const nuevaLista = prev.filter(i => i.codigo !== String(producto.codigo));
+        
+        // Lo regresamos al principio de la lista para que el trabajador lo vea inmediatamente
+        return [prodEnLista, ...nuevaLista];
+    });
+  };
+
   const handleSincronizacionTotal = () => {
     if (listaConteo.length === 0) { mostrarToast(t.noArchivarVacio, 'error'); return; }
     if (modoSeleccion && seleccionados.length === 0) { mostrarToast(t.errorSelVacia, 'error'); return; }
@@ -308,11 +367,9 @@ const InventarioView = () => {
       });
 
       const arrayConsolidadoFinal = Object.values(agruparConsolidado);
-      // 5. Subir a la nube (MODIFICADO PARA MODO OFFLINE)
+      
       try {
-        // Ejecutamos la promesa SIN el 'await' para que no bloquee la interfaz si no hay red.
-        // Firebase se encargará de encolarlo en background.
-        const promesaSubida = addDoc(collection(db, 'bitacora_inventario'), {
+        addDoc(collection(db, 'bitacora_inventario'), { // Sin await para modo offline
           fecha: serverTimestamp(),
           items: arrayConsolidadoFinal,
           total_skus: arrayConsolidadoFinal.length,
@@ -323,13 +380,11 @@ const InventarioView = () => {
         console.error("Error nube:", e); 
       }
 
-      // 6. Limpiar UI
       setListaConteo(itemsRestantes); 
       setModoSeleccion(false); 
       setSeleccionados([]);
       if(itemsRestantes.length === 0) localStorage.removeItem('een_inventario_activo'); 
       
-      // 7. LANZAR EL TOAST INTELIGENTE
       if (isOffline || !navigator.onLine) {
         mostrarToast(t.sincOffline, 'info');
       } else {
@@ -371,16 +426,12 @@ const InventarioView = () => {
 
   const copiarCodigo = (texto) => { navigator.clipboard.writeText(texto); mostrarToast(t.copiado, 'success'); };
   const copiarAjuste = (texto) => { navigator.clipboard.writeText(texto); mostrarToast(t.ajusteCopiado, 'success'); };
-
   const toggleSeleccion = (codigo) => setSeleccionados(prev => prev.includes(codigo) ? prev.filter(c => c !== codigo) : [...prev, codigo]);
   const toggleTodos = () => setSeleccionados(seleccionados.length === listaConteo.length ? [] : listaConteo.map(i => i.codigo));
-
-  // --- LÓGICA DE BLOQUEO POR FECHA ---
   const esRegistroDeHoy = () => {
     if (!sesionSeleccionadaNube?.fecha) return false;
     const fechaSesion = new Date(sesionSeleccionadaNube.fecha.toDate()).toDateString();
-    const hoy = new Date().toDateString();
-    return fechaSesion === hoy;
+    return fechaSesion === new Date().toDateString();
   };
 
   const descargarCSV = () => {
@@ -411,6 +462,15 @@ const InventarioView = () => {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-slate-900 text-slate-100 relative selection:bg-blue-500/30">
       
+      {/* ✨ RENDER DEL ESCÁNER FLOTANTE */}
+      {mostrarScanner && (
+        <QRScannerInventario 
+          productos={catalogoBase} 
+          onScanSuccess={handleScanSuccess} 
+          onClose={() => setMostrarScanner(false)} 
+        />
+      )}
+
       {toast.visible && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[400] animate-fade-in pointer-events-none w-[90%] max-w-sm">
           <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border-2 ${toast.tipo === 'error' ? 'bg-red-900/95 border-red-500/80' : toast.tipo === 'success' ? 'bg-emerald-900/95 border-emerald-500/80' : 'bg-slate-800/95 border-blue-500/80'} backdrop-blur-md text-white`}>
@@ -422,14 +482,14 @@ const InventarioView = () => {
 
       {confirmar.visible && (
         <div className="fixed inset-0 z-[500] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
-           <div className="bg-slate-800 border border-slate-600 p-6 rounded-3xl max-w-sm w-full shadow-2xl text-center">
+           <div className="bg-slate-800 border border-slate-600 p-6 rounded-3xl max-w-sm w-full shadow-2xl text-center animate-fade-in-up">
               <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-amber-500/40">
                 <i className="fas fa-question text-3xl text-amber-400"></i>
               </div>
               <p className="text-white text-lg font-black mb-6 leading-snug">{confirmar.mensaje}</p>
               <div className="flex gap-3">
-                 <button onClick={() => setConfirmar({visible: false})} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3.5 rounded-xl font-bold">{t.cancelar}</button>
-                 <button onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/50">{confirmar.textoAceptar}</button>
+                 <button onClick={() => setConfirmar({visible: false})} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3.5 rounded-xl font-bold transition-all">{t.cancelar}</button>
+                 <button onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/50 transition-all">{confirmar.textoAceptar}</button>
               </div>
            </div>
         </div>
@@ -483,11 +543,27 @@ const InventarioView = () => {
       <main className="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full custom-scroll relative">
         {vistaActual === 'conteo' ? (
           <div className="flex flex-col gap-5 pb-12">
-            <div className="bg-slate-800 p-5 rounded-3xl border border-slate-600 shadow-xl"><EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} idioma={idioma} /></div>
-            <ListaConteo listaConteo={listaConteo} idioma={idioma} onCambiarCant={cambiarCant} onManualCant={manualCant} onEliminar={(cod) => setListaConteo(prev => prev.filter(p => p.codigo !== cod))}
+            
+            <div className="bg-slate-800 p-4 rounded-3xl border border-slate-600 shadow-xl flex gap-3">
+               <div className="flex-1 min-w-0">
+                  <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} idioma={idioma} />
+               </div>
+               <button 
+                  onClick={() => setMostrarScanner(true)}
+                  className="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400 text-white rounded-2xl shadow-lg flex items-center justify-center transition-all shrink-0 active:scale-95"
+               >
+                  <i className="fas fa-qrcode text-xl"></i>
+               </button>
+            </div>
+
+            <ListaConteo 
+              listaConteo={listaConteo} idioma={idioma} 
+              onCambiarCant={cambiarCant} onManualCant={manualCant} 
+              onEliminar={(cod) => setListaConteo(prev => prev.filter(p => p.codigo !== cod))}
               onAgregarEmpaque={(cod, pz) => { setListaConteo(prev => prev.map(p => p.codigo === cod ? { ...p, variantes: [...p.variantes, { id: `f_${Date.now()}`, pz: parseInt(pz), contadas: 0, isFantasma: true }].sort((a,b) => b.pz - a.pz) } : p)); }}
               onAbrirCalculadora={(codigo, varId) => { const p = listaConteo.find(x => x.codigo === codigo); setCalcActiva({ isOpen: true, codigo, varId, nombre: p?.nombre }); }}
-              onIniciarDictado={(codigo, varId, btn, letra) => iniciarDictado(codigo, varId, letra)} onZoomImagen={(img) => setImagenAmpliada(img)} modoSeleccion={modoSeleccion} seleccionados={seleccionados} onToggleSeleccion={toggleSeleccion} />
+              onIniciarDictado={(codigo, varId, btn, letra) => iniciarDictado(codigo, varId, letra)} onZoomImagen={(img) => setImagenAmpliada(img)} modoSeleccion={modoSeleccion} seleccionados={seleccionados} onToggleSeleccion={toggleSeleccion} 
+            />
           </div>
         ) : (
           <div className="flex flex-col gap-5 animate-fade-in pb-10">
