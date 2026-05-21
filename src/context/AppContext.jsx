@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, query, where } from "firebase/firestore";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getAnalytics, logEvent, isSupported } from "firebase/analytics";
 
 // ============================================================================
@@ -29,12 +29,10 @@ isSupported().then((supported) => {
   if (supported) analytics = getAnalytics(firebaseApp);
 });
 
-
 // ============================================================================
 // 🧠 MOTOR MATEMÁTICO: CÁLCULO DE STOCK DE KITS EN VIVO
 // ============================================================================
 const calcularStockKits = (productosRaw) => {
-  // 1. Diccionarios rápidos para búsquedas instantáneas
   const mapaPorCodigo = new Map();
   const mapaPorId = new Map();
 
@@ -44,19 +42,16 @@ const calcularStockKits = (productosRaw) => {
     if (p.id) mapaPorId.set(p.id, p);
   });
 
-  // 2. Procesamos el catálogo
   return productosRaw.map(producto => {
     const tipoItem = producto.tipo_item || 'PIEZA_BASE';
     const receta = producto.receta || producto.receta_desglose;
 
-    // Si es pieza base o no trae receta, se queda con su stock normal
     if (tipoItem === 'PIEZA_BASE' || !receta) {
       return producto; 
     }
 
     let maxKitsPosibles = Infinity;
 
-    // CASO A: KIT OFICIAL (Arreglo con codigo_pieza)
     if (tipoItem === 'KIT_OFICIAL' && Array.isArray(receta)) {
       receta.forEach(ingrediente => {
         const pieza = mapaPorCodigo.get(ingrediente.codigo_pieza);
@@ -64,22 +59,18 @@ const calcularStockKits = (productosRaw) => {
           const stockPieza = Number(pieza.stock) || 0;
           const cantNecesaria = Number(ingrediente.cantidad) || 1;
           const kitsDisponibles = Math.floor(stockPieza / cantNecesaria);
-          
           if (kitsDisponibles < maxKitsPosibles) maxKitsPosibles = kitsDisponibles;
         } else {
-          maxKitsPosibles = 0; // Si falta una pieza en la base de datos, el kit no se puede armar
+          maxKitsPosibles = 0; 
         }
       });
     } 
-    
-    // CASO B: KIT FLEXIBLE (Objeto con IDs de Firebase)
     else if (tipoItem === 'KIT_FLEXIBLE' && typeof receta === 'object') {
       Object.entries(receta).forEach(([idPieza, cantNecesaria]) => {
         const pieza = mapaPorId.get(idPieza);
         if (pieza) {
           const stockPieza = Number(pieza.stock) || 0;
           const kitsDisponibles = Math.floor(stockPieza / Number(cantNecesaria));
-          
           if (kitsDisponibles < maxKitsPosibles) maxKitsPosibles = kitsDisponibles;
         } else {
           maxKitsPosibles = 0;
@@ -89,14 +80,12 @@ const calcularStockKits = (productosRaw) => {
 
     if (maxKitsPosibles === Infinity) maxKitsPosibles = 0;
 
-    // Sobreescribimos el stock del kit con el cálculo real
     return {
       ...producto,
       stock: Math.max(0, maxKitsPosibles)
     };
   });
 };
-
 
 // ============================================================================
 // CONTEXTO GLOBAL (CEREBRO)
@@ -110,37 +99,23 @@ export const AppProvider = ({ children }) => {
   const [categoriaActiva, setCategoriaActiva] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
   
-  // ✨ NUEVO ESTADO PARA LOS FILTROS RÁPIDOS
   const [filtroRapido, setFiltroRapido] = useState(null);
 
-  // ✨ NUEVA FUNCIÓN: Cambia la categoría y limpia la basura anterior
   const seleccionarCategoria = (nuevaCategoria) => {
     setCategoriaActiva(nuevaCategoria);
-    setSearchTerm('');      // Borra el texto del buscador
-    setFiltroRapido(null);  // Quita la píldora seleccionada
+    setSearchTerm('');      
+    setFiltroRapido(null);  
   };
-useEffect(() => {
+
+  useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .then(reg => console.log('SW Catálogo registrado en raíz:', reg.scope))
         .catch(err => console.error('Error SW Catálogo:', err));
     }
   }, []);
-  // ---------------------------------------------------------
-  // ✨ EFECTO PARA LEER LA URL Y AUTO-BUSCAR
-  // ---------------------------------------------------------
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const busquedaURL = params.get('q'); 
 
-    if (busquedaURL) {
-      setSearchTerm(busquedaURL);
-    }
-  }, []); 
-  // ---------------------------------------------------------
-
-  
-  // 1. Al iniciar, intenta recuperar el carrito guardado
+  // 1. Recuperar carrito
   const [carrito, setCarrito] = useState(() => {
     try {
       const carritoGuardado = localStorage.getItem('carrito_een');
@@ -150,30 +125,28 @@ useEffect(() => {
     }
   });
 
-  // 2. Cada vez que 'carrito' cambie, guárdalo en la memoria del navegador
   useEffect(() => {
     localStorage.setItem('carrito_een', JSON.stringify(carrito));
   }, [carrito]);
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState('recoger');
   const [paymentMethod, setPaymentMethod] = useState('');
-  
-  // NUEVO: Estado para el modo secreto
   const [esAdmin, setEsAdmin] = useState(false);
   
   const registrarEvento = (nombreEvento, parametros = {}) => {
     if (analytics) logEvent(analytics, nombreEvento, parametros);
   };
 
-  // Detectar Modo Secreto
   useEffect(() => {
     if (searchTerm.trim().toLowerCase() === 'secreto123') {
       setEsAdmin(true);
-      setSearchTerm(''); // Limpia el buscador
+      setSearchTerm(''); 
       alert('¡Modo Administrador Desbloqueado!');
     }
   }, [searchTerm]);
 
+  // Carga inicial del JSON
   useEffect(() => {
     const fetchProductos = async () => {
       try {
@@ -181,12 +154,8 @@ useEffect(() => {
         if (!response.ok) throw new Error("Archivo JSON no encontrado");
         
         const allProductsRaw = await response.json();
-
-        // 🧠 1. CALCULAR STOCK DE KITS PRIMERO
-        // (Debe hacerse con el JSON completo para que pueda encontrar insumos ocultos)
         const productosConStockReal = calcularStockKits(allProductsRaw);
 
-        // 🛑 2. EL FILTRO MÁGICO MEJORADO (Ahora filtramos sobre los que ya tienen stock calculado)
         const productosParaWeb = productosConStockReal.filter(producto => {
             const categoriaDelProducto = (producto.category || '').toLowerCase();
             return !categoriaDelProducto.includes('sistema');
@@ -202,6 +171,41 @@ useEffect(() => {
     };
     fetchProductos();
   }, []);
+
+  // ---------------------------------------------------------
+  // ✨ LÓGICA DE URL (BÚSQUEDAS Y CÓDIGOS QR DE VITRINA)
+  // ---------------------------------------------------------
+  useEffect(() => {
+    // Solo ejecutamos si ya terminó de cargar el catálogo de productos
+    if (!cargando && productos.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      
+      // 1. Manejo del Buscador Normal (?q=término)
+      const busquedaURL = params.get('q'); 
+      if (busquedaURL) {
+        setSearchTerm(busquedaURL);
+      }
+
+      // 2. 🔥 MANEJO DE LOS QRs DE VITRINA (?add=ID_DEL_PRODUCTO)
+      const addParam = params.get('add');
+      if (addParam) {
+        // Buscamos el producto exacto por ID en la base de datos ya cargada
+        const productoEscaneado = productos.find(p => p.id === addParam);
+        
+        if (productoEscaneado) {
+          // Lo agregamos directamente y abrimos el carrito
+          agregarAlCarrito(productoEscaneado, 1);
+          setIsCartOpen(true);
+        } else {
+          alert('❌ Producto escaneado no encontrado o fuera de stock.');
+        }
+
+        // LIMPIAR LA URL (Quitar el ?add= para que al recargar la página no se vuelva a sumar)
+        const urlSinQuery = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: urlSinQuery }, '', urlSinQuery);
+      }
+    }
+  }, [cargando, productos]); // Dependemos de que los productos existan
 
   const extraerCategorias = (lista) => {
     let uniqueCats = [...new Set(lista.map(p => p.category || 'Varios'))];
@@ -224,22 +228,15 @@ useEffect(() => {
   const eliminarProducto = (id) => setCarrito(prev => prev.filter(item => item.id !== id));
   const totalPiezas = carrito.reduce((sum, item) => sum + item.cantidad, 0);
 
- /// ======================================================================
-  // MOTOR TRADUCTOR RECURSIVO (A PRUEBA DE BALAS)
-  // ======================================================================
   const obtenerDesgloseBase = (idItem, cantidadMultiplicador, catalogoGlobal, resultado = {}) => {
       const item = catalogoGlobal.find(p => p.id === idItem);
       if (!item) return resultado;
 
-      // 1. Limpiamos el texto por si hay espacios extra, minúsculas o dice "FLEXIBLES"
       const tipoStr = String(item.tipo_item || 'PIEZA_BASE').toUpperCase().trim();
-      
-      // 2. Es kit si dice la palabra "FLEXIBLE" o si simplemente TIENE una receta válida.
       const tieneReceta = item.receta && Object.keys(item.receta).length > 0;
       const esKitFlexible = tipoStr.includes('FLEXIBLE') || tieneReceta;
 
       if (!esKitFlexible) {
-          // Es una pieza base, la sumamos a la lista final
           const cod = item.codigo_sistema || item.codigo_sistema_oficial || 'SIN-CODIGO';
           if (!resultado[cod]) {
               resultado[cod] = { nombre: item.name || item.nombre_flexible, cantidad: 0 };
@@ -247,25 +244,18 @@ useEffect(() => {
           resultado[cod].cantidad += cantidadMultiplicador;
       } 
       else {
-          // Es un Kit, nos metemos a escarbar en sus entrañas
           const receta = item.receta || item.receta_desglose;
-          
           if (receta && Object.keys(receta).length > 0) {
               for (const [compId, compQty] of Object.entries(receta)) {
-                  // Se invoca a sí misma (Recursividad al rescate)
                   obtenerDesgloseBase(compId, cantidadMultiplicador * compQty, catalogoGlobal, resultado);
               }
           } else {
               resultado['ERROR-RECETA'] = { nombre: `[BD: Falta Receta] ${item.name || item.nombre_flexible}`, cantidad: cantidadMultiplicador };
           }
       }
-      
       return resultado;
   };
 
-  // ======================================================================
-  // 1. ENVÍO POR WHATSAPP (Con negritas y emojis)
-  // ======================================================================
   const sendWhatsApp = (clientData) => {
     if(carrito.length === 0) return alert("Carrito vacío");
     registrarEvento('begin_checkout', { total_items: totalPiezas });
@@ -277,7 +267,6 @@ useEffect(() => {
 
     let msg = `👋 Hola, soy *${name}*.\nPedido:\n\n`;
 
-    // Datos de entrega
     if(delivery === 'recoger') {
         msg += `📍 *Recoger en Sucursal*\n💳 Pago: ${payment}\n\n`;
     } else if(delivery === 'local') {
@@ -288,7 +277,6 @@ useEffect(() => {
 
     msg += `*🛒 LISTA DE ARTÍCULOS:*\n\n`;
 
-    // Recorremos el carrito con tu lógica exacta
     carrito.forEach((item, index) => {
         const prod = productos.find(p => p.id === item.id) || item;
         const isBolsas = (prod.category||'').toLowerCase().includes('bolsa');
@@ -302,7 +290,6 @@ useEffect(() => {
         const tipoItem = prod.tipo_item || item.tipo_item || 'PIEZA_BASE';
         const codigoOficial = prod.codigo_sistema || prod.codigo_sistema_oficial || item.codigo_sistema || 'SIN_CODIGO';
         
-        // En React tu cantidad está en "item.cantidad" (en el viejo era item.quantity)
         const p = Math.floor(item.cantidad / packSize);
         const l = item.cantidad % packSize;
         let desgloseText = [];
@@ -340,9 +327,6 @@ useEffect(() => {
     window.open(`https://api.whatsapp.com/send?phone=528113728493&text=${encodeURIComponent(msg)}`, '_blank');
   };
 
-  // ======================================================================
-  // 2. ENVÍO POR CORREO (Formato formal, sin emojis para B2B)
-  // ======================================================================
   const sendEmail = (clientData) => {
     if(carrito.length === 0) return alert("Carrito vacío");
     registrarEvento('begin_checkout_email', { total_items: totalPiezas });
@@ -352,9 +336,7 @@ useEffect(() => {
     const payment = clientData.paymentMethod || paymentMethod || 'Por definir';
     const isOcurre = clientData.ocurre;
 
-    // Saludo más formal
     let msg = `Estimado equipo de Ventas,\n\nAdjunto los detalles del pedido solicitado por: ${name}\n\n`;
-    
     msg += `--- DATOS DE LOGÍSTICA Y PAGO ---\n`;
 
     if(delivery === 'recoger') {
@@ -408,14 +390,12 @@ useEffect(() => {
             obtenerDesgloseBase(prod.id, item.cantidad, productos, desgloseFinal);
             
             for (const [cod, info] of Object.entries(desgloseFinal)) {
-                // Viñeta limpia con guion en lugar de emoji
                 msg += `   - [${cod}] ${info.nombre}: ${info.cantidad} pz\n`;
             }
         }
         msg += `\n`; 
     });
 
-    // Asunto más profesional y descriptivo
     const subject = encodeURIComponent(`Nuevo Pedido Web - ${name}`);
     const body = encodeURIComponent(msg);
     window.location.href = `mailto:ventas@laeconomicamty.com?subject=${subject}&body=${body}`;
@@ -425,9 +405,9 @@ useEffect(() => {
     <AppContext.Provider value={{ 
       productos, categorias, cargando, categoriaActiva, setCategoriaActiva,
       searchTerm, setSearchTerm,
-      filtroRapido, setFiltroRapido, // ✨ AQUÍ ESTÁ EL ESTADO AÑADIDO
-      seleccionarCategoria, // ✨ PASAMOS LA NUEVA FUNCIÓN AQUÍ
-      carrito, isCartOpen, toggleCart, clearCart, agregarAlCarrito, eliminarProducto, totalPiezas,
+      filtroRapido, setFiltroRapido, 
+      seleccionarCategoria, 
+      carrito, isCartOpen, setIsCartOpen, toggleCart, clearCart, agregarAlCarrito, eliminarProducto, totalPiezas,
       deliveryMethod, setDeliveryMethod, paymentMethod, setPaymentMethod, sendWhatsApp, sendEmail, 
       registrarEvento, esAdmin, setEsAdmin
     }}>
