@@ -44,6 +44,7 @@ const ListaConteo = ({
   onAbrirCalculadora,
   onIniciarDictado,
   onZoomImagen,
+  onAutoCompletar = () => {}, // ✨ Función integrada para Auditoría Rápida
   soloLectura = false,
   modoSeleccion = false,
   seleccionados = [],
@@ -55,7 +56,7 @@ const ListaConteo = ({
   const [expandido, setExpandido] = useState(null);
   const [prevLength, setPrevLength] = useState(0);
   
-  // ✨ NUEVOS ESTADOS DE MODALES
+  // ESTADOS DE MODALES
   const [modalEmpaque, setModalEmpaque] = useState({ isOpen: false, codigo: null, cantidad: '' });
   const [modalEliminar, setModalEliminar] = useState({ isOpen: false, codigo: null, nombre: '' });
   const [modalSumaRapida, setModalSumaRapida] = useState({ isOpen: false, codigo: null, varId: null, cantidad: '' });
@@ -177,6 +178,16 @@ const ListaConteo = ({
                 </div>
               </div>
 
+              {/* ✨ BOTÓN VERDE DE VERIFICACIÓN RÁPIDA (AUDITORÍA) */}
+              {item.totalFisico === 0 && item.stockSistema > 0 && !modoSeleccion && !soloLectura && (
+                <button 
+                  onClick={(e) => { e.stopPropagation(); onAutoCompletar(item.codigo); }}
+                  className="shrink-0 flex items-center gap-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 px-3 py-2 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all active:scale-95 shadow-sm"
+                >
+                  <i className="fas fa-check-double text-xs"></i> OK ({item.stockSistema})
+                </button>
+              )}
+
               <div className="shrink-0 flex flex-col items-end pr-1 min-w-[50px]">
                 <p className={`text-xl font-black leading-none ${modoSeleccion && isSelected ? 'text-blue-200' : 'text-white'}`}>
                   {item.totalFisico}
@@ -222,7 +233,7 @@ const ListaConteo = ({
                             <button 
                               onMouseDown={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
                               onTouchStart={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
-                              className="w-14 h-14 bg-slate-800 border border-slate-600 rounded-xl text-slate-300 hover:text-red-400 hover:border-red-400 active:scale-95 transition-all flex items-center justify-center"
+                              className="w-14 h-14 bg-slate-800 border border-slate-600 rounded-xl text-slate-300 hover:text-red-400 hover:border-red-400 active:scale-95 transition-all flex items-center justify-center shrink-0"
                             >
                               <i className="fas fa-microphone text-lg"></i>
                             </button>
@@ -256,12 +267,13 @@ const ListaConteo = ({
                             {isSueltas && (
                               <button 
                                 onClick={() => setModalSumaRapida({ isOpen: true, codigo: item.codigo, varId: v.id, cantidad: '' })}
-                                className="w-14 h-14 bg-emerald-600/20 border border-emerald-500/40 rounded-xl text-emerald-400 hover:bg-emerald-600/40 active:scale-95 transition-all flex items-center justify-center"
+                                className="w-14 h-14 bg-emerald-600/20 border border-emerald-500/40 rounded-xl text-emerald-400 hover:bg-emerald-600/40 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
+                                title="Suma Rápida"
                               >
-                                <div className="flex flex-col items-center">
-    <i className="fas fa-plus text-xs"></i>
-    <i className="fas fa-puzzle-piece text-[10px] -mt-1 opacity-80"></i>
-  </div>
+                                <div className="flex items-center gap-1 opacity-90">
+                                   <i className="fas fa-plus text-sm"></i>
+                                   <i className="fas fa-cube text-sm"></i>
+                                </div>
                               </button>
                             )}
 
@@ -269,7 +281,8 @@ const ListaConteo = ({
                             {!isSueltas && (
                               <button 
                                 onClick={() => onAbrirCalculadora(item.codigo, v.id)}
-                                className="w-14 h-14 bg-purple-600/20 border border-purple-500/40 rounded-xl text-purple-300 hover:bg-purple-600/40 active:scale-95 transition-all flex items-center justify-center"
+                                className="w-14 h-14 bg-purple-600/20 border border-purple-500/40 rounded-xl text-purple-300 hover:bg-purple-600/40 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
+                                title="Calculadora de Estibas"
                               >
                                 <i className="fas fa-calculator text-lg"></i>
                               </button>
@@ -288,7 +301,7 @@ const ListaConteo = ({
                 {!soloLectura && (
                   <button 
                     onClick={() => setModalEmpaque({ isOpen: true, codigo: item.codigo, cantidad: '' })} 
-                    className="w-full text-center bg-slate-900 border border-dashed border-slate-500 hover:bg-slate-800 text-blue-400 font-black text-[11px] py-3.5 mb-5 rounded-xl uppercase tracking-wider"
+                    className="w-full text-center bg-slate-900 border border-dashed border-slate-500 hover:bg-slate-800 text-blue-400 font-black text-[11px] py-3.5 mb-5 rounded-xl uppercase tracking-wider transition-colors active:scale-[0.98] flex justify-center items-center gap-2"
                   >
                     <i className="fas fa-box-open"></i> {t.btnNuevoEmpaque}
                   </button>
@@ -311,12 +324,12 @@ const ListaConteo = ({
                   {ajuste > 0 ? `+${ajuste}` : ajuste} {ajuste === 0 ? `(${t.ok})` : ''}
                 </div>
 
-                {/* BOTÓN QUITAR DE LA LISTA (Abre el Modal) */}
+                {/* BOTÓN QUITAR DE LA LISTA */}
                 {!soloLectura && (
                   <div className="mt-4">
                     <button 
                       onClick={() => setModalEliminar({ isOpen: true, codigo: item.codigo, nombre: item.nombre })}
-                      className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all active:scale-95"
+                      className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all active:scale-95 flex justify-center items-center gap-2"
                     >
                       <i className="fas fa-trash-alt"></i> {t.eliminar}
                     </button>
@@ -394,7 +407,7 @@ const ListaConteo = ({
         <div className="fixed inset-0 z-[300] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
            <div className="bg-slate-800 border border-slate-600 p-6 rounded-3xl max-w-sm w-full shadow-2xl animate-fade-in-up text-center">
               <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-500/40">
-                <i className="fas fa-hand-sparkles text-3xl text-emerald-400"></i>
+                <i className="fas fa-layer-group text-3xl text-emerald-400"></i>
               </div>
               <h3 className="text-white text-lg font-black mb-2">{t.promptSuma}</h3>
               <p className="text-slate-400 text-xs font-bold mb-6">Esta cantidad se SUMARÁ a las que ya tenías contadas.</p>
