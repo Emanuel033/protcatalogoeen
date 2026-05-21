@@ -138,7 +138,7 @@ const ListaConteo = ({
             >
               {modoSeleccion && (
                 <div className="shrink-0 flex items-center justify-center">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all ${isSelected ? 'bg-blue-600 border-blue-400 text-white shadow-lg' : 'bg-slate-800 border-slate-500 text-transparent'}`}>
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all ${isSelected ? 'bg-blue-600 border-blue-400 text-white shadow-lg' : 'bg-slate-800 border-slate-600'}`}>
                     <i className="fas fa-check text-sm"></i>
                   </div>
                 </div>
@@ -203,11 +203,13 @@ const ListaConteo = ({
                       ? t.txtNuevoPaquete.replace('{pz}', v.pz) 
                       : (v.id === 'sueltas' ? t.sueltas : `${t.paquete} (${v.pz}${t.pz_abrev})`);
                     
+                    const isSueltas = v.id === 'sueltas';
+                    
                     return (
                       <div key={v.id} className="flex flex-col gap-2.5 bg-slate-900 p-3.5 rounded-2xl border border-slate-700 shadow-inner">
                         <div className="flex justify-between items-center px-1">
                           <span className="text-slate-200 text-xs font-black uppercase tracking-wider flex items-center gap-2">
-                            <i className={`fas ${v.id === 'sueltas' ? 'fa-cube text-slate-400' : 'fa-boxes text-blue-400'} text-sm`}></i>
+                            <i className={`fas ${isSueltas ? 'fa-cube text-slate-400' : 'fa-boxes text-blue-400'} text-sm`}></i>
                             {nombreVariante}
                           </span>
                           <span className="text-[10px] font-black text-slate-400 uppercase bg-slate-800 px-2.5 py-1 rounded-md border border-slate-600 shadow-sm">
@@ -220,7 +222,7 @@ const ListaConteo = ({
                             <button 
                               onMouseDown={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
                               onTouchStart={(e) => { e.preventDefault(); onIniciarDictado(item.codigo, v.id, 'mic', ''); }}
-                              className="w-14 h-14 bg-slate-800 border border-slate-600 rounded-xl text-slate-300 hover:text-red-400 hover:border-red-400 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
+                              className="w-14 h-14 bg-slate-800 border border-slate-600 rounded-xl text-slate-300 hover:text-red-400 hover:border-red-400 active:scale-95 transition-all flex items-center justify-center"
                             >
                               <i className="fas fa-microphone text-lg"></i>
                             </button>
@@ -244,27 +246,31 @@ const ListaConteo = ({
 
                               <button 
                                 onClick={() => onCambiarCant(item.codigo, v.id, 1)}
-                                className="w-14 h-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center active:bg-blue-400 transition-colors border-l border-blue-500 shrink-0 shadow-inner"
+                                className="w-14 h-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center active:bg-blue-400 transition-colors border-l border-blue-500 shrink-0"
                               >
                                 <i className="fas fa-plus"></i>
                               </button>
                             </div>
 
-                            {/* ✨ BOTÓN AÑADIR EXTRA (Suma Rápida) */}
-                            <button 
-                              onClick={() => setModalSumaRapida({ isOpen: true, codigo: item.codigo, varId: v.id, cantidad: '' })}
-                              className="w-14 h-14 bg-emerald-600/20 border border-emerald-500/40 rounded-xl text-emerald-400 hover:bg-emerald-600/40 active:scale-95 transition-all flex flex-col items-center justify-center shrink-0 shadow-sm"
-                            >
-                              <i className="fas fa-plus text-xs"></i>
-                              <i className="fas fa-box-open text-[10px] mt-0.5 opacity-80"></i>
-                            </button>
+                            {/* ✨ BOTÓN SUMA RÁPIDA - SOLO PARA PIEZAS SUELTAS */}
+                            {isSueltas && (
+                              <button 
+                                onClick={() => setModalSumaRapida({ isOpen: true, codigo: item.codigo, varId: v.id, cantidad: '' })}
+                                className="w-14 h-14 bg-emerald-600/20 border border-emerald-500/40 rounded-xl text-emerald-400 hover:bg-emerald-600/40 active:scale-95 transition-all flex items-center justify-center"
+                              >
+                                <i className="fas fa-hand-sparkles text-lg"></i>
+                              </button>
+                            )}
 
-                            <button 
-                              onClick={() => onAbrirCalculadora(item.codigo, v.id)}
-                              className="w-14 h-14 bg-purple-600/20 border border-purple-500/40 rounded-xl text-purple-300 hover:bg-purple-600/40 active:scale-95 transition-all flex items-center justify-center shrink-0 shadow-sm"
-                            >
-                              <i className="fas fa-calculator text-lg"></i>
-                            </button>
+                            {/* BOTÓN CALCULADORA - SOLO PARA NO-SUELTAS */}
+                            {!isSueltas && (
+                              <button 
+                                onClick={() => onAbrirCalculadora(item.codigo, v.id)}
+                                className="w-14 h-14 bg-purple-600/20 border border-purple-500/40 rounded-xl text-purple-300 hover:bg-purple-600/40 active:scale-95 transition-all flex items-center justify-center"
+                              >
+                                <i className="fas fa-calculator text-lg"></i>
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <div className="flex items-center justify-center h-14 bg-slate-800 border border-slate-600 rounded-xl text-white font-black text-2xl shadow-inner mt-1">
@@ -279,7 +285,7 @@ const ListaConteo = ({
                 {!soloLectura && (
                   <button 
                     onClick={() => setModalEmpaque({ isOpen: true, codigo: item.codigo, cantidad: '' })} 
-                    className="w-full text-center bg-slate-900 border border-dashed border-slate-500 hover:bg-slate-800 text-blue-400 font-black text-[11px] py-3.5 mb-5 rounded-xl uppercase tracking-wider transition-colors active:scale-[0.98] flex justify-center items-center gap-2"
+                    className="w-full text-center bg-slate-900 border border-dashed border-slate-500 hover:bg-slate-800 text-blue-400 font-black text-[11px] py-3.5 mb-5 rounded-xl uppercase tracking-wider"
                   >
                     <i className="fas fa-box-open"></i> {t.btnNuevoEmpaque}
                   </button>
@@ -307,7 +313,7 @@ const ListaConteo = ({
                   <div className="mt-4">
                     <button 
                       onClick={() => setModalEliminar({ isOpen: true, codigo: item.codigo, nombre: item.nombre })}
-                      className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                      className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all active:scale-95"
                     >
                       <i className="fas fa-trash-alt"></i> {t.eliminar}
                     </button>
@@ -343,10 +349,10 @@ const ListaConteo = ({
               />
 
               <div className="flex gap-3">
-                 <button onClick={() => setModalEmpaque({ isOpen: false, codigo: null, cantidad: '' })} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-black transition-colors border border-slate-600 active:scale-95 text-sm uppercase tracking-wider">
+                 <button onClick={() => setModalEmpaque({ isOpen: false, codigo: null, cantidad: '' })} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-black transition-colors">
                    {t.cancelar}
                  </button>
-                 <button onClick={handleConfirmarEmpaque} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black shadow-lg shadow-blue-900/50 transition-colors border border-blue-500 active:scale-95 text-sm uppercase tracking-wider">
+                 <button onClick={handleConfirmarEmpaque} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black shadow-lg shadow-blue-900/50 transition-colors border border-blue-500">
                    {t.anadir}
                  </button>
               </div>
@@ -367,10 +373,10 @@ const ListaConteo = ({
               <p className="text-slate-400 text-xs font-bold mb-6 truncate px-2">{modalEliminar.nombre}</p>
 
               <div className="flex gap-3">
-                 <button onClick={() => setModalEliminar({ isOpen: false, codigo: null, nombre: '' })} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-black transition-colors border border-slate-600 active:scale-95 text-sm uppercase tracking-wider">
+                 <button onClick={() => setModalEliminar({ isOpen: false, codigo: null, nombre: '' })} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-black transition-colors">
                    {t.cancelar}
                  </button>
-                 <button onClick={() => { onEliminar(modalEliminar.codigo); setModalEliminar({ isOpen: false, codigo: null, nombre: '' }); }} className="flex-1 bg-red-600 hover:bg-red-500 text-white py-4 rounded-xl font-black shadow-lg shadow-red-900/50 transition-colors border border-red-500 active:scale-95 text-sm uppercase tracking-wider">
+                 <button onClick={() => { onEliminar(modalEliminar.codigo); setModalEliminar({ isOpen: false, codigo: null, nombre: '' }); }} className="flex-1 bg-red-600 hover:bg-red-500 text-white py-4 rounded-xl font-black shadow-lg shadow-red-900/50 transition-colors border border-red-500">
                    {t.siQuitar}
                  </button>
               </div>
@@ -385,7 +391,7 @@ const ListaConteo = ({
         <div className="fixed inset-0 z-[300] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
            <div className="bg-slate-800 border border-slate-600 p-6 rounded-3xl max-w-sm w-full shadow-2xl animate-fade-in-up text-center">
               <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-500/40">
-                <i className="fas fa-plus text-3xl text-emerald-400"></i>
+                <i className="fas fa-hand-sparkles text-3xl text-emerald-400"></i>
               </div>
               <h3 className="text-white text-lg font-black mb-2">{t.promptSuma}</h3>
               <p className="text-slate-400 text-xs font-bold mb-6">Esta cantidad se SUMARÁ a las que ya tenías contadas.</p>
@@ -404,10 +410,10 @@ const ListaConteo = ({
               </div>
 
               <div className="flex gap-3">
-                 <button onClick={() => setModalSumaRapida({ isOpen: false, codigo: null, varId: null, cantidad: '' })} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-black transition-colors border border-slate-600 active:scale-95 text-sm uppercase tracking-wider">
+                 <button onClick={() => setModalSumaRapida({ isOpen: false, codigo: null, varId: null, cantidad: '' })} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-black transition-colors">
                    {t.cancelar}
                  </button>
-                 <button onClick={handleConfirmarSumaRapida} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-black shadow-lg shadow-emerald-900/50 transition-colors border border-emerald-500 active:scale-95 text-sm uppercase tracking-wider">
+                 <button onClick={handleConfirmarSumaRapida} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-black shadow-lg shadow-emerald-900/50 transition-colors border border-emerald-500">
                    {t.btnSumar}
                  </button>
               </div>
