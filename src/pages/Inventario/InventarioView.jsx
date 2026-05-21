@@ -6,7 +6,7 @@ import EscanerManual from './components/EscanerManual';
 import ListaConteo from './components/ListaConteo';
 import ModalCalculadora from './components/ModalCalculadora';
 import useDictadoVoz from './hooks/useDictadoVoz';
-import QRScannerInventario from './components/QRScannerInventario'; // ✨ ESCÁNER INTEGRADO
+import QRScannerInventario from './components/QRScannerInventario';
 
 const tInv = {
   es: {
@@ -65,10 +65,12 @@ const tInv = {
     sincExito: '¡Consolidado del día respaldado en la nube exitosamente!',
     sincOffline: '⚠️ Guardado localmente. Se sincronizará automáticamente al tener internet.',
     etiquetaConsolidado: '📊 Consolidado Hoy',
-    // ✨ NUEVOS TÍTULOS DE TABLAS SEPARADAS
     tituloEntradas: "🟢 ENTRADAS (Sobrantes)",
     tituloSalidas: "🔴 SALIDAS (Faltantes)",
-    tituloCorrectos: "⚪ SIN DIFERENCIA (Correctos)"
+    tituloCorrectos: "⚪ SIN DIFERENCIA (Correctos)",
+    // ✨ NUEVOS TEXTOS DE AUDITORÍA
+    auditarSesion: "📋 Auditar Sesión",
+    msgAuditoria: "¿Cargar los productos de esta sesión (con conteo en 0) para verificarlos en el almacén?"
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -126,10 +128,11 @@ const tInv = {
     sincExito: 'Cumul du jour synchronisé avec succès !',
     sincOffline: '⚠️ Sauvegardé localement. Il sera synchronisé dès la connexion internet.',
     etiquetaConsolidado: '📊 Cumul du Jour',
-    // ✨ NUEVOS TÍTULOS DE TABLAS SEPARADAS
     tituloEntradas: "🟢 ENTRÉES (Excédents)",
     tituloSalidas: "🔴 SORTIES (Manquants)",
-    tituloCorrectos: "⚪ SANS DIFFÉRENCE (Corrects)"
+    tituloCorrectos: "⚪ SANS DIFFÉRENCE (Corrects)",
+    auditarSesion: "📋 Auditer la Session",
+    msgAuditoria: "Charger les produits de cette session (avec comptage à 0) pour les vérifier dans l'entrepôt ?"
   }
 };
 
@@ -208,7 +211,7 @@ const InventarioView = () => {
       const sesionActualizada = sesionesNube.find(s => s.id === sesionSeleccionadaNube.id);
       if (sesionActualizada) setSesionSeleccionadaNube(sesionActualizada);
     }
-  }, [sesionesNube]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sesionesNube]); 
   
   const manualCant = useCallback((codigo, varId, valor) => {
     const pz = parseInt(valor, 10) || 0;
@@ -262,6 +265,37 @@ const InventarioView = () => {
         totalFisico: 0
       }, ...prev]);
     }
+  };
+
+  // ✨ FUNCIÓN PARA EXTRAER SESIÓN COMO PLANTILLA DE AUDITORÍA
+  const cargarParaAuditoria = () => {
+    if (!sesionSeleccionadaNube) return;
+    pedirConfirmacion(t.msgAuditoria, () => {
+      // Tomamos los items de la sesión de la nube y los reiniciamos a 0
+      const itemsParaAuditar = sesionSeleccionadaNube.items.map(item => ({
+        codigo: item.codigo,
+        nombre: item.nombre,
+        stockSistema: item.stockSistema, // Se queda con el stock que dejó el compañero
+        imagen: item.imagen || null,
+        variantes: [{ id: 'sueltas', pz: 1, contadas: 0, isFantasma: false }], // Limpiamos los empaques
+        totalFisico: 0
+      }));
+      
+      setListaConteo(itemsParaAuditar);
+      setVistaActual('conteo');
+      mostrarToast("Lista de auditoría cargada", "success");
+    });
+  };
+
+  // ✨ FUNCIÓN PARA EL BOTÓN DE AUTOCOMPLETADO (CHECK RÁPIDO)
+  const autoCompletarStock = (codigo) => {
+    setListaConteo(prev => prev.map(p => {
+      if(p.codigo !== codigo) return p;
+      const nuevasVariantes = p.variantes.map(v => 
+        v.id === 'sueltas' ? { ...v, contadas: Math.max(0, p.stockSistema) } : { ...v, contadas: 0 }
+      );
+      return { ...p, variantes: nuevasVariantes, totalFisico: Math.max(0, p.stockSistema) };
+    }));
   };
 
   const handleScanSuccess = (producto, cantidadPiezasPaquete, tipoEscaneo) => {
@@ -459,10 +493,8 @@ const InventarioView = () => {
     l.setAttribute("download", `Consolidado_Dia.csv`); document.body.appendChild(l); l.click();
   };
 
-  // ✨ LÓGICA DE SEPARACIÓN DE TABLAS PARA LA NUBE
   const getGruposNube = () => {
     if (!sesionSeleccionadaNube || !sesionSeleccionadaNube.items) return [];
-
     const entradas = [];
     const salidas = [];
     const correctos = [];
@@ -586,6 +618,7 @@ const InventarioView = () => {
               onAgregarEmpaque={(cod, pz) => { setListaConteo(prev => prev.map(p => p.codigo === cod ? { ...p, variantes: [...p.variantes, { id: `f_${Date.now()}`, pz: parseInt(pz), contadas: 0, isFantasma: true }].sort((a,b) => b.pz - a.pz) } : p)); }}
               onAbrirCalculadora={(codigo, varId) => { const p = listaConteo.find(x => x.codigo === codigo); setCalcActiva({ isOpen: true, codigo, varId, nombre: p?.nombre }); }}
               onIniciarDictado={(codigo, varId, btn, letra) => iniciarDictado(codigo, varId, letra)} onZoomImagen={(img) => setImagenAmpliada(img)} modoSeleccion={modoSeleccion} seleccionados={seleccionados} onToggleSeleccion={toggleSeleccion} 
+              onAutoCompletar={autoCompletarStock} // ✨ PASAMOS LA NUEVA FUNCIÓN
             />
           </div>
         ) : (
@@ -608,15 +641,21 @@ const InventarioView = () => {
 
             {sesionSeleccionadaNube ? (
               <div className="flex flex-col gap-4">
-                <div className="bg-slate-850 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 mb-2">
-                  <h3 className="font-black text-sm text-white flex items-center gap-2"><i className="fas fa-cloud-download-alt text-purple-400"></i> {t.tablaTitulo}</h3>
-                  <span className="text-[11px] text-slate-400"><i className="fas fa-pencil-alt mr-1"></i>{t.tablaSub}</span>
+                
+                {/* ✨ BOTÓN DE RECUPERAR PARA AUDITORÍA */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-850 p-4 rounded-2xl border border-slate-700 mb-2 gap-3">
+                  <div>
+                    <h3 className="font-black text-sm text-white flex items-center gap-2"><i className="fas fa-cloud-download-alt text-purple-400"></i> {t.tablaTitulo}</h3>
+                    <span className="text-[11px] text-slate-400"><i className="fas fa-pencil-alt mr-1"></i>{t.tablaSub}</span>
+                  </div>
+                  <button 
+                    onClick={cargarParaAuditoria} 
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 border border-blue-400"
+                  >
+                    <i className="fas fa-clipboard-check text-base"></i> {t.auditarSesion}
+                  </button>
                 </div>
 
-                {/* ======================================================== */}
-                {/* ✨ RENDERIZADO DE LAS 3 TABLAS (MOBILE Y DESKTOP) */}
-                {/* ======================================================== */}
-                
                 {gruposNube.map((grupo) => {
                   if (grupo.data.length === 0) return null;
                   const canEdit = esRegistroDeHoy();
@@ -624,7 +663,7 @@ const InventarioView = () => {
                   return (
                     <div key={grupo.id} className="mb-6">
                       
-                      {/* VISTA MOBILE (Tarjetas) */}
+                      {/* VISTA MOBILE */}
                       <div className="md:hidden">
                         <h4 className={`${grupo.textColor} font-black text-xs uppercase tracking-wider mb-3 ml-2 border-b border-slate-700 pb-2`}>
                           {grupo.titulo} <span className="bg-slate-800 px-2 py-0.5 rounded-full ml-1 text-white">{grupo.data.length}</span>
@@ -658,7 +697,7 @@ const InventarioView = () => {
                         </div>
                       </div>
 
-                      {/* VISTA DESKTOP (Tablas Separadas) */}
+                      {/* VISTA DESKTOP */}
                       <div className="hidden md:block bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
                         <div className={`bg-slate-900/60 p-3 border-b border-slate-700 flex justify-between items-center`}>
                           <h4 className={`${grupo.textColor} font-black text-xs uppercase tracking-wider`}>
