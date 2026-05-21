@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import Swal from 'sweetalert2'; // 🔥 IMPORTAMOS SWEETALERT
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../../firebase'; // Ajusta la ruta a tu firebase
+import { db } from '../../../../firebase'; // Ajusta la ruta a tu firebase
 import { useAdminContext } from '../../context/AdminContext';
 import { getCalculatedStock, isProductPending } from '../../utils/businessRules';
 import massQRPrintService from '../../utils/massQRPrintService';
