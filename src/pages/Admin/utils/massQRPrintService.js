@@ -158,7 +158,7 @@ export async function printAllPackagesQRs(
     let dataArray = [];
     const promises = filtered.map(async (p) => {
       const snap = await db
-        .collection('productos')
+        .collection('productos_master')
         .doc(p.id)
         .collection('paquetes')
         .get();
@@ -233,7 +233,7 @@ export async function printAllQRs(
 
     let baseUrl = '';
     if (printType === 'vitrina') {
-      baseUrl = vitrinaUrl || 'https://mi-tienda.com/?add=';
+      baseUrl = vitrinaUrl || 'https://productoseen.web.app/?add=';
       if (!baseUrl) {
         showToast('URL requerida', 'error');
         return;
