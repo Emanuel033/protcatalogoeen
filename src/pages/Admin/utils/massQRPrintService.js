@@ -1,24 +1,17 @@
 /**
  * Servicio de Impresión Masiva de QRs
- * Migrado de las funciones window.printAllQRs y window.printAllPackagesQRs
- * 
- * Proporcionado por: qrcode.react + jspdf para la generación de QRs
- * Exportado por: MasterTable, Topbar
+ * Migrado y actualizado a Firebase V9 Modular
  */
 
-import { db } from '../../../firebase'; // Ajusta la ruta según tu config
+import { db } from '../../../firebase'; 
+// 🔥 IMPORTACIÓN CLAVE PARA FIREBASE V9 MODULAR
+import { collection, getDocs } from 'firebase/firestore';
 
 /**
  * Construye el HTML para imprimir etiquetas con QRs
- * @param {Array} dataArray - Array de objetos con { id, title, sub }
- * @param {Number} quantityPerLabel - Cantidad de veces a repetir cada etiqueta
- * @param {Boolean} isPackage - Si es para paquetes o productos
- * @param {String} baseUrl - URL base para vitrina (opcional)
- * @param {String} labelFormat - Formato de etiqueta (ej: '3x10')
- * @returns {String} HTML para imprimir
  */
 function buildPrintHTML(dataArray, quantityPerLabel, isPackage, baseUrl, labelFormat) {
-  const labelsPerPage = 30; // Ajusta según tu formato
+  const labelsPerPage = 30;
   let html = `<!DOCTYPE html>
 <html>
 <head>
@@ -50,7 +43,6 @@ function buildPrintHTML(dataArray, quantityPerLabel, isPackage, baseUrl, labelFo
 </head>
 <body>`;
 
-  // Crear etiquetas con las repeticiones
   let labels = [];
   dataArray.forEach(item => {
     for (let i = 0; i < quantityPerLabel; i++) {
@@ -58,7 +50,6 @@ function buildPrintHTML(dataArray, quantityPerLabel, isPackage, baseUrl, labelFo
     }
   });
 
-  // Agrupar en páginas
   for (let i = 0; i < labels.length; i += labelsPerPage) {
     const chunk = labels.slice(i, i + labelsPerPage);
     html += '<div class="page">';
@@ -66,7 +57,7 @@ function buildPrintHTML(dataArray, quantityPerLabel, isPackage, baseUrl, labelFo
     chunk.forEach(lbl => {
       html += `
         <div class="label">
-            <div class="qr" id="qr-${lbl.id}"></div>
+            <div class="qr" id="qr-${lbl.id.replace(/[^a-zA-Z0-9]/g, '-')}"></div>
             <div>
                 <h4>${lbl.title}</h4>
                 <p>${lbl.sub}</p>
@@ -74,7 +65,6 @@ function buildPrintHTML(dataArray, quantityPerLabel, isPackage, baseUrl, labelFo
         </div>`;
     });
 
-    // Llenar espacios vacíos
     for (let j = chunk.length; j < labelsPerPage; j++) {
       html += '<div class="label"></div>';
     }
@@ -84,7 +74,9 @@ function buildPrintHTML(dataArray, quantityPerLabel, isPackage, baseUrl, labelFo
   html += `<script>
     const qrData = ${JSON.stringify(labels)};
     qrData.forEach(item => {
-      new QRCode(document.getElementById('qr-' + item.id), {
+      // Limpiamos el ID para evitar errores en el selector de JS
+      const safeId = item.id.replace(/[^a-zA-Z0-9]/g, '-');
+      new QRCode(document.getElementById('qr-' + safeId), {
         text: item.id,
         width: 60,
         height: 60,
@@ -95,17 +87,13 @@ function buildPrintHTML(dataArray, quantityPerLabel, isPackage, baseUrl, labelFo
     window.onload = function() { 
       setTimeout(() => { window.print(); }, 500); 
     }
-  <\/script></body></html>`;
+  </script></body></html>`;
 
   return html;
 }
 
 /**
- * Obtiene los productos filtrados según los criterios del contexto
- * @param {Object} filters - { searchTerm, filterType, showOnlyPending }
- * @param {Array} allItems - Array de todos los productos
- * @param {Function} isProductPending - Función para verificar si está pendiente
- * @returns {Array} Productos filtrados
+ * Obtiene los productos filtrados
  */
 function getFilteredProductsForPrint(filters, allItems, isProductPending) {
   const { searchTerm = '', filterType = 'ALL', showOnlyPending = false } = filters;
@@ -129,12 +117,7 @@ function getFilteredProductsForPrint(filters, allItems, isProductPending) {
 }
 
 /**
- * Imprime QRs de paquetes masivamente
- * @param {Array} allItems - Todos los productos
- * @param {Function} isProductPending - Función para verificar pendientes
- * @param {Object} filters - Filtros actuales
- * @param {Function} showToast - Función para mostrar notificaciones
- * @param {Function} customPrompt - Función para diálogos personalizados
+ * Imprime QRs de paquetes masivamente (CORREGIDO A FIREBASE V9)
  */
 export async function printAllPackagesQRs(
   allItems,
@@ -156,12 +139,11 @@ export async function printAllPackagesQRs(
     showToast('Calculando paquetes...', 'info');
 
     let dataArray = [];
+    
     const promises = filtered.map(async (p) => {
-      const snap = await db
-        .collection('productos_master')
-        .doc(p.id)
-        .collection('paquetes')
-        .get();
+      // 🔥 SOLUCIÓN: Consulta con sintaxis de Firebase V9 Modular
+      const paquetesRef = collection(db, 'productos_master', p.id, 'paquetes');
+      const snap = await getDocs(paquetesRef);
 
       snap.forEach(doc => {
         const pkg = doc.data();
@@ -192,19 +174,12 @@ export async function printAllPackagesQRs(
     printWindow.document.close();
   } catch (e) {
     console.error('Error en printAllPackagesQRs:', e);
-    showToast('Error al obtener los paquetes.', 'error');
+    showToast('Error al obtener los paquetes. Revisa la consola.', 'error');
   }
 }
 
 /**
  * Imprime QRs masivamente (inventario o vitrina)
- * @param {String} printType - 'inventario' o 'vitrina'
- * @param {Array} allItems - Todos los productos
- * @param {Function} isProductPending - Función para verificar pendientes
- * @param {Object} filters - Filtros actuales
- * @param {String} vitrinaUrl - URL base de vitrina (si printType === 'vitrina')
- * @param {Function} showToast - Función para mostrar notificaciones
- * @param {Function} customPrompt - Función para diálogos personalizados
  */
 export async function printAllQRs(
   printType,
@@ -247,7 +222,6 @@ export async function printAllQRs(
 
     if (!qty || qty <= 0) return;
 
-    // Construir array de datos para impresión
     const dataArray = filtered.map(p => {
       let qrContent = '';
       if (printType === 'inventario') {
