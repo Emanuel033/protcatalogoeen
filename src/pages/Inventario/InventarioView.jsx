@@ -68,9 +68,8 @@ const tInv = {
     tituloEntradas: "🟢 ENTRADAS (Sobrantes)",
     tituloSalidas: "🔴 SALIDAS (Faltantes)",
     tituloCorrectos: "⚪ SIN DIFERENCIA (Correctos)",
-    // ✨ NUEVOS TEXTOS DE AUDITORÍA
     auditarSesion: "📋 Auditar Sesión",
-    msgAuditoria: "¿Cargar los productos de esta sesión (con conteo en 0) para verificarlos en el almacén?"
+    msgAuditoria: "¿Cargar productos para auditoría? (Se actualizará el stock contra el sistema actual)"
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -132,7 +131,7 @@ const tInv = {
     tituloSalidas: "🔴 SORTIES (Manquants)",
     tituloCorrectos: "⚪ SANS DIFFÉRENCE (Corrects)",
     auditarSesion: "📋 Auditer la Session",
-    msgAuditoria: "Charger les produits de cette session (avec comptage à 0) pour les vérifier dans l'entrepôt ?"
+    msgAuditoria: "Charger les produits pour audit ? (Le stock actuel du système sera utilisé)"
   }
 };
 
@@ -267,27 +266,33 @@ const InventarioView = () => {
     }
   };
 
-  // ✨ FUNCIÓN PARA EXTRAER SESIÓN COMO PLANTILLA DE AUDITORÍA
+  // ✨ CORRECCIÓN: FUNCIÓN PARA EXTRAER SESIÓN Y COMPARAR CON STOCK ACTUAL
   const cargarParaAuditoria = () => {
     if (!sesionSeleccionadaNube) return;
     pedirConfirmacion(t.msgAuditoria, () => {
-      // Tomamos los items de la sesión de la nube y los reiniciamos a 0
-      const itemsParaAuditar = sesionSeleccionadaNube.items.map(item => ({
-        codigo: item.codigo,
-        nombre: item.nombre,
-        stockSistema: item.stockSistema, // Se queda con el stock que dejó el compañero
-        imagen: item.imagen || null,
-        variantes: [{ id: 'sueltas', pz: 1, contadas: 0, isFantasma: false }], // Limpiamos los empaques
-        totalFisico: 0
-      }));
+      
+      const itemsParaAuditar = sesionSeleccionadaNube.items.map(item => {
+        // BUSCAMOS EL PRODUCTO EN EL CATÁLOGO ACTUAL PARA OBTENER EL STOCK REAL DE HOY
+        const prodActual = catalogoBase.find(p => String(p.codigo).toLowerCase() === String(item.codigo).toLowerCase());
+        const stockActualizado = prodActual ? parseFloat(prodActual.stock || 0) : parseFloat(item.stockSistema || 0);
+
+        return {
+          codigo: item.codigo,
+          nombre: item.nombre,
+          stockSistema: stockActualizado, // ✨ Usamos el stock del sistema YA ACTUALIZADO
+          imagen: item.imagen || null,
+          variantes: [{ id: 'sueltas', pz: 1, contadas: 0, isFantasma: false }], // Limpiamos los empaques para contar de nuevo
+          totalFisico: 0
+        };
+      });
       
       setListaConteo(itemsParaAuditar);
       setVistaActual('conteo');
-      mostrarToast("Lista de auditoría cargada", "success");
+      mostrarToast("Lista de auditoría cargada con stock actual del sistema", "success");
     });
   };
 
-  // ✨ FUNCIÓN PARA EL BOTÓN DE AUTOCOMPLETADO (CHECK RÁPIDO)
+  // FUNCIÓN PARA EL BOTÓN DE AUTOCOMPLETADO (CHECK RÁPIDO)
   const autoCompletarStock = (codigo) => {
     setListaConteo(prev => prev.map(p => {
       if(p.codigo !== codigo) return p;
@@ -618,7 +623,7 @@ const InventarioView = () => {
               onAgregarEmpaque={(cod, pz) => { setListaConteo(prev => prev.map(p => p.codigo === cod ? { ...p, variantes: [...p.variantes, { id: `f_${Date.now()}`, pz: parseInt(pz), contadas: 0, isFantasma: true }].sort((a,b) => b.pz - a.pz) } : p)); }}
               onAbrirCalculadora={(codigo, varId) => { const p = listaConteo.find(x => x.codigo === codigo); setCalcActiva({ isOpen: true, codigo, varId, nombre: p?.nombre }); }}
               onIniciarDictado={(codigo, varId, btn, letra) => iniciarDictado(codigo, varId, letra)} onZoomImagen={(img) => setImagenAmpliada(img)} modoSeleccion={modoSeleccion} seleccionados={seleccionados} onToggleSeleccion={toggleSeleccion} 
-              onAutoCompletar={autoCompletarStock} // ✨ PASAMOS LA NUEVA FUNCIÓN
+              onAutoCompletar={autoCompletarStock} 
             />
           </div>
         ) : (
@@ -642,7 +647,7 @@ const InventarioView = () => {
             {sesionSeleccionadaNube ? (
               <div className="flex flex-col gap-4">
                 
-                {/* ✨ BOTÓN DE RECUPERAR PARA AUDITORÍA */}
+                {/* BOTÓN DE RECUPERAR PARA AUDITORÍA */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-850 p-4 rounded-2xl border border-slate-700 mb-2 gap-3">
                   <div>
                     <h3 className="font-black text-sm text-white flex items-center gap-2"><i className="fas fa-cloud-download-alt text-purple-400"></i> {t.tablaTitulo}</h3>
