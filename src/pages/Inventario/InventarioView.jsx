@@ -278,7 +278,9 @@ const InventarioView = () => {
           nombre: item.nombre,
           stockSistema: stockActualizado, 
           imagen: item.imagen || null,
-          variantes: [{ id: 'sueltas', pz: 1, contadas: 0, isFantasma: false }], 
+          // ✨ CORRECCIÓN AQUÍ: Tomamos TODAS las variantes (cajas, paquetes, sueltas) que tenía la sesión
+          // y simplemente reiniciamos su valor de "contadas" a 0.
+          variantes: item.variantes.map(v => ({ ...v, contadas: 0 })), 
           totalFisico: 0
         };
       });
