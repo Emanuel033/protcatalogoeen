@@ -266,22 +266,19 @@ const InventarioView = () => {
     }
   };
 
-  // ✨ CORRECCIÓN: FUNCIÓN PARA EXTRAER SESIÓN Y COMPARAR CON STOCK ACTUAL
   const cargarParaAuditoria = () => {
     if (!sesionSeleccionadaNube) return;
     pedirConfirmacion(t.msgAuditoria, () => {
-      
       const itemsParaAuditar = sesionSeleccionadaNube.items.map(item => {
-        // BUSCAMOS EL PRODUCTO EN EL CATÁLOGO ACTUAL PARA OBTENER EL STOCK REAL DE HOY
         const prodActual = catalogoBase.find(p => String(p.codigo).toLowerCase() === String(item.codigo).toLowerCase());
         const stockActualizado = prodActual ? parseFloat(prodActual.stock || 0) : parseFloat(item.stockSistema || 0);
 
         return {
           codigo: item.codigo,
           nombre: item.nombre,
-          stockSistema: stockActualizado, // ✨ Usamos el stock del sistema YA ACTUALIZADO
+          stockSistema: stockActualizado, 
           imagen: item.imagen || null,
-          variantes: [{ id: 'sueltas', pz: 1, contadas: 0, isFantasma: false }], // Limpiamos los empaques para contar de nuevo
+          variantes: [{ id: 'sueltas', pz: 1, contadas: 0, isFantasma: false }], 
           totalFisico: 0
         };
       });
@@ -292,7 +289,6 @@ const InventarioView = () => {
     });
   };
 
-  // FUNCIÓN PARA EL BOTÓN DE AUTOCOMPLETADO (CHECK RÁPIDO)
   const autoCompletarStock = (codigo) => {
     setListaConteo(prev => prev.map(p => {
       if(p.codigo !== codigo) return p;
@@ -540,79 +536,71 @@ const InventarioView = () => {
         </div>
       )}
 
-      {confirmar.visible && (
-        <div className="fixed inset-0 z-[500] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
-           <div className="bg-slate-800 border border-slate-600 p-6 rounded-3xl max-w-sm w-full shadow-2xl text-center animate-fade-in-up">
-              <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-amber-500/40">
-                <i className="fas fa-question text-3xl text-amber-400"></i>
-              </div>
-              <p className="text-white text-lg font-black mb-6 leading-snug">{confirmar.mensaje}</p>
-              <div className="flex gap-3">
-                 <button onClick={() => setConfirmar({visible: false})} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3.5 rounded-xl font-bold transition-all">{t.cancelar}</button>
-                 <button onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/50 transition-all">{confirmar.textoAceptar}</button>
-              </div>
-           </div>
-        </div>
-      )}
-
-      <div className="bg-slate-950 border-b border-slate-850 px-4 py-2.5 flex justify-between items-center shrink-0 z-50">
+      {/* TABS SUPERIORES - Más delgadas en landscape */}
+      <div className="bg-slate-950 border-b border-slate-850 px-4 py-2.5 landscape:py-1 flex justify-between items-center shrink-0 z-50">
         <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-750 shadow-inner">
-          <button onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaConteo}</button>
-          <button onClick={() => { setVistaActual('nube'); setModoSeleccion(false); }} className={`px-3 py-1 rounded-lg font-black text-xs transition-all flex items-center gap-1.5 ${vistaActual === 'nube' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaNube} {sesionesNube.length > 0 && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}</button>
+          <button onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1 landscape:py-0.5 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaConteo}</button>
+          <button onClick={() => { setVistaActual('nube'); setModoSeleccion(false); }} className={`px-3 py-1 landscape:py-0.5 rounded-lg font-black text-xs transition-all flex items-center gap-1.5 ${vistaActual === 'nube' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaNube} {sesionesNube.length > 0 && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}</button>
         </div>
-        <button onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 px-3 py-1 rounded-lg font-bold text-xs text-white transition-colors">{t.idioma}</button>
+        <button onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 px-3 py-1 landscape:py-0.5 rounded-lg font-bold text-xs text-white transition-colors">{t.idioma}</button>
       </div>
 
       {vistaActual === 'conteo' && (
-        <header className={`border-b shrink-0 shadow-lg z-40 transition-colors ${modoSeleccion ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'} p-4 flex flex-col gap-4`}>
-          <div className="flex justify-between items-center">
+        // ✨ HEADER PRINCIPAL - Adaptable a Landscape
+        <header className={`border-b shrink-0 shadow-lg z-40 transition-colors ${modoSeleccion ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'} p-4 landscape:p-2 landscape:px-4 flex flex-col landscape:flex-row landscape:items-center landscape:justify-between gap-4 landscape:gap-4`}>
+          <div className="flex justify-between items-center landscape:w-1/3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg border shrink-0 ${modoSeleccion ? 'bg-blue-500 border-blue-400 text-white' : 'bg-blue-600 border-blue-500/50 shadow-blue-900/50'}`}>
-                <i className={`fas ${modoSeleccion ? 'fa-check-double' : estaEscuchando ? 'fa-microphone animate-pulse text-red-200' : 'fa-clipboard-list text-white'}`}></i>
+              <div className={`w-11 h-11 landscape:w-9 landscape:h-9 rounded-xl landscape:rounded-lg flex items-center justify-center shadow-lg border shrink-0 ${modoSeleccion ? 'bg-blue-500 border-blue-400 text-white' : 'bg-blue-600 border-blue-500/50 shadow-blue-900/50'}`}>
+                <i className={`fas ${modoSeleccion ? 'fa-check-double' : estaEscuchando ? 'fa-microphone animate-pulse text-red-200' : 'fa-clipboard-list text-white'} landscape:text-sm`}></i>
               </div>
               <div className="min-w-0">
-                <h1 className="text-xl font-black tracking-tight text-white truncate">{modoSeleccion ? `${seleccionados.length} Seleccionados` : t.titulo}</h1>
-                <p className="text-[11px] text-slate-300 font-bold uppercase tracking-wider truncate">{modoSeleccion ? 'Modo de edición parcial' : (catStatus.error ? t.errorCarga : catStatus.loading ? t.cargando : `${catStatus.count} ${t.listas}`)}</p>
+                <h1 className="text-xl landscape:text-lg font-black tracking-tight text-white truncate">{modoSeleccion ? `${seleccionados.length} Seleccionados` : t.titulo}</h1>
+                <p className="text-[11px] landscape:text-[9px] text-slate-300 font-bold uppercase tracking-wider truncate">{modoSeleccion ? 'Modo de edición parcial' : (catStatus.error ? t.errorCarga : catStatus.loading ? t.cargando : `${catStatus.count} ${t.listas}`)}</p>
               </div>
             </div>
             {listaConteo.length > 0 && (
-              <button onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}><i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}</button>
+              <button onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`landscape:hidden px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}><i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}</button>
             )}
           </div>
+          
           {modoSeleccion ? (
-            <div className="flex gap-3">
-               <button onClick={toggleTodos} className="flex-1 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white p-3 rounded-2xl transition-all shadow-sm font-bold text-sm flex justify-center items-center gap-2 active:scale-95"><i className={`far ${seleccionados.length === listaConteo.length ? 'fa-square' : 'fa-check-square'}`}></i> {seleccionados.length === listaConteo.length ? t.selNada : t.selTodo}</button>
-               <button onClick={handleSincronizacionTotal} className="flex-[2] bg-emerald-600 border border-emerald-500 hover:bg-emerald-500 text-white p-3 rounded-2xl transition-all shadow-lg font-black text-sm uppercase tracking-wider flex justify-center items-center gap-2 active:scale-95"><i className="fas fa-cloud-upload-alt"></i> {t.sincronizarSel?.replace('{n}', seleccionados.length)}</button>
+            <div className="flex gap-3 landscape:w-2/3 landscape:justify-end">
+               <button onClick={toggleTodos} className="flex-1 landscape:flex-none bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white p-3 landscape:py-1.5 landscape:px-4 rounded-2xl landscape:rounded-lg transition-all shadow-sm font-bold text-sm landscape:text-xs flex justify-center items-center gap-2 active:scale-95"><i className={`far ${seleccionados.length === listaConteo.length ? 'fa-square' : 'fa-check-square'}`}></i> {seleccionados.length === listaConteo.length ? t.selNada : t.selTodo}</button>
+               <button onClick={handleSincronizacionTotal} className="flex-[2] landscape:flex-none bg-emerald-600 border border-emerald-500 hover:bg-emerald-500 text-white p-3 landscape:py-1.5 landscape:px-6 rounded-2xl landscape:rounded-lg transition-all shadow-lg font-black text-sm landscape:text-xs uppercase tracking-wider flex justify-center items-center gap-2 active:scale-95"><i className="fas fa-cloud-upload-alt"></i> {t.sincronizarSel?.replace('{n}', seleccionados.length)}</button>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col landscape:flex-row gap-3 landscape:gap-2 landscape:w-2/3 landscape:justify-end">
               {listaConteo.length > 0 && (
-                <button onClick={handleSincronizacionTotal} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-950/50 border border-emerald-400 flex items-center justify-center gap-2 active:scale-95 transition-all"><i className="fas fa-cloud-upload-alt text-lg"></i> {t.botonSincronizar}</button>
+                <button onClick={handleSincronizacionTotal} className="w-full landscape:w-auto bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 landscape:py-1.5 landscape:px-6 rounded-2xl landscape:rounded-lg font-black text-sm landscape:text-xs uppercase tracking-wider shadow-lg shadow-emerald-950/50 border border-emerald-400 flex items-center justify-center gap-2 active:scale-95 transition-all"><i className="fas fa-cloud-upload-alt text-lg landscape:text-sm"></i> {t.botonSincronizar}</button>
               )}
-              <div className="grid grid-cols-4 gap-3">
-                <button onClick={handleFinalizarConteo} className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"><i className="fas fa-archive text-xl"></i><span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span></button>
-                <button onClick={descargarCSV} className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"><i className="fas fa-file-excel text-xl"></i><span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span></button>
-                <button onClick={generarCSVDia} className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"><i className="fas fa-file-csv text-xl"></i><span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span></button>
-                <button onClick={() => setMostrarHistorial(true)} className="flex flex-col items-center justify-center gap-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 text-purple-400 p-3 rounded-2xl transition-all shadow-sm active:scale-95"><i className="fas fa-history text-xl"></i><span className="text-[10px] font-black uppercase text-center leading-tight tracking-tighter text-purple-200">{t.historial}</span></button>
+              <div className="grid grid-cols-4 landscape:flex landscape:flex-row gap-3 landscape:gap-2">
+                {listaConteo.length > 0 && (
+                  <button onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`hidden landscape:flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm`} title="Selección"><i className="fas fa-check-square text-xl landscape:text-base"></i></button>
+                )}
+                <button onClick={handleFinalizarConteo} className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-archive text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span></button>
+                <button onClick={descargarCSV} className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-file-excel text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span></button>
+                <button onClick={generarCSVDia} className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-file-csv text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span></button>
+                <button onClick={() => setMostrarHistorial(true)} className="flex flex-col items-center justify-center gap-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 text-purple-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-history text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-purple-200">{t.historial}</span></button>
               </div>
             </div>
           )}
         </header>
       )}
 
-      <main className="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full custom-scroll relative">
+      <main className="flex-1 overflow-y-auto p-4 landscape:p-2 max-w-5xl mx-auto w-full custom-scroll relative">
         {vistaActual === 'conteo' ? (
-          <div className="flex flex-col gap-5 pb-12">
+          <div className="flex flex-col gap-5 landscape:gap-3 pb-12 landscape:pb-6">
             
-            <div className="bg-slate-800 p-4 rounded-3xl border border-slate-600 shadow-xl flex gap-3">
+            {/* ✨ CONTENEDOR BUSCADOR/ESCÁNER - Adaptable a Landscape */}
+            <div className="bg-slate-800 p-4 landscape:p-2 landscape:px-3 rounded-3xl landscape:rounded-xl border border-slate-600 shadow-xl flex gap-3 landscape:gap-2 items-center">
                <div className="flex-1 min-w-0">
                   <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} idioma={idioma} />
                </div>
                <button 
                   onClick={() => setMostrarScanner(true)}
-                  className="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400 text-white rounded-2xl shadow-lg flex items-center justify-center transition-all shrink-0 active:scale-95"
+                  className="w-12 h-12 landscape:w-10 landscape:h-10 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400 text-white rounded-2xl landscape:rounded-lg shadow-lg flex items-center justify-center transition-all shrink-0 active:scale-95"
                >
-                  <i className="fas fa-qrcode text-xl"></i>
+                  <i className="fas fa-qrcode text-xl landscape:text-base"></i>
                </button>
             </div>
 
@@ -627,6 +615,7 @@ const InventarioView = () => {
             />
           </div>
         ) : (
+          /* CONTENIDO NUBE MANTIENE SU ESTRUCTURA NORMAL (SE VE BIEN EN HORIZONTAL) */
           <div className="flex flex-col gap-5 animate-fade-in pb-10">
             <div className="flex gap-3 overflow-x-auto pb-2 custom-scroll">
               {sesionesNube.length === 0 ? ( <p className="text-slate-500 text-sm italic py-4">{t.nubeVacia}</p> ) : (
