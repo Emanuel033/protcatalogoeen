@@ -344,7 +344,7 @@
     "codigo": "BPLA-500/CP",
     "precio": 2.72,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA 500 ML LISA S/TAPA",
-    "stock": 2118,
+    "stock": 2098,
     "tipo": 1,
     "receta": null
   },
@@ -706,7 +706,7 @@
     "codigo": "BD-28/410/CP",
     "precio": 8.26,
     "nombre": "BOMBA DOSIFICADORA 28/410 SILLA DE MONTAR",
-    "stock": 3115,
+    "stock": 3105,
     "tipo": 1,
     "receta": null
   },
@@ -1744,7 +1744,7 @@
     "codigo": "TPBL-19-M/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO BLANCA P/CUBETA DE 15 Y 19 L LISA  MUN",
-    "stock": 7015,
+    "stock": 7014,
     "tipo": 1,
     "receta": null
   },
@@ -2249,7 +2249,7 @@
     "codigo": "BPLAN-1-L/CP",
     "precio": 4.36,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA DE 1 LT. LISA S/TAPA R-28",
-    "stock": 16934,
+    "stock": 16914,
     "tipo": 1,
     "receta": null
   },
@@ -2681,7 +2681,7 @@
     "codigo": "TP-CIL-250/CP",
     "precio": 3.71,
     "nombre": "TARRO PET CILINDRICO DE 250 ML R-63 S/TAPA",
-    "stock": 10886,
+    "stock": 10866,
     "tipo": 1,
     "receta": null
   },
@@ -3226,7 +3226,7 @@
     "codigo": "TP-CIL-500/CP",
     "precio": 4.21,
     "nombre": "TARRO PET CILINDRICO DE 1/2 L R-63 S/TAPA",
-    "stock": 32664,
+    "stock": 32644,
     "tipo": 1,
     "receta": null
   },
@@ -4161,14 +4161,6 @@
     "receta": null
   },
   {
-    "codigo": "TPA-2001/CP",
-    "precio": 1078.75,
-    "nombre": "1TAMBO DE PLASTICO DE 200 LTS ABIERTO C/ARO Y CINCHO",
-    "stock": 43,
-    "tipo": 1,
-    "receta": null
-  },
-  {
     "codigo": "BPS-3L/CP",
     "precio": 9.75,
     "nombre": "BOTELLA SUAVITEL 3 L R-63 S/TAPA",
@@ -4492,6 +4484,14 @@
     "receta": null
   },
   {
+    "codigo": "TPA-200/CP",
+    "precio": 1078.75,
+    "nombre": "TAMBO DE PLASTICO DE 200 LTS ABIERTO C/ARO Y CINCHO",
+    "stock": 43,
+    "tipo": 1,
+    "receta": null
+  },
+  {
     "codigo": "GPA-2L-CT",
     "precio": 8.4,
     "nombre": "GARRAFON DE POLIETILENO NATURAL P/AGUA DE 2 L C/TAPA R-38",
@@ -4507,14 +4507,6 @@
         "cantidad": 1
       }
     ]
-  },
-  {
-    "codigo": "TPA-200/CP",
-    "precio": 1078.75,
-    "nombre": "TAMBO DE PLASTICO DE 200 LTS ABIERTO C/ARO Y CINCHO",
-    "stock": 43,
-    "tipo": 1,
-    "receta": null
   },
   {
     "codigo": "BP83-SU-BCA-TRANS-250/CP",
@@ -4947,7 +4939,7 @@
     "codigo": "T-R63B/CP",
     "precio": 1.82,
     "nombre": "TAPA BLANCA R-63 SIN LAINER",
-    "stock": 21422,
+    "stock": 21382,
     "tipo": 1,
     "receta": null
   },
@@ -5114,7 +5106,7 @@
     "codigo": "BP-20-FND-30/CP",
     "precio": 63.95,
     "nombre": "BOMBA PARA PORRON DE 20 LTS FND 30",
-    "stock": 1378,
+    "stock": 1377,
     "tipo": 1,
     "receta": null
   },
@@ -5130,7 +5122,7 @@
     "codigo": "GPI-250/CP",
     "precio": 4.95,
     "nombre": "GARRAFON DE PLASTICO INDUSTRIAL DE 250 ML CON TAPA",
-    "stock": 3642,
+    "stock": 3542,
     "tipo": 1,
     "receta": null
   },
@@ -5488,7 +5480,7 @@
     "codigo": "BPB-250/CP",
     "precio": 3.91,
     "nombre": "BOTELLA PET BOSTON 250 ML R-28 S/TAPA",
-    "stock": 3406,
+    "stock": 3396,
     "tipo": 1,
     "receta": null
   },
@@ -6835,7 +6827,7 @@
     "codigo": "TPI-R28-COL/CP",
     "precio": 0.6,
     "nombre": "TAPA DE PLASTICO INVIOLABLE R-28 COLORES",
-    "stock": 53475,
+    "stock": 53425,
     "tipo": 1,
     "receta": null
   },
@@ -7023,7 +7015,7 @@
     "codigo": "T-R28-B-L/CP",
     "precio": 0.66,
     "nombre": "TAPA R-28 CON LAINER",
-    "stock": 148834,
+    "stock": 148794,
     "tipo": 1,
     "receta": null
   },
@@ -7260,7 +7252,7 @@
     "codigo": "CPB-19-M/CP",
     "precio": 74.38,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 19 L MUN S/TAPA",
-    "stock": 23587.64,
+    "stock": 23586.64,
     "tipo": 1,
     "receta": null
   },
@@ -7948,7 +7940,7 @@
     "codigo": "BPC-500-ST/CP",
     "precio": 2.96,
     "nombre": "BOTELLA PET CRISTAL CUADRADA DE 500 ML S/TAPA",
-    "stock": 5318,
+    "stock": 5268,
     "tipo": 1,
     "receta": null
   },
