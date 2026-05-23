@@ -852,7 +852,7 @@
     "codigo": "SGAP-3/4/CP",
     "precio": 5.51,
     "nombre": "SELLO DE GARANTIA ALL PLASTIC DE 3/4\" BLANCO  ( 7000000369 )",
-    "stock": 2397,
+    "stock": 2297,
     "tipo": 1,
     "receta": null
   },
@@ -1211,7 +1211,7 @@
     "codigo": "TF-STDB/CP",
     "precio": 7.8,
     "nombre": "TAPON FLEX SPOUT FS-II BLANCO    ( 1202010419 )",
-    "stock": 31849,
+    "stock": 31846,
     "tipo": 1,
     "receta": null
   },
@@ -1534,7 +1534,7 @@
     "codigo": "SGAP-2/CP",
     "precio": 13.73,
     "nombre": "SELLO DE GARANTIA ALL PLASTIC 2 \" BLANCO ( 7000000370 )",
-    "stock": 2127,
+    "stock": 2027,
     "tipo": 1,
     "receta": null
   },
@@ -2060,7 +2060,7 @@
     "codigo": "BPA-500-ST/CP",
     "precio": 2.65,
     "nombre": "BOTELLA PET P/AGUA DE 500 ML S/TAPA",
-    "stock": 8249,
+    "stock": 8149,
     "tipo": 1,
     "receta": null
   },
@@ -2076,7 +2076,7 @@
     "codigo": "EPL-1/CP",
     "precio": 3.46,
     "nombre": "ENVASE PLASTICO LECHERO DE 1 L S/TAPA",
-    "stock": 242414.995,
+    "stock": 240896.995,
     "tipo": 1,
     "receta": null
   },
@@ -2241,7 +2241,7 @@
     "codigo": "GIR-NAT/CP",
     "precio": 12.02,
     "nombre": "GALON INDUSTRIAL REDONDO NATURAL S/TAPA R-38",
-    "stock": 15950,
+    "stock": 15945,
     "tipo": 1,
     "receta": null
   },
@@ -2434,7 +2434,7 @@
     "codigo": "BPGE-930/CP",
     "precio": 2.6,
     "nombre": "BOTELLA PET GUARDA ETIQUETA 930 ML S/TAPA R-28",
-    "stock": 8777,
+    "stock": 8757,
     "tipo": 1,
     "receta": null
   },
@@ -2576,7 +2576,7 @@
     "codigo": "PIN-20-S/CP",
     "precio": 68.48,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 20 L C/TAPON SAMPSON",
-    "stock": 5,
+    "stock": 92,
     "tipo": 1,
     "receta": null
   },
@@ -2987,7 +2987,7 @@
     "codigo": "GP-5-NAT/CP",
     "precio": 18,
     "nombre": "GARRAFA MALETIN NATURAL DE 5 L R-38 GDL S/TAPA",
-    "stock": 806,
+    "stock": 791,
     "tipo": 1,
     "receta": null
   },
@@ -3161,7 +3161,7 @@
     "codigo": "BPH-180/CP",
     "precio": 2.55,
     "nombre": "BOTELLA PET HABANERA DE 180 ML R-24 S/TAPA",
-    "stock": 13488,
+    "stock": 13388,
     "tipo": 1,
     "receta": null
   },
@@ -3283,7 +3283,7 @@
     "codigo": "TP-R38-CC/CP",
     "precio": 1.47,
     "nombre": "TAPA R-38 CON CINTILLO",
-    "stock": 2383,
+    "stock": 2368,
     "tipo": 1,
     "receta": null
   },
@@ -3299,7 +3299,7 @@
     "codigo": "TPP-5/CP",
     "precio": 3.3,
     "nombre": "TARRITO DE POLIPROPILENO NO. 5 CON TAPA (20 mL)",
-    "stock": 12098,
+    "stock": 11698,
     "tipo": 1,
     "receta": null
   },
@@ -4161,6 +4161,14 @@
     "receta": null
   },
   {
+    "codigo": "TPA-2001/CP",
+    "precio": 1078.75,
+    "nombre": "1TAMBO DE PLASTICO DE 200 LTS ABIERTO C/ARO Y CINCHO",
+    "stock": 43,
+    "tipo": 1,
+    "receta": null
+  },
+  {
     "codigo": "BPS-3L/CP",
     "precio": 9.75,
     "nombre": "BOTELLA SUAVITEL 3 L R-63 S/TAPA",
@@ -4270,7 +4278,7 @@
     "codigo": "CPA-19-M/CP",
     "precio": 76.25,
     "nombre": "CUBETA DE PLASTICO DE 19 L AZUL LTH MUN C/LIT S/TAPA",
-    "stock": 1427,
+    "stock": 1424,
     "tipo": 1,
     "receta": null
   },
@@ -4286,7 +4294,7 @@
     "codigo": "TFT-24/410-BCA/CP",
     "precio": 2.39,
     "nombre": "TAPA FLIP TOP R-24/410 BLANCA",
-    "stock": 33524.61,
+    "stock": 33444.61,
     "tipo": 1,
     "receta": null
   },
@@ -4357,7 +4365,7 @@
     "codigo": "LS-24/CP",
     "precio": 0.19,
     "nombre": "LAINER SENSITIVO IMPORTADO R-24",
-    "stock": 34926,
+    "stock": 34846,
     "tipo": 1,
     "receta": null
   },
@@ -4484,14 +4492,6 @@
     "receta": null
   },
   {
-    "codigo": "TPA-200/CP",
-    "precio": 1078.75,
-    "nombre": "TAMBO DE PLASTICO DE 200 LTS ABIERTO C/ARO Y CINCHO",
-    "stock": 43,
-    "tipo": 1,
-    "receta": null
-  },
-  {
     "codigo": "GPA-2L-CT",
     "precio": 8.4,
     "nombre": "GARRAFON DE POLIETILENO NATURAL P/AGUA DE 2 L C/TAPA R-38",
@@ -4507,6 +4507,14 @@
         "cantidad": 1
       }
     ]
+  },
+  {
+    "codigo": "TPA-200/CP",
+    "precio": 1078.75,
+    "nombre": "TAMBO DE PLASTICO DE 200 LTS ABIERTO C/ARO Y CINCHO",
+    "stock": 43,
+    "tipo": 1,
+    "receta": null
   },
   {
     "codigo": "BP83-SU-BCA-TRANS-250/CP",
@@ -4755,7 +4763,7 @@
     "codigo": "TFT-R33/CP",
     "precio": 1.8,
     "nombre": "TAPA FLIP TOP R-33",
-    "stock": 48433,
+    "stock": 48413,
     "tipo": 1,
     "receta": null
   },
@@ -4939,7 +4947,7 @@
     "codigo": "T-R63B/CP",
     "precio": 1.82,
     "nombre": "TAPA BLANCA R-63 SIN LAINER",
-    "stock": 21652,
+    "stock": 21622,
     "tipo": 1,
     "receta": null
   },
@@ -5034,7 +5042,7 @@
     "codigo": "TP-EL/CP",
     "precio": 0.53,
     "nombre": "TAPA PORTOLA PARA ENVASE LECHERO",
-    "stock": 92322,
+    "stock": 90804,
     "tipo": 1,
     "receta": null
   },
@@ -5553,7 +5561,7 @@
     "codigo": "BPSQ-250/CP",
     "precio": 5.79,
     "nombre": "BOTELLA PET SQUEEZABLE DE 250 ML S/TAPA",
-    "stock": 14244,
+    "stock": 14224,
     "tipo": 1,
     "receta": null
   },
@@ -5740,7 +5748,7 @@
     "codigo": "TPA-19-M/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO AZUL LTH P/CUBETA DE 15 Y 19 L C/ORIFI MUN",
-    "stock": 3597,
+    "stock": 3594,
     "tipo": 1,
     "receta": null
   },
@@ -6034,7 +6042,7 @@
     "codigo": "GPC-GAL/CP",
     "precio": 13.61,
     "nombre": "GARRAFA PET CUADRADA DE GALON C/TAPA Y ASA",
-    "stock": 632,
+    "stock": 612,
     "tipo": 1,
     "receta": null
   },
@@ -6431,7 +6439,7 @@
     "codigo": "TP-CIL-1000/CP",
     "precio": 6.63,
     "nombre": "TARRO PET CILINDRICO DE 1 L CRISTAL R-63 S/TAPA",
-    "stock": 8634,
+    "stock": 8604,
     "tipo": 1,
     "receta": null
   },
@@ -6519,7 +6527,7 @@
     "codigo": "TP-R38-SC/CP",
     "precio": 0.9,
     "nombre": "TAPA R-38 SIN CINTILLO",
-    "stock": 241009,
+    "stock": 241004,
     "tipo": 1,
     "receta": null
   },
@@ -6682,7 +6690,7 @@
     "codigo": "TP-R28/CP",
     "precio": 0.69,
     "nombre": "TAPA R-28 BLANCA INVIOLABLE VEDAT",
-    "stock": 73276,
+    "stock": 73156,
     "tipo": 1,
     "receta": null
   },
@@ -7883,7 +7891,7 @@
     "codigo": "PING-20-S/CP",
     "precio": 74.43,
     "nombre": "PORRON INDUSTRIAL NEGRO DE 20 L C/TAPON SAMPSON",
-    "stock": 491,
+    "stock": 479,
     "tipo": 1,
     "receta": null
   },
@@ -8112,7 +8120,7 @@
     "codigo": "TPP-20-LL/CP",
     "precio": 70.91,
     "nombre": "TAPON PARA PORRON DE 20 L C/LLAVE",
-    "stock": 157,
+    "stock": 156,
     "tipo": 1,
     "receta": null
   },
