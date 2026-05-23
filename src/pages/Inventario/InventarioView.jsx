@@ -69,7 +69,12 @@ const tInv = {
     tituloSalidas: "🔴 SALIDAS (Faltantes)",
     tituloCorrectos: "⚪ SIN DIFERENCIA (Correctos)",
     auditarSesion: "📋 Auditar Sesión",
-    msgAuditoria: "¿Cargar productos para auditoría? (Se actualizará el stock contra el sistema actual)"
+    msgAuditoria: "¿Cargar productos para auditoría? (Se actualizará el stock contra el sistema actual)",
+    // ✨ NUEVOS TEXTOS PARA LIMPIAR
+    limpiarLista: 'Vaciar lista',
+    confirmaLimpiar: '¿Seguro que deseas vaciar toda la lista? Se perderá el progreso no archivado.',
+    siLimpiar: 'Sí, vaciar',
+    listaLimpiada: 'Lista vaciada correctamente.'
   },
   fr: {
     titulo: 'Inventaire EEN',
@@ -131,7 +136,11 @@ const tInv = {
     tituloSalidas: "🔴 SORTIES (Manquants)",
     tituloCorrectos: "⚪ SANS DIFFÉRENCE (Corrects)",
     auditarSesion: "📋 Auditer la Session",
-    msgAuditoria: "Charger les produits pour audit ? (Le stock actuel du système sera utilisé)"
+    msgAuditoria: "Charger les produits pour audit ? (Le stock actuel du système sera utilisé)",
+    limpiarLista: 'Vider la liste',
+    confirmaLimpiar: 'Êtes-vous sûr de vouloir vider toute la liste ? Le progrès non sauvegardé sera perdu.',
+    siLimpiar: 'Oui, vider',
+    listaLimpiada: 'Liste vidée avec succès.'
   }
 };
 
@@ -155,9 +164,10 @@ const InventarioView = () => {
     setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3500);
   };
 
-  const [confirmar, setConfirmar] = useState({ visible: false, mensaje: '', onConfirm: null, textoAceptar: t.aceptar });
-  const pedirConfirmacion = (mensaje, onConfirm, textoPersonalizado = t.aceptar) => {
-    setConfirmar({ visible: true, mensaje, onConfirm, textoAceptar: textoPersonalizado });
+  // ✨ MODIFICACIÓN: Agregado "esPeligro" para hacer el botón rojo cuando vaciamos.
+  const [confirmar, setConfirmar] = useState({ visible: false, mensaje: '', onConfirm: null, textoAceptar: t.aceptar, esPeligro: false });
+  const pedirConfirmacion = (mensaje, onConfirm, textoPersonalizado = t.aceptar, esPeligro = false) => {
+    setConfirmar({ visible: true, mensaje, onConfirm, textoAceptar: textoPersonalizado, esPeligro });
   };
    
   useEffect(() => { document.title = "Inventario | La Económica del Norte"; }, []);
@@ -297,6 +307,23 @@ const InventarioView = () => {
       );
       return { ...p, variantes: nuevasVariantes, totalFisico: Math.max(0, p.stockSistema) };
     }));
+  };
+
+  // ✨ NUEVA FUNCIÓN: Vaciar toda la lista
+  const handleLimpiarLista = () => {
+    if (listaConteo.length === 0) return;
+    pedirConfirmacion(
+      t.confirmaLimpiar, 
+      () => {
+        setListaConteo([]);
+        localStorage.removeItem('een_inventario_activo');
+        setModoSeleccion(false);
+        setSeleccionados([]);
+        mostrarToast(t.listaLimpiada, 'success');
+      }, 
+      t.siLimpiar, 
+      true // esPeligro = true para que el botón sea rojo
+    );
   };
 
   const handleScanSuccess = (producto, cantidadPiezasPaquete, tipoEscaneo) => {
@@ -536,23 +563,25 @@ const InventarioView = () => {
         </div>
       )}
 
-      {/* ✨ Modal Confirmación asegurado con un z-index altísimo */}
+      {/* ✨ Modal Confirmación asegurado y con color rojo si esPeligro es true */}
       {confirmar.visible && (
         <div className="fixed inset-0 z-[5000] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
            <div className="bg-slate-800 border border-slate-600 p-6 rounded-3xl max-w-sm w-full shadow-2xl text-center animate-fade-in-up">
-              <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-amber-500/40">
-                <i className="fas fa-question text-3xl text-amber-400"></i>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border-2 ${confirmar.esPeligro ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-amber-500/20 border-amber-500/40 text-amber-400'}`}>
+                <i className={`fas ${confirmar.esPeligro ? 'fa-trash-alt' : 'fa-question'} text-3xl`}></i>
               </div>
               <p className="text-white text-lg font-black mb-6 leading-snug">{confirmar.mensaje}</p>
               <div className="flex gap-3">
                  <button type="button" onClick={() => setConfirmar({visible: false})} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3.5 rounded-xl font-bold transition-all">{t.cancelar}</button>
-                 <button type="button" onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/50 transition-all">{confirmar.textoAceptar}</button>
+                 <button type="button" onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className={`flex-1 text-white py-3.5 rounded-xl font-bold shadow-lg transition-all ${confirmar.esPeligro ? 'bg-red-600 hover:bg-red-500 shadow-red-900/50' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/50'}`}>
+                   {confirmar.textoAceptar}
+                 </button>
               </div>
            </div>
         </div>
       )}
 
-      {/* ✨ Forzamos "relative z-50" en ambas barras superiores para evitar que el scroll o "main" los tape */}
+      {/* Forzamos "relative z-50" en ambas barras superiores */}
       <div className="bg-slate-950 border-b border-slate-850 px-4 py-2.5 landscape:py-1 flex justify-between items-center shrink-0 relative z-50">
         <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-750 shadow-inner">
           <button type="button" onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1 landscape:py-0.5 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaConteo}</button>
@@ -573,8 +602,26 @@ const InventarioView = () => {
                 <p className="text-[11px] landscape:text-[9px] text-slate-300 font-bold uppercase tracking-wider truncate">{modoSeleccion ? 'Modo de edición parcial' : (catStatus.error ? t.errorCarga : catStatus.loading ? t.cargando : `${catStatus.count} ${t.listas}`)}</p>
               </div>
             </div>
+            
+            {/* ✨ BOTONES SELECCIONAR Y LIMPIAR (VISTA VERTICAL) */}
             {listaConteo.length > 0 && (
-              <button type="button" onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`landscape:hidden px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}><i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}</button>
+              <div className="landscape:hidden flex items-center gap-2 shrink-0">
+                <button 
+                  type="button" 
+                  onClick={handleLimpiarLista} 
+                  className="px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border bg-slate-800/80 text-red-400 border-red-500/30 hover:bg-red-500/20 active:scale-95" 
+                  title={t.limpiarLista}
+                >
+                  <i className="fas fa-trash-alt"></i>
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} 
+                  className={`px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}
+                >
+                  <i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}
+                </button>
+              </div>
             )}
           </div>
           
@@ -588,10 +635,16 @@ const InventarioView = () => {
               {listaConteo.length > 0 && (
                 <button type="button" onClick={handleSincronizacionTotal} className="w-full landscape:w-auto bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 landscape:py-1.5 landscape:px-6 rounded-2xl landscape:rounded-lg font-black text-sm landscape:text-xs uppercase tracking-wider shadow-lg shadow-emerald-950/50 border border-emerald-400 flex items-center justify-center gap-2 active:scale-95 transition-all"><i className="fas fa-cloud-upload-alt text-lg landscape:text-sm"></i> {t.botonSincronizar}</button>
               )}
+              
               <div className="grid grid-cols-4 landscape:flex landscape:flex-row gap-3 landscape:gap-2">
+                {/* ✨ BOTONES SELECCIONAR Y LIMPIAR (VISTA HORIZONTAL) */}
                 {listaConteo.length > 0 && (
-                  <button type="button" onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`hidden landscape:flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm`} title="Selección"><i className="fas fa-check-square text-xl landscape:text-base"></i></button>
+                  <>
+                    <button type="button" onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`hidden landscape:flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm`} title={t.seleccionar}><i className="fas fa-check-square text-xl landscape:text-base"></i></button>
+                    <button type="button" onClick={handleLimpiarLista} className={`hidden landscape:flex flex-col items-center justify-center gap-1.5 bg-red-500/10 border border-red-500/30 text-red-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95`} title={t.limpiarLista}><i className="fas fa-trash-alt text-xl landscape:text-base"></i></button>
+                  </>
                 )}
+
                 <button type="button" onClick={handleFinalizarConteo} className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-archive text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span></button>
                 <button type="button" onClick={descargarCSV} className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-file-excel text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span></button>
                 <button type="button" onClick={generarCSVDia} className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-file-csv text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span></button>
@@ -602,7 +655,7 @@ const InventarioView = () => {
         </header>
       )}
 
-      {/* ✨ z-0 para asegurar que quede bajo el header siempre */}
+      {/* z-0 para asegurar que quede bajo el header siempre */}
       <main className="flex-1 overflow-y-auto p-4 landscape:p-2 max-w-5xl mx-auto w-full custom-scroll relative z-0">
         {vistaActual === 'conteo' ? (
           <div className="flex flex-col gap-5 landscape:gap-3 pb-12 landscape:pb-6">
