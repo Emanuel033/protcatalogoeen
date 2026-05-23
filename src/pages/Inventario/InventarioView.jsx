@@ -266,6 +266,7 @@ const InventarioView = () => {
     }
   };
 
+  // ✨ CORRECCIÓN DE LA FUNCIÓN DE AUDITORÍA
   const cargarParaAuditoria = () => {
     if (!sesionSeleccionadaNube) return;
     pedirConfirmacion(t.msgAuditoria, () => {
@@ -278,9 +279,7 @@ const InventarioView = () => {
           nombre: item.nombre,
           stockSistema: stockActualizado, 
           imagen: item.imagen || null,
-          // ✨ CORRECCIÓN AQUÍ: Tomamos TODAS las variantes (cajas, paquetes, sueltas) que tenía la sesión
-          // y simplemente reiniciamos su valor de "contadas" a 0.
-          variantes: item.variantes.map(v => ({ ...v, contadas: 0 })), 
+          variantes: item.variantes.map(v => ({ ...v, contadas: 0 })), // Conserva paquetes, solo resetea a 0
           totalFisico: 0
         };
       });
@@ -548,7 +547,7 @@ const InventarioView = () => {
       </div>
 
       {vistaActual === 'conteo' && (
-        // ✨ HEADER PRINCIPAL - Adaptable a Landscape
+        // HEADER PRINCIPAL - Adaptable a Landscape
         <header className={`border-b shrink-0 shadow-lg z-40 transition-colors ${modoSeleccion ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'} p-4 landscape:p-2 landscape:px-4 flex flex-col landscape:flex-row landscape:items-center landscape:justify-between gap-4 landscape:gap-4`}>
           <div className="flex justify-between items-center landscape:w-1/3">
             <div className="flex items-center gap-3 min-w-0">
@@ -593,7 +592,7 @@ const InventarioView = () => {
         {vistaActual === 'conteo' ? (
           <div className="flex flex-col gap-5 landscape:gap-3 pb-12 landscape:pb-6">
             
-            {/* ✨ CONTENEDOR BUSCADOR/ESCÁNER - Adaptable a Landscape */}
+            {/* CONTENEDOR BUSCADOR/ESCÁNER - Adaptable a Landscape */}
             <div className="bg-slate-800 p-4 landscape:p-2 landscape:px-3 rounded-3xl landscape:rounded-xl border border-slate-600 shadow-xl flex gap-3 landscape:gap-2 items-center">
                <div className="flex-1 min-w-0">
                   <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} idioma={idioma} />
@@ -617,7 +616,6 @@ const InventarioView = () => {
             />
           </div>
         ) : (
-          /* CONTENIDO NUBE MANTIENE SU ESTRUCTURA NORMAL (SE VE BIEN EN HORIZONTAL) */
           <div className="flex flex-col gap-5 animate-fade-in pb-10">
             <div className="flex gap-3 overflow-x-auto pb-2 custom-scroll">
               {sesionesNube.length === 0 ? ( <p className="text-slate-500 text-sm italic py-4">{t.nubeVacia}</p> ) : (
