@@ -266,7 +266,6 @@ const InventarioView = () => {
     }
   };
 
-  // ✨ CORRECCIÓN DE LA FUNCIÓN DE AUDITORÍA
   const cargarParaAuditoria = () => {
     if (!sesionSeleccionadaNube) return;
     pedirConfirmacion(t.msgAuditoria, () => {
@@ -279,7 +278,7 @@ const InventarioView = () => {
           nombre: item.nombre,
           stockSistema: stockActualizado, 
           imagen: item.imagen || null,
-          variantes: item.variantes.map(v => ({ ...v, contadas: 0 })), // Conserva paquetes, solo resetea a 0
+          variantes: item.variantes.map(v => ({ ...v, contadas: 0 })), 
           totalFisico: 0
         };
       });
@@ -537,18 +536,33 @@ const InventarioView = () => {
         </div>
       )}
 
-      {/* TABS SUPERIORES - Más delgadas en landscape */}
-      <div className="bg-slate-950 border-b border-slate-850 px-4 py-2.5 landscape:py-1 flex justify-between items-center shrink-0 z-50">
-        <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-750 shadow-inner">
-          <button onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1 landscape:py-0.5 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaConteo}</button>
-          <button onClick={() => { setVistaActual('nube'); setModoSeleccion(false); }} className={`px-3 py-1 landscape:py-0.5 rounded-lg font-black text-xs transition-all flex items-center gap-1.5 ${vistaActual === 'nube' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaNube} {sesionesNube.length > 0 && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}</button>
+      {/* ✨ Modal Confirmación asegurado con un z-index altísimo */}
+      {confirmar.visible && (
+        <div className="fixed inset-0 z-[5000] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
+           <div className="bg-slate-800 border border-slate-600 p-6 rounded-3xl max-w-sm w-full shadow-2xl text-center animate-fade-in-up">
+              <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-amber-500/40">
+                <i className="fas fa-question text-3xl text-amber-400"></i>
+              </div>
+              <p className="text-white text-lg font-black mb-6 leading-snug">{confirmar.mensaje}</p>
+              <div className="flex gap-3">
+                 <button type="button" onClick={() => setConfirmar({visible: false})} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3.5 rounded-xl font-bold transition-all">{t.cancelar}</button>
+                 <button type="button" onClick={() => { confirmar.onConfirm(); setConfirmar({visible: false}); }} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-900/50 transition-all">{confirmar.textoAceptar}</button>
+              </div>
+           </div>
         </div>
-        <button onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 px-3 py-1 landscape:py-0.5 rounded-lg font-bold text-xs text-white transition-colors">{t.idioma}</button>
+      )}
+
+      {/* ✨ Forzamos "relative z-50" en ambas barras superiores para evitar que el scroll o "main" los tape */}
+      <div className="bg-slate-950 border-b border-slate-850 px-4 py-2.5 landscape:py-1 flex justify-between items-center shrink-0 relative z-50">
+        <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-750 shadow-inner">
+          <button type="button" onClick={() => { setVistaActual('conteo'); setModoSeleccion(false); }} className={`px-3 py-1 landscape:py-0.5 rounded-lg font-black text-xs transition-all ${vistaActual === 'conteo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaConteo}</button>
+          <button type="button" onClick={() => { setVistaActual('nube'); setModoSeleccion(false); }} className={`px-3 py-1 landscape:py-0.5 rounded-lg font-black text-xs transition-all flex items-center gap-1.5 ${vistaActual === 'nube' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}>{t.pestañaNube} {sesionesNube.length > 0 && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />}</button>
+        </div>
+        <button type="button" onClick={() => setIdioma(idioma === 'es' ? 'fr' : 'es')} className="bg-slate-800 border border-slate-700 hover:bg-slate-750 px-3 py-1 landscape:py-0.5 rounded-lg font-bold text-xs text-white transition-colors">{t.idioma}</button>
       </div>
 
       {vistaActual === 'conteo' && (
-        // HEADER PRINCIPAL - Adaptable a Landscape
-        <header className={`border-b shrink-0 shadow-lg z-40 transition-colors ${modoSeleccion ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'} p-4 landscape:p-2 landscape:px-4 flex flex-col landscape:flex-row landscape:items-center landscape:justify-between gap-4 landscape:gap-4`}>
+        <header className={`border-b shrink-0 shadow-lg relative z-40 transition-colors ${modoSeleccion ? 'bg-blue-900/40 border-blue-500/50' : 'bg-slate-900 border-slate-700'} p-4 landscape:p-2 landscape:px-4 flex flex-col landscape:flex-row landscape:items-center landscape:justify-between gap-4 landscape:gap-4`}>
           <div className="flex justify-between items-center landscape:w-1/3">
             <div className="flex items-center gap-3 min-w-0">
               <div className={`w-11 h-11 landscape:w-9 landscape:h-9 rounded-xl landscape:rounded-lg flex items-center justify-center shadow-lg border shrink-0 ${modoSeleccion ? 'bg-blue-500 border-blue-400 text-white' : 'bg-blue-600 border-blue-500/50 shadow-blue-900/50'}`}>
@@ -560,44 +574,45 @@ const InventarioView = () => {
               </div>
             </div>
             {listaConteo.length > 0 && (
-              <button onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`landscape:hidden px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}><i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}</button>
+              <button type="button" onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`landscape:hidden px-3.5 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm border shrink-0 ${modoSeleccion ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/40 hover:bg-blue-500/30'}`}><i className={`fas ${modoSeleccion ? 'fa-times' : 'fa-check-square'} mr-1.5`}></i> {modoSeleccion ? t.cancelar : t.seleccionar}</button>
             )}
           </div>
           
           {modoSeleccion ? (
             <div className="flex gap-3 landscape:w-2/3 landscape:justify-end">
-               <button onClick={toggleTodos} className="flex-1 landscape:flex-none bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white p-3 landscape:py-1.5 landscape:px-4 rounded-2xl landscape:rounded-lg transition-all shadow-sm font-bold text-sm landscape:text-xs flex justify-center items-center gap-2 active:scale-95"><i className={`far ${seleccionados.length === listaConteo.length ? 'fa-square' : 'fa-check-square'}`}></i> {seleccionados.length === listaConteo.length ? t.selNada : t.selTodo}</button>
-               <button onClick={handleSincronizacionTotal} className="flex-[2] landscape:flex-none bg-emerald-600 border border-emerald-500 hover:bg-emerald-500 text-white p-3 landscape:py-1.5 landscape:px-6 rounded-2xl landscape:rounded-lg transition-all shadow-lg font-black text-sm landscape:text-xs uppercase tracking-wider flex justify-center items-center gap-2 active:scale-95"><i className="fas fa-cloud-upload-alt"></i> {t.sincronizarSel?.replace('{n}', seleccionados.length)}</button>
+               <button type="button" onClick={toggleTodos} className="flex-1 landscape:flex-none bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white p-3 landscape:py-1.5 landscape:px-4 rounded-2xl landscape:rounded-lg transition-all shadow-sm font-bold text-sm landscape:text-xs flex justify-center items-center gap-2 active:scale-95"><i className={`far ${seleccionados.length === listaConteo.length ? 'fa-square' : 'fa-check-square'}`}></i> {seleccionados.length === listaConteo.length ? t.selNada : t.selTodo}</button>
+               <button type="button" onClick={handleSincronizacionTotal} className="flex-[2] landscape:flex-none bg-emerald-600 border border-emerald-500 hover:bg-emerald-500 text-white p-3 landscape:py-1.5 landscape:px-6 rounded-2xl landscape:rounded-lg transition-all shadow-lg font-black text-sm landscape:text-xs uppercase tracking-wider flex justify-center items-center gap-2 active:scale-95"><i className="fas fa-cloud-upload-alt"></i> {t.sincronizarSel?.replace('{n}', seleccionados.length)}</button>
             </div>
           ) : (
             <div className="flex flex-col landscape:flex-row gap-3 landscape:gap-2 landscape:w-2/3 landscape:justify-end">
               {listaConteo.length > 0 && (
-                <button onClick={handleSincronizacionTotal} className="w-full landscape:w-auto bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 landscape:py-1.5 landscape:px-6 rounded-2xl landscape:rounded-lg font-black text-sm landscape:text-xs uppercase tracking-wider shadow-lg shadow-emerald-950/50 border border-emerald-400 flex items-center justify-center gap-2 active:scale-95 transition-all"><i className="fas fa-cloud-upload-alt text-lg landscape:text-sm"></i> {t.botonSincronizar}</button>
+                <button type="button" onClick={handleSincronizacionTotal} className="w-full landscape:w-auto bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 landscape:py-1.5 landscape:px-6 rounded-2xl landscape:rounded-lg font-black text-sm landscape:text-xs uppercase tracking-wider shadow-lg shadow-emerald-950/50 border border-emerald-400 flex items-center justify-center gap-2 active:scale-95 transition-all"><i className="fas fa-cloud-upload-alt text-lg landscape:text-sm"></i> {t.botonSincronizar}</button>
               )}
               <div className="grid grid-cols-4 landscape:flex landscape:flex-row gap-3 landscape:gap-2">
                 {listaConteo.length > 0 && (
-                  <button onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`hidden landscape:flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm`} title="Selección"><i className="fas fa-check-square text-xl landscape:text-base"></i></button>
+                  <button type="button" onClick={() => { setModoSeleccion(!modoSeleccion); setSeleccionados([]); }} className={`hidden landscape:flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm`} title="Selección"><i className="fas fa-check-square text-xl landscape:text-base"></i></button>
                 )}
-                <button onClick={handleFinalizarConteo} className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-archive text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span></button>
-                <button onClick={descargarCSV} className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-file-excel text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span></button>
-                <button onClick={generarCSVDia} className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-file-csv text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span></button>
-                <button onClick={() => setMostrarHistorial(true)} className="flex flex-col items-center justify-center gap-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 text-purple-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-history text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-purple-200">{t.historial}</span></button>
+                <button type="button" onClick={handleFinalizarConteo} className="flex flex-col items-center justify-center gap-1.5 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-archive text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-amber-200">{t.archivar}</span></button>
+                <button type="button" onClick={descargarCSV} className="flex flex-col items-center justify-center gap-1.5 bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-file-excel text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-emerald-200">{t.csvVista}</span></button>
+                <button type="button" onClick={generarCSVDia} className="flex flex-col items-center justify-center gap-1.5 bg-blue-500/20 border border-blue-500/40 hover:bg-blue-500/30 text-blue-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-file-csv text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-blue-200">{t.csvDia}</span></button>
+                <button type="button" onClick={() => setMostrarHistorial(true)} className="flex flex-col items-center justify-center gap-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 text-purple-400 p-3 landscape:py-1.5 landscape:px-3 rounded-2xl landscape:rounded-lg transition-all shadow-sm active:scale-95"><i className="fas fa-history text-xl landscape:text-base"></i><span className="text-[10px] landscape:hidden font-black uppercase text-center leading-tight tracking-tighter text-purple-200">{t.historial}</span></button>
               </div>
             </div>
           )}
         </header>
       )}
 
-      <main className="flex-1 overflow-y-auto p-4 landscape:p-2 max-w-5xl mx-auto w-full custom-scroll relative">
+      {/* ✨ z-0 para asegurar que quede bajo el header siempre */}
+      <main className="flex-1 overflow-y-auto p-4 landscape:p-2 max-w-5xl mx-auto w-full custom-scroll relative z-0">
         {vistaActual === 'conteo' ? (
           <div className="flex flex-col gap-5 landscape:gap-3 pb-12 landscape:pb-6">
             
-            {/* CONTENEDOR BUSCADOR/ESCÁNER - Adaptable a Landscape */}
             <div className="bg-slate-800 p-4 landscape:p-2 landscape:px-3 rounded-3xl landscape:rounded-xl border border-slate-600 shadow-xl flex gap-3 landscape:gap-2 items-center">
                <div className="flex-1 min-w-0">
                   <EscanerManual catalogoBase={catalogoBase} onAgregarProducto={agregarProductoALista} idioma={idioma} />
                </div>
                <button 
+                  type="button"
                   onClick={() => setMostrarScanner(true)}
                   className="w-12 h-12 landscape:w-10 landscape:h-10 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400 text-white rounded-2xl landscape:rounded-lg shadow-lg flex items-center justify-center transition-all shrink-0 active:scale-95"
                >
@@ -623,7 +638,7 @@ const InventarioView = () => {
                   const isSelected = sesionSeleccionadaNube?.id === sesion.id;
                   const fechaStr = sesion.fecha ? new Date(sesion.fecha.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Live';
                   return (
-                    <button key={sesion.id} onClick={() => setSesionSeleccionadaNube(sesion)} className={`p-3 rounded-2xl border text-left shrink-0 transition-all flex flex-col gap-1 min-w-[140px] ${isSelected ? 'bg-purple-950/60 border-purple-500 text-white shadow-lg' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-750'}`}>
+                    <button type="button" key={sesion.id} onClick={() => setSesionSeleccionadaNube(sesion)} className={`p-3 rounded-2xl border text-left shrink-0 transition-all flex flex-col gap-1 min-w-[140px] ${isSelected ? 'bg-purple-950/60 border-purple-500 text-white shadow-lg' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-750'}`}>
                       <span className={`text-[10px] font-black uppercase tracking-wider ${sesion.etiqueta ? 'text-emerald-400' : 'text-purple-400'}`}>{sesion.etiqueta || t.sesionNum.replace('{n}', sesionesNube.length - idx)}</span>
                       <span className="font-bold text-xs text-slate-200">{fechaStr} • {sesion.total_skus || 0} SKUs</span>
                       <span className="text-[9px] text-slate-500 truncate"><i className="fas fa-warehouse mr-1"></i>{sesion.origen || t.origenDispositivo}</span>
@@ -636,13 +651,13 @@ const InventarioView = () => {
             {sesionSeleccionadaNube ? (
               <div className="flex flex-col gap-4">
                 
-                {/* BOTÓN DE RECUPERAR PARA AUDITORÍA */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-850 p-4 rounded-2xl border border-slate-700 mb-2 gap-3">
                   <div>
                     <h3 className="font-black text-sm text-white flex items-center gap-2"><i className="fas fa-cloud-download-alt text-purple-400"></i> {t.tablaTitulo}</h3>
                     <span className="text-[11px] text-slate-400"><i className="fas fa-pencil-alt mr-1"></i>{t.tablaSub}</span>
                   </div>
                   <button 
+                    type="button"
                     onClick={cargarParaAuditoria} 
                     className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 border border-blue-400"
                   >
@@ -657,7 +672,6 @@ const InventarioView = () => {
                   return (
                     <div key={grupo.id} className="mb-6">
                       
-                      {/* VISTA MOBILE */}
                       <div className="md:hidden">
                         <h4 className={`${grupo.textColor} font-black text-xs uppercase tracking-wider mb-3 ml-2 border-b border-slate-700 pb-2`}>
                           {grupo.titulo} <span className="bg-slate-800 px-2 py-0.5 rounded-full ml-1 text-white">{grupo.data.length}</span>
@@ -667,7 +681,7 @@ const InventarioView = () => {
                             const ajuste = item.totalFisico - item.stockSistema;
                             return (
                               <div key={item.codigo} className={`bg-slate-800 border ${grupo.borderColor} rounded-2xl p-4 flex flex-col gap-3 shadow-md`}>
-                                <button onClick={() => copiarCodigo(item.codigo)} className="w-full bg-slate-900 border border-slate-650 hover:border-blue-500 text-blue-400 p-2.5 rounded-xl font-mono font-black text-sm flex items-center justify-between active:scale-[0.98] transition-all">
+                                <button type="button" onClick={() => copiarCodigo(item.codigo)} className="w-full bg-slate-900 border border-slate-650 hover:border-blue-500 text-blue-400 p-2.5 rounded-xl font-mono font-black text-sm flex items-center justify-between active:scale-[0.98] transition-all">
                                   <span className="tracking-wider">{item.codigo}</span> <span className="text-[10px] bg-blue-600/20 text-blue-300 px-2 py-1 rounded border border-blue-500/30 uppercase tracking-widest flex items-center gap-1"><i className="fas fa-copy"></i> {t.copiarBoton}</span>
                                 </button>
                                 <p className="font-bold text-xs text-white leading-tight">{item.nombre}</p>
@@ -680,7 +694,7 @@ const InventarioView = () => {
                                     <span className="block text-[9px] font-black text-blue-400 uppercase">{t.colFis}</span>
                                     <span className="font-black text-xs text-white block mt-1">{item.totalFisico}</span>
                                   </div>
-                                  <button onClick={() => copiarAjuste(ajuste)} className={`p-2 rounded-lg border flex flex-col items-center justify-center active:scale-95 transition-all ${ajuste > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/10' : 'text-slate-400 border-slate-700 bg-slate-800/50'}`}>
+                                  <button type="button" onClick={() => copiarAjuste(ajuste)} className={`p-2 rounded-lg border flex flex-col items-center justify-center active:scale-95 transition-all ${ajuste > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/10' : 'text-slate-400 border-slate-700 bg-slate-800/50'}`}>
                                     <span className="block text-[9px] font-black uppercase opacity-80">{t.colDif}</span>
                                     <span className="font-black text-xs block mt-1">{ajuste > 0 ? `+${ajuste}` : ajuste}</span>
                                   </button>
@@ -691,7 +705,6 @@ const InventarioView = () => {
                         </div>
                       </div>
 
-                      {/* VISTA DESKTOP */}
                       <div className="hidden md:block bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
                         <div className={`bg-slate-900/60 p-3 border-b border-slate-700 flex justify-between items-center`}>
                           <h4 className={`${grupo.textColor} font-black text-xs uppercase tracking-wider`}>
@@ -714,14 +727,14 @@ const InventarioView = () => {
                               const ajuste = item.totalFisico - item.stockSistema;
                               return (
                                 <tr key={item.codigo} className="hover:bg-slate-750/50 transition-colors group">
-                                  <td className="p-3 pl-4"><button onClick={() => copiarCodigo(item.codigo)} className="w-full text-left text-blue-400 hover:text-blue-300 flex items-center justify-between bg-slate-900/40 p-1.5 rounded-lg border border-slate-700 group-hover:border-blue-500/40 transition-all font-mono font-bold"><span>{item.codigo}</span> <i className="fas fa-copy text-[10px]"></i></button></td>
+                                  <td className="p-3 pl-4"><button type="button" onClick={() => copiarCodigo(item.codigo)} className="w-full text-left text-blue-400 hover:text-blue-300 flex items-center justify-between bg-slate-900/40 p-1.5 rounded-lg border border-slate-700 group-hover:border-blue-500/40 transition-all font-mono font-bold"><span>{item.codigo}</span> <i className="fas fa-copy text-[10px]"></i></button></td>
                                   <td className="p-3 font-bold text-white truncate max-w-sm">{item.nombre}</td>
                                   <td className="p-3 text-center">
                                     <input key={`pc-${item.codigo}-${item.stockSistema}`} type="number" disabled={!canEdit} className={`w-16 bg-slate-900/30 text-slate-300 text-center font-bold border-b border-dashed border-slate-500 focus:outline-none focus:bg-slate-900 py-1 rounded transition-all ${!canEdit ? 'opacity-40 cursor-not-allowed border-none' : 'hover:bg-slate-800'}`} defaultValue={item.stockSistema} onBlur={(e) => handleUpdateStockSistema(item.codigo, e.target.value)} onKeyDown={(e) => e.key === 'Enter' && e.target.blur()} />
                                   </td>
                                   <td className="p-3 text-center font-bold text-white bg-slate-900/20">{item.totalFisico}</td>
                                   <td className="p-3 text-center pr-4">
-                                    <button onClick={() => copiarAjuste(ajuste)} className={`w-full py-2 rounded-lg border font-black active:scale-95 transition-all flex items-center justify-center gap-2 ${ajuste > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/5 hover:bg-red-500/10' : 'text-slate-400 border-slate-700 bg-slate-800/50 hover:bg-slate-700'}`}>
+                                    <button type="button" onClick={() => copiarAjuste(ajuste)} className={`w-full py-2 rounded-lg border font-black active:scale-95 transition-all flex items-center justify-center gap-2 ${ajuste > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10' : ajuste < 0 ? 'text-red-400 border-red-500/30 bg-red-500/5 hover:bg-red-500/10' : 'text-slate-400 border-slate-700 bg-slate-800/50 hover:bg-slate-700'}`}>
                                       {ajuste > 0 ? `+${ajuste}` : ajuste} <i className="fas fa-copy text-[10px] opacity-30"></i>
                                     </button>
                                   </td>
@@ -742,11 +755,11 @@ const InventarioView = () => {
       </main>
 
       <ModalCalculadora isOpen={calcActiva.isOpen} tituloTarget={calcActiva.nombre} codigoItem={calcActiva.codigo} varIdItem={calcActiva.varId} onClose={() => setCalcActiva(prev => ({ ...prev, isOpen: false }))} onAplicar={(total) => cambiarCant(calcActiva.codigo, calcActiva.varId, total)} idioma={idioma} />
-      {imagenAmpliada && <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/95 backdrop-blur-md p-4 touch-none" onClick={() => setImagenAmpliada(null)}><div className="relative max-w-md w-full flex flex-col items-center animate-fade-in" onClick={e => e.stopPropagation()}><button onClick={() => setImagenAmpliada(null)} className="absolute -top-14 right-0 w-12 h-12 bg-slate-800 border border-slate-600 rounded-full text-white shadow-xl flex items-center justify-center"><i className="fas fa-times text-xl"></i></button><div className="bg-white p-3 rounded-3xl shadow-2xl w-full flex justify-center"><img src={imagenAmpliada} alt="Verificación" className="w-full max-h-[70vh] object-contain rounded-2xl mix-blend-multiply" /></div><p className="text-white font-black text-xs mt-6 uppercase tracking-widest bg-slate-800 px-6 py-3 rounded-full border border-slate-600 cursor-pointer" onClick={() => setImagenAmpliada(null)}>{t.cerrarVerificacion}</p></div></div>}
+      {imagenAmpliada && <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/95 backdrop-blur-md p-4 touch-none" onClick={() => setImagenAmpliada(null)}><div className="relative max-w-md w-full flex flex-col items-center animate-fade-in" onClick={e => e.stopPropagation()}><button type="button" onClick={() => setImagenAmpliada(null)} className="absolute -top-14 right-0 w-12 h-12 bg-slate-800 border border-slate-600 rounded-full text-white shadow-xl flex items-center justify-center"><i className="fas fa-times text-xl"></i></button><div className="bg-white p-3 rounded-3xl shadow-2xl w-full flex justify-center"><img src={imagenAmpliada} alt="Verificación" className="w-full max-h-[70vh] object-contain rounded-2xl mix-blend-multiply" /></div><p className="text-white font-black text-xs mt-6 uppercase tracking-widest bg-slate-800 px-6 py-3 rounded-full border border-slate-600 cursor-pointer" onClick={() => setImagenAmpliada(null)}>{t.cerrarVerificacion}</p></div></div>}
 
       {mostrarHistorial && (
         <div className="fixed inset-0 z-[150] flex flex-col bg-slate-900/98 backdrop-blur-xl animate-fade-in">
-          <div className="p-5 border-b border-slate-700 bg-slate-900 sticky top-0 z-10 flex justify-between items-center"><h2 className="text-xl font-black text-white">{conteoSeleccionado ? t.detalleConteo : t.historialArchivados}</h2><button onClick={() => { conteoSeleccionado ? setConteoSeleccionado(null) : setMostrarHistorial(false); }} className="w-11 h-11 bg-slate-800 border border-slate-600 rounded-xl flex items-center justify-center text-white"><i className={`fas ${conteoSeleccionado ? 'fa-arrow-left' : 'fa-times'} text-lg`}></i></button></div>
+          <div className="p-5 border-b border-slate-700 bg-slate-900 sticky top-0 z-10 flex justify-between items-center"><h2 className="text-xl font-black text-white">{conteoSeleccionado ? t.detalleConteo : t.historialArchivados}</h2><button type="button" onClick={() => { conteoSeleccionado ? setConteoSeleccionado(null) : setMostrarHistorial(false); }} className="w-11 h-11 bg-slate-800 border border-slate-600 rounded-xl flex items-center justify-center text-white"><i className={`fas ${conteoSeleccionado ? 'fa-arrow-left' : 'fa-times'} text-lg`}></i></button></div>
           <div className="flex-1 overflow-y-auto p-4 pb-20 custom-scroll">
             {conteoSeleccionado ? <ListaConteo listaConteo={conteoSeleccionado.items} idioma={idioma} soloLectura={true} /> : (
               <div className="grid gap-4 max-w-3xl mx-auto">{JSON.parse(localStorage.getItem('een_historial_conteos') || '[]').map(reg => (
