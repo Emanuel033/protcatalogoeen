@@ -4114,6 +4114,37 @@
     "paquetes": []
   },
   {
+    "id": "BRfwGvQKTUp7cFJf3Rlb",
+    "firebase_data": {
+      "id": "BRfwGvQKTUp7cFJf3Rlb",
+      "nombre_flexible": "BOTELLA PET FARMACEUTICA 120 ML CRISTAL C/TAPA R-24",
+      "imagen_url": "https://i.ibb.co/gMZ80FqB/7ddd5b57e368.png",
+      "categoria": "PET",
+      "codigo_sistema_oficial": "BPF-120-CR-CT",
+      "tipo_item": "KIT_OFICIAL",
+      "receta_desglose": null,
+      "hereda_empaques_de": "h0qloWayf0XFintPj9cj",
+      "activo": true,
+      "id_facturacion": "BPF-120-CR-CT",
+      "stock_total_piezas": 0,
+      "fecha_creacion": {
+        "_seconds": 1780614995,
+        "_nanoseconds": 895000000
+      }
+    },
+    "paquetes": [
+      {
+        "id": "hV3CqYkfXbI5SS3JiNCM",
+        "piezas": 290,
+        "sku": "BPF-120-CR/CP-290PZ",
+        "fecha_creacion": {
+          "_seconds": 1780614548,
+          "_nanoseconds": 565000000
+        }
+      }
+    ]
+  },
+  {
     "id": "BSDHIQgFYPnq5RA4NmyT",
     "firebase_data": {
       "id": "BSDHIQgFYPnq5RA4NmyT",
@@ -5710,6 +5741,37 @@
       }
     },
     "paquetes": []
+  },
+  {
+    "id": "h0qloWayf0XFintPj9cj",
+    "firebase_data": {
+      "id": "h0qloWayf0XFintPj9cj",
+      "nombre_flexible": "BOTELLA PET FARMACEUTICA 120 ML CRISTAL S/TAPA",
+      "imagen_url": "https://i.ibb.co/67x9c585/2581547be533.png",
+      "categoria": "PET",
+      "codigo_sistema_oficial": "BPF-120-CR/CP",
+      "tipo_item": "PIEZA_BASE",
+      "receta_desglose": null,
+      "hereda_empaques_de": null,
+      "activo": true,
+      "id_facturacion": "BPF-120-CR-CP",
+      "stock_total_piezas": 0,
+      "fecha_creacion": {
+        "_seconds": 1780614539,
+        "_nanoseconds": 928000000
+      }
+    },
+    "paquetes": [
+      {
+        "id": "hV3CqYkfXbI5SS3JiNCM",
+        "piezas": 290,
+        "sku": "BPF-120-CR/CP-290PZ",
+        "fecha_creacion": {
+          "_seconds": 1780614548,
+          "_nanoseconds": 565000000
+        }
+      }
+    ]
   },
   {
     "id": "h4H0n7NhKrl0ugtgDSLz",
