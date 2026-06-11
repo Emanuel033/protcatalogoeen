@@ -3,13 +3,13 @@
     "codigo": "LLFK-2/CP",
     "precio": 614.46,
     "nombre": "LLAVE FLOW KING 2\"  ( 1202010001 )",
-    "stock": 41,
+    "stock": 45,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "BPL-900-CT",
-    "precio": 7.63,
+    "precio": 5.72,
     "nombre": "BOTELLA PET LAVATRASTE 900 ML C/TAPA FLIP TOP R-28",
     "stock": 0,
     "tipo": 2,
@@ -28,7 +28,7 @@
     "codigo": "PP-1/CP",
     "precio": 27.3,
     "nombre": "PIZETA DE POLIETILENO DE 1 L C/TAPA",
-    "stock": 145,
+    "stock": 223,
     "tipo": 1,
     "receta": null
   },
@@ -36,7 +36,7 @@
     "codigo": "TPN-O-19-H/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO NEGRA C/ORIFICIO P/CUBETA DE 19 Y 15 L MUN",
-    "stock": 7042,
+    "stock": 6577,
     "tipo": 1,
     "receta": null
   },
@@ -44,7 +44,7 @@
     "codigo": "BP19-SU-PLATA-TRANS-500/CP",
     "precio": 5.39,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA PLATA/TRAN 19X25X9 #19",
-    "stock": 1116,
+    "stock": 1215,
     "tipo": 1,
     "receta": null
   },
@@ -98,7 +98,7 @@
     "codigo": "LS-20/CP",
     "precio": 0.14,
     "nombre": "LAINER SENSITIVO IMPORTADO R-20",
-    "stock": 23226,
+    "stock": 8226,
     "tipo": 1,
     "receta": null
   },
@@ -106,7 +106,7 @@
     "codigo": "CPB-10-U/CP",
     "precio": 58.46,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 10 L  SIN TAPA",
-    "stock": 7605,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -147,7 +147,7 @@
     "codigo": "BP18-SU-PLATA-TRANS-250/CP",
     "precio": 3.95,
     "nombre": "BOLSA STANDUP POUCH C/Z TRILAMINADA PLATA/TRA 15.3X23.2X6#18",
-    "stock": 1400,
+    "stock": 2360,
     "tipo": 1,
     "receta": null
   },
@@ -155,7 +155,7 @@
     "codigo": "TF-LS-63-C/CP",
     "precio": 4.01,
     "nombre": "TAPA FLAPER R-63 S/LAINER SENSITIVO (GDL)",
-    "stock": 19682,
+    "stock": 20514,
     "tipo": 1,
     "receta": null
   },
@@ -247,7 +247,7 @@
     "codigo": "CTP-4/5/CP",
     "precio": 1.51,
     "nombre": "CONTRATAPA P/PORRON DE 4 Y 5 L",
-    "stock": 976,
+    "stock": 1921,
     "tipo": 1,
     "receta": null
   },
@@ -255,7 +255,7 @@
     "codigo": "TPP-60/CP",
     "precio": 4.93,
     "nombre": "TARRITO DE POLIPROPILENO NO. 60 CON TAPA (40 mL)",
-    "stock": 1637,
+    "stock": 2194,
     "tipo": 1,
     "receta": null
   },
@@ -284,6 +284,14 @@
     "receta": null
   },
   {
+    "codigo": "TPBL-23/CP",
+    "precio": 0,
+    "nombre": "TAPA DE PLASTICO BLANCA LISA PARA 23 L",
+    "stock": 0,
+    "tipo": 1,
+    "receta": null
+  },
+  {
     "codigo": "TPL-2-R110-NAT-CT",
     "precio": 18.09,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 2 KG R-110\r\n C/TAPA",
@@ -304,7 +312,7 @@
     "codigo": "BP12-SU-BLANCA-150/CP",
     "precio": 4.65,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA BCA 12X20X6 #12",
-    "stock": 400,
+    "stock": 600,
     "tipo": 1,
     "receta": null
   },
@@ -328,7 +336,7 @@
     "codigo": "BLSF-TTP-4-GZ/CP",
     "precio": 27.34,
     "nombre": "BOTE DE LAMINA DE 4 L TTP S/FENOL 610X802",
-    "stock": 18454,
+    "stock": 12534,
     "tipo": 1,
     "receta": null
   },
@@ -336,7 +344,7 @@
     "codigo": "BPLA-500/CP",
     "precio": 2.72,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA 500 ML LISA S/TAPA",
-    "stock": 9093,
+    "stock": 3739,
     "tipo": 1,
     "receta": null
   },
@@ -369,13 +377,13 @@
     "codigo": "BP58-FUELLE-PLATA-1/CP",
     "precio": 7.69,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA PLATA 14X4X36 #58",
-    "stock": 499,
+    "stock": 999,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "PPCL-TEO/CP",
-    "precio": 12463,
+    "precio": 10863,
     "nombre": "PULPO P/CERRAR CUBETA DE LAMINA DE 19 LTS (TEO)",
     "stock": 3,
     "tipo": 1,
@@ -385,7 +393,7 @@
     "codigo": "LE-24/CP",
     "precio": 0.39,
     "nombre": "LAINER ESPUMADO R-24",
-    "stock": 159580,
+    "stock": 149580,
     "tipo": 1,
     "receta": null
   },
@@ -410,7 +418,7 @@
     "codigo": "GPI-125/CP",
     "precio": 2.97,
     "nombre": "GARRAFON DE PLASTICO INDUSTRIAL DE 125 ML CON TAPA",
-    "stock": 3100,
+    "stock": 3156,
     "tipo": 1,
     "receta": null
   },
@@ -418,7 +426,7 @@
     "codigo": "TS-HZ24-R/CP",
     "precio": 2.4,
     "nombre": "TAPON STOLZ HZ-24 ROJO   ( 6000000200 )",
-    "stock": 471612,
+    "stock": 98961,
     "tipo": 1,
     "receta": null
   },
@@ -426,7 +434,7 @@
     "codigo": "BP94-SUP-ROSA-150/CP",
     "precio": 4.79,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROSA 12X20X6 #94",
-    "stock": 499,
+    "stock": 500,
     "tipo": 1,
     "receta": null
   },
@@ -434,7 +442,7 @@
     "codigo": "BP88-SUP-ROJA-150/CP",
     "precio": 4.79,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROJA 12X20X6 #88",
-    "stock": 478,
+    "stock": 500,
     "tipo": 1,
     "receta": null
   },
@@ -448,7 +456,7 @@
   },
   {
     "codigo": "TPL-500-R70-BCO-CT",
-    "precio": 9.77,
+    "precio": 8.72,
     "nombre": "TARRO DE POLIETILENO BCO DE 500 G C/TAPA R-70",
     "stock": 0,
     "tipo": 2,
@@ -467,7 +475,7 @@
     "codigo": "BPAT-1-BCA/CP",
     "precio": 9.21,
     "nombre": "BOTELLA PET ATOMIZADORA DE 1L BLANCA S/TAPA",
-    "stock": 7847,
+    "stock": 8012,
     "tipo": 1,
     "receta": null
   },
@@ -500,7 +508,7 @@
     "codigo": "TFT-28/410-COL/CP",
     "precio": 2.04,
     "nombre": "TAPA FLIP TOP R28/410 VARIOS COLORES",
-    "stock": 13422,
+    "stock": 13652,
     "tipo": 1,
     "receta": null
   },
@@ -550,7 +558,7 @@
     "codigo": "BP43-SU-KRAFT-CV-500/CP",
     "precio": 15.15,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z CON VENTANA OVAL 21X29X9 #43",
-    "stock": 200,
+    "stock": 100,
     "tipo": 1,
     "receta": null
   },
@@ -583,7 +591,7 @@
     "codigo": "BP44-SU-PA-VERDE-CV-70/CP",
     "precio": 5.16,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z VERDE PAPEL ARROZ 10X15X5 #44",
-    "stock": 300,
+    "stock": 99,
     "tipo": 1,
     "receta": null
   },
@@ -591,7 +599,7 @@
     "codigo": "TPP-10/CP",
     "precio": 6.75,
     "nombre": "TARRITO DE POLIPROPILENO NO. 10 CON TAPA (100 mL)",
-    "stock": 1131,
+    "stock": 523,
     "tipo": 1,
     "receta": null
   },
@@ -599,7 +607,7 @@
     "codigo": "BP56-KRAFT-CV-TINTIE-250/CP",
     "precio": 5.85,
     "nombre": "BOLSA KRAFT CON VENTANA Y TIN-TIE 8.6X6.4X19.7 #56",
-    "stock": 500,
+    "stock": 499,
     "tipo": 1,
     "receta": null
   },
@@ -607,7 +615,7 @@
     "codigo": "FPP-110-CR/CP",
     "precio": 2.95,
     "nombre": "FRASCO PET PASTILLERO 110 ML CRISTAL S/TAPA",
-    "stock": 19088,
+    "stock": 13861,
     "tipo": 1,
     "receta": null
   },
@@ -615,7 +623,7 @@
     "codigo": "BPT-CON-NEG-1/CP",
     "precio": 10.78,
     "nombre": "BOTE DE PLAST TINTERO CONICO NEGRO DE 1 L C/TAPA",
-    "stock": 1070,
+    "stock": 1270,
     "tipo": 1,
     "receta": null
   },
@@ -657,7 +665,7 @@
     "codigo": "BP57-FUELLE-PLATA-500/CP",
     "precio": 6.62,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA PLATA 11X7X28 #57",
-    "stock": 280,
+    "stock": 279,
     "tipo": 1,
     "receta": null
   },
@@ -698,7 +706,7 @@
     "codigo": "BD-28/410/CP",
     "precio": 8.26,
     "nombre": "BOMBA DOSIFICADORA 28/410 SILLA DE MONTAR",
-    "stock": 3051,
+    "stock": 3168,
     "tipo": 1,
     "receta": null
   },
@@ -712,9 +720,9 @@
   },
   {
     "codigo": "TPL-1-R89-BCO/CP",
-    "precio": 9.06,
+    "precio": 8.87,
     "nombre": "TARRO DE POLIETILENO BCO DE 1 KG S/TAPA R-89",
-    "stock": 21752,
+    "stock": 12165,
     "tipo": 1,
     "receta": null
   },
@@ -730,7 +738,7 @@
     "codigo": "BP59-FUELLE-PLATA-250/CP",
     "precio": 6.15,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA PLATA 9X2X24 #59",
-    "stock": 500,
+    "stock": 99,
     "tipo": 1,
     "receta": null
   },
@@ -755,13 +763,13 @@
     "codigo": "G-NB-55/CP",
     "precio": 2.51,
     "nombre": "GOTERO DE 55 ML CON INSERTO Y TAPA",
-    "stock": 11630,
+    "stock": 11652,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "CPB-TL-8-U",
-    "precio": 114.35,
+    "precio": 99.44,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 8 L CON TAPA LISA UNI",
     "stock": 0,
     "tipo": 2,
@@ -780,7 +788,7 @@
     "codigo": "BPB-500/CP",
     "precio": 4.63,
     "nombre": "BOTELLA PET BOSTON 500 ML R-28 S/TAPA",
-    "stock": 10009,
+    "stock": 10502,
     "tipo": 1,
     "receta": null
   },
@@ -788,7 +796,7 @@
     "codigo": "GA-60/CP",
     "precio": 3.01,
     "nombre": "GOTERO ALCUZAR NATURAL DE 60 ML CON TAPA",
-    "stock": 1239,
+    "stock": 1338,
     "tipo": 1,
     "receta": null
   },
@@ -796,7 +804,7 @@
     "codigo": "TPPT-RF-2/CP",
     "precio": 20.51,
     "nombre": "TAPON DE PLASTICO PARA TAMBO ROSCA FINA 2\"",
-    "stock": 3894,
+    "stock": 3994,
     "tipo": 1,
     "receta": null
   },
@@ -804,7 +812,7 @@
     "codigo": "BAPOL-NAT/CP",
     "precio": 9.86,
     "nombre": "BOTELLA PAD ATOMIZADORA NATURAL DE 1 L R-28 GDL",
-    "stock": 0,
+    "stock": 2,
     "tipo": 1,
     "receta": null
   },
@@ -812,7 +820,7 @@
     "codigo": "EPP-CIL-500/CP",
     "precio": 5.24,
     "nombre": "ENVASE P/PEGAMENTO CIL 500 ML C/CONO Y RONDANA",
-    "stock": 426,
+    "stock": 526,
     "tipo": 1,
     "receta": null
   },
@@ -820,7 +828,7 @@
     "codigo": "GIR-BCO/CP",
     "precio": 11.82,
     "nombre": "GALON INDUSTRIAL REDONDO BLANCO S/TAPA R-38",
-    "stock": 1076,
+    "stock": 120,
     "tipo": 1,
     "receta": null
   },
@@ -828,7 +836,7 @@
     "codigo": "CPOLVO-50-ML/CP",
     "precio": 2.48,
     "nombre": "CUCHARA MEDIDORA PARA POLVO 50 ML",
-    "stock": 5051,
+    "stock": 5096,
     "tipo": 1,
     "receta": null
   },
@@ -836,7 +844,7 @@
     "codigo": "BPAT-1/CP",
     "precio": 7.65,
     "nombre": "BOTELLA PET ATOMIZADORA  DE 1 L TRANS S/TAPA",
-    "stock": 14508,
+    "stock": 14792,
     "tipo": 1,
     "receta": null
   },
@@ -844,7 +852,7 @@
     "codigo": "SGAP-3/4/CP",
     "precio": 5.51,
     "nombre": "SELLO DE GARANTIA ALL PLASTIC DE 3/4\" BLANCO  ( 7000000369 )",
-    "stock": 1492,
+    "stock": 2527,
     "tipo": 1,
     "receta": null
   },
@@ -852,7 +860,7 @@
     "codigo": "TPBO-19-M/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO BLANCA C/ORIFICIO PARA 15Y19 L MUN",
-    "stock": 20744,
+    "stock": 19268,
     "tipo": 1,
     "receta": null
   },
@@ -860,7 +868,7 @@
     "codigo": "BLSF-CDO-1-GZ/CP",
     "precio": 11.7,
     "nombre": "BOTE DE LAMINA CERRADO DE 1L S/FENOL 404X502",
-    "stock": 6794,
+    "stock": 13284,
     "tipo": 1,
     "receta": null
   },
@@ -868,7 +876,7 @@
     "codigo": "TPL-1.5-R110-B/CP",
     "precio": 5.6,
     "nombre": "TARRO DE POLIETILENO BLANCO DE 1.5 KG S/TAPA R-110",
-    "stock": 538,
+    "stock": 742,
     "tipo": 1,
     "receta": null
   },
@@ -876,7 +884,7 @@
     "codigo": "TPL-40-R38-NAT/CP",
     "precio": 1.04,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 40 G R-38 S/TAPA",
-    "stock": 24722,
+    "stock": 26848,
     "tipo": 1,
     "receta": null
   },
@@ -884,7 +892,7 @@
     "codigo": "BP54-KRAFT-CV-TINTIE-500/CP",
     "precio": 6.62,
     "nombre": "BOLSA KRAFT CON VENTANA Y TIN-TIE 12.1X6.4X19.7 500 GRS #54",
-    "stock": 400,
+    "stock": 499,
     "tipo": 1,
     "receta": null
   },
@@ -892,13 +900,13 @@
     "codigo": "TPI-R24/CP",
     "precio": 1,
     "nombre": "TAPA DE PLASTICO INVIOLABLE R-24",
-    "stock": 41894,
+    "stock": 43418,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "EPL-500-CT",
-    "precio": 2.56,
+    "precio": 2.26,
     "nombre": "ENVASE PLASTICO LECHERO DE 500 ML C/TAPA",
     "stock": 0,
     "tipo": 2,
@@ -925,7 +933,7 @@
     "codigo": "PPB-DF-30/CP",
     "precio": 11.94,
     "nombre": "POMADERO POLIPRO BCO DOBLE FONDO 30 ML C/TAPA Y DISCO",
-    "stock": 325,
+    "stock": 1990,
     "tipo": 1,
     "receta": null
   },
@@ -983,7 +991,7 @@
     "codigo": "BPB-60-BCA/CP",
     "precio": 2.5,
     "nombre": "BOTELLA PET BOSTON 60 ML R-20 BLANCA S/TAPA",
-    "stock": 6756,
+    "stock": 6831,
     "tipo": 1,
     "receta": null
   },
@@ -991,7 +999,7 @@
     "codigo": "GA-250/CP",
     "precio": 5.31,
     "nombre": "GOTERO ALCUZAR NATURAL DE 250 ML CON TAPA",
-    "stock": 5002,
+    "stock": 3205,
     "tipo": 1,
     "receta": null
   },
@@ -1007,7 +1015,7 @@
     "codigo": "TPL-19-REC-COL--GB/CP",
     "precio": 23.4,
     "nombre": "TAPA DE PLASTICO REC PARA 19 L LISA GB",
-    "stock": 3140,
+    "stock": 265,
     "tipo": 1,
     "receta": null
   },
@@ -1015,13 +1023,13 @@
     "codigo": "LE-58/CP",
     "precio": 0.46,
     "nombre": "LAINER ESPUMADO R-58",
-    "stock": 37400,
+    "stock": 37402,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TPLG-1-R110-BCO-CT",
-    "precio": 10.18,
+    "precio": 8.71,
     "nombre": "TARRO DE POLIETILENO GRASERO BLANCO DE 1 KG C/TAPA R-110",
     "stock": 0,
     "tipo": 2,
@@ -1048,7 +1056,7 @@
     "codigo": "CPB-15-U/CP",
     "precio": 109.24,
     "nombre": "CUBETA DE PLASTICO DE 15 L BLANCA UNI S/TAPA",
-    "stock": 2983,
+    "stock": 3183,
     "tipo": 1,
     "receta": null
   },
@@ -1072,7 +1080,7 @@
     "codigo": "TP-R20/CP",
     "precio": 0.87,
     "nombre": "TAPA R-20  ( para frasco de vidrio ambar de 30 ml.)",
-    "stock": 4408,
+    "stock": 5538,
     "tipo": 1,
     "receta": null
   },
@@ -1097,7 +1105,7 @@
     "codigo": "BPO-250/CP",
     "precio": 5.25,
     "nombre": "BOTELLA PET OVAL 250 ML R-24 S/TAPA",
-    "stock": 3614,
+    "stock": 34,
     "tipo": 1,
     "receta": null
   },
@@ -1105,7 +1113,7 @@
     "codigo": "TPL-R50-NAT/CP",
     "precio": 1.04,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 50 GRS R-38 S/TAPA",
-    "stock": 2616,
+    "stock": 3738,
     "tipo": 1,
     "receta": null
   },
@@ -1121,7 +1129,7 @@
     "codigo": "BPLB-60-BCO/CP",
     "precio": 1.43,
     "nombre": "BOTELLA PAD BOSTON BLANCA DE 60 ML R-24 S/TAPA",
-    "stock": 14028,
+    "stock": 15104,
     "tipo": 1,
     "receta": null
   },
@@ -1129,7 +1137,7 @@
     "codigo": "GPL-10/CP",
     "precio": 16.1,
     "nombre": "GARRAFA PET DE 10 LTS. CON TAPA Y ASA",
-    "stock": 652,
+    "stock": 709,
     "tipo": 1,
     "receta": null
   },
@@ -1137,7 +1145,7 @@
     "codigo": "TPL-1-R89-NAT/CP",
     "precio": 8.87,
     "nombre": "TARRO DE POLIETILENO NATURAL 1 KG R-89 S/TAPA",
-    "stock": 1821,
+    "stock": 1260,
     "tipo": 1,
     "receta": null
   },
@@ -1145,7 +1153,7 @@
     "codigo": "TPNO-19-U/CP",
     "precio": 43.15,
     "nombre": "TAPA DE PLASTICO NEGRA C/ORIFICIO P/CUBETA DE 15 Y 19 L UNI",
-    "stock": 369,
+    "stock": 802,
     "tipo": 1,
     "receta": null
   },
@@ -1170,7 +1178,7 @@
     "codigo": "BP04-SU-PLATA-500/CP",
     "precio": 4.39,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA PLATA 19X25X9 #04",
-    "stock": 156,
+    "stock": 456,
     "tipo": 1,
     "receta": null
   },
@@ -1195,7 +1203,7 @@
     "codigo": "GPI-2/CP",
     "precio": 14.51,
     "nombre": "GARRAFON DE PLASTICO INDUSTRIAL DE 2 L CON TAPA",
-    "stock": 2714,
+    "stock": 1534,
     "tipo": 1,
     "receta": null
   },
@@ -1203,7 +1211,7 @@
     "codigo": "TF-STDB/CP",
     "precio": 7.8,
     "nombre": "TAPON FLEX SPOUT FS-II BLANCO    ( 1202010419 )",
-    "stock": 31368,
+    "stock": 32514,
     "tipo": 1,
     "receta": null
   },
@@ -1211,15 +1219,15 @@
     "codigo": "VP-4-R110/CP",
     "precio": 15.82,
     "nombre": "VITROLERO PET CILINDRICO DE GALON R-110 S/TAPA",
-    "stock": 2879,
+    "stock": 1567,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TPA220A-REC",
-    "precio": 935.31,
+    "precio": 500,
     "nombre": "TAMBO DE POLIETILENO APM 220 LTS.ABIERTO REC E15AB007DA18",
-    "stock": 0,
+    "stock": 21,
     "tipo": 1,
     "receta": null
   },
@@ -1227,7 +1235,7 @@
     "codigo": "BLPS-2/CP",
     "precio": 31.32,
     "nombre": "BOTE DE LAMINA PRESION SENCILLA DE 2 LT",
-    "stock": 1314,
+    "stock": 1690,
     "tipo": 1,
     "receta": null
   },
@@ -1251,8 +1259,8 @@
   {
     "codigo": "BPAF-1L/CP",
     "precio": 9.18,
-    "nombre": "BOTE DE PLASTICO TAPA FACIL BCO. DE 1 L CON TAPA",
-    "stock": 5472,
+    "nombre": "BOTE DE PLASTICO TAPA FACIL DE 1 L CON TAPA",
+    "stock": 8944,
     "tipo": 1,
     "receta": null
   },
@@ -1294,7 +1302,7 @@
     "codigo": "TPL-4-R110-NAT/CP",
     "precio": 18.45,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 4 KG R-110 S/TAPA",
-    "stock": 698,
+    "stock": 708,
     "tipo": 1,
     "receta": null
   },
@@ -1302,7 +1310,7 @@
     "codigo": "BP16-SU-PLATA-TRANS-70/CP",
     "precio": 3.88,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA PLATA/TRAN 10X15X5 #16",
-    "stock": 2000,
+    "stock": 7560,
     "tipo": 1,
     "receta": null
   },
@@ -1310,7 +1318,7 @@
     "codigo": "PIN-50-U/CP",
     "precio": 343.49,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 50 L C/TAPON UNI",
-    "stock": 1483,
+    "stock": 943,
     "tipo": 1,
     "receta": null
   },
@@ -1318,7 +1326,7 @@
     "codigo": "BP85-SU-NEG-CV-150/CP",
     "precio": 7.64,
     "nombre": "BOLSA SUP NEGRA C/VENTANA OVAL C/ZIPPER 12.7X20.2X7.2 #85",
-    "stock": 5,
+    "stock": 600,
     "tipo": 1,
     "receta": null
   },
@@ -1334,7 +1342,7 @@
     "codigo": "BP81-POLLERA-PLATA-1/CP",
     "precio": 5.09,
     "nombre": "BOLSA POLLERA TRILAMINADA 20X30 #81",
-    "stock": 1500,
+    "stock": 1100,
     "tipo": 1,
     "receta": null
   },
@@ -1342,7 +1350,7 @@
     "codigo": "TFT-R38/CP",
     "precio": 1.8,
     "nombre": "TAPA FLIP TOP R-38",
-    "stock": 48527,
+    "stock": 52832,
     "tipo": 1,
     "receta": null
   },
@@ -1350,7 +1358,7 @@
     "codigo": "AD-R28/410-C-BCO/CP",
     "precio": 4.82,
     "nombre": "ATOMIZADOR DE DEDO R-28/410 BLANCO CON CAPUCHA",
-    "stock": 4355,
+    "stock": 4582,
     "tipo": 1,
     "receta": null
   },
@@ -1358,7 +1366,7 @@
     "codigo": "LFA-24/CP",
     "precio": 0.18,
     "nombre": "LAINER FOIL DE ALUMINIO UNIVERSAL R-24",
-    "stock": 10281,
+    "stock": 11283,
     "tipo": 1,
     "receta": null
   },
@@ -1366,7 +1374,7 @@
     "codigo": "PPSG-G10-RIE/CP",
     "precio": 14648.65,
     "nombre": "PULPO P/COLOCAR SELLO DE GARANTIA G-10  (5005004002)  2\"",
-    "stock": 2,
+    "stock": 3,
     "tipo": 1,
     "receta": null
   },
@@ -1399,7 +1407,7 @@
     "codigo": "M-500/CP",
     "precio": 11.33,
     "nombre": "MOSTACERO NATURAL DE 500 ML",
-    "stock": 1423,
+    "stock": 1509,
     "tipo": 1,
     "receta": null
   },
@@ -1477,7 +1485,7 @@
     "codigo": "TPA-220-A/CP",
     "precio": 1090.7,
     "nombre": "TAMBO DE POLIETILENO APM 220 L ABIERTO E16AB007DA18",
-    "stock": 183,
+    "stock": 80,
     "tipo": 1,
     "receta": null
   },
@@ -1493,7 +1501,7 @@
     "codigo": "BP75-SU-LIQ-250/CP",
     "precio": 5.7,
     "nombre": "BOLSA STAND UP POUCH PARA LIQUIDOS 12.5X20X6 #75",
-    "stock": 880,
+    "stock": 1280,
     "tipo": 1,
     "receta": null
   },
@@ -1526,7 +1534,7 @@
     "codigo": "SGAP-2/CP",
     "precio": 13.73,
     "nombre": "SELLO DE GARANTIA ALL PLASTIC 2 \" BLANCO ( 7000000370 )",
-    "stock": 1302,
+    "stock": 2257,
     "tipo": 1,
     "receta": null
   },
@@ -1534,7 +1542,7 @@
     "codigo": "TPAO-19-M",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO AMARILLA P/CUBETA DE 15 Y 19 L C/ORIF MUN",
-    "stock": 1554,
+    "stock": 1904,
     "tipo": 1,
     "receta": null
   },
@@ -1576,15 +1584,15 @@
     "codigo": "CLSF-19-B-E/CT",
     "precio": 131.5,
     "nombre": "CUBETA DE LAMINA BCA DE 19 L S/FENOL EEE  C/TAPA  *",
-    "stock": 1246,
+    "stock": 1776,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "PIB-5-P/CP",
     "precio": 34.9,
-    "nombre": "PORRON INDUSTRIAL BLANCO DE 5 L C/TAPON AMARILLO 03C3010KA18",
-    "stock": 1376,
+    "nombre": "PORRON INDUSTRIAL BLANCO DE 5 L C/TAPON E03C3010KA18",
+    "stock": 802,
     "tipo": 1,
     "receta": null
   },
@@ -1600,15 +1608,15 @@
     "codigo": "TPBO-19-U/CP",
     "precio": 43.15,
     "nombre": "TAPA DE PLASTICO BLANCA C/ORIFICIO P/19 L Y 15 L UNIV",
-    "stock": 1765,
+    "stock": 2142,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "BPGE-500/CP",
-    "precio": 2.46,
+    "precio": 2.39,
     "nombre": "BOTELLA PET GUARDA ETIQUETA 500 ML S/TAPA",
-    "stock": 5082,
+    "stock": 8449,
     "tipo": 1,
     "receta": null
   },
@@ -1616,7 +1624,7 @@
     "codigo": "FPP-150-CR/CP",
     "precio": 4.11,
     "nombre": "FRASCO PET PASTILLERO 150 ML CRISTAL S/TAPA",
-    "stock": 3905,
+    "stock": 5047,
     "tipo": 1,
     "receta": null
   },
@@ -1668,7 +1676,7 @@
   },
   {
     "codigo": "CPB-TL-19-U",
-    "precio": 147.89,
+    "precio": 128.6,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 19 L CON TAPA LISA UNI",
     "stock": 0,
     "tipo": 2,
@@ -1704,7 +1712,7 @@
     "codigo": "BLSF-ST-1/CP",
     "precio": 11.51,
     "nombre": "BOTE DE LAMINA STOLZ DE 1 L S/FENOL 307X710",
-    "stock": 24719.44,
+    "stock": 23553.44,
     "tipo": 1,
     "receta": null
   },
@@ -1712,7 +1720,7 @@
     "codigo": "BP08-SU-DORADA-250/CP",
     "precio": 2.98,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA DORADA 15X20X7 #08",
-    "stock": 500,
+    "stock": 656,
     "tipo": 1,
     "receta": null
   },
@@ -1720,7 +1728,7 @@
     "codigo": "ECI-R/CP",
     "precio": 13.68,
     "nombre": "EMBUDO CON INSERTO ROSCABLE",
-    "stock": 138,
+    "stock": 144,
     "tipo": 1,
     "receta": null
   },
@@ -1736,7 +1744,7 @@
     "codigo": "TPBL-19-M/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO BLANCA P/CUBETA DE 15 Y 19 L LISA  MUN",
-    "stock": 8627,
+    "stock": 8036,
     "tipo": 1,
     "receta": null
   },
@@ -1744,7 +1752,7 @@
     "codigo": "TPL-500-R70-BCO/CP",
     "precio": 7.22,
     "nombre": "TARRO DE POLIETILENO BCO DE 500 G R-70 S/TAPA",
-    "stock": 8873,
+    "stock": 14966,
     "tipo": 1,
     "receta": null
   },
@@ -1752,7 +1760,7 @@
     "codigo": "GA-125/CP",
     "precio": 4.5,
     "nombre": "GOTERO ALCUZAR NATURAL DE 125 ML CON TAPA",
-    "stock": 8729,
+    "stock": 8815,
     "tipo": 1,
     "receta": null
   },
@@ -1760,7 +1768,7 @@
     "codigo": "LE-70/CP",
     "precio": 0.46,
     "nombre": "LAINER ESPUMADO R-70",
-    "stock": 218304,
+    "stock": 219646,
     "tipo": 1,
     "receta": null
   },
@@ -1776,7 +1784,7 @@
     "codigo": "VPC-1-R110/CP",
     "precio": 8.88,
     "nombre": "VITROLERO PET CILINDRICO DE 1 L R-110 S/TAPA",
-    "stock": 5920,
+    "stock": 4568,
     "tipo": 1,
     "receta": null
   },
@@ -1784,7 +1792,7 @@
     "codigo": "VPC-GAL/CP",
     "precio": 15.82,
     "nombre": "VITROLERO PET CUADRADO GALON S/TAPA",
-    "stock": 2247,
+    "stock": 3396,
     "tipo": 1,
     "receta": null
   },
@@ -1800,7 +1808,7 @@
     "codigo": "LS-38/CP",
     "precio": 0.38,
     "nombre": "LAINER SENSITIVO IMPORTADO R-38",
-    "stock": 51773,
+    "stock": 64178,
     "tipo": 1,
     "receta": null
   },
@@ -1808,7 +1816,7 @@
     "codigo": "PIN-4-P/CP",
     "precio": 18.85,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 4 L C3 C/TAPON NEG E02C3000KA18",
-    "stock": 3400,
+    "stock": 2169,
     "tipo": 1,
     "receta": null
   },
@@ -1833,7 +1841,7 @@
     "codigo": "GPAZ-19L/CP",
     "precio": 80.61,
     "nombre": "GARRAFON PET AZUL 19 L C/ASA S/TAPA",
-    "stock": 89,
+    "stock": 111,
     "tipo": 1,
     "receta": null
   },
@@ -1874,7 +1882,7 @@
     "codigo": "TP-500-R89-BCO/CP",
     "precio": 8.65,
     "nombre": "TARRO POMADERO DE 500 G BCO S/TAPA R-89",
-    "stock": 578,
+    "stock": 632,
     "tipo": 1,
     "receta": null
   },
@@ -1903,7 +1911,7 @@
     "codigo": "BLSF-TTP-250-GZ/CP",
     "precio": 7.1,
     "nombre": "BOTE DE LAMINA DE 250 ML TTP S/FENOL 213X301",
-    "stock": 167305,
+    "stock": 174239,
     "tipo": 1,
     "receta": null
   },
@@ -1911,7 +1919,7 @@
     "codigo": "BP27-SU-BICAPA-NEGRA 250/CP",
     "precio": 4.89,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER BICAPA NEGRA 15X20X6 #27",
-    "stock": 63,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -1940,7 +1948,7 @@
     "codigo": "BP77-SU-LIQ-1/CP",
     "precio": 9.09,
     "nombre": "BOLSA STAND UP POUCH PARA LIQUIDOS 16X26X8 #77",
-    "stock": 370,
+    "stock": 1070,
     "tipo": 1,
     "receta": null
   },
@@ -1948,7 +1956,7 @@
     "codigo": "FPE-150C/T/CP",
     "precio": 4,
     "nombre": "FRASCO PET ESPECIERO DE 150 ML  S/TAPA SIN LAINER",
-    "stock": 12551,
+    "stock": 3318,
     "tipo": 1,
     "receta": null
   },
@@ -1964,7 +1972,7 @@
     "codigo": "BP95-SUP-ROSA-250/CP",
     "precio": 5.94,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROSA 15X20X7 #95",
-    "stock": 299,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -1980,7 +1988,7 @@
     "codigo": "LS-63/CP",
     "precio": 0.83,
     "nombre": "LAINER SENSITIVO IMPORTADO R-63",
-    "stock": 8747,
+    "stock": 12250,
     "tipo": 1,
     "receta": null
   },
@@ -1988,7 +1996,7 @@
     "codigo": "BM-1/2-NEGRO/CP",
     "precio": 0,
     "nombre": "BOTELLA PAD MISIL TIPO BALA NEGRO DE 500 ML S/ TAPA",
-    "stock": 2451,
+    "stock": 2481,
     "tipo": 1,
     "receta": null
   },
@@ -1996,7 +2004,7 @@
     "codigo": "BPC-250/CP",
     "precio": 4.58,
     "nombre": "BOTELLA PET CAMPANA 250 ML R-24/410 S/TAPA",
-    "stock": 1998,
+    "stock": 2160,
     "tipo": 1,
     "receta": null
   },
@@ -2004,7 +2012,7 @@
     "codigo": "CPP-JR-P/CP",
     "precio": 2.07,
     "nombre": "CAJITA DE POLIPROPILENO JR TAPA PRECIÓN (3ml)",
-    "stock": 2731,
+    "stock": 2781,
     "tipo": 1,
     "receta": null
   },
@@ -2012,7 +2020,7 @@
     "codigo": "BPB355R38",
     "precio": 3.87,
     "nombre": "BOTELLA PET BOSTON CRISTAL 355 ML S/TAPA R38 ASEPTICA",
-    "stock": 546,
+    "stock": 600,
     "tipo": 1,
     "receta": null
   },
@@ -2020,7 +2028,7 @@
     "codigo": "BP06-SU-DORADA-70/CP",
     "precio": 3.68,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA DORADA 10X15X5 #06",
-    "stock": 883,
+    "stock": 1100,
     "tipo": 1,
     "receta": null
   },
@@ -2028,7 +2036,7 @@
     "codigo": "BP24-SU-TRANS-500/CP",
     "precio": 4.16,
     "nombre": "BOLSA STAND UP POUCH C/Z TRANSPARENTE500 GRS 19X25X9 #24",
-    "stock": 200,
+    "stock": 1300,
     "tipo": 1,
     "receta": null
   },
@@ -2044,7 +2052,7 @@
     "codigo": "BLSF-ST-500/CP",
     "precio": 8.8,
     "nombre": "BOTE DE LAMINA STOLZ 500 ML S/FENOL 211X604",
-    "stock": 29173,
+    "stock": 29853,
     "tipo": 1,
     "receta": null
   },
@@ -2052,7 +2060,7 @@
     "codigo": "BPA-500-ST/CP",
     "precio": 2.65,
     "nombre": "BOTELLA PET P/AGUA DE 500 ML S/TAPA",
-    "stock": 6345,
+    "stock": 16810,
     "tipo": 1,
     "receta": null
   },
@@ -2060,15 +2068,15 @@
     "codigo": "BPC-500/CP",
     "precio": 5.87,
     "nombre": "BOTELLA PET CAMPANA 500 ML R-28/410 S/TAPA",
-    "stock": 1245,
+    "stock": 1568,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "EPL-1/CP",
-    "precio": 3.46,
+    "precio": 2.63,
     "nombre": "ENVASE PLASTICO LECHERO DE 1 L S/TAPA",
-    "stock": 16756,
+    "stock": 245940.995,
     "tipo": 1,
     "receta": null
   },
@@ -2076,7 +2084,7 @@
     "codigo": "TPC-200-AC/CP",
     "precio": 935.56,
     "nombre": "TAMBO DE PLASTICO DE 200 LTS CERRADO AZUL CELESTE C/TAPONES",
-    "stock": 257,
+    "stock": 349,
     "tipo": 1,
     "receta": null
   },
@@ -2084,7 +2092,7 @@
     "codigo": "BP89-SUP-ROJA-250/CP",
     "precio": 5.94,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROJA 15X20X7 #89",
-    "stock": 490,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -2092,7 +2100,7 @@
     "codigo": "CPP-JR-R/CP",
     "precio": 4.15,
     "nombre": "CAJITA DE POLIPROPILENO JR CON ROSCA (5ml)",
-    "stock": 1801,
+    "stock": 6348,
     "tipo": 1,
     "receta": null
   },
@@ -2104,7 +2112,7 @@
     "tipo": 2,
     "receta": [
       {
-        "codigo_pieza": "BPCB-1-L/CP",
+        "codigo_pieza": "BPCN-1-L/CP",
         "cantidad": 1
       },
       {
@@ -2134,7 +2142,7 @@
     "codigo": "CLSF-CDA-19-B-E/",
     "precio": 136.5,
     "nombre": "CUBETA DE LAMINA DE 19 L CERRADA S/FENOL BCA  EEE    *",
-    "stock": 6732,
+    "stock": 8215,
     "tipo": 1,
     "receta": null
   },
@@ -2142,7 +2150,7 @@
     "codigo": "G-NB-10/CP",
     "precio": 1.83,
     "nombre": "GOTERO DE 10 ML CON INSERTO Y TAPA",
-    "stock": 29907,
+    "stock": 29977,
     "tipo": 1,
     "receta": null
   },
@@ -2156,7 +2164,7 @@
   },
   {
     "codigo": "TPL-1.5-R110-B-CT",
-    "precio": 16.72,
+    "precio": 14.93,
     "nombre": "TARRO DE POLITILENO BLANCO DE 1.5 KG C/TAPA R-110",
     "stock": 0,
     "tipo": 2,
@@ -2175,7 +2183,7 @@
     "codigo": "GPI-1/CP",
     "precio": 4.85,
     "nombre": "GARRAFON DE PLASTICO INDUSTRIAL DE 1 L CON TAPA",
-    "stock": 1287,
+    "stock": 2223,
     "tipo": 1,
     "receta": null
   },
@@ -2183,7 +2191,7 @@
     "codigo": "LS-110/CP",
     "precio": 2.66,
     "nombre": "LAINER SENSITIVO IMPORTADO R-110",
-    "stock": 31810,
+    "stock": 32290,
     "tipo": 1,
     "receta": null
   },
@@ -2191,7 +2199,7 @@
     "codigo": "TPRL-19/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO ROJA LISA PARA 19 LT MUN",
-    "stock": 1488,
+    "stock": 1589,
     "tipo": 1,
     "receta": null
   },
@@ -2233,7 +2241,7 @@
     "codigo": "GIR-NAT/CP",
     "precio": 12.02,
     "nombre": "GALON INDUSTRIAL REDONDO NATURAL S/TAPA R-38",
-    "stock": 4912,
+    "stock": 21781,
     "tipo": 1,
     "receta": null
   },
@@ -2241,7 +2249,7 @@
     "codigo": "BPLAN-1-L/CP",
     "precio": 4.36,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA DE 1 LT. LISA S/TAPA R-28",
-    "stock": 20831,
+    "stock": 22559,
     "tipo": 1,
     "receta": null
   },
@@ -2266,7 +2274,7 @@
     "codigo": "CTP-GAL/CP",
     "precio": 0.71,
     "nombre": "CONTRATAPA PARA GALON INDUSTRIAL R-38",
-    "stock": 22033,
+    "stock": 9198,
     "tipo": 1,
     "receta": null
   },
@@ -2290,7 +2298,7 @@
     "codigo": "BO-E250/CP",
     "precio": 26.8,
     "nombre": "BOMBA ESPUMADORA DE 250 ML.",
-    "stock": 601,
+    "stock": 636,
     "tipo": 1,
     "receta": null
   },
@@ -2298,7 +2306,7 @@
     "codigo": "BP39-SU-KRAFT-500/CP",
     "precio": 9.69,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z METALIZADO INT. 19X25X9 #39",
-    "stock": 400,
+    "stock": 499,
     "tipo": 1,
     "receta": null
   },
@@ -2320,9 +2328,9 @@
   },
   {
     "codigo": "EPL-1/2-GAL/CP",
-    "precio": 5.11,
+    "precio": 3.83,
     "nombre": "ENVASE PLASTICO LECHERO DE MEDIO GALON S/TAPA",
-    "stock": 9747,
+    "stock": 78915,
     "tipo": 1,
     "receta": null
   },
@@ -2330,13 +2338,13 @@
     "codigo": "BP73-FUELLE-AZULMATE-500/CP",
     "precio": 6.62,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA AZUL MATE 11X7X28 #73",
-    "stock": 500,
+    "stock": 499,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "PIG-20-S/CP",
-    "precio": 75.48,
+    "precio": 76.98,
     "nombre": "PORRON INDUSTRIAL GRIS DE 20 L C/TAPON SAMPSON",
     "stock": 0,
     "tipo": 1,
@@ -2346,7 +2354,7 @@
     "codigo": "BP92-SUP-AZUL-250/CP",
     "precio": 5.94,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA AZUL 15X20X7 #92",
-    "stock": 499,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -2354,7 +2362,7 @@
     "codigo": "VD-28/20/CP",
     "precio": 0.65,
     "nombre": "VASO DOSIFICADOR R-28/20",
-    "stock": 4753,
+    "stock": 5795,
     "tipo": 1,
     "receta": null
   },
@@ -2378,7 +2386,7 @@
     "codigo": "BP47-SU-PA-VERDE-CV-500/CP",
     "precio": 9.52,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z VERD PA ARROZ 16.5X26.6X9 #47",
-    "stock": 800,
+    "stock": 799,
     "tipo": 1,
     "receta": null
   },
@@ -2386,7 +2394,7 @@
     "codigo": "LS-33",
     "precio": 0.43,
     "nombre": "LAINER SENSITIVO IMPORTADO R-33",
-    "stock": 25636.995,
+    "stock": 27991.995,
     "tipo": 1,
     "receta": null
   },
@@ -2394,7 +2402,7 @@
     "codigo": "TPC-200-N/CP",
     "precio": 935.56,
     "nombre": "TAMBO DE PLASTICO DE 200 LTS CERRADO NEGRO C/TAPONES",
-    "stock": 31,
+    "stock": 47,
     "tipo": 1,
     "receta": null
   },
@@ -2402,7 +2410,7 @@
     "codigo": "GPA-250-NAT/CP",
     "precio": 5.4,
     "nombre": "GARRAFA P/ANTICONGELANTE NAT 250 ML S/TAPA",
-    "stock": 1007,
+    "stock": 1127,
     "tipo": 1,
     "receta": null
   },
@@ -2410,7 +2418,7 @@
     "codigo": "BCA-1-NAT/CP",
     "precio": 9.45,
     "nombre": "BOTELLA PAD CONICA ANILLADA NATURAL DE 1 L R-28 S/TAPA",
-    "stock": 9491,
+    "stock": 7599,
     "tipo": 1,
     "receta": null
   },
@@ -2426,7 +2434,7 @@
     "codigo": "BPGE-930/CP",
     "precio": 2.6,
     "nombre": "BOTELLA PET GUARDA ETIQUETA 930 ML S/TAPA R-28",
-    "stock": 5879,
+    "stock": 10127,
     "tipo": 1,
     "receta": null
   },
@@ -2434,7 +2442,7 @@
     "codigo": "EPT/CP",
     "precio": 13.68,
     "nombre": "EMBUDO PARA TRANSMISION",
-    "stock": 31,
+    "stock": 32,
     "tipo": 1,
     "receta": null
   },
@@ -2442,7 +2450,7 @@
     "codigo": "LFA-49/CP´",
     "precio": 0.55,
     "nombre": "LAINER FOIL DE ALUMINIO UNIVERSAL R-49",
-    "stock": 6842,
+    "stock": 1842,
     "tipo": 1,
     "receta": null
   },
@@ -2450,7 +2458,7 @@
     "codigo": "VPC-1/2-GAL/CP",
     "precio": 9.88,
     "nombre": "VITROLERO PET CUADRADO MEDIO GALON S/TAPA",
-    "stock": 5087,
+    "stock": 3220,
     "tipo": 1,
     "receta": null
   },
@@ -2466,7 +2474,7 @@
     "codigo": "BPO-125/CP",
     "precio": 3.45,
     "nombre": "BOTELLA PET OVAL DE 125 ML R-24 S/TAPA",
-    "stock": 3220,
+    "stock": 268,
     "tipo": 1,
     "receta": null
   },
@@ -2474,7 +2482,7 @@
     "codigo": "BPQ-500-AM/CP",
     "precio": 5.5,
     "nombre": "BOTELLA PET QUIMICA DE 500 ML AMBAR S/TAPA",
-    "stock": 1346,
+    "stock": 1360,
     "tipo": 1,
     "receta": null
   },
@@ -2482,7 +2490,7 @@
     "codigo": "LS-28/CP",
     "precio": 0.27,
     "nombre": "LAINER SENSITIVO IMPORTADO R-28",
-    "stock": 26079,
+    "stock": 28846,
     "tipo": 1,
     "receta": null
   },
@@ -2490,7 +2498,7 @@
     "codigo": "TLCF-NGA-L/CP",
     "precio": 45.29,
     "nombre": "TAPA DE LAMINA NEGRA LISA SIN FENOL",
-    "stock": 81080,
+    "stock": 80840,
     "tipo": 1,
     "receta": null
   },
@@ -2498,7 +2506,7 @@
     "codigo": "BP93-SUP-AZUL-500/CP",
     "precio": 0,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA AZUL 19X25X9 #93",
-    "stock": 499,
+    "stock": 500,
     "tipo": 1,
     "receta": null
   },
@@ -2506,7 +2514,7 @@
     "codigo": "BP63-FUELLE-NEGMATE-250/CP",
     "precio": 6.15,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA NEGRA MATE 9X2X24 #63",
-    "stock": 500,
+    "stock": 199,
     "tipo": 1,
     "receta": null
   },
@@ -2552,7 +2560,7 @@
     "codigo": "GPI-500/CP",
     "precio": 5.86,
     "nombre": "GARRAFON DE PLASTICO INDUSTRIAL DE 500 ML",
-    "stock": 771,
+    "stock": 815,
     "tipo": 1,
     "receta": null
   },
@@ -2566,9 +2574,9 @@
   },
   {
     "codigo": "PIN-20-S/CP",
-    "precio": 68.48,
+    "precio": 71.88,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 20 L C/TAPON SAMPSON",
-    "stock": 21,
+    "stock": 868,
     "tipo": 1,
     "receta": null
   },
@@ -2601,7 +2609,7 @@
     "codigo": "BPLB-240-BCO/CP",
     "precio": 2.9,
     "nombre": "BOTELLA PAD BOSTON BLANCA DE 250 ML R-24 S/TAPA",
-    "stock": 6970,
+    "stock": 7870,
     "tipo": 1,
     "receta": null
   },
@@ -2609,7 +2617,7 @@
     "codigo": "PPB-DF-240/CP",
     "precio": 23.1,
     "nombre": "POMADERO POLIPRO BCO DOBLE FONDO 240 ML C/TAPA Y DISCO",
-    "stock": 572,
+    "stock": 1525,
     "tipo": 1,
     "receta": null
   },
@@ -2617,7 +2625,7 @@
     "codigo": "GPA-1-N/CP",
     "precio": 8.27,
     "nombre": "GARRAFA P/ANTICONGELANTE  BLANCA 1 L S/TAPA NORTE",
-    "stock": 4237,
+    "stock": 4386,
     "tipo": 1,
     "receta": null
   },
@@ -2633,7 +2641,7 @@
     "codigo": "BP09-SU-DORADA-500/CP",
     "precio": 4.86,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA DORADA 19X25X9 #09",
-    "stock": 400,
+    "stock": 370,
     "tipo": 1,
     "receta": null
   },
@@ -2641,7 +2649,7 @@
     "codigo": "EN-500/CP",
     "precio": 4.45,
     "nombre": "ENVASE NEVERO BLANCO DE 500 ML C/TAPA",
-    "stock": 7660,
+    "stock": 8347,
     "tipo": 1,
     "receta": null
   },
@@ -2657,7 +2665,7 @@
     "codigo": "BMC-B-N-1/CP",
     "precio": 7.63,
     "nombre": "BOTELLA PAD MISIL CON COSTILLA DE 1 L R-38 S/TAPA",
-    "stock": 2790,
+    "stock": 2802,
     "tipo": 1,
     "receta": null
   },
@@ -2665,7 +2673,7 @@
     "codigo": "CPB-10-N-P/CP",
     "precio": 47.87,
     "nombre": "CUBETA DE PLASTICO NEGRA DE 10 L PLASAVO SIN TAPA",
-    "stock": 5232,
+    "stock": 5234,
     "tipo": 1,
     "receta": null
   },
@@ -2673,7 +2681,7 @@
     "codigo": "TP-CIL-250/CP",
     "precio": 3.71,
     "nombre": "TARRO PET CILINDRICO DE 250 ML R-63 S/TAPA",
-    "stock": 12442,
+    "stock": 15647,
     "tipo": 1,
     "receta": null
   },
@@ -2681,7 +2689,7 @@
     "codigo": "VP-450-R89/CP",
     "precio": 6.45,
     "nombre": "VITROLERO PET CILINDRICO DE 450 G R-89 S/TAPA",
-    "stock": 2869,
+    "stock": 4572,
     "tipo": 1,
     "receta": null
   },
@@ -2689,7 +2697,7 @@
     "codigo": "TDT-20/410/CP",
     "precio": 1.71,
     "nombre": "TAPA DISC TOP 20/410",
-    "stock": 52220,
+    "stock": 52547,
     "tipo": 1,
     "receta": null
   },
@@ -2735,7 +2743,7 @@
     "codigo": "BPF-120-AMB/CP",
     "precio": 4.46,
     "nombre": "BOTELLA PET FARMACEUTICA DE 120 ML AMBAR S/TAPA",
-    "stock": 4085,
+    "stock": 4145,
     "tipo": 1,
     "receta": null
   },
@@ -2776,7 +2784,7 @@
     "codigo": "BP65-FUELLE-NEGMATE-1/CP",
     "precio": 7.69,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA NEGRA MATE 14X4X36 #65",
-    "stock": 0,
+    "stock": 900,
     "tipo": 1,
     "receta": null
   },
@@ -2784,7 +2792,7 @@
     "codigo": "BP26-SU-BICAPA-NEGRA 150/CP",
     "precio": 5.78,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER BICAPA NEGRA 12X20X6 #26",
-    "stock": 200,
+    "stock": 391,
     "tipo": 1,
     "receta": null
   },
@@ -2792,7 +2800,7 @@
     "codigo": "CPB-1/CP",
     "precio": 11.16,
     "nombre": "CUBETA DE PLASTICO DE 1 L BCA C/TAPA",
-    "stock": 1169,
+    "stock": 1983,
     "tipo": 1,
     "receta": null
   },
@@ -2800,7 +2808,7 @@
     "codigo": "TPNL-19-U/CP",
     "precio": 43.15,
     "nombre": "TAPA DE PLASTICO NEGRA  LISA P/CUBETA DE 15 Y19 LTS UNI",
-    "stock": 6175,
+    "stock": 6662,
     "tipo": 1,
     "receta": null
   },
@@ -2816,15 +2824,15 @@
     "codigo": "CPB-4-REC-GDL/CP",
     "precio": 14.32,
     "nombre": "CUBETA DE PLASTICO REC DE 4 L GDL S/TAPA",
-    "stock": 2414,
+    "stock": 132717.91,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TPLG-1-R110-BCO/CP",
-    "precio": 6.75,
+    "precio": 5.46,
     "nombre": "TARRO DE POLIETILENO GRASERO BLANCO DE 1 KG S/TAPA R-110",
-    "stock": 2582,
+    "stock": 2935,
     "tipo": 1,
     "receta": null
   },
@@ -2840,7 +2848,7 @@
     "codigo": "CTP-24/CP",
     "precio": 0.6,
     "nombre": "CONTRATAPA ROSCA 24",
-    "stock": 7774,
+    "stock": 274,
     "tipo": 1,
     "receta": null
   },
@@ -2856,7 +2864,7 @@
     "codigo": "CPB-RE-2/CP",
     "precio": 13.16,
     "nombre": "CUBETA DE PLASTICO REC DE 2 L C/TAPA",
-    "stock": 805,
+    "stock": 888,
     "tipo": 1,
     "receta": null
   },
@@ -2880,7 +2888,7 @@
     "codigo": "G-NB-20/CP",
     "precio": 2.15,
     "nombre": "GOTERO DE 20 ML CON INSERTO Y TAPA",
-    "stock": 29498,
+    "stock": 30338,
     "tipo": 1,
     "receta": null
   },
@@ -2922,7 +2930,7 @@
     "codigo": "BPLA-60/CP",
     "precio": 1.36,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA 60 ML R-22 S/TAPA",
-    "stock": 2315,
+    "stock": 3286,
     "tipo": 1,
     "receta": null
   },
@@ -2930,7 +2938,7 @@
     "codigo": "BP34-SU-BCA-TRANS-150/CP",
     "precio": 3.84,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA BCA TRANS 12X20X6 #34",
-    "stock": 1300,
+    "stock": 798,
     "tipo": 1,
     "receta": null
   },
@@ -2963,15 +2971,15 @@
     "codigo": "BLSF-TTP-GAL/CP",
     "precio": 30.85,
     "nombre": "BOTE DE LAMINA DE GALON AMERICANO TTP S/FENOL 610X711",
-    "stock": 3050,
+    "stock": 3888,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "EPL-GAL/CP",
-    "precio": 6.61,
+    "precio": 5.89,
     "nombre": "ENVASE PLASTICO LECHERO DE GALON S/TAPA",
-    "stock": 956,
+    "stock": 92600,
     "tipo": 1,
     "receta": null
   },
@@ -2979,7 +2987,7 @@
     "codigo": "GP-5-NAT/CP",
     "precio": 18,
     "nombre": "GARRAFA MALETIN NATURAL DE 5 L R-38 GDL S/TAPA",
-    "stock": 703,
+    "stock": 818,
     "tipo": 1,
     "receta": null
   },
@@ -2987,7 +2995,7 @@
     "codigo": "TFT-20/410/CP",
     "precio": 1.62,
     "nombre": "TAPA FLIP TOP R-20/410",
-    "stock": 3820,
+    "stock": 3955,
     "tipo": 1,
     "receta": null
   },
@@ -3003,7 +3011,7 @@
     "codigo": "GIC-NAT/CP",
     "precio": 12.46,
     "nombre": "GALON INDUSTRIAL CUADRADO NATURAL S/TAPA R-38",
-    "stock": 8023,
+    "stock": 2902,
     "tipo": 1,
     "receta": null
   },
@@ -3011,15 +3019,15 @@
     "codigo": "PAMT-24-410-COL/CP",
     "precio": 6.08,
     "nombre": "PISTOLA ATOMIZADORA MINITRIGGER R-24 COLORES",
-    "stock": 2904,
+    "stock": 3193,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "CPN-19-M/CP",
-    "precio": 74.38,
+    "precio": 65.13,
     "nombre": "CUBETA DE PLASTICO DE 19 L NEGRA MUNDI S/TAPA",
-    "stock": 8340,
+    "stock": 8907,
     "tipo": 1,
     "receta": null
   },
@@ -3027,7 +3035,7 @@
     "codigo": "TPB-4-GDL/CP",
     "precio": 12.29,
     "nombre": "TAPA DE PLASTICO BLANCA PARA 4 L GDL",
-    "stock": 9022,
+    "stock": 7252,
     "tipo": 1,
     "receta": null
   },
@@ -3035,7 +3043,7 @@
     "codigo": "TP-CIL-750/CP",
     "precio": 6.07,
     "nombre": "TARRO PET CILINDRICO DE 750 ML R-63 S/TAPA",
-    "stock": 549,
+    "stock": 1084,
     "tipo": 1,
     "receta": null
   },
@@ -3043,7 +3051,7 @@
     "codigo": "TPPT-RS-2/CP",
     "precio": 20.51,
     "nombre": "TAPON DE PLASTICO PARA TAMBO ROSCA STD 2\"",
-    "stock": 4758,
+    "stock": 5088,
     "tipo": 1,
     "receta": null
   },
@@ -3051,7 +3059,7 @@
     "codigo": "CPB-8/CP",
     "precio": 89.5,
     "nombre": "CUBETA DE PLASTICO DE 8 L BLANCA UNI SIN TAPA",
-    "stock": 3552,
+    "stock": 4483,
     "tipo": 1,
     "receta": null
   },
@@ -3059,7 +3067,7 @@
     "codigo": "BPT-CIL-BCO-1/CP",
     "precio": 11.68,
     "nombre": "BOTE DE PLAST TINTERO CILINDRICO BCO DE 1 L C/TAPA",
-    "stock": 6023,
+    "stock": 7060,
     "tipo": 1,
     "receta": null
   },
@@ -3121,7 +3129,7 @@
     "codigo": "TPAL-19M",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO AMARILLA  LISA P/ CUBETA DE 15 Y 19 LT MUND",
-    "stock": 135,
+    "stock": 160,
     "tipo": 1,
     "receta": null
   },
@@ -3129,7 +3137,7 @@
     "codigo": "BP14-SU-BLANCA-500/CP",
     "precio": 6.86,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA BCA 19X25X9 #14",
-    "stock": 22,
+    "stock": 624,
     "tipo": 1,
     "receta": null
   },
@@ -3137,7 +3145,7 @@
     "codigo": "FPP-110-AM/CP",
     "precio": 3.4,
     "nombre": "FRASCO PET PASTILLERO 110 ML AMBAR S/TAPA R-38",
-    "stock": 0,
+    "stock": 95,
     "tipo": 1,
     "receta": null
   },
@@ -3145,7 +3153,7 @@
     "codigo": "LL-PP-10/CP",
     "precio": 159.38,
     "nombre": "LLAVE PARA ABRIR PORRON DE 10 L",
-    "stock": 11,
+    "stock": 14,
     "tipo": 1,
     "receta": null
   },
@@ -3153,7 +3161,7 @@
     "codigo": "BPH-180/CP",
     "precio": 2.55,
     "nombre": "BOTELLA PET HABANERA DE 180 ML R-24 S/TAPA",
-    "stock": 13175,
+    "stock": 13798,
     "tipo": 1,
     "receta": null
   },
@@ -3186,7 +3194,7 @@
     "codigo": "BPQ-500-CR/CP",
     "precio": 4.21,
     "nombre": "BOTELLA PET QUIMICA DE 500 ML CRISTAL S/TAPA",
-    "stock": 633,
+    "stock": 648,
     "tipo": 1,
     "receta": null
   },
@@ -3194,7 +3202,7 @@
     "codigo": "GPP-440/CP",
     "precio": 3.08,
     "nombre": "GARRAFA PET PIÑA DE 440 ML CON TAPA Y ASA",
-    "stock": 2599,
+    "stock": 2699,
     "tipo": 1,
     "receta": null
   },
@@ -3210,7 +3218,7 @@
     "codigo": "BP03-SU-PLATA-250/CP",
     "precio": 3.06,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA PLATA 15X20X7 #03",
-    "stock": 372,
+    "stock": 937,
     "tipo": 1,
     "receta": null
   },
@@ -3218,7 +3226,7 @@
     "codigo": "TP-CIL-500/CP",
     "precio": 4.21,
     "nombre": "TARRO PET CILINDRICO DE 1/2 L R-63 S/TAPA",
-    "stock": 17181,
+    "stock": 28645,
     "tipo": 1,
     "receta": null
   },
@@ -3226,15 +3234,15 @@
     "codigo": "GP-4-BCA/CP",
     "precio": 15.95,
     "nombre": "GARRAFA PAD BLANCA DE 4L R-38 GDL PLASTI C/TAPA E02E2110HB18",
-    "stock": 13112,
+    "stock": 10780,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "PIA-20-S/CP",
-    "precio": 72.98,
+    "precio": 74.43,
     "nombre": "PORRON INDUSTRIAL AZUL DE 20 L C/TAPON SAMPSOM",
-    "stock": 70,
+    "stock": 156,
     "tipo": 1,
     "receta": null
   },
@@ -3267,7 +3275,7 @@
     "codigo": "PP-250/CP",
     "precio": 20.76,
     "nombre": "PIZETA DE POLIETILENO DE 250 ML C/TAPA",
-    "stock": 1392,
+    "stock": 1432,
     "tipo": 1,
     "receta": null
   },
@@ -3275,7 +3283,7 @@
     "codigo": "TP-R38-CC/CP",
     "precio": 1.47,
     "nombre": "TAPA R-38 CON CINTILLO",
-    "stock": 5814,
+    "stock": 8231,
     "tipo": 1,
     "receta": null
   },
@@ -3291,7 +3299,7 @@
     "codigo": "TPP-5/CP",
     "precio": 3.3,
     "nombre": "TARRITO DE POLIPROPILENO NO. 5 CON TAPA (20 mL)",
-    "stock": 11694,
+    "stock": 10753,
     "tipo": 1,
     "receta": null
   },
@@ -3299,7 +3307,7 @@
     "codigo": "T-R70/CP",
     "precio": 2.2,
     "nombre": "TAPA R-70",
-    "stock": 31322,
+    "stock": 41253,
     "tipo": 1,
     "receta": null
   },
@@ -3307,7 +3315,7 @@
     "codigo": "BLSF-CDO-4-GZ-CA/CP",
     "precio": 32.48,
     "nombre": "BOTE DE LAMINA CERRADO DE 4 LS/FENOL 610X802 CON ASA",
-    "stock": 42929,
+    "stock": 36204,
     "tipo": 1,
     "receta": null
   },
@@ -3315,7 +3323,7 @@
     "codigo": "TV-R-40/410/CP",
     "precio": 0,
     "nombre": "TAPA CON VALVULA R-38",
-    "stock": 260,
+    "stock": 337,
     "tipo": 1,
     "receta": null
   },
@@ -3323,7 +3331,7 @@
     "codigo": "TPL-125-R58-NAT/CP",
     "precio": 2.4,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 125 GRS R-58 S/TAPA",
-    "stock": 10844,
+    "stock": 11141,
     "tipo": 1,
     "receta": null
   },
@@ -3331,7 +3339,7 @@
     "codigo": "CPP-3/CP",
     "precio": 3,
     "nombre": "CAJITA DE POLIPROPILENO NO. 3 CON TAPA (25 mL)",
-    "stock": 2319,
+    "stock": 2419,
     "tipo": 1,
     "receta": null
   },
@@ -3339,7 +3347,7 @@
     "codigo": "TPPC-5/CP",
     "precio": 3.34,
     "nombre": "TARRITO DE POLIPROPILENO COLORES NO. 5 CON TAPA (20 mL)",
-    "stock": 1980,
+    "stock": 1990,
     "tipo": 1,
     "receta": null
   },
@@ -3372,7 +3380,7 @@
     "codigo": "TDT-24/415/CP",
     "precio": 2.02,
     "nombre": "TAPA DISC TOP 24/415",
-    "stock": 6060,
+    "stock": 6138,
     "tipo": 1,
     "receta": null
   },
@@ -3388,7 +3396,7 @@
     "codigo": "BP25-SU-TRANS-1/CP",
     "precio": 6.01,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRANSPARENTE 1KG 22X32X9 #25",
-    "stock": 568,
+    "stock": 1470,
     "tipo": 1,
     "receta": null
   },
@@ -3413,13 +3421,13 @@
     "codigo": "CPPT-200-CLICK/CP",
     "precio": 13.5,
     "nombre": "CUBRE POLVO PARA TAMBO DE PLASTICO CLICK",
-    "stock": 1574,
+    "stock": 2305,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "CPN-TL-4-M",
-    "precio": 30.63,
+    "precio": 25.13,
     "nombre": "CUBETA DE PLASTICO NEGRA DE 4 L CON TAPA MUNDI",
     "stock": 0,
     "tipo": 2,
@@ -3438,7 +3446,7 @@
     "codigo": "EPP-CIL-1000/CP",
     "precio": 7.5,
     "nombre": "ENVASE P/PEGAMENTO CIL 1 L C/CONO Y RONDANA",
-    "stock": 2054,
+    "stock": 2145,
     "tipo": 1,
     "receta": null
   },
@@ -3513,7 +3521,7 @@
     "codigo": "BPF-60-CR/CP",
     "precio": 2.69,
     "nombre": "BOTELLA PET FARMACEUTICA DE 60 ML CRISTAL S/TAPA",
-    "stock": 2967,
+    "stock": 3187,
     "tipo": 1,
     "receta": null
   },
@@ -3529,13 +3537,13 @@
     "codigo": "PINA-20-S/CP",
     "precio": 78.45,
     "nombre": "PORRON INDUSTRIAL NARANJA DE 20 L C/TAPON SAMPSON",
-    "stock": 779,
+    "stock": 780,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "CPB-TO-FLEX-15-U",
-    "precio": 147.39,
+    "precio": 129.18,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 15 L CON TAPA Y FLEX UNI",
     "stock": 0,
     "tipo": 2,
@@ -3558,7 +3566,7 @@
     "codigo": "BP-RE-60X90/CP",
     "precio": 66.16,
     "nombre": "BOLSA DE PLASTICO REC. 60X90   (por kg. )",
-    "stock": 3865,
+    "stock": 3765,
     "tipo": 1,
     "receta": null
   },
@@ -3566,7 +3574,7 @@
     "codigo": "BPA-1.5/CP",
     "precio": 4.26,
     "nombre": "BOTELLA PET PARA AGUA DE 1.5 L S/TAPA",
-    "stock": 818,
+    "stock": 1081,
     "tipo": 1,
     "receta": null
   },
@@ -3582,7 +3590,7 @@
     "codigo": "BP87-SU-NEG-CV-500/CP",
     "precio": 6.72,
     "nombre": "BOLSA STAND UP NEGRA C/VENTANA OVAL C/ZIPPER 16.5X26.5X5 #87",
-    "stock": 5,
+    "stock": 700,
     "tipo": 1,
     "receta": null
   },
@@ -3661,7 +3669,7 @@
     "codigo": "PIN-50-P/CP",
     "precio": 193,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 50 L C/TAPON NEG E10C3000JD18",
-    "stock": 507,
+    "stock": 61,
     "tipo": 1,
     "receta": null
   },
@@ -3690,7 +3698,7 @@
     "codigo": "GCPNAT-1LT S/T",
     "precio": 12.5,
     "nombre": "GARRAFON CUADRADO DE POLIETILENO  NATURAL DE 1 L S/TAPA R-50",
-    "stock": 3534,
+    "stock": 4240,
     "tipo": 1,
     "receta": null
   },
@@ -3713,7 +3721,7 @@
   },
   {
     "codigo": "TPL-1-R89-BCO-CT",
-    "precio": 10.46,
+    "precio": 9.34,
     "nombre": "TARRO DE POLIETILENO BCO DE 1 KG R-89 C/TAPA",
     "stock": 0,
     "tipo": 2,
@@ -3732,7 +3740,7 @@
     "codigo": "PPN-DF-60/CP",
     "precio": 13.9,
     "nombre": "POMADERO POLIPRO NAT DOBLE FONDO 60 ML C/TAPA Y DISCO",
-    "stock": 1141,
+    "stock": 1430,
     "tipo": 1,
     "receta": null
   },
@@ -3740,7 +3748,7 @@
     "codigo": "TDT-28/415/CP",
     "precio": 2.02,
     "nombre": "TAPA DISC TOP 28-415",
-    "stock": 30474,
+    "stock": 30479,
     "tipo": 1,
     "receta": null
   },
@@ -3789,7 +3797,7 @@
     "codigo": "CPB-19-U/CP",
     "precio": 115.74,
     "nombre": "CUBETA DE PLASTICO 19 L BLANCA UNI SIN TAPA",
-    "stock": 796,
+    "stock": 1398,
     "tipo": 1,
     "receta": null
   },
@@ -3813,7 +3821,7 @@
     "codigo": "BP22-SU-TRANS-150/CP",
     "precio": 3.45,
     "nombre": "BOLSA STAND UP POUCH C/Z TRANSPARENTE 150 GR 12X20X6 #22",
-    "stock": 800,
+    "stock": 1000,
     "tipo": 1,
     "receta": null
   },
@@ -3835,18 +3843,10 @@
     ]
   },
   {
-    "codigo": "CPB-23-EM/CP",
-    "precio": 95.26,
-    "nombre": "CUBETA DE PLASTICO BLANCA DE 23 L S/TAPA",
-    "stock": 0,
-    "tipo": 1,
-    "receta": null
-  },
-  {
     "codigo": "CLSF-19-N-E/CT",
     "precio": 131.5,
     "nombre": "CUBETA DE LAMINA NEGRA DE 19 L S/FENOL EEE  C/TAPA   *",
-    "stock": 15998,
+    "stock": 15838,
     "tipo": 1,
     "receta": null
   },
@@ -3866,14 +3866,6 @@
         "cantidad": 1
       }
     ]
-  },
-  {
-    "codigo": "J-2018",
-    "precio": 0,
-    "nombre": "JETTA MK VI 4 PUERTAS",
-    "stock": 0,
-    "tipo": 1,
-    "receta": null
   },
   {
     "codigo": "FPP-110-CR-CT",
@@ -3900,7 +3892,7 @@
     "codigo": "BP82-POLLERA-PLATA-1.5/CP",
     "precio": 3.99,
     "nombre": "BOLSA POLLERA TRILAMINADA 25X35 #82",
-    "stock": 1500,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -3908,7 +3900,7 @@
     "codigo": "BP50-SU-PA-BCA-CV-250/CP",
     "precio": 8.15,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z BCA PAPEL ARROZ 15X23X7 #50",
-    "stock": 369,
+    "stock": 469,
     "tipo": 1,
     "receta": null
   },
@@ -3916,15 +3908,15 @@
     "codigo": "GPA-1-BCO/CP",
     "precio": 9.08,
     "nombre": "GARRAFA P/ANTICONGELANTE BCO 1 L E01P0010HB10 S/TAPA",
-    "stock": 5106,
+    "stock": 3146,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TP-R22/CP",
-    "precio": 0.6,
+    "precio": 0.53,
     "nombre": "TAPA R-22",
-    "stock": 31121,
+    "stock": 24280,
     "tipo": 1,
     "receta": null
   },
@@ -3940,7 +3932,7 @@
     "codigo": "BP48-SU-PA-BCA-CV-70/CP",
     "precio": 7.53,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z BCA PAPEL ARROZ 10X15X5 #48",
-    "stock": 500,
+    "stock": 599,
     "tipo": 1,
     "receta": null
   },
@@ -3948,7 +3940,7 @@
     "codigo": "BP45-SU-PA-VERDE-CV-150/CP",
     "precio": 6.62,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z VERDE PAPEL ARROZ 12X20X6 #45",
-    "stock": 500,
+    "stock": 489,
     "tipo": 1,
     "receta": null
   },
@@ -3956,7 +3948,7 @@
     "codigo": "BD-38/400-S/CP",
     "precio": 23.71,
     "nombre": "BOMBA DOSIFICADORA 38/400 BCA SENCILLO (10 ml. )",
-    "stock": 9537,
+    "stock": 9647,
     "tipo": 1,
     "receta": null
   },
@@ -4002,7 +3994,7 @@
     "codigo": "BP69-FUELLE-VERMATE-250/CP",
     "precio": 6.15,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA VERDE MATE 9X2X24 #69",
-    "stock": 480,
+    "stock": 379,
     "tipo": 1,
     "receta": null
   },
@@ -4018,7 +4010,7 @@
     "codigo": "M-250/CP",
     "precio": 6.67,
     "nombre": "MOSTACERO NATURAL DE 250 ML",
-    "stock": 2842,
+    "stock": 2846,
     "tipo": 1,
     "receta": null
   },
@@ -4026,7 +4018,7 @@
     "codigo": "TP-R58/CP",
     "precio": 1.88,
     "nombre": "TAPA R-58",
-    "stock": 13053,
+    "stock": 13350,
     "tipo": 1,
     "receta": null
   },
@@ -4034,7 +4026,7 @@
     "codigo": "FPE-120/CP",
     "precio": 3.27,
     "nombre": "FRASCO PET ESPECIERO DE 120 ML S/TAPA",
-    "stock": 19011,
+    "stock": 24596,
     "tipo": 1,
     "receta": null
   },
@@ -4059,7 +4051,7 @@
     "codigo": "BP35-SU-DORADA-TRANS-150/CP",
     "precio": 4,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA DORADA TRAN 12X20X6 #35",
-    "stock": 200,
+    "stock": 1203,
     "tipo": 1,
     "receta": null
   },
@@ -4067,7 +4059,7 @@
     "codigo": "TPL-250-R70-NEG/CP",
     "precio": 4.22,
     "nombre": "TARRO DE POLIETILENO NEGRO DE 250 G R-70 S/TAPA",
-    "stock": 4487,
+    "stock": 4867,
     "tipo": 1,
     "receta": null
   },
@@ -4075,7 +4067,7 @@
     "codigo": "BP99-SU-LIQP-1/CP",
     "precio": 5.53,
     "nombre": "BOLSA LIQUIDOS STAND UP POUCH C/POPOTE 1 L 16X25X8.5 #99",
-    "stock": 398,
+    "stock": 500,
     "tipo": 1,
     "receta": null
   },
@@ -4091,7 +4083,7 @@
     "codigo": "TPA-120-A/CP",
     "precio": 687.7,
     "nombre": "TAMBO DE POLIETILENO APM 120 LTS. ABIERTO  E13IP007IA18",
-    "stock": 46,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -4116,7 +4108,7 @@
     "codigo": "BPLA-30/CP",
     "precio": 1.12,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA DE 30 ML R-24 S/TAPA",
-    "stock": 1460,
+    "stock": 1793,
     "tipo": 1,
     "receta": null
   },
@@ -4124,7 +4116,7 @@
     "codigo": "TPC-200-B/CP",
     "precio": 1055,
     "nombre": "TAMBO DE PLASTICO DE 200 LTS CERRADO BLANCO C/TAPONES",
-    "stock": 0,
+    "stock": 31,
     "tipo": 1,
     "receta": null
   },
@@ -4132,7 +4124,7 @@
     "codigo": "BPP-30-FT/CP",
     "precio": 7.78,
     "nombre": "BOTELLA PET PIRAMIDE DE 30 ML S/FUNDA",
-    "stock": 2104,
+    "stock": 3029,
     "tipo": 1,
     "receta": null
   },
@@ -4140,7 +4132,7 @@
     "codigo": "BP15-SU-BLANCA-1/CP",
     "precio": 8.39,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA BCA 22X32X9 #15",
-    "stock": 800,
+    "stock": 400,
     "tipo": 1,
     "receta": null
   },
@@ -4148,7 +4140,7 @@
     "codigo": "TF-STD/CP",
     "precio": 7.8,
     "nombre": "TAPON FLEX STD   (  3004000001 )",
-    "stock": 122043,
+    "stock": 140610,
     "tipo": 1,
     "receta": null
   },
@@ -4156,7 +4148,7 @@
     "codigo": "TPET-750-PS/CP",
     "precio": 7.16,
     "nombre": "TARRO PET 750 ML PROMO SPORT (COLORES) R-63 S/TAPA",
-    "stock": 872,
+    "stock": 884,
     "tipo": 1,
     "receta": null
   },
@@ -4164,7 +4156,7 @@
     "codigo": "BPS-3L/CP",
     "precio": 9.75,
     "nombre": "BOTELLA SUAVITEL 3 L R-63 S/TAPA",
-    "stock": 437,
+    "stock": 480,
     "tipo": 1,
     "receta": null
   },
@@ -4188,7 +4180,7 @@
     "codigo": "BPB-120/CP",
     "precio": 2.81,
     "nombre": "BOTELLA PET BOSTON 120 ML R-20 S/TAPA",
-    "stock": 358,
+    "stock": 349,
     "tipo": 1,
     "receta": null
   },
@@ -4196,7 +4188,7 @@
     "codigo": "BM-.500-BCA/CP",
     "precio": 7.38,
     "nombre": "BOTELLA PAD MISIL TIPO BALA BCA DE 500 ML S/TAPA",
-    "stock": 2150,
+    "stock": 2205,
     "tipo": 1,
     "receta": null
   },
@@ -4204,7 +4196,7 @@
     "codigo": "BP21-SU-TRANS-70/CP",
     "precio": 3.55,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRANSPARENTE 70 10X15X5 #21",
-    "stock": 1500,
+    "stock": 182,
     "tipo": 1,
     "receta": null
   },
@@ -4229,7 +4221,7 @@
     "codigo": "BP70-FUELLE-VERMATE-500/CP",
     "precio": 6.62,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA VERDE MATE 11X7X28 #70",
-    "stock": 100,
+    "stock": 99,
     "tipo": 1,
     "receta": null
   },
@@ -4237,7 +4229,7 @@
     "codigo": "PP-500/CP",
     "precio": 23.23,
     "nombre": "PIZETA DE POLIETILENO DE 500 ML C/TAPA",
-    "stock": 483,
+    "stock": 533,
     "tipo": 1,
     "receta": null
   },
@@ -4245,13 +4237,13 @@
     "codigo": "TPBL-4-M/CP",
     "precio": 12.29,
     "nombre": "TAPA DE PLASTICO BLANCA PARA CUBETA DE 4 L MUN",
-    "stock": 7015,
+    "stock": 870,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "EPL-GAL-CT",
-    "precio": 11.13,
+    "precio": 8.6,
     "nombre": "ENVASE PLASTICO LECHERO DE GALON C/TAPA",
     "stock": 0,
     "tipo": 2,
@@ -4270,15 +4262,15 @@
     "codigo": "CPA-19-M/CP",
     "precio": 76.25,
     "nombre": "CUBETA DE PLASTICO DE 19 L AZUL LTH MUN C/LIT S/TAPA",
-    "stock": 845,
+    "stock": 1764,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "EPL-500/CP",
-    "precio": 1.94,
+    "precio": 1.48,
     "nombre": "ENVASE PLASTICO LECHERO DE 500 ML S/TAPA",
-    "stock": 8360,
+    "stock": 9932,
     "tipo": 1,
     "receta": null
   },
@@ -4286,7 +4278,7 @@
     "codigo": "TFT-24/410-BCA/CP",
     "precio": 2.39,
     "nombre": "TAPA FLIP TOP R-24/410 BLANCA",
-    "stock": 32634.61,
+    "stock": 33524.61,
     "tipo": 1,
     "receta": null
   },
@@ -4349,7 +4341,7 @@
     "codigo": "BPSQ-500/CP",
     "precio": 5.9,
     "nombre": "BOTELLA PET SQUEEZABLE 500 ML S/TAPA",
-    "stock": 3191,
+    "stock": 997,
     "tipo": 1,
     "receta": null
   },
@@ -4357,7 +4349,7 @@
     "codigo": "LS-24/CP",
     "precio": 0.19,
     "nombre": "LAINER SENSITIVO IMPORTADO R-24",
-    "stock": 34646,
+    "stock": 36126,
     "tipo": 1,
     "receta": null
   },
@@ -4365,7 +4357,7 @@
     "codigo": "TPP-20/50-VA/CP",
     "precio": 25,
     "nombre": "TAPON PARA PORRON DE 20-50 L CON VALVULA DE ALIVIO GORE",
-    "stock": 18,
+    "stock": 127,
     "tipo": 1,
     "receta": null
   },
@@ -4415,7 +4407,7 @@
     "codigo": "BLSF-TTP-1A/CP",
     "precio": 14.78,
     "nombre": "BOTE DE LAMINA DE 1 L AMERICANO TTP S/FENOL 404X414",
-    "stock": 13664,
+    "stock": 6804,
     "tipo": 1,
     "receta": null
   },
@@ -4423,7 +4415,7 @@
     "codigo": "BLSF-TTP-500-GZ/CP",
     "precio": 8.32,
     "nombre": "BOTE DE LAMINA DE 500 ML TTP S/FENOL 307X403",
-    "stock": 70376,
+    "stock": 76779,
     "tipo": 1,
     "receta": null
   },
@@ -4431,7 +4423,7 @@
     "codigo": "TPL-4-R110-BCO/CP",
     "precio": 18.45,
     "nombre": "TARRO DE POLIETILENO BCO DE 4 KG R-110 S/TAPA",
-    "stock": 2773,
+    "stock": 3653,
     "tipo": 1,
     "receta": null
   },
@@ -4439,7 +4431,7 @@
     "codigo": "LS-70/CP",
     "precio": 0.91,
     "nombre": "LAINER SENSITIVO IMPORTADO R-70",
-    "stock": 11195,
+    "stock": 15065,
     "tipo": 1,
     "receta": null
   },
@@ -4455,7 +4447,7 @@
     "codigo": "EPP-OV-125/CP",
     "precio": 2.63,
     "nombre": "ENVASE P/PEGAMENTO OVAL 125 ML C/TAPA GIRATORIA",
-    "stock": 699,
+    "stock": 700,
     "tipo": 1,
     "receta": null
   },
@@ -4479,7 +4471,7 @@
     "codigo": "BPA-250-S/T/CP",
     "precio": 2.72,
     "nombre": "BOTELLA PET PARA AGUA 250 ML S/TAPA",
-    "stock": 3676,
+    "stock": 6530,
     "tipo": 1,
     "receta": null
   },
@@ -4487,7 +4479,7 @@
     "codigo": "TPA-200/CP",
     "precio": 1078.75,
     "nombre": "TAMBO DE PLASTICO DE 200 LTS ABIERTO C/ARO Y CINCHO",
-    "stock": 54,
+    "stock": 114,
     "tipo": 1,
     "receta": null
   },
@@ -4512,7 +4504,7 @@
     "codigo": "BP83-SU-BCA-TRANS-250/CP",
     "precio": 3.55,
     "nombre": "BOLSA STAND UP C/ZIPER TRILAMINADA BCA/TRANSP 15X20X6 #83",
-    "stock": 700,
+    "stock": 779,
     "tipo": 1,
     "receta": null
   },
@@ -4520,7 +4512,7 @@
     "codigo": "SGAA-2/CP",
     "precio": 5.5,
     "nombre": "SELLO DE GARANTIA C/ARO DE ALUMINIO P/TAMBO 2\"",
-    "stock": 2760,
+    "stock": 3700,
     "tipo": 1,
     "receta": null
   },
@@ -4536,7 +4528,7 @@
     "codigo": "CPP-4/CP",
     "precio": 4.48,
     "nombre": "CAJITA DE POLIPROPILENO NO. 4 CON TAPA 60 GRS.",
-    "stock": 2210,
+    "stock": 3963,
     "tipo": 1,
     "receta": null
   },
@@ -4544,7 +4536,7 @@
     "codigo": "BPC500R38",
     "precio": 3.87,
     "nombre": "BOTELLA PET CUADRADA CRISTAL 500 ML R-38",
-    "stock": 355,
+    "stock": 405,
     "tipo": 1,
     "receta": null
   },
@@ -4552,7 +4544,7 @@
     "codigo": "BP66-FUELLE-BCAMATE-250/CP",
     "precio": 6.15,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA BLANCA MATE 9X2X24 #66",
-    "stock": 500,
+    "stock": 499,
     "tipo": 1,
     "receta": null
   },
@@ -4594,7 +4586,7 @@
     "codigo": "LFA-28/CP",
     "precio": 0.2,
     "nombre": "LAINER FOIL DE ALUMINIO UNIVERSAL R-28",
-    "stock": 47267,
+    "stock": 47367,
     "tipo": 1,
     "receta": null
   },
@@ -4602,7 +4594,7 @@
     "codigo": "G-PAD-1/2GAL-ESD",
     "precio": 13.43,
     "nombre": "GARRAFA PAD SALSERA MEDIO GALON NAT C/TAPA R-63 Y LAINER ALU",
-    "stock": 1181,
+    "stock": 1198,
     "tipo": 1,
     "receta": null
   },
@@ -4618,7 +4610,7 @@
     "codigo": "BP97-SU-LIQP-250/CP",
     "precio": 4,
     "nombre": "BOLSA LIQUIDOS STAND UP POUCH C/POPOTE 250ML 12X18X3.2 #97",
-    "stock": 100,
+    "stock": 600,
     "tipo": 1,
     "receta": null
   },
@@ -4626,7 +4618,7 @@
     "codigo": "BP71-FUELLE-VERMATE-1/CP",
     "precio": 7.69,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA VERDE MATE 14X4X36 #71",
-    "stock": 500,
+    "stock": 499,
     "tipo": 1,
     "receta": null
   },
@@ -4634,7 +4626,7 @@
     "codigo": "BPC-1L-ST/CP",
     "precio": 4.29,
     "nombre": "BOTELLA PET CRISTAL CUADRADA DE 1 L S/TAPA R-28",
-    "stock": 848,
+    "stock": 6723,
     "tipo": 1,
     "receta": null
   },
@@ -4642,7 +4634,7 @@
     "codigo": "TP-PGA/CP",
     "precio": 0.7,
     "nombre": "TAPA PARA GARRAFON DE AGUA CORTA",
-    "stock": 415,
+    "stock": 1066,
     "tipo": 1,
     "receta": null
   },
@@ -4650,7 +4642,7 @@
     "codigo": "BPF-240-CR/CP",
     "precio": 5.59,
     "nombre": "BOTELLA PET FARMACEUTICA DE 240 ML CRISTAL S/TAPA",
-    "stock": 1124,
+    "stock": 1129,
     "tipo": 1,
     "receta": null
   },
@@ -4663,18 +4655,10 @@
     "receta": null
   },
   {
-    "codigo": "BP103-SU-POLL-1/CP",
-    "precio": 4.6,
-    "nombre": "BOLSA POLLERA CON ASA Y FUELLE IMPRESA 31X14X12 #103",
-    "stock": 500,
-    "tipo": 1,
-    "receta": null
-  },
-  {
     "codigo": "A-FK/CP",
     "precio": 259.13,
     "nombre": "ADAPTADOR P/LLAVE FLOW KING (1202010122 )",
-    "stock": 35,
+    "stock": 19,
     "tipo": 1,
     "receta": null
   },
@@ -4682,7 +4666,7 @@
     "codigo": "PPB-DF-60/CP",
     "precio": 13.9,
     "nombre": "POMADERO POLIPRO BCO DOBLE FONDO 60 ML C/TAPA Y DISCO",
-    "stock": 504,
+    "stock": 3359,
     "tipo": 1,
     "receta": null
   },
@@ -4715,7 +4699,7 @@
     "codigo": "AD-R24/410-C-BCO/CP",
     "precio": 3.99,
     "nombre": "ATOMIZADOR DE DEDO R-24/410 BLANCO CON CAPUCHA",
-    "stock": 66544,
+    "stock": 66929,
     "tipo": 1,
     "receta": null
   },
@@ -4723,7 +4707,7 @@
     "codigo": "TDT-24/410/CP",
     "precio": 1.8,
     "nombre": "TAPA DISC TOP 24-410",
-    "stock": 4502,
+    "stock": 4797,
     "tipo": 1,
     "receta": null
   },
@@ -4731,7 +4715,7 @@
     "codigo": "FPER-1-S/T/CP",
     "precio": 9.11,
     "nombre": "FRASCO PET ESPECIERO CUADRADO DE 1 K S/TAPA R 63",
-    "stock": 1157,
+    "stock": 1724,
     "tipo": 1,
     "receta": null
   },
@@ -4739,7 +4723,7 @@
     "codigo": "TPP-10/5/4-N/CP",
     "precio": 13.75,
     "nombre": "TAPON PARA PORRON DE 10-5-4 L NEGRO",
-    "stock": 301,
+    "stock": 321,
     "tipo": 1,
     "receta": null
   },
@@ -4747,7 +4731,7 @@
     "codigo": "M-750-NAT/CP",
     "precio": 15.88,
     "nombre": "MOSTACERO NATURAL DE 750 ML",
-    "stock": 402,
+    "stock": 410,
     "tipo": 1,
     "receta": null
   },
@@ -4755,7 +4739,7 @@
     "codigo": "TFT-R33/CP",
     "precio": 1.8,
     "nombre": "TAPA FLIP TOP R-33",
-    "stock": 47711,
+    "stock": 50301,
     "tipo": 1,
     "receta": null
   },
@@ -4763,7 +4747,7 @@
     "codigo": "TPL-500-R70-NAT/CP",
     "precio": 7.22,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 500 GRS R-70 S/TAPA",
-    "stock": 3216,
+    "stock": 3429,
     "tipo": 1,
     "receta": null
   },
@@ -4771,13 +4755,13 @@
     "codigo": "BCA-1-BCO/CP",
     "precio": 9.76,
     "nombre": "BOTELLA PAD CONICA ANILLADA BLANCA DE 1 L R-28 S/TAPA",
-    "stock": 16694,
+    "stock": 14735,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "CPB-TL-15-U",
-    "precio": 139.59,
+    "precio": 121.38,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 15 L CON TAPA LISA UNI",
     "stock": 0,
     "tipo": 2,
@@ -4837,7 +4821,7 @@
     "codigo": "AD-R24/410-C-MOR/CP",
     "precio": 7.6,
     "nombre": "ATOMIZADOR DE DEDO R-24/410 METALICO ORO CON CAPUCHA",
-    "stock": 1848,
+    "stock": 1858,
     "tipo": 1,
     "receta": null
   },
@@ -4866,7 +4850,7 @@
     "codigo": "AC-P/CP",
     "precio": 88.59,
     "nombre": "ABRECUBETA DE PLASTICO",
-    "stock": 606,
+    "stock": 609,
     "tipo": 1,
     "receta": null
   },
@@ -4899,7 +4883,7 @@
     "codigo": "AP-UR-28-CNY/CP",
     "precio": 17.85,
     "nombre": "ATOMIZADOR DE PISTOLA USO RUDO 28-400 CANYON",
-    "stock": 23145,
+    "stock": 24643,
     "tipo": 1,
     "receta": null
   },
@@ -4907,7 +4891,7 @@
     "codigo": "BAPOL-BCA/CP",
     "precio": 9.86,
     "nombre": "BOTELLA PAD ATOMIZADORA BLANCA DE 1L R-28 GDL",
-    "stock": 2957,
+    "stock": 1214,
     "tipo": 1,
     "receta": null
   },
@@ -4915,7 +4899,7 @@
     "codigo": "BD-24/410/CP",
     "precio": 8.89,
     "nombre": "BOMBA DOSIFICADORA  24/410 SILLA DE MONTAR",
-    "stock": 1721,
+    "stock": 2066,
     "tipo": 1,
     "receta": null
   },
@@ -4931,7 +4915,7 @@
     "codigo": "GPA-1-NAT/CP",
     "precio": 8.93,
     "nombre": "GARRAFA P/ANTICONGELANTE DE 1 L NATURAL S/TAPA",
-    "stock": 11491,
+    "stock": 11650,
     "tipo": 1,
     "receta": null
   },
@@ -4939,7 +4923,7 @@
     "codigo": "T-R63B/CP",
     "precio": 1.82,
     "nombre": "TAPA BLANCA R-63 SIN LAINER",
-    "stock": 22247,
+    "stock": 22046,
     "tipo": 1,
     "receta": null
   },
@@ -4981,7 +4965,7 @@
     "codigo": "BP31-SU-NEGRA-MATE500/CP",
     "precio": 6.93,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA NEGRA MATE 19X25X9 #31",
-    "stock": 399,
+    "stock": 1299,
     "tipo": 1,
     "receta": null
   },
@@ -4989,7 +4973,7 @@
     "codigo": "CPB-5-GDL/CP",
     "precio": 38.1,
     "nombre": "CUBETA DE PLASTICO DE 5 L BLANCA GDL S/TAPA",
-    "stock": 3121,
+    "stock": 809,
     "tipo": 1,
     "receta": null
   },
@@ -5018,7 +5002,7 @@
     "codigo": "BPB-1000/CP",
     "precio": 6.69,
     "nombre": "BOTELLA PET BOSTON DE 1 L R-28/410 SIN TAPA",
-    "stock": 4451,
+    "stock": 7020,
     "tipo": 1,
     "receta": null
   },
@@ -5026,15 +5010,15 @@
     "codigo": "FPPOL-150-BCO/CP",
     "precio": 4.02,
     "nombre": "FRASCO PASTILLERO DE POLIETILENO BCO 150 ML R-38 S/TAPA",
-    "stock": 2458,
+    "stock": 2524,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TP-EL/CP",
-    "precio": 0.53,
+    "precio": 0.45,
     "nombre": "TAPA PORTOLA PARA ENVASE LECHERO",
-    "stock": 152013,
+    "stock": 103737,
     "tipo": 1,
     "receta": null
   },
@@ -5042,7 +5026,7 @@
     "codigo": "LE-110/CP",
     "precio": 0.48,
     "nombre": "LAINER ESPUMADO R-110",
-    "stock": 9832,
+    "stock": 11332,
     "tipo": 1,
     "receta": null
   },
@@ -5050,7 +5034,7 @@
     "codigo": "BPLB-500-BCO/CP",
     "precio": 4.52,
     "nombre": "BOTELLA PAD BOSTON BLANCA DE 500 ML R-24 S/TAPA",
-    "stock": 6411,
+    "stock": 6818,
     "tipo": 1,
     "receta": null
   },
@@ -5058,7 +5042,7 @@
     "codigo": "BP11-SU-BLANCA-70/CP",
     "precio": 4.5,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA BCA 10X15X5 #11",
-    "stock": 800,
+    "stock": 1199,
     "tipo": 1,
     "receta": null
   },
@@ -5066,7 +5050,7 @@
     "codigo": "LE-49/CP",
     "precio": 0.46,
     "nombre": "LAINER ESPUMADO R-49",
-    "stock": 95186,
+    "stock": 93498,
     "tipo": 1,
     "receta": null
   },
@@ -5082,7 +5066,7 @@
     "codigo": "M-125-NAT/CP",
     "precio": 5.06,
     "nombre": "MOSTACERO NATURAL DE 125 ML",
-    "stock": 1631,
+    "stock": 1637,
     "tipo": 1,
     "receta": null
   },
@@ -5090,7 +5074,7 @@
     "codigo": "TPL-250-R70-NAT/CP",
     "precio": 2.25,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 250 GRS R-70 S/TAPA",
-    "stock": 15032,
+    "stock": 18387,
     "tipo": 1,
     "receta": null
   },
@@ -5098,7 +5082,7 @@
     "codigo": "EN-2/CP",
     "precio": 9.65,
     "nombre": "ENVASE NEVERO BLANCO DE 2 L C/ TAPA",
-    "stock": 1420,
+    "stock": 1351,
     "tipo": 1,
     "receta": null
   },
@@ -5106,7 +5090,7 @@
     "codigo": "BP-20-FND-30/CP",
     "precio": 63.95,
     "nombre": "BOMBA PARA PORRON DE 20 LTS FND 30",
-    "stock": 1363,
+    "stock": 1379,
     "tipo": 1,
     "receta": null
   },
@@ -5114,7 +5098,7 @@
     "codigo": "BP05-SU-PLATA-1/CP",
     "precio": 6.88,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA PLATA 22X32X9 #05",
-    "stock": 500,
+    "stock": 300,
     "tipo": 1,
     "receta": null
   },
@@ -5122,7 +5106,7 @@
     "codigo": "GPI-250/CP",
     "precio": 4.95,
     "nombre": "GARRAFON DE PLASTICO INDUSTRIAL DE 250 ML CON TAPA",
-    "stock": 3202,
+    "stock": 3778,
     "tipo": 1,
     "receta": null
   },
@@ -5172,7 +5156,7 @@
     "codigo": "EPP-CIL-250/CP",
     "precio": 2.65,
     "nombre": "ENVASE P/PEGAMENTO CIL 250 ML C/CONO Y RONDANA",
-    "stock": 445,
+    "stock": 506,
     "tipo": 1,
     "receta": null
   },
@@ -5180,7 +5164,7 @@
     "codigo": "LE-38/CP",
     "precio": 0.35,
     "nombre": "LAINER ESPUMADO R-38",
-    "stock": 311983,
+    "stock": 267773,
     "tipo": 1,
     "receta": null
   },
@@ -5260,7 +5244,7 @@
     "codigo": "TPRO-19-M/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO ROJA C/ORIFICIO PARA 19 L MUN",
-    "stock": 710,
+    "stock": 800,
     "tipo": 1,
     "receta": null
   },
@@ -5276,7 +5260,7 @@
     "codigo": "BPLB-1-BCO/CP",
     "precio": 5.59,
     "nombre": "BOTELLA PAD BOSTON BLANCA DE 1 L R-28 S/TAPA",
-    "stock": 5206,
+    "stock": 9248,
     "tipo": 1,
     "receta": null
   },
@@ -5284,7 +5268,7 @@
     "codigo": "PPN-DF-120/CP",
     "precio": 17.78,
     "nombre": "POMADERO POLIPRO NAT DOBLE FONDO 120 ML C/TAPA Y DISCO",
-    "stock": 2515,
+    "stock": 2529,
     "tipo": 1,
     "receta": null
   },
@@ -5292,7 +5276,7 @@
     "codigo": "TDT-28/410/CP",
     "precio": 1.92,
     "nombre": "TAPA DISC TOP 28-410",
-    "stock": 27471,
+    "stock": 27632,
     "tipo": 1,
     "receta": null
   },
@@ -5300,7 +5284,7 @@
     "codigo": "TF-JR/CP",
     "precio": 2.4,
     "nombre": "TAPON FLEX JR    ( 3900000000 )",
-    "stock": 187383,
+    "stock": 123664,
     "tipo": 1,
     "receta": null
   },
@@ -5308,7 +5292,7 @@
     "codigo": "BP-RE-90X120/CP",
     "precio": 0,
     "nombre": "BOLSA DE PLASTICO REC 90X120",
-    "stock": 3441.84,
+    "stock": 3241.84,
     "tipo": 1,
     "receta": null
   },
@@ -5330,9 +5314,9 @@
   },
   {
     "codigo": "PIB-20/CP",
-    "precio": 72.98,
+    "precio": 74.43,
     "nombre": "PORRON INDUSTRIAL BLANCO DE 20 L C/TAPON SAMPSOM",
-    "stock": 125,
+    "stock": 317,
     "tipo": 1,
     "receta": null
   },
@@ -5357,7 +5341,7 @@
     "codigo": "BP07-SU-DORADA-150/CP",
     "precio": 3.75,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA DORADA12X20X6 #07",
-    "stock": 1000,
+    "stock": 700,
     "tipo": 1,
     "receta": null
   },
@@ -5365,7 +5349,7 @@
     "codigo": "BP38-SU-KRAFT-250/CP",
     "precio": 8.45,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z METALIZADO INT. 15X23X7 #38",
-    "stock": 1100,
+    "stock": 1099,
     "tipo": 1,
     "receta": null
   },
@@ -5373,7 +5357,7 @@
     "codigo": "BD-38/400-R/CP",
     "precio": 26,
     "nombre": "BOMBA DOSIFICADORA 38/400 BCA. FS-10 REFORZADO 30 ML",
-    "stock": 384,
+    "stock": 414,
     "tipo": 1,
     "receta": null
   },
@@ -5381,7 +5365,7 @@
     "codigo": "GPA-4-BCO/CP",
     "precio": 14.83,
     "nombre": "GARRAFA P/ANTICONGELANTE BCO 4 L  E02PS110HB10 S/TAPA",
-    "stock": 14131,
+    "stock": 10584,
     "tipo": 1,
     "receta": null
   },
@@ -5422,7 +5406,7 @@
     "codigo": "BPB-60/CP",
     "precio": 2.01,
     "nombre": "BOTELLA PET BOSTON 60 ML CRISTAL .R-20 S/TAPA",
-    "stock": 6016,
+    "stock": 7397,
     "tipo": 1,
     "receta": null
   },
@@ -5430,7 +5414,7 @@
     "codigo": "PIN-25-P/CP",
     "precio": 106.2,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 25 L C/TAPON NEG E07C3000KA18",
-    "stock": 98,
+    "stock": 364,
     "tipo": 1,
     "receta": null
   },
@@ -5480,7 +5464,7 @@
     "codigo": "BPB-250/CP",
     "precio": 3.91,
     "nombre": "BOTELLA PET BOSTON 250 ML R-28 S/TAPA",
-    "stock": 3274,
+    "stock": 3504,
     "tipo": 1,
     "receta": null
   },
@@ -5488,7 +5472,7 @@
     "codigo": "BPF-240-AM/CP",
     "precio": 5.59,
     "nombre": "BOTELLA PET FARMACEUTICA DE 240 ML AMBAR S/TAPA",
-    "stock": 4181,
+    "stock": 2408,
     "tipo": 1,
     "receta": null
   },
@@ -5496,7 +5480,7 @@
     "codigo": "BP78-PL-3SELLOS-PLATA-75/CP",
     "precio": 2.85,
     "nombre": "BOLSA PLANA TRES SELLOS TRIALMINADA PLATA TRANS. 10X15 #78",
-    "stock": 200,
+    "stock": 300,
     "tipo": 1,
     "receta": null
   },
@@ -5545,7 +5529,7 @@
     "codigo": "BPQ-1L-CR/CP",
     "precio": 5.81,
     "nombre": "BOTELLA PET QUIMICA DE 1 L CRISTAL S/TAPA",
-    "stock": 1113,
+    "stock": 1173,
     "tipo": 1,
     "receta": null
   },
@@ -5553,7 +5537,7 @@
     "codigo": "BPSQ-250/CP",
     "precio": 5.79,
     "nombre": "BOTELLA PET SQUEEZABLE DE 250 ML S/TAPA",
-    "stock": 13824,
+    "stock": 20361,
     "tipo": 1,
     "receta": null
   },
@@ -5561,15 +5545,15 @@
     "codigo": "BP36-SU-KRAFT-70/CP",
     "precio": 4.76,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z METALIZADO INT. 10X15X5 #36",
-    "stock": 350,
+    "stock": 249,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "CT-1000/CP",
-    "precio": 4550,
+    "precio": 7840.8,
     "nombre": "CONTENEDOR 1000 L (TOTEM)",
-    "stock": 7,
+    "stock": 6,
     "tipo": 1,
     "receta": null
   },
@@ -5577,7 +5561,7 @@
     "codigo": "AP-28-ECO/CP",
     "precio": 8,
     "nombre": "ATOMIZADOR DE PISTOLA 28/400 ECONOMICO",
-    "stock": 143844,
+    "stock": 144129,
     "tipo": 1,
     "receta": null
   },
@@ -5585,7 +5569,7 @@
     "codigo": "TPP-20-50-COL/CP",
     "precio": 14.16,
     "nombre": "TAPON PARA PORRON DE 20-50 L",
-    "stock": 3575,
+    "stock": 3869,
     "tipo": 1,
     "receta": null
   },
@@ -5610,7 +5594,7 @@
     "codigo": "BPW-1/CP",
     "precio": 5.02,
     "nombre": "BOTELLA PET WISKERA DE 1 L S/TAPA",
-    "stock": 9970,
+    "stock": 9980,
     "tipo": 1,
     "receta": null
   },
@@ -5618,7 +5602,7 @@
     "codigo": "LE-63/CP",
     "precio": 0.45,
     "nombre": "LAINER ESPUMADO R-63",
-    "stock": 23277,
+    "stock": 23814,
     "tipo": 1,
     "receta": null
   },
@@ -5626,7 +5610,7 @@
     "codigo": "GPA-4-NAT/CP",
     "precio": 12.24,
     "nombre": "GARRAFA P/ANTICONGELANTE DE 4 L NATURAL S/TAPA",
-    "stock": 10515,
+    "stock": 11167,
     "tipo": 1,
     "receta": null
   },
@@ -5642,7 +5626,7 @@
     "codigo": "BP96-SUP-ROSA-500/CP",
     "precio": 7.59,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA ROSA 19X25X9 #96",
-    "stock": 399,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -5650,7 +5634,7 @@
     "codigo": "TPO-19-REC-GB/CP",
     "precio": 20,
     "nombre": "TAPA DE PLASTICO REC PARA 19 L C/ORIFICIO GB",
-    "stock": 719,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -5658,13 +5642,13 @@
     "codigo": "T-R28/410-B-L/CP",
     "precio": 0.66,
     "nombre": "TAPA R-28/410CON LAINER (Para botella Boston de polietileno)",
-    "stock": 13833,
+    "stock": 16201,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "CPN-4-M/CP",
-    "precio": 23.4,
+    "precio": 22.97,
     "nombre": "CUBETA DE PLASTICO NEGRA DE 4 L MUNDI S/TAPA",
     "stock": 0,
     "tipo": 1,
@@ -5674,7 +5658,7 @@
     "codigo": "T-R63-COL-CH/CP",
     "precio": 2.03,
     "nombre": "TAPA COLORES R-63 CON CHUPON",
-    "stock": 32046,
+    "stock": 32646,
     "tipo": 1,
     "receta": null
   },
@@ -5707,7 +5691,7 @@
     "codigo": "BPLA-L-110/CP",
     "precio": 1.6,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA 110 ML LISA S/TAPA R-22",
-    "stock": 11777,
+    "stock": 12158,
     "tipo": 1,
     "receta": null
   },
@@ -5740,7 +5724,7 @@
     "codigo": "TPA-19-M/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO AZUL LTH P/CUBETA DE 15 Y 19 L C/ORIFI MUN",
-    "stock": 2936,
+    "stock": 2316,
     "tipo": 1,
     "receta": null
   },
@@ -5748,7 +5732,7 @@
     "codigo": "CPB-15-M/CP",
     "precio": 73.13,
     "nombre": "CUBETA DE PLASTICO DE 15 L BLANCA MUN S/TAPA",
-    "stock": 1560,
+    "stock": 1028,
     "tipo": 1,
     "receta": null
   },
@@ -5773,7 +5757,7 @@
     "codigo": "GPA-2L/CP",
     "precio": 7.2,
     "nombre": "GARRAFON DE POLIETILENO NATURAL PARA AGUA DE 2 L S/TAPA",
-    "stock": 466,
+    "stock": 486,
     "tipo": 1,
     "receta": null
   },
@@ -5781,7 +5765,7 @@
     "codigo": "BPM-250/CP",
     "precio": 2.38,
     "nombre": "BOTELLA PET MICHELADA DE 250 S/TAPA R-28",
-    "stock": 29552,
+    "stock": 29587,
     "tipo": 1,
     "receta": null
   },
@@ -5813,7 +5797,7 @@
     "codigo": "BP20-SU-PLATA-TRANS-1/CP",
     "precio": 8.16,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA PLATA/TRAN 22X32X9 #20",
-    "stock": 790,
+    "stock": 1790,
     "tipo": 1,
     "receta": null
   },
@@ -5850,7 +5834,7 @@
     "codigo": "CPB-2/CP",
     "precio": 16.63,
     "nombre": "CUBETA DE PLASTICO DE 2 L BCA CON TAPA Y ASA DE PLASTICO",
-    "stock": 3849,
+    "stock": 3933,
     "tipo": 1,
     "receta": null
   },
@@ -5858,7 +5842,7 @@
     "codigo": "AP-UR-28-CHI/CP",
     "precio": 8.5,
     "nombre": "ATOMIZADOR DE PISTOLA  USO RUDO 28-400 CHINO",
-    "stock": 24016,
+    "stock": 25854,
     "tipo": 1,
     "receta": null
   },
@@ -5866,7 +5850,7 @@
     "codigo": "CPOLVO-30ML/CP",
     "precio": 2.34,
     "nombre": "CUCHARA MEDIDORA DE POLVO 30 ML",
-    "stock": 18716,
+    "stock": 24736,
     "tipo": 1,
     "receta": null
   },
@@ -5874,7 +5858,7 @@
     "codigo": "GPB-9L/CP",
     "precio": 40.35,
     "nombre": "GARRAFA PAD BIDON BCO. DE 9 LTS S/TAPAS",
-    "stock": 254,
+    "stock": 331,
     "tipo": 1,
     "receta": null
   },
@@ -5882,7 +5866,7 @@
     "codigo": "BP74-FUELLE-AZULMATE-1/CP",
     "precio": 7.69,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA AZUL MATE 14X4X36 #74",
-    "stock": 500,
+    "stock": 499,
     "tipo": 1,
     "receta": null
   },
@@ -5928,7 +5912,7 @@
     "codigo": "CTCC15",
     "precio": 2,
     "nombre": "CONTENEDOR TERMOFORMADO CHICO CALIBRE 15 7.5X7.5X2.5",
-    "stock": 389,
+    "stock": 390,
     "tipo": 1,
     "receta": null
   },
@@ -5936,7 +5920,7 @@
     "codigo": "G-PAD-GAL-ESD/CP",
     "precio": 20.34,
     "nombre": "GARRAFA PAD SALSERA DE GALON NAT C/TAPA R-63 Y LAINER ALUM",
-    "stock": 1002,
+    "stock": 1004,
     "tipo": 1,
     "receta": null
   },
@@ -5944,7 +5928,7 @@
     "codigo": "BPG-ACP-500-R-28/CP",
     "precio": 11.47,
     "nombre": "BOTELLA PAD GLOBO DE 500 ML C/ATOMIZADOR COLA DE PATO R-28",
-    "stock": 268,
+    "stock": 272,
     "tipo": 1,
     "receta": null
   },
@@ -5952,7 +5936,7 @@
     "codigo": "BLSF-ST-250/CP",
     "precio": 7.46,
     "nombre": "BOTE DE LAMINA STOLZ DE 250 ML S/FENOL 211X400",
-    "stock": 15415,
+    "stock": 18668,
     "tipo": 1,
     "receta": null
   },
@@ -5960,7 +5944,7 @@
     "codigo": "BP72-FUELLE-AZULMATE-250/CP",
     "precio": 6.15,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA AZUL MATE 9X2X24 #72",
-    "stock": 89,
+    "stock": 179,
     "tipo": 1,
     "receta": null
   },
@@ -5968,7 +5952,7 @@
     "codigo": "BP17-SU-PLATA-TRANS-150/CP",
     "precio": 4.07,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA PLATA/TRAN 12X20X6 #17",
-    "stock": 2700,
+    "stock": 1999,
     "tipo": 1,
     "receta": null
   },
@@ -6034,7 +6018,7 @@
     "codigo": "GPC-GAL/CP",
     "precio": 13.61,
     "nombre": "GARRAFA PET CUADRADA DE GALON C/TAPA Y ASA",
-    "stock": 1508,
+    "stock": 737,
     "tipo": 1,
     "receta": null
   },
@@ -6042,7 +6026,7 @@
     "codigo": "TPB-5-GDL/CP",
     "precio": 12.29,
     "nombre": "TAPA DE PLASTICO BLANCA DE 5 L GDL",
-    "stock": 2991,
+    "stock": 1676,
     "tipo": 1,
     "receta": null
   },
@@ -6050,7 +6034,7 @@
     "codigo": "TPL-2-R110-BCO/CP",
     "precio": 15.33,
     "nombre": "TARRO DE POLIETILENO BCO DE 2 KG S/TAPA R-110",
-    "stock": 8821,
+    "stock": 9147,
     "tipo": 1,
     "receta": null
   },
@@ -6066,7 +6050,7 @@
     "codigo": "BP55-KRAFT-CV-TINTIE-1/CP",
     "precio": 7.8,
     "nombre": "BOLSA KRAFT CON VENTANA Y TIN-TIE 15.3X7X23.5 #55",
-    "stock": 292,
+    "stock": 92,
     "tipo": 1,
     "receta": null
   },
@@ -6074,14 +6058,14 @@
     "codigo": "GP-4-NAT/CP",
     "precio": 15.95,
     "nombre": "GARRAFA MALETIN NATURAL DE 4L R-38 GDL S/TAPA",
-    "stock": 1278,
+    "stock": 1354,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TLA-CF-200-GAM/CP",
     "precio": 1834.8,
-    "nombre": "TAMBO DE LAMINA ABIERTO DE 200 L C/FENOL",
+    "nombre": "TAMBO DE LAMINA ABIERTO DE 200 L C/FENOL GAMUZA",
     "stock": 4,
     "tipo": 1,
     "receta": null
@@ -6090,7 +6074,7 @@
     "codigo": "CPB-19-REC-GB/CP",
     "precio": 52.52,
     "nombre": "CUBETA DE PLASTICO REC DE 19 L GB S/TAPA",
-    "stock": 4294,
+    "stock": 2741,
     "tipo": 1,
     "receta": null
   },
@@ -6098,7 +6082,7 @@
     "codigo": "BP41-SU-KRAFT-CV-150/CP",
     "precio": 7.69,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z CON VENTANA OVAL 12X20X6 #41",
-    "stock": 500,
+    "stock": 598,
     "tipo": 1,
     "receta": null
   },
@@ -6122,15 +6106,15 @@
     "codigo": "LL-PP-20/50/CP",
     "precio": 173.23,
     "nombre": "LLAVE PARA ABRIR PORRON DE 20 Y 50 L",
-    "stock": 20,
+    "stock": 23,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "PIN-10-P/CP",
-    "precio": 30.77,
+    "precio": 38.96,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 10 L C/TAPON E05C3000KA18",
-    "stock": 854,
+    "stock": 917,
     "tipo": 1,
     "receta": null
   },
@@ -6138,7 +6122,7 @@
     "codigo": "BPLA-10/CP",
     "precio": 1.04,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA 10 ML C/TAPA",
-    "stock": 1369,
+    "stock": 1489,
     "tipo": 1,
     "receta": null
   },
@@ -6146,7 +6130,7 @@
     "codigo": "VM-R63/CP",
     "precio": 3.9,
     "nombre": "VASO MEDIDOR R-63",
-    "stock": 264,
+    "stock": 341,
     "tipo": 1,
     "receta": null
   },
@@ -6162,7 +6146,7 @@
     "codigo": "BLSF-TTP-1-GZ/CP",
     "precio": 11.86,
     "nombre": "BOTE DE LAMINA DE 1 L TTP S/FENOL 404X502",
-    "stock": 63503,
+    "stock": 59926,
     "tipo": 1,
     "receta": null
   },
@@ -6170,7 +6154,7 @@
     "codigo": "ENN-1/CP",
     "precio": 6.3,
     "nombre": "ENVASE NEVERO NATURAL DE 1L CON TAPA",
-    "stock": 780,
+    "stock": 1245,
     "tipo": 1,
     "receta": null
   },
@@ -6178,7 +6162,7 @@
     "codigo": "VPR-1/2-GAL/CP",
     "precio": 9.88,
     "nombre": "VITROLERO PET CILINDRICO DE MEDIO GALON S/TAPA",
-    "stock": 5209,
+    "stock": 3882,
     "tipo": 1,
     "receta": null
   },
@@ -6202,7 +6186,7 @@
     "codigo": "GPA-250-BCO/CP",
     "precio": 5.4,
     "nombre": "GARRAFA P/ANTICONGELANTE BCO 250 ML S/TAPA",
-    "stock": 574,
+    "stock": 602,
     "tipo": 1,
     "receta": null
   },
@@ -6268,7 +6252,7 @@
     "codigo": "BPLA-250-L/CP",
     "precio": 1.95,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA LISA DE 250 ML S/TAPA",
-    "stock": 15303,
+    "stock": 5161,
     "tipo": 1,
     "receta": null
   },
@@ -6276,7 +6260,7 @@
     "codigo": "CTP-20/CP",
     "precio": 8,
     "nombre": "CONTRATAPA P/PORRON INDUSTRIAL DE 20 L",
-    "stock": 441,
+    "stock": 444,
     "tipo": 1,
     "receta": null
   },
@@ -6309,7 +6293,7 @@
     "codigo": "BP67-FUELLE-BCAMATE-500/CP",
     "precio": 6.62,
     "nombre": "BOLSA CON FUELLE LATERAL TRILAMINADA BLANCA MATE 11X7X28 #67",
-    "stock": 500,
+    "stock": 599,
     "tipo": 1,
     "receta": null
   },
@@ -6317,7 +6301,7 @@
     "codigo": "EN-125/CP",
     "precio": 1.87,
     "nombre": "ENVASE NEVERO BLANCO DE 125 ML CON TAPA",
-    "stock": 6033,
+    "stock": 6612,
     "tipo": 1,
     "receta": null
   },
@@ -6333,7 +6317,7 @@
     "codigo": "TTP-SF1/CP",
     "precio": 4.35,
     "nombre": "TAPA DE LAMINA TRIPLE PRESION S/F PARA BOTE DE 1 LT.",
-    "stock": 21896,
+    "stock": 21901,
     "tipo": 1,
     "receta": null
   },
@@ -6341,13 +6325,13 @@
     "codigo": "TPA-19-M-L/CP",
     "precio": 30,
     "nombre": "TAPA DE PLASTICO AZUL LTH P/CUBETA DE 15 Y 19 L LISA MUN",
-    "stock": 1851,
+    "stock": 2322,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TPL-R50-NAT-CT",
-    "precio": 2.15,
+    "precio": 1.82,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 50 GRS R-38\r\n C/TAPA",
     "stock": 0,
     "tipo": 2,
@@ -6366,7 +6350,7 @@
     "codigo": "BPL-125/CP",
     "precio": 3.01,
     "nombre": "BOTELLA PAD NAT ALCOHOLERA 125 ML LISA S/TAPA R-24",
-    "stock": 9263,
+    "stock": 621,
     "tipo": 1,
     "receta": null
   },
@@ -6374,7 +6358,7 @@
     "codigo": "PSF-E-18X50X900/CP",
     "precio": 95.37,
     "nombre": "PELICULA STRECH FILM ECONOMICO 18X50X800",
-    "stock": 2814,
+    "stock": 2398,
     "tipo": 1,
     "receta": null
   },
@@ -6399,7 +6383,7 @@
     "codigo": "BM-250-BCA/CP",
     "precio": 6.32,
     "nombre": "BOTELLA PAD MISIL TIPO BALA BCA DE 250 ML S/TAPA",
-    "stock": 2045,
+    "stock": 2295,
     "tipo": 1,
     "receta": null
   },
@@ -6407,15 +6391,15 @@
     "codigo": "TFT-28/410-L/CP",
     "precio": 1.49,
     "nombre": "TAPA FLIP TOP R28/400 LAVATRASTES",
-    "stock": 10978,
+    "stock": 9431,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TPLG-500-R110-BCO/CP",
-    "precio": 4.65,
+    "precio": 3.64,
     "nombre": "TARRO DE POLIETILENO GRASERO BLANCO DE 1/2 KG S/TAPA R-110",
-    "stock": 4613,
+    "stock": 2785,
     "tipo": 1,
     "receta": null
   },
@@ -6431,15 +6415,23 @@
     "codigo": "TP-CIL-1000/CP",
     "precio": 6.63,
     "nombre": "TARRO PET CILINDRICO DE 1 L CRISTAL R-63 S/TAPA",
-    "stock": 9612,
+    "stock": 8884,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "BPL-900/CP",
-    "precio": 5.95,
+    "precio": 5.72,
     "nombre": "BOTELLA PET LAVATRASTE 900 ML S/TAPA R-28",
-    "stock": 5184,
+    "stock": 3637,
+    "tipo": 1,
+    "receta": null
+  },
+  {
+    "codigo": "CPB-23/CP",
+    "precio": 0,
+    "nombre": "CUBETA DE PLASTICO DE 23 L BLANCA S/TAPA",
+    "stock": 308,
     "tipo": 1,
     "receta": null
   },
@@ -6455,7 +6447,7 @@
     "codigo": "BO-E80/CP",
     "precio": 18.28,
     "nombre": "BOMBA ESPUMADORA DE 80 ML",
-    "stock": 1145,
+    "stock": 1173,
     "tipo": 1,
     "receta": null
   },
@@ -6463,7 +6455,7 @@
     "codigo": "GPA-4-BCOS/T",
     "precio": 14.25,
     "nombre": "GARRAFA P/ANTICONGELANTE  BLANCA 4 L S/TAPA NORTE",
-    "stock": 6700,
+    "stock": 6400,
     "tipo": 1,
     "receta": null
   },
@@ -6471,7 +6463,7 @@
     "codigo": "TFT-15/415/CP",
     "precio": 1.5,
     "nombre": "TAPA FLIP TOP R-15/415 NATURAL P/PIRAMIDE",
-    "stock": 2674,
+    "stock": 3549,
     "tipo": 1,
     "receta": null
   },
@@ -6479,7 +6471,7 @@
     "codigo": "BPT-CON-BCO-1/CP",
     "precio": 11.68,
     "nombre": "BOTE DE PLAST TINTERO CONICO BLANCO DE 1 L C/TAPA",
-    "stock": 200,
+    "stock": 600,
     "tipo": 1,
     "receta": null
   },
@@ -6487,7 +6479,7 @@
     "codigo": "BPT-DP/CP",
     "precio": 2197.44,
     "nombre": "BOMBA PARA TAMBO  DRUM PUMP",
-    "stock": 9,
+    "stock": 14,
     "tipo": 1,
     "receta": null
   },
@@ -6511,13 +6503,13 @@
     "codigo": "TP-R38-SC/CP",
     "precio": 0.9,
     "nombre": "TAPA R-38 SIN CINTILLO",
-    "stock": 252292,
+    "stock": 238078,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "BPGE-930-CT",
-    "precio": 3.45,
+    "precio": 3.36,
     "nombre": "BOTELLA PET GUARDA ETIQUETA 930 ML C/TAPA R-28",
     "stock": 0,
     "tipo": 2,
@@ -6533,27 +6525,10 @@
     ]
   },
   {
-    "codigo": "CPB-TL-23-EM",
-    "precio": 105.84,
-    "nombre": "CUBETA DE PLASTICO BLANCA DE 23 L CON TAPA LISA",
-    "stock": 0,
-    "tipo": 2,
-    "receta": [
-      {
-        "codigo_pieza": "CPB-23-EM/CP",
-        "cantidad": 1
-      },
-      {
-        "codigo_pieza": "TPBL-19-M/CP",
-        "cantidad": 1
-      }
-    ]
-  },
-  {
     "codigo": "BP30-SU-NEGRA-MATE250/CP",
     "precio": 5.36,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA NEGRA MATE 15X20X6 #30",
-    "stock": 1500,
+    "stock": 1499,
     "tipo": 1,
     "receta": null
   },
@@ -6561,7 +6536,7 @@
     "codigo": "BPLAB-1-L/CP",
     "precio": 4.75,
     "nombre": "BOTELLA PAD BCO ALCOHOLERA DE 1 LT. LISA S/TAPA R-28",
-    "stock": 728,
+    "stock": 994,
     "tipo": 1,
     "receta": null
   },
@@ -6569,7 +6544,7 @@
     "codigo": "CLSF-C26-19-B-U/CT",
     "precio": 131.5,
     "nombre": "CUBETA DE LAMINA BLANCA 19 LTS.C 118 S/FENOL C/TAPA UNI   *",
-    "stock": 11306,
+    "stock": 9146,
     "tipo": 1,
     "receta": null
   },
@@ -6577,7 +6552,7 @@
     "codigo": "CPB-1/2/CP",
     "precio": 9.44,
     "nombre": "CUBETA DE PLASTICO DE 500 ML BCA C/TAPA",
-    "stock": 711,
+    "stock": 987,
     "tipo": 1,
     "receta": null
   },
@@ -6585,7 +6560,7 @@
     "codigo": "BP76-SU-LIQ-500/CP",
     "precio": 7.23,
     "nombre": "BOLSA STAND UP POUCH PARA LIQUIDOS 13X22X6 #76",
-    "stock": 2506,
+    "stock": 13367,
     "tipo": 1,
     "receta": null
   },
@@ -6618,7 +6593,7 @@
     "codigo": "BPAT-600/CP",
     "precio": 6.58,
     "nombre": "BOTELLA PET ATOMIZADORA DE 600 ML TRANS S/TAPA",
-    "stock": 1402,
+    "stock": 1472,
     "tipo": 1,
     "receta": null
   },
@@ -6642,7 +6617,7 @@
     "codigo": "TPBL-19-U/CP",
     "precio": 43.15,
     "nombre": "TAPA DE PLASTICO BLANCA  P/CUBETA DE 15 Y 19 L LISA  UNI",
-    "stock": 3527,
+    "stock": 3943,
     "tipo": 1,
     "receta": null
   },
@@ -6667,7 +6642,7 @@
     "codigo": "CTP-28/CP",
     "precio": 0.6,
     "nombre": "CONTRATAPA ROSCA 28",
-    "stock": 17850,
+    "stock": 19588,
     "tipo": 1,
     "receta": null
   },
@@ -6675,15 +6650,15 @@
     "codigo": "EN-250/CP",
     "precio": 2,
     "nombre": "ENVASE NEVERO BLANCO 250 ML C/TAPA",
-    "stock": 20074,
+    "stock": 18180,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "TPA-50-A/CP",
-    "precio": 466.79,
+    "precio": 462.8,
     "nombre": "TAMBO DE POLIETILENO APM 50 L AZUL OBS Y CINCHO E10SD507AA18",
-    "stock": 39,
+    "stock": 336,
     "tipo": 1,
     "receta": null
   },
@@ -6691,7 +6666,7 @@
     "codigo": "TP-R28/CP",
     "precio": 0.69,
     "nombre": "TAPA R-28 BLANCA INVIOLABLE VEDAT",
-    "stock": 64296,
+    "stock": 80964,
     "tipo": 1,
     "receta": null
   },
@@ -6699,7 +6674,7 @@
     "codigo": "BLSF-ST-125./CP",
     "precio": 7.1,
     "nombre": "BOTE DE LAMINA STOLZ 125 ML S/FENOL 211 X 208",
-    "stock": 2510,
+    "stock": 3270,
     "tipo": 1,
     "receta": null
   },
@@ -6715,7 +6690,7 @@
     "codigo": "BP01-SU-PLATA-70-1/CP",
     "precio": 3.57,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA PLATA 10X15X5 #01",
-    "stock": 300,
+    "stock": 1590,
     "tipo": 1,
     "receta": null
   },
@@ -6723,7 +6698,7 @@
     "codigo": "TLCF-BCA-L/CP",
     "precio": 45.29,
     "nombre": "TAPA DE LAMINA BLANCA LISA CON FENOL P/19Lts.",
-    "stock": 26141,
+    "stock": 26021,
     "tipo": 1,
     "receta": null
   },
@@ -6731,7 +6706,7 @@
     "codigo": "TPN-8/10/CP",
     "precio": 22.16,
     "nombre": "TAPA DE PLASTICO NEGRA PARA 8 Y 10 L",
-    "stock": 8429,
+    "stock": 8431,
     "tipo": 1,
     "receta": null
   },
@@ -6739,7 +6714,7 @@
     "codigo": "CPP-JR-RB/CP",
     "precio": 4.5,
     "nombre": "CAJITA DE POLIPROPILENO JR BLANCA CON ROSCA (5ml)",
-    "stock": 3958,
+    "stock": 3960,
     "tipo": 1,
     "receta": null
   },
@@ -6755,7 +6730,7 @@
     "codigo": "BPA-1-S/T/CP",
     "precio": 3.39,
     "nombre": "BOTELLA PET PARA AGUA 1 L S/TAPA",
-    "stock": 5528,
+    "stock": 3288,
     "tipo": 1,
     "receta": null
   },
@@ -6804,7 +6779,7 @@
     "codigo": "BO-E120/CP",
     "precio": 22.44,
     "nombre": "BOMBA ESPUMADORA DE 120 ML.",
-    "stock": 1481,
+    "stock": 1538,
     "tipo": 1,
     "receta": null
   },
@@ -6812,7 +6787,7 @@
     "codigo": "T-R50-COL/CP",
     "precio": 1.08,
     "nombre": "TAPA R-50 P/MISIL SIN LAINER (COLORES)",
-    "stock": 30588,
+    "stock": 28109,
     "tipo": 1,
     "receta": null
   },
@@ -6836,7 +6811,7 @@
     "codigo": "TPI-R28-COL/CP",
     "precio": 0.6,
     "nombre": "TAPA DE PLASTICO INVIOLABLE R-28 COLORES",
-    "stock": 51817,
+    "stock": 30104,
     "tipo": 1,
     "receta": null
   },
@@ -6844,7 +6819,7 @@
     "codigo": "TP-R110/CP",
     "precio": 3,
     "nombre": "TAPA R-110",
-    "stock": 112598,
+    "stock": 108392,
     "tipo": 1,
     "receta": null
   },
@@ -6869,7 +6844,7 @@
     "codigo": "GCPB-1LT S/T",
     "precio": 12.5,
     "nombre": "GARRAFON CUADRADO DE POLIETILENO BLANCO DE 1 L S/TAPA R-50",
-    "stock": 2010,
+    "stock": 2011,
     "tipo": 1,
     "receta": null
   },
@@ -6885,7 +6860,7 @@
     "codigo": "BP102-SU-LIQP-5/CP",
     "precio": 26.7,
     "nombre": "BOLSA SPOUT TRANSPARENTE P/LIQUIDOS  5 LLT. 31X35+6.5 #102",
-    "stock": 300,
+    "stock": 500,
     "tipo": 1,
     "receta": null
   },
@@ -6907,7 +6882,7 @@
   },
   {
     "codigo": "EPL-1/2-GAL-CT",
-    "precio": 5.74,
+    "precio": 5.55,
     "nombre": "ENVASE PLASTICO LECHERO DE MEDIO GALON C/TAPA",
     "stock": 0,
     "tipo": 2,
@@ -6941,9 +6916,9 @@
   },
   {
     "codigo": "BLSF-CDO-4-GZ/CP",
-    "precio": 0,
+    "precio": 27.83,
     "nombre": "BOTE DE LAMINA CERRADO DE 4 L S/FENOL 610X802 SIN ASA",
-    "stock": 2532,
+    "stock": 2959,
     "tipo": 1,
     "receta": null
   },
@@ -6951,7 +6926,7 @@
     "codigo": "BP02-SU-PLATA-150/CP",
     "precio": 3.46,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA PLATA 12X20X6 #02",
-    "stock": 800,
+    "stock": 1099,
     "tipo": 1,
     "receta": null
   },
@@ -6992,7 +6967,7 @@
     "codigo": "LE-89/CP",
     "precio": 0.65,
     "nombre": "LAINER ESPUMADO R-89",
-    "stock": 4069,
+    "stock": 4233,
     "tipo": 1,
     "receta": null
   },
@@ -7008,7 +6983,7 @@
     "codigo": "BM-1-NEGRO/CP",
     "precio": 12.51,
     "nombre": "BOTELLA PAD MISIL TIPO BALA NEGRO DE 1 L S/ TAPA",
-    "stock": 1034,
+    "stock": 1480,
     "tipo": 1,
     "receta": null
   },
@@ -7024,7 +6999,7 @@
     "codigo": "T-R28-B-L/CP",
     "precio": 0.66,
     "nombre": "TAPA R-28 CON LAINER",
-    "stock": 142154,
+    "stock": 57573,
     "tipo": 1,
     "receta": null
   },
@@ -7057,7 +7032,7 @@
     "codigo": "GPI-5/CP",
     "precio": 16.2,
     "nombre": "GARRAFON DE PLASTICO INDUSTRIAL DE 5 L CON TAPA",
-    "stock": 8044,
+    "stock": 6025,
     "tipo": 1,
     "receta": null
   },
@@ -7090,7 +7065,7 @@
     "codigo": "TPL-2-R110-NAT/CP",
     "precio": 15.33,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 2 KG R-110 S/TAPA",
-    "stock": 414,
+    "stock": 455,
     "tipo": 1,
     "receta": null
   },
@@ -7098,7 +7073,7 @@
     "codigo": "VPS-R-63/CP",
     "precio": 1.82,
     "nombre": "VERTEDERO PARA ENVASE SUAVITEL R-63",
-    "stock": 504,
+    "stock": 547,
     "tipo": 1,
     "receta": null
   },
@@ -7129,9 +7104,9 @@
   },
   {
     "codigo": "EPL-250/CP",
-    "precio": 1.65,
+    "precio": 1.34,
     "nombre": "ENVASE PLASTICO LECHERO DE 250 ML S/TAPA",
-    "stock": 13556,
+    "stock": 13901,
     "tipo": 1,
     "receta": null
   },
@@ -7147,7 +7122,7 @@
     "codigo": "BP13-SU-BLANCA-250/CP",
     "precio": 4.59,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER TRILAMINADA BCA 15X20X7 #13",
-    "stock": 700,
+    "stock": 101,
     "tipo": 1,
     "receta": null
   },
@@ -7155,7 +7130,7 @@
     "codigo": "CPP-200-N/CP",
     "precio": 17.42,
     "nombre": "CAJITA DE POLIPROPILENO 200 ML. NATURAL",
-    "stock": 421,
+    "stock": 425,
     "tipo": 1,
     "receta": null
   },
@@ -7188,7 +7163,7 @@
     "codigo": "LFA-38/CP",
     "precio": 0.33,
     "nombre": "LAINER FOIL DE ALUMINIO UNIVERSAL R-38",
-    "stock": 47502,
+    "stock": 44957,
     "tipo": 1,
     "receta": null
   },
@@ -7196,7 +7171,7 @@
     "codigo": "TP-R24/CP",
     "precio": 0.54,
     "nombre": "TAPA R-24",
-    "stock": 11474,
+    "stock": 16684,
     "tipo": 1,
     "receta": null
   },
@@ -7221,7 +7196,7 @@
     "codigo": "TP-R89-COL/CP",
     "precio": 2.65,
     "nombre": "TAPA R-89",
-    "stock": 15877,
+    "stock": 3891,
     "tipo": 1,
     "receta": null
   },
@@ -7229,7 +7204,7 @@
     "codigo": "BPLB-1-NEG/CP",
     "precio": 5.6,
     "nombre": "BOTELLA PAD BOSTON NEGRA DE 1 L R-28 S/TAPA",
-    "stock": 2165,
+    "stock": 2366,
     "tipo": 1,
     "receta": null
   },
@@ -7237,7 +7212,7 @@
     "codigo": "BP79-PL-3SELLOS-PLATA-500/CP",
     "precio": 3.84,
     "nombre": "BOLSA PLANA TRES SELLOS TRIALMINADA PLATA TRANS. 18X21 #79",
-    "stock": 400,
+    "stock": 199,
     "tipo": 1,
     "receta": null
   },
@@ -7245,7 +7220,7 @@
     "codigo": "BP37-SU-KRAFT-150/CP",
     "precio": 5.53,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z METALIZADO INT. 12X20X6 #37",
-    "stock": 300,
+    "stock": 298,
     "tipo": 1,
     "receta": null
   },
@@ -7253,7 +7228,7 @@
     "codigo": "BP46-SU-PA-VERDE-CV-250/CP",
     "precio": 8.15,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z VERDE PAPEL ARROZ 15X23X7 #46",
-    "stock": 700,
+    "stock": 769,
     "tipo": 1,
     "receta": null
   },
@@ -7261,7 +7236,7 @@
     "codigo": "CPB-19-M/CP",
     "precio": 74.38,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 19 L MUN S/TAPA",
-    "stock": 25833.64,
+    "stock": 24413.64,
     "tipo": 1,
     "receta": null
   },
@@ -7269,7 +7244,7 @@
     "codigo": "CPB-4-GDL/CP",
     "precio": 20.65,
     "nombre": "CUBETA DE PLASTICO DE 4 L BLANCA GDL S/TAPA",
-    "stock": 35822,
+    "stock": 29336,
     "tipo": 1,
     "receta": null
   },
@@ -7339,7 +7314,7 @@
     "codigo": "BPCN-1-L/CP",
     "precio": 5.87,
     "nombre": "BOTELLA PAD NATURAL CLORO DE 1 LT. LISA S/TAPA R-28",
-    "stock": 1450,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -7355,7 +7330,7 @@
     "codigo": "BM-1-BCA/CP",
     "precio": 12.51,
     "nombre": "BOTELLA PAD MISIL TIPO BALA  BCA DE 1 L S/TAPA",
-    "stock": 5502,
+    "stock": 744,
     "tipo": 1,
     "receta": null
   },
@@ -7363,7 +7338,7 @@
     "codigo": "G-NB-30/CP",
     "precio": 2.28,
     "nombre": "GOTERO DE 30 ML CON INSERTO Y TAPA",
-    "stock": 14516,
+    "stock": 15522,
     "tipo": 1,
     "receta": null
   },
@@ -7371,7 +7346,7 @@
     "codigo": "TPCR38A",
     "precio": 0.94,
     "nombre": "TAPA CON CINTILLO R-38 BLANCA CON LENGÜETA INTEGRADA ASEPTI",
-    "stock": 2242,
+    "stock": 2316,
     "tipo": 1,
     "receta": null
   },
@@ -7379,7 +7354,7 @@
     "codigo": "BP10-SU-DORADA-1/CP",
     "precio": 6.45,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA DORADA  22X32X9 #10",
-    "stock": 344,
+    "stock": 343,
     "tipo": 1,
     "receta": null
   },
@@ -7387,7 +7362,7 @@
     "codigo": "PIN-5-P/CP",
     "precio": 21.45,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 5 L C/TAPON NEG E03C3000KA18",
-    "stock": 5535,
+    "stock": 594,
     "tipo": 1,
     "receta": null
   },
@@ -7395,7 +7370,7 @@
     "codigo": "TPB-8/10/CP",
     "precio": 23.93,
     "nombre": "TAPA DE PLASTICO BLANCA PARA 8 Y 10 L",
-    "stock": 6635,
+    "stock": 3455,
     "tipo": 1,
     "receta": null
   },
@@ -7403,7 +7378,7 @@
     "codigo": "TF-R38-LS/CP",
     "precio": 1.92,
     "nombre": "TAPA FLAPER R-38 S/LINER SENSITIVO (GDL)",
-    "stock": 22062,
+    "stock": 10682,
     "tipo": 1,
     "receta": null
   },
@@ -7445,7 +7420,7 @@
     "codigo": "BP86-SU-NEG-CV-250/CP",
     "precio": 5.28,
     "nombre": "BOLSA SUP NEGRA C/VENTANA OVAL C/ZIPPER 15X23.2X4.5 #86",
-    "stock": 4,
+    "stock": 600,
     "tipo": 1,
     "receta": null
   },
@@ -7453,7 +7428,7 @@
     "codigo": "CTGC12",
     "precio": 2.43,
     "nombre": "CONTENEDOR TERMOFORMADO GRANDE CALIBRE 12 9.5X12.2X3.5",
-    "stock": 499,
+    "stock": 500,
     "tipo": 1,
     "receta": null
   },
@@ -7461,7 +7436,7 @@
     "codigo": "TLSF-BCA-L/CP",
     "precio": 45.29,
     "nombre": "TAPA DE LAMINA BLANCA LISA SIN FENOL",
-    "stock": 101107,
+    "stock": 99668,
     "tipo": 1,
     "receta": null
   },
@@ -7469,7 +7444,7 @@
     "codigo": "TPS-R63/CP",
     "precio": 2.1,
     "nombre": "TAPA PARA ENVASE SUAVITEL R-63",
-    "stock": 499,
+    "stock": 542,
     "tipo": 1,
     "receta": null
   },
@@ -7494,7 +7469,7 @@
     "codigo": "BP33-SU-NEGRA-CV-500/CP",
     "precio": 8.39,
     "nombre": "BOLSA STAND UP POUCH C/Z TRILAMINADA NGR C/V 16.5X26.6X9 #33",
-    "stock": 400,
+    "stock": 399,
     "tipo": 1,
     "receta": null
   },
@@ -7502,7 +7477,7 @@
     "codigo": "GA-30/CP",
     "precio": 2.07,
     "nombre": "GOTERO ALCUZAR NATURAL  DE 30 GR. CON TAPA",
-    "stock": 3528,
+    "stock": 3758,
     "tipo": 1,
     "receta": null
   },
@@ -7510,7 +7485,7 @@
     "codigo": "TPI-R38-COL/CP",
     "precio": 1.53,
     "nombre": "TAPA DE PLASTICO INVIOLABLE R-38 COLORES",
-    "stock": 2292,
+    "stock": 2293,
     "tipo": 1,
     "receta": null
   },
@@ -7518,7 +7493,7 @@
     "codigo": "BPLB-60-NAT/CP",
     "precio": 1.04,
     "nombre": "BOTELLA PAD BOSTON NATURAL DE 60 ML R-24 S/TAPA",
-    "stock": 8085,
+    "stock": 8100,
     "tipo": 1,
     "receta": null
   },
@@ -7543,7 +7518,7 @@
     "codigo": "BPF-120-CR/CP",
     "precio": 4.46,
     "nombre": "BOTELLA PET FARMACEUTICA 120 ML CRISTAL S/TAPA",
-    "stock": 6410,
+    "stock": 6560,
     "tipo": 1,
     "receta": null
   },
@@ -7559,15 +7534,15 @@
     "codigo": "GPL-5/CP",
     "precio": 14.65,
     "nombre": "GARRAFA PET LIMP 5 LTS C/ASA Y TAPA",
-    "stock": 2169,
+    "stock": 1774,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "PIN-20-P/CP",
-    "precio": 69.55,
+    "precio": 70.2,
     "nombre": "PORRON INDUSTRIAL NATURAL DE 20 L C/TAPON E06C3000JD18",
-    "stock": 1048,
+    "stock": 92,
     "tipo": 1,
     "receta": null
   },
@@ -7583,7 +7558,7 @@
     "codigo": "TPL-20-R28-NAT/CP",
     "precio": 0.85,
     "nombre": "TARRO DE POLIETILENO NATURAL DE 20 G R-28 S/TAPA",
-    "stock": 2542,
+    "stock": 4634,
     "tipo": 1,
     "receta": null
   },
@@ -7616,7 +7591,7 @@
     "codigo": "BPB1R38",
     "precio": 4.03,
     "nombre": "BOTELLA PET BOSTON CRISTAL 1 LT S/TAPA R-38",
-    "stock": 59,
+    "stock": 149,
     "tipo": 1,
     "receta": null
   },
@@ -7624,7 +7599,7 @@
     "codigo": "BPC355R38",
     "precio": 3.87,
     "nombre": "BOTELLA PET CUADRADA CRISTAL 355 ML R-38 S/TAPA",
-    "stock": 436,
+    "stock": 510,
     "tipo": 1,
     "receta": null
   },
@@ -7632,7 +7607,7 @@
     "codigo": "BPQ-1L-AM/CP",
     "precio": 5.89,
     "nombre": "BOTELLA PET QUIMICA DE 1 L AMBAR S/TAPA",
-    "stock": 1872,
+    "stock": 2180,
     "tipo": 1,
     "receta": null
   },
@@ -7648,7 +7623,7 @@
     "codigo": "PPCF-RIE/CP",
     "precio": 13611.98,
     "nombre": "PULPO PARA COLOCAR TAPON FLEX  STD.(SELLADORA FS-600 )",
-    "stock": 21,
+    "stock": 22,
     "tipo": 1,
     "receta": null
   },
@@ -7656,7 +7631,7 @@
     "codigo": "BP100-SU-LIQP-2/CP",
     "precio": 17.4,
     "nombre": "BOLSA  SPOUT TRANSPARENTE P/LIQUIDOS  2LT. 23X30+6 #100",
-    "stock": 500,
+    "stock": 0,
     "tipo": 1,
     "receta": null
   },
@@ -7664,7 +7639,7 @@
     "codigo": "CLCF-C26-19-B/CT",
     "precio": 137.11,
     "nombre": "CUBETA DE LAMINA C26 DE 19 L C/FENOL BCA EEE C/TAPA",
-    "stock": 478,
+    "stock": 455,
     "tipo": 1,
     "receta": null
   },
@@ -7672,7 +7647,7 @@
     "codigo": "TCH-38/CP",
     "precio": 1.68,
     "nombre": "TAPA CHILDREN R-38",
-    "stock": 11572,
+    "stock": 4198,
     "tipo": 1,
     "receta": null
   },
@@ -7680,7 +7655,7 @@
     "codigo": "LS-89/CP",
     "precio": 1.52,
     "nombre": "LAINER SENSITIVO IMPORTADO R-89",
-    "stock": 49378,
+    "stock": 49813,
     "tipo": 1,
     "receta": null
   },
@@ -7703,7 +7678,7 @@
   },
   {
     "codigo": "BPGE-500-CT",
-    "precio": 3.31,
+    "precio": 3.08,
     "nombre": "BOTELLA PET GUARDA ETIQUETA 500 ML C/TAPA",
     "stock": 0,
     "tipo": 2,
@@ -7737,7 +7712,7 @@
   },
   {
     "codigo": "TPLG-500-R110-BCO-CT",
-    "precio": 8.05,
+    "precio": 6.89,
     "nombre": "TARRO DE POLIETILENO GRASERO BLANCO DE 1/2 KG C/TAPA R-110",
     "stock": 0,
     "tipo": 2,
@@ -7756,7 +7731,7 @@
     "codigo": "AD-R20/410-C-BCO/CP",
     "precio": 3.63,
     "nombre": "ATOMIZADOR DE DEDO R-20/410 BLANCO CON CAPUCHA",
-    "stock": 149969,
+    "stock": 151427,
     "tipo": 1,
     "receta": null
   },
@@ -7772,7 +7747,7 @@
     "codigo": "LE-28/CP",
     "precio": 0.19,
     "nombre": "LAINER ESPUMADO R-28",
-    "stock": 293182,
+    "stock": 293187,
     "tipo": 1,
     "receta": null
   },
@@ -7780,13 +7755,13 @@
     "codigo": "BP98-SU-LIQP-500/CP",
     "precio": 4.65,
     "nombre": "BOLSA LIQUIDOS STAND UP POUCH C/POPOTE 500ML 13X22.5X6.5 #98",
-    "stock": 0,
+    "stock": 300,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "CPB-TO-FLEX-19-U",
-    "precio": 155.69,
+    "precio": 136.4,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 19 L CON TAPA Y FLEX UNI",
     "stock": 0,
     "tipo": 2,
@@ -7817,7 +7792,7 @@
     "codigo": "FPEC-500-S/T/CP",
     "precio": 6.57,
     "nombre": "FRASCO PET ESPECIERO CUADRADO DE 500 S/TAPA R63",
-    "stock": 3440,
+    "stock": 3785,
     "tipo": 1,
     "receta": null
   },
@@ -7825,7 +7800,7 @@
     "codigo": "G-NB-45/CP",
     "precio": 2.44,
     "nombre": "GOTERO DE 45 ML CON INSERTO Y TAPA",
-    "stock": 1947,
+    "stock": 1949,
     "tipo": 1,
     "receta": null
   },
@@ -7884,7 +7859,7 @@
     "codigo": "FPP-150-AM/CP",
     "precio": 4.11,
     "nombre": "FRASCO PET PASTILLERO 150 ML. AMBAR S/TAPA",
-    "stock": 1982,
+    "stock": 2132,
     "tipo": 1,
     "receta": null
   },
@@ -7892,7 +7867,7 @@
     "codigo": "PING-20-S/CP",
     "precio": 74.43,
     "nombre": "PORRON INDUSTRIAL NEGRO DE 20 L C/TAPON SAMPSON",
-    "stock": 217,
+    "stock": 677,
     "tipo": 1,
     "receta": null
   },
@@ -7900,7 +7875,7 @@
     "codigo": "BP84-BLANCA-TRANS-500/CP",
     "precio": 6.38,
     "nombre": "BOLSA STAND UP BLANCA/ TRANS C/ZIPPERY FUELLE 19X25X9 #84",
-    "stock": 5,
+    "stock": 1200,
     "tipo": 1,
     "receta": null
   },
@@ -7949,7 +7924,7 @@
     "codigo": "BPC-500-ST/CP",
     "precio": 2.96,
     "nombre": "BOTELLA PET CRISTAL CUADRADA DE 500 ML S/TAPA",
-    "stock": 5068,
+    "stock": 2667.7,
     "tipo": 1,
     "receta": null
   },
@@ -7957,7 +7932,7 @@
     "codigo": "BP29-SU-BICAPA-NEGRA 1/CP",
     "precio": 10.78,
     "nombre": "BOLSA STAND UP POUCH C/ZIPPER BICAPA NEGRA 22X32X9 #29",
-    "stock": 1300,
+    "stock": 788,
     "tipo": 1,
     "receta": null
   },
@@ -7965,7 +7940,7 @@
     "codigo": "BP40-SU-KRAFT-CV-70/CP",
     "precio": 5.9,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z CON VENTANA OVAL 10X15X5 #40",
-    "stock": 554,
+    "stock": 558,
     "tipo": 1,
     "receta": null
   },
@@ -7990,7 +7965,7 @@
     "codigo": "TP-R63-PS/CP",
     "precio": 4,
     "nombre": "TAPA DE PLASTCO P/TARRO PROMO SPORT R-63",
-    "stock": 6292,
+    "stock": 6304,
     "tipo": 1,
     "receta": null
   },
@@ -7998,7 +7973,7 @@
     "codigo": "BLCF-TTP-4/CP",
     "precio": 31.88,
     "nombre": "BOTE DE LAMINA DE 4L TTP C/FENOL GRIS 610X802",
-    "stock": 2450,
+    "stock": -10,
     "tipo": 1,
     "receta": null
   },
@@ -8006,7 +7981,7 @@
     "codigo": "TPL-4-REC-GDL/CP",
     "precio": 6.78,
     "nombre": "TAPA DE PLASTICO REC PARA 4 L GDL",
-    "stock": 7080,
+    "stock": 3400,
     "tipo": 1,
     "receta": null
   },
@@ -8046,9 +8021,9 @@
   },
   {
     "codigo": "BPO-60/CP",
-    "precio": 1.97,
+    "precio": 1.93,
     "nombre": "BOTELLA PET OVAL DE 60 ML TRANSP R-20 /410S/TAPA",
-    "stock": 6589,
+    "stock": 966,
     "tipo": 1,
     "receta": null
   },
@@ -8073,7 +8048,7 @@
     "codigo": "BP42-SU-KRAFT-CV-250/CP",
     "precio": 8.46,
     "nombre": "BOLSA KRAFT STAND UP POUCH C/Z CON VENTANA OVAL 15X23X7 #42",
-    "stock": 557,
+    "stock": 656,
     "tipo": 1,
     "receta": null
   },
@@ -8081,7 +8056,7 @@
     "codigo": "CPB-4-M/CP",
     "precio": 23.4,
     "nombre": "CUBETA DE PLASTICO BLANCA DE 4 L MUNDI S/TAPA",
-    "stock": 10781,
+    "stock": 3798,
     "tipo": 1,
     "receta": null
   },
@@ -8089,7 +8064,7 @@
     "codigo": "BP23-SU-TRANS-250/CP",
     "precio": 2.79,
     "nombre": "BOLSA STAND UP POUCH C/Z TRANSPARENTE 250 GR 15X20X7 #23",
-    "stock": 0,
+    "stock": 2200,
     "tipo": 1,
     "receta": null
   },
@@ -8105,7 +8080,7 @@
     "codigo": "EN-1/CP",
     "precio": 5.93,
     "nombre": "ENVASE NEVERO BLANCO DE 1 L C/TAPA",
-    "stock": 6898,
+    "stock": 9872.2,
     "tipo": 1,
     "receta": null
   },
@@ -8113,7 +8088,7 @@
     "codigo": "PPB-DF-120/CP",
     "precio": 17.78,
     "nombre": "POMADERO POLIPRO BCO DOBLE FONDO 120 ML C/TAPA Y DISCO",
-    "stock": 2788,
+    "stock": 2230,
     "tipo": 1,
     "receta": null
   },
@@ -8121,15 +8096,15 @@
     "codigo": "TPP-20-LL/CP",
     "precio": 70.91,
     "nombre": "TAPON PARA PORRON DE 20 L C/LLAVE",
-    "stock": 143,
+    "stock": 173,
     "tipo": 1,
     "receta": null
   },
   {
     "codigo": "BPAF-4L/CP",
-    "precio": 28.6,
-    "nombre": "BOTE DE PLASTICO TAPA FACIL BCO.DE 4 L CON TAPA",
-    "stock": 1877,
+    "precio": 25.5,
+    "nombre": "BOTE DE PLASTICO TAPA FACIL DE 4 L CON TAPA",
+    "stock": 396,
     "tipo": 1,
     "receta": null
   }
